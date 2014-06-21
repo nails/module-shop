@@ -1,0 +1,33 @@
+{
+	"name": "nailsapp/module-shop",
+	"keywords": ["Nails","Shed Collective","CodeIgniter", "Shop Module"],
+	"homepage": "http://nailsapp.co.uk/modules/shop",
+	"description": "This the \"Shop\" module for Nails.",
+	"license":"MIT",
+	"authors": [
+		{
+			"name": "Pablo de la Pena",
+			"email": "p@shedcollective.org",
+			"homepage": "http://shedcollective.org",
+			"role": "Developer"
+		},
+		{
+			"name": "Gary Duncan",
+			"email": "g@shedcollective.org",
+			"homepage": "http://shedcollective.org",
+			"role": "Developer"
+		}
+	],
+	"support": {
+		"email": "hello@shedcollective.org"
+	},
+	"require":
+	{
+		"php": ">=5.4.0",
+		"nailsapp/common" : "dev-master",
+		"nailsapp/cdn" : "dev-master",
+		"nailsapp/email" : "dev-master",
+		"omnipay/omnipay": "~2.0",
+		"dompdf/dompdf" : "~0.6.1"
+	}
+}
