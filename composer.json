@@ -25,8 +25,8 @@
 	{
 		"php": ">=5.4.0",
 		"nailsapp/common" : "dev-master",
-		"nailsapp/cdn" : "dev-master",
-		"nailsapp/email" : "dev-master",
+		"nailsapp/module-cdn" : "dev-master",
+		"nailsapp/module-email" : "dev-master",
 		"omnipay/omnipay": "~2.0",
 		"dompdf/dompdf" : "~0.6.1"
 	}
