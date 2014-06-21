@@ -27,6 +27,7 @@
 		"nailsapp/common" : "dev-master",
 		"nailsapp/cdn" : "dev-master",
 		"nailsapp/email" : "dev-master",
-		"omnipay/omnipay": "~2.0"
+		"omnipay/omnipay": "~2.0",
+		"dompdf/dompdf" : "~0.6.1"
 	}
 }
