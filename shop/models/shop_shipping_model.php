@@ -39,16 +39,10 @@ class NAILS_Shop_shipping_model extends NAILS_Model
 
 		$this->_module_locations = array();
 
-		//	Nails modules
-		$this->_module_locations[]	= array(
-										'path'	=> NAILS_PATH . 'modules/shop/shipping',
-										'url'	=> NAILS_URL . 'modules/shop/shipping'
-									);
-
 		//	'Official' modules
 		$this->_module_locations[]	= array(
-										'path' => FCPATH . 'vendor/nailsapp',
-										'url' => site_url( 'vendor/nailsapp', page_is_secure() )
+										'path' => NAILS_PATH,
+										'url' => NAILS_URL
 									);
 
 		//	App Modules
