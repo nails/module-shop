@@ -160,7 +160,8 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Brand's Products
 		//	================
 
-		$this->data['products'] = $this->shop_product_model->get_for_brand( $this->data['brand']->id );
+		$_data = array( 'hide_inactive' => TRUE );
+		$this->data['products'] = $this->shop_product_model->get_for_brand( $this->data['brand']->id, NULL, NULL, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -261,7 +262,8 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Category's Products
 		//	===================
 
-		$this->data['products'] = $this->shop_product_model->get_for_category( $this->data['category']->id );
+		$_data = array( 'hide_inactive' => TRUE );
+		$this->data['products'] = $this->shop_product_model->get_for_category( $this->data['category']->id, NULL, NULL, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -362,7 +364,8 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Collection's Products
 		//	=====================
 
-		$this->data['products'] = $this->shop_product_model->get_for_collection( $this->data['collection']->id );
+		$_data = array( 'hide_inactive' => TRUE );
+		$this->data['products'] = $this->shop_product_model->get_for_collection( $this->data['collection']->id, NULL, NULL, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -530,7 +533,8 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Range's Products
 		//	================
 
-		$this->data['products'] = $this->shop_product_model->get_for_range( $this->data['range']->id );
+		$_data = array( 'hide_inactive' => TRUE );
+		$this->data['products'] = $this->shop_product_model->get_for_range( $this->data['range']->id, NULL, NULL, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -631,7 +635,8 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Sale's Products
 		//	===============
 
-		$this->data['products'] = $this->shop_product_model->get_for_sale( $this->data['sale']->id );
+		$_data = array( 'hide_inactive' => TRUE );
+		$this->data['products'] = $this->shop_product_model->get_for_sale( $this->data['sale']->id, NULL, NULL, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -729,7 +734,8 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Tag's Products
 		//	==============
 
-		$this->data['products'] = $this->shop_product_model->get_for_tag( $this->data['tag']->id );
+		$_data = array( 'hide_inactive' => TRUE );
+		$this->data['products'] = $this->shop_product_model->get_for_tag( $this->data['tag']->id, NULL, NULL, $_data );
 
 		// --------------------------------------------------------------------------
 

@@ -317,8 +317,15 @@ class NAILS_Shop_product_model extends NAILS_Model
 				$_base_price_set = FALSE;
 				foreach( $v['pricing'] AS $price_index => $price ) :
 
+					if ( empty( $price['currency'] ) ) :
+
+						$this->_set_error( '"Currency" field is required for all variant prices.' );
+						return FALSE;
+
+					endif;
+
 					$_data->variation[$index]->pricing[$price_index]				= new stdClass();
-					$_data->variation[$index]->pricing[$price_index]->currency		= ! empty( $price['currency'] )		? (float) $price['currency']	: NULL;
+					$_data->variation[$index]->pricing[$price_index]->currency		= $price['currency'];
 					$_data->variation[$index]->pricing[$price_index]->price			= ! empty( $price['price'] )		? (float) $price['price']		: NULL;
 					$_data->variation[$index]->pricing[$price_index]->sale_price	= ! empty( $price['sale_price'] )	? (float) $price['sale_price']	: NULL;
 
@@ -856,13 +863,14 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 	/**
 	 * Fetches all products
-	 * @param  boolean $only_active              Whether to restrict to active products or not
-	 * @param  array   $order                    Any ordering to apply
-	 * @param  array   $limit                    Any limiting to apply
-	 * @param  boolean $include_deleted          Whether to include deleted products or not
-	 * @param  boolean $include_deleted_variants Whether to include deleted product variants or not
-	 * @return array                             An array of product objects
-	 */
+	 * @access public
+	 * @param int $page The page number of the results, if NULL then no pagination
+	 * @param int $per_page How many items per page of paginated results
+	 * @param mixed $data Any data to pass to _getcount_common()
+	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
+	 * @param string $_caller Internal flag to pass to _getcount_common(), contains the calling method
+	 * @return array
+	 **/
 	public function get_all( $page = NULL, $per_page = NULL, $data = NULL, $include_deleted = FALSE, $_caller = 'GET_ALL' )
 	{
 
@@ -1083,13 +1091,175 @@ class NAILS_Shop_product_model extends NAILS_Model
 			$_search	= $this->db->escape_like_str( $data['search'] );
 
 			$_where		= array();
-			$_where[]	= $this->_table_prefix . '.id IN ( SELECT product_id FROM nails_shop_product_variation WHERE label LIKE \'%' . $_search . '%\' OR sku LIKE \'%' . $_search . '%\')' ;
+			$_where[]	= $this->_table_prefix . '.id IN ( SELECT product_id FROM ' . NAILS_DB_PREFIX . 'shop_product_variation WHERE label LIKE \'%' . $_search . '%\' OR sku LIKE \'%' . $_search . '%\')' ;
 			$_where[]	= $this->_table_prefix . '.id LIKE \'%' . $_search  . '%\'';
 			$_where[]	= $this->_table_prefix . '.label LIKE \'%' . $_search  . '%\'';
 			$_where[]	= $this->_table_prefix . '.description LIKE \'%' . $_search  . '%\'';
 			$_where[]	= $this->_table_prefix . '.seo_description LIKE \'%' . $_search  . '%\'';
 			$_where[]	= $this->_table_prefix . '.seo_keywords LIKE \'%' . $_search  . '%\'';
-			$_where		= implode( ' OR ', $_where );
+			$_where		= '(' . implode( ' OR ', $_where ) . ')';
+
+			$this->db->where( $_where );
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		//	Unless told otherwise, hide inactive items
+		if ( ! empty( $data['hide_inactive'] ) ) :
+
+			$this->db->where( $this->_table_prefix . '.is_active', TRUE );
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		//	Restricting to brand, category etc?
+
+		//	Brands
+		//	======
+
+		if ( ! empty( $data['brand_id'] ) ) :
+
+			$_where = $this->_table_prefix . '.id IN ( SELECT product_id FROM ' . $this->_table_brand . ' WHERE brand_id ';
+
+			if ( is_array( $data['brand_id'] ) ) :
+
+				$_brand_ids = array_map( array( $this->db, 'escape' ), $data['brand_id'] );
+				$_where .= 'IN (' . implode( ',', $_brand_ids ) . ')';
+
+			else :
+
+				$_where .= '= ' . $this->db->escape( $data['brand_id'] );
+
+			endif;
+
+			$_where .= ')';
+
+			$this->db->where( $_where );
+
+		endif;
+
+
+		//	Categories
+		//	==========
+
+		if ( ! empty( $data['category_id'] ) ) :
+
+			$_where = $this->_table_prefix . '.id IN ( SELECT product_id FROM ' . $this->_table_category . ' WHERE category_id ';
+
+			if ( is_array( $data['category_id'] ) ) :
+
+				$category_ids = array_map( array( $this->db, 'escape' ), $data['category_id'] );
+				$_where .= 'IN (' . implode( ',', $category_ids ) . ')';
+
+			else :
+
+				$_where .= '= ' . $this->db->escape( $data['category_id'] );
+
+			endif;
+
+			$_where .= ')';
+
+			$this->db->where( $_where );
+
+		endif;
+
+
+		//	Collections
+		//	===========
+
+		if ( ! empty( $data['collection_id'] ) ) :
+
+			$_where = $this->_table_prefix . '.id IN ( SELECT product_id FROM ' . $this->_table_collection . ' WHERE collection_id ';
+
+			if ( is_array( $data['collection_id'] ) ) :
+
+				$collection_ids = array_map( array( $this->db, 'escape' ), $data['collection_id'] );
+				$_where .= 'IN (' . implode( ',', $collection_ids ) . ')';
+
+			else :
+
+				$_where .= '= ' . $this->db->escape( $data['collection_id'] );
+
+			endif;
+
+			$_where .= ')';
+
+			$this->db->where( $_where );
+
+		endif;
+
+
+		//	Ranges
+		//	======
+
+		if ( ! empty( $data['range_id'] ) ) :
+
+			$_where = $this->_table_prefix . '.id IN ( SELECT product_id FROM ' . $this->_table_range . ' WHERE range_id ';
+
+			if ( is_array( $data['range_id'] ) ) :
+
+				$range_ids = array_map( array( $this->db, 'escape' ), $data['range_id'] );
+				$_where .= 'IN (' . implode( ',', $range_ids ) . ')';
+
+			else :
+
+				$_where .= '= ' . $this->db->escape( $data['range_id'] );
+
+			endif;
+
+			$_where .= ')';
+
+			$this->db->where( $_where );
+
+		endif;
+
+
+		//	Sales
+		//	=====
+
+		if ( ! empty( $data['sale_id'] ) ) :
+
+			$_where = $this->_table_prefix . '.id IN ( SELECT product_id FROM ' . $this->_table_sale . ' WHERE sale_id ';
+
+			if ( is_array( $data['sale_id'] ) ) :
+
+				$sale_ids = array_map( array( $this->db, 'escape' ), $data['sale_id'] );
+				$_where .= 'IN (' . implode( ',', $sale_ids ) . ')';
+
+			else :
+
+				$_where .= '= ' . $this->db->escape( $data['sale_id'] );
+
+			endif;
+
+			$_where .= ')';
+
+			$this->db->where( $_where );
+
+		endif;
+
+
+		//	Tags
+		//	====
+
+		if ( ! empty( $data['tag_id'] ) ) :
+
+			$_where = $this->_table_prefix . '.id IN ( SELECT product_id FROM ' . $this->_table_tag . ' WHERE tag_id ';
+
+			if ( is_array( $data['tag_id'] ) ) :
+
+				$tag_ids = array_map( array( $this->db, 'escape' ), $data['tag_id'] );
+				$_where .= 'IN (' . implode( ',', $tag_ids ) . ')';
+
+			else :
+
+				$_where .= '= ' . $this->db->escape( $data['tag_id'] );
+
+			endif;
+
+			$_where .= ')';
 
 			$this->db->where( $_where );
 
@@ -1102,16 +1272,24 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 	/**
 	 * Fetches all products which feature a particular brand
-	 * @param  boolean $only_active              Whether to restrict to active products or not
-	 * @param  array   $order                    Any ordering to apply
-	 * @param  array   $limit                    Any limiting to apply
-	 * @param  boolean $include_deleted          Whether to include deleted products or not
-	 * @param  boolean $include_deleted_variants Whether to include deleted product variants or not
-	 * @return array                             An array of product objects
-	 */
-	public function get_for_brand( $only_active = TRUE, $order = NULL, $limit = NULL, $include_deleted = FALSE, $include_deleted_variants = FALSE )
+	 * @access public
+	 * @param int $page The page number of the results, if NULL then no pagination
+	 * @param int $per_page How many items per page of paginated results
+	 * @param mixed $data Any data to pass to _getcount_common()
+	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
+	 * @return array
+	 **/
+	public function get_for_brand( $brand_id, $page = NULL, $per_page = NULL, $data = NULL, $include_deleted = FALSE )
 	{
-		return array( 'TODO' );
+		if ( is_null( $data ) ) :
+
+			$data = array();
+
+		endif;
+
+		$data['brand_id'] = $brand_id;
+
+		return $this->get_all( $page, $per_page, $data, $include_deleted, 'GET_FOR_BRAND' 	);
 	}
 
 
@@ -1120,16 +1298,24 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 	/**
 	 * Fetches all products which feature a particular category
-	 * @param  boolean $only_active              Whether to restrict to active products or not
-	 * @param  array   $order                    Any ordering to apply
-	 * @param  array   $limit                    Any limiting to apply
-	 * @param  boolean $include_deleted          Whether to include deleted products or not
-	 * @param  boolean $include_deleted_variants Whether to include deleted product variants or not
-	 * @return array                             An array of product objects
-	 */
-	public function get_for_category( $only_active = TRUE, $order = NULL, $limit = NULL, $include_deleted = FALSE, $include_deleted_variants = FALSE )
+	 * @access public
+	 * @param int $page The page number of the results, if NULL then no pagination
+	 * @param int $per_page How many items per page of paginated results
+	 * @param mixed $data Any data to pass to _getcount_common()
+	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
+	 * @return array
+	 **/
+	public function get_for_category( $category_id, $page = NULL, $per_page = NULL, $data = NULL, $include_deleted = FALSE )
 	{
-		return array( 'TODO' );
+		if ( is_null( $data ) ) :
+
+			$data = array();
+
+		endif;
+
+		$data['category_id'] = $category_id;
+
+		return $this->get_all( $page, $per_page, $data, $include_deleted, 'GET_FOR_CATEGORY' );
 	}
 
 
@@ -1138,16 +1324,24 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 	/**
 	 * Fetches all products which feature a particular collection
-	 * @param  boolean $only_active              Whether to restrict to active products or not
-	 * @param  array   $order                    Any ordering to apply
-	 * @param  array   $limit                    Any limiting to apply
-	 * @param  boolean $include_deleted          Whether to include deleted products or not
-	 * @param  boolean $include_deleted_variants Whether to include deleted product variants or not
-	 * @return array                             An array of product objects
-	 */
-	public function get_for_collection( $only_active = TRUE, $order = NULL, $limit = NULL, $include_deleted = FALSE, $include_deleted_variants = FALSE )
+	 * @access public
+	 * @param int $page The page number of the results, if NULL then no pagination
+	 * @param int $per_page How many items per page of paginated results
+	 * @param mixed $data Any data to pass to _getcount_common()
+	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
+	 * @return array
+	 **/
+	public function get_for_collection( $collection_id, $page = NULL, $per_page = NULL, $data = NULL, $include_deleted = FALSE )
 	{
-		return array( 'TODO' );
+		if ( is_null( $data ) ) :
+
+			$data = array();
+
+		endif;
+
+		$data['collection_id'] = $collection_id;
+
+		return $this->get_all( $page, $per_page, $data, $include_deleted, 'GET_FOR_COLLECTION' );
 	}
 
 
@@ -1156,16 +1350,24 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 	/**
 	 * Fetches all products which feature a particular range
-	 * @param  boolean $only_active              Whether to restrict to active products or not
-	 * @param  array   $order                    Any ordering to apply
-	 * @param  array   $limit                    Any limiting to apply
-	 * @param  boolean $include_deleted          Whether to include deleted products or not
-	 * @param  boolean $include_deleted_variants Whether to include deleted product variants or not
-	 * @return array                             An array of product objects
-	 */
-	public function get_for_range( $only_active = TRUE, $order = NULL, $limit = NULL, $include_deleted = FALSE, $include_deleted_variants = FALSE )
+	 * @access public
+	 * @param int $page The page number of the results, if NULL then no pagination
+	 * @param int $per_page How many items per page of paginated results
+	 * @param mixed $data Any data to pass to _getcount_common()
+	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
+	 * @return array
+	 **/
+	public function get_for_range( $range_id, $page = NULL, $per_page = NULL, $data = NULL, $include_deleted = FALSE )
 	{
-		return array( 'TODO' );
+		if ( is_null( $data ) ) :
+
+			$data = array();
+
+		endif;
+
+		$data['range_id'] = $range_id;
+
+		return $this->get_all( $page, $per_page, $data, $include_deleted, 'GET_FOR_RANGE' );
 	}
 
 
@@ -1174,16 +1376,24 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 	/**
 	 * Fetches all products which feature a particular sale
-	 * @param  boolean $only_active              Whether to restrict to active products or not
-	 * @param  array   $order                    Any ordering to apply
-	 * @param  array   $limit                    Any limiting to apply
-	 * @param  boolean $include_deleted          Whether to include deleted products or not
-	 * @param  boolean $include_deleted_variants Whether to include deleted product variants or not
-	 * @return array                             An array of product objects
-	 */
-	public function get_for_sale( $only_active = TRUE, $order = NULL, $limit = NULL, $include_deleted = FALSE, $include_deleted_variants = FALSE )
+	 * @access public
+	 * @param int $page The page number of the results, if NULL then no pagination
+	 * @param int $per_page How many items per page of paginated results
+	 * @param mixed $data Any data to pass to _getcount_common()
+	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
+	 * @return array
+	 **/
+	public function get_for_sale( $sale_id, $page = NULL, $per_page = NULL, $data = NULL, $include_deleted = FALSE )
 	{
-		return array( 'TODO' );
+		if ( is_null( $data ) ) :
+
+			$data = array();
+
+		endif;
+
+		$data['sale_id'] = $sale_id;
+
+		return $this->get_all( $page, $per_page, $data, $include_deleted, 'GET_FOR_SALE' );
 	}
 
 
@@ -1192,16 +1402,24 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 	/**
 	 * Fetches all products which feature a particular tag
-	 * @param  boolean $only_active              Whether to restrict to active products or not
-	 * @param  array   $order                    Any ordering to apply
-	 * @param  array   $limit                    Any limiting to apply
-	 * @param  boolean $include_deleted          Whether to include deleted products or not
-	 * @param  boolean $include_deleted_variants Whether to include deleted product variants or not
-	 * @return array                             An array of product objects
-	 */
-	public function get_for_tag( $only_active = TRUE, $order = NULL, $limit = NULL, $include_deleted = FALSE, $include_deleted_variants = FALSE )
+	 * @access public
+	 * @param int $page The page number of the results, if NULL then no pagination
+	 * @param int $per_page How many items per page of paginated results
+	 * @param mixed $data Any data to pass to _getcount_common()
+	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
+	 * @return array
+	 **/
+	public function get_for_tag( $tag_id, $page = NULL, $per_page = NULL, $data = NULL, $include_deleted = FALSE )
 	{
-		return array( 'TODO' );
+		if ( is_null( $data ) ) :
+
+			$data = array();
+
+		endif;
+
+		$data['tag_id'] = $tag_id;
+
+		return $this->get_all( $page, $per_page, $data, $include_deleted, 'GET_FOR_TAG' );
 	}
 
 
