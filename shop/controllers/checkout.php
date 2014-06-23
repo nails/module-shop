@@ -20,15 +20,6 @@ require_once '_shop.php';
 
 class NAILS_Checkout extends NAILS_Shop_Controller
 {
-	public function __construct()
-	{
-		parent::__construct();
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
 	/**
 	 * Handle the checkout process
 	 *
@@ -319,9 +310,9 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 			// --------------------------------------------------------------------------
 
 			//	Load veiws
-			$this->load->view( 'structure/header',									$this->data );
-			$this->load->view( 'shop/' . $this->_skin->dir . '/checkout/checkout',	$this->data );
-			$this->load->view( 'structure/footer',									$this->data );
+			$this->load->view( 'structure/header',								$this->data );
+			$this->load->view( $this->_skin->path . 'views/checkout/checkout',	$this->data );
+			$this->load->view( 'structure/footer',								$this->data );
 
 		else :
 
@@ -333,9 +324,9 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 			// --------------------------------------------------------------------------
 
-			$this->load->view( 'structure/header',									$this->data );
-			$this->load->view( 'shop/' . $this->_skin->dir . '/checkout/signin',	$this->data );
-			$this->load->view( 'structure/footer',									$this->data );
+			$this->load->view( 'structure/header',								$this->data );
+			$this->load->view( $this->_skin->path . 'views/checkout/signin',	$this->data );
+			$this->load->view( 'structure/footer',								$this->data );
 
 		endif;
 	}
@@ -401,9 +392,9 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 			// --------------------------------------------------------------------------
 
-			$this->load->view( 'structure/header',									$this->data );
-			$this->load->view( 'shop/' . $this->_skin->dir . '/checkout/confirm',	$this->data );
-			$this->load->view( 'structure/footer',									$this->data );
+			$this->load->view( 'structure/header',								$this->data );
+			$this->load->view( $this->_skin->path . 'views/checkout/confirm',	$this->data );
+			$this->load->view( 'structure/footer',								$this->data );
 
 		else :
 
@@ -416,6 +407,10 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Handle redirecting to the chosen payment gateway.
+	 * @return void
+	 */
 	public function payment()
 	{
 		if ( ! $this->_can_checkout() ) :
@@ -496,11 +491,6 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 				//	Known payment gateways
 				case 1 :	$this->_payment_paypal();	break;
-				case 2 :	$this->_payment_shedpay();	break;
-				case 3 :	$this->_payment_cardsave();	break;
-				case 4 :	$this->_payment_sagepay();	break;
-				case 5 :	$this->_payment_worldpay();	break;
-				case 6 :	$this->_payment_eway();		break;
 
 				// --------------------------------------------------------------------------
 
@@ -525,6 +515,10 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Handles sending the user to PayPal
+	 * @return void
+	 */
 	protected function _payment_paypal()
 	{
 		//	Create the order
@@ -582,79 +576,17 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 		// --------------------------------------------------------------------------
 
 		//	Load the views
-		$this->load->view( 'shop/' . $this->_skin->dir . '/checkout/payment/paypal/index',	$this->data );
+		$this->load->view( $this->_skin->path . 'views/checkout/payment/paypal/index',	$this->data );
 	}
 
 
 	// --------------------------------------------------------------------------
 
 
-	protected function _payment_shedpay()
-	{
-		dumpanddie( 'TODO: Shedpay interface' );
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	protected function _payment_cardsave()
-	{
-		dumpanddie( 'TODO: CardSave interface' );
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	protected function _payment_sagepay()
-	{
-		dumpanddie( 'TODO: SagePay interface' );
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	protected function _payment_worldpay()
-	{
-		dumpanddie( 'TODO: WordlPay interface' );
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	protected function _payment_eway()
-	{
-		dumpanddie( 'TODO: eWay interface' );
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	protected function _can_checkout()
-	{
-		//	Check basket isn't empty
-		$this->data['basket'] = $this->shop_basket_model->get_basket();
-
-		if ( ! $this->data['basket']->items ) :
-
-			$this->data['error'] = 'Your basket is empty.';
-			return FALSE;
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		return TRUE;
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
+	/**
+	 * Shown to the user once the payment gateway has been informed.
+	 * @return void
+	 */
 	public function processing()
 	{
 		$this->data['order'] = $this->shop_order_model->get_by_ref( $this->input->get( 'ref' ) );
@@ -689,26 +621,38 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Renders the "unpaid" processing view.
+	 * @return void
+	 */
 	protected function _processing_unpaid()
 	{
-		$this->load->view( 'shop/' . $this->_skin->dir . '/checkout/payment/processing/unpaid', $this->data );
+		$this->load->view( $this->_skin->path . 'views/checkout/processing/unpaid', $this->data );
 	}
 
 
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Renders the "pending" processing view.
+	 * @return void
+	 */
 	protected function _processing_pending()
 	{
-		$this->load->view( 'structure/header',														$this->data );
-		$this->load->view( 'shop/' . $this->_skin->dir . '/checkout/payment/processing/pending',	$this->data );
-		$this->load->view( 'structure/footer',														$this->data );
+		$this->load->view( 'structure/header',											$this->data );
+		$this->load->view( $this->_skin->path . 'views/checkout/processing/pending',	$this->data );
+		$this->load->view( 'structure/footer',											$this->data );
 	}
 
 
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Renders the "paid" processing view.
+	 * @return void
+	 */
 	protected function _processing_paid()
 	{
 		$this->data['page']->title	= 'Thanks for your order!';
@@ -716,42 +660,106 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		$this->load->view( 'structure/header',													$this->data );
-		$this->load->view( 'shop/' . $this->_skin->dir . '/checkout/payment/processing/paid',	$this->data );
-		$this->load->view( 'structure/footer',													$this->data );
+		$this->load->view( 'structure/header',										$this->data );
+		$this->load->view( $this->_skin->path . 'views/checkout/processing/paid',	$this->data );
+		$this->load->view( 'structure/footer',										$this->data );
 	}
 
 
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Renders the "failed" processing view.
+	 * @return void
+	 */
 	protected function _processing_failed()
 	{
-		$this->_processing_error();
+		if ( ! $this->data['error'] ) :
+
+			$this->data['error'] = '<strong>Sorry,</strong> there was a problem processing your order';
+
+		endif;
+
+		if ( ! isset( $this->data['page']->title ) || ! $this->data['page']->title ) :
+
+			$this->data['page']->title = 'An error occurred';
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		$this->load->view( 'structure/header',										$this->data );
+		$this->load->view( $this->_skin->path . 'views/checkout/processing/failed',	$this->data );
+		$this->load->view( 'structure/footer',										$this->data );
 	}
 
 
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Renders the "abandoned" processing view.
+	 * @return void
+	 */
 	protected function _processing_abandoned()
 	{
-		$this->_processing_error();
+		if ( ! $this->data['error'] ) :
+
+			$this->data['error'] = '<strong>Sorry,</strong> there was a problem processing your order';
+
+		endif;
+
+		if ( ! isset( $this->data['page']->title ) || ! $this->data['page']->title ) :
+
+			$this->data['page']->title = 'An error occurred';
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		$this->load->view( 'structure/header',											$this->data );
+		$this->load->view( $this->_skin->path . 'views/checkout/processing/abandoned',	$this->data );
+		$this->load->view( 'structure/footer',											$this->data );
 	}
 
 
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Renders the "cancelled" processing view.
+	 * @return void
+	 */
 	protected function _processing_cancelled()
 	{
-		$this->_processing_error();
+		if ( ! $this->data['error'] ) :
+
+			$this->data['error'] = '<strong>Sorry,</strong> there was a problem processing your order';
+
+		endif;
+
+		if ( ! isset( $this->data['page']->title ) || ! $this->data['page']->title ) :
+
+			$this->data['page']->title = 'An error occurred';
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		$this->load->view( 'structure/header',											$this->data );
+		$this->load->view( $this->_skin->path . 'views/checkout/processing/cancelled',	$this->data );
+		$this->load->view( 'structure/footer',								 			$this->data );
 	}
 
 
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Renders the "error" processing view.
+	 * @return void
+	 */
 	protected function _processing_error()
 	{
 		if ( ! $this->data['error'] ) :
@@ -768,15 +776,19 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		$this->load->view( 'structure/header',													$this->data );
-		$this->load->view( 'shop/' . $this->_skin->dir . '/checkout/payment/processing/error',	$this->data );
-		$this->load->view( 'structure/footer',													$this->data );
+		$this->load->view( 'structure/header',										$this->data );
+		$this->load->view( $this->_skin->path . 'views/checkout/processing/error',	$this->data );
+		$this->load->view( 'structure/footer',										$this->data );
 	}
 
 
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Marks an order as cancelled and redirects the use to the basket with feedback.
+	 * @return void
+	 */
 	public function cancel()
 	{
 		$this->data['order'] = $this->shop_order_model->get_by_ref( $this->input->get( 'ref' ) );
@@ -800,6 +812,10 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Handles incoming IPN notifications
+	 * @return void
+	 */
 	public function notify()
 	{
 		//	Testing, testing, 1, 2, 3?
@@ -821,6 +837,10 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Handles incoming IPN notification from PayPal
+	 * @return void
+	 */
 	protected function _notify_paypal()
 	{
 		//	Configure log
@@ -1151,6 +1171,35 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Determines whether a basket is in a state in which it's ready to checkout
+	 * @return boolean
+	 */
+	protected function _can_checkout()
+	{
+		//	Check basket isn't empty
+		$this->data['basket'] = $this->shop_basket_model->get_basket();
+
+		if ( ! $this->data['basket']->items ) :
+
+			$this->data['error'] = 'Your basket is empty.';
+			return FALSE;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		return TRUE;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Determines whether the IPN is in a testing mode or not
+	 * @return bool
+	 */
 	protected function _notify_is_testing()
 	{
 		if ( ENVIRONMENT == 'production' )

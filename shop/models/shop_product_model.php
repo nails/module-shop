@@ -155,6 +155,11 @@ class NAILS_Shop_product_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Prepares data, ready for the DB
+	 * @param  array $data Raw data to sue for the update/create
+	 * @return mixed       stdClass on success, FALSE of failure
+	 */
 	protected function _create_update_prep_data( $data )
 	{
 		//	Quick check of incoming data
@@ -229,7 +234,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 		$_product_type_meta	= array();
 
-		if ( is_callable( array( $this->product_type, 'meta_fields_' . $_product_type->slug ) ) ) :
+		if ( is_callable( array( $this->shop_product_type_model, 'meta_fields_' . $_product_type->slug ) ) ) :
 
 			$_product_type_meta = $this->shop_product_type_model->{'meta_fields_' . $_product_type->slug}();
 
@@ -314,11 +319,11 @@ class NAILS_Shop_product_model extends NAILS_Model
 				foreach( $v['pricing'] AS $price_index => $price ) :
 
 					$_data->variation[$index]->pricing[$price_index]				= new stdClass();
-					$_data->variation[$index]->pricing[$price_index]->currency_id	= isset( $price['currency_id'] )	? $price['currency_id']	: NULL;
-					$_data->variation[$index]->pricing[$price_index]->price			= isset( $price['price'] )			? $price['price']		: NULL;
-					$_data->variation[$index]->pricing[$price_index]->sale_price	= isset( $price['sale_price'] )		? $price['sale_price']	: NULL;
+					$_data->variation[$index]->pricing[$price_index]->currency		= isset( $price['currency'] )	? $price['currency']	: NULL;
+					$_data->variation[$index]->pricing[$price_index]->price			= isset( $price['price'] )		? $price['price']		: NULL;
+					$_data->variation[$index]->pricing[$price_index]->sale_price	= isset( $price['sale_price'] )	? $price['sale_price']	: NULL;
 
-					if ( $price['currency_id'] == SHOP_BASE_CURRENCY_ID ) :
+					if ( $price['currency'] == SHOP_BASE_CURRENCY_CODE ) :
 
 						$_base_price_set = TRUE;
 
@@ -430,6 +435,11 @@ class NAILS_Shop_product_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Actually executes the DB Call
+	 * @param  stdClass $data The object returned from _create_update_prep_data();
+	 * @return mixed    ID (int) on success, FALSE on failure
+	 */
 	protected function _create_update_execute( $data )
 	{
 		//	Start the transaction, safety first!
@@ -776,7 +786,6 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 			$this->db->select( 'id' );
 			$this->db->where( 'product_id', $data->id );
-			$this->db->where( 'is_active', TRUE );
 			$this->db->where( 'is_deleted', FALSE );
 			$this->db->where( 'stock_status', 'IN_STOCK' );
 			$this->db->where( '(quantity_available = 0 OR quantity_available - quantity_sold > 0)' );
@@ -847,12 +856,14 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 
 	/**
-	 * Fetches all objects
-	 *
-	 * @access public
-	 * @param none
-	 * @return array
-	 **/
+	 * Fetches all products
+	 * @param  boolean $only_active              Whether to restrict to active products or not
+	 * @param  array   $order                    Any ordering to apply
+	 * @param  array   $limit                    Any limiting to apply
+	 * @param  boolean $include_deleted          Whether to include deleted products or not
+	 * @param  boolean $include_deleted_variants Whether to include deleted product variants or not
+	 * @return array                             An array of product objects
+	 */
 	public function get_all( $only_active = TRUE, $order = NULL, $limit = NULL, $include_deleted = FALSE, $include_deleted_variants = FALSE )
 	{
 		//	TODO: Caching
@@ -1019,9 +1030,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 				//	Price
 				//	====
-				$this->db->select( 'c.id,c.code,c.symbol,c.symbol_position,c.label,c.decimal_precision,c.decimal_symbol,c.thousands_seperator,pvp.price,pvp.sale_price' );
 				$this->db->where( 'pvp.variation_id', $v->id );
-				$this->db->join( NAILS_DB_PREFIX . 'shop_currency c', 'c.id = pvp.currency_id' );
 				$v->price = $this->db->get( $this->_table_variation_price . ' pvp' )->result();
 
 				$this->_format_variation_object( $v );
@@ -1037,37 +1046,37 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 				foreach( $v->price AS $price ) :
 
-					if ( empty( $product->price[$price->code] ) ) :
+					if ( empty( $product->price[$price->currency] ) ) :
 
-						$product->price[$price->code]					= new stdClass();
-						$product->price[$price->code]->max_price		= NULL;
-						$product->price[$price->code]->min_price		= NULL;
-						$product->price[$price->code]->max_sale_price	= NULL;
-						$product->price[$price->code]->min_sale_price	= NULL;
-
-					endif;
-
-					if ( is_null( $product->price[$price->code]->max_price ) || $price->price > $product->price[$price->code]->max_price ) :
-
-						$product->price[$price->code]->max_price = $price->price;
+						$product->price[$price->currency]					= new stdClass();
+						$product->price[$price->currency]->max_price		= NULL;
+						$product->price[$price->currency]->min_price		= NULL;
+						$product->price[$price->currency]->max_sale_price	= NULL;
+						$product->price[$price->currency]->min_sale_price	= NULL;
 
 					endif;
 
-					if ( is_null( $product->price[$price->code]->min_price ) || $price->price < $product->price[$price->code]->min_price ) :
+					if ( is_null( $product->price[$price->currency]->max_price ) || $price->price > $product->price[$price->currency]->max_price ) :
 
-						$product->price[$price->code]->min_price = $price->price;
-
-					endif;
-
-					if ( is_null( $product->price[$price->code]->max_sale_price ) || $price->sale_price > $product->price[$price->code]->max_sale_price ) :
-
-						$product->price[$price->code]->max_sale_price = $price->sale_price;
+						$product->price[$price->currency]->max_price = $price->price;
 
 					endif;
 
-					if ( is_null( $product->price[$price->code]->min_sale_price ) || $price->sale_price < $product->price[$price->code]->min_sale_price ) :
+					if ( is_null( $product->price[$price->currency]->min_price ) || $price->price < $product->price[$price->currency]->min_price ) :
 
-						$product->price[$price->code]->min_sale_price = $price->sale_price;
+						$product->price[$price->currency]->min_price = $price->price;
+
+					endif;
+
+					if ( is_null( $product->price[$price->currency]->max_sale_price ) || $price->sale_price > $product->price[$price->currency]->max_sale_price ) :
+
+						$product->price[$price->currency]->max_sale_price = $price->sale_price;
+
+					endif;
+
+					if ( is_null( $product->price[$price->currency]->min_sale_price ) || $price->sale_price < $product->price[$price->currency]->min_sale_price ) :
+
+						$product->price[$price->currency]->min_sale_price = $price->sale_price;
 
 					endif;
 
@@ -1156,54 +1165,123 @@ class NAILS_Shop_product_model extends NAILS_Model
 		return $this->db->count_all_results( NAILS_DB_PREFIX . 'shop_product p' );
 	}
 
+
 	// --------------------------------------------------------------------------
 
 
 	/**
-	 * Fetch products from a particular category
-	 * @param  mixed  $category        The ID or slug of the category
-	 * @param  boolean $only_active     Include active items only
-	 * @param  [type]  $order           [description]
-	 * @param  [type]  $limit           [description]
-	 * @param  boolean $include_deleted Include deleted items
-	 * @return array                   An array of products
+	 * Fetches all products which feature a particular brand
+	 * @param  boolean $only_active              Whether to restrict to active products or not
+	 * @param  array   $order                    Any ordering to apply
+	 * @param  array   $limit                    Any limiting to apply
+	 * @param  boolean $include_deleted          Whether to include deleted products or not
+	 * @param  boolean $include_deleted_variants Whether to include deleted product variants or not
+	 * @return array                             An array of product objects
 	 */
-	public function get_for_category( $category, $only_active = TRUE, $order = NULL, $limit = NULL, $include_deleted = FALSE )
+	public function get_for_brand( $only_active = TRUE, $order = NULL, $limit = NULL, $include_deleted = FALSE, $include_deleted_variants = FALSE )
 	{
-		$this->load->model( 'shop/shop_category_model' );
-
-		if ( is_numeric( $category ) ) :
-
-			$_category = $this->shop_category_model->get_by_id( $category );
-
-		else :
-
-			$_category = $this->shop_category_model->get_by_slug( $category );
-
-		endif;
-
-		if ( ! $_category ) :
-
-			return array();
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		//	Fetch all the ID's we want to search across
-		$_ids = array( $_category->id );
-		$_ids = array_merge( $_ids, $this->shop_category_model->get_ids_of_all_children( $_category->id ) );
-
-		$this->db->where_in( 'pc.category_id', $_ids );
-		$this->db->join( $this->_table_category . ' pc', 'pc.product_id = p.id' );
-		$this->db->group_by( 'p.id' );
-		return $this->get_all( $only_active, $order, $limit, $include_deleted );
+		return array( 'TODO' );
 	}
 
 
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Fetches all products which feature a particular category
+	 * @param  boolean $only_active              Whether to restrict to active products or not
+	 * @param  array   $order                    Any ordering to apply
+	 * @param  array   $limit                    Any limiting to apply
+	 * @param  boolean $include_deleted          Whether to include deleted products or not
+	 * @param  boolean $include_deleted_variants Whether to include deleted product variants or not
+	 * @return array                             An array of product objects
+	 */
+	public function get_for_category( $only_active = TRUE, $order = NULL, $limit = NULL, $include_deleted = FALSE, $include_deleted_variants = FALSE )
+	{
+		return array( 'TODO' );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Fetches all products which feature a particular collection
+	 * @param  boolean $only_active              Whether to restrict to active products or not
+	 * @param  array   $order                    Any ordering to apply
+	 * @param  array   $limit                    Any limiting to apply
+	 * @param  boolean $include_deleted          Whether to include deleted products or not
+	 * @param  boolean $include_deleted_variants Whether to include deleted product variants or not
+	 * @return array                             An array of product objects
+	 */
+	public function get_for_collection( $only_active = TRUE, $order = NULL, $limit = NULL, $include_deleted = FALSE, $include_deleted_variants = FALSE )
+	{
+		return array( 'TODO' );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Fetches all products which feature a particular range
+	 * @param  boolean $only_active              Whether to restrict to active products or not
+	 * @param  array   $order                    Any ordering to apply
+	 * @param  array   $limit                    Any limiting to apply
+	 * @param  boolean $include_deleted          Whether to include deleted products or not
+	 * @param  boolean $include_deleted_variants Whether to include deleted product variants or not
+	 * @return array                             An array of product objects
+	 */
+	public function get_for_range( $only_active = TRUE, $order = NULL, $limit = NULL, $include_deleted = FALSE, $include_deleted_variants = FALSE )
+	{
+		return array( 'TODO' );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Fetches all products which feature a particular sale
+	 * @param  boolean $only_active              Whether to restrict to active products or not
+	 * @param  array   $order                    Any ordering to apply
+	 * @param  array   $limit                    Any limiting to apply
+	 * @param  boolean $include_deleted          Whether to include deleted products or not
+	 * @param  boolean $include_deleted_variants Whether to include deleted product variants or not
+	 * @return array                             An array of product objects
+	 */
+	public function get_for_sale( $only_active = TRUE, $order = NULL, $limit = NULL, $include_deleted = FALSE, $include_deleted_variants = FALSE )
+	{
+		return array( 'TODO' );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Fetches all products which feature a particular tag
+	 * @param  boolean $only_active              Whether to restrict to active products or not
+	 * @param  array   $order                    Any ordering to apply
+	 * @param  array   $limit                    Any limiting to apply
+	 * @param  boolean $include_deleted          Whether to include deleted products or not
+	 * @param  boolean $include_deleted_variants Whether to include deleted product variants or not
+	 * @return array                             An array of product objects
+	 */
+	public function get_for_tag( $only_active = TRUE, $order = NULL, $limit = NULL, $include_deleted = FALSE, $include_deleted_variants = FALSE )
+	{
+		return array( 'TODO' );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Formats a product's URL
+	 * @param  string $slug The product's slug
+	 * @return string       The product's URL
+	 */
 	public function format_url( $slug )
 	{
 		return site_url( app_setting( 'url', 'shop' ) . 'product/' . $slug );
@@ -1340,8 +1418,6 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 			foreach ( $variation->price AS $price ) :
 
-				$price->id					= (int) $price->id;
-				$price->decimal_precision	= (int) $price->decimal_precision;
 				$price->price				= (float) $price->price;
 				$price->sale_price			= (float) $price->sale_price;
 

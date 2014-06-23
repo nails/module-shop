@@ -48,12 +48,12 @@ class NAILS_Orders extends NAILS_Shop_Controller
 		//	Render PDF
 		if ( isset( $_GET['dl'] ) && ! $_GET['dl'] ) :
 
-			$this->load->view('shop/' . $this->_skin->dir . '/orders/invoice', $this->data );
+			$this->load->view( $this->_skin->path . 'views/order/invoice', $this->data );
 
 		else :
 
 			$this->load->library( 'pdf/pdf' );
-			$this->pdf->load_view('shop/' . $this->_skin->dir . '/orders/invoice', $this->data );
+			$this->pdf->load_view( $this->_skin->path . 'views/order/invoice', $this->data );
 			$this->pdf->render();
 			$this->pdf->stream( 'INVOICE-' . $this->data['order']->ref . '.pdf' );
 
@@ -66,10 +66,10 @@ class NAILS_Orders extends NAILS_Shop_Controller
 
 	protected function _bad_invoice( $message )
 	{
-		header( 'Cache-Control: no-cache, must-revalidate' );
-		header( 'Expires: Mon, 26 Jul 1997 05:00:00 GMT' );
-		header( 'Content-type: application/json' );
-		header( $this->input->server( 'SERVER_PROTOCOL' ) . ' 400 Bad Request' );
+		$this->output->set_content_type( 'application/json' );
+		$this->output->set_header( 'Cache-Control: no-cache, must-revalidate' );
+		$this->output->set_header( 'Expires: Mon, 26 Jul 1997 05:00:00 GMT' );
+		$this->output->set_header( $this->input->server( 'SERVER_PROTOCOL' ) . ' 400 Bad Request' );
 
 		// --------------------------------------------------------------------------
 
@@ -80,15 +80,7 @@ class NAILS_Orders extends NAILS_Shop_Controller
 
 		);
 
-		echo json_encode( $_out );
-
-		// --------------------------------------------------------------------------
-
-		//	Kill script, th, th, that's all folks.
-		//	Stop the output class from hijacking our headers and
-		//	setting an incorrect Content-Type
-
-		exit(0);
+		$this->output->set_output( json_encode( $out ) );
 	}
 }
 

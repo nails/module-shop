@@ -32,10 +32,6 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
 	// --------------------------------------------------------------------------
 
-	/* ! BAKSET */
-
-	// --------------------------------------------------------------------------
-
 
 	/**
 	 * Render the user's basket
@@ -47,53 +43,31 @@ class NAILS_Basket extends NAILS_Shop_Controller
 	public function index()
 	{
 		//	Abandon any previous order
-		if ( $this->shop_basket_model->get_order_id() ) :
+		$_order_id = $this->shop_basket_model->get_order_id();
+		if ( $_order_id ) :
 
 			//	Abandon this order and remove from basket
-			$this->shop_order_model->abandon( $this->shop_basket_model->get_order_id() );
+			$this->shop_order_model->abandon( $_order_id );
 			$this->shop_basket_model->remove_order_id();
 
 		endif;
 
 		// --------------------------------------------------------------------------
 
-		$this->data['page']->title = 'Your Basket';
+		$this->data['page']->title = $this->_shop_name . ': Your Basket';
 
 		// --------------------------------------------------------------------------
 
 		$this->data['basket']			= $this->shop_basket_model->get_basket();
 		$this->data['shipping_methods'] = $this->shop_shipping_model->get_all();
-		$this->data['currencies']		= $this->shop_currency_model->get_all();
+		$this->data['currencies']		= $this->shop_currency_model->get_all_supported();
 
 		// --------------------------------------------------------------------------
 
-		//	Load assets
-		$this->asset->load( 'nails.shop.basket.min.js', TRUE );
-
-		//	Inline assets
-		$_js  = 'var _nails_shop_basket;';
-		$_js .= '$(function(){';
-
-		$_js .= 'if ( typeof( NAILS_Shop_Basket ) === \'function\' ){';
-		$_js .= '_nails_shop_basket = new NAILS_Shop_Basket();';
-		$_js .= '_nails_shop_basket.init();}';
-
-		$_js .= '});';
-
-		$this->asset->inline( '<script>' . $_js . '</script>' );
-
-		// --------------------------------------------------------------------------
-
-		$this->load->view( 'structure/header',								$this->data );
-		$this->load->view( 'shop/' . $this->_skin->dir . '/basket/index',	$this->data );
-		$this->load->view( 'structure/footer',								$this->data );
+		$this->load->view( 'structure/header',							$this->data );
+		$this->load->view( $this->_skin->path . 'views/basket/index',	$this->data );
+		$this->load->view( 'structure/footer',							$this->data );
 	}
-
-
-	// --------------------------------------------------------------------------
-
-
-
 
 
 	// --------------------------------------------------------------------------
@@ -313,15 +287,15 @@ class NAILS_Basket extends NAILS_Shop_Controller
 	{
 		$_currency = $this->shop_currency_model->get_by_code( $this->input->post( 'currency' ) );
 
-		if ( $_currency && $_currency->is_active ) :
+		if ( $_currency ) :
 
 			//	Valid currency
-			$this->session->set_userdata( 'shop_currency', $_currency->id );
+			$this->session->set_userdata( 'shop_currency', $_currency->code );
 
 			if ( $this->user_model->is_logged_in() ) :
 
 				//	Save to the user object
-				$this->user_model->update( active_user( 'id' ), array( 'shop_currency' => $_currency->id ) );
+				$this->user_model->update( active_user( 'id' ), array( 'shop_currency' => $_currency->code ) );
 
 			endif;
 
@@ -330,7 +304,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 		else :
 
 			//	Failed to validate, feedback
-			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> that currency is not valid.' );
+			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> that currency is not supported.' );
 
 		endif;
 
@@ -377,4 +351,4 @@ if ( ! defined( 'NAILS_ALLOW_EXTENSION_BASKET' ) ) :
 endif;
 
 /* End of file basket.php */
-/* Location: ./application/modules/shop/controllers/basket.php */
+/* Location: ./modules/shop/controllers/basket.php */

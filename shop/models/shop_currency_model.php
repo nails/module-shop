@@ -55,6 +55,58 @@ class NAILS_Shop_currency_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
+	public function get_all_supported()
+	{
+		$_currencies	= $this->get_all();
+		$_additional	= app_setting( 'additional_currencies', 'shop' );
+		$_base			= app_setting( 'base_currency', 'shop' );
+		$_supported		= array();
+
+		if ( isset( $_currencies[$_base] ) ) :
+
+			$_supported[] = $_currencies[$_base];
+
+		endif;
+
+		if ( is_array( $_additional ) ) :
+
+			foreach( $_additional AS $additional ) :
+
+				if ( isset( $_currencies[$additional] ) ) :
+
+					$_supported[] = $_currencies[$additional];
+
+				endif;
+
+			endforeach;
+
+		endif;
+
+		return $_supported;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function get_all_supported_flat()
+	{
+		$_out		= array();
+		$_currency	= $this->get_all_supported();
+
+		foreach( $_currency AS $c ) :
+
+			$_out[$c->code] = $c->label;
+
+		endforeach;
+
+		return $_out;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
 	public function get_by_code( $code )
 	{
 		$_currency = $this->get_all();

@@ -353,6 +353,15 @@ class NAILS_Shop_category_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
+	public function get_top_level()
+	{
+		return array( 'TODO' );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
 	protected function _getcount_common( $data = array(), $_caller = NULL )
 	{
 		if ( empty( $data['sort'] ) ) :

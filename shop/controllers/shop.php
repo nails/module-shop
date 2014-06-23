@@ -20,6 +20,10 @@ require_once '_shop.php';
 
 class NAILS_Shop extends NAILS_Shop_Controller
 {
+	/**
+	 * Render's the shop's front page
+	 * @return void
+	 */
 	public function index()
 	{
 		//	Page title
@@ -29,28 +33,36 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
+		//	Models
+		//	======
+
+		$this->load->model( 'shop/shop_featured_product_model' );
+
+		// --------------------------------------------------------------------------
+
 		//	Categories
 		//	==========
 
+		$this->data['all_categories']		= $this->shop_category_model->get_all();
+		$this->data['top_level_categories']	= $this->shop_category_model->get_top_level();
 
-		$this->data['categories'] = $this->shop_category_model->get_all_nested();
-
-		dumpanddie($this->data['categories']);
-
+		// --------------------------------------------------------------------------
 
 		//	Tags
 		//	====
 
-		$this->data['tags'] = array( 'tags' );
-
-
-		//	Featured Products
-		//	=================
-
-		$this->data['products_featured'] = array( 'featured products' );
+		$this->data['all_tags'] = $this->shop_tag_model->get_all();
 
 		// --------------------------------------------------------------------------
 
+		//	Products
+		//	========
+
+		$this->data['featured_products'] = $this->shop_featured_product_model->get_for_area( 'home' );
+
+		// --------------------------------------------------------------------------
+
+		//	Load views
 		$this->load->view( 'structure/header',							$this->data );
 		$this->load->view( $this->_skin->path . 'views/front/index',	$this->data );
 		$this->load->view( 'structure/footer',							$this->data );
@@ -112,6 +124,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
+		//	Load views
 		$this->load->view( 'structure/header',								$this->data );
 		$this->load->view( $this->_skin->path . 'views/front/brand/index',	$this->data );
 		$this->load->view( 'structure/footer',								$this->data );
@@ -147,17 +160,11 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Brand's Products
 		//	================
 
-		//	TODO: Adopt the generic Nails Model approach and use a where conditional
-		$this->data['products'] = $this->shop_product_model->get_all();
-
-		if ( empty( $this->data['products'] ) ) :
-
-			show_404();
-
-		endif;
+		$this->data['products'] = $this->shop_product_model->get_for_brand( $this->data['brand']->id );
 
 		// --------------------------------------------------------------------------
 
+		//	Load views
 		$this->load->view( 'structure/header',								$this->data );
 		$this->load->view( $this->_skin->path . 'views/front/brand/single',	$this->data );
 		$this->load->view( 'structure/footer',								$this->data );
@@ -218,6 +225,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
+		//	Load views
 		$this->load->view( 'structure/header',									$this->data );
 		$this->load->view( $this->_skin->path . 'views/front/category/index',	$this->data );
 		$this->load->view( 'structure/footer',									$this->data );
@@ -253,17 +261,11 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Category's Products
 		//	===================
 
-		//	TODO: Adopt the generic Nails Model approach and use a where conditional
-		$this->data['products'] = $this->shop_product_model->get_all();
-
-		if ( empty( $this->data['products'] ) ) :
-
-			show_404();
-
-		endif;
+		$this->data['products'] = $this->shop_product_model->get_for_category( $this->data['category']->id );
 
 		// --------------------------------------------------------------------------
 
+		//	Load views
 		$this->load->view( 'structure/header',									$this->data );
 		$this->load->view( $this->_skin->path . 'views/front/category/single',	$this->data );
 		$this->load->view( 'structure/footer',									$this->data );
@@ -324,6 +326,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
+		//	Load views
 		$this->load->view( 'structure/header',									$this->data );
 		$this->load->view( $this->_skin->path . 'views/front/collection/index',	$this->data );
 		$this->load->view( 'structure/footer',									$this->data );
@@ -359,17 +362,11 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Collection's Products
 		//	=====================
 
-		//	TODO: Adopt the generic Nails Model approach and use a where conditional
-		$this->data['products'] = $this->shop_product_model->get_all();
-
-		if ( empty( $this->data['products'] ) ) :
-
-			show_404();
-
-		endif;
+		$this->data['products'] = $this->shop_product_model->get_for_collection( $this->data['collection']->id );
 
 		// --------------------------------------------------------------------------
 
+		//	Load views
 		$this->load->view( 'structure/header',										$this->data );
 		$this->load->view( $this->_skin->path . 'views/front/collection/single',	$this->data );
 		$this->load->view( 'structure/footer',										$this->data );
@@ -416,7 +413,12 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		endif;
 
+		// --------------------------------------------------------------------------
+
+
 		//	Generate missing SEO content
+		//	============================
+
 		$this->shop_product_model->generate_seo_content( $this->data['product'] );
 
 		// --------------------------------------------------------------------------
@@ -431,6 +433,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
+		//	Load views
 		$this->load->view( 'structure/header',									$this->data );
 		$this->load->view( $this->_skin->path . 'views/front/product/single',	$this->data );
 		$this->load->view( 'structure/footer',									$this->data );
@@ -491,6 +494,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
+		//	Load views
 		$this->load->view( 'structure/header',								$this->data );
 		$this->load->view( $this->_skin->path . 'views/front/range/index',	$this->data );
 		$this->load->view( 'structure/footer',								$this->data );
@@ -526,17 +530,11 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Range's Products
 		//	================
 
-		//	TODO: Adopt the generic Nails Model approach and use a where conditional
-		$this->data['products'] = $this->shop_product_model->get_all();
-
-		if ( empty( $this->data['products'] ) ) :
-
-			show_404();
-
-		endif;
+		$this->data['products'] = $this->shop_product_model->get_for_range( $this->data['range']->id );
 
 		// --------------------------------------------------------------------------
 
+		//	Load views
 		$this->load->view( 'structure/header',								$this->data );
 		$this->load->view( $this->_skin->path . 'views/front/range/single',	$this->data );
 		$this->load->view( 'structure/footer',								$this->data );
@@ -597,6 +595,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
+		//	Load views
 		$this->load->view( 'structure/header',								$this->data );
 		$this->load->view( $this->_skin->path . 'views/front/sale/index',	$this->data );
 		$this->load->view( 'structure/footer',								$this->data );
@@ -632,14 +631,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Sale's Products
 		//	===============
 
-		//	TODO: Adopt the generic Nails Model approach and use a where conditional
-		$this->data['products'] = $this->shop_product_model->get_all();
-
-		if ( empty( $this->data['products'] ) ) :
-
-			show_404();
-
-		endif;
+		$this->data['products'] = $this->shop_product_model->get_for_sale( $this->data['sale']->id );
 
 		// --------------------------------------------------------------------------
 
@@ -701,6 +693,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
+		//	Load views
 		$this->load->view( 'structure/header',								$this->data );
 		$this->load->view( $this->_skin->path . 'views/front/tag/index',	$this->data );
 		$this->load->view( 'structure/footer',								$this->data );
@@ -736,17 +729,11 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Tag's Products
 		//	==============
 
-		//	TODO: Adopt the generic Nails Model approach and use a where conditional
-		$this->data['products'] = $this->shop_product_model->get_all();
-
-		if ( empty( $this->data['products'] ) ) :
-
-			show_404();
-
-		endif;
+		$this->data['products'] = $this->shop_product_model->get_for_tag( $this->data['tag']->id );
 
 		// --------------------------------------------------------------------------
 
+		//	Load views
 		$this->load->view( 'structure/header',								$this->data );
 		$this->load->view( $this->_skin->path . 'views/front/tag/single',	$this->data );
 		$this->load->view( 'structure/footer',								$this->data );

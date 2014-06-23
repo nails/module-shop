@@ -1,9 +1,9 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
- * Name:			shop_sale_model.php
+ * Name:			shop_featured_product_model.php
  *
- * Description:		This model handles interfacing with shop sales
+ * Description:		This model handles everything to do with featured products
  *
  **/
 
@@ -15,51 +15,23 @@
  *
  **/
 
-class NAILS_Shop_sale_model extends NAILS_Model
+class NAILS_Shop_featured_product_model extends NAILS_Model
 {
 	public function __construct()
 	{
 		parent::__construct();
 
-		$this->_table			= NAILS_DB_PREFIX . 'shop_sale';
-		$this->_table_prefix	= 'ss';
+		$this->_table			= NAILS_DB_PREFIX . 'shop_featured_product';
+		$this->_table_prefix	= 'sfp';
 	}
 
 
 	// --------------------------------------------------------------------------
 
 
-	protected function _getcount_common( $data = array(), $_caller = NULL )
+	public function get_for_area( $area = 'index' )
 	{
-		if ( empty( $data['sort'] ) ) :
-
-			$data['sort'] = 'label';
-
-		else :
-
-			$data = array( 'sort' => 'label' );
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		if ( ! empty( $data['include_count'] ) ) :
-
-			if ( empty( $this->db->ar_select ) ) :
-
-				//	No selects have been called, call this so that we don't *just* get the product count
-				$_prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
-				$this->db->select( $_prefix . '*' );
-
-			endif;
-
-			$this->db->select( '(SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product_sale spt LEFT JOIN ' . NAILS_DB_PREFIX . 'shop_product p ON p.id = sps.product_id  WHERE sps.sale_id = s.id AND p.is_active = 1) product_count' );
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		return parent::_getcount_common( $data, $_caller );
+		return array( 'TODO' );
 	}
 }
 
@@ -91,13 +63,13 @@ class NAILS_Shop_sale_model extends NAILS_Model
  *
  **/
 
-if ( ! defined( 'NAILS_ALLOW_EXTENSION_SHOP_SALE_MODEL' ) ) :
+if ( ! defined( 'NAILS_ALLOW_EXTENSION_SHOP_FEATURED_PRODUCT_MODEL' ) ) :
 
-	class Shop_sale_model extends NAILS_Shop_sale_model
+	class Shop_featured_product_model extends NAILS_Shop_featured_product_model
 	{
 	}
 
 endif;
 
-/* End of file shop_sale_model.php */
-/* Location: ./modules/shop/models/shop_sale_model.php */
+/* End of file shop_featured_product_model.php */
+/* Location: ./modules/shop/models/shop_featured_product_model.php */

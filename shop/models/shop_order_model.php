@@ -131,7 +131,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 		//	Payment gateway
 		if ( $basket->payment_gateway ) :
 
-			$_order->payment_gateway_id = $basket->payment_gateway;
+			$_order->payment_gateway = $basket->payment_gateway;
 
 		endif;
 
@@ -147,9 +147,9 @@ class NAILS_Shop_order_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Set currency and exchange rates
-		$_order->currency_id		= SHOP_USER_CURRENCY_ID;
-		$_order->base_currency_id	= SHOP_BASE_CURRENCY_ID;
-		$_order->exchange_rate		= SHOP_USER_CURRENCY_BASE_EXCHANGE;
+		$_order->currency		= SHOP_USER_CURRENCY_CODE;
+		$_order->base_currency	= SHOP_BASE_CURRENCY_CODE;
+		$_order->exchange_rate	= SHOP_USER_CURRENCY_BASE_EXCHANGE;
 
 		// --------------------------------------------------------------------------
 
@@ -157,7 +157,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 		if ( $basket->requires_shipping ) :
 
 			$_order->requires_shipping	= TRUE;
-			$_order->shipping_method_id	= $basket->shipping_method;
+			$_order->shipping_method	= $basket->shipping_method;
 			$_order->shipping_addressee	= $basket->shipping_details->addressee;
 			$_order->shipping_line_1	= $basket->shipping_details->line_1;
 			$_order->shipping_line_2	= $basket->shipping_details->line_2;
@@ -341,11 +341,8 @@ class NAILS_Shop_order_model extends NAILS_Model
 	{
 		$this->db->select( 'o.*' );
 		$this->db->select( 'ue.email, u.first_name, u.last_name, u.gender, u.profile_img,ug.id user_group_id,ug.label user_group_label' );
-		$this->db->select( 'pg.slug pg_slug, pg.label pg_label, pg.logo pg_logo' );
-		$this->db->select( 'oc.code oc_code,oc.symbol oc_symbol, oc.decimal_precision oc_precision,bc.code bc_code,bc.symbol bc_symbol,bc.decimal_precision bc_precision' );
 		$this->db->select( 'v.code v_code,v.label v_label, v.type v_type, v.discount_type v_discount_type, v.discount_value v_discount_value, v.discount_application v_discount_application' );
 		$this->db->select( 'v.product_type_id v_product_type_id, v.is_active v_is_active, v.is_deleted v_is_deleted, v.valid_from v_valid_from, v.valid_to v_valid_to' );
-		$this->db->select( 'sm.courier sm_courier, sm.method sm_method' );
 
 		// --------------------------------------------------------------------------
 
@@ -447,11 +444,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 		$this->db->join( NAILS_DB_PREFIX . 'user u', 'u.id = o.user_id', 'LEFT' );
 		$this->db->join( NAILS_DB_PREFIX . 'user_email ue', 'ue.user_id = u.id AND ue.is_primary = 1', 'LEFT' );
 		$this->db->join( NAILS_DB_PREFIX . 'user_group ug', 'ug.id = u.group_id', 'LEFT' );
-		$this->db->join( NAILS_DB_PREFIX . 'shop_payment_gateway pg', 'pg.id = o.payment_gateway_id', 'LEFT' );
-		$this->db->join( NAILS_DB_PREFIX . 'shop_currency oc', 'oc.id = o.currency_id', 'LEFT' );
-		$this->db->join( NAILS_DB_PREFIX . 'shop_currency bc', 'bc.id = o.base_currency_id', 'LEFT' );
 		$this->db->join( NAILS_DB_PREFIX . 'shop_voucher v', 'v.id = o.voucher_id', 'LEFT' );
-		$this->db->join( NAILS_DB_PREFIX . 'shop_shipping_method sm', 'sm.id = o.shipping_method_id', 'LEFT' );
 
 		// --------------------------------------------------------------------------
 
@@ -1148,20 +1141,6 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
-		//	Payment gateway
-		$order->payment_gateway 		= new stdClass();
-		$order->payment_gateway->id		= (int) $order->payment_gateway_id;
-		$order->payment_gateway->slug	= $order->pg_slug;
-		$order->payment_gateway->label	= $order->pg_label;
-		$order->payment_gateway->logo	= $order->pg_logo;
-
-		unset( $order->payment_gateway_id );
-		unset( $order->pg_slug );
-		unset( $order->pg_label );
-		unset( $order->pg_logo );
-
-		// --------------------------------------------------------------------------
-
 		//	Shipping details
 		$order->shipping_details 			= new stdClass();
 		$order->shipping_details->addressee	= $order->shipping_addressee;
@@ -1180,31 +1159,19 @@ class NAILS_Shop_order_model extends NAILS_Model
 		unset( $order->shipping_state );
 		unset( $order->shipping_country );
 
-
-		//	Shipping method
-		$order->shipping_method 			= new stdClass();
-		$order->shipping_method->id 		= $order->shipping_method_id;
-		$order->shipping_method->courier 	= $order->sm_courier;
-		$order->shipping_method->method 	= $order->sm_method;
-
-		unset( $order->shipping_method_id );
-		unset( $order->sm_courier );
-		unset( $order->sm_method );
-
-
 		// --------------------------------------------------------------------------
 
 		//	Currencies
 		$order->currency					= new stdClass();
 
 		$order->currency->order				= new stdClass();
-		$order->currency->order->id			= (int) $order->currency_id;
+		$order->currency->order->id			= (int) $order->currency;
 		$order->currency->order->code		= $order->oc_code;
 		$order->currency->order->symbol		= $order->oc_symbol;
 		$order->currency->order->precision	= $order->oc_precision;
 
 		$order->currency->base				= new stdClass();
-		$order->currency->base->id			= (int) $order->base_currency_id;
+		$order->currency->base->id			= (int) $order->base_currency;
 		$order->currency->base->code		= $order->bc_code;
 		$order->currency->base->symbol		= $order->bc_symbol;
 		$order->currency->base->precision	= $order->bc_precision;
@@ -1213,11 +1180,11 @@ class NAILS_Shop_order_model extends NAILS_Model
 		$order->currency->exchange_rate		= (float) $order->exchange_rate;
 
 		unset( $order->exchange_rate );
-		unset( $order->currency_id );
+		unset( $order->currency );
 		unset( $order->oc_code );
 		unset( $order->oc_symbol );
 		unset( $order->oc_precision );
-		unset( $order->base_currency_id );
+		unset( $order->base_currency );
 		unset( $order->bc_code );
 		unset( $order->bc_symbol );
 		unset( $order->bc_precision );
