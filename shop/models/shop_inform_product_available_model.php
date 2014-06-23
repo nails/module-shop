@@ -66,7 +66,6 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 						$_email->data['variation']		= $variation_id;
 						$_email->data['email_subject']	= $_product->label . ' is back in stock.';
 
-						$this->load->library( 'emailer' );
 						$this->emailer->send( $_email );
 
 					endforeach;

@@ -79,7 +79,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 			_LOG( '... Base Currency is ' . SHOP_BASE_CURRENCY_CODE );
 
 			//	Set up the cURL request
-			$this->load->library( 'curl' );
+			$this->load->library( 'curl/curl' );
 
 			$_url		= 'http://openexchangerates.org/api/latest.json?app_id=' . NAILS_SHOP_OPENEXCHANGERATES_APP_ID;
 			$_params	= array( 'app_id' => NAILS_SHOP_OPENEXCHANGERATES_APP_ID );

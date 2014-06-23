@@ -918,8 +918,6 @@ class NAILS_Shop_order_model extends NAILS_Model
 		//	Send the user an email with the links
 		_LOG( 'Sending download email to ' . $order->user->email  . '; email contains ' . count( $_urls ) . ' expiring URLs' );
 
-		$this->load->library( 'emailer' );
-
 		$_email							= new stdClass();
 		$_email->type					= 'shop_product_type_download';
 		$_email->to_email				= $order->user->email;
@@ -973,13 +971,11 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
-		$this->load->library( 'emailer' );
-
-		$_email							= new stdClass();
-		$_email->type					= 'shop_receipt';
-		$_email->to_email				= $order->user->email;
-		$_email->data					= array();
-		$_email->data['order']			= $order;
+		$_email					= new stdClass();
+		$_email->type			= 'shop_receipt';
+		$_email->to_email		= $order->user->email;
+		$_email->data			= array();
+		$_email->data['order']	= $order;
 
 		if ( ! $this->emailer->send( $_email, TRUE ) ) :
 
@@ -1022,13 +1018,10 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
-		$this->load->library( 'emailer' );
-		$this->load->helper( 'email' );
-
-		$_email							= new stdClass();
-		$_email->type					= 'shop_notify';
-		$_email->data					= array();
-		$_email->data['order']			= $order;
+		$_email					= new stdClass();
+		$_email->type			= 'shop_notify';
+		$_email->data			= array();
+		$_email->data['order']	= $order;
 
 		$_recipients = explode( ',', notification( 'notify_order', 'shop' ) );
 
@@ -1062,36 +1055,36 @@ class NAILS_Shop_order_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	User
-		$order->user				= new stdClass();
-		$order->user->id			= $order->user_id;
+		$order->user		= new stdClass();
+		$order->user->id	= $order->user_id;
 
 		if ( $order->user_email ) :
 
-			$order->user->email		= $order->user_email;
+			$order->user->email = $order->user_email;
 
 		else :
 
-			$order->user->email		= $order->email;
+			$order->user->email = $order->email;
 
 		endif;
 
 		if ( $order->user_first_name ) :
 
-			$order->user->first_name	= $order->user_first_name;
+			$order->user->first_name = $order->user_first_name;
 
 		else :
 
-			$order->user->first_name	= $order->first_name;
+			$order->user->first_name = $order->first_name;
 
 		endif;
 
 		if ( $order->user_last_name ) :
 
-			$order->user->last_name		= $order->user_last_name;
+			$order->user->last_name = $order->user_last_name;
 
 		else :
 
-			$order->user->last_name		= $order->last_name;
+			$order->user->last_name = $order->last_name;
 
 		endif;
 

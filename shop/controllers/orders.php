@@ -52,7 +52,7 @@ class NAILS_Orders extends NAILS_Shop_Controller
 
 		else :
 
-			$this->load->library( 'pdf' );
+			$this->load->library( 'pdf/pdf' );
 			$this->pdf->load_view('shop/' . $this->_skin->dir . '/orders/invoice', $this->data );
 			$this->pdf->render();
 			$this->pdf->stream( 'INVOICE-' . $this->data['order']->ref . '.pdf' );

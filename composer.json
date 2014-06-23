@@ -26,7 +26,10 @@
 		"php": ">=5.4.0",
 		"nailsapp/common" : "dev-develop",
 		"nailsapp/module-cdn" : "dev-develop",
+		"nailsapp/module-curl" : "dev-develop",
 		"nailsapp/module-email" : "dev-develop",
+		"nailsapp/module-geo-ip" : "dev-develop",
+		"nailsapp/module-pdf" : "dev-develop",
 		"omnipay/omnipay": "~2.0",
 		"dompdf/dompdf" : "~0.6.1"
 	}
