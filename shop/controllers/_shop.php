@@ -57,7 +57,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
 		// --------------------------------------------------------------------------
 
 		//	Load up the shop's skin
-		$_skin = app_setting( 'skin', 'shop' ) ? app_setting( 'skin', 'shop' ) : 'gettingstarted';
+		$_skin = app_setting( 'skin', 'shop' ) ? app_setting( 'skin', 'shop' ) : 'skin-shop-gettingstarted';
 
 		$this->_skin = $this->shop_skin_model->get( $_skin );
 
