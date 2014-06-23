@@ -270,7 +270,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 				case 'IN_STOCK' :
 
-					$_data->variation[$index]->quantity_available	= isset( $v['quantity_available'] ) ? $v['quantity_available'] : NULL;
+					$_data->variation[$index]->quantity_available	= ! empty( $v['quantity_available'] ) ? (int) $v['quantity_available'] : NULL;
 					$_data->variation[$index]->lead_time			= NULL;
 
 				break;
@@ -285,7 +285,6 @@ class NAILS_Shop_product_model extends NAILS_Model
 				case 'OUT_OF_STOCK' :
 
 					//	Shhh, be vewy qwiet, we're huntin' wabbits.
-
 					$_data->variation[$index]->quantity_available	= NULL;
 					$_data->variation[$index]->lead_time			= NULL;
 
@@ -319,9 +318,9 @@ class NAILS_Shop_product_model extends NAILS_Model
 				foreach( $v['pricing'] AS $price_index => $price ) :
 
 					$_data->variation[$index]->pricing[$price_index]				= new stdClass();
-					$_data->variation[$index]->pricing[$price_index]->currency		= isset( $price['currency'] )	? $price['currency']	: NULL;
-					$_data->variation[$index]->pricing[$price_index]->price			= isset( $price['price'] )		? $price['price']		: NULL;
-					$_data->variation[$index]->pricing[$price_index]->sale_price	= isset( $price['sale_price'] )	? $price['sale_price']	: NULL;
+					$_data->variation[$index]->pricing[$price_index]->currency		= ! empty( $price['currency'] )		? (float) $price['currency']	: NULL;
+					$_data->variation[$index]->pricing[$price_index]->price			= ! empty( $price['price'] )		? (float) $price['price']		: NULL;
+					$_data->variation[$index]->pricing[$price_index]->sale_price	= ! empty( $price['sale_price'] )	? (float) $price['sale_price']	: NULL;
 
 					if ( $price['currency'] == SHOP_BASE_CURRENCY_CODE ) :
 
@@ -864,60 +863,10 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 * @param  boolean $include_deleted_variants Whether to include deleted product variants or not
 	 * @return array                             An array of product objects
 	 */
-	public function get_all( $only_active = TRUE, $order = NULL, $limit = NULL, $include_deleted = FALSE, $include_deleted_variants = FALSE )
+	public function get_all( $page = NULL, $per_page = NULL, $data = NULL, $include_deleted = FALSE, $_caller = 'GET_ALL' )
 	{
-		//	TODO: Caching
-		//	TODO: Adopt the generic Nails Model format
 
-		// --------------------------------------------------------------------------
-
-		//	Selects
-		$this->db->select( 'p.*' );
-		$this->db->select( 'pt.slug type_slug, pt.label type_label, pt.is_physical type_is_physical' );
-		$this->db->select( 'tr.label tax_rate_label, tr.rate tax_rate_rate' );
-
-		// --------------------------------------------------------------------------
-
-		//	Set Order
-		if ( is_array( $order ) ) :
-
-			$this->db->order_by( $order[0], $order[1] );
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		//	Set Limit
-		if ( is_array( $limit ) ) :
-
-			$this->db->limit( $limit[0], $limit[1] );
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		//	Join all the tables!
-		$this->db->join( $this->_table_type . ' pt', 'p.type_id = pt.id' );
-		$this->db->join( $this->_table_tax_rate . ' tr', 'p.tax_rate_id = tr.id', 'LEFT' );
-
-		//	GrumpyCat says no
-		if ( ! $include_deleted ) :
-
-			$this->db->where( 'p.is_deleted', FALSE );
-
-		endif;
-
-		if ( $only_active ) :
-
-			$this->db->where( 'p.is_active', TRUE );
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		$_products = $this->db->get( $this->_table . ' p' )->result();
-
-		// --------------------------------------------------------------------------
+		$_products = parent::get_all( $page, $per_page, $data, $include_deleted, $_caller );
 
 		foreach ( $_products AS $product ) :
 
@@ -999,7 +948,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 			//	==========
 			$this->db->select( 'pv.*' );
 			$this->db->where( 'pv.product_id', $product->id );
-			if ( ! $include_deleted_variants ) :
+			if ( ! empty( $data['include_deleted_variants'] ) ) :
 
 				$this->db->where( 'pv.is_deleted', FALSE );
 
@@ -1094,75 +1043,57 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 	// --------------------------------------------------------------------------
 
-	/**
-	 * Fetch a product by it's ID
-	 * @param  int $id The ID of the product
-	 * @return mixed     FALSE on failure, stdClass on success
-	 */
-	public function get_by_id( $id )
-	{
-		$this->db->where( $this->_table_prefix . '.id', $id );
-		$_item = $this->get_all( TRUE, NULL, NULL, TRUE, FALSE );
-
-		if ( ! $_item ) :
-
-			return FALSE;
-
-		endif;
-
-		return $_item[0];
-	}
-
-
-	// --------------------------------------------------------------------------
-
 
 	/**
-	 * Fetch a product by it's slug
-	 * @param  string $slug The slug of the product
-	 * @return mixed     FALSE on failure, stdClass on success
-	 */
-	public function get_by_slug( $slug )
+	 * This method applies the conditionals which are common across the get_*()
+	 * methods and the count() method.
+	 * @access public
+	 * @param string $data Data passed from the calling method
+	 * @param string $_caller The name of the calling method
+	 * @return void
+	 **/
+	protected function _getcount_common( $data = array(), $_caller = NULL )
 	{
-		$this->db->where( $this->_table_prefix . '.slug', $slug );
-		$_item = $this->get_all( TRUE, NULL, NULL, TRUE, FALSE );
+		parent::_getcount_common( $data, $_caller );
 
-		if ( ! $_item ) :
+		// --------------------------------------------------------------------------
 
-			return FALSE;
+		//	Selects
+		$this->db->select( $this->_table_prefix . '.*' );
+		$this->db->select( 'pt.slug type_slug, pt.label type_label, pt.is_physical type_is_physical' );
+		$this->db->select( 'tr.label tax_rate_label, tr.rate tax_rate_rate' );
 
-		endif;
+		//	Joins
+		$this->db->join( $this->_table_type . ' pt', 'p.type_id = pt.id' );
+		$this->db->join( $this->_table_tax_rate . ' tr', 'p.tax_rate_id = tr.id', 'LEFT' );
 
-		return $_item[0];
-	}
+		//	Default sort
+		if ( empty( $data['sort'] ) ) :
 
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Count all the total number of products
-	 * @param  boolean $only_active     Include active items only
-	 * @param  array  $where            TODO
-	 * @param  string  $search          TODO
-	 * @param  boolean $include_deleted Include deleted items
-	 * @return int                   The number of products
-	 */
-	public function count_all( $only_active = FALSE, $where = NULL, $search = NULL, $include_deleted = FALSE )
-	{
-		if ( ! $include_deleted ) :
-
-			$this->db->where( 'p.is_deleted', FALSE );
+			$this->db->order_by( $this->_table_prefix . '.label' );
 
 		endif;
 
-		if ( $only_active ) :
+		//	Search
+		if ( ! empty( $data['search'] ) ) :
 
-			$this->db->where( 'p.is_active', TRUE );
+			//	Because fo the sub query we need to manually create the where clause,
+			//	'cause Active Record is a big pile of $%!@
+
+			$_search	= $this->db->escape_like_str( $data['search'] );
+
+			$_where		= array();
+			$_where[]	= $this->_table_prefix . '.id IN ( SELECT product_id FROM nails_shop_product_variation WHERE label LIKE \'%' . $_search . '%\' OR sku LIKE \'%' . $_search . '%\')' ;
+			$_where[]	= $this->_table_prefix . '.id LIKE \'%' . $_search  . '%\'';
+			$_where[]	= $this->_table_prefix . '.label LIKE \'%' . $_search  . '%\'';
+			$_where[]	= $this->_table_prefix . '.description LIKE \'%' . $_search  . '%\'';
+			$_where[]	= $this->_table_prefix . '.seo_description LIKE \'%' . $_search  . '%\'';
+			$_where[]	= $this->_table_prefix . '.seo_keywords LIKE \'%' . $_search  . '%\'';
+			$_where		= implode( ' OR ', $_where );
+
+			$this->db->where( $_where );
 
 		endif;
-
-		return $this->db->count_all_results( NAILS_DB_PREFIX . 'shop_product p' );
 	}
 
 
