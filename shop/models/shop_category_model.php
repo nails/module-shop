@@ -134,6 +134,12 @@ class NAILS_Shop_category_model extends NAILS_Model
 
 		endif;
 
+		if ( isset( $data->seo_keywords ) ) :
+
+			$_data->seo_keywords = strip_tags( $data->seo_keywords );
+
+		endif;
+
 		// --------------------------------------------------------------------------
 
 		//	Generate the slug
