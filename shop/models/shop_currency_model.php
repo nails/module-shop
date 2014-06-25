@@ -21,7 +21,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 	{
 		parent::__construct();
 
-		$this->config->load( 'currency' );
+		$this->config->load( 'shop/currency' );
 	}
 
 
