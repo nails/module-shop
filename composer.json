@@ -31,7 +31,6 @@
 		"nailsapp/module-geo-ip" : "dev-develop",
 		"nailsapp/module-pdf" : "dev-develop",
 		"nailsapp/skin-shop-gettingstarted" : "dev-develop",
-		"omnipay/omnipay": "~2.0",
-		"dompdf/dompdf" : "~0.6.1"
+		"omnipay/omnipay": "~2.0"
 	}
 }
