@@ -53,7 +53,7 @@ class NAILS_Shop_sale_model extends NAILS_Model
 
 			endif;
 
-			$this->db->select( '(SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product_sale spt LEFT JOIN ' . NAILS_DB_PREFIX . 'shop_product p ON p.id = sps.product_id  WHERE sps.sale_id = s.id AND p.is_active = 1) product_count' );
+			$this->db->select( '(SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product_sale sps LEFT JOIN ' . NAILS_DB_PREFIX . 'shop_product p ON p.id = sps.product_id  WHERE sps.sale_id = s.id AND p.is_active = 1) product_count' );
 
 		endif;
 

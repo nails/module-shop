@@ -43,15 +43,15 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Categories
 		//	==========
 
-		$this->data['all_categories']		= $this->shop_category_model->get_all();
-		$this->data['top_level_categories']	= $this->shop_category_model->get_top_level();
+		$this->data['categories']			= $this->shop_category_model->get_all();
+		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested();
 
 		// --------------------------------------------------------------------------
 
 		//	Tags
 		//	====
 
-		$this->data['all_tags'] = $this->shop_tag_model->get_all();
+		$this->data['tags'] = $this->shop_tag_model->get_all();
 
 		// --------------------------------------------------------------------------
 
@@ -114,6 +114,13 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		$this->data['page']->title = $this->_shop_name . ': Brands';
 
+		// --------------------------------------------------------------------------
+
+		//	Categories
+		//	==========
+
+		$this->data['categories']			= $this->shop_category_model->get_all();
+		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested();
 
 		// --------------------------------------------------------------------------
 
@@ -154,6 +161,14 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	==========
 
 		$this->data['page']->title = $this->_shop_name . ': Brand: "' . $this->data['brand']->label . '"';
+
+		// --------------------------------------------------------------------------
+
+		//	Categories
+		//	==========
+
+		$this->data['categories']			= $this->shop_category_model->get_all();
+		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested();
 
 		// --------------------------------------------------------------------------
 
@@ -222,7 +237,8 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Categories
 		//	==========
 
-		$this->data['categories'] = $this->shop_category_model->get_all();
+		$this->data['categories']			= $this->shop_category_model->get_all();
+		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested();
 
 		// --------------------------------------------------------------------------
 
@@ -256,6 +272,14 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	==========
 
 		$this->data['page']->title = $this->_shop_name . ': Category: "' . $this->data['category']->label . '"';
+
+		// --------------------------------------------------------------------------
+
+		//	Categories
+		//	==========
+
+		$this->data['categories']			= $this->shop_category_model->get_all();
+		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested();
 
 		// --------------------------------------------------------------------------
 
@@ -321,6 +345,14 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
+		//	Categories
+		//	==========
+
+		$this->data['categories']			= $this->shop_category_model->get_all();
+		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested();
+
+		// --------------------------------------------------------------------------
+
 		//	Collections
 		//	===========
 
@@ -358,6 +390,14 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	==========
 
 		$this->data['page']->title = $this->_shop_name . ': Collection: "' . $this->data['collection']->label . '"';
+
+		// --------------------------------------------------------------------------
+
+		//	Categories
+		//	==========
+
+		$this->data['categories']			= $this->shop_category_model->get_all();
+		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested();
 
 		// --------------------------------------------------------------------------
 
@@ -415,6 +455,14 @@ class NAILS_Shop extends NAILS_Shop_Controller
 			show_404();
 
 		endif;
+
+		// --------------------------------------------------------------------------
+
+		//	Categories
+		//	==========
+
+		$this->data['categories']			= $this->shop_category_model->get_all();
+		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested();
 
 		// --------------------------------------------------------------------------
 
@@ -490,6 +538,14 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
+		//	Categories
+		//	==========
+
+		$this->data['categories']			= $this->shop_category_model->get_all();
+		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested();
+
+		// --------------------------------------------------------------------------
+
 		//	Ranges
 		//	======
 
@@ -527,6 +583,14 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	==========
 
 		$this->data['page']->title = $this->_shop_name . ': Range: "' . $this->data['range']->label . '"';
+
+		// --------------------------------------------------------------------------
+
+		//	Categories
+		//	==========
+
+		$this->data['categories']			= $this->shop_category_model->get_all();
+		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested();
 
 		// --------------------------------------------------------------------------
 
@@ -592,6 +656,14 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
+		//	Categories
+		//	==========
+
+		$this->data['categories']			= $this->shop_category_model->get_all();
+		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested();
+
+		// --------------------------------------------------------------------------
+
 		//	Sales
 		//	=====
 
@@ -629,6 +701,14 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	==========
 
 		$this->data['page']->title = $this->_shop_name . ': Sale: "' . $this->data['sale']->label . '"';
+
+		// --------------------------------------------------------------------------
+
+		//	Categories
+		//	==========
+
+		$this->data['categories']			= $this->shop_category_model->get_all();
+		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested();
 
 		// --------------------------------------------------------------------------
 
@@ -691,6 +771,14 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
+		//	Categories
+		//	==========
+
+		$this->data['categories']			= $this->shop_category_model->get_all();
+		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested();
+
+		// --------------------------------------------------------------------------
+
 		//	Tags
 		//	====
 
@@ -728,6 +816,14 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	==========
 
 		$this->data['page']->title = $this->_shop_name . ': Tag: "' . $this->data['tag']->label . '"';
+
+		// --------------------------------------------------------------------------
+
+		//	Categories
+		//	==========
+
+		$this->data['categories']			= $this->shop_category_model->get_all();
+		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested();
 
 		// --------------------------------------------------------------------------
 

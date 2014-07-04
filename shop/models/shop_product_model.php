@@ -45,6 +45,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 		$this->_table_collection		= NAILS_DB_PREFIX . 'shop_product_collection';
 		$this->_table_gallery			= NAILS_DB_PREFIX . 'shop_product_gallery';
 		$this->_table_range				= NAILS_DB_PREFIX . 'shop_product_range';
+		$this->_table_sale				= NAILS_DB_PREFIX . 'shop_sale_product';
 		$this->_table_tag				= NAILS_DB_PREFIX . 'shop_product_tag';
 		$this->_table_variation			= NAILS_DB_PREFIX . 'shop_product_variation';
 		$this->_table_variation_gallery	= NAILS_DB_PREFIX . 'shop_product_variation_gallery';
@@ -871,7 +872,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 * @param string $_caller Internal flag to pass to _getcount_common(), contains the calling method
 	 * @return array
 	 **/
-	public function get_all( $page = NULL, $per_page = NULL, $data = NULL, $include_deleted = FALSE, $_caller = 'GET_ALL' )
+	public function get_all( $page = NULL, $per_page = NULL, $data = array(), $include_deleted = FALSE, $_caller = 'GET_ALL' )
 	{
 
 		$_products = parent::get_all( $page, $per_page, $data, $include_deleted, $_caller );
@@ -1279,16 +1280,9 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
 	 * @return array
 	 **/
-	public function get_for_brand( $brand_id, $page = NULL, $per_page = NULL, $data = NULL, $include_deleted = FALSE )
+	public function get_for_brand( $brand_id, $page = NULL, $per_page = NULL, $data = array(), $include_deleted = FALSE )
 	{
-		if ( is_null( $data ) ) :
-
-			$data = array();
-
-		endif;
-
 		$data['brand_id'] = $brand_id;
-
 		return $this->get_all( $page, $per_page, $data, $include_deleted, 'GET_FOR_BRAND' 	);
 	}
 
@@ -1305,16 +1299,11 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
 	 * @return array
 	 **/
-	public function get_for_category( $category_id, $page = NULL, $per_page = NULL, $data = NULL, $include_deleted = FALSE )
+	public function get_for_category( $category_id, $page = NULL, $per_page = NULL, $data = array(), $include_deleted = FALSE )
 	{
-		if ( is_null( $data ) ) :
-
-			$data = array();
-
-		endif;
-
-		$data['category_id'] = $category_id;
-
+		//	Fetch this category's children also
+		$this->load->model( 'shop/shop_category_model' );
+		$data['category_id'] = array_merge( array( $category_id ), $this->shop_category_model->get_ids_of_children( $category_id ) );
 		return $this->get_all( $page, $per_page, $data, $include_deleted, 'GET_FOR_CATEGORY' );
 	}
 
@@ -1331,16 +1320,9 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
 	 * @return array
 	 **/
-	public function get_for_collection( $collection_id, $page = NULL, $per_page = NULL, $data = NULL, $include_deleted = FALSE )
+	public function get_for_collection( $collection_id, $page = NULL, $per_page = NULL, $data = array(), $include_deleted = FALSE )
 	{
-		if ( is_null( $data ) ) :
-
-			$data = array();
-
-		endif;
-
 		$data['collection_id'] = $collection_id;
-
 		return $this->get_all( $page, $per_page, $data, $include_deleted, 'GET_FOR_COLLECTION' );
 	}
 
@@ -1357,16 +1339,9 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
 	 * @return array
 	 **/
-	public function get_for_range( $range_id, $page = NULL, $per_page = NULL, $data = NULL, $include_deleted = FALSE )
+	public function get_for_range( $range_id, $page = NULL, $per_page = NULL, $data = array(), $include_deleted = FALSE )
 	{
-		if ( is_null( $data ) ) :
-
-			$data = array();
-
-		endif;
-
 		$data['range_id'] = $range_id;
-
 		return $this->get_all( $page, $per_page, $data, $include_deleted, 'GET_FOR_RANGE' );
 	}
 
@@ -1383,16 +1358,9 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
 	 * @return array
 	 **/
-	public function get_for_sale( $sale_id, $page = NULL, $per_page = NULL, $data = NULL, $include_deleted = FALSE )
+	public function get_for_sale( $sale_id, $page = NULL, $per_page = NULL, $data = array(), $include_deleted = FALSE )
 	{
-		if ( is_null( $data ) ) :
-
-			$data = array();
-
-		endif;
-
 		$data['sale_id'] = $sale_id;
-
 		return $this->get_all( $page, $per_page, $data, $include_deleted, 'GET_FOR_SALE' );
 	}
 
@@ -1409,16 +1377,9 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
 	 * @return array
 	 **/
-	public function get_for_tag( $tag_id, $page = NULL, $per_page = NULL, $data = NULL, $include_deleted = FALSE )
+	public function get_for_tag( $tag_id, $page = NULL, $per_page = NULL, $data = array(), $include_deleted = FALSE )
 	{
-		if ( is_null( $data ) ) :
-
-			$data = array();
-
-		endif;
-
 		$data['tag_id'] = $tag_id;
-
 		return $this->get_all( $page, $per_page, $data, $include_deleted, 'GET_FOR_TAG' );
 	}
 

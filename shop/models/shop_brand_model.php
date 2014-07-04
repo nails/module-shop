@@ -43,6 +43,39 @@ class NAILS_Shop_brand_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
+		//	Only include active items?
+		if ( isset( $data['only_active'] ) ) :
+
+			$_only_active = (bool) $data['only_active'];
+
+		else :
+
+			$_only_active = TRUE;
+
+		endif;
+
+		if ( $_only_active ) :
+
+			if ( ! isset( $data['where'] ) ) :
+
+				$data['where'] = array();
+
+			endif;
+
+			if ( is_array( $data['where'] ) ) :
+
+				$data['where'][] = array( 'is_active', TRUE );
+
+			elseif ( is_string( $data['where'] ) ) :
+
+				$data['where'] .= ' AND ' . $this->_table_prefix . '.is_active = 1';
+
+			endif;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
 		if ( ! empty( $data['include_count'] ) ) :
 
 			if ( empty( $this->db->ar_select ) ) :
@@ -60,6 +93,91 @@ class NAILS_Shop_brand_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		return parent::_getcount_common( $data, $_caller );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function get_by_id( $id, $data = array() )
+	{
+		if ( ! isset( $data['only_active'] ) ) :
+
+			$data['only_active'] = FALSE;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		return parent::get_by_id( $id, $data );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function get_by_ids( $ids, $data = array() )
+	{
+		if ( ! isset( $data['only_active'] ) ) :
+
+			$data['only_active'] = FALSE;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		return parent::get_by_ids( $ids, $data );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function get_by_slug( $slug, $data = array() )
+	{
+		if ( ! isset( $data['only_active'] ) ) :
+
+			$data['only_active'] = FALSE;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		return parent::get_by_slug( $slug, $data );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function get_by_slugs( $slugs, $data = array() )
+	{
+		if ( ! isset( $data['only_active'] ) ) :
+
+			$data['only_active'] = FALSE;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		return parent::get_by_slugs( $slugs, $data );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function get_by_id_or_slug( $id_slug, $data = array() )
+	{
+		if ( ! isset( $data['only_active'] ) ) :
+
+			$data['only_active'] = FALSE;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		return parent::get_by_id_or_slug( $id_slug, $data );
 	}
 }
 

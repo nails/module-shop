@@ -196,7 +196,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 			// --------------------------------------------------------------------------
 
 			//	Also regenerate breadcrumbs and slugs for all children
-			$_children = $this->_get_children( $id );
+			$_children = $this->get_ids_of_children( $id );
 
 			if ( $_children ) :
 
@@ -267,7 +267,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 		endif;
 
 		//	Fetch parents
-		$_parents = $this->_get_parents( $id );
+		$_parents = $this->get_ids_of_parents( $id );
 
 		if ( ! empty( $_parents ) ) :
 
@@ -285,7 +285,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	protected function _get_parents( $id )
+	public function get_ids_of_parents( $id )
 	{
 		$_return = array();
 
@@ -296,7 +296,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 		if ( ! empty( $_parent->parent_id ) ) :
 
 			$_temp		= array( $_parent->parent_id );
-			$_return	= array_merge( $_return, $_temp, $this->_get_parents( $_parent->parent_id ) );
+			$_return	= array_merge( $_return, $_temp, $this->get_ids_of_parents( $_parent->parent_id ) );
 
 		endif;
 
@@ -307,7 +307,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	protected function _get_children( $id )
+	public function get_ids_of_children( $id )
 	{
 		$_return = array();
 
@@ -320,7 +320,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 			foreach( $_children AS $child ) :
 
 				$_temp		= array( $child->id );
-				$_return	= array_merge( $_return, $_temp, $this->_get_children( $child->id ) );
+				$_return	= array_merge( $_return, $_temp, $this->get_ids_of_children( $child->id ) );
 
 			endforeach;
 
@@ -329,6 +329,39 @@ class NAILS_Shop_category_model extends NAILS_Model
 		return array_unique( array_filter( $_return ) );
 	}
 
+
+	// --------------------------------------------------------------------------
+
+
+	public function get_all_nested( $_parent_id = NULL )
+	{
+		return $this->_nest_items( $this->get_all(), NULL );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 *	Hat tip to Timur; http://stackoverflow.com/a/9224696/789224
+	 **/
+	protected function _nest_items( &$list, $parent = NULL )
+	{
+		$result = array();
+
+		for ( $i = 0, $c = count( $list ); $i < $c; $i++ ) :
+
+			if ( $list[$i]->parent_id == $parent ) :
+
+				$list[$i]->children	= $this->_nest_items( $list, $list[$i]->id );
+				$result[]			= $list[$i];
+
+			endif;
+
+		endfor;
+
+		return $result;
+	}
 
 	// --------------------------------------------------------------------------
 
@@ -353,15 +386,6 @@ class NAILS_Shop_category_model extends NAILS_Model
 		endforeach;
 
 		return $_out;
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	public function get_top_level()
-	{
-		return array( 'TODO' );
 	}
 
 
