@@ -125,7 +125,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Do all we need to do with the incoming data
-		$_data = $this->_create_update_prep_data( $data );
+		$_data = $this->_create_update_prep_data( $data, $id );
 
 		if ( ! $_data ) :
 
@@ -159,9 +159,10 @@ class NAILS_Shop_product_model extends NAILS_Model
 	/**
 	 * Prepares data, ready for the DB
 	 * @param  array $data Raw data to sue for the update/create
-	 * @return mixed       stdClass on success, FALSE of failure
+	 * @param  int   $id   If updating, the ID of the item being updated
+	 * @return mixed stdClass on success, FALSE of failure
 	 */
-	protected function _create_update_prep_data( $data )
+	protected function _create_update_prep_data( $data, $id = NULL )
 	{
 		//	Quick check of incoming data
 		$_data = new stdClass();
@@ -178,7 +179,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 		//	Slug
 		//	====
 
-		$_data->slug = $this->_generate_slug( $data['label'], '', '', $this->_table );
+		$_data->slug = $this->_generate_slug( $data['label'], '', '', $this->_table, NULL, $id );
 
 		//	Product Info
 		//	============
@@ -454,6 +455,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 		$_rollback = FALSE;
 
 		//	Add the product
+		$this->db->set( 'slug',				$data->slug );
 		$this->db->set( 'type_id',			$data->type_id );
 		$this->db->set( 'label',			$data->label );
 		$this->db->set( 'description',		$data->description );
