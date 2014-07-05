@@ -876,7 +876,6 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 **/
 	public function get_all( $page = NULL, $per_page = NULL, $data = array(), $include_deleted = FALSE, $_caller = 'GET_ALL' )
 	{
-
 		$_products = parent::get_all( $page, $per_page, $data, $include_deleted, $_caller );
 
 		foreach ( $_products AS $product ) :
@@ -971,13 +970,15 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 				//	Meta
 				//	====
+
 				$this->db->where( 'variation_id', $v->id );
 				$v->meta = $this->db->get( $this->_table_variation_meta )->row();
 
 				unset( $v->meta->variation_id );
 
-				//	Meta
-				//	====
+				//	Gallery
+				//	=======
+
 				$this->db->where( 'variation_id', $v->id );
 				$_temp = $this->db->get( $this->_table_variation_gallery )->result();
 				$v->gallery = array();
@@ -989,60 +990,188 @@ class NAILS_Shop_product_model extends NAILS_Model
 				endforeach;
 
 				//	Price
-				//	====
+				//	=====
+
+				$this->db->select( 'pvp.currency, pvp.price, pvp.sale_price' );
 				$this->db->where( 'pvp.variation_id', $v->id );
-				$v->price = $this->db->get( $this->_table_variation_price . ' pvp' )->result();
+				$_price = $this->db->get( $this->_table_variation_price . ' pvp' )->result();
 
-				$this->_format_variation_object( $v );
+				$v->price = new stdClass();
 
-			endforeach;
+				foreach ( $_price AS $price ) :
 
-			//	Work out price/price_from
-			//	=========================
-
-			$product->price = array();
-
-			foreach( $product->variations AS &$v ) :
-
-				foreach( $v->price AS $price ) :
-
-					if ( empty( $product->price[$price->currency] ) ) :
-
-						$product->price[$price->currency]					= new stdClass();
-						$product->price[$price->currency]->max_price		= NULL;
-						$product->price[$price->currency]->min_price		= NULL;
-						$product->price[$price->currency]->max_sale_price	= NULL;
-						$product->price[$price->currency]->min_sale_price	= NULL;
-
-					endif;
-
-					if ( is_null( $product->price[$price->currency]->max_price ) || $price->price > $product->price[$price->currency]->max_price ) :
-
-						$product->price[$price->currency]->max_price = $price->price;
-
-					endif;
-
-					if ( is_null( $product->price[$price->currency]->min_price ) || $price->price < $product->price[$price->currency]->min_price ) :
-
-						$product->price[$price->currency]->min_price = $price->price;
-
-					endif;
-
-					if ( is_null( $product->price[$price->currency]->max_sale_price ) || $price->sale_price > $product->price[$price->currency]->max_sale_price ) :
-
-						$product->price[$price->currency]->max_sale_price = $price->sale_price;
-
-					endif;
-
-					if ( is_null( $product->price[$price->currency]->min_sale_price ) || $price->sale_price < $product->price[$price->currency]->min_sale_price ) :
-
-						$product->price[$price->currency]->min_sale_price = $price->sale_price;
-
-					endif;
+					$v->price->{$price->currency} = $price;
 
 				endforeach;
 
+				$this->_format_variation_object( $v );
+
+				//	Work out price/price_from
+				//	=========================
+
+				//	Render Price - converts the price to the user's desired currency
+				$v->user_price				= new stdClass();
+				$v->user_price->price		= 0;
+				$v->user_price->sale_price	= 0;
+
+				$v->user_price_formatted				= new stdClass();
+				$v->user_price_formatted->price			= 0;
+				$v->user_price_formatted->sale_price	= 0;
+
+				$_base_price = isset( $v->price->{SHOP_BASE_CURRENCY_CODE} ) ? $v->price->{SHOP_BASE_CURRENCY_CODE} : NULL;
+				$_user_price = isset( $v->price->{SHOP_USER_CURRENCY_CODE} ) ? $v->price->{SHOP_USER_CURRENCY_CODE} : NULL;
+
+				if ( empty( $_base_price )  ) :
+
+					$_subject = 'Product missing price for base currency (' . SHOP_BASE_CURRENCY_CODE . ')';
+					$_message = 'Product #' . $product->id . ' does not contain a price for the shop\'s base currency, ' . SHOP_BASE_CURRENCY_CODE . '.';
+					show_fatal_error( $_subject, $_message );
+
+				endif;
+
+				if ( empty( $_user_price )  ) :
+
+					$_subject = 'Product missing price for currency (' . SHOP_USER_CURRENCY_CODE . ')';
+					$_message = 'Product #' . $product->id . ' does not contain a price for currency, ' . SHOP_USER_CURRENCY_CODE . '.';
+					show_fatal_error( $_subject, $_message );
+
+				endif;
+
+				//	If the user's currency preferences aren't the same as the base currency
+				//	then we may need to do some conversions
+
+				if ( SHOP_USER_CURRENCY_CODE != SHOP_BASE_CURRENCY_CODE ) :
+
+					//	Price, first
+					if ( empty( $_user_price->price ) ) :
+
+						//	The user's price is empty() so we should automatically calculate it from the base price
+						$_price = $this->shop_currency_model->convert_base_to_user( $_base_price->price );
+
+					else :
+
+						//	A price has been explicitly set for this currency, so render it as is
+						$_price = number_format( $_user_price->price, SHOP_USER_CURRENCY_PRECISION, '.', '' );
+
+					endif;
+
+					$v->user_price->price = number_format( $_price, SHOP_USER_CURRENCY_PRECISION, '.', '' );
+
+					//	Sale price, second
+					if ( empty( $_user_price->sale_price ) ) :
+
+						//	The user's sale_price is empty() so we should automatically calculate it from the base price
+						$_sale_price = $this->shop_currency_model->convert_base_to_user( $_base_price->sale_price );
+
+					else :
+
+						//	A sale_price has been explicitly set for this currency, so render it as is
+						$_sale_price = number_format( $_user_price->sale_price, SHOP_USER_CURRENCY_PRECISION, '.', '' );
+
+					endif;
+
+					$v->user_price->sale_price = number_format( $_sale_price, SHOP_USER_CURRENCY_PRECISION, '.', '' );
+
+				else :
+
+					$v->user_price->price		= number_format( $_user_price->price, SHOP_USER_CURRENCY_PRECISION, '.', '' );
+					$v->user_price->sale_price	= number_format( $_user_price->sale_price, SHOP_USER_CURRENCY_PRECISION, '.', '' );
+
+				endif;
+
+				//	Format
+				$v->user_price_formatted->price			= number_format( $v->user_price->price, SHOP_USER_CURRENCY_PRECISION, SHOP_USER_CURRENCY_DECIMALS, SHOP_USER_CURRENCY_THOUSANDS );
+				$v->user_price_formatted->sale_price	= number_format( $v->user_price->sale_price, SHOP_USER_CURRENCY_PRECISION, SHOP_USER_CURRENCY_DECIMALS, SHOP_USER_CURRENCY_THOUSANDS );
+
+				switch ( SHOP_USER_CURRENCY_SYMBOL_POS ) :
+
+					case 'BEFORE' :
+
+						$v->user_price_formatted->price			= SHOP_USER_CURRENCY_SYMBOL . $v->user_price_formatted->price;
+						$v->user_price_formatted->sale_price	= SHOP_USER_CURRENCY_SYMBOL . $v->user_price_formatted->sale_price;
+
+					break;
+
+					case 'AFTER' :
+
+						$v->user_price_formatted->price			= $v->user_price_formatted->price . SHOP_USER_CURRENCY_SYMBOL;
+						$v->user_price_formatted->sale_price	= $v->user_price_formatted->sale_price . SHOP_USER_CURRENCY_SYMBOL;
+
+					break;
+
+				endswitch;
+
+				// --------------------------------------------------------------------------
+
+				if ( empty( $product->user_price ) ) :
+
+					$product->user_price					= new stdClass();
+					$product->user_price->max_price			= NULL;
+					$product->user_price->min_price			= NULL;
+					$product->user_price->max_sale_price	= NULL;
+					$product->user_price->min_sale_price	= NULL;
+
+				endif;
+
+				if ( empty( $product->user_price_formatted ) ) :
+
+					$product->user_price_formatted					= new stdClass();
+					$product->user_price_formatted->max_price		= NULL;
+					$product->user_price_formatted->min_price		= NULL;
+					$product->user_price_formatted->max_sale_price	= NULL;
+					$product->user_price_formatted->min_sale_price	= NULL;
+
+				endif;
+
+				if ( is_null( $product->user_price->max_price ) || $v->user_price->price > $product->user_price->max_price ) :
+
+					$product->user_price->max_price				= $v->user_price->price;
+					$product->user_price_formatted->max_price	= $v->user_price_formatted->price;
+
+				endif;
+
+				if ( is_null( $product->user_price->min_price ) || $v->user_price->price < $product->user_price->min_price ) :
+
+					$product->user_price->min_price				= $v->user_price->price;
+					$product->user_price_formatted->min_price	= $v->user_price_formatted->price;
+
+				endif;
+
+				if ( is_null( $product->user_price->max_sale_price ) || $v->user_price->sale_price > $product->user_price->max_sale_price ) :
+
+					$product->user_price->max_sale_price			= $v->user_price->sale_price;
+					$product->user_price_formatted->max_sale_price	= $v->user_price_formatted->sale_price;
+
+				endif;
+
+				if ( is_null( $product->user_price->min_sale_price ) || $v->user_price->sale_price < $product->user_price->min_sale_price ) :
+
+					$product->user_price->min_sale_price			= $v->user_price->sale_price;
+					$product->user_price_formatted->min_sale_price	= $v->user_price_formatted->sale_price;
+
+				endif;
+
 			endforeach;
+
+			if ( $product->user_price->max_price == $product->user_price->min_price ) :
+
+				$product->user_price_formatted->price_string = $product->user_price_formatted->min_price;
+
+			else :
+
+				$product->user_price_formatted->price_string = 'From ' . $product->user_price_formatted->min_price;
+
+			endif;
+
+			if ( $product->user_price->max_sale_price == $product->user_price->min_sale_price ) :
+
+				$product->user_price_formatted->sale_price_string = $product->user_price_formatted->min_sale_price;
+
+			else :
+
+				$product->user_price_formatted->sale_price_string = 'From ' . $product->user_price_formatted->min_sale_price;
+
+			endif;
 
 		endforeach;
 
