@@ -333,9 +333,9 @@ class NAILS_Shop_category_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	public function get_all_nested( $_parent_id = NULL )
+	public function get_all_nested( $_parent_id = NULL, $_data = array() )
 	{
-		return $this->_nest_items( $this->get_all(), NULL );
+		return $this->_nest_items( $this->get_all( NULL, NULL, $_data ), NULL );
 	}
 
 
