@@ -876,6 +876,8 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 **/
 	public function get_all( $page = NULL, $per_page = NULL, $data = array(), $include_deleted = FALSE, $_caller = 'GET_ALL' )
 	{
+	    $this->load->model('shop/shop_category_model');
+	    
 		$_products = parent::get_all( $page, $per_page, $data, $include_deleted, $_caller );
 
 		foreach ( $_products AS $product ) :
@@ -906,6 +908,11 @@ class NAILS_Shop_product_model extends NAILS_Model
 			$this->db->where( 'pc.product_id', $product->id );
 			$this->db->join( NAILS_DB_PREFIX . 'shop_category c', 'c.id = pc.category_id' );
 			$product->categories = $this->db->get( $this->_table_category . ' pc' )->result();
+			foreach( $product->categories AS $category ) :
+
+                $category->url = $this->shop_category_model->format_url( $category->slug );
+                
+            endforeach;
 
 			//	Collections
 			//	===========
