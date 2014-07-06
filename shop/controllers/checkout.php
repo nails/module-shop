@@ -551,9 +551,9 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 		//	Prepapre variables for the template
 		$this->data['paypal'] = new stdClass();
 
-		switch ( ENVIRONMENT ) :
+		switch ( strtoupper( ENVIRONMENT ) ) :
 
-			case 'production' :
+			case 'PRODUCTION' :
 
 				$this->data['paypal']->url			= 'https://www.paypal.com/cgi-bin/webscr';
 				$this->data['paypal']->business		= $_payment_gateway->account_id;
@@ -988,7 +988,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 			_LOG( 'Checking if order has already been processed' );
 			_LOG();
 
-			if ( ENVIRONMENT == 'production' && $_order->status != 'UNPAID' ) :
+			if ( strtoupper( ENVIRONMENT ) == 'PRODUCTION' && $_order->status != 'UNPAID' ) :
 
 				_LOG( 'Order has already been processed, aborting.' );
 				_LOG( '- - - - - - - - - - - - - - - - - - -' );
@@ -996,7 +996,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 				return;
 
-			elseif ( ENVIRONMENT != 'production' && $_order->status != 'UNPAID' ) :
+			elseif ( strtoupper( ENVIRONMENT ) != 'PRODUCTION' && $_order->status != 'UNPAID' ) :
 
 				_LOG( 'Order has already been processed, but not on production so continuing anyway.' );
 				_LOG();
@@ -1202,8 +1202,11 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	 */
 	protected function _notify_is_testing()
 	{
-		if ( ENVIRONMENT == 'production' )
+		if ( strtoupper( ENVIRONMENT ) == 'PRODUCTION' ) :
+
 			return FALSE;
+
+		endif;
 
 		// --------------------------------------------------------------------------
 
