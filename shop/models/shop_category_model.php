@@ -116,6 +116,12 @@ class NAILS_Shop_category_model extends NAILS_Model
 
 		endif;
 
+		if ( isset( $data->cover_id ) ) :
+
+			$_data->cover_id = $data->cover_id;
+
+		endif;
+
 		if ( isset( $data->description ) ) :
 
 			$_data->description = $data->description;

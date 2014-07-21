@@ -61,6 +61,36 @@ class NAILS_Shop_tag_model extends NAILS_Model
 
 		return parent::_getcount_common( $data, $_caller );
 	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function create( $data = array(), $return_object = FALSE )
+	{
+		if ( ! empty( $data->label ) ) :
+
+			$data->slug = $this->_generate_slug( $data->label );
+
+		endif;
+
+		return parent::create( $data, $return_object );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function update( $id, $data = array() )
+	{
+		if ( ! empty( $data->label ) ) :
+
+			$data->slug = $this->_generate_slug( $data->label, '', '', NULL, NULL, $id );
+
+		endif;
+
+		return parent::update( $id, $data );
+	}
 }
 
 
