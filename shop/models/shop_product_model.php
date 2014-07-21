@@ -158,7 +158,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 	/**
 	 * Prepares data, ready for the DB
-	 * @param  array $data Raw data to sue for the update/create
+	 * @param  array $data Raw data to use for the update/create
 	 * @param  int   $id   If updating, the ID of the item being updated
 	 * @return mixed stdClass on success, FALSE of failure
 	 */
@@ -201,6 +201,45 @@ class NAILS_Shop_product_model extends NAILS_Model
 		$_data->tags		= isset( $data['tags'] )		? $data['tags']					: array();
 
 		$_data->tax_rate_id	= isset( $data['tax_rate_id'] ) &&	(int) $data['tax_rate_id']	? (int) $data['tax_rate_id']	: NULL;
+
+		// --------------------------------------------------------------------------
+
+		//	Product Meta
+		//	============
+
+		$this->config->load( 'shop/shop' );
+		$_product_meta = $this->config->item( 'shop_product_meta' );
+
+		if ( is_array( $_product_meta ) ) :
+
+			$_data->meta = new stdClass();
+
+			foreach( $_product_meta AS $field => $value ) :
+
+				$_datatype	= isset( $value['datatype'] )		? $value['datatype']	: 'text';
+				$_value		= isset( $data['meta'][$field] )	? $data['meta'][$field]	: '';
+
+				switch( $_datatype ) :
+
+					case 'bool' :
+					case 'boolean' :
+
+						$_value = (bool) $_value;
+
+					break;
+					case 'id' :
+
+						$_value = (int) $_value;
+
+					break;
+
+				endswitch;
+
+				$_data->meta->$field = $_value;
+
+			endforeach;
+
+		endif;
 
 		// --------------------------------------------------------------------------
 
@@ -488,6 +527,44 @@ class NAILS_Shop_product_model extends NAILS_Model
 		endif;
 
 		if ( $_result ) :
+
+			//	Product meta
+			$_product_meta	= $this->config->item( 'shop_product_meta' );
+			$_data			= new stdClass();
+
+			if ( is_array( $_product_meta ) ) :
+
+				foreach( $_product_meta AS $field => $value ) :
+
+					if ( isset( $data->meta->$field ) ) :
+
+						$this->db->set( $field, $data->meta->$field );
+
+					endif;
+
+				endforeach;
+
+			endif;
+
+			if ( $_action == 'create' ) :
+
+				$_data->product_id = $data->id;
+				$_result = $this->db->insert( NAILS_DB_PREFIX . 'shop_product_meta' );
+
+			else :
+
+				$this->db->where( 'product_id', $data->id );
+				$_result = $this->db->update( NAILS_DB_PREFIX . 'shop_product_meta' );
+
+			endif;
+
+			if ( ! $_result ) :
+
+				$this->_set_error( 'Failed to ' . $_action . ' product\'s meta entry.' );
+				$this->db->trans_rollback();
+				return FALSE;
+
+			endif;
 
 			//	The following items are all handled, and error, in the [mostly] same way
 			//	loopy loop for clarity and consistency.
@@ -877,11 +954,18 @@ class NAILS_Shop_product_model extends NAILS_Model
 	public function get_all( $page = NULL, $per_page = NULL, $data = array(), $include_deleted = FALSE, $_caller = 'GET_ALL' )
 	{
 	    $this->load->model('shop/shop_category_model');
-	    
+
 		$_products = parent::get_all( $page, $per_page, $data, $include_deleted, $_caller );
 
 		foreach ( $_products AS $product ) :
 
+			//	Fetch meta data
+			$this->db->where( 'product_id', $product->id );
+			$product->meta = $this->db->get( NAILS_DB_PREFIX . 'shop_product_meta' )->row();
+
+			// --------------------------------------------------------------------------
+
+			//	format
 			$this->_format_product_object( $product );
 
 			// --------------------------------------------------------------------------
@@ -911,7 +995,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 			foreach( $product->categories AS $category ) :
 
                 $category->url = $this->shop_category_model->format_url( $category->slug );
-                
+
             endforeach;
 
 			//	Collections
@@ -1546,6 +1630,10 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 */
 	protected function _format_product_object( &$product )
 	{
+		//	Remove meta fields
+		unset( $product->meta->id );
+		unset( $product->meta->product_id );
+
 		//	Type casting
 		$product->id			= (int) $product->id;
 		$product->is_active		= (bool) $product->is_active;
