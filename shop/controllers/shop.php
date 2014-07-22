@@ -33,13 +33,6 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		//	Models
-		//	======
-
-		$this->load->model( 'shop/shop_featured_product_model' );
-
-		// --------------------------------------------------------------------------
-
 		//	Categories
 		//	==========
 
@@ -59,7 +52,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Products
 		//	========
 
-		$this->data['featured_products'] = $this->shop_featured_product_model->get_for_area( 'home' );
+		$this->data['products'] = $this->shop_product_model->get_all();
 
 		// --------------------------------------------------------------------------
 

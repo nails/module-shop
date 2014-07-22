@@ -311,7 +311,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 				case 'IN_STOCK' :
 
-					$_data->variation[$index]->quantity_available	= ! empty( $v['quantity_available'] ) ? (int) $v['quantity_available'] : NULL;
+					$_data->variation[$index]->quantity_available	= is_numeric( $v['quantity_available'] ) ? (int) $v['quantity_available'] : NULL;
 					$_data->variation[$index]->lead_time			= NULL;
 
 				break;
@@ -530,7 +530,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 			//	Product meta
 			$_product_meta	= $this->config->item( 'shop_product_meta' );
-			$_data			= new stdClass();
+			$_data			= array();
 
 			if ( is_array( $_product_meta ) ) :
 
@@ -538,7 +538,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 					if ( isset( $data->meta->$field ) ) :
 
-						$this->db->set( $field, $data->meta->$field );
+						$_data[$field] = $data->meta->$field;
 
 					endif;
 
@@ -548,12 +548,14 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 			if ( $_action == 'create' ) :
 
-				$_data->product_id = $data->id;
+				$_data['product_id'] = $data->id;
+				$this->db->set( $_data );
 				$_result = $this->db->insert( NAILS_DB_PREFIX . 'shop_product_meta' );
 
-			else :
+			elseif ( $_action == 'update' && ! empty( $_data ) ) :
 
 				$this->db->where( 'product_id', $data->id );
+				$this->db->set( $_data );
 				$_result = $this->db->update( NAILS_DB_PREFIX . 'shop_product_meta' );
 
 			endif;
@@ -874,7 +876,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 			$this->db->where( 'product_id', $data->id );
 			$this->db->where( 'is_deleted', FALSE );
 			$this->db->where( 'stock_status', 'IN_STOCK' );
-			$this->db->where( '(quantity_available = 0 OR quantity_available - quantity_sold > 0)' );
+			$this->db->where( '(quantity_available IS NULL OR quantity_sold > 0)' );
 			$_variants_available_raw = $this->db->get( $this->_table_variation	 )->result();
 			$_variants_available = array();
 
@@ -1275,6 +1277,28 @@ class NAILS_Shop_product_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
+	public function get_by_variant_id( $variant_id )
+	{
+		$this->db->select( 'product_id' );
+		$this->db->where( 'id', $variant_id );
+		$this->db->where( 'is_deleted', FALSE );
+		$_variant = $this->db->get( $this->_table_variation )->row();
+
+		if ( $_variant ) :
+
+			return $this->get_by_id( $_variant->product_id );
+
+		else :
+
+			return FALSE;
+
+		endif;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
 	/**
 	 * This method applies the conditionals which are common across the get_*()
 	 * methods and the count() method.
@@ -1291,7 +1315,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 		//	Selects
 		$this->db->select( $this->_table_prefix . '.*' );
-		$this->db->select( 'pt.slug type_slug, pt.label type_label, pt.is_physical type_is_physical' );
+		$this->db->select( 'pt.slug type_slug, pt.label type_label, pt.max_per_order type_max_per_order, pt.is_physical type_is_physical' );
 		$this->db->select( 'tr.label tax_rate_label, tr.rate tax_rate_rate' );
 
 		//	Joins
@@ -1640,15 +1664,17 @@ class NAILS_Shop_product_model extends NAILS_Model
 		$product->is_deleted	= (bool) $product->is_deleted;
 
 		//	Product type
-		$product->type				= new stdClass();
-		$product->type->id			= (int) $product->type_id;
-		$product->type->slug		= $product->type_slug;
-		$product->type->label		= $product->type_label;
-		$product->type->is_physical	= $product->type_is_physical;
+		$product->type					= new stdClass();
+		$product->type->id				= (int) $product->type_id;
+		$product->type->slug			= $product->type_slug;
+		$product->type->label			= $product->type_label;
+		$product->type->max_per_order	= (int) $product->type_max_per_order;
+		$product->type->is_physical		= $product->type_is_physical;
 
 		unset( $product->type_id );
 		unset( $product->type_slug );
 		unset( $product->type_label );
+		unset( $product->type_max_per_order );
 		unset( $product->type_is_physical );
 
 		//	Tax Rate
@@ -1733,10 +1759,9 @@ class NAILS_Shop_product_model extends NAILS_Model
 		//	Type casting
 		$variation->id					= (int) $variation->id;
 		$variation->product_id			= (int) $variation->product_id;
-		$variation->quantity_sold		= (int) $variation->quantity_sold;
 		$variation->order				= (int) $variation->order;
 		$variation->is_deleted			= (bool) $variation->is_deleted;
-		$variation->quantity_available	= is_numeric( $variation->quantity_available ) ? (int) $variation->quantity_available : $variation->quantity_available;
+		$variation->quantity_available	= is_numeric( $variation->quantity_available ) ? (int) $variation->quantity_available : NULL;
 
 		//	Gallery
 		if ( ! empty( $variation->gallery ) && is_array( $variation->gallery ) ) :

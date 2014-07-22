@@ -193,13 +193,13 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 			endif;
 
-			if ( $_product && $_product->is_active && ( NULL === $_product->quantity_available || $_product->quantity_available ) ) :
+			if ( $_product && $_product->is_active && ( is_null( $_product->quantity_available ) || $_product->quantity_available ) ) :
 
 				//	Product is still available, calculate all we need to calculate
 				//	and format the basket object
 
 				//	Do we need to adjust quantities?
-				if ( NULL !== $_product->quantity_available && $_product->quantity_available < $item->quantity ) :
+				if ( ! is_null( $_product->quantity_available ) && $_product->quantity_available < $item->quantity ) :
 
 					$_basket->quantity_adjusted = $_product->title;
 
@@ -661,7 +661,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	public function add( $product_id, $quantity = NULL, $extra_data = NULL )
+	public function add( $variant_id, $quantity = NULL, $extra_data = NULL )
 	{
 		if ( ! $quantity ) :
 
@@ -674,7 +674,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		$this->load->model( 'shop/shop_product_model' );
 
 		//	Check item isn't already in the basket
-		$_key = $this->_get_basket_key_by_product_id( $product_id );
+		$_key = $this->_get_basket_key_by_variant_id( $variant_id );
 
 		// --------------------------------------------------------------------------
 
@@ -688,11 +688,30 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Check the product ID is valid
-		$_product = $this->shop_product_model->get_by_id( $product_id );
+		$_product = $this->shop_product_model->get_by_variant_id( $variant_id );
 
 		if ( ! $_product ) :
 
-			$this->_set_error( 'Invalid Product ID.' );
+			$this->_set_error( 'No Product for that Variant ID.' );
+			return FALSE;
+
+		endif;
+
+		$_variant = NULL;
+		foreach ( $_product->variations AS $variant ) :
+
+			if ( $variant_id == $variant->id ) :
+
+				$_variant = $variant;
+				break;
+
+			endif;
+
+		endforeach;
+
+		if ( ! $_variant ) :
+
+			$this->_set_error( 'Invalid Variant ID.' );
 			return FALSE;
 
 		endif;
@@ -710,9 +729,9 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Check quantity is available, if more are being requested, then reduce.
-		if ( NULL !== $_product->quantity_available && $quantity > $_product->quantity_available ) :
+		if ( ! is_null( $_variant->quantity_available ) && $quantity > $_variant->quantity_available ) :
 
-			$quantity = $_product->quantity_available;
+			$quantity = $_variant->quantity_available;
 
 		endif;
 
@@ -720,12 +739,14 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 		//	All good, add to basket
 		$_temp = new stdClass();
-		$_temp->product_id	= $_product->id;
-		$_temp->title		= $_product->title;
-		$_temp->quantity	= $quantity;
-		$_temp->extra_data	= $extra_data;
+		$_temp->variant_id		= $variant_id;
+		$_temp->product_id		= $_product->id;
+		$_temp->product_label	= $_product->label;
+		$_temp->variant_label	= $_variant->label;
+		$_temp->quantity		= $quantity;
+		$_temp->extra_data		= $extra_data;
 
-		$this->_items[]		= $_temp;
+		$this->_items[]			= $_temp;
 
 		unset( $_temp );
 
@@ -743,9 +764,9 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	public function remove( $product_id )
+	public function remove( $variant_id )
 	{
-		$_key = $this->_get_basket_key_by_product_id( $product_id );
+		$_key = $this->_get_basket_key_by_variant_id( $variant_id );
 
 		// --------------------------------------------------------------------------
 
@@ -797,7 +818,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 	public function increment( $product_id )
 	{
-		$_key = $this->_get_basket_key_by_product_id( $product_id );
+		$_key = $this->_get_basket_key_by_variant_id( $product_id );
 
 		// --------------------------------------------------------------------------
 
@@ -844,7 +865,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 	public function decrement( $product_id )
 	{
-		$_key = $this->_get_basket_key_by_product_id( $product_id );
+		$_key = $this->_get_basket_key_by_variant_id( $product_id );
 
 		// --------------------------------------------------------------------------
 
@@ -1012,9 +1033,9 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	public function is_in_basket( $product_id )
+	public function is_in_basket( $variant_id )
 	{
-		if ( $this->_get_basket_key_by_product_id( $product_id ) !== FALSE ) :
+		if ( $this->_get_basket_key_by_variant_id( $variant_id ) !== FALSE ) :
 
 			return TRUE;
 
@@ -1040,6 +1061,28 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 		endif;
 	}
+
+	// --------------------------------------------------------------------------
+
+
+	protected function _get_basket_key_by_variant_id( $variant_id )
+	{
+		foreach( $this->_items AS $key => $item ) :
+
+			if ( $variant_id == $item->variant_id ) :
+
+				return $key;
+				break;
+
+			endif;
+
+		endforeach;
+
+		// --------------------------------------------------------------------------
+
+		return FALSE;
+	}
+
 
 	// --------------------------------------------------------------------------
 

@@ -182,6 +182,20 @@ class NAILS_Shop_category_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
+		//	Find all childen
+		$_data->children_ids = implode( ',', $this->get_ids_of_children( $id ) );
+
+		if ( empty( $_data->children_ids ) ) :
+
+			$_data->children_ids = NULL;
+
+		endif;
+
+		//	And all the [old] parents
+		$_parents = $this->get_ids_of_parents( $id );
+
+		// --------------------------------------------------------------------------
+
 		//	Attempt the update
 		$this->db->trans_begin();
 
@@ -244,6 +258,36 @@ class NAILS_Shop_category_model extends NAILS_Model
 
 			endif;
 
+			// --------------------------------------------------------------------------
+
+			//	Fetch the new parents
+			$_parents = array_merge( $_parents, $this->get_ids_of_parents( $id ) );
+			$_parents = array_filter( $_parents );
+			$_parents = array_unique( $_parents );
+
+			foreach( $_parents AS $parent_id ) :
+
+				$_data					= new stdClass();
+				$_data->children_ids	= implode( ',', $this->get_ids_of_children( $parent_id ) );
+
+				if ( empty( $_data->children_ids ) ) :
+
+					$_data->children_ids = NULL;
+
+				endif;
+
+				if ( ! parent::update( $parent_id, $_data ) ) :
+
+					$this->db->trans_rollback();
+					$this->_set_error( 'Failed to update parent\'s children IDs.' );
+					return FALSE;
+
+				endif;
+
+			endforeach;
+
+			// --------------------------------------------------------------------------
+
 			$this->db->trans_commit();
 			return TRUE;
 
@@ -253,6 +297,63 @@ class NAILS_Shop_category_model extends NAILS_Model
 			return FALSE;
 
 		endif;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function delete( $id )
+	{
+		$_current = $this->get_by_id( $id );
+
+		if ( ! $_current ) :
+
+			$this->_set_error( 'Invalid Category ID' );
+			return FALSE;
+
+		endif;
+
+		$_parents = $this->get_ids_of_parents( $id );
+
+		// --------------------------------------------------------------------------
+
+		$this->db->trans_begin();
+
+		if ( parent::delete( $id ) ) :
+
+			foreach( $_parents AS $parent_id ) :
+
+				$_data					= new stdClass();
+				$_data->children_ids	= implode( ',', $this->get_ids_of_children( $parent_id ) );
+
+				if ( empty( $_data->children_ids ) ) :
+
+					$_data->children_ids = NULL;
+
+				endif;
+
+				if ( ! parent::update( $parent_id, $_data ) ) :
+
+					$this->db->trans_rollback();
+					$this->_set_error( 'Failed to update parent\'s children IDs.' );
+					return FALSE;
+
+				endif;
+
+			endforeach;
+
+			$this->db->trans_commit();
+			return TRUE;
+
+		else :
+
+			$this->_set_error( 'Invalid Category ID' );
+			$this->db->trans_rollback();
+			return FALSE;
+
+		endif;
+
 	}
 
 
@@ -422,7 +523,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 
 			endif;
 
-			$this->db->select( '(SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product_category WHERE category_id = ' . $this->_table_prefix . '.id) product_count' );
+			$this->db->select( '(SELECT COUNT(DISTINCT(product_id)) FROM ' . NAILS_DB_PREFIX .  'shop_product_category WHERE category_id = ' . $this->_table_prefix . '.id OR FIND_IN_SET ( category_id, ' . $this->_table_prefix . '.children_ids ) ) product_count' );
 
 		endif;
 

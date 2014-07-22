@@ -26,7 +26,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		$this->data['return'] = $this->input->get( 'return' ) ? $this->input->get( 'return' ) : app_setting( 'url', 'shop' ) . 'basket';
+		$this->data['return'] = $this->input->get( 'return' ) ? $this->input->get_post( 'return' ) : app_setting( 'url', 'shop' ) . 'basket';
 	}
 
 
@@ -58,9 +58,9 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		$this->data['basket']			= $this->shop_basket_model->get_basket();
-		$this->data['shipping_methods'] = $this->shop_shipping_model->get_all();
-		$this->data['currencies']		= $this->shop_currency_model->get_all_supported();
+		//$this->data['basket']			= $this->shop_basket_model->get_basket();
+		//$this->data['shipping_methods'] = $this->shop_shipping_model->get_all();
+		//$this->data['currencies']		= $this->shop_currency_model->get_all_supported();
 
 		// --------------------------------------------------------------------------
 
@@ -82,9 +82,12 @@ class NAILS_Basket extends NAILS_Shop_Controller
 	 **/
 	public function add()
 	{
-		if ( $this->shop_basket_model->add( $this->uri->rsegment( 3 ), $this->uri->rsegment( 4 ) ) ) :
+		$_variant_id	= $this->input->get_post( 'variant_id' );
+		$_quantity		= $this->input->get_post( 'quantity' ) ? $this->input->get_post( 'quantity' ) : 1;
 
-			$this->session->set_flashdata( 'success', '<strong>Success!</strong> Item was added to your basket. <a href="javascript: history.go(-1)">Continue Shopping</a>' );
+		if ( $this->shop_basket_model->add( $_variant_id, $_quantity ) ) :
+
+			$this->session->set_flashdata( 'success', '<strong>Success!</strong> Item was added to your basket.' );
 
 		else :
 
@@ -110,7 +113,9 @@ class NAILS_Basket extends NAILS_Shop_Controller
 	 **/
 	public function remove()
 	{
-		if ( $this->shop_basket_model->remove( $this->uri->rsegment( 3 ), $this->uri->rsegment( 4 ) ) ) :
+		$_variant_id = $this->input->get_post( 'variant_id' );
+
+		if ( $this->shop_basket_model->remove( $_variant_id ) ) :
 
 			$this->session->set_flashdata( 'success', '<strong>Success!</strong> Item was removed from your basket.' );
 
@@ -158,7 +163,17 @@ class NAILS_Basket extends NAILS_Shop_Controller
 	 **/
 	public function increment()
 	{
-		$this->shop_basket_model->increment( $this->uri->rsegment( 3 ) );
+		$_variant_id = $this->input->get_post( 'variant_id' );
+
+		if ( $this->shop_basket_model->increment( $_variant_id ) ) :
+
+			$this->session->set_flashdata( 'success', '<strong>Success!</strong> Quantity adjusted!' );
+
+		else :
+
+			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> could not adjust quantity. ' . $this->shop_basket_model->last_error() );
+
+		endif;
 
 		// --------------------------------------------------------------------------
 
@@ -178,7 +193,17 @@ class NAILS_Basket extends NAILS_Shop_Controller
 	 **/
 	public function decrement()
 	{
-		$this->shop_basket_model->decrement( $this->uri->rsegment( 3 ) );
+		$_variant_id = $this->input->get_post( 'variant_id' );
+
+		if ( $this->shop_basket_model->decrement( $_variant_id ) ) :
+
+			$this->session->set_flashdata( 'success', '<strong>Success!</strong> Quantity adjusted!' );
+
+		else :
+
+			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> could not adjust quantity. ' . $this->shop_basket_model->last_error() );
+
+		endif;
 
 		// --------------------------------------------------------------------------
 
@@ -198,7 +223,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 	 **/
 	public function add_voucher()
 	{
-		$_voucher = $this->shop_voucher_model->validate( $this->input->post( 'voucher' ), get_basket() );
+		$_voucher = $this->shop_voucher_model->validate( $this->input->get_post( 'voucher' ), get_basket() );
 
 		if ( $_voucher ) :
 
@@ -252,7 +277,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 	 **/
 	public function set_shipping_method()
 	{
-		$_method = $this->shop_shipping_model->validate( $this->input->post( 'shipping_method' ) );
+		$_method = $this->shop_shipping_model->validate( $this->input->get_post( 'shipping_method' ) );
 
 		if ( $_method ) :
 
@@ -285,7 +310,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 	 **/
 	public function set_currency()
 	{
-		$_currency = $this->shop_currency_model->get_by_code( $this->input->post( 'currency' ) );
+		$_currency = $this->shop_currency_model->get_by_code( $this->input->get_post( 'currency' ) );
 
 		if ( $_currency ) :
 
