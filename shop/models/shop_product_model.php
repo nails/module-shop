@@ -876,7 +876,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 			$this->db->where( 'product_id', $data->id );
 			$this->db->where( 'is_deleted', FALSE );
 			$this->db->where( 'stock_status', 'IN_STOCK' );
-			$this->db->where( '(quantity_available IS NULL OR quantity_sold > 0)' );
+			$this->db->where( '(quantity_available IS NULL OR quantity_available > 0)' );
 			$_variants_available_raw = $this->db->get( $this->_table_variation	 )->result();
 			$_variants_available = array();
 
