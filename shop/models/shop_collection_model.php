@@ -209,6 +209,28 @@ class NAILS_Shop_collection_model extends NAILS_Model
 
 		return parent::update( $id, $data );
 	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function format_url( $slug )
+	{
+		return site_url( app_setting( 'url', 'shop' ) . 'collection/' . $slug );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	protected function _format_object( &$object )
+	{
+		//	Type casting
+		$object->id				= (int) $object->id;
+		$object->created_by		= $object->created_by ? (int) $object->created_by : NULL;
+		$object->modified_by	= $object->modified_by ? (int) $object->modified_by : NULL;
+		$object->url			= $this->format_url( $object->slug );
+	}
 }
 
 

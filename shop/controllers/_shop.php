@@ -74,6 +74,11 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
 		// --------------------------------------------------------------------------
 
+		//	Fetch the user's basket
+		$this->data['basket'] = $this->shop_basket_model->get();
+
+		// --------------------------------------------------------------------------
+
 		//	Shop's name
 		$this->_shop_name = app_setting( 'name', 'shop' ) ? app_setting( 'name', 'shop' ) : 'Shop';
 	}

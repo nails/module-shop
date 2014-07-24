@@ -42,23 +42,11 @@ class NAILS_Basket extends NAILS_Shop_Controller
 	 **/
 	public function index()
 	{
-		//	Abandon any previous order
-		$_order_id = $this->shop_basket_model->get_order_id();
-		if ( $_order_id ) :
-
-			//	Abandon this order and remove from basket
-			$this->shop_order_model->abandon( $_order_id );
-			$this->shop_basket_model->remove_order_id();
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
 		$this->data['page']->title = $this->_shop_name . ': Your Basket';
 
 		// --------------------------------------------------------------------------
 
-		//$this->data['basket']			= $this->shop_basket_model->get_basket();
+		$this->data['basket']			= $this->shop_basket_model->get();
 		//$this->data['shipping_methods'] = $this->shop_shipping_model->get_all();
 		//$this->data['currencies']		= $this->shop_currency_model->get_all_supported();
 

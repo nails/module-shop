@@ -166,6 +166,23 @@ class NAILS_Shop_model extends NAILS_Model
 		//	Fetch base currency
 		$_base = $this->shop_currency_model->get_by_code( app_setting( 'base_currency', 'shop' ) );
 
+		//	If no base currency is found, default to GBP
+		if ( ! $_base ) :
+
+			$_base = $this->shop_currency_model->get_by_code( 'GBP' );
+
+			if ( ! $_base ) :
+
+				show_fatal_error( 'Could not define base currency', 'No base currency was set, so the system fell back to GBP, but could not find that either.' );
+
+			else :
+
+				set_app_setting( 'base_currency', 'shop', 'GBP' );
+
+			endif;
+
+		endif;
+
 		//	Cache
 		$this->_set_cache( 'base_currency', $_base );
 

@@ -1178,7 +1178,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	protected function _can_checkout()
 	{
 		//	Check basket isn't empty
-		$this->data['basket'] = $this->shop_basket_model->get_basket();
+		$this->data['basket'] = $this->shop_basket_model->get();
 
 		if ( ! $this->data['basket']->items ) :
 
