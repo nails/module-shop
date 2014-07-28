@@ -596,7 +596,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 		endif;
 
 		//	Voucher expired?
-		if ( NULL !== $_voucher->valid_to && $_voucher->valid_to != '0000-00-00 00:00:00' && strtotime( $_voucher->valid_to ) < time() ) :
+		if ( ! is_null( $_voucher->valid_to ) && $_voucher->valid_to != '0000-00-00 00:00:00' && strtotime( $_voucher->valid_to ) < time() ) :
 
 			$this->_set_error( 'Voucher has expired.' );
 			return FALSE;
@@ -604,7 +604,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 		endif;
 
 		//	Is this a shipping voucher being applied to an order with no shippable items?
-		if ( NULL !== $basket && $_voucher->discount_application == 'SHIPPING' && ! $basket->requires_shipping ) :
+		if ( ! is_null( $basket ) && $_voucher->discount_application == 'SHIPPING' && ! $basket->requires_shipping ) :
 
 			$this->_set_error( 'Your order does not contian any items which require shipping, voucher not needed!' );
 			return FALSE;
@@ -615,7 +615,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 		//	and the threshold has been reached then prevent it being added as it
 		//	doesn't make sense.
 
-		if ( NULL !== $basket && app_setting( 'free_shipping_threshold', 'shop' ) && $_voucher->discount_application == 'SHIPPING' ) :
+		if ( ! is_null( $basket ) && app_setting( 'free_shipping_threshold', 'shop' ) && $_voucher->discount_application == 'SHIPPING' ) :
 
 			if ( $basket->totals->sub >= app_setting( 'free_shipping_threshold', 'shop' ) ) :
 
@@ -630,7 +630,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 		//	If the voucher applies to a particular product type, check the basket contains
 		//	that product, otherwise it doesn't make sense to add it
 
-		if ( NULL !== $basket && $_voucher->discount_application == 'PRODUCT_TYPES' ) :
+		if ( ! is_null( $basket ) && $_voucher->discount_application == 'PRODUCT_TYPES' ) :
 
 			$_matched = FALSE;
 
@@ -639,7 +639,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 				if ( $item->type->id == $_voucher->product_type_id ) :
 
 					$_matched = TRUE;
-				break;
+					break;
 
 				endif;
 
@@ -727,7 +727,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 
 	protected function _validate_gift_card( &$voucher )
 	{
-		if ( $voucher->gift_card_balance ) :
+		if ( $voucher->gift_card_balance > 0 ) :
 
 			return $voucher;
 

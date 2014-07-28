@@ -105,6 +105,8 @@ class NAILS_Shop_model extends NAILS_Model
 
 		endif;
 
+		$_currency_code = 'USD';
+
 		//	Fetch the user's render currency
 		$_user_currency = $this->shop_currency_model->get_by_code( $_currency_code );
 

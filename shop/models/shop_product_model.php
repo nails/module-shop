@@ -1082,6 +1082,16 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 				endforeach;
 
+				if ( ! empty( $v->gallery[0] ) ) :
+
+					$v->featured_img = $v->gallery[0];
+
+				else :
+
+					$v->featured_img = NULL;
+
+				endif;
+
 				//	Price
 				//	=====
 
@@ -1089,11 +1099,12 @@ class NAILS_Shop_product_model extends NAILS_Model
 				$this->db->where( 'pvp.variation_id', $v->id );
 				$_price = $this->db->get( $this->_table_variation_price . ' pvp' )->result();
 
-				$v->price = new stdClass();
+				$v->price_raw	= new stdClass();
+				$v->price		= new stdClass();
 
 				foreach ( $_price AS $price ) :
 
-					$v->price->{$price->currency} = $price;
+					$v->price_raw->{$price->currency} = $price;
 
 				endforeach;
 
@@ -1102,17 +1113,25 @@ class NAILS_Shop_product_model extends NAILS_Model
 				//	Work out price/price_from
 				//	=========================
 
-				//	Render Price - converts the price to the user's desired currency
-				$v->user_price				= new stdClass();
-				$v->user_price->price		= 0;
-				$v->user_price->sale_price	= 0;
+				//	Fields
+				$_prototype_fields					= new stdClass();
+				$_prototype_fields->value			= 0;
+				$_prototype_fields->value_inc_tax	= 0;
+				$_prototype_fields->value_ex_tax	= 0;
+				$_prototype_fields->value_tax		= 0;
 
-				$v->user_price_formatted				= new stdClass();
-				$v->user_price_formatted->price			= 0;
-				$v->user_price_formatted->sale_price	= 0;
+				//	Clone the fields for each price, we gotta use a deep copy 'hack' to avoid references.
+				$v->price->price					= new stdClass();
+				$v->price->price->base				= unserialize( serialize( $_prototype_fields ) );
+				$v->price->price->base_formatted	= unserialize( serialize( $_prototype_fields ) );
+				$v->price->price->user				= unserialize( serialize( $_prototype_fields ) );
+				$v->price->price->user_formatted	= unserialize( serialize( $_prototype_fields ) );
 
-				$_base_price = isset( $v->price->{SHOP_BASE_CURRENCY_CODE} ) ? $v->price->{SHOP_BASE_CURRENCY_CODE} : NULL;
-				$_user_price = isset( $v->price->{SHOP_USER_CURRENCY_CODE} ) ? $v->price->{SHOP_USER_CURRENCY_CODE} : NULL;
+				//	And an exact clone for the sale price
+				$v->price->sale_price = unserialize( serialize( $v->price->price ) );
+
+				$_base_price = isset( $v->price_raw->{SHOP_BASE_CURRENCY_CODE} ) ? $v->price_raw->{SHOP_BASE_CURRENCY_CODE} : NULL;
+				$_user_price = isset( $v->price_raw->{SHOP_USER_CURRENCY_CODE} ) ? $v->price_raw->{SHOP_USER_CURRENCY_CODE} : NULL;
 
 				if ( empty( $_base_price )  ) :
 
@@ -1130,8 +1149,18 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 				endif;
 
-				//	If the user's currency preferences aren't the same as the base currency
-				//	then we may need to do some conversions
+				//	Define the base prices first
+				$v->price->price->base->value		= $_base_price->price;
+				$v->price->sale_price->base->value	= $_base_price->sale_price;
+
+				$v->price->price->base_formatted->value			= number_format( $v->price->price->base->value, SHOP_BASE_CURRENCY_PRECISION, SHOP_BASE_CURRENCY_DECIMALS, SHOP_BASE_CURRENCY_THOUSANDS );
+				$v->price->sale_price->base_formatted->value	= number_format( $v->price->sale_price->base->value, SHOP_BASE_CURRENCY_PRECISION, SHOP_BASE_CURRENCY_DECIMALS, SHOP_BASE_CURRENCY_THOUSANDS );
+
+
+				// --------------------------------------------------------------------------
+
+				//	If the user's currency preferences aren't the same as the
+				//	base currency then we need to do some conversions
 
 				if ( SHOP_USER_CURRENCY_CODE != SHOP_BASE_CURRENCY_CODE ) :
 
@@ -1141,6 +1170,12 @@ class NAILS_Shop_product_model extends NAILS_Model
 						//	The user's price is empty() so we should automatically calculate it from the base price
 						$_price = $this->shop_currency_model->convert_base_to_user( $_base_price->price );
 
+						if ( ! $_price ) :
+
+							show_fatal_error( 'Failed to convert currency', 'Could not convert from ' . SHOP_BASE_CURRENCY_CODE . ' to ' . SHOP_USER_CURRENCY_CODE . '. ' . $this->shop_currency_model->last_error() );
+
+						endif;
+
 					else :
 
 						//	A price has been explicitly set for this currency, so render it as is
@@ -1148,13 +1183,19 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 					endif;
 
-					$v->user_price->price = number_format( $_price, SHOP_USER_CURRENCY_PRECISION, '.', '' );
+					$v->price->price->user->value = number_format( $_price, SHOP_USER_CURRENCY_PRECISION, '.', '' );
 
 					//	Sale price, second
 					if ( empty( $_user_price->sale_price ) ) :
 
 						//	The user's sale_price is empty() so we should automatically calculate it from the base price
 						$_sale_price = $this->shop_currency_model->convert_base_to_user( $_base_price->sale_price );
+
+						if ( ! $_price ) :
+
+							show_fatal_error( 'Failed to convert currency', 'Could not convert from ' . SHOP_BASE_CURRENCY_CODE . ' to ' . SHOP_USER_CURRENCY_CODE . '. ' . $this->shop_currency_model->last_error() );
+
+						endif;
 
 					else :
 
@@ -1163,32 +1204,217 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 					endif;
 
-					$v->user_price->sale_price = number_format( $_sale_price, SHOP_USER_CURRENCY_PRECISION, '.', '' );
+					$v->price->sale_price->user->value = number_format( $_sale_price, SHOP_USER_CURRENCY_PRECISION, '.', '' );
 
 				else :
 
-					$v->user_price->price		= number_format( $_user_price->price, SHOP_USER_CURRENCY_PRECISION, '.', '' );
-					$v->user_price->sale_price	= number_format( $_user_price->sale_price, SHOP_USER_CURRENCY_PRECISION, '.', '' );
+					//	This formatting is intentional, it's setting it up for the next stage of formatting
+					$v->price->price->user->value		= number_format( $v->price->price->user->value, SHOP_USER_CURRENCY_PRECISION, '.', '' );
+					$v->price->sale_price->user->value	= number_format( $v->price->sale_price->user->value, SHOP_USER_CURRENCY_PRECISION, '.', '' );
 
 				endif;
 
-				//	Format
-				$v->user_price_formatted->price			= number_format( $v->user_price->price, SHOP_USER_CURRENCY_PRECISION, SHOP_USER_CURRENCY_DECIMALS, SHOP_USER_CURRENCY_THOUSANDS );
-				$v->user_price_formatted->sale_price	= number_format( $v->user_price->sale_price, SHOP_USER_CURRENCY_PRECISION, SHOP_USER_CURRENCY_DECIMALS, SHOP_USER_CURRENCY_THOUSANDS );
+				// --------------------------------------------------------------------------
 
-				switch ( SHOP_USER_CURRENCY_SYMBOL_POS ) :
+				//	Tax pricing
+				if ( app_setting( 'price_exclude_tax', 'shop' ) ) :
+
+					//	Prices do not include any applicable taxes
+					$v->price->price->base->value_ex_tax = $v->price->price->base->value;
+					$v->price->price->user->value_ex_tax = $v->price->price->user->value;
+
+					//	Work out the ex-tax price by working out the tax and adding
+					if ( ! empty( $product->tax_rate->rate ) ) :
+
+						$v->price->price->base->value_tax		= $product->tax_rate->rate * $v->price->price->base->value_ex_tax;
+						$v->price->price->base->value_tax		= round( $v->price->price->base->value_tax, SHOP_BASE_CURRENCY_PRECISION );
+						$v->price->price->user->value_tax		= $product->tax_rate->rate * $v->price->price->user->value_ex_tax;
+						$v->price->price->user->value_tax		= round( $v->price->price->user->value_tax, SHOP_USER_CURRENCY_PRECISION );
+
+						$v->price->price->base->value_inc_tax	= $v->price->price->base->value_ex_tax + $v->price->price->base->value_tax;
+						$v->price->price->user->value_inc_tax	= $v->price->price->user->value_ex_tax + $v->price->price->user->value_tax;
+
+					else :
+
+						$v->price->price->base->value_tax		= 0;
+						$v->price->price->user->value_tax		= 0;
+
+						$v->price->price->base->value_inc_tax	= $v->price->price->base->value_ex_tax;
+						$v->price->price->user->value_inc_tax	= $v->price->price->user->value_ex_tax;
+
+					endif;
+
+					// --------------------------------------------------------------------------
+
+					//	Sale price next...
+					$v->price->sale_price->base->value_ex_tax = $v->price->sale_price->base->value;
+					$v->price->sale_price->user->value_ex_tax = $v->price->sale_price->user->value;
+
+					//	Work out the ex-tax price by working out the tax and subtracting
+					if ( ! empty( $product->tax_rate->rate ) ) :
+
+						$v->price->sale_price->base->value_tax		= $product->tax_rate->rate * $v->price->sale_price->base->value_ex_tax;
+						$v->price->sale_price->base->value_tax		= round( $v->price->sale_price->base->value_tax, SHOP_BASE_CURRENCY_PRECISION );
+						$v->price->sale_price->user->value_tax		= $product->tax_rate->rate * $v->price->sale_price->user->value_ex_tax;
+						$v->price->sale_price->user->value_tax		= round( $v->price->sale_price->user->value_tax, SHOP_USER_CURRENCY_PRECISION );
+
+						$v->price->sale_price->base->value_inc_tax	= $v->price->sale_price->base->value_ex_tax + $v->price->sale_price->base->value_tax;
+						$v->price->sale_price->user->value_inc_tax	= $v->price->sale_price->user->value_ex_tax + $v->price->sale_price->user->value_tax;
+
+					else :
+
+						$v->price->sale_price->base->value_tax		= 0;
+						$v->price->sale_price->user->value_tax		= 0;
+
+						$v->price->sale_price->base->value_inc_tax	= $v->price->sale_price->base->value_ex_tax;
+						$v->price->sale_price->user->value_inc_tax	= $v->price->sale_price->user->value_ex_tax;
+
+					endif;
+
+				else :
+
+					//	Prices are inclusive of any applicable taxes
+					$v->price->price->base->value_inc_tax = $v->price->price->base->value;
+					$v->price->price->user->value_inc_tax = $v->price->price->user->value;
+
+					//	Work out the ex-tax price by working out the tax and subtracting
+					if ( ! empty( $product->tax_rate->rate ) ) :
+
+						$v->price->price->base->value_tax		= ($product->tax_rate->rate * $v->price->price->base->value_inc_tax) / (1 + $product->tax_rate->rate);
+						$v->price->price->base->value_tax		= round( $v->price->price->base->value_tax, SHOP_BASE_CURRENCY_PRECISION );
+						$v->price->price->user->value_tax		= ($product->tax_rate->rate * $v->price->price->user->value_inc_tax) / (1 + $product->tax_rate->rate);
+						$v->price->price->user->value_tax		= round( $v->price->price->user->value_tax, SHOP_USER_CURRENCY_PRECISION );
+
+						$v->price->price->base->value_ex_tax	= $v->price->price->base->value_inc_tax - $v->price->price->base->value_tax;
+						$v->price->price->user->value_ex_tax	= $v->price->price->user->value_inc_tax - $v->price->price->user->value_tax;
+
+					else :
+
+						$v->price->price->base->value_tax		= 0;
+						$v->price->price->user->value_tax		= 0;
+
+						$v->price->price->base->value_ex_tax	= $v->price->price->base->value_inc_tax;
+						$v->price->price->user->value_ex_tax	= $v->price->price->user->value_inc_tax;
+
+					endif;
+
+					// --------------------------------------------------------------------------
+
+					//	Sale price next...
+					$v->price->sale_price->base->value_inc_tax = $v->price->sale_price->base->value;
+					$v->price->sale_price->user->value_inc_tax = $v->price->sale_price->user->value;
+
+					//	Work out the ex-tax price by working out the tax and subtracting
+					if ( ! empty( $product->tax_rate->rate ) ) :
+
+						$v->price->sale_price->base->value_tax		= ($product->tax_rate->rate * $v->price->sale_price->base->value_inc_tax) / (1 + $product->tax_rate->rate);
+						$v->price->sale_price->base->value_tax		= round( $v->price->sale_price->base->value_tax, SHOP_BASE_CURRENCY_PRECISION );
+						$v->price->sale_price->user->value_tax		= ($product->tax_rate->rate * $v->price->sale_price->user->value_inc_tax) / (1 + $product->tax_rate->rate);
+						$v->price->sale_price->user->value_tax		= round( $v->price->sale_price->user->value_tax, SHOP_USER_CURRENCY_PRECISION );
+
+						$v->price->sale_price->base->value_ex_tax	= $v->price->sale_price->base->value_inc_tax - $v->price->sale_price->base->value_tax;
+						$v->price->sale_price->user->value_ex_tax	= $v->price->sale_price->user->value_inc_tax - $v->price->sale_price->user->value_tax;
+
+					else :
+
+						$v->price->sale_price->base->value_tax		= 0;
+						$v->price->sale_price->user->value_tax		= 0;
+
+						$v->price->sale_price->base->value_ex_tax	= $v->price->sale_price->base->value_inc_tax;
+						$v->price->sale_price->user->value_ex_tax	= $v->price->sale_price->user->value_inc_tax;
+
+					endif;
+
+				endif;
+
+				// --------------------------------------------------------------------------
+
+				//	Price Formatting
+				$v->price->price->base_formatted->value			= number_format( $v->price->price->base->value, SHOP_BASE_CURRENCY_PRECISION, SHOP_BASE_CURRENCY_DECIMALS, SHOP_BASE_CURRENCY_THOUSANDS );
+				$v->price->price->base_formatted->value_inc_tax	= number_format( $v->price->price->base->value_inc_tax, SHOP_BASE_CURRENCY_PRECISION, SHOP_BASE_CURRENCY_DECIMALS, SHOP_BASE_CURRENCY_THOUSANDS );
+				$v->price->price->base_formatted->value_ex_tax	= number_format( $v->price->price->base->value_ex_tax, SHOP_BASE_CURRENCY_PRECISION, SHOP_BASE_CURRENCY_DECIMALS, SHOP_BASE_CURRENCY_THOUSANDS );
+				$v->price->price->base_formatted->value_tax		= number_format( $v->price->price->base->value_tax, SHOP_BASE_CURRENCY_PRECISION, SHOP_BASE_CURRENCY_DECIMALS, SHOP_BASE_CURRENCY_THOUSANDS );
+
+				$v->price->price->user_formatted->value			= number_format( $v->price->price->user->value, SHOP_USER_CURRENCY_PRECISION, SHOP_USER_CURRENCY_DECIMALS, SHOP_USER_CURRENCY_THOUSANDS );
+				$v->price->price->user_formatted->value_inc_tax	= number_format( $v->price->price->user->value_inc_tax, SHOP_USER_CURRENCY_PRECISION, SHOP_USER_CURRENCY_DECIMALS, SHOP_USER_CURRENCY_THOUSANDS );
+				$v->price->price->user_formatted->value_ex_tax	= number_format( $v->price->price->user->value_ex_tax, SHOP_USER_CURRENCY_PRECISION, SHOP_USER_CURRENCY_DECIMALS, SHOP_USER_CURRENCY_THOUSANDS );
+				$v->price->price->user_formatted->value_tax		= number_format( $v->price->price->user->value_tax, SHOP_USER_CURRENCY_PRECISION, SHOP_USER_CURRENCY_DECIMALS, SHOP_USER_CURRENCY_THOUSANDS );
+
+				$v->price->sale_price->base_formatted->value			= number_format( $v->price->sale_price->base->value, SHOP_BASE_CURRENCY_PRECISION, SHOP_BASE_CURRENCY_DECIMALS, SHOP_BASE_CURRENCY_THOUSANDS );
+				$v->price->sale_price->base_formatted->value_inc_tax	= number_format( $v->price->sale_price->base->value_inc_tax, SHOP_BASE_CURRENCY_PRECISION, SHOP_BASE_CURRENCY_DECIMALS, SHOP_BASE_CURRENCY_THOUSANDS );
+				$v->price->sale_price->base_formatted->value_ex_tax		= number_format( $v->price->sale_price->base->value_ex_tax, SHOP_BASE_CURRENCY_PRECISION, SHOP_BASE_CURRENCY_DECIMALS, SHOP_BASE_CURRENCY_THOUSANDS );
+				$v->price->sale_price->base_formatted->value_tax		= number_format( $v->price->sale_price->base->value_tax, SHOP_BASE_CURRENCY_PRECISION, SHOP_BASE_CURRENCY_DECIMALS, SHOP_BASE_CURRENCY_THOUSANDS );
+
+				$v->price->sale_price->user_formatted->value			= number_format( $v->price->sale_price->user->value, SHOP_USER_CURRENCY_PRECISION, SHOP_USER_CURRENCY_DECIMALS, SHOP_USER_CURRENCY_THOUSANDS );
+				$v->price->sale_price->user_formatted->value_inc_tax	= number_format( $v->price->sale_price->user->value_inc_tax, SHOP_USER_CURRENCY_PRECISION, SHOP_USER_CURRENCY_DECIMALS, SHOP_USER_CURRENCY_THOUSANDS );
+				$v->price->sale_price->user_formatted->value_ex_tax		= number_format( $v->price->sale_price->user->value_ex_tax, SHOP_USER_CURRENCY_PRECISION, SHOP_USER_CURRENCY_DECIMALS, SHOP_USER_CURRENCY_THOUSANDS );
+				$v->price->sale_price->user_formatted->value_tax		= number_format( $v->price->sale_price->user->value_tax, SHOP_USER_CURRENCY_PRECISION, SHOP_USER_CURRENCY_DECIMALS, SHOP_USER_CURRENCY_THOUSANDS );
+
+				// --------------------------------------------------------------------------
+
+				//	Currency symbol
+
+				//	Base
+				switch ( SHOP_BASE_CURRENCY_SYMBOL_POS ) :
 
 					case 'BEFORE' :
 
-						$v->user_price_formatted->price			= SHOP_USER_CURRENCY_SYMBOL . $v->user_price_formatted->price;
-						$v->user_price_formatted->sale_price	= SHOP_USER_CURRENCY_SYMBOL . $v->user_price_formatted->sale_price;
+						$v->price->price->base_formatted->value				= SHOP_BASE_CURRENCY_SYMBOL . $v->price->price->base_formatted->value;
+						$v->price->price->base_formatted->value_inc_tax		= SHOP_BASE_CURRENCY_SYMBOL . $v->price->price->base_formatted->value_inc_tax;
+						$v->price->price->base_formatted->value_ex_tax		= SHOP_BASE_CURRENCY_SYMBOL . $v->price->price->base_formatted->value_ex_tax;
+						$v->price->price->base_formatted->value_tax			= SHOP_BASE_CURRENCY_SYMBOL . $v->price->price->base_formatted->value_tax;
+
+						$v->price->sale_price->base_formatted->value			= SHOP_BASE_CURRENCY_SYMBOL . $v->price->sale_price->base_formatted->value;
+						$v->price->sale_price->base_formatted->value_inc_tax	= SHOP_BASE_CURRENCY_SYMBOL . $v->price->sale_price->base_formatted->value_inc_tax;
+						$v->price->sale_price->base_formatted->value_ex_tax		= SHOP_BASE_CURRENCY_SYMBOL . $v->price->sale_price->base_formatted->value_ex_tax;
+						$v->price->sale_price->base_formatted->value_tax		= SHOP_BASE_CURRENCY_SYMBOL . $v->price->sale_price->base_formatted->value_tax;
 
 					break;
 
 					case 'AFTER' :
 
-						$v->user_price_formatted->price			= $v->user_price_formatted->price . SHOP_USER_CURRENCY_SYMBOL;
-						$v->user_price_formatted->sale_price	= $v->user_price_formatted->sale_price . SHOP_USER_CURRENCY_SYMBOL;
+						$v->price->price->base_formatted->value			= $v->price->price->base_formatted->value . SHOP_BASE_CURRENCY_SYMBOL;
+						$v->price->price->base_formatted->value_inc_tax	= $v->price->price->base_formatted->value_inc_tax . SHOP_BASE_CURRENCY_SYMBOL;
+						$v->price->price->base_formatted->value_ex_tax	= $v->price->price->base_formatted->value_ex_tax . SHOP_BASE_CURRENCY_SYMBOL;
+						$v->price->price->base_formatted->value_tax		= $v->price->price->base_formatted->value_tax . SHOP_BASE_CURRENCY_SYMBOL;
+
+						$v->price->sale_price->base_formatted->value			= $v->price->sale_price->base_formatted->value . SHOP_BASE_CURRENCY_SYMBOL;
+						$v->price->sale_price->base_formatted->value_inc_tax	= $v->price->sale_price->base_formatted->value_inc_tax . SHOP_BASE_CURRENCY_SYMBOL;
+						$v->price->sale_price->base_formatted->value_ex_tax		= $v->price->sale_price->base_formatted->value_ex_tax . SHOP_BASE_CURRENCY_SYMBOL;
+						$v->price->sale_price->base_formatted->value_tax		= $v->price->sale_price->base_formatted->value_tax . SHOP_BASE_CURRENCY_SYMBOL;
+
+					break;
+
+				endswitch;
+
+				//	User
+				switch ( SHOP_USER_CURRENCY_SYMBOL_POS ) :
+
+					case 'BEFORE' :
+
+						$v->price->price->user_formatted->value				= SHOP_USER_CURRENCY_SYMBOL . $v->price->price->user_formatted->value;
+						$v->price->price->user_formatted->value_inc_tax		= SHOP_USER_CURRENCY_SYMBOL . $v->price->price->user_formatted->value_inc_tax;
+						$v->price->price->user_formatted->value_ex_tax		= SHOP_USER_CURRENCY_SYMBOL . $v->price->price->user_formatted->value_ex_tax;
+						$v->price->price->user_formatted->value_tax			= SHOP_USER_CURRENCY_SYMBOL . $v->price->price->user_formatted->value_tax;
+
+						$v->price->sale_price->user_formatted->value			= SHOP_USER_CURRENCY_SYMBOL . $v->price->sale_price->user_formatted->value;
+						$v->price->sale_price->user_formatted->value_inc_tax	= SHOP_USER_CURRENCY_SYMBOL . $v->price->sale_price->user_formatted->value_inc_tax;
+						$v->price->sale_price->user_formatted->value_ex_tax		= SHOP_USER_CURRENCY_SYMBOL . $v->price->sale_price->user_formatted->value_ex_tax;
+						$v->price->sale_price->user_formatted->value_tax		= SHOP_USER_CURRENCY_SYMBOL . $v->price->sale_price->user_formatted->value_tax;
+
+					break;
+
+					case 'AFTER' :
+
+						$v->price->price->user_formatted->value			= $v->price->price->user_formatted->value . SHOP_USER_CURRENCY_SYMBOL;
+						$v->price->price->user_formatted->value_inc_tax	= $v->price->price->user_formatted->value_inc_tax . SHOP_USER_CURRENCY_SYMBOL;
+						$v->price->price->user_formatted->value_ex_tax	= $v->price->price->user_formatted->value_ex_tax . SHOP_USER_CURRENCY_SYMBOL;
+						$v->price->price->user_formatted->value_tax		= $v->price->price->user_formatted->value_tax . SHOP_USER_CURRENCY_SYMBOL;
+
+						$v->price->sale_price->user_formatted->value			= $v->price->sale_price->user_formatted->value . SHOP_USER_CURRENCY_SYMBOL;
+						$v->price->sale_price->user_formatted->value_inc_tax	= $v->price->sale_price->user_formatted->value_inc_tax . SHOP_USER_CURRENCY_SYMBOL;
+						$v->price->sale_price->user_formatted->value_ex_tax		= $v->price->sale_price->user_formatted->value_ex_tax . SHOP_USER_CURRENCY_SYMBOL;
+						$v->price->sale_price->user_formatted->value_tax		= $v->price->sale_price->user_formatted->value_tax . SHOP_USER_CURRENCY_SYMBOL;
 
 					break;
 
@@ -1196,73 +1422,125 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 				// --------------------------------------------------------------------------
 
-				if ( empty( $product->user_price ) ) :
+				//	Product User Price ranges
+				if ( empty( $product->price ) ) :
 
-					$product->user_price					= new stdClass();
-					$product->user_price->max_price			= NULL;
-					$product->user_price->min_price			= NULL;
-					$product->user_price->max_sale_price	= NULL;
-					$product->user_price->min_sale_price	= NULL;
+					$product->price = new stdClass();
 
 				endif;
 
-				if ( empty( $product->user_price_formatted ) ) :
+				if ( empty( $product->price->user ) ) :
 
-					$product->user_price_formatted					= new stdClass();
-					$product->user_price_formatted->max_price		= NULL;
-					$product->user_price_formatted->min_price		= NULL;
-					$product->user_price_formatted->max_sale_price	= NULL;
-					$product->user_price_formatted->min_sale_price	= NULL;
+					$product->price->user = new stdClass();
 
-				endif;
+					$product->price->user->max_price			= NULL;
+					$product->price->user->max_price_inc_tax	= NULL;
+					$product->price->user->max_price_ex_tax		= NULL;
 
-				if ( is_null( $product->user_price->max_price ) || $v->user_price->price > $product->user_price->max_price ) :
+					$product->price->user->min_price			= NULL;
+					$product->price->user->min_price_inc_tax	= NULL;
+					$product->price->user->min_price_ex_tax		= NULL;
 
-					$product->user_price->max_price				= $v->user_price->price;
-					$product->user_price_formatted->max_price	= $v->user_price_formatted->price;
+					$product->price->user->max_sale_price			= NULL;
+					$product->price->user->max_sale_price_inc_tax	= NULL;
+					$product->price->user->max_sale_price_ex_tax	= NULL;
 
-				endif;
-
-				if ( is_null( $product->user_price->min_price ) || $v->user_price->price < $product->user_price->min_price ) :
-
-					$product->user_price->min_price				= $v->user_price->price;
-					$product->user_price_formatted->min_price	= $v->user_price_formatted->price;
+					$product->price->user->min_sale_price			= NULL;
+					$product->price->user->min_sale_price_inc_tax	= NULL;
+					$product->price->user->min_sale_price_ex_tax	= NULL;
 
 				endif;
 
-				if ( is_null( $product->user_price->max_sale_price ) || $v->user_price->sale_price > $product->user_price->max_sale_price ) :
+				if ( empty( $product->price->user_formatted ) ) :
 
-					$product->user_price->max_sale_price			= $v->user_price->sale_price;
-					$product->user_price_formatted->max_sale_price	= $v->user_price_formatted->sale_price;
+					$product->price->user_formatted = new stdClass();
+
+					$product->price->user_formatted->max_price			= NULL;
+					$product->price->user_formatted->max_price_inc_tax	= NULL;
+					$product->price->user_formatted->max_price_ex_tax		= NULL;
+
+					$product->price->user_formatted->min_price			= NULL;
+					$product->price->user_formatted->min_price_inc_tax	= NULL;
+					$product->price->user_formatted->min_price_ex_tax	= NULL;
+
+					$product->price->user_formatted->max_sale_price			= NULL;
+					$product->price->user_formatted->max_sale_price_inc_tax	= NULL;
+					$product->price->user_formatted->max_sale_price_ex_tax	= NULL;
+
+					$product->price->user_formatted->min_sale_price			= NULL;
+					$product->price->user_formatted->min_sale_price_inc_tax	= NULL;
+					$product->price->user_formatted->min_sale_price_ex_tax	= NULL;
 
 				endif;
 
-				if ( is_null( $product->user_price->min_sale_price ) || $v->user_price->sale_price < $product->user_price->min_sale_price ) :
+				if ( is_null( $product->price->user->max_price ) || $v->price->price->user->value > $product->price->user->max_price ) :
 
-					$product->user_price->min_sale_price			= $v->user_price->sale_price;
-					$product->user_price_formatted->min_sale_price	= $v->user_price_formatted->sale_price;
+					$product->price->user->max_price			= $v->price->price->user->value;
+					$product->price->user->max_price_inc_tax	= $v->price->price->user->value_inc_tax;
+					$product->price->user->max_price_ex_tax		= $v->price->price->user->value_ex_tax;
+
+					$product->price->user_formatted->max_price			= $v->price->price->user_formatted->value;
+					$product->price->user_formatted->max_price_inc_tax	= $v->price->price->user_formatted->value_inc_tax;
+					$product->price->user_formatted->max_price_ex_tax	= $v->price->price->user_formatted->value_ex_tax;
+
+				endif;
+
+				if ( is_null( $product->price->user->min_price ) || $v->price->price->user->value < $product->price->user->min_price ) :
+
+					$product->price->user->min_price			= $v->price->price->user->value;
+					$product->price->user->min_price_inc_tax	= $v->price->price->user->value_inc_tax;
+					$product->price->user->min_price_ex_tax		= $v->price->price->user->value_ex_tax;
+
+					$product->price->user_formatted->min_price			= $v->price->price->user_formatted->value;
+					$product->price->user_formatted->min_price_inc_tax	= $v->price->price->user_formatted->value_inc_tax;
+					$product->price->user_formatted->min_price_ex_tax	= $v->price->price->user_formatted->value_ex_tax;
+
+				endif;
+
+				if ( is_null( $product->price->user->max_sale_price ) || $v->price->sale_price->user->value > $product->price->user->max_sale_price ) :
+
+					$product->price->user->max_sale_price			= $v->price->sale_price->user->value;
+					$product->price->user->max_sale_price_inc_tax	= $v->price->sale_price->user->value_inc_tax;
+					$product->price->user->max_sale_price_ex_tax	= $v->price->sale_price->user->value_ex_tax;
+
+					$product->price->user_formatted->max_sale_price			= $v->price->sale_price->user_formatted->value;
+					$product->price->user_formatted->max_sale_price_inc_tax	= $v->price->sale_price->user_formatted->value_inc_tax;
+					$product->price->user_formatted->max_sale_price_ex_tax	= $v->price->sale_price->user_formatted->value_ex_tax;
+
+				endif;
+
+				if ( is_null( $product->price->user->min_sale_price ) || $v->price->sale_price->user->value < $product->price->user->min_sale_price ) :
+
+					$product->price->user->min_sale_price			= $v->price->sale_price->user->value;
+					$product->price->user->min_sale_price_inc_tax	= $v->price->sale_price->user->value_inc_tax;
+					$product->price->user->min_sale_price_ex_tax	= $v->price->sale_price->user->value_ex_tax;
+
+					$product->price->user_formatted->min_sale_price			= $v->price->sale_price->user_formatted->value;
+					$product->price->user_formatted->min_sale_price_inc_tax	= $v->price->sale_price->user_formatted->value_inc_tax;
+					$product->price->user_formatted->min_sale_price_ex_tax	= $v->price->sale_price->user_formatted->value_ex_tax;
 
 				endif;
 
 			endforeach;
 
-			if ( $product->user_price->max_price == $product->user_price->min_price ) :
+			//	Range strings
+			if ( $product->price->user->max_price == $product->price->user->min_price ) :
 
-				$product->user_price_formatted->price_string = $product->user_price_formatted->min_price;
+				$product->price->user_formatted->price_string = $product->price->user_formatted->min_price;
 
 			else :
 
-				$product->user_price_formatted->price_string = 'From ' . $product->user_price_formatted->min_price;
+				$product->price->user_formatted->price_string = 'From ' . $product->price->user_formatted->min_price;
 
 			endif;
 
-			if ( $product->user_price->max_sale_price == $product->user_price->min_sale_price ) :
+			if ( $product->price->user->max_sale_price == $product->price->user->min_sale_price ) :
 
-				$product->user_price_formatted->sale_price_string = $product->user_price_formatted->min_sale_price;
+				$product->price->user_formatted->sale_price_string = $product->price->user_formatted->min_sale_price;
 
 			else :
 
-				$product->user_price_formatted->sale_price_string = 'From ' . $product->user_price_formatted->min_sale_price;
+				$product->price->user_formatted->sale_price_string = 'From ' . $product->price->user_formatted->min_sale_price;
 
 			endif;
 
@@ -1775,12 +2053,12 @@ class NAILS_Shop_product_model extends NAILS_Model
 		endif;
 
 		//	Price
-		if ( ! empty( $variation->price ) && is_array( $variation->price ) ) :
+		if ( ! empty( $variation->price_raw ) && is_array( $variation->price_raw ) ) :
 
-			foreach ( $variation->price AS $price ) :
+			foreach ( $variation->price_raw AS $price ) :
 
-				$price->price				= (float) $price->price;
-				$price->sale_price			= (float) $price->sale_price;
+				$price->price		= (float) $price->price;
+				$price->sale_price	= (float) $price->sale_price;
 
 			endforeach;
 

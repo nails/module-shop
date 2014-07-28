@@ -129,7 +129,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	public function sync()
+	public function sync( $mute_log = TRUE )
 	{
 		$_openexchangerates_app_id			= app_setting( 'openexchangerates_app_id', 'shop' );
 		$_openexchangerates_etag			= app_setting( 'openexchangerates_etag', 'shop' );
@@ -138,7 +138,15 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
 		if ( empty( $_additional_currencies ) ) :
 
-			_LOG( '... No additional currencies are supported, aborting sync.' );
+			$_message = 'No additional currencies are supported, aborting sync.';
+			$this->_set_error( $_message );
+
+			if ( empty( $mute_log ) ) :
+
+				_LOG( '... ' . $_message );
+
+			endif;
+
 			return FALSE;
 
 		endif;
@@ -152,7 +160,11 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
 			endif;
 
-			_LOG( '... Base Currency is ' . SHOP_BASE_CURRENCY_CODE );
+			if ( empty( $mute_log ) ) :
+
+				_LOG( '... Base Currency is ' . SHOP_BASE_CURRENCY_CODE );
+
+			endif;
 
 			//	Set up the cURL request
 			//	First attempt to get the rates using the Shop's base currency
@@ -188,12 +200,24 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
 				if ( ! empty( $_response->message ) && $_response->message == 'invalid_app_id' ) :
 
-					_LOG( $_openexchangerates_app_id . ' is not a valid OER app ID.' );
+					$_message = $_openexchangerates_app_id . ' is not a valid OER app ID.';
+					$this->_set_error( $_message );
+
+					if ( empty( $mute_log ) ) :
+
+						_LOG( $_message );
+
+					endif;
+
 					return FALSE;
 
 				endif;
 
-				_LOG( '... Query using base as ' . SHOP_BASE_CURRENCY_CODE  . ' failed, trying agian using USD' );
+				if ( empty( $mute_log ) ) :
+
+					_LOG( '... Query using base as ' . SHOP_BASE_CURRENCY_CODE  . ' failed, trying agian using USD' );
+
+				endif;
 
 				$_params['base'] = 'USD';
 
@@ -213,7 +237,12 @@ class NAILS_Shop_currency_model extends NAILS_Model
 			elseif ( ! empty( $this->curl->info['http_code'] ) && $this->curl->info['http_code'] == 304 ) :
 
 				//	304 Not Modified, abort sync.
-				_LOG( '... OER reported 304 Not Modified, aborting sync' );
+				if ( empty( $mute_log ) ) :
+
+					_LOG( '... OER reported 304 Not Modified, aborting sync' );
+
+				endif;
+
 				return TRUE;
 
 			endif;
@@ -231,8 +260,16 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
 				if ( empty( $_response[1] ) ) :
 
-					_LOG( 'Could not extract the body of the request.' );
-					_LOG( print_r( $_response, TRUE ) );
+					$_message = 'Could not extract the body of the request.';
+					$this->_set_error( $_message );
+
+					if ( empty( $mute_log ) ) :
+
+						_LOG( $_message );
+						_LOG( print_r( $_response, TRUE ) );
+
+					endif;
+
 					return FALSE;
 
 				endif;
@@ -242,8 +279,16 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
 				if ( empty( $_response[1] ) ) :
 
-					_LOG( 'Could not parse the body of the request.' );
-					_LOG( print_r( $_response, TRUE ) );
+					$_message = 'Could not parse the body of the request.';
+					$this->_set_error( $_message );
+
+					if ( empty( $mute_log ) ) :
+
+						_LOG( $_message );
+						_LOG( print_r( $_response, TRUE ) );
+
+					endif;
+
 					return FALSE;
 
 				endif;
@@ -275,7 +320,11 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
 						if ( array_search( $to_currency, $_additional_currencies ) !== FALSE ) :
 
-							_LOG( '... ' . $to_currency . ' > ' . $rate );
+							if ( empty( $mute_log ) ) :
+
+								_LOG( '... ' . $to_currency . ' > ' . $rate );
+
+							endif;
 
 							$_to_save[] = array(
 								'from'		=> $_response->base,
@@ -290,7 +339,11 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
 				else :
 
-					_LOG( '... API base is ' . $_response->base . '; calculating differences...' );
+					if ( empty( $mute_log ) ) :
+
+						_LOG( '... API base is ' . $_response->base . '; calculating differences...' );
+
+					endif;
 
 					$_base = 1;
 					foreach ( $_response->rates AS $code => $rate ) :
@@ -317,7 +370,11 @@ class NAILS_Shop_currency_model extends NAILS_Model
 								'modified'	=> date( 'Y-m-d H:i:s' )
 							);
 
-							_LOG( '... Calculating and saving new exchange rate for ' . SHOP_BASE_CURRENCY_CODE . ' > ' . $to_currency . ' (' . $_new_rate . ')' );
+							if ( empty( $mute_log ) ) :
+
+								_LOG( '... Calculating and saving new exchange rate for ' . SHOP_BASE_CURRENCY_CODE . ' > ' . $to_currency . ' (' . $_new_rate . ')' );
+
+							endif;
 
 						endif;
 
@@ -336,7 +393,15 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
 						else :
 
-							_LOG( '... Failed to insert new currency data.' );
+							$_message = 'Failed to insert new currency data.';
+							$this->_set_error( $_message );
+
+							if ( empty( $mute_log ) ) :
+
+								_LOG( '... ' . $_message );
+
+							endif;
+
 							return FALSE;
 
 						endif;
@@ -349,7 +414,15 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
 				else :
 
-					_LOG( '... Failed to truncate currency table.' );
+					$_message = 'Failed to truncate currency table.';
+					$this->_set_error( $_message );
+
+					if ( empty( $mute_log ) ) :
+
+						_LOG( '... ' . $_message );
+
+					endif;
+
 					return FALSE;
 
 				endif;
@@ -357,7 +430,12 @@ class NAILS_Shop_currency_model extends NAILS_Model
 			elseif ( ! empty( $this->curl->info['http_code'] ) && $this->curl->info['http_code'] == 304 ) :
 
 				//	304 Not Modified, abort sync.
-				_LOG( '... OER reported 304 Not Modified, aborting sync' );
+				if ( empty( $mute_log ) ) :
+
+					_LOG( '... OER reported 304 Not Modified, aborting sync' );
+
+				endif;
+
 				return TRUE;
 
 			else :
@@ -366,8 +444,15 @@ class NAILS_Shop_currency_model extends NAILS_Model
 				$_response = explode( "\r\n\r\n", $_response, 2 );
 				$_response = ! empty( $_response[1] ) ? @json_decode( $_response[1] ) : NULL;
 
-				_LOG( '... An error occurred when querying the API:' );
-				_LOG( print_r( $_response, TRUE ) );
+				$_message = 'An error occurred when querying the API.';
+				$this->_set_error( $_message );
+
+				if ( empty( $mute_log ) ) :
+
+					_LOG( '... ' . $_message );
+					_LOG( print_r( $_response, TRUE ) );
+
+				endif;
 
 				return FALSE;
 
@@ -375,7 +460,15 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
 		else :
 
-			_LOG( '... `openexchangerates_app_id` setting is not set. Sync aborted.' );
+			$_message = '`openexchangerates_app_id` setting is not set. Sync aborted.';
+			$this->_set_error( $_message );
+
+			if ( empty( $mute_log ) ) :
+
+				_LOG( '... ' . $_message );
+
+			endif;
+
 			return FALSE;
 
 		endif;
@@ -406,6 +499,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
 		else :
 
+			$this->_set_error( 'No exchange rate available for thos conversion; does the system need to sync?' );
 			return FALSE;
 
 		endif;

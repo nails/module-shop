@@ -29,6 +29,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	 **/
 	public function index()
 	{
+		dumpanddie( 'TODO: Single page checkout' );
 		if ( ! $this->_can_checkout() ) :
 
 			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> you can\'t checkout right now: ' . $this->data['error'] );

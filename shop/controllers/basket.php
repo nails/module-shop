@@ -222,7 +222,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 		else :
 
 			//	Failed to validate, feedback
-			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> that voucher is not valid:<br />&rsaquo; ' . implode( '<br />&rsaquo;', $this->shop_voucher_model->get_errors() ) );
+			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> that voucher is not valid. ' . $this->shop_voucher_model->last_error() );
 
 		endif;
 
