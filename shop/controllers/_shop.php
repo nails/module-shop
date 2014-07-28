@@ -74,8 +74,51 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
 		// --------------------------------------------------------------------------
 
-		//	Fetch the user's basket
-		$this->data['basket'] = $this->shop_basket_model->get();
+		//	Load skin assets
+
+		//	CSS
+		if ( ! empty( $this->_skin->assets->css ) && is_array( $this->_skin->assets->css ) ) :
+
+			foreach ( $this->_skin->assets->css AS $asset ) :
+
+				$this->asset->load( $this->_skin->url . 'assets/css/' . $asset );
+
+			endforeach;
+
+		endif;
+
+		//	CSS - Inline
+		if ( ! empty( $this->_skin->assets->css_inline ) && is_array( $this->_skin->assets->css_inline ) ) :
+
+			foreach ( $this->_skin->assets->css_inline AS $asset ) :
+
+				$this->asset->inline( $asset, 'CSS_INLINE' );
+
+			endforeach;
+
+		endif;
+
+		//	JS
+		if ( ! empty( $this->_skin->assets->js ) && is_array( $this->_skin->assets->js ) ) :
+
+			foreach ( $this->_skin->assets->js AS $asset ) :
+
+				$this->asset->load( $this->_skin->url . 'assets/js/' . $asset );
+
+			endforeach;
+
+		endif;
+
+		//	JS - Inline
+		if ( ! empty( $this->_skin->assets->js_inline ) && is_array( $this->_skin->assets->js_inline ) ) :
+
+			foreach ( $this->_skin->assets->js_inline AS $asset ) :
+
+				$this->asset->inline( $asset, 'JS_INLINE' );
+
+			endforeach;
+
+		endif;
 
 		// --------------------------------------------------------------------------
 
