@@ -29,7 +29,11 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	 **/
 	public function index()
 	{
-		dumpanddie( 'TODO: Single page checkout' );
+		$this->load->view( 'structure/header',							$this->data );
+		$this->load->view( $this->_skin->path . 'views/checkout/index',	$this->data );
+		$this->load->view( 'structure/footer',							$this->data );
+
+		return;
 		if ( ! $this->_can_checkout() ) :
 
 			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> you can\'t checkout right now: ' . $this->data['error'] );

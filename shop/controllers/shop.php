@@ -20,6 +20,47 @@ require_once '_shop.php';
 
 class NAILS_Shop extends NAILS_Shop_Controller
 {
+	protected $_product_sort;
+	protected $_product_pagination;
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Defines the default items, then sets them if they're to be set.
+	 */
+	public function __construct()
+	{
+		parent::__construct();
+
+		// --------------------------------------------------------------------------
+
+		//	Defaults
+		$this->_product_sort			= new stdClass();
+		$this->_product_sort->sort		= app_setting( 'default_product_sort' ) ? app_setting( 'default_product_sort' ) : 'recent';
+		$this->_product_sort->perpage	= app_setting( 'default_product_per_page' ) ? app_setting( 'default_product_per_page' ) : 100;
+
+		//	Actual Values
+		$this->_product_sort->sort		= $this->input->get_post( 'sort' ) ? $this->input->get_post( 'sort' ) : $this->_product_sort->sort;
+		$this->_product_sort->perpage	= $this->input->get_post( 'perpage' ) ? $this->input->get_post( 'perpage' ) : $this->_product_sort->perpage;
+
+		//	Pass to view
+		$this->data['product_sort'] = $this->_product_sort;
+
+		// --------------------------------------------------------------------------
+
+		//	Product pagination
+		//	TODO
+
+		$this->_product_pagination			= new stdClasS();
+		$this->_product_pagination->page	= NULL;
+		$this->_product_pagination->total	= NULL;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
 	/**
 	 * Render's the shop's front page
 	 * @return void
@@ -33,26 +74,20 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		//	Categories
-		//	==========
+		//	Sidebar Items
+		//	=============
 
-		$_data = array( 'include_count' => TRUE );
-		$this->data['categories']			= $this->shop_category_model->get_all( NULL, NULL, $_data );
-		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested( NULL, $_data );
-
-		// --------------------------------------------------------------------------
-
-		//	Tags
-		//	====
-
-		$this->data['tags'] = $this->shop_tag_model->get_all();
+		$this->data['brands']		= $this->shop_brand_model->get_all();
+		$this->data['categories']	= $this->shop_category_model->get_top_level();
+		$this->data['collections']	= $this->shop_collection_model->get_all();
+		$this->data['ranges']		= $this->shop_range_model->get_all();
 
 		// --------------------------------------------------------------------------
 
 		//	Products
 		//	========
 
-		$this->data['products'] = $this->shop_product_model->get_all();
+		$this->data['products'] = $this->shop_product_model->get_all( $this->_product_pagination->page, $this->_product_sort->perpage );
 
 		// --------------------------------------------------------------------------
 
@@ -90,7 +125,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 
 	/**
-	 * Renders the list of categories
+	 * Renders the list of brands
 	 * @return void
 	 */
 	protected function _brand_index()
@@ -172,7 +207,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	================
 
 		$_data = array( 'hide_inactive' => TRUE );
-		$this->data['products'] = $this->shop_product_model->get_for_brand( $this->data['brand']->id, NULL, NULL, $_data );
+		$this->data['products'] = $this->shop_product_model->get_for_brand( $this->data['brand']->id, $this->_product_pagination->page, $this->_product_sort->perpage, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -272,12 +307,17 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		//	Categories
-		//	==========
+		//	Category's (immediate) decendants
+		//	=================================
 
-		$_data = array( 'include_count' => TRUE );
-		$this->data['categories']			= $this->shop_category_model->get_all( NULL, NULL, $_data );
-		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested( NULL, $_data );
+		$this->data['category']->children = $this->shop_category_model->get_children( $this->data['category']->id, TRUE );
+
+		// --------------------------------------------------------------------------
+
+		//	Category's siblings
+		//	=================================
+
+		$this->data['category_siblings'] = $this->shop_category_model->get_siblings( $this->data['category']->id );
 
 		// --------------------------------------------------------------------------
 
@@ -285,7 +325,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	===================
 
 		$_data = array( 'hide_inactive' => TRUE );
-		$this->data['products'] = $this->shop_product_model->get_for_category( $this->data['category']->id, NULL, NULL, $_data );
+		$this->data['products'] = $this->shop_product_model->get_for_category( $this->data['category']->id, $this->_product_pagination->page, $this->_product_sort->perpage, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -323,7 +363,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 
 	/**
-	 * Renders the list of categories
+	 * Renders the list of collections
 	 * @return void
 	 */
 	protected function _collection_index()
@@ -405,7 +445,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	=====================
 
 		$_data = array( 'hide_inactive' => TRUE );
-		$this->data['products'] = $this->shop_product_model->get_for_collection( $this->data['collection']->id, NULL, NULL, $_data );
+		$this->data['products'] = $this->shop_product_model->get_for_collection( $this->data['collection']->id, $this->_product_pagination->page, $this->_product_sort->perpage, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -519,7 +559,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 
 	/**
-	 * Renders the list of categories
+	 * Renders the list of ranges
 	 * @return void
 	 */
 	protected function _range_index()
@@ -601,7 +641,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	================
 
 		$_data = array( 'hide_inactive' => TRUE );
-		$this->data['products'] = $this->shop_product_model->get_for_range( $this->data['range']->id, NULL, NULL, $_data );
+		$this->data['products'] = $this->shop_product_model->get_for_range( $this->data['range']->id, $this->_product_pagination->page, $this->_product_sort->perpage, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -639,7 +679,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 
 	/**
-	 * Renders the list of categories
+	 * Renders the list of sales
 	 * @return void
 	 */
 	protected function _sale_index()
@@ -721,7 +761,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	===============
 
 		$_data = array( 'hide_inactive' => TRUE );
-		$this->data['products'] = $this->shop_product_model->get_for_sale( $this->data['sale']->id, NULL, NULL, $_data );
+		$this->data['products'] = $this->shop_product_model->get_for_sale( $this->data['sale']->id, $this->_product_pagination->page, $this->_product_sort->perpage, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -758,7 +798,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 
 	/**
-	 * Renders the list of categories
+	 * Renders the list of tags
 	 * @return void
 	 */
 	protected function _tag_index()
@@ -838,7 +878,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	==============
 
 		$_data = array( 'hide_inactive' => TRUE );
-		$this->data['products'] = $this->shop_product_model->get_for_tag( $this->data['tag']->id, NULL, NULL, $_data );
+		$this->data['products'] = $this->shop_product_model->get_for_tag( $this->data['tag']->id, $this->_product_pagination->page, $this->_product_sort->perpage, $_data );
 
 		// --------------------------------------------------------------------------
 

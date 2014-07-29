@@ -53,6 +53,10 @@ class NAILS_Shop_product_model extends NAILS_Model
 		$this->_table_variation_price	= NAILS_DB_PREFIX . 'shop_product_variation_price';
 		$this->_table_type				= NAILS_DB_PREFIX . 'shop_product_type';
 		$this->_table_tax_rate			= NAILS_DB_PREFIX . 'shop_tax_rate';
+
+		// --------------------------------------------------------------------------
+
+		$this->_destructive_delete = FALSE;
 	}
 
 

@@ -414,7 +414,13 @@ class NAILS_Shop_category_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	public function get_ids_of_children( $id )
+	/**
+	 * Fetches the IDs of a category's descendants
+	 * @param  int     $id             The ID of the starting category
+	 * @param  boolean $only_immediate Whether to recurscively fetch all descendants, or just the immediate descendants
+	 * @return array
+	 */
+	public function get_ids_of_children( $id, $only_immediate = FALSE )
 	{
 		$_return = array();
 
@@ -422,14 +428,26 @@ class NAILS_Shop_category_model extends NAILS_Model
 		$this->db->where( 'parent_id', $id );
 		$_children = $this->db->get( $this->_table )->result();
 
-		if ( ! empty( $_children ) ) :
+		if ( $only_immediate ) :
 
 			foreach( $_children AS $child ) :
 
-				$_temp		= array( $child->id );
-				$_return	= array_merge( $_return, $_temp, $this->get_ids_of_children( $child->id ) );
+				$_return[] = $child->id;
 
 			endforeach;
+
+		else :
+
+			if ( ! empty( $_children ) ) :
+
+				foreach( $_children AS $child ) :
+
+					$_temp		= array( $child->id );
+					$_return	= array_merge( $_return, $_temp, $this->get_ids_of_children( $child->id, FALSE ) );
+
+				endforeach;
+
+			endif;
 
 		endif;
 
@@ -440,9 +458,86 @@ class NAILS_Shop_category_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	public function get_all_nested( $_parent_id = NULL, $_data = array() )
+	/**
+	 * Gets a category's descendants in object form
+	 * @param  int     $category_id    The ID of the category
+	 * @param  boolean $only_immediate Whether to recurscively fetch all descendants, or just the immediate descendants
+	 * @return array
+	 */
+	public function get_children( $category_id, $only_immediate = FALSE )
 	{
-		return $this->_nest_items( $this->get_all( NULL, NULL, $_data ), NULL );
+		$_children = $this->get_ids_of_children( $category_id, $only_immediate );
+
+		if ( ! empty( $_children ) ) :
+
+			return $this->get_by_ids( $_children );
+
+		endif;
+
+		return array();
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function get_ids_of_siblings( $category_id )
+	{
+		$this->db->select( 'parent_id' );
+		$this->db->where( 'id', $category_id );
+		$_parent = $this->db->get( $this->_table )->row();
+
+		if ( ! $_parent ) :
+
+			return array();
+
+		endif;
+
+		$this->db->where( 'id !=', $category_id );
+		return $this->get_ids_of_children( $_parent->parent_id, TRUE );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function get_siblings( $category_id )
+	{
+		$_children = $this->get_ids_of_siblings( $category_id );
+
+		if ( ! empty( $_children ) ) :
+
+			return $this->get_by_ids( $_children );
+
+		endif;
+
+		return array();
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function get_all_nested( $_parent_id = NULL, $data = array() )
+	{
+		return $this->_nest_items( $this->get_all( NULL, NULL, $data ), NULL );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function get_top_level( $data = array() )
+	{
+		if ( empty( $data['where'] ) ) :
+
+			$data['where'][] = array( 'column' => 'parent_id', 'value' => NULL );
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		return $this->get_all( NULL, NULL, $data );
 	}
 
 
