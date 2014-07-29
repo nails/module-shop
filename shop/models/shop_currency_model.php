@@ -23,23 +23,33 @@ class NAILS_Shop_currency_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Construct the model, define defaults and load dependencies.
+	 */
 	public function __construct()
 	{
 		parent::__construct();
 
 		// --------------------------------------------------------------------------
 
+		//	Load required config file
 		$this->config->load( 'shop/currency' );
 
 		// --------------------------------------------------------------------------
 
-		$this->_oer_url = 'http://openexchangerates.org/api/latest.json';
+		//	Defaults
+		$this->_oer_url	= 'http://openexchangerates.org/api/latest.json';
+		$this->_rates	= NULL;
 	}
 
 
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Get all defined currencies.
+	 * @return array
+	 */
 	public function get_all()
 	{
 		return $this->config->item( 'currency' );
@@ -49,6 +59,11 @@ class NAILS_Shop_currency_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Get all defined currencies as a flat array; the index is the currency's code,
+	 * the value is the currency's label.
+	 * @return array
+	 */
 	public function get_all_flat()
 	{
 		$_out		= array();
@@ -67,6 +82,10 @@ class NAILS_Shop_currency_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Gets all currencies supported by the shop.
+	 * @return array
+	 */
 	public function get_all_supported()
 	{
 		$_currencies	= $this->get_all();
@@ -101,6 +120,11 @@ class NAILS_Shop_currency_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Gets all supported currencies as a flat array; the index is the currency's
+	 * code, the value is the currency's label.
+	 * @return array
+	 */
 	public function get_all_supported_flat()
 	{
 		$_out		= array();
@@ -119,6 +143,11 @@ class NAILS_Shop_currency_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Gets an individual currency by it's 3 letter code.
+	 * @param  string $code The code to return
+	 * @return mixed        stdClass on success, FALSE on failure
+	 */
 	public function get_by_code( $code )
 	{
 		$_currency = $this->get_all();
@@ -129,6 +158,11 @@ class NAILS_Shop_currency_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Syncs exchange rates to the Open Exchange Rates service.
+	 * @param  boolean $mute_log Whether or not to write errors to the log
+	 * @return boolean
+	 */
 	public function sync( $mute_log = TRUE )
 	{
 		$_openexchangerates_app_id			= app_setting( 'openexchangerates_app_id', 'shop' );
@@ -166,9 +200,11 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
 			endif;
 
-			//	Set up the cURL request
-			//	First attempt to get the rates using the Shop's base currency
-			//	(only available to paid subscribers, but probably more accurate)
+			/**
+			 * Set up the CURL request
+			 * First attempt to get the rates using the Shop's base currency
+			 * (only available to paid subscribers, but probably more accurate)
+			 */
 
 			$this->load->library( 'curl/curl' );
 
@@ -189,8 +225,10 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
 			$_response = $this->curl->execute();
 
-			//	If this failed, it's probably due to requesting a non-USD base
-			//	Try again with but using USD base this time.
+			/**
+			 * If this failed, it's probably due to requesting a non-USD base
+			 * Try again with but using USD base this time.
+			 */
 
 			if ( empty( $this->curl->info['http_code'] ) || $this->curl->info['http_code'] != 200 ) :
 
@@ -249,12 +287,14 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
 			if ( ! empty( $this->curl->info['http_code'] ) && $this->curl->info['http_code'] == 200 ) :
 
-				//	Ok, now we know the rates we need to work out what the base_exchange rate is.
-				//	If the store's base rate is the same as the API's base rate then we're golden,
-				//	if it's not then we'll need to do some calculations.
-
-				//	Attempt to extract the headers (so we can use the E-Tag) and then parse
-				//	the body.
+				/**
+				 * Ok, now we know the rates we need to work out what the base_exchange rate is.
+				 * If the store's base rate is the same as the API's base rate then we're golden,
+				 * if it's not then we'll need to do some calculations.
+				 *
+				 * Attempt to extract the headers (so we can use the E-Tag) and then parse
+				 * the body.
+				 */
 
 				$_response = explode( "\r\n\r\n", $_response, 2 );
 
@@ -383,6 +423,35 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
 				endif;
 
+				// --------------------------------------------------------------------------
+
+				//	Ok, we've done all the BASE -> CURRENCY conversions, now how about we work
+				//	out the reverse?
+				$_to_save_reverse = array();
+
+				//	Easy one first, base to base, base, bass, drop da bass. BASS.
+				$_to_save_reverse[] = array(
+					'from'		=> SHOP_BASE_CURRENCY_CODE,
+					'to'		=> SHOP_BASE_CURRENCY_CODE,
+					'rate'		=> 1,
+					'modified'	=> date( 'Y-m-d H:i:s' )
+				);
+
+				foreach ( $_to_save AS $old ) :
+
+					$_to_save_reverse[] = array(
+					'from'		=> $old['to'],
+					'to'		=> SHOP_BASE_CURRENCY_CODE,
+					'rate'		=> 1 / $old['rate'],
+					'modified'	=> date( 'Y-m-d H:i:s' )
+				);
+
+				endforeach;
+
+				$_to_save = array_merge( $_to_save, $_to_save_reverse );
+
+				// --------------------------------------------------------------------------
+
 				if ( $this->db->truncate( NAILS_DB_PREFIX . 'shop_currency_exchange' ) ) :
 
 					if ( ! empty( $_to_save ) ) :
@@ -478,6 +547,13 @@ class NAILS_Shop_currency_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Converts a value between currencies.
+	 * @param  mixed  $value The value to convert
+	 * @param  string $from  The currency to convert from
+	 * @param  string $to    The currency to convert too
+	 * @return mixed         Float on success, fALSE on failure
+	 */
 	public function convert( $value, $from, $to )
 	{
 		if ( is_null( $this->_rates ) ) :
@@ -499,17 +575,95 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
 		else :
 
-			$this->_set_error( 'No exchange rate available for thos conversion; does the system need to sync?' );
+			$this->_set_error( 'No exchange rate available for those currencies; does the system need to sync?' );
+			return FALSE;
+
+		endif;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Converts a value from the base currency to the user's currency.
+	 * @param  mixed $value The value to convert
+	 * @return mixed        Float on success, FALSE on failure
+	 */
+	public function convert_base_to_user( $value )
+	{
+		return $this->convert( $value, SHOP_BASE_CURRENCY_CODE, SHOP_USER_CURRENCY_CODE );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Formats a value using the settings for a given currency.
+	 * @param  mixed   $value      The value to format, string, int or float
+	 * @param  string  $code       The currency to format as
+	 * @param  boolean $inc_symbol Whether or not to include the currency's symbol
+	 * @return mixed               String on success, FALSE on failure
+	 */
+	public function format( $value, $code, $inc_symbol = TRUE )
+	{
+		$_currency = $this->get_by_code( $code );
+
+		if ( ! $_currency ) :
+
+			$this->_set_error( 'Invalid currency code.' );
 			return FALSE;
 
 		endif;
 
+		$value = number_format( $value, $_currency->decimal_precision, $_currency->decimal_symbol, $_currency->thousands_seperator );
+
+		if ( $inc_symbol ) :
+
+			if ( $_currency->symbol_position == 'BEFORE' ) :
+
+				$value = $_currency->symbol . $value;
+
+			else :
+
+				$value = $value . $_currency->symbol;
+
+			endif;
+
+		endif;
+
+		return $value;
 	}
 
 
-	public function convert_base_to_user( $value )
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Formats a value using the settings for the base currency.
+	 * @param  mixed   $value      The value to format, string, int or float
+	 * @param  boolean $inc_symbol Whether or not to include the currency's symbol
+	 * @return mixed               String on success, FALSE on failure
+	 */
+	public function format_base( $value, $inc_symbol = TRUE )
 	{
-		return $this->convert( $value, SHOP_BASE_CURRENCY_CODE, SHOP_USER_CURRENCY_CODE );
+		return $this->format( $value, SHOP_BASE_CURRENCY_CODE, $inc_symbol );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Formats a value using the settings for the user's currency.
+	 * @param  mixed   $value      The value to format, string, int or float
+	 * @param  boolean $inc_symbol Whether or not to include the currency's symbol
+	 * @return mixed               String on success, FALSE on failure
+	 */
+	public function format_user( $value, $inc_symbol = TRUE )
+	{
+		return $this->format( $value, SHOP_USER_CURRENCY_CODE, $inc_symbol );
 	}
 }
 

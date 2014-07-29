@@ -171,60 +171,26 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
+		//	If item prices are inclusive of tax then show the items total + tax
+		if ( ! app_setting( 'price_exclude_tax', 'shop' ) ) :
+
+			$_basket->totals->base->item += $_basket->totals->base->tax;
+			$_basket->totals->user->item += $_basket->totals->user->tax;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
 		//	Format totals
-		$_basket->totals->base_formatted->item		= number_format( $_basket->totals->base->item, SHOP_BASE_CURRENCY_PRECISION, SHOP_BASE_CURRENCY_DECIMALS, SHOP_BASE_CURRENCY_THOUSANDS );
-		$_basket->totals->base_formatted->shipping	= number_format( $_basket->totals->base->shipping, SHOP_BASE_CURRENCY_PRECISION, SHOP_BASE_CURRENCY_DECIMALS, SHOP_BASE_CURRENCY_THOUSANDS );
-		$_basket->totals->base_formatted->tax		= number_format( $_basket->totals->base->tax, SHOP_BASE_CURRENCY_PRECISION, SHOP_BASE_CURRENCY_DECIMALS, SHOP_BASE_CURRENCY_THOUSANDS );
-		$_basket->totals->base_formatted->grand		= number_format( $_basket->totals->base->grand, SHOP_BASE_CURRENCY_PRECISION, SHOP_BASE_CURRENCY_DECIMALS, SHOP_BASE_CURRENCY_THOUSANDS );
+		$_basket->totals->base_formatted->item		= $this->shop_currency_model->format_base( $_basket->totals->base->item );
+		$_basket->totals->base_formatted->shipping	= $this->shop_currency_model->format_base( $_basket->totals->base->shipping );
+		$_basket->totals->base_formatted->tax		= $this->shop_currency_model->format_base( $_basket->totals->base->tax );
+		$_basket->totals->base_formatted->grand		= $this->shop_currency_model->format_base( $_basket->totals->base->grand );
 
-		switch ( SHOP_BASE_CURRENCY_SYMBOL_POS ) :
-
-			case 'BEFORE' :
-
-				$_basket->totals->base_formatted->item		= SHOP_BASE_CURRENCY_SYMBOL . $_basket->totals->base_formatted->item;
-				$_basket->totals->base_formatted->shipping	= SHOP_BASE_CURRENCY_SYMBOL . $_basket->totals->base_formatted->shipping;
-				$_basket->totals->base_formatted->tax		= SHOP_BASE_CURRENCY_SYMBOL . $_basket->totals->base_formatted->tax;
-				$_basket->totals->base_formatted->grand		= SHOP_BASE_CURRENCY_SYMBOL . $_basket->totals->base_formatted->grand;
-
-			break;
-
-			case 'AFTER' :
-
-				$_basket->totals->base_formatted->item		= $_basket->totals->base_formatted->item . SHOP_BASE_CURRENCY_SYMBOL;
-				$_basket->totals->base_formatted->shipping	= $_basket->totals->base_formatted->shipping . SHOP_BASE_CURRENCY_SYMBOL;
-				$_basket->totals->base_formatted->tax		= $_basket->totals->base_formatted->tax . SHOP_BASE_CURRENCY_SYMBOL;
-				$_basket->totals->base_formatted->grand		= $_basket->totals->base_formatted->grand . SHOP_BASE_CURRENCY_SYMBOL;
-
-			break;
-
-		endswitch;
-
-		$_basket->totals->user_formatted->item		= number_format( $_basket->totals->user->item, SHOP_USER_CURRENCY_PRECISION, SHOP_USER_CURRENCY_DECIMALS, SHOP_USER_CURRENCY_THOUSANDS );
-		$_basket->totals->user_formatted->shipping	= number_format( $_basket->totals->user->shipping, SHOP_USER_CURRENCY_PRECISION, SHOP_USER_CURRENCY_DECIMALS, SHOP_USER_CURRENCY_THOUSANDS );
-		$_basket->totals->user_formatted->tax		= number_format( $_basket->totals->user->tax, SHOP_USER_CURRENCY_PRECISION, SHOP_USER_CURRENCY_DECIMALS, SHOP_USER_CURRENCY_THOUSANDS );
-		$_basket->totals->user_formatted->grand		= number_format( $_basket->totals->user->grand, SHOP_USER_CURRENCY_PRECISION, SHOP_USER_CURRENCY_DECIMALS, SHOP_USER_CURRENCY_THOUSANDS );
-
-		switch ( SHOP_USER_CURRENCY_SYMBOL_POS ) :
-
-			case 'BEFORE' :
-
-				$_basket->totals->user_formatted->item		= SHOP_USER_CURRENCY_SYMBOL . $_basket->totals->user_formatted->item;
-				$_basket->totals->user_formatted->shipping	= SHOP_USER_CURRENCY_SYMBOL . $_basket->totals->user_formatted->shipping;
-				$_basket->totals->user_formatted->tax		= SHOP_USER_CURRENCY_SYMBOL . $_basket->totals->user_formatted->tax;
-				$_basket->totals->user_formatted->grand		= SHOP_USER_CURRENCY_SYMBOL . $_basket->totals->user_formatted->grand;
-
-			break;
-
-			case 'AFTER' :
-
-				$_basket->totals->user_formatted->item		= $_basket->totals->user_formatted->item . SHOP_USER_CURRENCY_SYMBOL;
-				$_basket->totals->user_formatted->shipping	= $_basket->totals->user_formatted->shipping . SHOP_USER_CURRENCY_SYMBOL;
-				$_basket->totals->user_formatted->tax		= $_basket->totals->user_formatted->tax . SHOP_USER_CURRENCY_SYMBOL;
-				$_basket->totals->user_formatted->grand		= $_basket->totals->user_formatted->grand . SHOP_USER_CURRENCY_SYMBOL;
-
-			break;
-
-		endswitch;
+		$_basket->totals->user_formatted->item		= $this->shop_currency_model->format_user( $_basket->totals->user->item );
+		$_basket->totals->user_formatted->shipping	= $this->shop_currency_model->format_user( $_basket->totals->user->shipping );
+		$_basket->totals->user_formatted->tax		= $this->shop_currency_model->format_user( $_basket->totals->user->tax );
+		$_basket->totals->user_formatted->grand		= $this->shop_currency_model->format_user( $_basket->totals->user->grand );
 
 		// --------------------------------------------------------------------------
 

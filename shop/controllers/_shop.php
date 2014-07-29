@@ -76,21 +76,21 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
 		//	Load skin assets
 
-		//	CSS
-		if ( ! empty( $this->_skin->assets->css ) && is_array( $this->_skin->assets->css ) ) :
+		//	CSS and JS
+		if ( ! empty( $this->_skin->assets ) && is_array( $this->_skin->assets ) ) :
 
-			foreach ( $this->_skin->assets->css AS $asset ) :
+			foreach ( $this->_skin->assets AS $asset ) :
 
-				$this->asset->load( $this->_skin->url . 'assets/css/' . $asset );
+				$this->asset->load( $this->_skin->url . 'assets/' . $asset );
 
 			endforeach;
 
 		endif;
 
 		//	CSS - Inline
-		if ( ! empty( $this->_skin->assets->css_inline ) && is_array( $this->_skin->assets->css_inline ) ) :
+		if ( ! empty( $this->_skin->css_inline ) && is_array( $this->_skin->css_inline ) ) :
 
-			foreach ( $this->_skin->assets->css_inline AS $asset ) :
+			foreach ( $this->_skin->css_inline AS $asset ) :
 
 				$this->asset->inline( $asset, 'CSS_INLINE' );
 
@@ -98,21 +98,10 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
 		endif;
 
-		//	JS
-		if ( ! empty( $this->_skin->assets->js ) && is_array( $this->_skin->assets->js ) ) :
-
-			foreach ( $this->_skin->assets->js AS $asset ) :
-
-				$this->asset->load( $this->_skin->url . 'assets/js/' . $asset );
-
-			endforeach;
-
-		endif;
-
 		//	JS - Inline
-		if ( ! empty( $this->_skin->assets->js_inline ) && is_array( $this->_skin->assets->js_inline ) ) :
+		if ( ! empty( $this->_skin->js_inline ) && is_array( $this->_skin->js_inline ) ) :
 
-			foreach ( $this->_skin->assets->js_inline AS $asset ) :
+			foreach ( $this->_skin->js_inline AS $asset ) :
 
 				$this->asset->inline( $asset, 'JS_INLINE' );
 
