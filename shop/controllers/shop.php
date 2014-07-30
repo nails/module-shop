@@ -38,11 +38,34 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Defaults
 		$this->_product_sort			= new stdClass();
 		$this->_product_sort->sort		= app_setting( 'default_product_sort' ) ? app_setting( 'default_product_sort' ) : 'recent';
-		$this->_product_sort->perpage	= app_setting( 'default_product_per_page' ) ? app_setting( 'default_product_per_page' ) : 100;
+		$this->_product_sort->perpage	= app_setting( 'default_product_per_page' ) ? app_setting( 'default_product_per_page' ) : 25;
 
 		//	Actual Values
 		$this->_product_sort->sort		= $this->input->get_post( 'sort' ) ? $this->input->get_post( 'sort' ) : $this->_product_sort->sort;
 		$this->_product_sort->perpage	= $this->input->get_post( 'perpage' ) ? $this->input->get_post( 'perpage' ) : $this->_product_sort->perpage;
+
+		//	Translate into useable values, also catch out people fiddling with the URL
+		$_table_prefix = $this->shop_product_model->get_property_table_prefix();
+
+		switch ( $this->_product_sort->sort ) :
+
+			case 'price_low_high' :	$this->_product_sort->sort_on = $_table_prefix . '.XXX';		break;
+			case 'price_low_high' :	$this->_product_sort->sort_on = $_table_prefix . '.XXX';		break;
+			case 'a-z' :			$this->_product_sort->sort_on = $_table_prefix . '.label';		break;
+			case 'recent' :
+			default :				$this->_product_sort->sort_on = $_table_prefix . '.created';	break;
+
+		endswitch;
+
+		switch ( $this->_product_sort->perpage ) :
+
+			case '10' :		$this->_product_sort->perpage = 10;		break;
+			case '50' :		$this->_product_sort->perpage = 50;		break;
+			case '100' :	$this->_product_sort->perpage = 100;	break;
+			case '25' :
+			default :		$this->_product_sort->perpage = 25;		break;
+
+		endswitch;
 
 		//	Pass to view
 		$this->data['product_sort'] = $this->_product_sort;
@@ -53,7 +76,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	TODO
 
 		$this->_product_pagination			= new stdClasS();
-		$this->_product_pagination->page	= NULL;
+		$this->_product_pagination->page	= (int) $this->input->get_post( 'page' );
 		$this->_product_pagination->total	= NULL;
 	}
 
@@ -87,7 +110,12 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Products
 		//	========
 
-		$this->data['products'] = $this->shop_product_model->get_all( $this->_product_pagination->page, $this->_product_sort->perpage );
+		//	Set up the data array, we'll use this to constrain products according to the filters
+		$_data			= array();
+		$_data['where']	= array();
+		$_data['sort']	= $this->_product_sort->sort_on;
+
+		$this->data['products'] = $this->shop_product_model->get_all( $this->_product_pagination->page, $this->_product_sort->perpage, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -206,7 +234,11 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Brand's Products
 		//	================
 
-		$_data = array( 'hide_inactive' => TRUE );
+		//	Set up the data array, we'll use this to constrain products according to the filters
+		$_data			= array();
+		$_data['where']	= array();
+		$_data['sort']	= $this->_product_sort->sort_on;
+
 		$this->data['products'] = $this->shop_product_model->get_for_brand( $this->data['brand']->id, $this->_product_pagination->page, $this->_product_sort->perpage, $_data );
 
 		// --------------------------------------------------------------------------
@@ -324,7 +356,11 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Category's Products
 		//	===================
 
-		$_data = array( 'hide_inactive' => TRUE );
+		//	Set up the data array, we'll use this to constrain products according to the filters
+		$_data			= array();
+		$_data['where']	= array();
+		$_data['sort']	= $this->_product_sort->sort_on;
+
 		$this->data['products'] = $this->shop_product_model->get_for_category( $this->data['category']->id, $this->_product_pagination->page, $this->_product_sort->perpage, $_data );
 
 		// --------------------------------------------------------------------------
@@ -444,7 +480,11 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Collection's Products
 		//	=====================
 
-		$_data = array( 'hide_inactive' => TRUE );
+		//	Set up the data array, we'll use this to constrain products according to the filters
+		$_data			= array();
+		$_data['where']	= array();
+		$_data['sort']	= $this->_product_sort->sort_on;
+
 		$this->data['products'] = $this->shop_product_model->get_for_collection( $this->data['collection']->id, $this->_product_pagination->page, $this->_product_sort->perpage, $_data );
 
 		// --------------------------------------------------------------------------
@@ -640,7 +680,11 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Range's Products
 		//	================
 
-		$_data = array( 'hide_inactive' => TRUE );
+		//	Set up the data array, we'll use this to constrain products according to the filters
+		$_data			= array();
+		$_data['where']	= array();
+		$_data['sort']	= $this->_product_sort->sort_on;
+
 		$this->data['products'] = $this->shop_product_model->get_for_range( $this->data['range']->id, $this->_product_pagination->page, $this->_product_sort->perpage, $_data );
 
 		// --------------------------------------------------------------------------
@@ -760,7 +804,11 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Sale's Products
 		//	===============
 
-		$_data = array( 'hide_inactive' => TRUE );
+		//	Set up the data array, we'll use this to constrain products according to the filters
+		$_data			= array();
+		$_data['where']	= array();
+		$_data['sort']	= $this->_product_sort->sort_on;
+
 		$this->data['products'] = $this->shop_product_model->get_for_sale( $this->data['sale']->id, $this->_product_pagination->page, $this->_product_sort->perpage, $_data );
 
 		// --------------------------------------------------------------------------
@@ -877,7 +925,11 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Tag's Products
 		//	==============
 
-		$_data = array( 'hide_inactive' => TRUE );
+		//	Set up the data array, we'll use this to constrain products according to the filters
+		$_data			= array();
+		$_data['where']	= array();
+		$_data['sort']	= $this->_product_sort->sort_on;
+
 		$this->data['products'] = $this->shop_product_model->get_for_tag( $this->data['tag']->id, $this->_product_pagination->page, $this->_product_sort->perpage, $_data );
 
 		// --------------------------------------------------------------------------
