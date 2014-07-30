@@ -25,6 +25,44 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 
 		$this->_table			= NAILS_DB_PREFIX . 'shop_inform_product_available';
 		$this->_table_prefix	= 'sipa';
+
+		// --------------------------------------------------------------------------
+
+		$this->load->model( 'shop/shop_product_model' );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function add( $variant_id, $email )
+	{
+		$this->load->helper( 'email' );
+
+		if ( ! valid_email( $email ) ) :
+
+			$this->_set_error( '"' . $email . '" is not a valid email address.' );
+			return FALSE;
+
+		endif;
+
+		$_product = $this->shop_product_model->get_by_variant_id( $variant_id );
+
+		if ( ! $_product ) :
+
+			$this->_set_error( 'Invalid Variant ID.' );
+			return FALSE;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		$_data					= array();
+		$_data['product_id']	= $_product->id;
+		$_data['variation_id']	= $variant_id;
+		$_data['email']			= $email;
+
+		return (bool) parent::create( $_data );
 	}
 
 
@@ -38,12 +76,6 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 		$variation_ids = array_unique( $variation_ids );
 
 		if ( $variation_ids ) :
-
-			if ( ! $this->load->model_is_loaded( 'shop_product_model' ) ) :
-
-				$this->load->model( 'shop/shop_product_model' );
-
-			endif;
 
 			$_product = $this->shop_product_model->get_by_id( $product_id );
 
@@ -72,15 +104,14 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 
 				endforeach;
 
-				//	Delete requests
-				$this->db->where( 'product_id', $product_id );
-				$this->db->where_in( 'variation_id', $variation_ids );
-				$this->db->delete( $this->_table );
-
 			endif;
 
 		endif;
 
+		//	Delete requests
+		$this->db->where( 'product_id', $product_id );
+		$this->db->where_in( 'variation_id', $variation_ids );
+		$this->db->delete( $this->_table );
 	}
 }
 
