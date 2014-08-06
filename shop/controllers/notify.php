@@ -58,7 +58,7 @@ class NAILS_Notify extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		if (  $this->input->post() ) :
+		if ( $this->input->post() ) :
 
 			$this->load->model( 'shop/shop_inform_product_available_model' );
 
