@@ -310,7 +310,6 @@ class NAILS_Shop_product_model extends NAILS_Model
 			//	-----
 			$_data->variation[$index]->stock_status = isset( $v['stock_status'] ) ? $v['stock_status'] : 'OUT_OF_STOCK';
 
-
 			switch ( $_data->variation[$index]->stock_status ) :
 
 				case 'IN_STOCK' :
@@ -332,6 +331,28 @@ class NAILS_Shop_product_model extends NAILS_Model
 					//	Shhh, be vewy qwiet, we're huntin' wabbits.
 					$_data->variation[$index]->quantity_available	= NULL;
 					$_data->variation[$index]->lead_time			= NULL;
+
+				break;
+
+			endswitch;
+
+			//	Out of Stock Behaviour
+			//	----------------------
+
+			$_data->variation[$index]->out_of_stock_behaviour = isset( $v['out_of_stock_behaviour'] ) ? $v['out_of_stock_behaviour'] : 'OUT_OF_STOCK';
+
+			switch ( $_data->variation[$index]->out_of_stock_behaviour ) :
+
+				case 'TO_ORDER' :
+
+					$_data->variation[$index]->out_of_stock_to_order_lead_time = isset( $v['out_of_stock_to_order_lead_time'] ) ? $v['out_of_stock_to_order_lead_time'] : NULL;
+
+				break;
+
+				case 'OUT_OF_STOCK' :
+
+					//	Shhh, be vewy qwiet, we're huntin' wabbits.
+					$_data->variation[$index]->out_of_stock_to_order_lead_time = NULL;
 
 				break;
 
@@ -679,6 +700,12 @@ class NAILS_Shop_product_model extends NAILS_Model
 					$this->db->set( 'stock_status',			$v->stock_status );
 					$this->db->set( 'quantity_available',	$v->quantity_available );
 					$this->db->set( 'lead_time',			$v->lead_time );
+
+					//	Product Variation: Out of Stock Behaviour
+					//	=========================================
+
+					$this->db->set( 'out_of_stock_behaviour',			$v->out_of_stock_behaviour );
+					$this->db->set( 'out_of_stock_to_order_lead_time',	$v->out_of_stock_to_order_lead_time );
 
 
 					//	Product Variation: Shipping
@@ -2020,6 +2047,37 @@ class NAILS_Shop_product_model extends NAILS_Model
 		unset( $variation->ship_weight );
 		unset( $variation->ship_weight_unit );
 		unset( $variation->ship_collection_only );
+
+		//	Stock status
+		if ( $variation->stock_status == 'OUT_OF_STOCK' ) :
+
+			switch ( $variation->out_of_stock_behaviour ) :
+
+				case 'TO_ORDER' :
+
+					//	Set the original values, in case they're needed
+					$variation->stock_status_original	= $variation->stock_status;
+					$variation->lead_time_original		= $variation->lead_time;
+
+					//	And... override!
+					$variation->stock_status	= 'TO_ORDER';
+					$variation->lead_time		= $variation->out_of_stock_to_order_lead_time ? $variation->out_of_stock_to_order_lead_time : $variation->lead_time;
+
+				break;
+
+				case 'OUT_OF_STOCK' :
+				default :
+
+					//	Nothing to do.
+
+				break;
+
+			endswitch;
+
+			unset( $variation->out_of_stock_behaviour  );
+			unset( $variation->out_of_stock_to_order_lead_time );
+
+		endif;
 	}
 }
 
