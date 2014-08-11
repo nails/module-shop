@@ -31,7 +31,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	{
 		$_basket = $this->shop_basket_model->get();
 
-		if ( empty( $_bsket->items ) ) :
+		if ( empty( $_basket->items ) ) :
 
 			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> you cannot checkout just now. Your basket is empty.' );
 			redirect( $this->_shop_url . 'basket' );
