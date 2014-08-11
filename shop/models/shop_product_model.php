@@ -2098,6 +2098,80 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 
 	/**
+	 * Adds a product as a recently viewed item and saves it to the user's meta
+	 * data if they're logged in.
+	 * @param int $product_id The product's ID
+	 */
+	public function add_as_recently_viewed( $product_id )
+	{
+		//	Session
+		$_recently_viewed = $this->session->userdata( 'shop_recently_viewed' );
+
+		if ( empty( $_recently_viewed ) ) :
+
+			$_recently_viewed = array();
+
+		endif;
+
+		//	If this product is already there, remove it
+		$_search = array_search( $product_id, $_recently_viewed );
+		if ( $_search !== FALSE ) :
+
+			unset( $_recently_viewed[$_search] );
+
+		endif;
+
+		//	Pop it on the end
+		$_recently_viewed[] = (int) $product_id;
+
+		//	Restrict to 6 most recently viewed items
+		$_recently_viewed = array_slice( $_recently_viewed, -6 );
+
+		$this->session->set_userdata( 'shop_recently_viewed', $_recently_viewed );
+
+		// --------------------------------------------------------------------------
+
+		//	Logged in?
+		if ( $this->user->is_logged_in() ) :
+
+			$_data = array( 'shop_recently_viewed' => json_encode( $_recently_viewed ) );
+			$this->user_model->update( active_user( 'id' ), $_data );
+
+		endif;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Returns an array of recently viewed products
+	 * @return array
+	 */
+	public function get_recently_viewed()
+	{
+		//	Session
+		$_recently_viewed = $this->session->userdata( 'shop_recently_viewed' );
+
+		// --------------------------------------------------------------------------
+
+		//	Logged in?
+		if ( empty( $_recently_viewed ) && $this->user->is_logged_in() ) :
+
+			$_recently_viewed = active_user( 'shop_recently_viewed' );
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		return array_filter( (array) $_recently_viewed );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
 	 * Formats a variation object
 	 * @param  stdClass $variation The variation object to format
 	 * @return void

@@ -672,6 +672,10 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
+		//	Add as a recently viewed product for this user
+		$this->shop_product_model->add_as_recently_viewed( $this->data['product']->id );
+
+		// --------------------------------------------------------------------------
 
 		//	Generate missing SEO content
 		//	============================
