@@ -57,6 +57,11 @@ class NAILS_Shop_product_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		$this->_destructive_delete = FALSE;
+
+		// --------------------------------------------------------------------------
+
+		//	Shop's base URL
+		$this->_shop_url = app_setting( 'url', 'shop' ) ? app_setting( 'url', 'shop' ) : 'shop/';
 	}
 
 
@@ -1988,7 +1993,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 */
 	public function format_url( $slug )
 	{
-		return site_url( app_setting( 'url', 'shop' ) . 'product/' . $slug );
+		return site_url( $this->_shop_url . 'product/' . $slug );
 	}
 
 

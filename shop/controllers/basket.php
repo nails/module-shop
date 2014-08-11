@@ -26,7 +26,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		$this->data['return'] = $this->input->get( 'return' ) ? $this->input->get_post( 'return' ) : app_setting( 'url', 'shop' ) . 'basket';
+		$this->data['return'] = $this->input->get( 'return' ) ? $this->input->get_post( 'return' ) : $this->_shop_url . 'basket';
 	}
 
 
@@ -54,7 +54,8 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
 		//	Continue shopping URL
 		//	Skins can render a button which takes the user to a sensible place to keep shopping
-		$this->data['continue_shopping_url'] = app_setting( 'url', 'shop' ) ? app_setting( 'url', 'shop' ) : 'shop/';
+
+		$this->data['continue_shopping_url'] = $this->_shop_url;
 
 		//	Most recently viewed item
 		$_recently_viewed = $this->shop_product_model->get_recently_viewed();

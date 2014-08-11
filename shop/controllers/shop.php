@@ -164,7 +164,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 	public function brand()
 	{
 		//	Strip out the store's URL, leave just the brand's slug
-		$_slug = preg_replace( '#' . app_setting( 'url', 'shop' ) . 'brand/?#', '', uri_string() );
+		$_slug = preg_replace( '#' . $this->_shop_url . 'brand/?#', '', uri_string() );
 
 		//	Strip out the pagination segment, if present
 		$_slug = preg_replace( '#\/\d+$#', '', $_slug );
@@ -320,7 +320,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 	public function category()
 	{
 		//	Strip out the store's URL, leave just the category's slug
-		$_slug = preg_replace( '#' . app_setting( 'url', 'shop' ) . 'category/?#', '', uri_string() );
+		$_slug = preg_replace( '#' . $this->_shop_url . 'category/?#', '', uri_string() );
 
 		//	Strip out the pagination segment, if present
 		$_slug = preg_replace( '#\/\d+$#', '', $_slug );
@@ -474,7 +474,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 	public function collection()
 	{
 		//	Strip out the store's URL, leave just the colelction's slug
-		$_slug = preg_replace( '#' . app_setting( 'url', 'shop' ) . 'colelction/?#', '', uri_string() );
+		$_slug = preg_replace( '#' . $this->_shop_url . 'colelction/?#', '', uri_string() );
 
 		//	Strip out the pagination segment, if present
 		$_slug = preg_replace( '#\/\d+$#', '', $_slug );
@@ -630,7 +630,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 	protected function product()
 	{
 		//	Strip out the store's URL, leave just the product's slug
-		$_slug = preg_replace( '#' . app_setting( 'url', 'shop' ) . 'product/?#', '', uri_string() );
+		$_slug = preg_replace( '#' . $this->_shop_url . 'product/?#', '', uri_string() );
 
 		if ( $_slug ) :
 
@@ -711,7 +711,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 	public function range()
 	{
 		//	Strip out the store's URL, leave just the range's slug
-		$_slug = preg_replace( '#' . app_setting( 'url', 'shop' ) . 'range/?#', '', uri_string() );
+		$_slug = preg_replace( '#' . $this->_shop_url . 'range/?#', '', uri_string() );
 
 		//	Strip out the pagination segment, if present
 		$_slug = preg_replace( '#\/\d+$#', '', $_slug );
@@ -867,7 +867,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 	public function sale()
 	{
 		//	Strip out the store's URL, leave just the sale's slug
-		$_slug = preg_replace( '#' . app_setting( 'url', 'shop' ) . 'sale/?#', '', uri_string() );
+		$_slug = preg_replace( '#' . $this->_shop_url . 'sale/?#', '', uri_string() );
 
 		//	Strip out the pagination segment, if present
 		$_slug = preg_replace( '#\/\d+$#', '', $_slug );
@@ -1022,7 +1022,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 	public function tag()
 	{
 		//	Strip out the store's URL, leave just the tag's slug
-		$_slug = preg_replace( '#' . app_setting( 'url', 'shop' ) . 'tag/?#', '', uri_string() );
+		$_slug = preg_replace( '#' . $this->_shop_url . 'tag/?#', '', uri_string() );
 
 		//	Strip out the pagination segment, if present
 		$_slug = preg_replace( '#\/\d+$#', '', $_slug );
@@ -1181,9 +1181,9 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		$_config = array();
 
-		if ( app_setting( 'url', 'shop' ) ) :
+		if ( $this->_shop_url ) :
 
-			$_config['base_url'] = app_setting( 'url', 'shop' ) . $base_url;
+			$_config['base_url'] = $this->_shop_url . $base_url;
 
 		else :
 

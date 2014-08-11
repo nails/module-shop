@@ -23,6 +23,11 @@ class NAILS_Shop_category_model extends NAILS_Model
 
 		$this->_table			= NAILS_DB_PREFIX . 'shop_category';
 		$this->_table_prefix	= 'sc';
+
+		// --------------------------------------------------------------------------
+
+		//	Shop's base URL
+		$this->_shop_url = app_setting( 'url', 'shop' ) ? app_setting( 'url', 'shop' ) : 'shop/';
 	}
 
 
@@ -633,7 +638,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 
 	public function format_url( $slug )
 	{
-		return site_url( app_setting( 'url', 'shop' ) . 'category/' . $slug );
+		return site_url( $this->_shop_url . 'category/' . $slug );
 	}
 
 

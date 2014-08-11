@@ -29,6 +29,19 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	 **/
 	public function index()
 	{
+		$_basket = $this->shop_basket_model->get();
+
+		if ( empty( $_bsket->items ) ) :
+
+			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> you cannot checkout just now. Your basket is empty.' );
+			redirect( $this->_shop_url . 'basket' );
+
+		endif;
+
+		$this->data['page']->title = $this->_shop_name . ': Checkout';
+
+		// --------------------------------------------------------------------------
+
 		$this->load->view( 'structure/header',							$this->data );
 		$this->load->view( $this->_skin->path . 'views/checkout/index',	$this->data );
 		$this->load->view( 'structure/footer',							$this->data );
@@ -37,7 +50,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 		if ( ! $this->_can_checkout() ) :
 
 			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> you can\'t checkout right now: ' . $this->data['error'] );
-			redirect( app_setting( 'url', 'shop' ) . 'basket' );
+			redirect( $this->_shop_url . 'basket' );
 			return;
 
 		endif;
@@ -92,7 +105,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 				endif;
 
 				//	... and redirect to confirm
-				$_uri  = app_setting( 'url', 'shop' ) . 'checkout/confirm';
+				$_uri  = $this->_shop_url . 'checkout/confirm';
 				$_uri .= $this->data['guest'] ? '?guest=true' : '';
 
 				redirect( $_uri );
@@ -235,7 +248,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 						$this->shop_basket_model->add_payment_gateway( $this->data['payment_gateways'][0]->id );
 
 						//	... and confirm
-						$_uri  = app_setting( 'url', 'shop' ) . 'checkout/confirm';
+						$_uri  = $this->_shop_url . 'checkout/confirm';
 						$_uri .= $this->data['guest'] ? '?guest=true' : '';
 
 						redirect( $_uri );
@@ -250,7 +263,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 								$this->shop_basket_model->add_payment_gateway( $pg->id );
 
 								//	... and confirm
-								$_uri  = app_setting( 'url', 'shop' ) . 'checkout/confirm';
+								$_uri  = $this->_shop_url . 'checkout/confirm';
 								$_uri .= $this->data['guest'] ? '?guest=true' : '';
 
 								redirect( $_uri );
@@ -267,7 +280,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 						// --------------------------------------------------------------------------
 
-						$_uri  = app_setting( 'url', 'shop' ) . 'checkout/confirm';
+						$_uri  = $this->_shop_url . 'checkout/confirm';
 						$_uri .= $this->data['guest'] ? '?guest=true' : '';
 
 						redirect( $_uri );
@@ -352,7 +365,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 		if ( ! $this->_can_checkout() ) :
 
 			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> you can\'t checkout right now: ' . $this->data['error'] );
-			redirect( app_setting( 'url', 'shop' ) . 'basket' );
+			redirect( $this->_shop_url . 'basket' );
 			return;
 
 		endif;
@@ -382,7 +395,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 				$this->shop_basket_model->add_payment_gateway( $this->data['payment_gateways'][0]->id );
 
-				$_uri  = app_setting( 'url', 'shop' ) . 'checkout/payment';
+				$_uri  = $this->_shop_url . 'checkout/payment';
 				$_uri .= $this->data['guest'] ? '?guest=true' : '';
 
 				redirect( $_uri );
@@ -403,7 +416,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 		else :
 
-			redirect( app_setting( 'url', 'shop' ) . 'checkout' );
+			redirect( $this->_shop_url . 'checkout' );
 
 		endif;
 	}
@@ -421,7 +434,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 		if ( ! $this->_can_checkout() ) :
 
 			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> you can\'t checkout right now: ' . $this->data['error'] );
-			redirect( app_setting( 'url', 'shop' ) . 'basket' );
+			redirect( $this->_shop_url . 'basket' );
 			return;
 
 		endif;
@@ -459,7 +472,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 				if ( ! $_order ) :
 
 					$this->session->set_flashdata( 'error', 'There was a problem checking out: ' . $this->data['error'] );
-					redirect( app_setting( 'url', 'shop' ) . 'basket' );
+					redirect( $this->_shop_url . 'basket' );
 					return;
 
 				endif;
@@ -486,7 +499,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 				// --------------------------------------------------------------------------
 
 				//	Redirect to processing page
-				redirect( app_setting( 'url', 'shop' ) . 'checkout/processing?ref=' . $_order->ref );
+				redirect( $this->_shop_url . 'checkout/processing?ref=' . $_order->ref );
 
 			endif;
 
@@ -503,7 +516,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 				default :
 
 					$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> there was a problem verifying your chosen payment option. Please try again.' );
-					redirect( app_setting( 'url', 'shop' ) . 'basket' );
+					redirect( $this->_shop_url . 'basket' );
 
 				break;
 
@@ -511,7 +524,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 		else :
 
-			redirect( app_setting( 'url', 'shop' ) . 'checkout' );
+			redirect( $this->_shop_url . 'checkout' );
 
 		endif;
 	}
@@ -532,7 +545,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 		if ( ! $this->data['order'] ) :
 
 			$this->session->set_flashdata( 'error', 'There was a problem checking out: ' . $this->data['error'] );
-			redirect( app_setting( 'url', 'shop' ) . 'basket' );
+			redirect( $this->_shop_url . 'basket' );
 			return;
 
 		endif;
@@ -574,9 +587,9 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 		endswitch;
 
-		$this->data['paypal']->notify		= site_url( app_setting( 'url', 'shop' ) . 'checkout/notify/paypal' );
-		$this->data['paypal']->cancel		= site_url( app_setting( 'url', 'shop' ) . 'checkout/cancel' );
-		$this->data['paypal']->processing	= site_url( app_setting( 'url', 'shop' ) . 'checkout/processing' );
+		$this->data['paypal']->notify		= site_url( $this->_shop_url . 'checkout/notify/paypal' );
+		$this->data['paypal']->cancel		= site_url( $this->_shop_url . 'checkout/cancel' );
+		$this->data['paypal']->processing	= site_url( $this->_shop_url . 'checkout/processing' );
 
 		// --------------------------------------------------------------------------
 
@@ -810,7 +823,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 		$this->session->set_flashdata( 'message', '<strong>Checkout was cancelled.</strong><br />At your request, we cancelled checkout - you have not been charged.' );
 
-		redirect( app_setting( 'url', 'shop' ) . 'basket' );
+		redirect( $this->_shop_url . 'basket' );
 	}
 
 
@@ -849,7 +862,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	protected function _notify_paypal()
 	{
 		//	Configure log
-		_LOG_FILE( app_setting( 'url', 'shop' ) . 'notify/paypal/ipn-' . date( 'Y-m-d' ) . '.php' );
+		_LOG_FILE( $this->_shop_url . 'notify/paypal/ipn-' . date( 'Y-m-d' ) . '.php' );
 
 		_LOG();
 		_LOG( '- - - - - - - - - - - - - - - - - - -' );
@@ -1159,7 +1172,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 			if ( $this->data['testing'] ) :
 
-				echo anchor( app_setting( 'url', 'shop' ) . 'checkout/processing?ref=' . $_order->ref, 'Continue to Processing Page' );
+				echo anchor( $this->_shop_url . 'checkout/processing?ref=' . $_order->ref, 'Continue to Processing Page' );
 
 			endif;
 

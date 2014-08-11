@@ -69,11 +69,6 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
 		// --------------------------------------------------------------------------
 
-		//	Pass to $this->data, for the views
-		$this->data['skin'] = $this->_skin;
-
-		// --------------------------------------------------------------------------
-
 		//	Load skin assets
 
 		//	CSS and JS
@@ -113,6 +108,18 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
 		//	Shop's name
 		$this->_shop_name = app_setting( 'name', 'shop' ) ? app_setting( 'name', 'shop' ) : 'Shop';
+
+		// --------------------------------------------------------------------------
+
+		//	Shop's base URL
+		$this->_shop_url = app_setting( 'url', 'shop' ) ? app_setting( 'url', 'shop' ) : 'shop/';
+
+		// --------------------------------------------------------------------------
+
+		//	Pass data to the views
+		$this->data['skin']			= $this->_skin;
+		$this->data['shop_name']	= $this->_shop_name;
+		$this->data['shop_url']		= $this->_shop_url;
 	}
 }
 
