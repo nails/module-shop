@@ -35,49 +35,58 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
+		//	Product Sorting
+		//	===============
+
 		//	Defaults
 		$this->_product_sort			= new stdClass();
 		$this->_product_sort->sort		= app_setting( 'default_product_sort','shop' ) ? app_setting( 'default_product_sort','shop' ) : 'recent';
-		$this->_product_sort->perpage	= app_setting( 'default_product_per_page','shop' ) ? app_setting( 'default_product_per_page','shop' ) : 25;
 
 		//	Actual Values
 		$this->_product_sort->sort		= $this->input->get_post( 'sort' ) ? $this->input->get_post( 'sort' ) : $this->_product_sort->sort;
-		$this->_product_sort->perpage	= $this->input->get_post( 'perpage' ) ? $this->input->get_post( 'perpage' ) : $this->_product_sort->perpage;
 
-		//	Translate into useable values, also catch out people fiddling with the URL
-		$_table_prefix = $this->shop_product_model->get_property_table_prefix();
-
+		//	Sanitise/translate
 		switch ( $this->_product_sort->sort ) :
 
-			case 'price_low_high' :	$this->_product_sort->sort_on = $_table_prefix . '.XXX';		break;
-			case 'price_low_high' :	$this->_product_sort->sort_on = $_table_prefix . '.XXX';		break;
-			case 'a-z' :			$this->_product_sort->sort_on = $_table_prefix . '.label';		break;
+			case 'price_low_high' :	$this->_product_sort->sort_on = $this->shop_product_model->get_property_table_prefix() . '.XXX';		break;
+			case 'price_low_high' :	$this->_product_sort->sort_on = $this->shop_product_model->get_property_table_prefix() . '.XXX';		break;
+			case 'a-z' :			$this->_product_sort->sort_on = $this->shop_product_model->get_property_table_prefix() . '.label';		break;
 			case 'recent' :
-			default :				$this->_product_sort->sort_on = $_table_prefix . '.created';	break;
+			default :				$this->_product_sort->sort_on =  $this->shop_product_model->get_property_table_prefix() . '.created';	break;
 
 		endswitch;
 
-		switch ( $this->_product_sort->perpage ) :
-
-			case '10' :		$this->_product_sort->perpage = 10;		break;
-			case '50' :		$this->_product_sort->perpage = 50;		break;
-			case '100' :	$this->_product_sort->perpage = 100;	break;
-			case '25' :
-			default :		$this->_product_sort->perpage = 25;		break;
-
-		endswitch;
-
-		//	Pass to view
+		//	Pass to views
 		$this->data['product_sort'] = $this->_product_sort;
 
 		// --------------------------------------------------------------------------
 
-		//	Product pagination
-		//	TODO
+		//	Product Pagination
+		//	==================
 
-		$this->_product_pagination			= new stdClasS();
-		$this->_product_pagination->page	= (int) $this->input->get_post( 'page' );
-		$this->_product_pagination->total	= NULL;
+		//	Defaults
+		$this->_product_pagination				= new stdClasS();
+		$this->_product_pagination->page		= 0;
+		$this->_product_pagination->rsegment	= 2;
+		$this->_product_pagination->total		= 0;
+		$this->_product_pagination->per_page	= app_setting( 'default_product_per_page','shop' ) ? app_setting( 'default_product_per_page','shop' ) : 25;
+
+		//	Actual Values
+		$this->_product_pagination->per_page	= $this->input->get_post( 'per_page' ) ? $this->input->get_post( 'per_page' ) : $this->_product_pagination->per_page;
+
+		//	Sanitise
+		switch ( $this->_product_pagination->per_page ) :
+
+			case '10' :		$this->_product_pagination->per_page = 10;	break;
+			case '50' :		$this->_product_pagination->per_page = 50;	break;
+			case '100' :	$this->_product_pagination->per_page = 100;	break;
+			case '25' :
+			default :		$this->_product_pagination->per_page = 25;	break;
+
+		endswitch;
+
+		//	Pass to views
+		$this->data['product_pagination'] = $this->_product_pagination;
 	}
 
 
@@ -107,15 +116,34 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		//	Products
-		//	========
+		//	Configure Conditionals and Sorting
+		//	==================================
 
-		//	Set up the data array, we'll use this to constrain products according to the filters
 		$_data			= array();
 		$_data['where']	= array();
 		$_data['sort']	= $this->_product_sort->sort_on;
 
-		$this->data['products'] = $this->shop_product_model->get_all( $this->_product_pagination->page, $this->_product_sort->perpage, $_data );
+		// --------------------------------------------------------------------------
+
+		//	Pagination
+		//	==========
+
+		/**
+		 * Set the page number, done per method as the rsegment to use changes place,
+		 * like a ninja.
+		 */
+
+		$this->_product_pagination->rsegment	= 2;
+		$this->_product_pagination->page		= (int) $this->uri->rsegment( $this->_product_pagination->rsegment );
+
+		$this->_configure_pagination( $this->shop_product_model->count_all( $_data ) );
+
+		// --------------------------------------------------------------------------
+
+		//	Products
+		//	========
+
+		$this->data['products'] = $this->shop_product_model->get_all( $this->_product_pagination->page, $this->_product_pagination->per_page, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -135,7 +163,11 @@ class NAILS_Shop extends NAILS_Shop_Controller
 	 */
 	public function brand()
 	{
+		//	Strip out the store's URL, leave just the brand's slug
 		$_slug = preg_replace( '#' . app_setting( 'url', 'shop' ) . 'brand/?#', '', uri_string() );
+
+		//	Strip out the pagination segment, if present
+		$_slug = preg_replace( '#\/\d+$#', '', $_slug );
 
 		if ( $_slug ) :
 
@@ -170,6 +202,13 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	==========
 
 		$this->data['page']->title = $this->_shop_name . ': Brands';
+
+		// --------------------------------------------------------------------------
+
+		//	Pagination
+		//	==========
+
+		$this->load->library( 'pagination' );
 
 		// --------------------------------------------------------------------------
 
@@ -231,15 +270,36 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		//	Brand's Products
-		//	================
+		//	Configure Conditionals and Sorting
+		//	==================================
 
-		//	Set up the data array, we'll use this to constrain products according to the filters
 		$_data			= array();
 		$_data['where']	= array();
 		$_data['sort']	= $this->_product_sort->sort_on;
 
-		$this->data['products'] = $this->shop_product_model->get_for_brand( $this->data['brand']->id, $this->_product_pagination->page, $this->_product_sort->perpage, $_data );
+		// --------------------------------------------------------------------------
+
+		//	Pagination
+		//	==========
+
+		/**
+		 * Set the page number, done per method as the rsegment to use changes place,
+		 * like a ninja. Additionally, We need the segment after the category's slug,
+		 * the additional 3 takes into consideration segments 1 & 2 (i.e shop/category).
+		 */
+
+		$this->_product_pagination->rsegment	= count( explode( '/', $this->data['brand']->slug ) ) + 3;
+		$this->_product_pagination->page		= (int) $this->uri->rsegment( $this->_product_pagination->rsegment );
+		$this->_product_pagination->total		= $this->shop_product_model->count_for_brand( $this->data['brand']->id, $_data );
+
+		$this->_configure_pagination( $this->_product_pagination->total, 'brand/' . $this->data['brand']->slug );
+
+		// --------------------------------------------------------------------------
+
+		//	Products
+		//	========
+
+		$this->data['products'] = $this->shop_product_model->get_for_brand( $this->data['brand']->id, $this->_product_pagination->page, $this->_product_pagination->per_page, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -259,7 +319,11 @@ class NAILS_Shop extends NAILS_Shop_Controller
 	 */
 	public function category()
 	{
+		//	Strip out the store's URL, leave just the category's slug
 		$_slug = preg_replace( '#' . app_setting( 'url', 'shop' ) . 'category/?#', '', uri_string() );
+
+		//	Strip out the pagination segment, if present
+		$_slug = preg_replace( '#\/\d+$#', '', $_slug );
 
 		if ( $_slug ) :
 
@@ -294,6 +358,13 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	==========
 
 		$this->data['page']->title = $this->_shop_name . ': Categories';
+
+		// --------------------------------------------------------------------------
+
+		//	Pagination
+		//	==========
+
+		$this->load->library( 'pagination' );
 
 		// --------------------------------------------------------------------------
 
@@ -353,15 +424,36 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		//	Category's Products
-		//	===================
+		//	Configure Conditionals and Sorting
+		//	==================================
 
-		//	Set up the data array, we'll use this to constrain products according to the filters
 		$_data			= array();
 		$_data['where']	= array();
 		$_data['sort']	= $this->_product_sort->sort_on;
 
-		$this->data['products'] = $this->shop_product_model->get_for_category( $this->data['category']->id, $this->_product_pagination->page, $this->_product_sort->perpage, $_data );
+		// --------------------------------------------------------------------------
+
+		//	Pagination
+		//	==========
+
+		/**
+		 * Set the page number, done per method as the rsegment to use changes place,
+		 * like a ninja. Additionally, We need the segment after the category's slug,
+		 * the additional 3 takes into consideration segments 1 & 2 (i.e shop/category).
+		 */
+
+		$this->_product_pagination->rsegment	= count( explode( '/', $this->data['category']->slug ) ) + 3;
+		$this->_product_pagination->page		= (int) $this->uri->rsegment( $this->_product_pagination->rsegment );
+		$this->_product_pagination->total		= $this->shop_product_model->count_for_category( $this->data['category']->id, $_data );
+
+		$this->_configure_pagination( $this->_product_pagination->total, 'category/' . $this->data['category']->slug );
+
+		// --------------------------------------------------------------------------
+
+		//	Products
+		//	========
+
+		$this->data['products'] = $this->shop_product_model->get_for_category( $this->data['category']->id, $this->_product_pagination->page, $this->_product_pagination->per_page, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -381,7 +473,11 @@ class NAILS_Shop extends NAILS_Shop_Controller
 	 */
 	public function collection()
 	{
-		$_slug = preg_replace( '#' . app_setting( 'url', 'shop' ) . 'collection/?#', '', uri_string() );
+		//	Strip out the store's URL, leave just the colelction's slug
+		$_slug = preg_replace( '#' . app_setting( 'url', 'shop' ) . 'colelction/?#', '', uri_string() );
+
+		//	Strip out the pagination segment, if present
+		$_slug = preg_replace( '#\/\d+$#', '', $_slug );
 
 		if ( $_slug ) :
 
@@ -416,6 +512,13 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	==========
 
 		$this->data['page']->title = $this->_shop_name . ': Collections';
+
+		// --------------------------------------------------------------------------
+
+		//	Pagination
+		//	==========
+
+		$this->load->library( 'pagination' );
 
 		// --------------------------------------------------------------------------
 
@@ -477,15 +580,36 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		//	Collection's Products
-		//	=====================
+		//	Configure Conditionals and Sorting
+		//	==================================
 
-		//	Set up the data array, we'll use this to constrain products according to the filters
 		$_data			= array();
 		$_data['where']	= array();
 		$_data['sort']	= $this->_product_sort->sort_on;
 
-		$this->data['products'] = $this->shop_product_model->get_for_collection( $this->data['collection']->id, $this->_product_pagination->page, $this->_product_sort->perpage, $_data );
+		// --------------------------------------------------------------------------
+
+		//	Pagination
+		//	==========
+
+		/**
+		 * Set the page number, done per method as the rsegment to use changes place,
+		 * like a ninja. Additionally, We need the segment after the collection's slug,
+		 * the additional 3 takes into consideration segments 1 & 2 (i.e shop/collection).
+		 */
+
+		$this->_product_pagination->rsegment	= count( explode( '/', $this->data['collection']->slug ) ) + 3;
+		$this->_product_pagination->page		= (int) $this->uri->rsegment( $this->_product_pagination->rsegment );
+		$this->_product_pagination->total		= $this->shop_product_model->count_for_collection( $this->data['collection']->id, $_data );
+
+		$this->_configure_pagination( $this->_product_pagination->total, 'collection/' . $this->data['collection']->slug );
+
+		// --------------------------------------------------------------------------
+
+		//	Products
+		//	========
+
+		$this->data['products'] = $this->shop_product_model->get_for_collection( $this->data['collection']->id, $this->_product_pagination->page, $this->_product_pagination->per_page, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -505,6 +629,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 	 */
 	protected function product()
 	{
+		//	Strip out the store's URL, leave just the product's slug
 		$_slug = preg_replace( '#' . app_setting( 'url', 'shop' ) . 'product/?#', '', uri_string() );
 
 		if ( $_slug ) :
@@ -581,7 +706,11 @@ class NAILS_Shop extends NAILS_Shop_Controller
 	 */
 	public function range()
 	{
+		//	Strip out the store's URL, leave just the range's slug
 		$_slug = preg_replace( '#' . app_setting( 'url', 'shop' ) . 'range/?#', '', uri_string() );
+
+		//	Strip out the pagination segment, if present
+		$_slug = preg_replace( '#\/\d+$#', '', $_slug );
 
 		if ( $_slug ) :
 
@@ -616,6 +745,13 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	==========
 
 		$this->data['page']->title = $this->_shop_name . ': Ranges';
+
+		// --------------------------------------------------------------------------
+
+		//	Pagination
+		//	==========
+
+		$this->load->library( 'pagination' );
 
 		// --------------------------------------------------------------------------
 
@@ -677,15 +813,36 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		//	Range's Products
-		//	================
+		//	Configure Conditionals and Sorting
+		//	==================================
 
-		//	Set up the data array, we'll use this to constrain products according to the filters
 		$_data			= array();
 		$_data['where']	= array();
 		$_data['sort']	= $this->_product_sort->sort_on;
 
-		$this->data['products'] = $this->shop_product_model->get_for_range( $this->data['range']->id, $this->_product_pagination->page, $this->_product_sort->perpage, $_data );
+		// --------------------------------------------------------------------------
+
+		//	Pagination
+		//	==========
+
+		/**
+		 * Set the page number, done per method as the rsegment to use changes place,
+		 * like a ninja. Additionally, We need the segment after the range's slug,
+		 * the additional 3 takes into consideration segments 1 & 2 (i.e shop/range).
+		 */
+
+		$this->_product_pagination->rsegment	= count( explode( '/', $this->data['range']->slug ) ) + 3;
+		$this->_product_pagination->page		= (int) $this->uri->rsegment( $this->_product_pagination->rsegment );
+		$this->_product_pagination->total		= $this->shop_product_model->count_for_range( $this->data['range']->id, $_data );
+
+		$this->_configure_pagination( $this->_product_pagination->total, 'range/' . $this->data['range']->slug );
+
+		// --------------------------------------------------------------------------
+
+		//	Products
+		//	========
+
+		$this->data['products'] = $this->shop_product_model->get_for_range( $this->data['range']->id, $this->_product_pagination->page, $this->_product_pagination->per_page, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -705,7 +862,11 @@ class NAILS_Shop extends NAILS_Shop_Controller
 	 */
 	public function sale()
 	{
+		//	Strip out the store's URL, leave just the sale's slug
 		$_slug = preg_replace( '#' . app_setting( 'url', 'shop' ) . 'sale/?#', '', uri_string() );
+
+		//	Strip out the pagination segment, if present
+		$_slug = preg_replace( '#\/\d+$#', '', $_slug );
 
 		if ( $_slug ) :
 
@@ -740,6 +901,13 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	==========
 
 		$this->data['page']->title = $this->_shop_name . ': Sales';
+
+		// --------------------------------------------------------------------------
+
+		//	Pagination
+		//	==========
+
+		$this->load->library( 'pagination' );
 
 		// --------------------------------------------------------------------------
 
@@ -801,15 +969,36 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		//	Sale's Products
-		//	===============
+		//	Configure Conditionals and Sorting
+		//	==================================
 
-		//	Set up the data array, we'll use this to constrain products according to the filters
 		$_data			= array();
 		$_data['where']	= array();
 		$_data['sort']	= $this->_product_sort->sort_on;
 
-		$this->data['products'] = $this->shop_product_model->get_for_sale( $this->data['sale']->id, $this->_product_pagination->page, $this->_product_sort->perpage, $_data );
+		// --------------------------------------------------------------------------
+
+		//	Pagination
+		//	==========
+
+		/**
+		 * Set the page number, done per method as the rsegment to use changes place,
+		 * like a ninja. Additionally, We need the segment after the sale's slug,
+		 * the additional 3 takes into consideration segments 1 & 2 (i.e shop/sale).
+		 */
+
+		$this->_product_pagination->rsegment	= count( explode( '/', $this->data['sale']->slug ) ) + 3;
+		$this->_product_pagination->page		= (int) $this->uri->rsegment( $this->_product_pagination->rsegment );
+		$this->_product_pagination->total		= $this->shop_product_model->count_for_sale( $this->data['sale']->id, $_data );
+
+		$this->_configure_pagination( $this->_product_pagination->total, 'sale/' . $this->data['sale']->slug );
+
+		// --------------------------------------------------------------------------
+
+		//	Products
+		//	========
+
+		$this->data['products'] = $this->shop_product_model->get_for_sale( $this->data['sale']->id, $this->_product_pagination->page, $this->_product_pagination->per_page, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -828,7 +1017,11 @@ class NAILS_Shop extends NAILS_Shop_Controller
 	 */
 	public function tag()
 	{
+		//	Strip out the store's URL, leave just the tag's slug
 		$_slug = preg_replace( '#' . app_setting( 'url', 'shop' ) . 'tag/?#', '', uri_string() );
+
+		//	Strip out the pagination segment, if present
+		$_slug = preg_replace( '#\/\d+$#', '', $_slug );
 
 		if ( $_slug ) :
 
@@ -861,6 +1054,13 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	==========
 
 		$this->data['page']->title = $this->_shop_name . ': Tags';
+
+		// --------------------------------------------------------------------------
+
+		//	Pagination
+		//	==========
+
+		$this->load->library( 'pagination' );
 
 		// --------------------------------------------------------------------------
 
@@ -922,15 +1122,36 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		//	Tag's Products
-		//	==============
+		//	Configure Conditionals and Sorting
+		//	==================================
 
-		//	Set up the data array, we'll use this to constrain products according to the filters
 		$_data			= array();
 		$_data['where']	= array();
 		$_data['sort']	= $this->_product_sort->sort_on;
 
-		$this->data['products'] = $this->shop_product_model->get_for_tag( $this->data['tag']->id, $this->_product_pagination->page, $this->_product_sort->perpage, $_data );
+		// --------------------------------------------------------------------------
+
+		//	Pagination
+		//	==========
+
+		/**
+		 * Set the page number, done per method as the rsegment to use changes place,
+		 * like a ninja. Additionally, We need the segment after the tag's slug,
+		 * the additional 3 takes into consideration segments 1 & 2 (i.e shop/tag).
+		 */
+
+		$this->_product_pagination->rsegment	= count( explode( '/', $this->data['tag']->slug ) ) + 3;
+		$this->_product_pagination->page		= (int) $this->uri->rsegment( $this->_product_pagination->rsegment );
+		$this->_product_pagination->total		= $this->shop_product_model->count_for_tag( $this->data['tag']->id, $_data );
+
+		$this->_configure_pagination( $this->_product_pagination->total, 'tag/' . $this->data['tag']->slug );
+
+		// --------------------------------------------------------------------------
+
+		//	Products
+		//	========
+
+		$this->data['products'] = $this->shop_product_model->get_for_tag( $this->data['tag']->id, $this->_product_pagination->page, $this->_product_pagination->per_page, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -945,13 +1166,88 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 
 	/**
+	 * Common pagination configurations
+	 * @param  integer $total_rows The total number of rows to paginate for
+	 * @param  string  $base_url   Any additional part of the URL to add
+	 * @return void
+	 */
+	protected function _configure_pagination( $total_rows = 0, $base_url = '' )
+	{
+		$this->load->library( 'pagination' );
+
+		$_config = array();
+
+		if ( app_setting( 'url', 'shop' ) ) :
+
+			$_config['base_url'] = app_setting( 'url', 'shop' ) . $base_url;
+
+		else :
+
+			$_config['base_url'] = 'shop/' . $base_url;
+
+		endif;
+
+		$_config['base_url']			= site_url( $_config['base_url'] );
+		$_config['total_rows']			= $total_rows;
+		$_config['per_page']			= $this->_product_pagination->per_page;
+		$_config['use_page_numbers']	= TRUE;
+		$_config['use_rsegment']		= TRUE;
+		$_config['uri_segment']			= $this->_product_pagination->rsegment;
+
+		// --------------------------------------------------------------------------
+
+		//	Bootstrap-ify
+		$_config['full_tag_open'] = '<div class="text-center"><ul class="pagination">';
+		$_config['full_tag_close'] = '</ul></div><!--pagination-->';
+
+		$_config['first_link'] = '&laquo; First';
+		$_config['first_tag_open'] = '<li class="prev page">';
+		$_config['first_tag_close'] = '</li>';
+
+		$_config['last_link'] = 'Last &raquo;';
+		$_config['last_tag_open'] = '<li class="next page">';
+		$_config['last_tag_close'] = '</li>';
+
+		$_config['next_link'] = 'Next &rarr;';
+		$_config['next_tag_open'] = '<li class="next page">';
+		$_config['next_tag_close'] = '</li>';
+
+		$_config['prev_link'] = '&larr; Previous';
+		$_config['prev_tag_open'] = '<li class="prev page">';
+		$_config['prev_tag_close'] = '</li>';
+
+		$_config['cur_tag_open'] = '<li class="active"><a href="">';
+		$_config['cur_tag_close'] = '</a></li>';
+
+		$_config['num_tag_open'] = '<li class="page">';
+		$_config['num_tag_close'] = '</li>';
+
+		// --------------------------------------------------------------------------
+
+		$this->pagination->initialize( $_config );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
 	 * Manually remap the URL as CI's router has some issues resolving the index()
 	 * route, especially when using a non-standard shop base URL
 	 * @return void
 	 */
 	public function _remap()
 	{
-		$_method = $this->uri->rsegment( 2 ) ? $this->uri->rsegment( 2 ) : 'index';
+		if ( is_numeric( $this->uri->rsegment( 2 ) ) ) :
+
+			//	Paginating the front page
+			$_method = 'index';
+
+		else :
+
+			$_method = $this->uri->rsegment( 2 ) ? $this->uri->rsegment( 2 ) : 'index';
+
+		endif;
 
 		// --------------------------------------------------------------------------
 
