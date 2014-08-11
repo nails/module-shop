@@ -205,22 +205,6 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		//	Pagination
-		//	==========
-
-		$this->load->library( 'pagination' );
-
-		// --------------------------------------------------------------------------
-
-		//	Categories
-		//	==========
-
-		$_data = array( 'include_count' => TRUE );
-		$this->data['categories']			= $this->shop_category_model->get_all( NULL, NULL, $_data );
-		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested( NULL, $_data );
-
-		// --------------------------------------------------------------------------
-
 		//	Brands
 		//	======
 
@@ -258,15 +242,6 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	==========
 
 		$this->data['page']->title = $this->_shop_name . ': Brand: "' . $this->data['brand']->label . '"';
-
-		// --------------------------------------------------------------------------
-
-		//	Categories
-		//	==========
-
-		$_data = array( 'include_count' => TRUE );
-		$this->data['categories']			= $this->shop_category_model->get_all( NULL, NULL, $_data );
-		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested( NULL, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -474,7 +449,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 	public function collection()
 	{
 		//	Strip out the store's URL, leave just the colelction's slug
-		$_slug = preg_replace( '#' . $this->_shop_url . 'colelction/?#', '', uri_string() );
+		$_slug = preg_replace( '#' . $this->_shop_url . 'collection/?#', '', uri_string() );
 
 		//	Strip out the pagination segment, if present
 		$_slug = preg_replace( '#\/\d+$#', '', $_slug );
@@ -515,22 +490,6 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		//	Pagination
-		//	==========
-
-		$this->load->library( 'pagination' );
-
-		// --------------------------------------------------------------------------
-
-		//	Categories
-		//	==========
-
-		$_data = array( 'include_count' => TRUE );
-		$this->data['categories']			= $this->shop_category_model->get_all( NULL, NULL, $_data );
-		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested( NULL, $_data );
-
-		// --------------------------------------------------------------------------
-
 		//	Collections
 		//	===========
 
@@ -568,15 +527,6 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	==========
 
 		$this->data['page']->title = $this->_shop_name . ': Collection: "' . $this->data['collection']->label . '"';
-
-		// --------------------------------------------------------------------------
-
-		//	Categories
-		//	==========
-
-		$_data = array( 'include_count' => TRUE );
-		$this->data['categories']			= $this->shop_category_model->get_all( NULL, NULL, $_data );
-		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested( NULL, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -663,15 +613,6 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		//	Categories
-		//	==========
-
-		$_data = array( 'include_count' => TRUE );
-		$this->data['categories']			= $this->shop_category_model->get_all( NULL, NULL, $_data );
-		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested( NULL, $_data );
-
-		// --------------------------------------------------------------------------
-
 		//	Add as a recently viewed product for this user
 		$this->shop_product_model->add_as_recently_viewed( $this->data['product']->id );
 
@@ -752,22 +693,6 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		//	Pagination
-		//	==========
-
-		$this->load->library( 'pagination' );
-
-		// --------------------------------------------------------------------------
-
-		//	Categories
-		//	==========
-
-		$_data = array( 'include_count' => TRUE );
-		$this->data['categories']			= $this->shop_category_model->get_all( NULL, NULL, $_data );
-		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested( NULL, $_data );
-
-		// --------------------------------------------------------------------------
-
 		//	Ranges
 		//	======
 
@@ -805,15 +730,6 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	==========
 
 		$this->data['page']->title = $this->_shop_name . ': Range: "' . $this->data['range']->label . '"';
-
-		// --------------------------------------------------------------------------
-
-		//	Categories
-		//	==========
-
-		$_data = array( 'include_count' => TRUE );
-		$this->data['categories']			= $this->shop_category_model->get_all( NULL, NULL, $_data );
-		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested( NULL, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -908,22 +824,6 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		//	Pagination
-		//	==========
-
-		$this->load->library( 'pagination' );
-
-		// --------------------------------------------------------------------------
-
-		//	Categories
-		//	==========
-
-		$_data = array( 'include_count' => TRUE );
-		$this->data['categories']			= $this->shop_category_model->get_all( NULL, NULL, $_data );
-		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested( NULL, $_data );
-
-		// --------------------------------------------------------------------------
-
 		//	Sales
 		//	=====
 
@@ -961,15 +861,6 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	==========
 
 		$this->data['page']->title = $this->_shop_name . ': Sale: "' . $this->data['sale']->label . '"';
-
-		// --------------------------------------------------------------------------
-
-		//	Categories
-		//	==========
-
-		$_data = array( 'include_count' => TRUE );
-		$this->data['categories']			= $this->shop_category_model->get_all( NULL, NULL, $_data );
-		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested( NULL, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -1061,22 +952,6 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		//	Pagination
-		//	==========
-
-		$this->load->library( 'pagination' );
-
-		// --------------------------------------------------------------------------
-
-		//	Categories
-		//	==========
-
-		$_data = array( 'include_count' => TRUE );
-		$this->data['categories']			= $this->shop_category_model->get_all( NULL, NULL, $_data );
-		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested( NULL, $_data );
-
-		// --------------------------------------------------------------------------
-
 		//	Tags
 		//	====
 
@@ -1114,15 +989,6 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	==========
 
 		$this->data['page']->title = $this->_shop_name . ': Tag: "' . $this->data['tag']->label . '"';
-
-		// --------------------------------------------------------------------------
-
-		//	Categories
-		//	==========
-
-		$_data = array( 'include_count' => TRUE );
-		$this->data['categories']			= $this->shop_category_model->get_all( NULL, NULL, $_data );
-		$this->data['categories_nested']	= $this->shop_category_model->get_all_nested( NULL, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -1197,6 +1063,14 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		$_config['use_page_numbers']	= TRUE;
 		$_config['use_rsegment']		= TRUE;
 		$_config['uri_segment']			= $this->_product_pagination->rsegment;
+
+		// --------------------------------------------------------------------------
+
+		//	If there's any get data then bind that tot eh end
+		$_get = (array) $this->input->get();
+		$_get = array_filter( $_get );
+		$_get = http_build_query( $_get );
+		$_config['suffix'] = $_get ? '?' . $_get : '';
 
 		// --------------------------------------------------------------------------
 

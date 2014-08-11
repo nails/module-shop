@@ -1871,7 +1871,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 	public function count_for_collection( $collection_id, $data = array(), $include_deleted = FALSE )
 	{
 		$data['collection_id'] = $collection_id;
-		return $this->get_all( $data, $include_deleted, 'COUNT_FOR_COLLECTION' );
+		return $this->count_all( $data, $include_deleted, 'COUNT_FOR_COLLECTION' );
 	}
 
 
@@ -1907,7 +1907,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 	public function count_for_range( $range_id, $data = array(), $include_deleted = FALSE )
 	{
 		$data['range_id'] = $range_id;
-		return $this->get_all( $data, $include_deleted, 'COUNT_FOR_RANGE' );
+		return $this->count_all( $data, $include_deleted, 'COUNT_FOR_RANGE' );
 	}
 
 
@@ -1979,7 +1979,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 	public function count_for_tag( $tag_id, $data = array(), $include_deleted = FALSE )
 	{
 		$data['tag_id'] = $tag_id;
-		return $this->get_all( $data, $include_deleted, 'COUNT_FOR_TAG' );
+		return $this->count_all( $data, $include_deleted, 'COUNT_FOR_TAG' );
 	}
 
 
