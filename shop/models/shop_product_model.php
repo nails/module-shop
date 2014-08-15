@@ -1087,7 +1087,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 			//	==========
 			$this->db->select( 'pv.*' );
 			$this->db->where( 'pv.product_id', $product->id );
-			if ( ! empty( $data['include_deleted_variants'] ) ) :
+			if ( empty( $data['include_deleted_variants'] ) ) :
 
 				$this->db->where( 'pv.is_deleted', FALSE );
 

@@ -100,7 +100,10 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		//	First loop through all the items and fetch product information
 		$this->load->model( 'shop/shop_product_model' );
 
-		foreach ( $_basket->items AS $item ) :
+		//	This variable will hold any keys which need to be unset
+		$_unset = array();
+
+		foreach ( $_basket->items AS $basket_key => $item ) :
 
 			$item->product = $this->shop_product_model->get_by_id( $item->product_id );
 
@@ -120,18 +123,42 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 				if ( empty( $item->variant ) ) :
 
-					//	TODO: handle bad variant ID
+					//	Bad variant ID, possible item has been deleted so don't get too angry
+					$_unset[] = $basket_key;
 
 				endif;
 
 			else :
 
-				//	TODO: Handle bad product ID
+				//	Bad product ID, again, possible product was deleted or deactivated - KCCO
+				$_unset[] = $basket_key;
 
 			endif;
 
-
 		endforeach;
+
+		//	Removing anything?
+		if ( ! empty( $_unset ) ) :
+
+			foreach( $_unset AS $key ) :
+
+				//	Remove from the local basket object
+				unset( $_basket->items[$key] );
+
+				//	Also remove from the main basket object
+				unset( $this->_basket->items[$key] );
+
+			endforeach;
+
+			$_basket->items			= array_values( $_basket->items );
+			$this->_basket->items	= array_values( $this->_basket->items );
+			$_basket->items_removed	= count( $_unset );
+
+			// --------------------------------------------------------------------------
+
+			$this->save();
+
+		endif;
 
 		// --------------------------------------------------------------------------
 
@@ -1389,7 +1416,11 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 */
 	protected function _save_session()
 	{
-		$this->session->set_userdata( $this->_sess_var, $this->_save_object() );
+		if ( ! headers_sent() ) :
+
+			$this->session->set_userdata( $this->_sess_var, $this->_save_object() );
+
+		endif;
 	}
 
 
