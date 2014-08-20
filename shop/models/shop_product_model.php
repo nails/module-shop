@@ -2056,22 +2056,46 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 */
 	public function generate_seo_content( &$product )
 	{
-		//	Autogenerate some SEO content if it's not been set
+		/**
+		 * Autogenerate some SEO content if it's not been set
+		 * Buy {{PRODUCT}} at {{STORE}} ({{CATEGORIES}}) - {{DESCRIPTION,FIRST SENTENCE}}
+		 **/
+
 		if ( empty( $product->seo_description ) ) :
 
+			//	Base string
 			$product->seo_description = 'Buy ' . $product->label . ' at ' . APP_NAME;
 
+			//	Add up to 3 categories
 			if ( ! empty( $product->categories ) ) :
 
-				$_categories_arr = array();
+				$_categories_arr	= array();
+				$_counter			= 0;
+
 				foreach( $product->categories AS $category ) :
 
 					$_categories_arr[] = $category->label;
 
+					$_counter++;
+
+					if ( $_counter == 3 ) :
+
+						break;
+
+					endif;
+
 				endforeach;
+
 				$product->seo_description .= ' (' . implode( ', ', $_categories_arr ) . ')';
 
 			endif;
+
+			//	Add the first sentence of the description
+			$_description = strip_tags( $product->description );
+			$product->seo_description .= ' - ' . substr( $_description, 0, strpos( $_description, '.' ) + 1 );
+
+			//	Encode entities
+			$product->seo_description = htmlentities( $product->seo_description );
 
 		endif;
 
@@ -2094,6 +2118,9 @@ class NAILS_Shop_product_model extends NAILS_Model
 			$_description = array_slice( $_description, 0, 10 );
 
 			$product->seo_keywords = implode( ',', $_description );
+
+			//	Encode entities
+			$product->seo_keywords = htmlentities( $product->seo_keywords );
 
 		endif;
 	}
