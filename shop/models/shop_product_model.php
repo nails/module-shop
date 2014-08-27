@@ -1526,6 +1526,90 @@ class NAILS_Shop_product_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Fetches an item by it's ID; overriding to specify the `include_inactive` flag by default
+	 * @param  int   $id   The ID of the product to fetch
+	 * @param  array $data An array of mutation options
+	 * @return mixed       FALSE on failre, stdClass on success
+	 */
+	public function get_by_id( $id, $data = array() )
+	{
+		if ( ! isset( $data['include_inactive'] ) ) :
+
+			$data['include_inactive'] = TRUE;
+
+		endif;
+
+		return parent::get_by_id( $id, $data );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Fetches items by their IDs; overriding to specify the `include_inactive` flag by default
+	 * @param  array $ids  An array of product IDs to fetch
+	 * @param  array $data An array of mutation options
+	 * @return array
+	 */
+	public function get_by_ids( $ids, $data = array() )
+	{
+		if ( ! isset( $data['include_inactive'] ) ) :
+
+			$data['include_inactive'] = TRUE;
+
+		endif;
+
+		return parent::get_by_ids( $ids, $data );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Fetches an item by it's slug; overriding to specify the `include_inactive` flag by default
+	 * @param  string $slug The Slug of the product to fetch
+	 * @param  array  $data An array of mutation options
+	 * @return mixed        FALSE on failre, stdClass on success
+	 */
+	public function get_by_slug( $slug, $data = array() )
+	{
+		if ( ! isset( $data['include_inactive'] ) ) :
+
+			$data['include_inactive'] = TRUE;
+
+		endif;
+
+		return parent::get_by_slug( $slug, $data );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Fetches items by their slugs; overriding to specify the `include_inactive` flag by default
+	 * @param  array $ids  An array of product Slugs to fetch
+	 * @param  array $data An array of mutation options
+	 * @return array
+	 */
+	public function get_by_slugs( $slugs, $data = array() )
+	{
+		if ( ! isset( $data['include_inactive'] ) ) :
+
+			$data['include_inactive'] = TRUE;
+
+		endif;
+
+		return parent::get_by_slugs( $slugs, $data );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
 	public function get_by_variant_id( $variant_id )
 	{
 		$this->db->select( 'product_id' );
@@ -1601,8 +1685,8 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
-		//	Unless told otherwise, hide inactive items
-		if ( ! empty( $data['hide_inactive'] ) ) :
+		//	Unless told otherwise, only return active items
+		if ( empty( $data['include_inactive'] ) ) :
 
 			$this->db->where( $this->_table_prefix . '.is_active', TRUE );
 
