@@ -469,13 +469,13 @@ class NAILS_Shop_category_model extends NAILS_Model
 	 * @param  boolean $only_immediate Whether to recurscively fetch all descendants, or just the immediate descendants
 	 * @return array
 	 */
-	public function get_children( $category_id, $only_immediate = FALSE )
+	public function get_children( $category_id, $only_immediate = FALSE, $_data = array() )
 	{
 		$_children = $this->get_ids_of_children( $category_id, $only_immediate );
 
 		if ( ! empty( $_children ) ) :
 
-			return $this->get_by_ids( $_children );
+			return $this->get_by_ids( $_children, $_data );
 
 		endif;
 
@@ -506,13 +506,13 @@ class NAILS_Shop_category_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	public function get_siblings( $category_id )
+	public function get_siblings( $category_id, $_data = array() )
 	{
 		$_children = $this->get_ids_of_siblings( $category_id );
 
 		if ( ! empty( $_children ) ) :
 
-			return $this->get_by_ids( $_children );
+			return $this->get_by_ids( $_children, $_data );
 
 		endif;
 
@@ -537,6 +537,12 @@ class NAILS_Shop_category_model extends NAILS_Model
 		if ( empty( $data['where'] ) ) :
 
 			$data['where'][] = array( 'column' => 'parent_id', 'value' => NULL );
+
+		endif;
+
+		if ( ! isset( $data['include_count'] ) ) :
+
+			$data['include_count'] = TRUE;
 
 		endif;
 
@@ -623,6 +629,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 
 			endif;
 
+			//	TODO: Take into consideration inactive/deleted products
 			$this->db->select( '(SELECT COUNT(DISTINCT(product_id)) FROM ' . NAILS_DB_PREFIX .  'shop_product_category WHERE category_id = ' . $this->_table_prefix . '.id OR FIND_IN_SET ( category_id, ' . $this->_table_prefix . '.children_ids ) ) product_count' );
 
 		endif;

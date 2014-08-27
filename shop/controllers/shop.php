@@ -368,7 +368,8 @@ class NAILS_Shop extends NAILS_Shop_Controller
 	 */
 	protected function _category_single( $slug )
 	{
-		$this->data['category'] = $this->shop_category_model->get_by_slug( $slug );
+		$_data = array( 'include_count' => TRUE );
+		$this->data['category'] = $this->shop_category_model->get_by_slug( $slug, $_data );
 
 		if ( ! $this->data['category' ] ) :
 
@@ -388,14 +389,14 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Category's (immediate) decendants
 		//	=================================
 
-		$this->data['category']->children = $this->shop_category_model->get_children( $this->data['category']->id, TRUE );
+		$this->data['category']->children = $this->shop_category_model->get_children( $this->data['category']->id, TRUE, $_data );
 
 		// --------------------------------------------------------------------------
 
 		//	Category's siblings
 		//	=================================
 
-		$this->data['category_siblings'] = $this->shop_category_model->get_siblings( $this->data['category']->id );
+		$this->data['category_siblings'] = $this->shop_category_model->get_siblings( $this->data['category']->id, $_data );
 
 		// --------------------------------------------------------------------------
 
