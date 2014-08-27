@@ -38,6 +38,120 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 		endif;
 
+		// --------------------------------------------------------------------------
+
+		if ( $this->input->post() ) :
+
+			$this->load->library( 'form_validation' );
+
+			$this->form_validation->set_rules( 'delivery_address_line_1',	'', 'xss_clean|required' );
+			$this->form_validation->set_rules( 'delivery_address_line_2',	'', 'xss_clean' );
+			$this->form_validation->set_rules( 'delivery_address_town',		'', 'xss_clean|required' );
+			$this->form_validation->set_rules( 'delivery_address_state',	'', 'xss_clean' );
+			$this->form_validation->set_rules( 'delivery_address_postcode',	'', 'xss_clean|required' );
+			$this->form_validation->set_rules( 'delivery_address_country',	'', 'xss_clean|required' );
+
+			$this->form_validation->set_rules( 'first_name',				'', 'xss_clean|required' );
+			$this->form_validation->set_rules( 'last_name',					'', 'xss_clean|required' );
+			$this->form_validation->set_rules( 'email',						'', 'xss_clean|required' );
+			$this->form_validation->set_rules( 'telephone',					'', 'xss_clean' );
+
+			if ( ! $this->input->post( 'same_billing_address' ) ) :
+
+				$this->form_validation->set_rules( 'billing_address_line_1',	'', 'xss_clean|required' );
+				$this->form_validation->set_rules( 'billing_address_line_2',	'', 'xss_clean' );
+				$this->form_validation->set_rules( 'billing_address_town',		'', 'xss_clean|required' );
+				$this->form_validation->set_rules( 'billing_address_state',		'', 'xss_clean' );
+				$this->form_validation->set_rules( 'billing_address_postcode',	'', 'xss_clean|required' );
+				$this->form_validation->set_rules( 'billing_address_country',	'', 'xss_clean|required' );
+
+			else :
+
+				$this->form_validation->set_rules( 'billing_address_line_1',	'', 'xss_clean' );
+				$this->form_validation->set_rules( 'billing_address_line_2',	'', 'xss_clean' );
+				$this->form_validation->set_rules( 'billing_address_town',		'', 'xss_clean' );
+				$this->form_validation->set_rules( 'billing_address_state',		'', 'xss_clean' );
+				$this->form_validation->set_rules( 'billing_address_postcode',	'', 'xss_clean' );
+				$this->form_validation->set_rules( 'billing_address_country',	'', 'xss_clean' );
+
+			endif;
+
+			$this->form_validation->set_message( 'required', lang( 'fv_required' ) );
+
+			if ( $this->form_validation->run() ) :
+
+				//	Prepare data
+				$_data						= new stdClass();
+
+				//	Contact details
+				$_data->contact				= new stdClass();
+				$_data->contact->first_name	= $this->input->post( 'first_name' );
+				$_data->contact->last_name	= $this->input->post( 'last_name' );
+				$_data->contact->email		= $this->input->post( 'email' );
+				$_data->contact->telephone	= $this->input->post( 'telephone' );
+
+				//	Delivery Details
+				$_data->delivery			= new stdClass();
+				$_data->delivery->line_1	= $this->input->post( 'delivery_address_line_1' );
+				$_data->delivery->line_2	= $this->input->post( 'delivery_address_line_2' );
+				$_data->delivery->town		= $this->input->post( 'delivery_address_town' );
+				$_data->delivery->state		= $this->input->post( 'delivery_address_state' );
+				$_data->delivery->postcode	= $this->input->post( 'delivery_address_postcode' );
+				$_data->delivery->country	= $this->input->post( 'delivery_address_country' );
+
+				//	Billing details
+				if ( ! $this->input->post( 'same_billing_address' ) ) :
+
+					$_data->billing				= new stdClass();
+					$_data->billing->line_1		= $this->input->post( 'billing_address_line_1' );
+					$_data->billing->line_2		= $this->input->post( 'billing_address_line_2' );
+					$_data->billing->town		= $this->input->post( 'billing_address_town' );
+					$_data->billing->state		= $this->input->post( 'billing_address_state' );
+					$_data->billing->postcode	= $this->input->post( 'billing_address_postcode' );
+					$_data->billing->country	= $this->input->post( 'billing_address_country' );
+
+				else :
+
+					$_data->billing				= new stdClass();
+					$_data->billing->line_1		= $this->input->post( 'delivery_address_line_1' );
+					$_data->billing->line_2		= $this->input->post( 'delivery_address_line_2' );
+					$_data->billing->town		= $this->input->post( 'delivery_address_town' );
+					$_data->billing->state		= $this->input->post( 'delivery_address_state' );
+					$_data->billing->postcode	= $this->input->post( 'delivery_address_postcode' );
+					$_data->billing->country	= $this->input->post( 'delivery_address_country' );
+
+				endif;
+
+				//	And the basket
+				$_data->basket = $_basket;
+
+				//	Generate the order and proceed to payment
+				$_order = $this->shop_order_model->create( $_data, TRUE );
+
+				if ( $_order ) :
+
+					//	Get the code
+
+					//	Order created successfully proceed to payment
+					redirect( $this->_shop_url . 'checkout/payment/' . $_order->ref . '/' . $_order->code );
+
+				else :
+
+					$this->data['error'] = '<strong>Sorry,</strong> there was a problem processing your order. ' . $this->shop_order_model->last_error();
+
+				endif;
+
+			else :
+
+				$this->data['error'] = lang( 'fv_there_were_errors' );
+
+			endif;
+
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
 		$this->data['page']->title = $this->_shop_name . ': Checkout';
 
 		// --------------------------------------------------------------------------
@@ -45,380 +159,6 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 		$this->load->view( 'structure/header',							$this->data );
 		$this->load->view( $this->_skin->path . 'views/checkout/index',	$this->data );
 		$this->load->view( 'structure/footer',							$this->data );
-
-		return;
-		if ( ! $this->_can_checkout() ) :
-
-			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> you can\'t checkout right now: ' . $this->data['error'] );
-			redirect( $this->_shop_url . 'basket' );
-			return;
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		if ( $this->user_model->is_logged_in() || $this->input->get( 'guest' ) ) :
-
-			//	Continue, user is logged in or is checking out as a guest
-			if ( $this->input->get( 'guest' ) ) :
-
-				$this->data['guest'] = TRUE;
-
-			else :
-
-				$this->data['guest'] = FALSE;
-
-			endif;
-
-			// --------------------------------------------------------------------------
-
-			//	Check the order to see if we need to take shipping information
-			$this->data['requires_shipping'] = FALSE;
-			foreach ( $this->data['basket']->items AS $item ) :
-
-				if ( $item->type->requires_shipping ) :
-
-					$this->data['requires_shipping'] = TRUE;
-					break;
-
-				endif;
-
-			endforeach;
-
-			// --------------------------------------------------------------------------
-
-			//	If there's no shipping and only one payment gateway then skip this page
-			//	entirely - simples! Unless they are a guest, in which case we need to take
-			//	some personal details
-
-			if ( ! $this->data['guest'] && ! $this->data['requires_shipping'] && ( count( $this->data['payment_gateways'] ) == 1 || $this->data['basket']->totals->grand == 0 ) ) :
-
-				//	Save payment gateway info to the session
-				if ( $this->data['basket']->totals->grand != 0 ) :
-
-					$this->shop_basket_model->add_payment_gateway( $this->data['payment_gateways'][0]->id );
-
-				else :
-
-					$this->shop_basket_model->remove_payment_gateway();
-
-				endif;
-
-				//	... and redirect to confirm
-				$_uri  = $this->_shop_url . 'checkout/confirm';
-				$_uri .= $this->data['guest'] ? '?guest=true' : '';
-
-				redirect( $_uri );
-				return;
-
-			endif;
-
-			// --------------------------------------------------------------------------
-
-			//	If there's post data, then deal with that. If shipping is required then verify shipping info
-			//	If not then punt onto shop/checkout/confirm
-
-			if ( $this->input->post() ) :
-
-				//	Validate
-				$this->load->library( 'form_validation' );
-
-				if ( $this->data['guest'] ) :
-
-					$this->form_validation->set_rules( 'first_name',	'First Name',	'xss_clean|required' );
-					$this->form_validation->set_rules( 'last_name',		'Surname',		'xss_clean|required' );
-					$this->form_validation->set_rules( 'email',			'Email',		'xss_clean|required|valid_email' );
-
-				endif;
-
-				// --------------------------------------------------------------------------
-
-				if ( $this->data['requires_shipping'] ) :
-
-					$this->form_validation->set_rules( 'addressee',	'Addressee',	'xss_clean|required' );
-					$this->form_validation->set_rules( 'line_1',	'Line_1',		'xss_clean|required' );
-					$this->form_validation->set_rules( 'line_2',	'Line_2',		'xss_clean|required' );
-					$this->form_validation->set_rules( 'town',		'Town',			'xss_clean|required' );
-					$this->form_validation->set_rules( 'postcode',	'Postcode',		'xss_clean|required' );
-					$this->form_validation->set_rules( 'country',	'Country',		'xss_clean|required' );
-
-					//	If country is USA then us_state is required
-					if ( $this->input->post( 'country' ) == 'ID OF USA' ) :
-
-						$this->form_validation->set_rules( 'us_state',		'State',		'xss_clean|required' );
-
-					else :
-
-						$this->form_validation->set_rules( 'us_state',		'State',		'xss_clean' );
-
-					endif;
-
-					//	If country is AUSTRALIA then aus_state is required
-					if ( $this->input->post( 'country' ) == 'ID OF AUSTRALIA' ) :
-
-						$this->form_validation->set_rules( 'aus_state',		'State',		'xss_clean|required' );
-
-					else :
-
-						$this->form_validation->set_rules( 'aus_state',		'State',		'xss_clean' );
-
-					endif;
-
-				endif;
-
-				// --------------------------------------------------------------------------
-
-				//	Payment gateway
-				if ( $this->data['basket']->totals->grand > 0 ) :
-
-					$this->form_validation->set_rules( 'payment_gateway', 'Payment Gateway', 'xss_clean|required|is_natural' );
-
-				endif;
-
-				// --------------------------------------------------------------------------
-
-				//	Set messages
-				$this->form_validation->set_message( 'required',	lang( 'fv_required' ) );
-				$this->form_validation->set_message( 'is_natural',	lang( 'fv_required' ) );
-				$this->form_validation->set_message( 'valid_email',	lang( 'fv_valid_email' ) );
-
-				if ( $this->form_validation->run() ) :
-
-					//	Save personal info to session
-					if ( $this->data['guest'] ) :
-
-						$_details				= new stdClass();
-						$_details->first_name	= $this->input->post( 'first_name' );
-						$_details->last_name	= $this->input->post( 'last_name' );
-						$_details->email		= $this->input->post( 'email' );
-
-						$this->shop_basket_model->add_personal_details( $_details );
-
-					else :
-
-						//	In case it's already there for some reason
-						$this->shop_basket_model->remove_personal_details();
-
-					endif;
-
-					// --------------------------------------------------------------------------
-
-					//	Save shipping info to the session
-					if ( $this->data['requires_shipping'] ) :
-
-						$_details				= new stdClass();
-						$_details->addressee	= $this->input->post( 'addressee' );
-						$_details->line_1		= $this->input->post( 'line_1' );
-						$_details->line_2		= $this->input->post( 'line_2' );
-						$_details->town			= $this->input->post( 'town' );
-						$_details->postcode		= $this->input->post( 'postcode' );
-						$_details->country		= $this->input->post( 'country' );
-
-						if ( $this->input->post( 'country' ) == 'ID OF USA' ) :
-
-							$_details->state	= $this->input->post( 'us_state' );
-
-						elseif ( $this->input->post( 'country' ) == 'ID OF AUSTRALIA' ) :
-
-							$_details->state	= $this->input->post( 'aus_state' );
-
-						else :
-
-							$_details->state	= '';
-
-						endif;
-
-						$this->shop_basket_model->add_shipping_details( $_details );
-
-					else :
-
-						//	In case it's already there for some reason
-						$this->shop_basket_model->remove_shipping_details();
-
-					endif;
-
-					// --------------------------------------------------------------------------
-
-					//	Redirect to the appropriate payment gateway. If there's only one, then
-					//	bump straight along to that one
-
-					if ( $this->data['basket']->totals->grand > 0 && count( $this->data['payment_gateways'] ) == 1 ) :
-
-						//	Save payment gateway info to the session
-						$this->shop_basket_model->add_payment_gateway( $this->data['payment_gateways'][0]->id );
-
-						//	... and confirm
-						$_uri  = $this->_shop_url . 'checkout/confirm';
-						$_uri .= $this->data['guest'] ? '?guest=true' : '';
-
-						redirect( $_uri );
-
-					elseif ( $this->data['basket']->totals->grand > 0 && count( $this->data['payment_gateways'] ) >= 1 ) :
-
-						foreach ( $this->data['payment_gateways'] AS $pg ) :
-
-							if ( $pg->id == $this->input->post( 'payment_gateway' ) ) :
-
-								//	Save payment gateway info to the session
-								$this->shop_basket_model->add_payment_gateway( $pg->id );
-
-								//	... and confirm
-								$_uri  = $this->_shop_url . 'checkout/confirm';
-								$_uri .= $this->data['guest'] ? '?guest=true' : '';
-
-								redirect( $_uri );
-								break;
-
-							endif;
-
-						endforeach;
-
-					elseif ( $this->data['basket']->totals->grand == 0 ) :
-
-						//	Incase it's already there for some reason
-						$this->shop_basket_model->remove_payment_gateway();
-
-						// --------------------------------------------------------------------------
-
-						$_uri  = $this->_shop_url . 'checkout/confirm';
-						$_uri .= $this->data['guest'] ? '?guest=true' : '';
-
-						redirect( $_uri );
-
-					endif;
-
-					// --------------------------------------------------------------------------
-					here();
-					//	Something went wrong.
-					$this->data['error'] = '<strong>Sorry,</strong> we couldn\'t verify your payment option. Please try again.';
-
-				else :
-
-					$this->data['error'] = lang( 'fv_there_were_errors' );
-
-				endif;
-
-			endif;
-
-			// --------------------------------------------------------------------------
-
-			//	Set appropriate title
-			$_titles = array();
-
-			if ( $this->data['guest'] ) :
-
-				$_titles[] = 'Personal Details';
-
-			endif;
-
-			if ( $this->data['requires_shipping'] ) :
-
-				$_titles[] = 'Shipping Details';
-
-			endif;
-
-			if ( count( $this->data['payment_gateways'] ) > 1 ) :
-
-				$_titles[] = 'Payment Options';
-
-			endif;
-
-			$this->data['page']->title = 'Checkout &rsaquo; ' . str_lreplace( ', ', ' &amp; ', implode( ', ', $_titles ) );
-
-			// --------------------------------------------------------------------------
-
-			//	Load veiws
-			$this->load->view( 'structure/header',								$this->data );
-			$this->load->view( $this->_skin->path . 'views/checkout/checkout',	$this->data );
-			$this->load->view( 'structure/footer',								$this->data );
-
-		else :
-
-			$this->data['page']->title = 'Checkout &rsaquo; Please Sign In';
-
-			// --------------------------------------------------------------------------
-
-			$this->lang->load( 'auth/auth' );
-
-			// --------------------------------------------------------------------------
-
-			$this->load->view( 'structure/header',								$this->data );
-			$this->load->view( $this->_skin->path . 'views/checkout/signin',	$this->data );
-			$this->load->view( 'structure/footer',								$this->data );
-
-		endif;
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Handle the checkout process
-	 *
-	 * @access	public
-	 * @return	void
-	 *
-	 **/
-	public function confirm()
-	{
-		if ( ! $this->_can_checkout() ) :
-
-			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> you can\'t checkout right now: ' . $this->data['error'] );
-			redirect( $this->_shop_url . 'basket' );
-			return;
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		if ( $this->user_model->is_logged_in() || $this->input->get( 'guest' ) ) :
-
-			//	Continue, user is logged in or is checking out as a guest
-			if ( $this->input->get( 'guest' ) ) :
-
-				$this->data['guest'] = TRUE;
-
-			else :
-
-				$this->data['guest'] = FALSE;
-
-			endif;
-
-			// --------------------------------------------------------------------------
-
-			//	If there's no shipping required and there's only one payment gateway then
-			//	just create the order and punt the user to the payment gateway's processing
-			//	page.
-
-			if ( ! $this->data['basket']->requires_shipping && count( $this->data['payment_gateways'] ) == 1 ) :
-
-				$this->shop_basket_model->add_payment_gateway( $this->data['payment_gateways'][0]->id );
-
-				$_uri  = $this->_shop_url . 'checkout/payment';
-				$_uri .= $this->data['guest'] ? '?guest=true' : '';
-
-				redirect( $_uri );
-				return;
-
-			endif;
-
-			// --------------------------------------------------------------------------
-
-			$this->data['page']->title	= 'Checkout &rsaquo; Confirm Your Order';
-			$this->data['currencies']	= $this->shop_currency_model->get_all();
-
-			// --------------------------------------------------------------------------
-
-			$this->load->view( 'structure/header',								$this->data );
-			$this->load->view( $this->_skin->path . 'views/checkout/confirm',	$this->data );
-			$this->load->view( 'structure/footer',								$this->data );
-
-		else :
-
-			redirect( $this->_shop_url . 'checkout' );
-
-		endif;
 	}
 
 
@@ -431,170 +171,52 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	 */
 	public function payment()
 	{
-		if ( ! $this->_can_checkout() ) :
+		//	Verify there's an unpaid order
+		$this->data['order_ref']	= $this->uri->rsegment(3);
+		$this->data['order_code']	= $this->uri->rsegment(4);
+		$_gateway					= $this->uri->rsegment(5);
 
-			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> you can\'t checkout right now: ' . $this->data['error'] );
-			redirect( $this->_shop_url . 'basket' );
-			return;
+		$_order = $this->shop_order_model->get_by_ref( $this->data['order_ref'] );
+
+		if ( ! $_order || $_order->code != $this->data['order_code'] || $_order->status != 'UNPAID' ) :
+
+			show_404();
 
 		endif;
 
 		// --------------------------------------------------------------------------
 
-		if ( $this->user_model->is_logged_in() || $this->input->get( 'guest' ) ) :
+		$this->load->model( 'shop/shop_payment_gateway_model' );
+		$this->data['payment_gateways'] = $this->shop_payment_gateway_model->get_enabled();
 
-			//	Continue, user is logged in or is checking out as a guest
-			if ( $this->input->get( 'guest' ) ) :
+		if ( ! $_gateway && count( $this->data['payment_gateways'] ) == 1 ) :
 
-				$this->data['guest'] = TRUE;
+			$_gateway = $this->data['payment_gateways'][0];
+
+		endif;
+
+		if ( $_gateway ) :
+
+			//	Gateway selected, process
+			if ( $this->shop_payment_gateway_model->do_payment( $_order->id, $_gateway ) ) :
+
+				dump( 'Payment complete' );
 
 			else :
 
-				$this->data['guest'] = FALSE;
+				$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> something went wrong during checkout. ' . $this->shop_payment_gateway_model->last_error() );
+				dump($this->shop_payment_gateway_model->last_error());
+				dumpanddie($this->_shop_url . 'checkout' );
 
 			endif;
-
-			// --------------------------------------------------------------------------
-
-			//	Mute the logger (causes issues on non-production environments)
-			_LOG_MUTE_OUTPUT();
-
-			// --------------------------------------------------------------------------
-
-			//	Is the order a zero-value order? If so, just mark it as paid and send
-			//	to processing immediately
-
-			if ( $this->data['basket']->totals->grand == 0 ) :
-
-				//	Create order, then set as paid and redirect to processing page
-				$_order = $this->shop_order_model->create( $this->data['basket'], TRUE );
-
-				if ( ! $_order ) :
-
-					$this->session->set_flashdata( 'error', 'There was a problem checking out: ' . $this->data['error'] );
-					redirect( $this->_shop_url . 'basket' );
-					return;
-
-				endif;
-
-				//	Set as paid
-				$this->shop_order_model->paid( $_order->id );
-
-				//	Process the order, send receipt and send order notification
-				$this->shop_order_model->process( $_order );
-				$this->shop_order_model->send_receipt( $_order );
-				$this->shop_order_model->send_order_notification( $_order );
-
-				if ( $_order->voucher ) :
-
-					$this->shop_voucher_model->redeem( $_order->voucher->id, $_order );
-
-				endif;
-
-				// --------------------------------------------------------------------------
-
-				//	Destory the basket
-				$this->shop_basket_model->destroy();
-
-				// --------------------------------------------------------------------------
-
-				//	Redirect to processing page
-				redirect( $this->_shop_url . 'checkout/processing?ref=' . $_order->ref );
-
-			endif;
-
-			// --------------------------------------------------------------------------
-
-			switch ( $this->data['basket']->payment_gateway ) :
-
-				//	Known payment gateways
-				case 1 :	$this->_payment_paypal();	break;
-
-				// --------------------------------------------------------------------------
-
-				//	Unknown
-				default :
-
-					$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> there was a problem verifying your chosen payment option. Please try again.' );
-					redirect( $this->_shop_url . 'basket' );
-
-				break;
-
-			endswitch;
 
 		else :
 
-			redirect( $this->_shop_url . 'checkout' );
+			$this->load->view( 'structure/header',										$this->data );
+			$this->load->view( $this->_skin->path . 'views/checkout/choose_gateway',	$this->data );
+			$this->load->view( 'structure/footer',										$this->data );
 
 		endif;
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Handles sending the user to PayPal
-	 * @return void
-	 */
-	protected function _payment_paypal()
-	{
-		//	Create the order
-		$this->data['order'] = $this->shop_order_model->create( $this->data['basket'], TRUE );
-
-		if ( ! $this->data['order'] ) :
-
-			$this->session->set_flashdata( 'error', 'There was a problem checking out: ' . $this->data['error'] );
-			redirect( $this->_shop_url . 'basket' );
-			return;
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		//	Fetch payment gateway details
-		foreach( $this->data['payment_gateways'] AS $pg ) :
-
-			if ( $this->data['basket']->payment_gateway == $pg->id ) :
-
-				$_payment_gateway =& $pg;
-				break;
-
-			endif;
-
-		endforeach;
-
-		// --------------------------------------------------------------------------
-
-		//	Prepapre variables for the template
-		$this->data['paypal'] = new stdClass();
-
-		switch ( strtoupper( ENVIRONMENT ) ) :
-
-			case 'PRODUCTION' :
-
-				$this->data['paypal']->url			= 'https://www.paypal.com/cgi-bin/webscr';
-				$this->data['paypal']->business		= $_payment_gateway->account_id;
-
-			break;
-
-			default :
-
-				$this->data['paypal']->url			= 'https://www.sandbox.paypal.com/cgi-bin/webscr';
-				$this->data['paypal']->business		= $_payment_gateway->sandbox_account_id;
-
-			break;
-
-		endswitch;
-
-		$this->data['paypal']->notify		= site_url( $this->_shop_url . 'checkout/notify/paypal' );
-		$this->data['paypal']->cancel		= site_url( $this->_shop_url . 'checkout/cancel' );
-		$this->data['paypal']->processing	= site_url( $this->_shop_url . 'checkout/processing' );
-
-		// --------------------------------------------------------------------------
-
-		//	Load the views
-		$this->load->view( $this->_skin->path . 'views/checkout/payment/paypal/index',	$this->data );
 	}
 
 
@@ -1183,31 +805,6 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 			_LOG();
 
 		endif;
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Determines whether a basket is in a state in which it's ready to checkout
-	 * @return boolean
-	 */
-	protected function _can_checkout()
-	{
-		//	Check basket isn't empty
-		$this->data['basket'] = $this->shop_basket_model->get();
-
-		if ( ! $this->data['basket']->items ) :
-
-			$this->data['error'] = 'Your basket is empty.';
-			return FALSE;
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		return TRUE;
 	}
 
 

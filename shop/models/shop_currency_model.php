@@ -665,6 +665,27 @@ class NAILS_Shop_currency_model extends NAILS_Model
 	{
 		return $this->format( $value, SHOP_USER_CURRENCY_CODE, $inc_symbol );
 	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function get_exchange_rate( $from, $to )
+	{
+		$this->db->select( 'rate' );
+		$this->db->where( 'from', $from );
+		$this->db->where( 'to', $to );
+
+		$_rate = $this->db->get( NAILS_DB_PREFIX . 'shop_currency_exchange' )->row();
+
+		if ( ! $_rate ) :
+
+			return NULL;
+
+		endif;
+
+		return $_rate->rate;
+	}
 }
 
 

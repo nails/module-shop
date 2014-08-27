@@ -1622,8 +1622,8 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		$_out->line_1		= NULL;	//	Building number and street name
 		$_out->line_2		= NULL;	//	Locality name, if required
 		$_out->town			= NULL;	//	Town
-		$_out->postcode		= NULL;	//	Postcode
 		$_out->state		= NULL;	//	State
+		$_out->postcode		= NULL;	//	Postcode
 		$_out->country		= NULL;	//	Country
 
 		return $_out;

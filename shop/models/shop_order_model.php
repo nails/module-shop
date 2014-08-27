@@ -41,17 +41,15 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 
 	/**
-	 * Creates a new order object
-	 *
-	 * @access public
-	 * @param array $basket The basket object to create the order with
-	 * @param bool $return_obj Whether to return just the new ID or the full object
+	 * Creates a new order in the system
+	 * @param  object  $data       The data required to create the order
+	 * @param  boolean $return_obj Whether or not to return the entire order object, or just the ID.
 	 * @return mixed
-	 **/
-	public function create( &$basket, $return_obj = FALSE )
+	 */
+	public function create( $data, $return_obj = FALSE )
 	{
 		//	Basket has items?
-		if ( ! isset( $basket->items ) || ! $basket->items ) :
+		if ( empty( $data->basket->items ) ) :
 
 			$this->_set_error( 'Basket is empty.' );
 			return FALSE;
@@ -61,9 +59,9 @@ class NAILS_Shop_order_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Is the basket already associated with an order?
-		if ( isset( $basket->order_id ) && $basket->order_id ) :
+		if ( ! empty( $basket->order->id ) ) :
 
-			$this->abandon( $basket->order_id );
+			$this->abandon( $basket->order->id );
 
 		endif;
 
@@ -75,7 +73,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 		do
 		{
 			//	Generate the string
-			$_order->ref = date( 'Y' ) . '-' . strtoupper( random_string( 'alnum', 8 ) );
+			$_order->ref = date( 'Ym' ) . '-' . strtoupper( random_string( 'alpha', 8 ) ) . '-' . date( 'dH' );
 
 			//	Test it
 			$this->db->where( 'ref', $_order->ref );
@@ -90,16 +88,16 @@ class NAILS_Shop_order_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Generate a code (used as a secondary verification method)
-		$_order->code = $this->input->ip_address() . '|'. time() . '|' . random_string( 'alnum', 15 );
+		$_order->code = md5( $this->input->ip_address() . '|'. time() . '|' . random_string( 'alnum', 15 ) );
 
 		// --------------------------------------------------------------------------
 
 		//	Set the user, if not defined, or empty, look for the logged in user
-		if ( isset( $basket->personal_details->email ) && $basket->personal_details->email ) :
+		if ( isset( $basket->contact->email ) && $basket->contact->email ) :
 
-			$_order->user_email			= $basket->personal_details->email;
-			$_order->user_first_name	= $basket->personal_details->first_name;
-			$_order->user_last_name		= $basket->personal_details->last_name;
+			$_order->user_email			= $basket->contact->email;
+			$_order->user_first_name	= $basket->contact->first_name;
+			$_order->user_last_name		= $basket->contact->last_name;
 
 			//	Double check to make sure this isn't a user we can associate with instead
 			$_user = $this->user_model->get_by_email( $_order->user_email );
@@ -128,17 +126,8 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
-		//	Payment gateway
-		if ( $basket->payment_gateway ) :
-
-			$_order->payment_gateway = $basket->payment_gateway;
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
 		//	Set voucher ID
-		if ( $basket->voucher ) :
+		if ( ! empty( $basket->voucher->id ) ) :
 
 			$_order->voucher_id = $basket->voucher->id;
 
@@ -149,85 +138,93 @@ class NAILS_Shop_order_model extends NAILS_Model
 		//	Set currency and exchange rates
 		$_order->currency		= SHOP_USER_CURRENCY_CODE;
 		$_order->base_currency	= SHOP_BASE_CURRENCY_CODE;
-		$_order->exchange_rate	= SHOP_USER_CURRENCY_BASE_EXCHANGE;
 
 		// --------------------------------------------------------------------------
 
-		//	Shipping details
-		if ( $basket->requires_shipping ) :
+		//	Delivery Address
+		$_order->shipping_line_1	= $data->delivery->line_1;
+		$_order->shipping_line_2	= $data->delivery->line_2;
+		$_order->shipping_town		= $data->delivery->town;
+		$_order->shipping_state		= $data->delivery->state;
+		$_order->shipping_postcode	= $data->delivery->postcode;
+		$_order->shipping_country	= $data->delivery->country;
 
-			$_order->requires_shipping	= TRUE;
-			$_order->shipping_method	= $basket->shipping_method;
-			$_order->shipping_addressee	= $basket->shipping_details->addressee;
-			$_order->shipping_line_1	= $basket->shipping_details->line_1;
-			$_order->shipping_line_2	= $basket->shipping_details->line_2;
-			$_order->shipping_town		= $basket->shipping_details->town;
-			$_order->shipping_postcode	= $basket->shipping_details->postcode;
-			$_order->shipping_state		= $basket->shipping_details->state;
-			$_order->shipping_country	= $basket->shipping_details->country;
-
-		endif;
+		//	Billing Address
+		$_order->billing_line_1		= $data->billing->line_1;
+		$_order->billing_line_2		= $data->billing->line_2;
+		$_order->billing_town		= $data->billing->town;
+		$_order->billing_state		= $data->billing->state;
+		$_order->billing_postcode	= $data->billing->postcode;
+		$_order->billing_country	= $data->billing->country;
 
 		// --------------------------------------------------------------------------
 
 		//	Set totals
-		$_order->shipping_total				= $basket->totals->shipping;
-		$_order->shipping_total_render		= $basket->totals->shipping_render;
-		$_order->sub_total					= $basket->totals->sub;
-		$_order->sub_total_render			= $basket->totals->sub_render;
-		$_order->tax_shipping				= $basket->totals->tax_shipping;
-		$_order->tax_shipping_render		= $basket->totals->tax_shipping_render;
-		$_order->tax_items					= $basket->totals->tax_items;
-		$_order->tax_items_render			= $basket->totals->tax_items_render;
-		$_order->discount_shipping			= $basket->discount->shipping;
-		$_order->discount_shipping_render	= $basket->discount->shipping_render;
-		$_order->discount_items				= $basket->discount->items;
-		$_order->discount_items_render		= $basket->discount->items_render;
-		$_order->grand_total				= $basket->totals->grand;
-		$_order->grand_total_render			= $basket->totals->grand_render;
+		$_order->total_base_item		= $data->basket->totals->base->item;
+		$_order->total_base_shipping	= $data->basket->totals->base->shipping;
+		$_order->total_base_tax			= $data->basket->totals->base->tax;
+		$_order->total_base_grand		= $data->basket->totals->base->grand;
+
+		$_order->total_user_item		= $data->basket->totals->user->item;
+		$_order->total_user_shipping	= $data->basket->totals->user->shipping;
+		$_order->total_user_tax			= $data->basket->totals->user->tax;
+		$_order->total_user_grand		= $data->basket->totals->user->grand;
 
 		// --------------------------------------------------------------------------
 
-		//	Set this data
+		$_order->created	= date( 'Y-m-d H:i:s' );
+		$_order->modified	= date( 'Y-m-d H:i:s' );
+
+		// --------------------------------------------------------------------------
+
+		//	Start the transaction
+		$this->db->trans_begin();
+		$_rollback = FALSE;
+
+		// --------------------------------------------------------------------------
+
 		$this->db->set( $_order );
-
-		// --------------------------------------------------------------------------
-
-		//	Set timestamps
-		$this->db->set( 'created', 'NOW()', FALSE );
-		$this->db->set( 'modified', 'NOW()', FALSE );
-
 		$this->db->insert( NAILS_DB_PREFIX . 'shop_order' );
 
-		if ( $this->db->affected_rows() ) :
+		$_order->id = $this->db->insert_id();
 
-			//	Grab the order's ID
-			$_order->id = $this->db->insert_id();
+		if ( $_order->id ) :
 
 			//	Add the items
 			$_items = array();
 
-			foreach( $basket->items AS $item ) :
+			foreach( $data->basket->items AS $item ) :
 
-				$_temp							= array();
-				$_temp['order_id']				= $_order->id;
-				$_temp['product_id']			= $item->id;
-				$_temp['quantity']				= $item->quantity;
-				$_temp['title']					= $item->title;
-				$_temp['price']					= $item->price;
-				$_temp['price_render']			= $item->price_render;
-				$_temp['sale_price']			= $item->sale_price;
-				$_temp['sale_price_render']		= $item->sale_price_render;
-				$_temp['tax']					= $item->tax;
-				$_temp['tax_render']			= $item->tax_render;
-				$_temp['shipping']				= $item->shipping;
-				$_temp['shipping_render']		= $item->shipping_render;
-				$_temp['shipping_tax']			= $item->shipping_tax;
-				$_temp['shipping_tax_render']	= $item->shipping_tax_render;
-				$_temp['total']					= $item->total;
-				$_temp['total_render']			= $item->total_render;
-				$_temp['tax_rate_id']			= $item->tax_rate->id;
-				$_temp['was_on_sale']			= $item->is_on_sale;
+				$_temp					= array();
+				$_temp['order_id']		= $_order->id;
+				$_temp['product_id']	= $item->product_id;
+				$_temp['product_label']	= $item->product_label;
+				$_temp['variant_id']	= $item->variant_id;
+				$_temp['variant_label']	= $item->variant_label;
+				$_temp['quantity']		= $item->quantity;
+				$_temp['tax_rate_id']	= ! empty( $item->product->tax_rate->id ) ? $item->product->tax_rate->id : NULL;
+
+				//	Price
+				$_temp['price_base_value']			= $item->variant->price->price->base->value;
+				$_temp['price_base_value_inc_tax']	= $item->variant->price->price->base->value_inc_tax;
+				$_temp['price_base_value_ex_tax']	= $item->variant->price->price->base->value_ex_tax;
+				$_temp['price_base_value_tax']		= $item->variant->price->price->base->value_tax;
+
+				$_temp['price_user_value']			= $item->variant->price->price->user->value;
+				$_temp['price_user_value_inc_tax']	= $item->variant->price->price->user->value_inc_tax;
+				$_temp['price_user_value_ex_tax']	= $item->variant->price->price->user->value_ex_tax;
+				$_temp['price_user_value_tax']		= $item->variant->price->price->user->value_tax;
+
+				//	Sale Price
+				$_temp['sale_price_base_value']			= $item->variant->price->sale_price->base->value;
+				$_temp['sale_price_base_value_inc_tax']	= $item->variant->price->sale_price->base->value_inc_tax;
+				$_temp['sale_price_base_value_ex_tax']	= $item->variant->price->sale_price->base->value_ex_tax;
+				$_temp['sale_price_base_value_tax']		= $item->variant->price->sale_price->base->value_tax;
+
+				$_temp['sale_price_user_value']			= $item->variant->price->sale_price->user->value;
+				$_temp['sale_price_user_value_inc_tax']	= $item->variant->price->sale_price->user->value_inc_tax;
+				$_temp['sale_price_user_value_ex_tax']	= $item->variant->price->sale_price->user->value_ex_tax;
+				$_temp['sale_price_user_value_tax']		= $item->variant->price->sale_price->user->value_tax;
 
 				if ( isset( $item->extra_data ) && $item->extra_data ) :
 
@@ -240,42 +237,45 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 			endforeach;
 
-			$this->db->insert_batch( 'shop_order_product', $_items );
+			$this->db->insert_batch( NAILS_DB_PREFIX . 'shop_order_product', $_items );
 
-			if ( $this->db->affected_rows() ) :
-
-				//	Associate the basket with this order
-				$this->shop_basket_model->add_order_id( $_order->id );
-
-				// --------------------------------------------------------------------------
-
-				if ( $return_obj ) :
-
-					return $this->get_by_id( $_order->id );
-
-				else :
-
-					return $_order->id;
-
-				endif;
-
-			else :
-
-				//	Failed to insert products, delete order
-				$this->db->where( 'id', $_order->id );
-				$this->db->delete( NAILS_DB_PREFIX . 'shop_order' );
+			if ( ! $this->db->affected_rows() ) :
 
 				//	Set error message
+				$_rollback = TRUE;
 				$this->_set_error( 'Unable to add products to order, aborting.' );
-				return FALSE;
 
 			endif;
 
 		else :
 
 			//	Failed to create order
+			$_rollback = TRUE;
 			$this->_set_error( 'An error occurred while creating the order.' );
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		//	Return
+		if ( $_rollback ) :
+
+			$this->db->trans_rollback();
 			return FALSE;
+
+		else :
+
+			$this->db->trans_commit();
+
+			if ( $return_obj ) :
+
+				return $this->get_by_id( $_order->id );
+
+			else :
+
+				return $_order->id;
+
+			endif;
 
 		endif;
 	}
@@ -626,9 +626,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 	public function get_items_for_order( $order_id )
 	{
-		$this->db->select( 'op.id,op.product_id,op.quantity,op.title,op.price,op.sale_price,op.tax,op.shipping,op.shipping_tax,op.total' );
-		$this->db->select( 'op.price_render,op.sale_price_render,op.tax_render,op.shipping_render,op.shipping_tax_render,op.total_render' );
-		$this->db->select( 'op.was_on_sale,op.processed,op.refunded,op.refunded_date,op.extra_data' );
+		$this->db->select( 'op.*' );
 		$this->db->select( 'pt.id pt_id, pt.slug pt_slug, pt.label pt_label, pt.ipn_method pt_ipn_method' );
 		$this->db->select( 'tr.id tax_rate_id, tr.label tax_rate_label, tr.rate tax_rate_rate' );
 
@@ -1042,8 +1040,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 	protected function _format_order( &$order )
 	{
 		//	Generic
-		$order->id					= (int) $order->id;
-		$order->requires_shipping	= (bool) $order->requires_shipping;
+		$order->id = (int) $order->id;
 
 		// --------------------------------------------------------------------------
 
@@ -1103,91 +1100,61 @@ class NAILS_Shop_order_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Totals
-		$order->totals 						= new stdClass();
-		$order->totals->shipping			= (float) $order->shipping_total;
-		$order->totals->shipping_render		= (float) $order->shipping_total_render;
-		$order->totals->sub					= (float) $order->sub_total;
-		$order->totals->sub_render			= (float) $order->sub_total_render;
-		$order->totals->tax_shipping		= (float) $order->tax_shipping;
-		$order->totals->tax_shipping_render	= (float) $order->tax_shipping_render;
-		$order->totals->tax_items			= (float) $order->tax_items;
-		$order->totals->tax_items_render	= (float) $order->tax_items_render;
-		$order->totals->grand				= (float) $order->grand_total;
-		$order->totals->grand_render		= (float) $order->grand_total_render;
+		$order->totals 					= new stdClass();
 
-		$order->discount 					= new stdClass();
-		$order->discount->shipping			= (float) $order->discount_shipping;
-		$order->discount->shipping_render	= (float) $order->discount_shipping_render;
-		$order->discount->items				= (float) $order->discount_items;
-		$order->discount->items_render		= (float) $order->discount_items_render;
+		$order->totals->base			= new stdClass();
+		$order->totals->base->item		= (float) $order->total_base_item;
+		$order->totals->base->shipping	= (float) $order->total_base_shipping;
+		$order->totals->base->tax		= (float) $order->total_base_tax;
+		$order->totals->base->grand		= (float) $order->total_base_grand;
 
-		$order->totals->fees			= (float) $order->fees_deducted;
+		$order->totals->user			= new stdClass();
+		$order->totals->user->item		= (float) $order->total_user_item;
+		$order->totals->user->shipping	= (float) $order->total_user_shipping;
+		$order->totals->user->tax		= (float) $order->total_user_tax;
+		$order->totals->user->grand		= (float) $order->total_user_grand;
 
-		unset( $order->shipping_total );
-		unset( $order->shipping_total_render );
-		unset( $order->sub_total );
-		unset( $order->sub_total_render );
-		unset( $order->tax_shipping );
-		unset( $order->tax_shipping_render );
-		unset( $order->tax_items );
-		unset( $order->tax_items_render );
-		unset( $order->grand_total );
-		unset( $order->grand_total_render );
-		unset( $order->discount_shipping );
-		unset( $order->discount_shipping_render );
-		unset( $order->discount_items );
-		unset( $order->discount_items_render );
-		unset( $order->fees_deducted );
+		unset( $order->total_base_item );
+		unset( $order->total_base_shipping );
+		unset( $order->total_base_tax );
+		unset( $order->total_base_grand );
+		unset( $order->total_user_item );
+		unset( $order->total_user_shipping );
+		unset( $order->total_user_tax );
+		unset( $order->total_user_grand );
 
 		// --------------------------------------------------------------------------
 
 		//	Shipping details
-		$order->shipping_details 			= new stdClass();
-		$order->shipping_details->addressee	= $order->shipping_addressee;
-		$order->shipping_details->line_1	= $order->shipping_line_1;
-		$order->shipping_details->line_2	= $order->shipping_line_2;
-		$order->shipping_details->town		= $order->shipping_town;
-		$order->shipping_details->postcode	= $order->shipping_postcode;
-		$order->shipping_details->state		= $order->shipping_state;
-		$order->shipping_details->country	= $order->shipping_country;
+		$order->shipping_address 			= new stdClass();
+		$order->shipping_address->line_1	= $order->shipping_line_1;
+		$order->shipping_address->line_2	= $order->shipping_line_2;
+		$order->shipping_address->town		= $order->shipping_town;
+		$order->shipping_address->state		= $order->shipping_state;
+		$order->shipping_address->postcode	= $order->shipping_postcode;
+		$order->shipping_address->country	= $order->shipping_country;
 
-		unset( $order->shipping_addressee );
 		unset( $order->shipping_line_1 );
 		unset( $order->shipping_line_2 );
 		unset( $order->shipping_town );
-		unset( $order->shipping_postcode );
 		unset( $order->shipping_state );
+		unset( $order->shipping_postcode );
 		unset( $order->shipping_country );
 
-		// --------------------------------------------------------------------------
+		$order->billing_address 			= new stdClass();
+		$order->billing_address->line_1		= $order->billing_line_1;
+		$order->billing_address->line_2		= $order->billing_line_2;
+		$order->billing_address->town		= $order->billing_town;
+		$order->billing_address->state		= $order->billing_state;
+		$order->billing_address->postcode	= $order->billing_postcode;
+		$order->billing_address->country	= $order->billing_country;
 
-		//	Currencies
-		$order->currency					= new stdClass();
-
-		$order->currency->order				= new stdClass();
-		$order->currency->order->id			= (int) $order->currency;
-		$order->currency->order->code		= $order->oc_code;
-		$order->currency->order->symbol		= $order->oc_symbol;
-		$order->currency->order->precision	= $order->oc_precision;
-
-		$order->currency->base				= new stdClass();
-		$order->currency->base->id			= (int) $order->base_currency;
-		$order->currency->base->code		= $order->bc_code;
-		$order->currency->base->symbol		= $order->bc_symbol;
-		$order->currency->base->precision	= $order->bc_precision;
-
-
-		$order->currency->exchange_rate		= (float) $order->exchange_rate;
-
-		unset( $order->exchange_rate );
-		unset( $order->currency );
-		unset( $order->oc_code );
-		unset( $order->oc_symbol );
-		unset( $order->oc_precision );
-		unset( $order->base_currency );
-		unset( $order->bc_code );
-		unset( $order->bc_symbol );
-		unset( $order->bc_precision );
+		unset( $order->billing_line_1 );
+		unset( $order->billing_line_2 );
+		unset( $order->billing_town );
+		unset( $order->billing_state );
+		unset( $order->billing_postcode );
+		unset( $order->billing_country );
 
 		// --------------------------------------------------------------------------
 
@@ -1234,21 +1201,57 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 	protected function _format_item( &$item )
 	{
-		$item->id					= (int) $item->id;
-		$item->quantity				= (int) $item->quantity;
-		$item->price				= (float) $item->price;
-		$item->price_render			= (float) $item->price_render;
-		$item->sale_price			= (float) $item->sale_price;
-		$item->sale_price_render	= (float) $item->sale_price_render;
-		$item->tax					= (float) $item->tax;
-		$item->tax_render			= (float) $item->tax_render;
-		$item->shipping				= (float) $item->shipping;
-		$item->shipping_render		= (float) $item->shipping_render;
-		$item->total				= (float) $item->total;
-		$item->total_render			= (float) $item->total_render;
-		$item->was_on_sale			= (bool) $item->was_on_sale;
-		$item->processed			= (bool) $item->processed;
-		$item->refunded				= (bool) $item->refunded;
+		$item->id		= (int) $item->id;
+		$item->quantity	= (int) $item->quantity;
+
+		// --------------------------------------------------------------------------
+
+		$item->price						= new stdClass();
+		$item->price->base					= new stdClass();
+		$item->price->base->value			= (float) $item->price_base_value;
+		$item->price->base->value_inc_tax	= (float) $item->price_base_value_inc_tax;
+		$item->price->base->value_ex_tax	= (float) $item->price_base_value_ex_tax;
+		$item->price->base->value_tax		= (float) $item->price_base_value_tax;
+
+		$item->price->user					= new stdClass();
+		$item->price->user->value			= (float) $item->price_user_value;
+		$item->price->user->value_inc_tax	= (float) $item->price_user_value_inc_tax;
+		$item->price->user->value_ex_tax	= (float) $item->price_user_value_ex_tax;
+		$item->price->user->value_tax		= (float) $item->price_user_value_tax;
+
+		$item->sale_price						= new stdClass();
+		$item->sale_price->base					= new stdClass();
+		$item->sale_price->base->value			= (float) $item->sale_price_base_value;
+		$item->sale_price->base->value_inc_tax	= (float) $item->sale_price_base_value_inc_tax;
+		$item->sale_price->base->value_ex_tax	= (float) $item->sale_price_base_value_ex_tax;
+		$item->sale_price->base->value_tax		= (float) $item->sale_price_base_value_tax;
+
+		$item->sale_price->user					= new stdClass();
+		$item->sale_price->user->value			= (float) $item->sale_price_user_value;
+		$item->sale_price->user->value_inc_tax	= (float) $item->sale_price_user_value_inc_tax;
+		$item->sale_price->user->value_ex_tax	= (float) $item->sale_price_user_value_ex_tax;
+		$item->sale_price->user->value_tax		= (float) $item->sale_price_user_value_tax;
+
+		$item->processed	= (bool) $item->processed;
+		$item->refunded		= (bool) $item->refunded;
+
+		unset( $item->price_base_value );
+		unset( $item->price_base_value_inc_tax );
+		unset( $item->price_base_value_ex_tax );
+		unset( $item->price_base_value_tax );
+		unset( $item->price_user_value );
+		unset( $item->price_user_value_inc_tax );
+		unset( $item->price_user_value_ex_tax );
+		unset( $item->price_user_value_tax );
+		unset( $item->sale_price_base_value );
+		unset( $item->sale_price_base_value_inc_tax );
+		unset( $item->sale_price_base_value_ex_tax );
+		unset( $item->sale_price_base_value_tax );
+		unset( $item->sale_price_user_value );
+		unset( $item->sale_price_user_value_inc_tax );
+		unset( $item->sale_price_user_value_ex_tax );
+		unset( $item->sale_price_user_value_tax );
+
 
 		// --------------------------------------------------------------------------
 
@@ -1285,7 +1288,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Extra data
-		$item->extra_data = $item->extra_data ? unserialize( $item->extra_data ) : NULL;
+		$item->extra_data = $item->extra_data ? @unserialize( $item->extra_data ) : NULL;
 	}
 }
 
