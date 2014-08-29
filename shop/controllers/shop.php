@@ -109,10 +109,12 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Sidebar Items
 		//	=============
 
-		$this->data['brands']		= $this->shop_brand_model->get_all();
 		$this->data['categories']	= $this->shop_category_model->get_top_level();
-		$this->data['collections']	= $this->shop_collection_model->get_all();
-		$this->data['ranges']		= $this->shop_range_model->get_all();
+
+		$_data = array( 'include_count' => TRUE );
+		$this->data['brands']		= $this->shop_brand_model->get_all( NULL, NULL, $_data );
+		$this->data['collections']	= $this->shop_collection_model->get_all( NULL, NULL, $_data );
+		$this->data['ranges']		= $this->shop_range_model->get_all( NULL, NULL, $_data );
 
 		// --------------------------------------------------------------------------
 
