@@ -371,6 +371,9 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 		$_orders = $this->db->get( NAILS_DB_PREFIX . 'shop_order o' )->result();
 
+		//	Needed by the _format_*() methods
+		$this->load->model( 'shop/shop_currency_model' );
+
 		foreach ( $_orders AS $order ) :
 
 			//	Format order object
@@ -629,13 +632,18 @@ class NAILS_Shop_order_model extends NAILS_Model
 		$this->db->select( 'op.*' );
 		$this->db->select( 'pt.id pt_id, pt.slug pt_slug, pt.label pt_label, pt.ipn_method pt_ipn_method' );
 		$this->db->select( 'tr.id tax_rate_id, tr.label tax_rate_label, tr.rate tax_rate_rate' );
+		$this->db->select( 'v.sku v_sku' );
 
 		$this->db->join( NAILS_DB_PREFIX . 'shop_product p', 'p.id = op.product_id' );
 		$this->db->join( NAILS_DB_PREFIX . 'shop_product_type pt', 'pt.id = p.type_id' );
 		$this->db->join( NAILS_DB_PREFIX . 'shop_tax_rate tr', 'tr.id = p.tax_rate_id', 'LEFT' );
+		$this->db->join( NAILS_DB_PREFIX . 'shop_product_variation v', 'v.id = op.variant_id', 'LEFT' );
 
 		$this->db->where( 'op.order_id', $order_id );
 		$_items = $this->db->get( NAILS_DB_PREFIX . 'shop_order_product op' )->result();
+
+		//	Needed by the _format_*() methods
+		$this->load->model( 'shop/shop_currency_model' );
 
 		foreach ( $_items AS $item ) :
 
@@ -699,6 +707,9 @@ class NAILS_Shop_order_model extends NAILS_Model
 		endif;
 
 		$_items = $this->db->get( NAILS_DB_PREFIX . 'shop_order_product op' )->result();
+
+		//	Needed by the _format_*() methods
+		$this->load->model( 'shop/shop_currency_model' );
 
 		foreach ( $_items AS $item ) :
 
@@ -1078,6 +1089,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 		endif;
 
+		$order->user->telephone		= $order->user_telephone;
 		$order->user->gender		= $order->gender;
 		$order->user->profile_img	= $order->profile_img;
 
@@ -1089,6 +1101,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 		unset( $order->user_email );
 		unset( $order->user_first_name );
 		unset( $order->user_last_name );
+		unset( $order->user_telephone );
 		unset( $order->email );
 		unset( $order->first_name );
 		unset( $order->last_name );
@@ -1108,11 +1121,23 @@ class NAILS_Shop_order_model extends NAILS_Model
 		$order->totals->base->tax		= (float) $order->total_base_tax;
 		$order->totals->base->grand		= (float) $order->total_base_grand;
 
+		$order->totals->base_formatted				= new stdClass();
+		$order->totals->base_formatted->item		= $this->shop_currency_model->format_base( $order->totals->base->item );
+		$order->totals->base_formatted->shipping	= $this->shop_currency_model->format_base( $order->totals->base->shipping );
+		$order->totals->base_formatted->tax			= $this->shop_currency_model->format_base( $order->totals->base->tax );
+		$order->totals->base_formatted->grand		= $this->shop_currency_model->format_base( $order->totals->base->grand );
+
 		$order->totals->user			= new stdClass();
 		$order->totals->user->item		= (float) $order->total_user_item;
 		$order->totals->user->shipping	= (float) $order->total_user_shipping;
 		$order->totals->user->tax		= (float) $order->total_user_tax;
 		$order->totals->user->grand		= (float) $order->total_user_grand;
+
+		$order->totals->user_formatted				= new stdClass();
+		$order->totals->user_formatted->item		= $this->shop_currency_model->format_user( $order->totals->user->item );
+		$order->totals->user_formatted->shipping	= $this->shop_currency_model->format_user( $order->totals->user->shipping );
+		$order->totals->user_formatted->tax			= $this->shop_currency_model->format_user( $order->totals->user->tax );
+		$order->totals->user_formatted->grand		= $this->shop_currency_model->format_user( $order->totals->user->grand );
 
 		unset( $order->total_base_item );
 		unset( $order->total_base_shipping );
@@ -1202,7 +1227,10 @@ class NAILS_Shop_order_model extends NAILS_Model
 	protected function _format_item( &$item )
 	{
 		$item->id		= (int) $item->id;
+		$item->sku		= $item->v_sku;
 		$item->quantity	= (int) $item->quantity;
+
+		unset($item->v_sku);
 
 		// --------------------------------------------------------------------------
 
@@ -1213,11 +1241,23 @@ class NAILS_Shop_order_model extends NAILS_Model
 		$item->price->base->value_ex_tax	= (float) $item->price_base_value_ex_tax;
 		$item->price->base->value_tax		= (float) $item->price_base_value_tax;
 
+		$item->price->base_formatted				= new stdClass();
+		$item->price->base_formatted->value			= $this->shop_currency_model->format_base( $item->price->base->value );
+		$item->price->base_formatted->value_inc_tax	= $this->shop_currency_model->format_base( $item->price->base->value_inc_tax );
+		$item->price->base_formatted->value_ex_tax	= $this->shop_currency_model->format_base( $item->price->base->value_ex_tax );
+		$item->price->base_formatted->value_tax		= $this->shop_currency_model->format_base( $item->price->base->value_tax );
+
 		$item->price->user					= new stdClass();
 		$item->price->user->value			= (float) $item->price_user_value;
 		$item->price->user->value_inc_tax	= (float) $item->price_user_value_inc_tax;
 		$item->price->user->value_ex_tax	= (float) $item->price_user_value_ex_tax;
 		$item->price->user->value_tax		= (float) $item->price_user_value_tax;
+
+		$item->price->user_formatted				= new stdClass();
+		$item->price->user_formatted->value			= $this->shop_currency_model->format_user( $item->price->user->value );
+		$item->price->user_formatted->value_inc_tax	= $this->shop_currency_model->format_user( $item->price->user->value_inc_tax );
+		$item->price->user_formatted->value_ex_tax	= $this->shop_currency_model->format_user( $item->price->user->value_ex_tax );
+		$item->price->user_formatted->value_tax		= $this->shop_currency_model->format_user( $item->price->user->value_tax );
 
 		$item->sale_price						= new stdClass();
 		$item->sale_price->base					= new stdClass();
@@ -1226,11 +1266,23 @@ class NAILS_Shop_order_model extends NAILS_Model
 		$item->sale_price->base->value_ex_tax	= (float) $item->sale_price_base_value_ex_tax;
 		$item->sale_price->base->value_tax		= (float) $item->sale_price_base_value_tax;
 
+		$item->sale_price->base_formatted					= new stdClass();
+		$item->sale_price->base_formatted->value			= $this->shop_currency_model->format_base( $item->sale_price->base->value );
+		$item->sale_price->base_formatted->value_inc_tax	= $this->shop_currency_model->format_base( $item->sale_price->base->value_inc_tax );
+		$item->sale_price->base_formatted->value_ex_tax		= $this->shop_currency_model->format_base( $item->sale_price->base->value_ex_tax );
+		$item->sale_price->base_formatted->value_tax		= $this->shop_currency_model->format_base( $item->sale_price->base->value_tax );
+
 		$item->sale_price->user					= new stdClass();
 		$item->sale_price->user->value			= (float) $item->sale_price_user_value;
 		$item->sale_price->user->value_inc_tax	= (float) $item->sale_price_user_value_inc_tax;
 		$item->sale_price->user->value_ex_tax	= (float) $item->sale_price_user_value_ex_tax;
 		$item->sale_price->user->value_tax		= (float) $item->sale_price_user_value_tax;
+
+		$item->sale_price->user_formatted					= new stdClass();
+		$item->sale_price->user_formatted->value			= $this->shop_currency_model->format_user( $item->sale_price->user->value );
+		$item->sale_price->user_formatted->value_inc_tax	= $this->shop_currency_model->format_user( $item->sale_price->user->value_inc_tax );
+		$item->sale_price->user_formatted->value_ex_tax		= $this->shop_currency_model->format_user( $item->sale_price->user->value_ex_tax );
+		$item->sale_price->user_formatted->value_tax		= $this->shop_currency_model->format_user( $item->sale_price->user->value_tax );
 
 		$item->processed	= (bool) $item->processed;
 		$item->refunded		= (bool) $item->refunded;
