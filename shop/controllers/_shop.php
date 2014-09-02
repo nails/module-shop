@@ -48,7 +48,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
 		$this->load->model( 'shop/shop_product_model' );
 		$this->load->model( 'shop/shop_product_type_model' );
 		$this->load->model( 'shop/shop_range_model' );
-		$this->load->model( 'shop/shop_shipping_model' );
+		$this->load->model( 'shop/shop_shipping_driver_model' );
 		$this->load->model( 'shop/shop_sale_model' );
 		$this->load->model( 'shop/shop_tag_model' );
 		$this->load->model( 'shop/shop_voucher_model' );

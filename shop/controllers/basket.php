@@ -304,39 +304,6 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
 
 	/**
-	 * Set the preferred shipping method
-	 *
-	 * @access	public
-	 * @return	void
-	 *
-	 **/
-	public function set_shipping_method()
-	{
-		$_method = $this->shop_shipping_model->validate( $this->input->get_post( 'shipping_method' ) );
-
-		if ( $_method ) :
-
-			//	Validated, add to basket
-			$this->session->set_flashdata( 'success', '<strong>Success!</strong> Your shipping method has been updated.' );
-			$this->shop_basket_model->add_shipping_method( $_method->id );
-
-		else :
-
-			//	Failed to validate, feedback
-			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> that shipping is not valid:<br />&rsaquo; ' . implode( '<br />&rsaquo;', $this->shipping->get_errors() ) );
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		redirect( $this->data['return'] );
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
 	 * Set the user's preferred currency
 	 *
 	 * @access	public

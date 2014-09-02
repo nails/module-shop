@@ -552,10 +552,19 @@ class NAILS_Shop_currency_model extends NAILS_Model
 	 * @param  mixed  $value The value to convert
 	 * @param  string $from  The currency to convert from
 	 * @param  string $to    The currency to convert too
-	 * @return mixed         Float on success, fALSE on failure
+	 * @return mixed         Float on success, FALSE on failure
 	 */
 	public function convert( $value, $from, $to )
 	{
+		//	If we're "converting" between the same currency then we don't need to look up rates
+		if ( $from === $to ) :
+
+			return $value;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
 		if ( is_null( $this->_rates ) ) :
 
 			$this->_rates	= array();

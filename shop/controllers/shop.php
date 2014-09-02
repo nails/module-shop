@@ -77,11 +77,12 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Sanitise
 		switch ( $this->_product_pagination->per_page ) :
 
-			case '10' :		$this->_product_pagination->per_page = 10;	break;
-			case '50' :		$this->_product_pagination->per_page = 50;	break;
-			case '100' :	$this->_product_pagination->per_page = 100;	break;
-			case '25' :
-			default :		$this->_product_pagination->per_page = 25;	break;
+			case '20' :		$this->_product_pagination->per_page = 10;		break;
+			case '40' :		$this->_product_pagination->per_page = 40;		break;
+			case '80' :		$this->_product_pagination->per_page = 08;		break;
+			case '100' :	$this->_product_pagination->per_page = 100;		break;
+			case 'all' :	$this->_product_pagination->per_page = 10000;	break;	//	C'mon, who's gonna have more than this?
+			default :		$this->_product_pagination->per_page = 20;		break;
 
 		endswitch;
 

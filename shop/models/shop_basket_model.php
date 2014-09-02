@@ -59,7 +59,6 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 			$this->add_order( $_saved_basket->order );
 			$this->add_customer_details( $_saved_basket->customer_details );
-			$this->add_shipping_method( $_saved_basket->shipping_method );
 			$this->add_shipping_details( $_saved_basket->shipping_details );
 			$this->add_payment_gateway( $_saved_basket->payment_gateway );
 			$this->add_voucher( $_saved_basket->voucher );
@@ -173,7 +172,12 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Calculate shipping costs
-		//	TODO
+		$this->load->model( 'shop/shop_shipping_driver_model' );
+
+		$_shipping_costs = $this->shop_shipping_driver_model->calculate( $_basket );
+
+		$_basket->totals->base->shipping = $_shipping_costs->base;
+		$_basket->totals->user->shipping = $_shipping_costs->user;
 
 		// --------------------------------------------------------------------------
 
@@ -609,48 +613,6 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 
 	/**
-	 * Returns the basket's "shipping method" object.
-	 * @return stdClass
-	 */
-	public function get_shipping_method()
-	{
-		return $this->_basket->shipping->method;
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Sets the basket's "shipping method" object.
-	 * @return boolean
-	 */
-	public function add_shipping_method( $method )
-	{
-		//	TODO: verify?
-		$this->_basket->shipping->method = $method;
-
-		return TRUE;
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Resets the basket's "shipping method" object.
-	 * @return void
-	 */
-	public function remove_shipping_method()
-	{
-		$this->_basket->shipping->method = $this->_default_shipping_method();
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
 	 * Returns the basket's "shipping details" object.
 	 * @return stdClass
 	 */
@@ -902,7 +864,6 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		$_save->items				= $this->_basket->items;
 		$_save->order				= $this->_basket->order;
 		$_save->customer_details	= $this->_basket->customer->details;
-		$_save->shipping_method		= $this->_basket->shipping->method;
 		$_save->shipping_details	= $this->_basket->shipping->details;
 		$_save->payment_gateway		= $this->_basket->payment_gateway;
 		$_save->voucher				= $this->_basket->voucher->id;
@@ -1008,7 +969,6 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		$_out->customer				= new stdClass();
 		$_out->customer->details	= $this->_default_customer_details();
 		$_out->shipping				= new stdClass();
-		$_out->shipping->method		= $this->_default_shipping_method();
 		$_out->shipping->details	= $this->_default_shipping_details();
 		$_out->payment_gateway		= $this->_default_payment_gateway();
 		$_out->voucher				= $this->_default_voucher();
@@ -1129,22 +1089,6 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		$_out->state		= NULL;	//	State
 		$_out->postcode		= NULL;	//	Postcode
 		$_out->country		= NULL;	//	Country
-
-		return $_out;
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Returns a default, empty, basket "shipping method" object
-	 * @return stdClass
-	 */
-	protected function _default_shipping_method()
-	{
-		$_out		= new stdClass();
-		$_out->id	= NULL;
 
 		return $_out;
 	}

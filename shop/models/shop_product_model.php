@@ -444,23 +444,13 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 			if ( $_product_type->is_physical ) :
 
-				$_data->variation[$index]->shipping->length				= isset( $v['shipping']['length'] )				? $v['shipping']['length']					: NULL;
-				$_data->variation[$index]->shipping->width				= isset( $v['shipping']['width'] )				? $v['shipping']['width']					: NULL;
-				$_data->variation[$index]->shipping->height				= isset( $v['shipping']['height'] )				? $v['shipping']['height']					: NULL;
-				$_data->variation[$index]->shipping->measurement_unit	= isset( $v['shipping']['measurement_unit'] )	? $v['shipping']['measurement_unit']		: 'MM';
-				$_data->variation[$index]->shipping->weight				= isset( $v['shipping']['weight'] )				? $v['shipping']['weight']					: NULL;
-				$_data->variation[$index]->shipping->weight_unit		= isset( $v['shipping']['weight_unit'] )		? $v['shipping']['weight_unit']				: 'G';
-				$_data->variation[$index]->shipping->collection_only	= isset( $v['shipping']['collection_only'] )	? (bool) $v['shipping']['collection_only']	: FALSE;
+				$_data->variation[$index]->shipping->collection_only	= isset( $v['shipping']['collection_only'] ) ? (bool) $v['shipping']['collection_only'] : FALSE;
+				$_data->variation[$index]->shipping->driver_data		= isset( $v['shipping']['driver_data'] ) ? $v['shipping']['driver_data'] : NULL;
 
 			else :
 
-				$_data->variation[$index]->shipping->length				= NULL;
-				$_data->variation[$index]->shipping->width				= NULL;
-				$_data->variation[$index]->shipping->height				= NULL;
-				$_data->variation[$index]->shipping->measurement_unit	= NULL;
-				$_data->variation[$index]->shipping->weight				= NULL;
-				$_data->variation[$index]->shipping->weight_unit		= NULL;
 				$_data->variation[$index]->shipping->collection_only	= FALSE;
+				$_data->variation[$index]->shipping->driver_data		= NULL;
 
 			endif;
 
@@ -519,6 +509,28 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 */
 	protected function _create_update_execute( $data )
 	{
+		/**
+		 * Fetch the current state of the item if an ID is set
+		 * We'll use this later on in the shipping driver section to see what data we're updating
+		 */
+
+		if ( ! empty( $data->id ) ) :
+
+			$_current = $this->get_by_id( $data->id );
+
+		else :
+
+			$_current = FALSE;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		//	Load dependant models
+		$this->load->model( 'shop/shop_shipping_driver_model' );
+
+		// --------------------------------------------------------------------------
+
 		//	Start the transaction, safety first!
 		$this->db->trans_begin();
 		$_rollback = FALSE;
@@ -716,13 +728,50 @@ class NAILS_Shop_product_model extends NAILS_Model
 					//	Product Variation: Shipping
 					//	===========================
 
+					//	TODO: deprecate this and somehow use the driver to display stuff on the front end.
 					$this->db->set( 'ship_collection_only',		$v->shipping->collection_only );
-					$this->db->set( 'ship_length',				$v->shipping->length );
-					$this->db->set( 'ship_width',				$v->shipping->width );
-					$this->db->set( 'ship_height',				$v->shipping->height );
-					$this->db->set( 'ship_measurement_unit',	$v->shipping->measurement_unit );
-					$this->db->set( 'ship_weight',				$v->shipping->weight );
-					$this->db->set( 'ship_weight_unit',			$v->shipping->weight_unit );
+
+					if ( $v->id ) :
+
+						//	A variation ID exists, find it and update just the specific field.
+
+						foreach( $_current->variations AS $variation ) :
+
+							if ( $variation->id != $v->id ) :
+
+								continue;
+
+							else :
+
+								$_current_driver_data = $variation->shipping->driver_data;
+								break;
+
+							endif;
+
+						endforeach;
+
+					endif;
+
+					$_enabled_driver = $this->shop_shipping_driver_model->get_enabled();
+
+					if ( $_enabled_driver ) :
+
+						if ( ! empty( $_current_driver_data ) ) :
+
+							//	Data exists, only update the specific bitty.
+							$_current_driver_data[$_enabled_driver->slug] = $v->shipping->driver_data[$_enabled_driver->slug];
+							$this->db->set( 'ship_driver_data', serialize( $_current_driver_data ) );
+
+						else :
+
+							//	Nothing exists, use whatever's been passed
+							$this->db->set( 'ship_driver_data', serialize( $v->shipping->driver_data ) );
+
+						endif;
+
+					endif;
+
+					// --------------------------------------------------------------------------
 
 					if ( ! empty( $v->id ) ) :
 
@@ -2326,13 +2375,8 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 		//	Shipping data
 		$variation->shipping					= new stdClass();
-		$variation->shipping->length			= (float) $variation->ship_length;
-		$variation->shipping->width				= (float) $variation->ship_width;
-		$variation->shipping->height			= (float) $variation->ship_height;
-		$variation->shipping->measurement_unit	= $variation->ship_measurement_unit;
-		$variation->shipping->weight			= (float) $variation->ship_weight;
-		$variation->shipping->weight_unit		= $variation->ship_weight_unit;
 		$variation->shipping->collection_only	= (bool) $variation->ship_collection_only;
+		$variation->shipping->driver_data		= @unserialize( $variation->ship_driver_data );
 
 		unset( $variation->ship_length );
 		unset( $variation->ship_width );
@@ -2341,6 +2385,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 		unset( $variation->ship_weight );
 		unset( $variation->ship_weight_unit );
 		unset( $variation->ship_collection_only );
+		unset( $variation->ship_driver_data );
 
 		//	Stock status
 		if ( $variation->stock_status == 'OUT_OF_STOCK' ) :
