@@ -62,35 +62,6 @@ class NAILS_Shop_product_type_model extends NAILS_Model
 
 		return parent::_getcount_common( $data, $_caller );
 	}
-
-
-	// --------------------------------------------------------------------------
-
-	//	Meta fields for various product types
-
-	// --------------------------------------------------------------------------
-
-	public function meta_fields_download()
-	{
-		$_out = array();
-
-		// --------------------------------------------------------------------------
-
-		//	TODO: This array should be a form builder config array - when that library is complete.
-
-		//	Download ID
-		$_out[0]				= new stdClass();
-		$_out[0]->type			= 'cdn_object';
-		$_out[0]->key			= 'download_id';
-		$_out[0]->label			= 'Download';
-		$_out[0]->bucket		= 'shop-download';
-		$_out[0]->tip			= '';
-		$_out[0]->validation	= 'xss_clean|required';
-
-		// --------------------------------------------------------------------------
-
-		return $_out;
-	}
 }
 
 

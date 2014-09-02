@@ -39,20 +39,20 @@ class NAILS_Shop_product_model extends NAILS_Model
 		$this->_table					= NAILS_DB_PREFIX . 'shop_product';
 		$this->_table_prefix			= 'p';
 
-		$this->_table_attribute			= NAILS_DB_PREFIX . 'shop_product_attribute';
-		$this->_table_brand				= NAILS_DB_PREFIX . 'shop_product_brand';
-		$this->_table_category			= NAILS_DB_PREFIX . 'shop_product_category';
-		$this->_table_collection		= NAILS_DB_PREFIX . 'shop_product_collection';
-		$this->_table_gallery			= NAILS_DB_PREFIX . 'shop_product_gallery';
-		$this->_table_range				= NAILS_DB_PREFIX . 'shop_product_range';
-		$this->_table_sale				= NAILS_DB_PREFIX . 'shop_sale_product';
-		$this->_table_tag				= NAILS_DB_PREFIX . 'shop_product_tag';
-		$this->_table_variation			= NAILS_DB_PREFIX . 'shop_product_variation';
-		$this->_table_variation_gallery	= NAILS_DB_PREFIX . 'shop_product_variation_gallery';
-		$this->_table_variation_meta	= NAILS_DB_PREFIX . 'shop_product_variation_meta';
-		$this->_table_variation_price	= NAILS_DB_PREFIX . 'shop_product_variation_price';
-		$this->_table_type				= NAILS_DB_PREFIX . 'shop_product_type';
-		$this->_table_tax_rate			= NAILS_DB_PREFIX . 'shop_tax_rate';
+		$this->_table_attribute						= NAILS_DB_PREFIX . 'shop_product_attribute';
+		$this->_table_brand							= NAILS_DB_PREFIX . 'shop_product_brand';
+		$this->_table_category						= NAILS_DB_PREFIX . 'shop_product_category';
+		$this->_table_collection					= NAILS_DB_PREFIX . 'shop_product_collection';
+		$this->_table_gallery						= NAILS_DB_PREFIX . 'shop_product_gallery';
+		$this->_table_range							= NAILS_DB_PREFIX . 'shop_product_range';
+		$this->_table_sale							= NAILS_DB_PREFIX . 'shop_sale_product';
+		$this->_table_tag							= NAILS_DB_PREFIX . 'shop_product_tag';
+		$this->_table_variation						= NAILS_DB_PREFIX . 'shop_product_variation';
+		$this->_table_variation_gallery				= NAILS_DB_PREFIX . 'shop_product_variation_gallery';
+		$this->_table_variation_product_type_meta	= NAILS_DB_PREFIX . 'shop_product_variation_product_type_meta';
+		$this->_table_variation_price				= NAILS_DB_PREFIX . 'shop_product_variation_price';
+		$this->_table_type							= NAILS_DB_PREFIX . 'shop_product_type';
+		$this->_table_tax_rate						= NAILS_DB_PREFIX . 'shop_tax_rate';
 
 		// --------------------------------------------------------------------------
 
@@ -209,46 +209,15 @@ class NAILS_Shop_product_model extends NAILS_Model
 		$_data->categories	= isset( $data['categories'] )	? $data['categories']			: array();
 		$_data->tags		= isset( $data['tags'] )		? $data['tags']					: array();
 
-		$_data->tax_rate_id	= isset( $data['tax_rate_id'] ) &&	(int) $data['tax_rate_id']	? (int) $data['tax_rate_id']	: NULL;
+		if ( app_setting( 'enable_external_products', 'shop' ) ) :
 
-		// --------------------------------------------------------------------------
-
-		//	Product Meta
-		//	============
-
-		$this->config->load( 'shop/shop' );
-		$_product_meta = $this->config->item( 'shop_product_meta' );
-
-		if ( is_array( $_product_meta ) ) :
-
-			$_data->meta = new stdClass();
-
-			foreach( $_product_meta AS $field => $value ) :
-
-				$_datatype	= isset( $value['datatype'] )		? $value['datatype']	: 'text';
-				$_value		= isset( $data['meta'][$field] )	? $data['meta'][$field]	: '';
-
-				switch( $_datatype ) :
-
-					case 'bool' :
-					case 'boolean' :
-
-						$_value = (bool) $_value;
-
-					break;
-					case 'id' :
-
-						$_value = (int) $_value;
-
-					break;
-
-				endswitch;
-
-				$_data->meta->$field = $_value;
-
-			endforeach;
+			$_data->is_external				= isset( $data['is_external'] )				? (bool) $data['is_external']			: FALSE;
+			$_data->external_vendor_label	= isset( $data['external_vendor_label'] )	? (bool) $data['external_vendor_label']	: '';
+			$_data->external_vendor_url		= isset( $data['external_vendor_url'] )		? (bool) $data['external_vendor_url']	: '';
 
 		endif;
+
+		$_data->tax_rate_id	= isset( $data['tax_rate_id'] ) &&	(int) $data['tax_rate_id']	? (int) $data['tax_rate_id']	: NULL;
 
 		// --------------------------------------------------------------------------
 
@@ -282,13 +251,8 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 		endif;
 
-		$_product_type_meta	= array();
-
-		if ( is_callable( array( $this->shop_product_type_model, 'meta_fields_' . $_product_type->slug ) ) ) :
-
-			$_product_type_meta = $this->shop_product_type_model->{'meta_fields_' . $_product_type->slug}();
-
-		endif;
+		$this->load->model( 'shop/shop_product_type_meta_model' );
+		$_product_type_meta = $this->shop_product_type_meta_model->get_by_product_type_id( $_product_type->id );
 
 		$_sku_tracker = array();
 
@@ -366,15 +330,16 @@ class NAILS_Shop_product_model extends NAILS_Model
 			//	Meta
 			//	----
 
-			//	If this product type is_physical then ensure that the dimensions are specified
-			$_data->variation[$index]->meta = new stdClass();
-
-			//	Any custom checks for the extra meta fields
+			$_data->variation[$index]->meta = array();
 
 			//	Process each field
 			foreach( $_product_type_meta AS $field ) :
 
-				$_data->variation[$index]->meta->{$field->key} = isset( $v['meta'][$field->key] ) ? $v['meta'][$field->key] : NULL;
+				//	No need to set variation ID, that will be set later on during execution
+				$_temp					= array();
+				$_temp['meta_field_id']	= $field->id;
+				$_temp['value']			= isset( $v['meta'][$field->id] ) ? $v['meta'][$field->id] : NULL;
+				$_data->variation[$index]->meta[] = $_temp;
 
 			endforeach;
 
@@ -546,6 +511,15 @@ class NAILS_Shop_product_model extends NAILS_Model
 		$this->db->set( 'tax_rate_id',		$data->tax_rate_id );
 		$this->db->set( 'is_active',		$data->is_active );
 		$this->db->set( 'is_deleted',		$data->is_deleted );
+
+		if ( app_setting( 'enable_external_products', 'shop' ) ) :
+
+			$this->db->set( 'is_external',				$data->is_external );
+			$this->db->set( 'external_vendor_label',	$data->external_vendor_label );
+			$this->db->set( 'external_vendor_url',		$data->external_vendor_url );
+
+		endif;
+
 		$this->db->set( 'modified',			'NOW()', FALSE );
 
 		if ( $this->user_model->is_logged_in() ) :
@@ -569,46 +543,6 @@ class NAILS_Shop_product_model extends NAILS_Model
 		endif;
 
 		if ( $_result ) :
-
-			//	Product meta
-			$_product_meta	= $this->config->item( 'shop_product_meta' );
-			$_data			= array();
-
-			if ( is_array( $_product_meta ) ) :
-
-				foreach( $_product_meta AS $field => $value ) :
-
-					if ( isset( $data->meta->$field ) ) :
-
-						$_data[$field] = $data->meta->$field;
-
-					endif;
-
-				endforeach;
-
-			endif;
-
-			if ( $_action == 'create' ) :
-
-				$_data['product_id'] = $data->id;
-				$this->db->set( $_data );
-				$_result = $this->db->insert( NAILS_DB_PREFIX . 'shop_product_meta' );
-
-			elseif ( $_action == 'update' && ! empty( $_data ) ) :
-
-				$this->db->where( 'product_id', $data->id );
-				$this->db->set( $_data );
-				$_result = $this->db->update( NAILS_DB_PREFIX . 'shop_product_meta' );
-
-			endif;
-
-			if ( ! $_result ) :
-
-				$this->_set_error( 'Failed to ' . $_action . ' product\'s meta entry.' );
-				$this->db->trans_rollback();
-				return FALSE;
-
-			endif;
 
 			//	The following items are all handled, and error, in the [mostly] same way
 			//	loopy loop for clarity and consistency.
@@ -728,13 +662,11 @@ class NAILS_Shop_product_model extends NAILS_Model
 					//	Product Variation: Shipping
 					//	===========================
 
-					//	TODO: deprecate this and somehow use the driver to display stuff on the front end.
 					$this->db->set( 'ship_collection_only',		$v->shipping->collection_only );
 
-					if ( $v->id ) :
+					if ( ! empty( $v->id ) ) :
 
 						//	A variation ID exists, find it and update just the specific field.
-
 						foreach( $_current->variations AS $variation ) :
 
 							if ( $variation->id != $v->id ) :
@@ -839,8 +771,14 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 						if ( ! $_rollback ) :
 
+							foreach( $v->meta AS &$meta ) :
+
+								$meta['variation_id'] = $v->id;
+
+							endforeach;
+
 							$this->db->where( 'variation_id', $v->id );
-							if ( ! $this->db->delete( $this->_table_variation_meta ) ) :
+							if ( ! $this->db->delete( $this->_table_variation_product_type_meta ) ) :
 
 								$this->_set_error( 'Failed to clear meta data for variant with label "' . $v->label . '"' );
 								$_rollback = TRUE;
@@ -849,10 +787,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 							if ( ! $_rollback ) :
 
-								$this->db->set( 'variation_id',	$v->id );
-								$this->db->set( (array) $v->meta );
-
-								if ( ! $this->db->insert( $this->_table_variation_meta ) ) :
+								if ( ! $this->db->insert_batch( $this->_table_variation_product_type_meta, $v->meta ) ) :
 
 									$this->_set_error( 'Failed to update meta data for variant with label "' . $v->label . '"' );
 									$_rollback = TRUE;
@@ -1046,13 +981,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 		foreach ( $_products AS $product ) :
 
-			//	Fetch meta data
-			$this->db->where( 'product_id', $product->id );
-			$product->meta = $this->db->get( NAILS_DB_PREFIX . 'shop_product_meta' )->row();
-
-			// --------------------------------------------------------------------------
-
-			//	format
+			//	Format
 			$this->_format_product_object( $product );
 
 			// --------------------------------------------------------------------------
@@ -1149,10 +1078,10 @@ class NAILS_Shop_product_model extends NAILS_Model
 				//	Meta
 				//	====
 
+				$this->db->select( 'a.id,a.meta_field_id,b.label,a.value' );
+				$this->db->join( NAILS_DB_PREFIX . 'shop_product_type_meta_field b', 'a.meta_field_id = b.id' );
 				$this->db->where( 'variation_id', $v->id );
-				$v->meta = $this->db->get( $this->_table_variation_meta )->row();
-
-				unset( $v->meta->variation_id );
+				$v->meta = $this->db->get( $this->_table_variation_product_type_meta . ' a' )->result();
 
 				//	Gallery
 				//	=======
@@ -2140,10 +2069,6 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 */
 	protected function _format_product_object( &$product )
 	{
-		//	Remove meta fields
-		unset( $product->meta->id );
-		unset( $product->meta->product_id );
-
 		//	Type casting
 		$product->id			= (int) $product->id;
 		$product->is_active		= (bool) $product->is_active;

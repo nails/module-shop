@@ -647,8 +647,6 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 		foreach ( $_items AS $item ) :
 
-			$this->db->where( 'product_id', $item->product_id );
-			$item->meta = $this->db->get( NAILS_DB_PREFIX . 'shop_product_meta' )->row();
 			$this->_format_item( $item );
 
 		endforeach;
@@ -713,8 +711,6 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 		foreach ( $_items AS $item ) :
 
-			$this->db->where( 'product_id', $item->product_id );
-			$item->meta = $this->db->get( NAILS_DB_PREFIX . 'shop_product_meta' )->row();
 			$this->_format_item( $item );
 
 		endforeach;
