@@ -211,9 +211,9 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 		if ( app_setting( 'enable_external_products', 'shop' ) ) :
 
-			$_data->is_external				= isset( $data['is_external'] )				? (bool) $data['is_external']			: FALSE;
-			$_data->external_vendor_label	= isset( $data['external_vendor_label'] )	? (bool) $data['external_vendor_label']	: '';
-			$_data->external_vendor_url		= isset( $data['external_vendor_url'] )		? (bool) $data['external_vendor_url']	: '';
+			$_data->is_external				= isset( $data['is_external'] )				? (bool) $data['is_external']		: FALSE;
+			$_data->external_vendor_label	= isset( $data['external_vendor_label'] )	? $data['external_vendor_label']	: '';
+			$_data->external_vendor_url		= isset( $data['external_vendor_url'] )		? $data['external_vendor_url']		: '';
 
 		endif;
 
