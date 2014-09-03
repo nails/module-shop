@@ -32,6 +32,7 @@
 		"nailsapp/module-geo-ip" : "dev-develop",
 		"nailsapp/module-pdf" : "dev-develop",
 		"nailsapp/skin-shop-gettingstarted" : "dev-develop",
+		"nailsapp/shop-shipping-driver-flatrate" : "dev-develop",
 		"omnipay/omnipay": "~2.0"
 	}
 }
