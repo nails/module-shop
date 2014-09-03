@@ -1143,31 +1143,32 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 						$v->meta[$meta->meta_field_id] = $meta;
 
-					else :
+					endif;
 
-						if ( $meta->allow_multiple ) :
+					if ( $meta->allow_multiple ) :
 
-							if ( ! is_array( $v->meta[$meta->meta_field_id]->value ) ) :
+						if ( ! is_array( $v->meta[$meta->meta_field_id]->value ) ) :
 
-								//	Grab the current value and turn `value` into an array
-								$_temp = $v->meta[$meta->meta_field_id]->value;
-								$v->meta[$meta->meta_field_id]->value	= array();
-								$v->meta[$meta->meta_field_id]->value[$_temp]	= $_temp;
-
-							endif;
-
-							$v->meta[$meta->meta_field_id]->value[$meta->value]	= $meta->value;
+							//	Grab the current value and turn `value` into an array
+							$_temp = $v->meta[$meta->meta_field_id]->value;
+							$v->meta[$meta->meta_field_id]->value	= array();
+							$v->meta[$meta->meta_field_id]->value[]	= $_temp;
 
 						else :
 
-							//	Overwrite previous entry
-							$v->meta[$meta->meta_field_id]->value = $meta->value;
+							$v->meta[$meta->meta_field_id]->value[]	= $meta->value;
 
 						endif;
+
+					else :
+
+						//	Overwrite previous entry
+						$v->meta[$meta->meta_field_id]->value = $meta->value;
 
 					endif;
 
 				endforeach;
+
 
 				//	Gallery
 				//	=======
