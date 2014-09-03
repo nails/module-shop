@@ -92,35 +92,86 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
-		//	Set the user, if not defined, or empty, look for the logged in user
-		if ( isset( $basket->contact->email ) && $basket->contact->email ) :
+		/**
+		 * Set the user details. If defined in the order object use them, if not see
+		 * if anyone's logged in, if not still then either bail out or leave blank.
+		 */
 
-			$_order->user_email			= $basket->contact->email;
-			$_order->user_first_name	= $basket->contact->first_name;
-			$_order->user_last_name		= $basket->contact->last_name;
+		//	Email
+		if ( ! empty( $data->contact->email ) ) :
 
-			//	Double check to make sure this isn't a user we can associate with instead
-			$_user = $this->user_model->get_by_email( $_order->user_email );
-
-			if ( $_user ) :
-
-				$_order->user_id = $_user->id;
-
-			endif;
-
-			unset( $_user );
+			$_order->user_email = $data->contact->email;
 
 		elseif ( $this->user_model->is_logged_in() ) :
 
-			$_order->user_id			= active_user( 'id' );
-			$_order->user_email			= active_user( 'email' );
-			$_order->user_first_name	= active_user( 'first_name' );
-			$_order->user_last_name		= active_user( 'last_name' );
+			$_order->user_email = active_user( 'email' );
 
 		else :
 
-			$this->_set_error( 'No user to associate order with.' );
+			$this->_set_error( 'An email address must be supplied' );
 			return FALSE;
+
+		endif;
+
+		//	User ID
+		$_user = $this->user_model->get_by_email( $_order->user_email );
+		if ( $_user ) :
+
+			$_order->user_id = $_user->id;
+
+		elseif ( $this->user_model->is_logged_in() ) :
+
+			$_order->user_id = active_user( 'id' );
+
+		else :
+
+			$_order->user_id = NULL;
+
+		endif;
+		unset($_user);
+
+		//	First name
+		if ( ! empty( $data->contact->first_name ) ) :
+
+			$_order->user_first_name = $data->contact->first_name;
+
+		elseif ( $this->user_model->is_logged_in() ) :
+
+			$_order->user_first_name = active_user( 'first_name' );
+
+		else :
+
+			$_order->user_first_name = NULL;
+
+		endif;
+
+		//	Last name
+		if ( ! empty( $data->contact->last_name ) ) :
+
+			$_order->user_last_name = $data->contact->last_name;
+
+		elseif ( $this->user_model->is_logged_in() ) :
+
+			$_order->user_last_name = active_user( 'last_name' );
+
+		else :
+
+			$_order->user_last_name = NULL;
+
+		endif;
+
+		//	Telephone
+		if ( ! empty( $data->contact->telephone ) ) :
+
+			$_order->user_telephone = $data->contact->telephone;
+
+		elseif ( $this->user_model->is_logged_in() ) :
+
+			$_order->user_telephone = active_user( 'telephone' );
+
+		else :
+
+			$_order->user_telephone = NULL;
 
 		endif;
 
