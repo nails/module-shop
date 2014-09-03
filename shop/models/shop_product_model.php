@@ -339,10 +339,42 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 					if ( ! empty( $value ) ) :
 
-						$_temp					= array();
-						$_temp['meta_field_id']	= $field_id;
-						$_temp['value']			= $value;
-						$_data->variation[$index]->meta[] = $_temp;
+						/**
+						 * Test to see if this field allows multiple values, if it does then explode
+						 * it and create multiple elements, if not, leave as is
+						 */
+
+						foreach( $_product_type_meta AS $meta ) :
+
+							if (  $meta->id == $field_id ) :
+
+								$_allow_multiple = TRUE;
+								break;
+
+							endif;
+
+						endforeach;
+
+						if ( empty( $_allow_multiple ) ) :
+
+							$_temp					= array();
+							$_temp['meta_field_id']	= $field_id;
+							$_temp['value']			= $value;
+							$_data->variation[$index]->meta[] = $_temp;
+
+						else :
+
+							$_values = explode( ',', $value );
+							foreach ( $_values AS $val ) :
+
+								$_temp					= array();
+								$_temp['meta_field_id']	= $field_id;
+								$_temp['value']			= $val;
+								$_data->variation[$index]->meta[] = $_temp;
+
+							endforeach;
+
+						endif;
 
 					endif;
 
@@ -1098,10 +1130,44 @@ class NAILS_Shop_product_model extends NAILS_Model
 				//	Meta
 				//	====
 
-				$this->db->select( 'a.id,a.meta_field_id,b.label,a.value' );
+				$this->db->select( 'a.id,a.meta_field_id,b.label,a.value,b.allow_multiple' );
 				$this->db->join( NAILS_DB_PREFIX . 'shop_product_type_meta_field b', 'a.meta_field_id = b.id' );
 				$this->db->where( 'variation_id', $v->id );
-				$v->meta = $this->db->get( $this->_table_variation_product_type_meta . ' a' )->result();
+				$_meta_raw = $this->db->get( $this->_table_variation_product_type_meta . ' a' )->result();
+
+				//	Merge `allow_multiple` fields into one
+				$v->meta = array();
+				foreach( $_meta_raw AS $meta ) :
+
+					if ( ! isset( $v->meta[$meta->meta_field_id] ) ) :
+
+						$v->meta[$meta->meta_field_id] = $meta;
+
+					else :
+
+						if ( $meta->allow_multiple ) :
+
+							if ( ! is_array( $v->meta[$meta->meta_field_id]->value ) ) :
+
+								//	Grab the current value and turn `value` into an array
+								$_temp = $v->meta[$meta->meta_field_id]->value;
+								$v->meta[$meta->meta_field_id]->value	= array();
+								$v->meta[$meta->meta_field_id]->value[$_temp]	= $_temp;
+
+							endif;
+
+							$v->meta[$meta->meta_field_id]->value[$meta->value]	= $meta->value;
+
+						else :
+
+							//	Overwrite previous entry
+							$v->meta[$meta->meta_field_id]->value = $meta->value;
+
+						endif;
+
+					endif;
+
+				endforeach;
 
 				//	Gallery
 				//	=======
@@ -2405,6 +2471,13 @@ class NAILS_Shop_product_model extends NAILS_Model
 			$_filters = array();
 
 			foreach ( $_meta_fields AS $field ) :
+
+				//	Ignore ones which aren't set as filters
+				if ( empty( $field->is_filter ) ) :
+
+					continue;
+
+				endif;
 
 				$_temp = new stdClass();
 				$_temp->id		= $field->id;
