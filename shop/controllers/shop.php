@@ -48,6 +48,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Sanitise/translate
 		switch ( $this->_product_sort->sort ) :
 
+			//	TODO: Finish sorting by price
 			case 'price_low_high' :	$this->_product_sort->sort_on = $this->shop_product_model->get_property_table_prefix() . '.XXX';		break;
 			case 'price_low_high' :	$this->_product_sort->sort_on = $this->shop_product_model->get_property_table_prefix() . '.XXX';		break;
 			case 'a-z' :			$this->_product_sort->sort_on = $this->shop_product_model->get_property_table_prefix() . '.label';		break;
@@ -281,6 +282,13 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
+		//	Sidebar Filters
+		//	===============
+
+		$this->data['sidebar_filters'] = $this->shop_product_model->get_filters_for_products_in_brand( $this->data['brand']->id, $_data );
+
+		// --------------------------------------------------------------------------
+
 		//	Load views
 		$this->load->view( 'structure/header',								$this->data );
 		$this->load->view( $this->_skin->path . 'views/front/brand/single',	$this->data );
@@ -406,9 +414,10 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Configure Conditionals and Sorting
 		//	==================================
 
-		$_data			= array();
-		$_data['where']	= array();
-		$_data['sort']	= $this->_product_sort->sort_on;
+		$_data				= array();
+		$_data['where']		= array();
+		$_data['sort']		= $this->_product_sort->sort_on;
+		$_data['filter']	= $this->input->get( 'f' );
 
 		// --------------------------------------------------------------------------
 
@@ -433,6 +442,13 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	========
 
 		$this->data['products'] = $this->shop_product_model->get_for_category( $this->data['category']->id, $this->_product_pagination->page, $this->_product_pagination->per_page, $_data );
+
+		// --------------------------------------------------------------------------
+
+		//	Sidebar Filters
+		//	===============
+
+		$this->data['sidebar_filters'] = $this->shop_product_model->get_filters_for_products_in_category( $this->data['category']->id, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -564,6 +580,13 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	========
 
 		$this->data['products'] = $this->shop_product_model->get_for_collection( $this->data['collection']->id, $this->_product_pagination->page, $this->_product_pagination->per_page, $_data );
+
+		// --------------------------------------------------------------------------
+
+		//	Sidebar Filters
+		//	===============
+
+		$this->data['sidebar_filters'] = $this->shop_product_model->get_filters_for_products_in_collection( $this->data['collection']->id, $_data );
 
 		// --------------------------------------------------------------------------
 
@@ -770,6 +793,13 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
+		//	Sidebar Filters
+		//	===============
+
+		$this->data['sidebar_filters'] = $this->shop_product_model->get_filters_for_products_in_range( $this->data['range']->id, $_data );
+
+		// --------------------------------------------------------------------------
+
 		//	Load views
 		$this->load->view( 'structure/header',								$this->data );
 		$this->load->view( $this->_skin->path . 'views/front/range/single',	$this->data );
@@ -901,6 +931,13 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
+		//	Sidebar Filters
+		//	===============
+
+		$this->data['sidebar_filters'] = $this->shop_product_model->get_filters_for_products_in_sale( $this->data['sale']->id, $_data );
+
+		// --------------------------------------------------------------------------
+
 		$this->load->view( 'structure/header',								$this->data );
 		$this->load->view( $this->_skin->path . 'views/front/sale/single',	$this->data );
 		$this->load->view( 'structure/footer',								$this->data );
@@ -1026,6 +1063,13 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	========
 
 		$this->data['products'] = $this->shop_product_model->get_for_tag( $this->data['tag']->id, $this->_product_pagination->page, $this->_product_pagination->per_page, $_data );
+
+		// --------------------------------------------------------------------------
+
+		//	Sidebar Filters
+		//	===============
+
+		$this->data['sidebar_filters'] = $this->shop_product_model->get_filters_for_products_in_tag( $this->data['tag']->id, $_data );
 
 		// --------------------------------------------------------------------------
 

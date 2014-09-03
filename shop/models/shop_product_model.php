@@ -332,16 +332,23 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 			$_data->variation[$index]->meta = array();
 
-			//	Process each field
-			foreach( $_product_type_meta AS $field ) :
+			//	No need to set variation ID, that will be set later on during execution
+			if ( isset( $v['meta'][$_data->type_id] ) ) :
 
-				//	No need to set variation ID, that will be set later on during execution
-				$_temp					= array();
-				$_temp['meta_field_id']	= $field->id;
-				$_temp['value']			= isset( $v['meta'][$field->id] ) ? $v['meta'][$field->id] : NULL;
-				$_data->variation[$index]->meta[] = $_temp;
+				foreach( $v['meta'][$_data->type_id] AS $field_id => $value ) :
 
-			endforeach;
+					if ( ! empty( $value ) ) :
+
+						$_temp					= array();
+						$_temp['meta_field_id']	= $field_id;
+						$_temp['value']			= $value;
+						$_data->variation[$index]->meta[] = $_temp;
+
+					endif;
+
+				endforeach;
+
+			endif;
 
 			//	Pricing
 			//	-------
@@ -517,6 +524,18 @@ class NAILS_Shop_product_model extends NAILS_Model
 			$this->db->set( 'is_external',				$data->is_external );
 			$this->db->set( 'external_vendor_label',	$data->external_vendor_label );
 			$this->db->set( 'external_vendor_url',		$data->external_vendor_url );
+
+		endif;
+
+		if ( empty( $data->id ) ) :
+
+			$this->db->set( 'created',			'NOW()', FALSE );
+
+			if ( $this->user_model->is_logged_in() ) :
+
+				$this->db->set( 'created_by',	active_user( 'id' ) );
+
+			endif;
 
 		endif;
 
@@ -778,6 +797,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 							endforeach;
 
 							$this->db->where( 'variation_id', $v->id );
+
 							if ( ! $this->db->delete( $this->_table_variation_product_type_meta ) ) :
 
 								$this->_set_error( 'Failed to clear meta data for variant with label "' . $v->label . '"' );
@@ -785,7 +805,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 							endif;
 
-							if ( ! $_rollback ) :
+							if ( ! $_rollback && ! empty( $v->meta ) ) :
 
 								if ( ! $this->db->insert_batch( $this->_table_variation_product_type_meta, $v->meta ) ) :
 
@@ -1625,9 +1645,13 @@ class NAILS_Shop_product_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Selects
-		$this->db->select( $this->_table_prefix . '.*' );
-		$this->db->select( 'pt.slug type_slug, pt.label type_label, pt.max_per_order type_max_per_order, pt.is_physical type_is_physical' );
-		$this->db->select( 'tr.label tax_rate_label, tr.rate tax_rate_rate' );
+		if ( empty( $data['_do_not_select'] ) ) :
+
+			$this->db->select( $this->_table_prefix . '.*' );
+			$this->db->select( 'pt.slug type_slug, pt.label type_label, pt.max_per_order type_max_per_order, pt.is_physical type_is_physical' );
+			$this->db->select( 'tr.label tax_rate_label, tr.rate tax_rate_rate' );
+
+		endif;
 
 		//	Joins
 		$this->db->join( $this->_table_type . ' pt', 'p.type_id = pt.id' );
@@ -1820,6 +1844,38 @@ class NAILS_Shop_product_model extends NAILS_Model
 			$_where .= ')';
 
 			$this->db->where( $_where );
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		//	Filtering?
+		//	This is a beastly one, only do stuff if it's been requested
+
+		if ( empty( $data['_ignore_filters'] ) && ! empty( $data['filter'] ) ) :
+
+			//	Join the avriation table
+			$this->db->join( $this->_table_variation . ' spv', $this->_table_prefix . '.id = spv.product_id' );
+
+			foreach ( $data['filter'] AS $meta_field_id => $values ) :
+
+				$_values = $values;
+				$_values = array_filter( $_values );
+				$_values = array_unique( $_values );
+
+				foreach( $_values AS &$value ) :
+
+					$value = $this->db->escape( $value );
+
+				endforeach;
+
+				$_values = implode( ',', $_values );
+
+				$this->db->join( $this->_table_variation_product_type_meta . ' spvptm' . $meta_field_id , 'spvptm' . $meta_field_id . '.variation_id = spv.id AND spvptm' . $meta_field_id . '.meta_field_id = \'' . $meta_field_id . '\' AND spvptm' . $meta_field_id . '.value IN (' . $_values . ')' );
+
+			endforeach;
+
+			$this->db->group_by( $this->_table_prefix . '.id' );
 
 		endif;
 	}
@@ -2255,6 +2311,191 @@ class NAILS_Shop_product_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		return array_filter( (array) $_recently_viewed );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function get_filters_for_products( $data )
+	{
+		if ( ! $this->_table ) :
+
+			show_error( get_called_class() . '::count_all() Table variable not set' );
+
+		else :
+
+			$_table	 = $this->_table_prefix ? $this->_table . ' ' . $this->_table_prefix : $this->_table;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		/**
+		 * Get all variations which appear within this result set; then determine which
+		 * product types these variations belong too. From that we can work out which
+		 * filters need fetched, their values and (maybe) the number of products each
+		 * filter value contains.
+		 */
+
+		//	Fetch the products in the result set
+		$data['_do_not_select']		= TRUE;
+		$data['_ignore_filters']	= TRUE;
+		$this->_getcount_common( $data, 'GET_FILTERS_FOR_PRODUCTS' );
+		$this->db->select( 'p.id, p.type_id' );
+		$_product_ids_raw	= $this->db->get( $_table )->result();
+		$_product_ids		= array();
+		$_product_type_ids	= array();
+
+		foreach( $_product_ids_raw AS $pid ) :
+
+			$_product_ids[]			= $pid->id;
+			$_product_type_ids[]	= $pid->type_id;
+
+		endforeach;
+
+		$_product_ids		= array_unique( $_product_ids );
+		$_product_ids		= array_filter( $_product_ids );
+		$_product_type_ids	= array_unique( $_product_type_ids );
+		$_product_type_ids	= array_filter( $_product_type_ids );
+
+		unset( $_product_ids_raw );
+
+		if ( empty( $_product_ids ) ) :
+
+			//	No products returned, nothing else to do
+			return array();
+
+		else :
+
+			/**
+			 * Now fetch the variants in the result set, we'll use these
+			 * to restrict the values we show in the filters
+			 */
+
+			$this->db->select( 'id' );
+			$this->db->where_in( 'product_id', $_product_ids );
+			$_variant_ids_raw	= $this->db->get( $this->_table_variation )->result();
+			$_variant_ids		= array();
+
+			foreach( $_variant_ids_raw AS $vid ) :
+
+				$_variant_ids[] = $vid->id;
+
+			endforeach;
+
+			$_variant_ids = array_unique( $_variant_ids );
+			$_variant_ids = array_filter( $_variant_ids );
+
+			unset( $_variant_ids_raw );
+
+			/**
+			 * For each product type, get it's associated meta content and then fetch
+			 * the distinct values from the values table
+			 */
+
+			$this->load->model( 'shop/shop_product_type_meta_model' );
+			$_meta_fields = $this->shop_product_type_meta_model->get_by_product_type_ids( $_product_type_ids );
+
+			/**
+			 * Now start putting together the filters array; this is basically just the
+			 * field label & ID with all potential values of the result set.
+			 */
+
+			$_filters = array();
+
+			foreach ( $_meta_fields AS $field ) :
+
+				$_temp = new stdClass();
+				$_temp->id		= $field->id;
+				$_temp->label	= $field->label;
+
+				$this->db->select( 'DISTINCT(`value`) `value`, COUNT(variation_id) product_count' );
+				$this->db->where( 'meta_field_id', $field->id );
+				$this->db->where( 'value !=', '' );
+				$this->db->where_in( 'variation_id', $_variant_ids );
+				$this->db->group_by( 'value' );
+				$_temp->values = $this->db->get( $this->_table_variation_product_type_meta )->result();
+
+				if ( ! empty( $_temp->values ) ) :
+
+					$_filters[] = $_temp;
+
+				endif;
+
+				unset( $_temp );
+
+			endforeach;
+
+			unset( $_meta_fields );
+
+			// --------------------------------------------------------------------------
+
+			return $_filters;
+
+		endif;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function get_filters_for_products_in_brand( $brand_id, $data = array() )
+	{
+		$data['brand_id'] = $brand_id;
+		return $this->get_filters_for_products( $data );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function get_filters_for_products_in_category( $category_id, $data = array() )
+	{
+		//	Fetch this category's children also
+		$this->load->model( 'shop/shop_category_model' );
+		$data['category_id'] = array_merge( array( $category_id ), $this->shop_category_model->get_ids_of_children( $category_id ) );
+		return $this->get_filters_for_products( $data );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function get_filters_for_products_in_collection( $collection_id, $data = array() )
+	{
+		$data['collection_id'] = $collection_id;
+		return $this->get_filters_for_products( $data );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function get_filters_for_products_in_range( $range_id, $data = array() )
+	{
+		$data['range_id'] = $range_id;
+		return $this->get_filters_for_products( $data );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function get_filters_for_products_in_sale( $sale_id, $data = array() )
+	{
+		$data['sale_id'] = $sale_id;
+		return $this->get_filters_for_products( $data );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function get_filters_for_products_in_tag( $tag_id, $data = array() )
+	{
+		$data['tag_id'] = $tag_id;
+		return $this->get_filters_for_products( $data );
 	}
 
 

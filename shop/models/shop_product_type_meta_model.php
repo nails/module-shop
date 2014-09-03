@@ -59,9 +59,29 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
 
 	public function get_by_product_type_id( $type_id )
 	{
+		$this->db->where( $this->_table_taxonomy_prefix . '.product_type_id', $type_id );
+		return $this->_get_by_product_type();
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	public function get_by_product_type_ids( $type_ids )
+	{
+		$this->db->where_in( $this->_table_taxonomy_prefix . '.product_type_id', $type_ids );
+		return $this->_get_by_product_type();
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	protected function _get_by_product_type()
+	{
 		$this->db->select( $this->_table_prefix . '.*' );
 		$this->db->join( $this->_table  . ' ' . $this->_table_prefix, $this->_table_prefix . '.id = ' . $this->_table_taxonomy_prefix . '.meta_field_id' );
-		$this->db->where( $this->_table_taxonomy_prefix . '.product_type_id', $type_id );
+		$this->db->group_by( $this->_table_prefix . '.id' );
 		$_result = $this->db->get( $this->_table_taxonomy . ' ' . $this->_table_taxonomy_prefix )->result();
 
 		foreach ( $_result AS $result ) :

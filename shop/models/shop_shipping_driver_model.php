@@ -178,7 +178,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 					//	All good!
 
 					//	Set the slug
-					$_config->slug = $shipping_driver;
+					$_config->slug = strtolower( $shipping_driver );
 
 					//	Set the path
 					$_config->path = $_path . $shipping_driver . '/';
