@@ -39,7 +39,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
 
 			if ( isset( $data['include_associated_product_types'] ) ) :
 
-				$this->db->select( 'pt.id,pt.slug,pt.label' );
+				$this->db->select( 'pt.id,pt.label' );
 				$this->db->join( NAILS_DB_PREFIX . 'shop_product_type pt', 'pt.id = ' . $this->_table_taxonomy_prefix . '.product_type_id' );
 				$this->db->group_by( 'pt.id' );
 				$this->db->order_by( 'pt.label' );

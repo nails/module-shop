@@ -1715,7 +1715,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 		if ( empty( $data['_do_not_select'] ) ) :
 
 			$this->db->select( $this->_table_prefix . '.*' );
-			$this->db->select( 'pt.slug type_slug, pt.label type_label, pt.max_per_order type_max_per_order, pt.is_physical type_is_physical' );
+			$this->db->select( 'pt.label type_label, pt.max_per_order type_max_per_order, pt.is_physical type_is_physical' );
 			$this->db->select( 'tr.label tax_rate_label, tr.rate tax_rate_rate' );
 
 		endif;
@@ -2200,13 +2200,11 @@ class NAILS_Shop_product_model extends NAILS_Model
 		//	Product type
 		$product->type					= new stdClass();
 		$product->type->id				= (int) $product->type_id;
-		$product->type->slug			= $product->type_slug;
 		$product->type->label			= $product->type_label;
 		$product->type->max_per_order	= (int) $product->type_max_per_order;
 		$product->type->is_physical		= $product->type_is_physical;
 
 		unset( $product->type_id );
-		unset( $product->type_slug );
 		unset( $product->type_label );
 		unset( $product->type_max_per_order );
 		unset( $product->type_is_physical );

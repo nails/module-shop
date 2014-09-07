@@ -681,7 +681,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 	public function get_items_for_order( $order_id )
 	{
 		$this->db->select( 'op.*' );
-		$this->db->select( 'pt.id pt_id, pt.slug pt_slug, pt.label pt_label, pt.ipn_method pt_ipn_method' );
+		$this->db->select( 'pt.id pt_id, pt.label pt_label, pt.ipn_method pt_ipn_method' );
 		$this->db->select( 'tr.id tax_rate_id, tr.label tax_rate_label, tr.rate tax_rate_rate' );
 		$this->db->select( 'v.sku v_sku' );
 
@@ -725,12 +725,12 @@ class NAILS_Shop_order_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	public function get_items_for_user( $user_id, $email, $type = NULL )
+	public function get_items_for_user( $user_id, $email )
 	{
 		$this->db->select( 'op.id,op.product_id,op.quantity,op.title,op.price,op.sale_price,op.tax,op.shipping,op.shipping_tax,op.total' );
 		$this->db->select( 'op.price_render,op.sale_price_render,op.tax_render,op.shipping_render,op.shipping_tax_render,op.total_render' );
 		$this->db->select( 'op.was_on_sale,op.processed,op.refunded,op.refunded_date,op.extra_data' );
-		$this->db->select( 'pt.id pt_id, pt.slug pt_slug, pt.label pt_label, pt.ipn_method pt_ipn_method' );
+		$this->db->select( 'pt.id pt_id, pt.label pt_label, pt.ipn_method pt_ipn_method' );
 		$this->db->select( 'tr.id tax_rate_id, tr.label tax_rate_label, tr.rate tax_rate_rate' );
 
 		$this->db->join( NAILS_DB_PREFIX . 'shop_order o', 'o.id = op.order_id', 'LEFT' );
@@ -740,20 +740,6 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 		$this->db->where( '(o.user_id = ' . $user_id . ' OR o.user_email = \'' . $email . '\')' );
 		$this->db->where( 'o.status', 'PAID' );
-
-		if ( $type ) :
-
-			if ( is_numeric( $type ) ) :
-
-				$this->db->where( 'pt.id', $type );
-
-			else :
-
-				$this->db->where( 'pt.slug', $type );
-
-			endif;
-
-		endif;
 
 		$_items = $this->db->get( NAILS_DB_PREFIX . 'shop_order_product op' )->result();
 
@@ -1357,12 +1343,10 @@ class NAILS_Shop_order_model extends NAILS_Model
 		//	Product type
 		$item->type				= new stdClass();
 		$item->type->id			= (int) $item->pt_id;
-		$item->type->slug		= $item->pt_slug;
 		$item->type->label		= $item->pt_label;
 		$item->type->ipn_method	= $item->pt_ipn_method;
 
 		unset( $item->pt_id );
-		unset( $item->pt_slug );
 		unset( $item->pt_label );
 		unset( $item->pt_ipn_method );
 
