@@ -118,7 +118,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 	public function add()
 	{
 		$_variant_id	= $this->input->get_post( 'variant_id' );
-		$_quantity		= $this->input->get_post( 'quantity' ) ? $this->input->get_post( 'quantity' ) : 1;
+		$_quantity		= (int) $this->input->get_post( 'quantity' );
 
 		if ( $this->shop_basket_model->add( $_variant_id, $_quantity ) ) :
 

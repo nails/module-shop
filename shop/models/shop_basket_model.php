@@ -308,6 +308,15 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
+		if ( $quantity < 1 ) :
+
+			$this->_set_error( 'Quantity must be greater than 0.' );
+			return FALSE;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
 		$this->load->model( 'shop/shop_product_model' );
 
 		//	Check if item is already in the basket.
@@ -357,6 +366,16 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 		//	Check product is active
 		if ( ! $_product->is_active ) :
+
+			$this->_set_error( 'Product is not available.' );
+			return FALSE;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		//	Check there are items
+		if ( ! is_null( $_variant->quantity_available ) && $_variant->quantity_available <= 0 ) :
 
 			$this->_set_error( 'Product is not available.' );
 			return FALSE;

@@ -277,6 +277,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 			//	Stock
 			//	-----
+
 			$_data->variation[$index]->stock_status = isset( $v['stock_status'] ) ? $v['stock_status'] : 'OUT_OF_STOCK';
 
 			switch ( $_data->variation[$index]->stock_status ) :
@@ -304,6 +305,19 @@ class NAILS_Shop_product_model extends NAILS_Model
 				break;
 
 			endswitch;
+
+			/**
+			 * If the status is IN_STOCK but there is no stock, then we should forcibly set
+			 * as if OUT_OF_STOCK was set.
+			 */
+
+			if ( $_data->variation[$index]->stock_status == 'IN_STOCK' && $_data->variation[$index]->quantity_available <= 0 ) :
+
+				$_data->variation[$index]->stock_status			= 'OUT_OF_STOCK';
+				$_data->variation[$index]->quantity_available	= NULL;
+				$_data->variation[$index]->lead_time			= NULL;
+
+			endif;
 
 			//	Out of Stock Behaviour
 			//	----------------------
@@ -969,8 +983,6 @@ class NAILS_Shop_product_model extends NAILS_Model
 				$this->shop_inform_product_available_model->inform( $data->id, $_variants_available );
 
 			endif;
-
-
 
 			// --------------------------------------------------------------------------
 
@@ -2616,16 +2628,14 @@ class NAILS_Shop_product_model extends NAILS_Model
 		$variation->shipping->collection_only	= (bool) $variation->ship_collection_only;
 		$variation->shipping->driver_data		= @unserialize( $variation->ship_driver_data );
 
-		unset( $variation->ship_length );
-		unset( $variation->ship_width );
-		unset( $variation->ship_height );
-		unset( $variation->ship_measurement_unit );
-		unset( $variation->ship_weight );
-		unset( $variation->ship_weight_unit );
-		unset( $variation->ship_collection_only );
-		unset( $variation->ship_driver_data );
-
 		//	Stock status
+		if ( $variation->stock_status == 'IN_STOCK' && ! is_null( $variation->quantity_available ) && $variation->quantity_available <= 0 ) :
+
+			//	Item is marked as IN_STOCK, but there's no stock to sell, set as out of stock so the `out_of_stock_behaviour` kicks in.
+			$variation->stock_status = 'OUT_OF_STOCK';
+
+		endif;
+
 		if ( $variation->stock_status == 'OUT_OF_STOCK' ) :
 
 			switch ( $variation->out_of_stock_behaviour ) :
