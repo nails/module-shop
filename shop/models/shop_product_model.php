@@ -289,13 +289,6 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 				break;
 
-				case 'TO_ORDER' :
-
-					$_data->variation[$index]->quantity_available	= NULL;
-					$_data->variation[$index]->lead_time			= isset( $v['lead_time'] ) ? $v['lead_time'] : NULL;
-
-				break;
-
 				case 'OUT_OF_STOCK' :
 
 					//	Shhh, be vewy qwiet, we're huntin' wabbits.
