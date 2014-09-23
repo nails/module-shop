@@ -1177,7 +1177,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		if ( method_exists( $this, $_method ) ) :
+		if ( method_exists( $this, $_method ) && substr( $_method, 0, 1 ) != '_' ) :
 
 			$this->{$_method}();
 
