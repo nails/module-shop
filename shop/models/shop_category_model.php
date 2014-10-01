@@ -647,6 +647,57 @@ class NAILS_Shop_category_model extends NAILS_Model
 	{
 		return site_url( $this->_shop_url . 'category/' . $slug );
 	}
+	
+	
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * If the seo_description or seo_keywords fields are empty this method will
+	 * generate some content for category.
+	 * @param  object $category A category object
+	 * @return void
+	 */
+	public function generate_seo_content( &$category )
+	{
+		/**
+		 * Autogenerate some SEO content if it's not been set
+		 * Buy {{PRODUCT}} at {{STORE}}
+		 **/
+
+		if ( empty( $category->seo_description ) ) :
+
+			//	Base string
+			$category->seo_description = 'Buy ' . $category->label . ' at ' . APP_NAME;
+			$category->seo_description = htmlentities( $category->seo_description );
+
+		endif;
+
+		if ( empty( $category->seo_keywords ) ) :
+
+			//	Extract common keywords
+			$this->lang->load( 'shop/shop' );
+			$_common = explode( ',', lang( 'shop_common_words' ) );
+			$_common = array_unique( $_common );
+			$_common = array_filter( $_common );
+
+			//	Remove them and return the most popular words
+			$_description = strtolower( $category->description );
+			$_description = str_replace( "\n", ' ', strip_tags( $_description ) );
+			$_description = str_word_count( $_description, 1 );
+			$_description = array_count_values( $_description	);
+			arsort( $_description );
+			$_description = array_keys( $_description );
+			$_description = array_diff( $_description, $_common );
+			$_description = array_slice( $_description, 0, 10 );
+
+			$category->seo_keywords = implode( ',', $_description );
+
+			//	Encode entities
+			$category->seo_keywords = htmlentities( $category->seo_keywords );
+
+		endif;
+	}
 
 
 	// --------------------------------------------------------------------------
