@@ -1774,7 +1774,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 		//	======
 
 		//	Oh hey there, if there's a brand_id filter set then that counts too.
-		if ( ! empty( $data['filter']['brand_id'] ) ) :
+		if ( empty( $data['_ignore_filters'] ) && ! empty( $data['filter']['brand_id'] ) ) :
 
 			if ( ! empty( $data['brand_id'] ) ) :
 
