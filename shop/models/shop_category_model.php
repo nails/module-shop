@@ -647,8 +647,8 @@ class NAILS_Shop_category_model extends NAILS_Model
 	{
 		return site_url( $this->_shop_url . 'category/' . $slug );
 	}
-	
-	
+
+
 	// --------------------------------------------------------------------------
 
 
@@ -662,7 +662,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 	{
 		/**
 		 * Autogenerate some SEO content if it's not been set
-		 * Buy {{PRODUCT}} at {{STORE}}
+		 * Buy {{CATEGORY}} at {{STORE}}
 		 **/
 
 		if ( empty( $category->seo_description ) ) :
