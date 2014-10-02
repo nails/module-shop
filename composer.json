@@ -1,10 +1,16 @@
 {
 	"name": "nailsapp/module-shop",
-	"keywords": ["Nails","Shed Collective","CodeIgniter", "Shop Module"],
+	"keywords":
+		["Nails",
+		"Shed Collective",
+		"CodeIgniter",
+		"Shop Module"
+	],
 	"homepage": "http://nailsapp.co.uk/modules/shop",
 	"description": "This the \"Shop\" module for Nails.",
-	"license":"MIT",
-	"authors": [
+	"license": "MIT",
+	"authors":
+	[
 		{
 			"name": "Pablo de la Pena",
 			"email": "p@shedcollective.org",
@@ -18,21 +24,21 @@
 			"role": "Developer"
 		}
 	],
-	"support": {
+	"support":
+	{
 		"email": "hello@shedcollective.org"
 	},
 	"require":
 	{
-		"php": ">=5.4.0",
-		"nailsapp/common" : "dev-develop",
-		"nailsapp/module-barcode" : "dev-develop",
-		"nailsapp/module-cdn" : "dev-develop",
-		"nailsapp/module-curl" : "dev-develop",
-		"nailsapp/module-email" : "dev-develop",
-		"nailsapp/module-geo-ip" : "dev-develop",
-		"nailsapp/module-pdf" : "dev-develop",
-		"nailsapp/skin-shop-gettingstarted" : "dev-develop",
-		"nailsapp/shop-shipping-driver-flatrate" : "dev-develop",
+		"nailsapp/common": "dev-develop",
+		"nailsapp/module-barcode": "dev-develop",
+		"nailsapp/module-cdn": "dev-develop",
+		"nailsapp/module-curl": "dev-develop",
+		"nailsapp/module-email": "dev-develop",
+		"nailsapp/module-geo-ip": "dev-develop",
+		"nailsapp/module-pdf": "dev-develop",
+		"nailsapp/skin-shop-gettingstarted": "dev-develop",
+		"nailsapp/shop-shipping-driver-flatrate": "dev-develop",
 		"omnipay/omnipay": "~2.0"
 	}
 }
