@@ -1773,6 +1773,31 @@ class NAILS_Shop_product_model extends NAILS_Model
 		//	Brands
 		//	======
 
+		//	Oh hey there, if there's a brand_id filter set then that counts too.
+		if ( ! empty( $data['filter']['brand_id'] ) ) :
+
+			if ( ! empty( $data['brand_id'] ) ) :
+
+				//	Already being set, apend the filter brand(s)
+				if ( ! is_array( $data['brand_id'] ) ) :
+
+					$data['brand_id'] = array( $data['brand_id'] );
+
+				endif;
+
+			else :
+
+				$data['brand_id'] = $data['filter']['brand_id'];
+
+			endif;
+
+			$data['brand_id'] = array_merge( $data['brand_id'], $data['filter']['brand_id'] );
+			$data['brand_id'] = array_unique( $data['brand_id'] );
+			$data['brand_id'] = array_filter( $data['brand_id'] );
+			$data['brand_id'] = array_map( 'intval', $data['brand_id'] );
+
+		endif;
+
 		if ( ! empty( $data['brand_id'] ) ) :
 
 			$_where = $this->_table_prefix . '.id IN ( SELECT product_id FROM ' . $this->_table_brand . ' WHERE brand_id ';
@@ -1804,7 +1829,8 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 			if ( is_array( $data['category_id'] ) ) :
 
-				$category_ids = array_map( array( $this->db, 'escape' ), $data['category_id'] );
+				$category_ids = array_map( 'intval', $data['category_id'] );
+				$category_ids = array_map( array( $this->db, 'escape' ), $category_ids );
 				$_where .= 'IN (' . implode( ',', $category_ids ) . ')';
 
 			else :
@@ -1829,7 +1855,8 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 			if ( is_array( $data['collection_id'] ) ) :
 
-				$collection_ids = array_map( array( $this->db, 'escape' ), $data['collection_id'] );
+				$collection_ids = array_map( 'intval', $data['collection_id'] );
+				$collection_ids = array_map( array( $this->db, 'escape' ), $collection_ids );
 				$_where .= 'IN (' . implode( ',', $collection_ids ) . ')';
 
 			else :
@@ -1854,7 +1881,8 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 			if ( is_array( $data['range_id'] ) ) :
 
-				$range_ids = array_map( array( $this->db, 'escape' ), $data['range_id'] );
+				$range_ids = array_map( 'intval', $data['range_id'] );
+				$range_ids = array_map( array( $this->db, 'escape' ), $range_ids );
 				$_where .= 'IN (' . implode( ',', $range_ids ) . ')';
 
 			else :
@@ -1879,7 +1907,8 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 			if ( is_array( $data['sale_id'] ) ) :
 
-				$sale_ids = array_map( array( $this->db, 'escape' ), $data['sale_id'] );
+				$sale_ids = array_map( 'intval', $data['sale_id'] );
+				$sale_ids = array_map( array( $this->db, 'escape' ), $sale_ids );
 				$_where .= 'IN (' . implode( ',', $sale_ids ) . ')';
 
 			else :
@@ -1904,7 +1933,8 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 			if ( is_array( $data['tag_id'] ) ) :
 
-				$tag_ids = array_map( array( $this->db, 'escape' ), $data['tag_id'] );
+				$tag_ids = array_map( 'intval', $data['tag_id'] );
+				$tag_ids = array_map( array( $this->db, 'escape' ), $tag_ids );
 				$_where .= 'IN (' . implode( ',', $tag_ids ) . ')';
 
 			else :
@@ -1921,8 +1951,10 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
-		//	Filtering?
-		//	This is a beastly one, only do stuff if it's been requested
+		/**
+		 * Filtering?
+		 * This is a beastly one, only do stuff if it's been requested
+		 */
 
 		if ( empty( $data['_ignore_filters'] ) && ! empty( $data['filter'] ) ) :
 
@@ -1931,16 +1963,17 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 			foreach ( $data['filter'] AS $meta_field_id => $values ) :
 
+				if ( ! is_numeric( $meta_field_id ) ) :
+
+					continue;
+
+				endif;
+
 				$_values = $values;
 				$_values = array_filter( $_values );
 				$_values = array_unique( $_values );
-
-				foreach( $_values AS &$value ) :
-
-					$value = $this->db->escape( $value );
-
-				endforeach;
-
+				$_values = array_map( 'intval', $_values );
+				$_values = array_map( array( $this->db, 'escape' ), $_values );
 				$_values = implode( ',', $_values );
 
 				$this->db->join( $this->_table_variation_product_type_meta . ' spvptm' . $meta_field_id , 'spvptm' . $meta_field_id . '.variation_id = spv.id AND spvptm' . $meta_field_id . '.meta_field_id = \'' . $meta_field_id . '\' AND spvptm' . $meta_field_id . '.value IN (' . $_values . ')' );
@@ -2401,6 +2434,10 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
+		$_filters = array();
+
+		// --------------------------------------------------------------------------
+
 		/**
 		 * Get all variations which appear within this result set; then determine which
 		 * product types these variations belong too. From that we can work out which
@@ -2431,12 +2468,34 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 		unset( $_product_ids_raw );
 
-		if ( empty( $_product_ids ) ) :
+		if ( ! empty( $_product_ids ) ) :
 
-			//	No products returned, nothing else to do
-			return array();
+			/**
+			 * Brand apply to most products, include a brand filter if we're not looking
+			 * at a brand page
+			 */
 
-		else :
+			if ( ! isset( $data['brand_id'] ) ) :
+
+				$this->db->select( 'sb.id value, sb.label, COUNT(spb.product_id) product_count' );
+				$this->db->join( NAILS_DB_PREFIX . 'shop_brand sb', 'sb.id = spb.brand_id' );
+				$this->db->where_in( 'spb.product_id', $_product_ids );
+				$this->db->group_by( 'sb.id' );
+				$this->db->order_by( 'sb.label' );
+				$_result = $this->db->get( $this->_table_brand . ' spb' )->result();
+
+				if ( $_result ) :
+
+					$_filters[0]			= new stdClass();
+					$_filters[0]->id		= 'brand_id';
+					$_filters[0]->label		= 'Brands';
+					$_filters[0]->values	= $_result;
+
+				endif;
+
+			endif;
+
+			// --------------------------------------------------------------------------
 
 			/**
 			 * Now fetch the variants in the result set, we'll use these
@@ -2468,11 +2527,9 @@ class NAILS_Shop_product_model extends NAILS_Model
 			$_meta_fields = $this->shop_product_type_meta_model->get_by_product_type_ids( $_product_type_ids );
 
 			/**
-			 * Now start putting together the filters array; this is basically just the
+			 * Now start adding to the filters array; this is basically just the
 			 * field label & ID with all potential values of the result set.
 			 */
-
-			$_filters = array();
 
 			foreach ( $_meta_fields AS $field ) :
 
@@ -2496,6 +2553,12 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 				if ( ! empty( $_temp->values ) ) :
 
+					foreach( $_temp->values AS $v ) :
+
+						$v->label = $v->value;
+
+					endforeach;
+
 					$_filters[] = $_temp;
 
 				endif;
@@ -2506,11 +2569,11 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 			unset( $_meta_fields );
 
-			// --------------------------------------------------------------------------
-
-			return $_filters;
-
 		endif;
+
+		// --------------------------------------------------------------------------
+
+		return $_filters;
 	}
 
 

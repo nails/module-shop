@@ -394,7 +394,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	============================
 
 		$this->shop_category_model->generate_seo_content( $this->data['category'] );
-		
+
 		//	SEO
 		//	===
 		$this->data['page']->title = $this->_shop_name . ': Category: "' . $this->data['category']->label . '"';
