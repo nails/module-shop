@@ -130,8 +130,6 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 				if ( $_order ) :
 
-					//	Get the code
-
 					//	Order created successfully proceed to payment
 					redirect( $this->_shop_url . 'checkout/payment/' . $_order->ref . '/' . $_order->code );
 
@@ -153,6 +151,11 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 		// --------------------------------------------------------------------------
 
 		$this->data['page']->title = $this->_shop_name . ': Checkout';
+
+		// --------------------------------------------------------------------------
+
+		$this->load->model( 'system/country_model' );
+		$this->data['countries_flat'] = $this->country_model->get_all_flat();
 
 		// --------------------------------------------------------------------------
 
@@ -205,8 +208,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 			else :
 
 				$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> something went wrong during checkout. ' . $this->shop_payment_gateway_model->last_error() );
-				dump($this->shop_payment_gateway_model->last_error());
-				dumpanddie($this->_shop_url . 'checkout' );
+				redirect($this->_shop_url . 'checkout' );
 
 			endif;
 

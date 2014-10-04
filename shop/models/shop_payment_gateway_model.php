@@ -89,6 +89,34 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
 
 	/**
+	 * Returns the correct casing for a payment gateway
+	 * @param  string $name The payment gateway to retrieve
+	 * @return mixed        String on success, NULL on failure
+	 */
+	public function get_correct_casing( $name )
+	{
+		$_gateways	= $this->get_available();
+		$_name		= NULL;
+
+		foreach( $_gateways AS $gateway ) :
+
+			if ( trim( strtolower( $name ) ) == strtolower( $gateway ) ) :
+
+				$_name = $gateway;
+				break;
+
+			endif;
+
+		endforeach;
+
+		return $_name;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
 	 * Attempts to make a payment for the order
 	 * @param  int    $order_id The order to make a payment against.
 	 * @param  string $gateway  the gateway to use.
@@ -96,15 +124,18 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 	 */
 	public function do_payment( $order_id, $gateway )
 	{
-		$_enabled_gateways = $this->get_enabled();
+		$_enabled_gateways	= $this->get_enabled();
+		$_gateway_name		= $this->get_correct_casing( $gateway );
 
-		if ( array_search( $gateway, $_enabled_gateways ) === FALSE ) :
+		if ( empty( $_gateway_name ) || array_search( $_gateway_name, $_enabled_gateways ) === FALSE ) :
 
 			$this->_set_error( '"' . $gateway . '" is not an enabled Payment Gatway.' );
 			return FALSE;
 
 		endif;
 
+		$this->load->model( 'shop/shop_model' );
+		$this->load->model( 'shop/shop_order_model' );
 		$_order = $this->shop_order_model->get_by_id( $order_id );
 
 		if ( ! $_order || $_order->status != 'UNPAID' ) :
@@ -117,17 +148,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Prepare the gateway
-		if ( method_exists( $this, '_prepare_gateway_' . strtolower( $gateway ) ) ) :
-
-			$_gateway = $this->{'_prepare_gateway_' . strtolower( $gateway )}();
-
-		else :
-
-			$this->_set_error( '"' . $gateway . '" is not a supported gateway.' );
-			log_message( 'error', '"' . $gateway . '" is considered supported but no handling method was found.' );
-			return FALSE;
-
-		endif;
+		$_gateway = $this->_prepare_gateway( $_gateway_name );
 
 		// --------------------------------------------------------------------------
 
@@ -142,12 +163,14 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 		$_data['billingPostcode']	= $_order->billing_address->postcode;
 		$_data['billingState']		= $_order->billing_address->state;
 		$_data['billingCountry']	= $_order->billing_address->country;
-		$_data['shippingAddress1']	= $_order->shipping_address->line_1;;
-		$_data['shippingAddress2']	= $_order->shipping_address->line_2;;
-		$_data['shippingCity']		= $_order->shipping_address->town;;
-		$_data['shippingPostcode']	= $_order->shipping_address->postcode;;
-		$_data['shippingState']		= $_order->shipping_address->state;;
-		$_data['shippingCountry']	= $_order->shipping_address->country;;
+		$_data['billingPhone']		= $_order->user->telephone;
+		$_data['shippingAddress1']	= $_order->shipping_address->line_1;
+		$_data['shippingAddress2']	= $_order->shipping_address->line_2;
+		$_data['shippingCity']		= $_order->shipping_address->town;
+		$_data['shippingPostcode']	= $_order->shipping_address->postcode;
+		$_data['shippingState']		= $_order->shipping_address->state;
+		$_data['shippingCountry']	= $_order->shipping_address->country;
+		$_data['shippingPhone']		= $_order->user->telephone;
 
 		$_card = new CreditCard( $_data );
 
@@ -162,7 +185,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
 		//	Set the return URL
 		$_shop_url = app_setting( 'url', 'shop' ) ? app_setting( 'url', 'shop' ) : 'shop/';
-		$_data['returnUrl']		= site_url( $_shop_url . 'checkout/processing/' . $_order->ref . '/' . $_order->code );
+		$_data['returnUrl'] = site_url( $_shop_url . 'checkout/processing/' . $_order->ref . '/' . $_order->code );
 
 		// --------------------------------------------------------------------------
 
@@ -197,37 +220,119 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	protected function _prepare_gateway_worldpay()
+	public function complete_payment( $gateway )
 	{
-		//	Fetch credentials
-		$_installation_id	= app_setting( 'omnipay_WorldPay_installationId',	'shop' );
-		$_account_id		= app_setting( 'omnipay_WorldPay_accountId', 		'shop' );
-		$_secret_word		= app_setting( 'omnipay_WorldPay_secretWord',		'shop' );
-		$_callback_password	= app_setting( 'omnipay_WorldPay_callbackPassword',	'shop' );
+		$_gateway_name = $this->get_correct_casing( $gateway );
 
-		//	Testing, or no?
-		$_test_mode = ENVIRONMENT == 'PRODUCTION' ? FALSE : TRUE;
+		if ( empty( $_gateway_name ) ) :
+
+			$this->_set_error( '"' . $gateway . '" is not a valid gateway.' );
+			return FALSE;
+
+		endif;
+
+		//	Prepare the gateway
+		$_gateway = $this->_prepare_gateway( $_gateway_name );
+
+		try
+		{
+			$_response = $_gateway->completePurchase()->send();
+		}
+		catch ( Exception $e )
+		{
+			$this->_set_error( 'Payment Failed with error: ' . $e->getMessage() );
+			return FALSE;
+		}
 
 		// --------------------------------------------------------------------------
 
-		if ( empty( $_installation_id ) ) :
+		/**
+		 * Big OmniPay Hack
+		 * ================
+		 *
+		 * It staggers me there's no way to retrieve the original transactionId in
+		 * OmniPay. This thread on GitHub, possibly explains there reasoning for not
+		 * including an official mechanism. So, until there's an official solution
+		 * I'll have to roll something a little hacky.
+		 *
+		 * For each gateway that Nails supports we need to manually extract data.
+		 * Totally foul.
+		 *
+		 */
 
-			show_fatal_error( 'WorldPay is not configured correctly', 'Attempted payment using WorldPay but credentials are missing.' );
+		if ( method_exists( $this, '_extract_transactionId_' . strtolower( $_gateway_name ) ) ) :
+
+			$_order_id = $this->{'_extract_transactionId_' . strtolower( $_gateway_name )}();
+
+		else :
+
+			//	Fail, no idea what order we're dealing with here
+			$this->_set_error( 'Unable to extract Order ID from request. No method configured for ' . $_gateway_name . '.'  );
+			return FALSE;
 
 		endif;
 
 		// --------------------------------------------------------------------------
 
-		$_gateway = Omnipay::create( 'WorldPay' );
-		$_gateway->setInstallationId( $_installation_id );
-		$_gateway->setAccountId( $_account_id );
-		$_gateway->setSecretWord( $_account_id );
-		$_gateway->setCallbackPassword( $_account_id );
+		$this->load->model( 'shop/shop_model' );
+		$this->load->model( 'shop/shop_order_model' );
+		$_order = $this->shop_order_model->get_by_id( $_order_id );
+
+		if ( ! $_order  ) :
+
+			$this->_set_error( 'Could not find order #' . $_order_id . '.' );
+			return FALSE;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		//	Update order
+		if ( ! $this->shop_order_model->paid( $_order->id ) ) :
+
+			$this->_set_error( 'Failed to mark order #' . $_order_id . ' as PAID.' );
+			return FALSE;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		return TRUE;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	protected function _prepare_gateway( $gateway_name )
+	{
+		$_gateway	= Omnipay::create( $gateway_name );
+		$_params	= $_gateway->getDefaultParameters();
+
+		foreach ( $_params AS $param => $default ) :
+
+			$_value = app_setting( 'omnipay_' . $gateway_name . '_' . $param,	'shop' );
+			$_gateway->{'set' . ucfirst( $param )}( $_value );
+
+		endforeach;
+
+		// --------------------------------------------------------------------------
+
+		//	Testing, or no?
+		$_test_mode = ENVIRONMENT == 'PRODUCTION' ? FALSE : TRUE;
 		$_gateway->setTestMode( $_test_mode );
 
 		// --------------------------------------------------------------------------
 
 		return $_gateway;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+	protected function _extract_transactionId_worldpay()
+	{
+		return (int) $this->input->post( 'cartId' );
 	}
 }
 
