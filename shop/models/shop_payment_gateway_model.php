@@ -220,29 +220,30 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	public function complete_payment( $gateway )
+	public function complete_payment( $gateway, $enable_log = FALSE )
 	{
+		/**
+		 * Set the logger's dummy mode. If set to FALSE calls to _LOG()
+		 * will do nothing. We do this to keep the method clean and not
+		 * littered with conditionals.
+		 */
+
+		_LOG_DUMMY_MODE( !$enable_log );
+
+		// --------------------------------------------------------------------------
+
 		$_gateway_name = $this->get_correct_casing( $gateway );
+
+		_LOG( 'Detected gateway: ' . $_gateway_name );
 
 		if ( empty( $_gateway_name ) ) :
 
-			$this->_set_error( '"' . $gateway . '" is not a valid gateway.' );
+			$_error = '"' . $gateway . '" is not a valid gateway.';
+			_LOG( $_error );
+			$this->_set_error( $_error );
 			return FALSE;
 
 		endif;
-
-		//	Prepare the gateway
-		$_gateway = $this->_prepare_gateway( $_gateway_name );
-
-		try
-		{
-			$_response = $_gateway->completePurchase()->send();
-		}
-		catch ( Exception $e )
-		{
-			$this->_set_error( 'Payment Failed with error: ' . $e->getMessage() );
-			return FALSE;
-		}
 
 		// --------------------------------------------------------------------------
 
@@ -250,37 +251,145 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 		 * Big OmniPay Hack
 		 * ================
 		 *
-		 * It staggers me there's no way to retrieve the original transactionId in
-		 * OmniPay. This thread on GitHub, possibly explains there reasoning for not
-		 * including an official mechanism. So, until there's an official solution
-		 * I'll have to roll something a little hacky.
+		 * It staggers me there's no way to retrieve data like the original transactionId
+		 * in OmniPay. [This thread](https://github.com/thephpleague/omnipay/issues/204)
+		 * on GitHub, possibly explains their reasoning for not including an official
+		 * mechanism. So, until there's an official solution I'll have to roll something
+		 * a little hacky.
 		 *
 		 * For each gateway that Nails supports we need to manually extract data.
 		 * Totally foul.
-		 *
 		 */
 
-		if ( method_exists( $this, '_extract_transactionId_' . strtolower( $_gateway_name ) ) ) :
+		_LOG( 'Fetching Payment Data' );
+		$_payment_data = $this->_extract_payment_data( $_gateway_name );
 
-			$_order_id = $this->{'_extract_transactionId_' . strtolower( $_gateway_name )}();
+		//	Verify ID
+		if ( empty( $_payment_data['order_id'] ) ) :
+
+			$_error = 'Unable to extract Order ID from request.';
+			_LOG( $_error );
+			$this->_set_error( $_error );
+			return FALSE;
 
 		else :
 
-			//	Fail, no idea what order we're dealing with here
-			$this->_set_error( 'Unable to extract Order ID from request. No method configured for ' . $_gateway_name . '.'  );
+			_LOG( 'Order ID: #' . $_payment_data['order_id'] );
+
+		endif;
+
+		//	Verify Amount
+		if ( empty( $_payment_data['amount'] ) ) :
+
+			$_error = 'Unable to extract payment amount from request.';
+			_LOG( $_error );
+			$this->_set_error( $_error );
+			return FALSE;
+
+		else :
+
+			_LOG( 'Payment Amount: #' . $_payment_data['amount'] );
+
+		endif;
+
+		//	Verify Currency
+		if ( empty( $_payment_data['currency'] ) ) :
+
+			$_error = 'Unable to extract currency from request.';
+			_LOG( $_error );
+			$this->_set_error( $_error );
+			return FALSE;
+
+		else :
+
+			_LOG( 'Payment Currency: #' . $_payment_data['currency'] );
+
+		endif;
+
+		//	Verify Transaction ID
+		if ( empty( $_payment_data['transaction_id'] ) ) :
+
+			$_error = 'Unable to extract payment transaction ID from request.';
+			_LOG( $_error );
+			$this->_set_error( $_error );
+			return FALSE;
+
+		else :
+
+			_LOG( 'Payment Transaction ID: #' . $_payment_data['transaction_id'] );
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		//	Verify order exists
+		$this->load->model( 'shop/shop_model' );
+		$this->load->model( 'shop/shop_order_model' );
+		$_order = $this->shop_order_model->get_by_id( $_payment_data['order_id'] );
+
+		if ( ! $_order  ) :
+
+			$_error = 'Could not find order #' . $_payment_data['order_id'] . '.';
+			_LOG( $_error );
+			$this->_set_error( $_error );
 			return FALSE;
 
 		endif;
 
 		// --------------------------------------------------------------------------
 
-		$this->load->model( 'shop/shop_model' );
-		$this->load->model( 'shop/shop_order_model' );
-		$_order = $this->shop_order_model->get_by_id( $_order_id );
+		//	Check this payment
+		$this->load->model( 'shop/shop_order_payment_model' );
 
-		if ( ! $_order  ) :
+		//	First, check we've not already handled this payment
+		$_payment = $this->shop_order_payment_model->get_by_transaction_id( $_payment_data['transaction_id'], $_gateway_name );
 
-			$this->_set_error( 'Could not find order #' . $_order_id . '.' );
+		if ( $_payment ) :
+
+			$_error = 'Payment with ID ' . $_gateway_name . ':' . $_payment_data['transaction_id'] . ' has already been processed.';
+			_LOG( $_error );
+			$this->_set_error( $_error );
+			return FALSE;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		//	Payment verified?
+		$_gateway = $this->_prepare_gateway( $_gateway_name, $enable_log );
+
+		try
+		{
+			_LOG( 'Attempting completePurchase()' );
+			$_response = $_gateway->completePurchase()->send();
+		}
+		catch ( Exception $e )
+		{
+			$_error = 'Payment Failed with error: ' . $e->getMessage();
+			_LOG( $_error );
+			$this->_set_error( $_error );
+			return FALSE;
+		}
+
+		// --------------------------------------------------------------------------
+
+		//	Add payment against the order
+		$_data						= array();
+		$_data['order_id']			= $_payment_data['order_id'];
+		$_data['payment_gateway']	= $_gateway_name;
+		$_data['transaction_id']	= $_payment_data['transaction_id'];
+		$_data['amount']			= $_payment_data['amount'];
+		$_data['currency']			= $_payment_data['currency'];
+		$_data['raw_get']			= $this->input->server( 'QUERY_STRING' );
+		$_data['raw_post']			= @file_get_contents( 'php://input' );
+
+		$_result = $this->shop_order_payment_model->create( $_data );
+
+		if ( $_payment ) :
+
+			$_error = 'Failed to create payment reference. ' . $this->shop_order_payment_model->last_error();
+			_LOG( $_error );
+			$this->_set_error( $_error );
 			return FALSE;
 
 		endif;
@@ -288,10 +397,52 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Update order
-		if ( ! $this->shop_order_model->paid( $_order->id ) ) :
+		if ( $this->shop_order_payment_model->order_is_paid( $_order->id ) ) :
 
-			$this->_set_error( 'Failed to mark order #' . $_order_id . ' as PAID.' );
-			return FALSE;
+			_LOG( 'Order is completely paid.' );
+
+			if ( ! $this->shop_order_model->paid( $_order->id ) ) :
+
+				$_error = 'Failed to mark order #' . $_order->id . ' as PAID.';
+				_LOG( $_error );
+				$this->_set_error( $_error );
+				return FALSE;
+
+			else :
+
+				_LOG( 'Marked order #' . $_order->id . ' as PAID.' );
+
+			endif;
+
+			// --------------------------------------------------------------------------
+
+			//	Process the order, i.e do any after sales stuff which needs done immediately
+			if ( ! $this->shop_order_model->process( $_order->id ) ) :
+
+				$_error = 'Failed to process order #' . $_order->id . '.';
+				_LOG( $_error );
+				$this->_set_error( $_error );
+				return FALSE;
+
+			else :
+
+				_LOG( 'Successfully processed order #' . $_order->id );
+
+			endif;
+
+			// --------------------------------------------------------------------------
+
+			//	Send notifications to manager(s) and customer
+			$this->shop_order_model->send_order_notification( $_order, $_payment_data, FALSE );
+			$this->shop_order_model->send_receipt( $_order, $_payment_data, FALSE );
+
+		else :
+
+			_LOG( 'Order is partially paid.' );
+
+			//	Send notifications to manager(s) and customer
+			$this->shop_order_model->send_order_notification( $_order, $_payment_data, TRUE );
+			$this->shop_order_model->send_receipt( $_order, $_payment_data, TRUE );
 
 		endif;
 
@@ -304,13 +455,23 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	protected function _prepare_gateway( $gateway_name )
+	protected function _prepare_gateway( $gateway_name, $enable_log = FALSE )
 	{
+		/**
+		 * Set the logger's dummy mode. If set to FALSE calls to _LOG()
+		 * will do nothing. We do this to keep the method clean and not
+		 * littered with conditionals.
+		 */
+
+		_LOG_DUMMY_MODE( !$enable_log );
+		_LOG( 'Preparing "' . $gateway_name . '"' );
+
 		$_gateway	= Omnipay::create( $gateway_name );
 		$_params	= $_gateway->getDefaultParameters();
 
 		foreach ( $_params AS $param => $default ) :
 
+			_LOG( 'Setting value for "omnipay_' . $gateway_name . '_' . $param . '"' );
 			$_value = app_setting( 'omnipay_' . $gateway_name . '_' . $param,	'shop' );
 			$_gateway->{'set' . ucfirst( $param )}( $_value );
 
@@ -322,6 +483,12 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 		$_test_mode = ENVIRONMENT == 'PRODUCTION' ? FALSE : TRUE;
 		$_gateway->setTestMode( $_test_mode );
 
+		if ( $_test_mode ) :
+
+			_LOG( 'TEST MODE' );
+
+		endif;
+
 		// --------------------------------------------------------------------------
 
 		return $_gateway;
@@ -330,9 +497,37 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
 	// --------------------------------------------------------------------------
 
-	protected function _extract_transactionId_worldpay()
+
+	protected function _extract_payment_data( $gateway )
 	{
-		return (int) $this->input->post( 'cartId' );
+		$_out					= array();
+		$_out['order_id']		= NULL;
+		$_out['transaction_id']	= NULL;
+		$_out['amount']			= NULL;
+		$_out['currency']		= NULL;
+
+		if ( method_exists( $this, '_extract_payment_data_' . strtolower( $gateway ) ) ) :
+
+			$_out = $this->{'_extract_payment_data_' . strtolower( $gateway )}();
+
+		endif;
+
+		return $_out;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	protected function _extract_payment_data_worldpay()
+	{
+		$_out					= array();
+		$_out['order_id']		= (int) $this->input->post( 'cartId' );
+		$_out['transaction_id']	= $this->input->post( 'transId' );
+		$_out['amount']			= (float) $this->input->post( 'amount' );
+		$_out['currency']		= $this->input->post( 'currency' );
+
+		return $_out;
 	}
 }
 

@@ -1500,4 +1500,4 @@ $config['currency']['ZWL']->decimal_symbol		= '.';
 $config['currency']['ZWL']->thousands_seperator	= ',';
 
 /* End of file currency.php */
-/* Location: ./config/currency.php */
+/* Location: ./module-shop/shop/config/currency.php */

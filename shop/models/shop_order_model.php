@@ -844,6 +844,11 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 	public function process( $order )
 	{
+		//	This is TODO
+		return TRUE;
+
+		// --------------------------------------------------------------------------
+
 		//	If an ID has been passed, look it up
 		if ( is_numeric( $order ) ) :
 
@@ -864,9 +869,11 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 		_LOG( 'Processing order #' . $order->id );
 
-		//	Loop through all the items in the order. If there's a proccessor method
-		//	for the object type then begin grouping the products so we can execute
-		//	the processor in a oner with all the associated products
+		/**
+		 * Loop through all the items in the order. If there's a proccessor method
+		 * for the object type then begin grouping the products so we can execute
+		 * the processor in a oner with all the associated products
+		 */
 
 		$_processors = array();
 
@@ -986,7 +993,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	public function send_receipt( $order )
+	public function send_receipt( $order, $payment_data = array(), $partial = FALSE )
 	{
 		//	If an ID has been passed, look it up
 		if ( is_numeric( $order ) ) :
@@ -1006,21 +1013,35 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
-		$_email					= new stdClass();
-		$_email->type			= 'shop_receipt';
-		$_email->to_email		= $order->user->email;
-		$_email->data			= array();
-		$_email->data['order']	= $order;
+		$_email							= new stdClass();
+		$_email->type					= $partial ? 'shop_receipt_partial' : 'shop_receipt';
+		$_email->to_email				= $order->user->email;
+		$_email->data					= array();
+		$_email->data['order']			= $order;
+		$_email->data['payment_data']	= $payment_data;
 
 		if ( ! $this->emailer->send( $_email, TRUE ) ) :
 
 			//	Email failed to send, alert developers
-			_LOG( '!! Failed to send receipt, alerting developers' );
-			_LOG( implode( "\n", $this->emailer->get_errors() ) );
+			$_email_errors = $this->emailer->get_errors();
 
-			send_developer_mail( 'Unable to send receipt email', 'Unable to send the email receipt to ' . $_email->to_email . '; order: #' . $order->id . "\n\nEmailer errors:\n\n" . print_r( $this->emailer->get_errors(), TRUE ) );
+			if ( $partial ) :
 
-			return FALSE;
+				_LOG( '!! Failed to send receipt (partial payment) to customer, alerting developers' );
+				$_subject  = 'Unable to send customer receipt email (partial payment)';
+
+			else :
+
+				_LOG( '!! Failed to send receipt to customer, alerting developers' );
+				$_subject  = 'Unable to send customer receipt email';
+
+			endif;
+			_LOG( implode( "\n", $_email_errors ) );
+
+			$_message  = 'Unable to send the customer receipt to ' . $_email->to_email . '; order: #' . $order->id . "\n\n";
+			$_message .= 'Emailer errors:' . "\n\n" . print_r( $_email_errors, TRUE );
+
+			send_developer_mail( $_subject, $_message );
 
 		endif;
 
@@ -1033,7 +1054,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	public function send_order_notification( $order )
+	public function send_order_notification( $order, $payment_data = array(), $partial = FALSE )
 	{
 		//	If an ID has been passed, look it up
 		if ( is_numeric( $order ) ) :
@@ -1053,24 +1074,41 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
-		$_email					= new stdClass();
-		$_email->type			= 'shop_notify';
-		$_email->data			= array();
-		$_email->data['order']	= $order;
+		$_email							= new stdClass();
+		$_email->type					= $partial ? 'notification_partial_payment' : 'notification_paid';
+		$_email->data					= array();
+		$_email->data['order']			= $order;
+		$_email->data['payment_data']	= $payment_data;
 
-		$_recipients = explode( ',', notification( 'notify_order', 'shop' ) );
+		$this->load->model( 'system/app_notification_model' );
+		$_notify = $this->app_notification_model->get( 'orders', 'shop' );
 
-		foreach ( $_recipients AS $recipient ) :
+		foreach ( $_notify AS $email ) :
 
-			$_email->to_email = $recipient;
+			$_email->to_email = $email;
 
 			if ( ! $this->emailer->send( $_email, TRUE ) ) :
 
-				//	Email failed to send, alert developers
-				_LOG( '!! Failed to send order notification to ' . $_email->to_email . ', alerting developers.' );
-				_LOG( implode( "\n", $this->emailer->get_errors() ) );
+				$_email_errors = $this->emailer->get_errors();
 
-				send_developer_mail( 'Unable to send order notification email', 'Unable to send the order notification to ' . $_email->to_email . '; order: #' . $order->id . "\n\nEmailer errors:\n\n" . print_r( $this->emailer->get_errors(), TRUE ) );
+				if ( $partial ) :
+
+					_LOG( '!! Failed to send order notification (partially payment) to ' . $email . ', alerting developers.' );
+					$_subject  = 'Unable to send order notification email (partial payment)';
+
+				else :
+
+					_LOG( '!! Failed to send order notification to ' . $email . ', alerting developers.' );
+					$_subject  = 'Unable to send order notification email';
+
+				endif;
+
+				_LOG( implode( "\n", $_email_errors ) );
+
+				$_message  = 'Unable to send the order notification to ' . $email . '; order: #' . $_order->id . "\n\n";
+				$_message .= 'Emailer errors:' . "\n\n" . print_r( $_email_errors, TRUE );
+
+				send_developer_mail( $_subject, $_message );
 
 			endif;
 

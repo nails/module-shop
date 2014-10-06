@@ -119,8 +119,6 @@ class NAILS_Enquire extends NAILS_Shop_Controller
 
 			if ( $this->form_validation->run() ) :
 
-				$this->load->helper( 'app_notification' );
-
 				$_data							= array();
 
 				$_data['customer']				= new stdClass();
