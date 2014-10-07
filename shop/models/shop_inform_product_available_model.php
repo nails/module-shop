@@ -35,6 +35,32 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
+	protected function _getcount_common( $data = array(), $_caller = NULL )
+	{
+		parent::_getcount_common( $data, $_caller );
+
+		if ( empty( $data['sort'] ) ) :
+
+			$this->db->order_by( $this->_table_prefix . '.created', 'DESC' );
+
+		endif;
+
+		$this->db->select( $this->_table_prefix . '.*, ue.user_id, u.first_name, u.last_name, u.profile_img, u.gender' );
+		$this->db->select( 'sp.label product_label, spv.label variation_label' );
+
+		//	Join the User tables
+		$this->db->join( NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ' . $this->_table_prefix . '.email', 'LEFT' );
+		$this->db->join( NAILS_DB_PREFIX . 'user u', 'u.id = ue.user_id', 'LEFT' );
+
+		//	Join the product & variartion tables
+		$this->db->join( NAILS_DB_PREFIX . 'shop_product sp', 'sp.id = ' . $this->_table_prefix . '.product_id' );
+		$this->db->join( NAILS_DB_PREFIX . 'shop_product_variation spv', 'spv.id = ' . $this->_table_prefix . '.variation_id' );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
 	public function add( $variant_id, $email )
 	{
 		$this->load->helper( 'email' );
@@ -75,6 +101,8 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 		$variation_ids = array_filter( $variation_ids );
 		$variation_ids = array_unique( $variation_ids );
 
+		$_sent = array();
+
 		if ( $variation_ids ) :
 
 			$_product = $this->shop_product_model->get_by_id( $product_id );
@@ -90,6 +118,15 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 
 					foreach( $_result AS $result ) :
 
+						//	Have we already sent this notification?
+						$_sent_string = $_email->to_email . '|' . $_product_id . '|' . $variation_id;
+
+						if ( in_array( $_sent_string, $_sent) ) :
+
+							continue;
+
+						endif;
+
 						$_email							= new stdClass();
 						$_email->to_email				= $result->email;
 						$_email->type					= 'shop_inform_product_available';
@@ -99,6 +136,8 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 						$_email->data['email_subject']	= $_product->label . ' is back in stock.';
 
 						$this->emailer->send( $_email );
+
+						$_sent[] = $_sent_string;
 
 					endforeach;
 
@@ -112,6 +151,41 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 		$this->db->where( 'product_id', $product_id );
 		$this->db->where_in( 'variation_id', $variation_ids );
 		$this->db->delete( $this->_table );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	protected function _format_object( &$obj )
+	{
+		parent::_format_object( $obj );
+
+		$obj->product			= new stdClass();
+		$obj->product->id		= (int) $obj->product_id;
+		$obj->product->label	= $obj->product_label;
+		unset( $obj->product_id );
+		unset( $obj->product_label );
+
+		$obj->variation			= new stdClass();
+		$obj->variation->id		= (int) $obj->variation_id;
+		$obj->variation->label	= $obj->variation_label;
+		unset( $obj->variation_id );
+		unset( $obj->variation_label );
+
+		$obj->user				= new stdClass();
+		$obj->user->id			= $obj->user_id;
+		$obj->user->email		= $obj->email;
+		$obj->user->first_name	= $obj->first_name;
+		$obj->user->last_name	= $obj->last_name;
+		$obj->user->profile_img	= $obj->profile_img;
+		$obj->user->gender		= $obj->gender;
+		unset( $obj->user_id );
+		unset( $obj->email );
+		unset( $obj->first_name );
+		unset( $obj->last_name );
+		unset( $obj->profile_img );
+		unset( $obj->gender );
 	}
 }
 

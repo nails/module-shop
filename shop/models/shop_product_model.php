@@ -1597,6 +1597,38 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 
 	/**
+	 * Returns an array of all the products and their variations as a flat array
+	 * @return [type] [description]
+	 */
+	public function get_all_product_variation_flat()
+	{
+		$this->db->select( 'p.id p_id, v.id v_id, p.label p_label, v.label v_label, v.sku' );
+		$this->db->join( $this->_table . ' p', 'v.product_id = p.id' );
+		$this->db->order_by( 'p.label' );
+		$this->db->where( 'v.is_deleted', FALSE );
+		$this->db->where( 'p.is_deleted', FALSE );
+		$_items = $this->db->get( $this->_table_variation . ' v' )->result();
+
+		$_out = array();
+
+		foreach( $_items AS $item ) :
+
+			$_key = $item->p_id . ':' . $item->v_id;
+			$_label = $item->p_label == $item->v_label ? $item->p_label : $item->p_label . ' - ' . $item->v_label;
+			$_label .= $item->sku ? ' (SKU: ' . $item->sku . ')' : '';
+
+			$_out[$_key] = $_label;
+
+		endforeach;
+
+		return $_out;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
 	 * Fetches an item by it's ID; overriding to specify the `include_inactive` flag by default
 	 * @param  int   $id   The ID of the product to fetch
 	 * @param  array $data An array of mutation options
@@ -1713,6 +1745,19 @@ class NAILS_Shop_product_model extends NAILS_Model
 	protected function _getcount_common( $data = array(), $_caller = NULL )
 	{
 		parent::_getcount_common( $data, $_caller );
+
+		// --------------------------------------------------------------------------
+
+		/**
+		 * Don't do anything if the caller is get_all_product_variation_flat(), it
+		 * will handle everything itself
+		 */
+
+		if ( $_caller == 'GET_ALL_PRODUCT_VARIATION_FLAT' ) :
+
+			return;
+
+		endif;
 
 		// --------------------------------------------------------------------------
 
