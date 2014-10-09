@@ -21,6 +21,19 @@ require_once '_shop.php';
 class NAILS_Checkout extends NAILS_Shop_Controller
 {
 	/**
+	 * Construct the model
+	 */
+	public function __construct()
+	{
+		parent::__construct();
+		$this->load->model( 'shop/shop_payment_gateway_model' );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
 	 * Handle the checkout process
 	 *
 	 * @access	public
@@ -30,7 +43,6 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	public function index()
 	{
 		$this->load->model( 'system/country_model' );
-		$this->load->model( 'shop/shop_payment_gateway_model' );
 
 		$this->data['countries_flat']	= $this->country_model->get_all_flat();
 		$this->data['payment_gateways']	= $this->shop_payment_gateway_model->get_enabled_formatted();
@@ -55,6 +67,18 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> you cannot checkout just now. Your basket is empty.' );
 			redirect( $this->_shop_url . 'basket' );
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		//	Abandon any previous orders
+		$_previous_order = $this->shop_payment_gateway_model->checkout_session_get();
+
+		if ( $_previous_order ) :
+
+			$this->shop_order_model->abandon( $_previous_order );
+			$this->shop_payment_gateway_model->checkout_session_clear();
 
 		endif;
 
@@ -158,18 +182,30 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 					if ( $_order ) :
 
-						//	Order created successfully proceed to payment
+						/**
+						 * Order created successfully, attempt payment. We need to keep track of the order ID
+						 * so that when we redirect the processing/cancel pages can pick up where we left off.
+						 */
+
+						$this->shop_payment_gateway_model->checkout_session_save( $_order->id, $_order->ref, $_order->code );
+
 						if ( $this->shop_payment_gateway_model->do_payment( $_order->id, $this->input->post( 'payment_gateway' ), $this->input->post() ) ) :
 
-							//	Payment complete! Send the user to the processing page
+							//	Payment complete! Mark order as paid and then process it, finally send user to processing page for receipt
+							$this->shop_order_model->paid( $_order->id );
+							$this->shop_order_model->process( $_order->id );
+
 							$_shop_url = app_setting( 'url', 'shop' ) ? app_setting( 'url', 'shop' ) : 'shop/';
-							redirect( $_shop_url . 'checkout/processing/' . $_order->ref . '/' . $_order->code );
+							redirect( $_shop_url . 'checkout/processing?ref=' . $_order->ref );
 
 						else :
 
 							//	Payment failed, mark this order as a failure too.
 							$this->shop_order_model->fail( $_order->id, $this->shop_payment_gateway_model->last_error() );
-							$this->data['error'] = '<strong>Sorry,</strong> something went wrong during checkout. ' . $this->shop_payment_gateway_model->last_error();
+							$this->data['error']			= '<strong>Sorry,</strong> something went wrong during checkout. ' . $this->shop_payment_gateway_model->last_error();
+							$this->data['payment_error']	= $this->shop_payment_gateway_model->last_error();
+
+							$this->shop_payment_gateway_model->checkout_session_clear();
 
 						endif;
 
@@ -191,6 +227,31 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
+		//	Load assets required by the payment gateways
+		foreach ( $this->data['payment_gateways'] AS $pg ) :
+
+			$_assets = $this->shop_payment_gateway_model->get_checkout_assets( $pg->slug );
+
+			foreach ( $_assets AS $asset ) :
+
+				$_inline = array( 'JS_INLINE', 'JS-INLINE', 'CSS_INLINE', 'CSS-INLINE' );
+
+				if ( in_array( $asset[2], $_inline ) ) :
+
+					$this->asset->inline( $asset[0], $asset[2] );
+
+				else :
+
+					$this->asset->load( $asset[0], $asset[1], $asset[2] );
+
+				endif;
+
+			endforeach;
+
+		endforeach;
+
+		// --------------------------------------------------------------------------
+
 		$this->data['page']->title = $this->_shop_name . ': Checkout';
 
 		// --------------------------------------------------------------------------
@@ -199,64 +260,6 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 		$this->load->view( $this->_skin->path . 'views/checkout/index',	$this->data );
 		$this->load->view( 'structure/footer',							$this->data );
 	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Handle redirecting to the chosen payment gateway.
-	 * @return void
-	 */
-	public function payment()
-	{
-		//	Verify there's an unpaid order
-		$this->data['order_ref']	= $this->uri->rsegment(3);
-		$this->data['order_code']	= $this->uri->rsegment(4);
-		$_gateway					= $this->uri->rsegment(5);
-
-		$_order = $this->shop_order_model->get_by_ref( $this->data['order_ref'] );
-
-		if ( ! $_order || $_order->code != $this->data['order_code'] || $_order->status != 'UNPAID' ) :
-
-			show_404();
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		$this->load->model( 'shop/shop_payment_gateway_model' );
-		$this->data['payment_gateways'] = $this->shop_payment_gateway_model->get_enabled();
-
-		if ( ! $_gateway && count( $this->data['payment_gateways'] ) == 1 ) :
-
-			$_gateway = $this->data['payment_gateways'][0];
-
-		endif;
-
-		if ( $_gateway ) :
-
-			//	Gateway selected, process
-			if ( $this->shop_payment_gateway_model->do_payment( $_order->id, $_gateway ) ) :
-
-				dump( 'Payment complete' );
-
-			else :
-
-				$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> something went wrong during checkout. ' . $this->shop_payment_gateway_model->last_error() );
-				redirect($this->_shop_url . 'checkout' );
-
-			endif;
-
-		else :
-
-			$this->load->view( 'structure/header',										$this->data );
-			$this->load->view( $this->_skin->path . 'views/checkout/choose_gateway',	$this->data );
-			$this->load->view( 'structure/footer',										$this->data );
-
-		endif;
-	}
-
 
 	// --------------------------------------------------------------------------
 
@@ -267,33 +270,75 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	 */
 	public function processing()
 	{
-		dumpanddie('processing. TODO: Get order, not relying on URL. Session?');
-		$this->data['order'] = $this->shop_order_model->get_by_ref( $this->input->get( 'ref' ) );
+		$this->data['order'] = $this->_get_order();
 
-		if ( ! $this->data['order'] ) :
+		if ( empty( $this->data['order'] ) ) :
 
 			show_404();
 
+		else :
+
+			//	Fetch the product/variants associated with each order item
+			foreach ( $this->data['order']->items AS $item ) :
+
+				$item->product = $this->shop_product_model->get_by_id( $item->product_id );
+
+				if ( ! empty( $item->product ) ) :
+
+					//	Find the variant
+					foreach( $item->product->variations AS &$v ) :
+
+						if ( $v->id == $item->variant_id ) :
+
+							$item->variant = $v;
+							break;
+
+						endif;
+
+					endforeach;
+
+				endif;
+
+			endforeach;
+
+			// --------------------------------------------------------------------------
+
+			//	Map the country codes to names
+			$this->load->model( 'system/country_model' );
+			$this->data['country'] = $this->country_model->get_all_flat();
+
+			if ( $this->data['order']->shipping_address->country ) :
+
+				$this->data['order']->shipping_address->country = $this->data['country'][$this->data['order']->shipping_address->country];
+
+			endif;
+
+			if ( $this->data['order']->billing_address->country ) :
+
+				$this->data['order']->billing_address->country = $this->data['country'][$this->data['order']->billing_address->country];
+
+			endif;
+
+			// --------------------------------------------------------------------------
+
+			//	Empty the basket
+			$this->shop_basket_model->destroy();
+
+			// --------------------------------------------------------------------------
+
+			switch( $this->data['order']->status ) :
+
+				case 'UNPAID' :		$this->_processing_unpaid();		break;
+				case 'PAID' :		$this->_processing_paid();			break;
+				case 'PENDING' :	$this->_processing_pending();		break;
+				case 'FAILED' :		$this->_processing_failed();		break;
+				case 'ABANDONED' :	$this->_processing_abandoned();		break;
+				case 'CANCELLED' :	$this->_processing_cancelled();		break;
+				default :			$this->_processing_error();			break;
+
+			endswitch;
+
 		endif;
-
-		// --------------------------------------------------------------------------
-
-		//	Empty the basket
-		$this->shop_basket_model->destroy();
-
-		// --------------------------------------------------------------------------
-
-		switch( $this->data['order']->status ) :
-
-			case 'UNPAID' :		$this->_processing_unpaid();		break;
-			case 'PAID' :		$this->_processing_paid();			break;
-			case 'PENDING' :	$this->_processing_pending();		break;
-			case 'FAILED' :		$this->_processing_failed();		break;
-			case 'ABANDONED' :	$this->_processing_abandoned();		break;
-			case 'CANCELLED' :	$this->_processing_cancelled();		break;
-			default :			$this->_processing_error();			break;
-
-		endswitch;
 	}
 
 
@@ -306,7 +351,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	 */
 	protected function _processing_unpaid()
 	{
-		$this->load->view( $this->_skin->path . 'views/checkout/processing/unpaid', $this->data );
+		$this->load->view( $this->_skin->path . 'views/checkout/processing/unpaid',	$this->data );
 	}
 
 
@@ -319,9 +364,11 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	 */
 	protected function _processing_pending()
 	{
-		$this->load->view( 'structure/header',											$this->data );
+		//	Now we know what the state of play is, clear the session.
+		$this->shop_payment_gateway_model->checkout_session_clear();
+
+		//	And load the view
 		$this->load->view( $this->_skin->path . 'views/checkout/processing/pending',	$this->data );
-		$this->load->view( 'structure/footer',											$this->data );
 	}
 
 
@@ -339,9 +386,11 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		$this->load->view( 'structure/header',										$this->data );
+		//	Now we know what the state of play is, clear the session.
+		$this->shop_payment_gateway_model->checkout_session_clear();
+
+		//	And load the view
 		$this->load->view( $this->_skin->path . 'views/checkout/processing/paid',	$this->data );
-		$this->load->view( 'structure/footer',										$this->data );
 	}
 
 
@@ -368,9 +417,11 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		$this->load->view( 'structure/header',										$this->data );
+		//	Now we know what the state of play is, clear the session.
+		$this->shop_payment_gateway_model->checkout_session_clear();
+
+		//	And load the view
 		$this->load->view( $this->_skin->path . 'views/checkout/processing/failed',	$this->data );
-		$this->load->view( 'structure/footer',										$this->data );
 	}
 
 
@@ -397,9 +448,11 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		$this->load->view( 'structure/header',											$this->data );
+		//	Now we know what the state of play is, clear the session.
+		$this->shop_payment_gateway_model->checkout_session_clear();
+
+		//	And load the view
 		$this->load->view( $this->_skin->path . 'views/checkout/processing/abandoned',	$this->data );
-		$this->load->view( 'structure/footer',											$this->data );
 	}
 
 
@@ -426,9 +479,11 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		$this->load->view( 'structure/header',											$this->data );
+		//	Now we know what the state of play is, clear the session.
+		$this->shop_payment_gateway_model->checkout_session_clear();
+
+		//	And load the view
 		$this->load->view( $this->_skin->path . 'views/checkout/processing/cancelled',	$this->data );
-		$this->load->view( 'structure/footer',								 			$this->data );
 	}
 
 
@@ -439,11 +494,11 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	 * Renders the "error" processing view.
 	 * @return void
 	 */
-	protected function _processing_error()
+	protected function _processing_error( $error = '' )
 	{
 		if ( ! $this->data['error'] ) :
 
-			$this->data['error'] = '<strong>Sorry,</strong> there was a problem processing your order';
+			$this->data['error'] = '<strong>Sorry,</strong> there was a problem processing your order. ' . $error;
 
 		endif;
 
@@ -455,9 +510,11 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		$this->load->view( 'structure/header',										$this->data );
+		//	Now we know what the state of play is, clear the session.
+		$this->shop_payment_gateway_model->checkout_session_clear();
+
+		//	And load the view
 		$this->load->view( $this->_skin->path . 'views/checkout/processing/error',	$this->data );
-		$this->load->view( 'structure/footer',										$this->data );
 	}
 
 
@@ -465,25 +522,30 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 
 	/**
-	 * Marks an order as cancelled and redirects the use to the basket with feedback.
+	 * Marks an order as cancelled and redirects the user to the basket with feedback.
 	 * @return void
 	 */
 	public function cancel()
 	{
-		dumpanddie('Cancel. TODO: Get order, not relying on URL. Session?');
-		$this->data['order'] = $this->shop_order_model->get_by_ref( $this->input->get( 'ref' ) );
+		$_order = $this->_get_order();
 
-		if ( ! $this->data['order'] ) :
+		if ( empty( $_order ) ) :
 
 			show_404();
 
 		endif;
 
-		// --------------------------------------------------------------------------
+		//	Can't cancel an order which has been paid
+		if ( $_order->status == 'PAID' ) :
 
-		$this->shop_order_model->cancel( $this->data['order']->id );
+			$this->session->set_flashdata( 'error', '<strong>Order cannot be cancelled.</strong><br />that order has already been paid and cannot be cancelled.' );
 
-		$this->session->set_flashdata( 'message', '<strong>Checkout was cancelled.</strong><br />At your request, we cancelled checkout - you have not been charged.' );
+		else :
+
+			$this->shop_order_model->cancel( $_order->id );
+			$this->session->set_flashdata( 'message', '<strong>Checkout was cancelled.</strong><br />At your request, we cancelled checkout - you have not been charged.' );
+
+		endif;
 
 		redirect( $this->_shop_url . 'basket' );
 	}
@@ -492,357 +554,26 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	// --------------------------------------------------------------------------
 
 
-	/**
-	 * Handles incoming IPN notifications
-	 * @return void
-	 */
-	public function notify()
+	public function confirm()
 	{
-		//	Testing, testing, 1, 2, 3?
-		$this->data['testing'] = $this->_notify_is_testing();
+		$_order = $this->_get_order();
 
-		//	Handle the notification in a way appropriate to the payment gateway
-		switch( $this->uri->rsegment( 3 ) ) :
+		if ( empty( $_order ) ) :
 
-			case 'paypal';	$this->_notify_paypal();	break;
-
-			// --------------------------------------------------------------------------
-
-			default : /*	Silence is golden	*/	break;
-
-		endswitch;
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Handles incoming IPN notification from PayPal
-	 * @return void
-	 */
-	protected function _notify_paypal()
-	{
-		//	Configure log
-		_LOG_FILE( $this->_shop_url . 'notify/paypal/ipn-' . date( 'Y-m-d' ) . '.php' );
-
-		_LOG();
-		_LOG( '- - - - - - - - - - - - - - - - - - -' );
-		_LOG( 'Waking up IPN responder; handling with PayPal' );
-
-		// --------------------------------------------------------------------------
-
-		//	POST data?
-
-		//	Want to test a previous IPN message?
-		//	Paste the IPN message into the following and uncomment the following lines
-
-		//	$_message = '';
-		//	$_message = str_replace( '+', '%2B', $_message );
-		//	parse_str( $_message, $_POST );
-
-		if ( ! $this->data['testing'] && ! $this->input->post() ) :
-
-			_LOG( 'No POST data, going back to sleep...' );
-			_LOG( '- - - - - - - - - - - - - - - - - - -' );
-			_LOG();
-
-			return;
+			show_404();
 
 		endif;
 
-		// --------------------------------------------------------------------------
+		$_result = $this->shop_payment_gateway_model->confirm_complete_payment( $this->uri->rsegment( 3 ), $_order );
 
-		//	Are we testing?
-		if ( $this->data['testing'] ) :
+		if ( $_result ) :
 
-			$_ipn = TRUE;
-			_LOG();
-			_LOG( '**TESTING**' );
-			_LOG( '**Simulating data sent from PayPal**' );
-			_LOG();
-
-			//	Check order exists
-			$_order = $this->shop_order_model->get_by_ref( $this->input->get( 'ref' ) );
-
-			if ( ! $_order ) :
-
-				_LOG( 'Invalid order reference, aborting.' );
-				_LOG( '- - - - - - - - - - - - - - - - - - -' );
-				_LOG();
-
-				return;
-
-			endif;
-
-			// --------------------------------------------------------------------------
-
-			$_paypal					= array();
-			$_paypal['payment_type']	= 'instant';
-			$_paypal['invoice']			= $_order->ref;
-			$_paypal['custom']			=  $this->encrypt->encode( md5( $_order->ref . ':' . $_order->code ), APP_PRIVATE_KEY );
-			$_paypal['txn_id']			= 'TEST:' . random_string( 'alpha', 6 );
-			$_paypal['txn_type']		= 'cart';
-			$_paypal['payment_status']	= 'Completed';
-			$_paypal['pending_reason']	= 'PaymentReview';
-			$_paypal['mc_fee']			= 0.00;
+			redirect( $this->_shop_url . 'checkout/processing?ref=' . $_order->ref );
 
 		else :
 
-			_LOG( 'Validating the IPN call' );
-			$this->load->library( 'paypal' );
-
-			$_ipn		= $this->paypal->validate_ipn();
-			$_paypal	= $this->input->post();
-
-			$_order = $this->shop_order_model->get_by_ref( $this->input->post( 'invoice' ) );
-
-			if ( ! $_order ) :
-
-				_LOG( 'Invalid order ID, aborting. Likely a transaction not initiated by the site.' );
-				_LOG( '- - - - - - - - - - - - - - - - - - -' );
-				_LOG();
-
-				return;
-
-			endif;
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		//	Did the IPN validate?
-		if ( $_ipn ) :
-
-			_LOG( 'IPN Verified with PayPal' );
-			_LOG();
-
-			// --------------------------------------------------------------------------
-
-			//	Extra verification step, check the 'custom' variable decodes appropriately
-			_LOG( 'Verifying data' );
-			_LOG();
-
-			$_verification = $this->encrypt->decode( $_paypal['custom'], APP_PRIVATE_KEY );
-
-			if ( $_verification != md5( $_order->ref . ':' . $_order->code ) ) :
-
-				$_data = array(
-					'pp_txn_id'	=> $_paypal['txn_id']
-				);
-				$this->shop_order_model->fail( $_order->id, $_data );
-
-				_LOG( 'Order failed secondary verification, aborting.' );
-				_LOG( '- - - - - - - - - - - - - - - - - - -' );
-				_LOG();
-
-				// --------------------------------------------------------------------------
-
-				//	Inform developers
-				send_developer_mail( 'An IPN request failed', 'An IPN request was made which failed secondary verification, Order: ' . $_paypal['invoice'] );
-
-				return;
-
-			endif;
-
-			// --------------------------------------------------------------------------
-
-			//	Only bother to handle certain types
-			//	TODO: handle refunds
-			_LOG( 'Checking txn_type is supported' );
-			_LOG();
-
-			if ( $_paypal['txn_type'] != 'cart' ) :
-
-				_LOG( '"' . $_paypal['txn_type'] . '" is not a supported PayPal txn_type, gracefully aborting.' );
-				_LOG( '- - - - - - - - - - - - - - - - - - -' );
-				_LOG();
-
-				return;
-
-			endif;
-
-			// --------------------------------------------------------------------------
-
-			//	Check if order has already been processed
-			_LOG( 'Checking if order has already been processed' );
-			_LOG();
-
-			if ( strtoupper( ENVIRONMENT ) == 'PRODUCTION' && $_order->status != 'UNPAID' ) :
-
-				_LOG( 'Order has already been processed, aborting.' );
-				_LOG( '- - - - - - - - - - - - - - - - - - -' );
-				_LOG();
-
-				return;
-
-			elseif ( strtoupper( ENVIRONMENT ) != 'PRODUCTION' && $_order->status != 'UNPAID' ) :
-
-				_LOG( 'Order has already been processed, but not on production so continuing anyway.' );
-				_LOG();
-
-			endif;
-
-			// --------------------------------------------------------------------------
-
-			//	Check the status of the payment
-			_LOG( 'Checking the status of the payment' );
-			_LOG();
-
-
-			switch( strtolower( $_paypal['payment_status'] ) ) :
-
-
-				case 'completed' :
-
-					//	Do nothing, this transaction is OK
-					_LOG( 'Payment status is "completed"; continuing...' );
-
-				break;
-
-				// --------------------------------------------------------------------------
-
-				case 'reversed' :
-
-					//	Transaction was cancelled, mark order as FAILED
-					_LOG( 'Payment was reversed, marking as failed and aborting' );
-
-					$_data = array(
-						'pp_txn_id'	=> $_paypal['txn_id']
-					);
-					$this->shop_order_model->fail( $_order->id, $_data );
-
-				break;
-
-				// --------------------------------------------------------------------------
-
-				case 'pending' :
-
-					//	Check the pending_reason, if it's 'paymentreview' then gracefully stop
-					//	processing; PayPal will send a further IPN once the payment is complete
-
-					_LOG( 'Payment status is "pending"; check the reason.' );
-
-					if ( strtolower( $_paypal['pending_reason'] ) == 'paymentreview' ) :
-
-						//	The transaction is pending review, gracefully stop proicessing, but don't cancel the order
-						_LOG( 'Payment is pending review by PayPal, gracefully aborting just now.' );
-						$this->shop_order_model->pending( $_order->id );
-						return;
-
-					else :
-
-						_LOG( 'Unsupported payment reason "' . $_paypal['pending_reason'] . '", aborting.' );
-
-						// --------------------------------------------------------------------------
-
-						$_data = array(
-							'pp_txn_id'	=> $_paypal['txn_id']
-						);
-						$this->shop_order_model->fail( $_order->id, $_data );
-
-						// --------------------------------------------------------------------------
-
-						//	Inform developers
-						send_developer_mail( 'A PayPal payment failed', '<strong>' . $_order->user->first_name . ' ' . $_order->user->last_name . ' (' . $_order->user->email . ')</strong> has just attempted to pay for order ' . $_order->ref . '. The payment failed with status "' . $_paypal['payment_status'] . '" and reason "' . $_paypal['pending_reason'] . '".' );
-						return;
-
-
-					endif;
-
-					// --------------------------------------------------------------------------
-
-					return;
-
-				break;
-
-				// --------------------------------------------------------------------------
-
-				default :
-
-					//	Unknown/invalid payment status
-					_LOG( 'Invalid payment status' );
-
-					$_data = array(
-						'pp_txn_id'	=> $_paypal['txn_id']
-					);
-					$this->shop_order_model->fail( $_order->id, $_data );
-
-					// --------------------------------------------------------------------------
-
-					//	Inform developers
-					send_developer_mail( 'A PayPal payment failed', '<strong>' . $_order->user->first_name . ' ' . $_order->user->last_name . ' (' . $_order->user->email . ')</strong> has just attempted to pay for order ' . $_order->ref . '. The payment failed with status "' . $_paypal['payment_status'] . '" and reason "' . $_paypal['pending_reason'] . '".' );
-					return;
-
-				break;
-
-			endswitch;
-
-			// --------------------------------------------------------------------------
-
-			//	All seems good, continue with order processing
-			_LOG( 'All seems well, continuing...' );
-			_LOG();
-
-			_LOG( 'Setting txn_id (' . $_paypal['txn_id'] . ') and fees_deducted (' . $_paypal['mc_fee'] . ').' );
-			_LOG();
-
-			$_data = array(
-				'pp_txn_id'		=> $_paypal['txn_id'],
-				'fees_deducted'	=> $_paypal['mc_fee']
-			);
-			$this->shop_order_model->paid( $_order->id, $_data );
-
-			// --------------------------------------------------------------------------
-
-			//	PROCESSSSSS...
-			$this->shop_order_model->process( $_order );
-			_LOG();
-
-			// --------------------------------------------------------------------------
-
-			//	Send a receipt to the customer
-			_LOG( 'Sending receipt to customer: ' . $_order->user->email );
-			$this->shop_order_model->send_receipt( $_order );
-			_LOG();
-
-			// --------------------------------------------------------------------------
-
-			//	Send a notification to the store owner(s)
-			_LOG( 'Sending notification to store owner(s): ' . notification( 'notify_order', 'shop' ) );
-			$this->shop_order_model->send_order_notification( $_order );
-
-			// --------------------------------------------------------------------------
-
-			if ( $_order->voucher ) :
-
-				//	Redeem the voucher, if it's there
-				_LOG( 'Redeeming voucher: ' . $_order->voucher->code . ' - ' . $_order->voucher->label );
-				$this->shop_voucher_model->redeem( $_order->voucher->id, $_order );
-
-			endif;
-
-			// --------------------------------------------------------------------------
-
-			_LOG();
-
-			// --------------------------------------------------------------------------
-
-			_LOG( 'All done here, going back to sleep...' );
-			_LOG( '- - - - - - - - - - - - - - - - - - -' );
-			_LOG();
-
-			if ( $this->data['testing'] ) :
-
-				echo anchor( $this->_shop_url . 'checkout/processing?ref=' . $_order->ref, 'Continue to Processing Page' );
-
-			endif;
-
-		else :
-
-			_LOG( 'PayPal did not verify this IPN call, aborting.' );
-			_LOG( '- - - - - - - - - - - - - - - - - - -' );
-			_LOG();
+			$this->session->set_flashdata( 'error', 'An error occurred during checkout, you may have been charged. ' . $this->shop_payment_gateway_model->last_error() );
+			redirect( $this->_shop_url . 'checkout' );
 
 		endif;
 	}
@@ -851,27 +582,32 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	// --------------------------------------------------------------------------
 
 
-	/**
-	 * Determines whether the IPN is in a testing mode or not
-	 * @return bool
-	 */
-	protected function _notify_is_testing()
+	protected function _get_order()
 	{
-		if ( strtoupper( ENVIRONMENT ) == 'PRODUCTION' ) :
+		$_order_ref = $this->input->get( 'ref' );
 
-			return FALSE;
+		if ( $_order_ref ) :
 
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		if ( $this->input->get( 'testing' ) && $this->input->get( 'ref' ) ) :
-
-			return TRUE;
+			$this->shop_payment_gateway_model->checkout_session_clear();
+			return $this->shop_order_model->get_by_ref( $_order_ref );
 
 		else :
 
-			return FALSE;
+			//	No ref, try the session
+			$_order_id = $this->shop_payment_gateway_model->checkout_session_get();
+
+			if ( $_order_id ) :
+
+				$_order = $this->shop_order_model->get_by_id( $_order_id );
+
+				if ( $_order ) :
+
+					$this->shop_payment_gateway_model->checkout_session_clear();
+					redirect( $this->_shop_url . 'checkout/processing?ref=' . $_order->ref );
+
+				endif;
+
+			endif;
 
 		endif;
 	}

@@ -76,7 +76,15 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
 			foreach ( $this->_skin->assets AS $asset ) :
 
-				$this->asset->load( $this->_skin->url . 'assets/' . $asset );
+				if ( is_string( $asset ) ) :
+
+					$this->asset->load( $this->_skin->url . 'assets/' . $asset );
+
+				else :
+
+					$this->asset->load( $asset[0], $asset[1] );
+
+				endif;
 
 			endforeach;
 

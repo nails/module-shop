@@ -23,7 +23,7 @@ use Omnipay\Omnipay;
 class NAILS_Shop_payment_gateway_model extends NAILS_Model
 {
 	protected $_supported;
-
+	protected $_checkout_session_key;
 
 	// --------------------------------------------------------------------------
 
@@ -49,7 +49,6 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 		$this->_supported	= array();
 		$this->_supported[]	= 'WorldPay';
 		$this->_supported[]	= 'Stripe';
-		$this->_supported[]	= 'PayPal_Pro';
 		$this->_supported[]	= 'PayPal_Express';
 
 		// --------------------------------------------------------------------------
@@ -57,6 +56,11 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 		//	These gateways use redirects rather than inline card details
 		$this->_is_redirect		= array();
 		$this->_is_redirect[]	= 'WorldPay';
+		$this->_is_redirect[]	= 'PayPal_Express';
+
+		// --------------------------------------------------------------------------
+
+		$this->_checkout_session_key = 'nailsshopcheckoutorder';
 	}
 
 
@@ -174,6 +178,27 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 		endforeach;
 
 		return $_name;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Returns any assets which the gateway requires for checkout
+	 * @param  string $gateway The name of the gateway to check for
+	 * @return array
+	 */
+	public function get_checkout_assets( $gateway )
+	{
+		$_gateway_name = $this->get_correct_casing( $gateway );
+
+		$_assets				= array();
+		$_assets['Stripe']		= array();
+		$_assets['Stripe'][]	= array( 'https://js.stripe.com/v2/', 'APP', 'JS' );
+		$_assets['Stripe'][]	= array( 'window.NAILS.SHOP_Checkout_Stripe_publishableKey = "' . app_setting( 'omnipay_Stripe_publishableKey', 'shop' ) . '";', 'APP', 'JS-INLINE' );
+
+		return isset( $_assets[$_gateway_name] ) ? $_assets[$_gateway_name] : array();
 	}
 
 
@@ -329,15 +354,16 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 		$_data['description']	= 'Payment for Order: ' . $_order->ref;
 		$_data['clientIp']		= $this->input->ip_address();
 
-		//	Set the return URL
+		//	Set the relevant URLs
 		$_shop_url = app_setting( 'url', 'shop' ) ? app_setting( 'url', 'shop' ) : 'shop/';
-		$_data['returnUrl'] = site_url( $_shop_url . 'checkout/processing/' . $_order->ref . '/' . $_order->code );
-		$_data['cancelUrl'] = site_url( $_shop_url . 'checkout/cancel/' . $_order->ref . '/' . $_order->code );
+		$_data['returnUrl'] = site_url( $_shop_url . 'checkout/processing?ref=' . $_order->ref );
+		$_data['cancelUrl'] = site_url( $_shop_url . 'checkout/cancel?ref=' . $_order->ref );
+		$_data['notifyUrl'] = site_url( 'api/shop/webhook/' . strtolower( $_gateway_name ) . '?ref=' . $_order->ref );
 
 		//	Any gateway specific handlers for the request object?
 		if ( method_exists( $this, '_prepare_request_' . strtolower( $gateway ) ) ) :
 
-			$this->{'_prepare_request_' . strtolower( $gateway )}( $_data );
+			$this->{'_prepare_request_' . strtolower( $gateway )}( $_data, $_order );
 
 		endif;
 
@@ -350,7 +376,84 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
 			if ( $_response->isSuccessful() ) :
 
-				//	Payment was successful
+				//	Payment was successful - add the payment to the order and process if required
+				$this->load->model( 'shop/shop_order_payment_model' );
+
+				$_transaction_id = $_response->getTransactionReference();
+
+				//	First, check we've not already handled this payment. This should NOT happen.
+				$_payment = $this->shop_order_payment_model->get_by_transaction_id( $_transaction_id, $_gateway_name );
+
+				if ( $_payment ) :
+
+					show_fatal_error( 'Transaction already processed.', 'Transaction with id: ' . $_transaction_id . ' has already been processed. Order ID: ' . $_order->id );
+
+				endif;
+
+				//	Define the payment data
+				$_payment_data						= array();
+				$_payment_data['order_id']			= $_order->id;
+				$_payment_data['transaction_id']	= $_transaction_id;
+				$_payment_data['amount']			= $_order->totals->user->grand;
+				$_payment_data['currency']			= $_order->currency;
+
+				// --------------------------------------------------------------------------
+
+				//	Add payment against the order
+				$_data						= array();
+				$_data['order_id']			= $_payment_data['order_id'];
+				$_data['payment_gateway']	= $_gateway_name;
+				$_data['transaction_id']	= $_payment_data['transaction_id'];
+				$_data['amount']			= $_payment_data['amount'];
+				$_data['currency']			= $_payment_data['currency'];
+				$_data['raw_get']			= $this->input->server( 'QUERY_STRING' );
+				$_data['raw_post']			= @file_get_contents( 'php://input' );
+
+				$_result = $this->shop_order_payment_model->create( $_data );
+
+				//	Bad news, fall over
+				if ( $_payment ) :
+
+					show_fatal_error( 'Failed to create payment reference against order ' . $_order->id, 'The customer was charged but the payment failed to associate with the order. ' . $this->shop_order_payment_model->last_error() );
+
+				endif;
+
+				// --------------------------------------------------------------------------
+
+				//	Update order
+				if ( $this->shop_order_payment_model->order_is_paid( $_order->id ) ) :
+
+					if ( ! $this->shop_order_model->paid( $_order->id ) ) :
+
+						send_developer_mail( 'Failed to mark order #' . $_order->id . ' as paid', 'The transaction for this order was successfull, but I was unable to mark the order as paid.' );
+
+					endif;
+
+					// --------------------------------------------------------------------------
+
+					//	Process the order, i.e do any after sales stuff which needs done immediately
+					if ( ! $this->shop_order_model->process( $_order->id ) ) :
+
+						send_developer_mail( 'Failed to process order #' . $_order->id . ' as paid', 'The transaction for this order was successfull, but I was unable to processthe order.' );
+
+					endif;
+
+					// --------------------------------------------------------------------------
+
+					//	Send notifications to manager(s) and customer
+					$this->shop_order_model->send_order_notification( $_order, $_payment_data, FALSE );
+					$this->shop_order_model->send_receipt( $_order, $_payment_data, FALSE );
+
+				else :
+
+					_LOG( 'Order is partially paid.' );
+
+					//	Send notifications to manager(s) and customer
+					$this->shop_order_model->send_order_notification( $_order, $_payment_data, TRUE );
+					$this->shop_order_model->send_receipt( $_order, $_payment_data, TRUE );
+
+				endif;
+
 				return TRUE;
 
 			elseif ( $_response->isRedirect() ) :
@@ -361,8 +464,8 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 			else :
 
 				//	Payment failed: display message to customer
-				$_error  = 'Payment Gateway denied the transaction. ';
-				$_error .= $this->user_model->is_superuser() ? $_response->getMessage() : '';
+				$_error  = 'Our payment processor denied the transaction and did not charge you.';
+				$_error .= $_response->getMessage() ? ' Reason: ' . $_response->getMessage() : '';
 				$this->_set_error( $_error );
 				return FALSE;
 
@@ -383,7 +486,48 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	public function complete_payment( $gateway, $enable_log = FALSE )
+	public function confirm_complete_payment( $gateway, $order )
+	{
+		$_gateway_name = $this->get_correct_casing( $gateway );
+
+		if ( $_gateway_name ) :
+
+			$_gateway = $this->_prepare_gateway( $_gateway_name );
+
+
+		else :
+
+			$this->_set_error( '"' . $gateway . '" is not a valid gateway.' );
+			return FALSE;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		//	Payment data
+		$_payment_data						= array();
+		$_payment_data['order_id']			= $order->id;
+		$_payment_data['transaction_id']	= NULL;
+		$_payment_data['amount']			= $order->totals->user->grand;
+		$_payment_data['currency']			= $order->currency;
+
+		// --------------------------------------------------------------------------
+
+		//	Complete the payment
+		return $this->_complete_payment( $_gateway_name, $_payment_data, $order, FALSE );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Called via the webhook
+	 * @param  [type]  $gateway    [description]
+	 * @param  boolean $enable_log [description]
+	 * @return [type]              [description]
+	 */
+	public function webhook_complete_payment( $gateway, $enable_log = FALSE )
 	{
 		/**
 		 * Set the logger's dummy mode. If set to FALSE calls to _LOG()
@@ -501,30 +645,22 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
-		//	Check this payment
-		$this->load->model( 'shop/shop_order_payment_model' );
+		//	Complete the payment
+		return $this->_complete_payment( $_gateway_name, $_payment_data, $_order, $enable_log );
+	}
 
-		//	First, check we've not already handled this payment
-		$_payment = $this->shop_order_payment_model->get_by_transaction_id( $_payment_data['transaction_id'], $_gateway_name );
 
-		if ( $_payment ) :
+	// --------------------------------------------------------------------------
 
-			$_error = 'Payment with ID ' . $_gateway_name . ':' . $_payment_data['transaction_id'] . ' has already been processed.';
-			_LOG( $_error );
-			$this->_set_error( $_error );
-			return FALSE;
 
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		//	Payment verified?
-		$_gateway = $this->_prepare_gateway( $_gateway_name, $enable_log );
+	protected function _complete_payment( $gateway_name, $payment_data, $order, $enable_log )
+	{
+		$_gateway = $this->_prepare_gateway( $gateway_name, $enable_log );
 
 		try
 		{
 			_LOG( 'Attempting completePurchase()' );
-			$_response = $_gateway->completePurchase()->send();
+			$_response = $_gateway->completePurchase( $payment_data )->send();
 		}
 		catch ( Exception $e )
 		{
@@ -534,21 +670,44 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 			return FALSE;
 		}
 
+		if ( ! $_response ->isSuccessful() ):
+
+			$_error = 'Payment Failed with error: ' . $_response->getMessage();
+			_LOG( $_error );
+			$this->_set_error( $_error );
+			return FALSE;
+
+		endif;
+
 		// --------------------------------------------------------------------------
 
 		//	Add payment against the order
 		$_data						= array();
-		$_data['order_id']			= $_payment_data['order_id'];
-		$_data['payment_gateway']	= $_gateway_name;
-		$_data['transaction_id']	= $_payment_data['transaction_id'];
-		$_data['amount']			= $_payment_data['amount'];
-		$_data['currency']			= $_payment_data['currency'];
+		$_data['order_id']			= $payment_data['order_id'];
+		$_data['payment_gateway']	= $gateway_name;
+		$_data['transaction_id']	= $_response->getTransactionReference();
+		$_data['amount']			= $payment_data['amount'];
+		$_data['currency']			= $payment_data['currency'];
 		$_data['raw_get']			= $this->input->server( 'QUERY_STRING' );
 		$_data['raw_post']			= @file_get_contents( 'php://input' );
 
+		$this->load->model( 'shop/shop_order_payment_model' );
+
+		//	First check if this transaction has been dealt with before
+		$_payment = $this->shop_order_payment_model->get_by_transaction_id( $_data['transaction_id'], $gateway_name );
+
+		if ( $_payment ):
+
+			$_error = 'Payment with ID ' . $gateway_name . ':' . $_data['transaction_id'] . ' has already been processed by this system.';
+			_LOG( $_error );
+			$this->_set_error( $_error );
+			return FALSE;
+
+		endif;
+
 		$_result = $this->shop_order_payment_model->create( $_data );
 
-		if ( $_payment ) :
+		if ( ! $_result ) :
 
 			$_error = 'Failed to create payment reference. ' . $this->shop_order_payment_model->last_error();
 			_LOG( $_error );
@@ -560,56 +719,54 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Update order
-		if ( $this->shop_order_payment_model->order_is_paid( $_order->id ) ) :
+		if ( $this->shop_order_payment_model->order_is_paid( $order->id ) ) :
 
 			_LOG( 'Order is completely paid.' );
 
-			if ( ! $this->shop_order_model->paid( $_order->id ) ) :
+			if ( ! $this->shop_order_model->paid( $order->id ) ) :
 
-				$_error = 'Failed to mark order #' . $_order->id . ' as PAID.';
+				$_error = 'Failed to mark order #' . $order->id . ' as PAID.';
 				_LOG( $_error );
 				$this->_set_error( $_error );
 				return FALSE;
 
 			else :
 
-				_LOG( 'Marked order #' . $_order->id . ' as PAID.' );
+				_LOG( 'Marked order #' . $order->id . ' as PAID.' );
 
 			endif;
 
 			// --------------------------------------------------------------------------
 
 			//	Process the order, i.e do any after sales stuff which needs done immediately
-			if ( ! $this->shop_order_model->process( $_order->id ) ) :
+			if ( ! $this->shop_order_model->process( $order->id ) ) :
 
-				$_error = 'Failed to process order #' . $_order->id . '.';
+				$_error = 'Failed to process order #' . $order->id . '.';
 				_LOG( $_error );
 				$this->_set_error( $_error );
 				return FALSE;
 
 			else :
 
-				_LOG( 'Successfully processed order #' . $_order->id );
+				_LOG( 'Successfully processed order #' . $order->id );
 
 			endif;
 
 			// --------------------------------------------------------------------------
 
 			//	Send notifications to manager(s) and customer
-			$this->shop_order_model->send_order_notification( $_order, $_payment_data, FALSE );
-			$this->shop_order_model->send_receipt( $_order, $_payment_data, FALSE );
+			$this->shop_order_model->send_order_notification( $order, $payment_data, FALSE );
+			$this->shop_order_model->send_receipt( $order, $payment_data, FALSE );
 
 		else :
 
 			_LOG( 'Order is partially paid.' );
 
 			//	Send notifications to manager(s) and customer
-			$this->shop_order_model->send_order_notification( $_order, $_payment_data, TRUE );
-			$this->shop_order_model->send_receipt( $_order, $_payment_data, TRUE );
+			$this->shop_order_model->send_order_notification( $order, $payment_data, TRUE );
+			$this->shop_order_model->send_receipt( $order, $payment_data, TRUE );
 
 		endif;
-
-		// --------------------------------------------------------------------------
 
 		return TRUE;
 	}
@@ -666,9 +823,25 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 	 * @param  array $data The raw request object
 	 * @return void
 	 */
-	protected function _prepare_request_stripe( &$data )
+	protected function _prepare_request_stripe( &$data, $order )
 	{
-		$data['token'] = $this->input->post( 'token' );
+		$data['token'] = $this->input->post( 'stripe_token' );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Prepares the request object when submitting to PayPal_Express
+	 * @param  array $data The raw request object
+	 * @return void
+	 */
+	protected function _prepare_request_paypal_express( &$data, $order )
+	{
+		//	Alter the return URL so we go to an intermediary page
+		$_shop_url = app_setting( 'url', 'shop' ) ? app_setting( 'url', 'shop' ) : 'shop/';
+		$data['returnUrl'] = site_url( $_shop_url . 'checkout/confirm/paypal_express?ref=' . $order->ref );
 	}
 
 
@@ -729,6 +902,111 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 		$_gateway	= Omnipay::create( $_gateway_name );
 
 		return $_gateway->getDefaultParameters();
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Saves the order ID to the session in an encrypted format
+	 * @param  int    $order_id   The order's ID
+	 * @param  string $order_ref  The order's ref
+	 * @param  strong $order_code The order's code
+	 * @return void
+	 */
+	public function checkout_session_save( $order_id, $order_ref, $order_code )
+	{
+		$this->checkout_session_clear();
+
+		// --------------------------------------------------------------------------
+
+		$_hash = $order_id . ':' . $order_ref . ':' . $order_code;
+		$_hash = $this->encrypt->encode( $_hash, APP_PRIVATE_KEY );
+
+		$_session				= array();
+		$_session['hash']		= $_hash;
+		$_session['signature']	= md5( $_hash . APP_PRIVATE_KEY );
+
+		$this->session->set_userdata( $this->_checkout_session_key, $_session );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Clears the order ID from the session
+	 * @return void
+	 */
+	public function checkout_session_clear()
+	{
+		$this->session->unset_userdata( $this->_checkout_session_key );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Fetches the order ID from the session, verifying it along the way
+	 * @return mixed INT on success FALSE on failure.
+	 */
+	public function checkout_session_get()
+	{
+		$_hash = $this->session->userdata( $this->_checkout_session_key );
+
+		if ( is_array( $_hash ) ) :
+
+			if ( ! empty( $_hash['hash'] ) && ! empty( $_hash['signature'] ) ) :
+
+				if ( $_hash['signature'] == md5( $_hash['hash'] . APP_PRIVATE_KEY ) ) :
+
+					$_hash = $this->encrypt->decode( $_hash['hash'], APP_PRIVATE_KEY );
+
+					if ( ! empty( $_hash ) ) :
+
+						$_hash = explode( ':', $_hash );
+
+						if ( count( $_hash ) == 3 ) :
+
+							//	Return just the order ID.
+							return (int) $_hash[0];
+
+						else :
+
+							$this->_set_error( 'Wrong number of hash parts. Error #5' );
+							return FALSE;
+
+						endif;
+
+					else :
+
+						$this->_set_error( 'Unable to decrypt hash. Error #4' );
+						return FALSE;
+
+					endif;
+
+				else :
+
+					$this->_set_error( 'Invalid signature. Error #3' );
+					return FALSE;
+
+				endif;
+
+			else :
+
+				$this->_set_error( 'Session data missing elements. Error #2' );
+				return FALSE;
+
+			endif;
+
+		else :
+
+			$this->_set_error( 'Invalid session data. Error #1' );
+			return FALSE;
+
+		endif;
 	}
 }
 

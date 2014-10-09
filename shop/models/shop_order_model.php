@@ -720,11 +720,6 @@ class NAILS_Shop_order_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-
-
-	// --------------------------------------------------------------------------
-
-
 	public function get_items_for_user( $user_id, $email )
 	{
 		$this->db->select( 'op.id,op.product_id,op.quantity,op.title,op.price,op.sale_price,op.tax,op.shipping,op.shipping_tax,op.total' );
@@ -1084,7 +1079,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		$_email							= new stdClass();
-		$_email->type					= $partial ? 'notification_partial_payment' : 'notification_paid';
+		$_email->type					= $partial ? 'shop_notification_partial_payment' : 'shop_notification_paid';
 		$_email->data					= array();
 		$_email->data['order']			= $order;
 		$_email->data['payment_data']	= $payment_data;
