@@ -22,36 +22,68 @@ use Omnipay\Omnipay;
 
 class NAILS_Shop_payment_gateway_model extends NAILS_Model
 {
+	protected $_supported;
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Construct the model
+	 */
+	public function __construct()
+	{
+		parent::__construct();
+
+		// --------------------------------------------------------------------------
+
+		/**
+		 * An array of gateways supported by Nails.
+		 * ========================================
+		 *
+		 * In order to qualify for "supported" status, do_payment() needs to know
+		 * how to handle the checkout procedure and Admin settings needs to know how
+		 * to gather the production and staging credentials.
+		 */
+
+		$this->_supported	= array();
+		$this->_supported[]	= 'WorldPay';
+		$this->_supported[]	= 'Stripe';
+		$this->_supported[]	= 'PayPal_Pro';
+		$this->_supported[]	= 'PayPal_Express';
+
+		// --------------------------------------------------------------------------
+
+		//	These gateways use redirects rather than inline card details
+		$this->_is_redirect		= array();
+		$this->_is_redirect[]	= 'WorldPay';
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
 	/**
 	 * Returns an array of payment gateways available to the system.
 	 * @return array
 	 */
 	public function get_available()
 	{
-		/**
-		 * An array of gateways supported by Nails.
-		 * In order to qualify for "supported" status, do_payment() needs to know
-		 * how to handle the checkout procedure and Admin settings needs to know how
-		 * to gather the production and staging credentials.
-		 */
-		//
-		$_supported		= array();
-		$_supported[]	= 'WorldPay';
-
 		//	Available to the system
-		$_available		= Omnipay::find();
-
-		$_out = array();
+		$_available	= Omnipay::find();
+		$_out		= array();
 
 		foreach( $_available AS $gateway ) :
 
-			if ( array_search( $gateway, $_supported ) !== FALSE ) :
+			if ( array_search( $gateway, $this->_supported ) !== FALSE ) :
 
 				$_out[] = $gateway;
 
 			endif;
 
 		endforeach;
+
+		asort( $_out );
 
 		return $_out;
 	}
@@ -88,6 +120,38 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
+	public function get_enabled_formatted()
+	{
+		$_enabled_payment_gateways	= $this->get_enabled();
+		$_payment_gateways			= array();
+
+		foreach( $_enabled_payment_gateways AS $pg ) :
+
+			$_temp				= new stdClass();
+			$_temp->slug		= $this->shop_payment_gateway_model->get_correct_casing( $pg );
+			$_temp->label		= app_setting( 'omnipay_' . $_temp->slug . '_customise_label', 'shop' );
+			$_temp->img			= app_setting( 'omnipay_' . $_temp->slug . '_customise_img', 'shop' );
+			$_temp->is_redirect = $this->shop_payment_gateway_model->is_redirect( $pg );
+
+			//	Sort label
+			if ( empty( $_temp->label ) ) :
+
+				$_temp->label = str_replace( '_', ' ', $_temp->slug );
+				$_temp->label = ucwords( $_temp->label );
+
+			endif;
+
+			$_payment_gateways[] = $_temp;
+
+		endforeach;
+
+		return $_payment_gateways;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
 	/**
 	 * Returns the correct casing for a payment gateway
 	 * @param  string $name The payment gateway to retrieve
@@ -117,12 +181,87 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
 
 	/**
-	 * Attempts to make a payment for the order
-	 * @param  int    $order_id The order to make a payment against.
-	 * @param  string $gateway  the gateway to use.
+	 * Determines whether a gateway is available or not
+	 * @param  string  $gateway The gateway to check
 	 * @return boolean
 	 */
-	public function do_payment( $order_id, $gateway )
+	public function is_available( $gateway )
+	{
+		$_gateway = $this->get_correct_casing( $gateway );
+
+		if ( $_gateway ) :
+
+			//	get_correct_casing() will return NULL if not a valid gateway
+			return TRUE;
+
+		else :
+
+			return FALSE;
+
+		endif;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Determines whether a gateway is enabled or not
+	 * @param  string  $gateway The gateway to check
+	 * @return boolean
+	 */
+	public function is_enabled( $gateway )
+	{
+		$_gateway = $this->get_correct_casing( $gateway );
+
+		if ( $_gateway ) :
+
+			$_enabled = $this->get_enabled();
+
+			return in_array( $_gateway, $_enabled );
+
+		else :
+
+			return FALSE;
+
+		endif;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Determines whether the payment gateway is going to redirect to take card
+	 * details or whether the card details are taken inline.
+	 * @param  string  $gateway The gateway to check
+	 * @return boolean          Boolean on success, NULL on failure
+	 */
+	public function is_redirect( $gateway )
+	{
+		$_gateway = $this->get_correct_casing( $gateway );
+
+		if ( ! $_gateway ) :
+
+			return NULL;
+
+		endif;
+
+		return in_array( $gateway, $this->_is_redirect );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Attempts to make a payment for the order
+	 * @param  int    $order_id The order to make a payment against
+	 * @param  string $gateway  The gateway to use
+	 * @param  array  $raw_data The Raw data of the request
+	 * @return boolean
+	 */
+	public function do_payment( $order_id, $gateway, $raw_data )
 	{
 		$_enabled_gateways	= $this->get_enabled();
 		$_gateway_name		= $this->get_correct_casing( $gateway );
@@ -172,6 +311,13 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 		$_data['shippingCountry']	= $_order->shipping_address->country;
 		$_data['shippingPhone']		= $_order->user->telephone;
 
+		//	Any gateway specific handlers for the card object?
+		if ( method_exists( $this, '_prepare_card_' . strtolower( $gateway ) ) ) :
+
+			$this->{'_prepare_card_' . strtolower( $gateway )}( $_data );
+
+		endif;
+
 		$_card = new CreditCard( $_data );
 
 		//	And now the purchase request
@@ -186,30 +332,47 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 		//	Set the return URL
 		$_shop_url = app_setting( 'url', 'shop' ) ? app_setting( 'url', 'shop' ) : 'shop/';
 		$_data['returnUrl'] = site_url( $_shop_url . 'checkout/processing/' . $_order->ref . '/' . $_order->code );
+		$_data['cancelUrl'] = site_url( $_shop_url . 'checkout/cancel/' . $_order->ref . '/' . $_order->code );
+
+		//	Any gateway specific handlers for the request object?
+		if ( method_exists( $this, '_prepare_request_' . strtolower( $gateway ) ) ) :
+
+			$this->{'_prepare_request_' . strtolower( $gateway )}( $_data );
+
+		endif;
 
 		// --------------------------------------------------------------------------
 
 		//	Attempt the purchase
-		$_response = $_gateway->purchase( $_data )->send();
+		try
+		{
+			$_response = $_gateway->purchase( $_data )->send();
 
-		if ( $_response->isSuccessful() ) :
+			if ( $_response->isSuccessful() ) :
 
-			//	Payment was successful
-			dumpanddie($_response);
-			return TRUE;
+				//	Payment was successful
+				return TRUE;
 
-		elseif ( $_response->isRedirect() ) :
+			elseif ( $_response->isRedirect() ) :
 
-			//	Redirect to offsite payment gateway
-			$_response->redirect();
+				//	Redirect to offsite payment gateway
+				$_response->redirect();
 
-		else :
+			else :
 
-			//	Payment failed: display message to customer
-			$this->_set_error( 'Payment Gateway denied the transaction. ' . $_response->getMessage() );
+				//	Payment failed: display message to customer
+				$_error  = 'Payment Gateway denied the transaction. ';
+				$_error .= $this->user_model->is_superuser() ? $_response->getMessage() : '';
+				$this->_set_error( $_error );
+				return FALSE;
+
+			endif;
+		}
+		catch( Exception $e )
+		{
+			$this->_set_error( 'Payment Request failed. ' . $e->getMessage() );
 			return FALSE;
-
-		endif;
+		}
 
 		// --------------------------------------------------------------------------
 
@@ -498,6 +661,20 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
+	/**
+	 * Prepares the request object when submitting to Stripe
+	 * @param  array $data The raw request object
+	 * @return void
+	 */
+	protected function _prepare_request_stripe( &$data )
+	{
+		$data['token'] = $this->input->post( 'token' );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
 	protected function _extract_payment_data( $gateway )
 	{
 		$_out					= array();
@@ -528,6 +705,30 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 		$_out['currency']		= $this->input->post( 'currency' );
 
 		return $_out;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Returns the default parameters for a gateway
+	 * @param  string $gateway The gateway to get parameters for
+	 * @return array
+	 */
+	public function get_default_params( $gateway )
+	{
+		$_gateway_name = $this->get_correct_casing( $gateway );
+
+		if ( ! $_gateway_name ) :
+
+			return array();
+
+		endif;
+
+		$_gateway	= Omnipay::create( $_gateway_name );
+
+		return $_gateway->getDefaultParameters();
 	}
 }
 

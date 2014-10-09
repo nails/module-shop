@@ -769,10 +769,19 @@ class NAILS_Shop_order_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	public function fail( $order_id, $data = array() )
+	public function fail( $order_id, $reason = '', $data = array() )
 	{
 		$data['status'] = 'FAILED';
-		return $this->update( $order_id, $data );
+		if ( $this->update( $order_id, $data ) ) :
+
+			$_reason = empty( $reason ) ? 'No reason supplied.' : $reason;
+			$this->note_add( $order_id, 'Failure Reason: ' . $_reason );
+
+		else :
+
+			return FALSE;
+
+		endif;
 	}
 
 
@@ -1113,6 +1122,58 @@ class NAILS_Shop_order_model extends NAILS_Model
 			endif;
 
 		endforeach;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Adds a note against an order
+	 * @param int $order_id The order IDto add the note against
+	 * @param boolean
+	 */
+	public function note_add( $order_id, $note )
+	{
+		$this->db->set( 'order_id', $order_id );
+		$this->db->set( 'note', $note );
+
+		$this->db->set( 'created', 'NOW()', FALSE );
+		$this->db->set( 'modified', 'NOW()', FALSE );
+
+		if ( $this->user_model->is_logged_in() ) :
+
+			$this->db->set( 'created_by', active_user( 'id' ) );
+			$this->db->set( 'modified_by', active_user( 'id' ) );
+
+		else :
+
+			$this->db->set( 'created_by', NULL );
+			$this->db->set( 'modified_by', NULL );
+
+		endif;
+
+		$this->db->insert( NAILS_DB_PREFIX . 'shop_order_note' );
+
+		return (bool) $this->db->affected_rows();
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Deletes an existing order note
+	 * @param  int    $order_id The Order's ID
+	 * @param  int    $note_id  The note's ID
+	 * @return boolean
+	 */
+	public function note_delete( $order_id, $note_id )
+	{
+		$this->db->where( 'id', $note_id );
+		$this->db->where( 'order_iid', $order_id );
+		$this->db->delete( NAILS_DB_PREFIX . 'shop_order_note' );
+		return (bool) $this->db->affected_rows();
 	}
 
 

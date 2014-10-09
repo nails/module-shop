@@ -29,6 +29,26 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	 **/
 	public function index()
 	{
+		$this->load->model( 'system/country_model' );
+		$this->load->model( 'shop/shop_payment_gateway_model' );
+
+		$this->data['countries_flat']	= $this->country_model->get_all_flat();
+		$this->data['payment_gateways']	= $this->shop_payment_gateway_model->get_enabled_formatted();
+
+		if ( ! count( $this->data['payment_gateways'] ) ) :
+
+			$this->data['error'] = '<strong>Error:</strong> No Payment Gateways are configured.';
+			$this->data['page']->title = $this->_shop_name . ': No Payment Gateways have been configured';
+
+			$this->load->view( 'structure/header',									$this->data );
+			$this->load->view( $this->_skin->path . 'views/checkout/no_gateway',	$this->data );
+			$this->load->view( 'structure/footer',									$this->data );
+			return;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
 		$_basket = $this->shop_basket_model->get();
 
 		if ( empty( $_basket->items ) ) :
@@ -42,120 +62,136 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 		if ( $this->input->post() ) :
 
-			$this->load->library( 'form_validation' );
+			if ( ! $this->shop_payment_gateway_model->is_enabled( $this->input->post( 'payment_gateway' ) ) ) :
 
-			$this->form_validation->set_rules( 'delivery_address_line_1',	'', 'xss_clean|required' );
-			$this->form_validation->set_rules( 'delivery_address_line_2',	'', 'xss_clean' );
-			$this->form_validation->set_rules( 'delivery_address_town',		'', 'xss_clean|required' );
-			$this->form_validation->set_rules( 'delivery_address_state',	'', 'xss_clean' );
-			$this->form_validation->set_rules( 'delivery_address_postcode',	'', 'xss_clean|required' );
-			$this->form_validation->set_rules( 'delivery_address_country',	'', 'xss_clean|required' );
-
-			$this->form_validation->set_rules( 'first_name',				'', 'xss_clean|required' );
-			$this->form_validation->set_rules( 'last_name',					'', 'xss_clean|required' );
-			$this->form_validation->set_rules( 'email',						'', 'xss_clean|required' );
-			$this->form_validation->set_rules( 'telephone',					'', 'xss_clean' );
-
-			if ( ! $this->input->post( 'same_billing_address' ) ) :
-
-				$this->form_validation->set_rules( 'billing_address_line_1',	'', 'xss_clean|required' );
-				$this->form_validation->set_rules( 'billing_address_line_2',	'', 'xss_clean' );
-				$this->form_validation->set_rules( 'billing_address_town',		'', 'xss_clean|required' );
-				$this->form_validation->set_rules( 'billing_address_state',		'', 'xss_clean' );
-				$this->form_validation->set_rules( 'billing_address_postcode',	'', 'xss_clean|required' );
-				$this->form_validation->set_rules( 'billing_address_country',	'', 'xss_clean|required' );
+				$this->data['error'] = '"' . $this->input->post( 'payment_gateway' ) . '" is not a valid payment gateway.';
 
 			else :
 
-				$this->form_validation->set_rules( 'billing_address_line_1',	'', 'xss_clean' );
-				$this->form_validation->set_rules( 'billing_address_line_2',	'', 'xss_clean' );
-				$this->form_validation->set_rules( 'billing_address_town',		'', 'xss_clean' );
-				$this->form_validation->set_rules( 'billing_address_state',		'', 'xss_clean' );
-				$this->form_validation->set_rules( 'billing_address_postcode',	'', 'xss_clean' );
-				$this->form_validation->set_rules( 'billing_address_country',	'', 'xss_clean' );
+				$this->load->library( 'form_validation' );
 
-			endif;
+				$this->form_validation->set_rules( 'delivery_address_line_1',	'', 'xss_clean|trim|required' );
+				$this->form_validation->set_rules( 'delivery_address_line_2',	'', 'xss_clean|trim' );
+				$this->form_validation->set_rules( 'delivery_address_town',		'', 'xss_clean|trim|required' );
+				$this->form_validation->set_rules( 'delivery_address_state',	'', 'xss_clean|trim' );
+				$this->form_validation->set_rules( 'delivery_address_postcode',	'', 'xss_clean|trim|required' );
+				$this->form_validation->set_rules( 'delivery_address_country',	'', 'xss_clean|required' );
 
-			$this->form_validation->set_message( 'required', lang( 'fv_required' ) );
+				$this->form_validation->set_rules( 'first_name',				'', 'xss_clean|trim|required' );
+				$this->form_validation->set_rules( 'last_name',					'', 'xss_clean|trim|required' );
+				$this->form_validation->set_rules( 'email',						'', 'xss_clean|trim|required' );
+				$this->form_validation->set_rules( 'telephone',					'', 'xss_clean|trim' );
 
-			if ( $this->form_validation->run() ) :
-
-				//	Prepare data
-				$_data						= new stdClass();
-
-				//	Contact details
-				$_data->contact				= new stdClass();
-				$_data->contact->first_name	= $this->input->post( 'first_name' );
-				$_data->contact->last_name	= $this->input->post( 'last_name' );
-				$_data->contact->email		= $this->input->post( 'email' );
-				$_data->contact->telephone	= $this->input->post( 'telephone' );
-
-				//	Delivery Details
-				$_data->delivery			= new stdClass();
-				$_data->delivery->line_1	= $this->input->post( 'delivery_address_line_1' );
-				$_data->delivery->line_2	= $this->input->post( 'delivery_address_line_2' );
-				$_data->delivery->town		= $this->input->post( 'delivery_address_town' );
-				$_data->delivery->state		= $this->input->post( 'delivery_address_state' );
-				$_data->delivery->postcode	= $this->input->post( 'delivery_address_postcode' );
-				$_data->delivery->country	= $this->input->post( 'delivery_address_country' );
-
-				//	Billing details
 				if ( ! $this->input->post( 'same_billing_address' ) ) :
 
-					$_data->billing				= new stdClass();
-					$_data->billing->line_1		= $this->input->post( 'billing_address_line_1' );
-					$_data->billing->line_2		= $this->input->post( 'billing_address_line_2' );
-					$_data->billing->town		= $this->input->post( 'billing_address_town' );
-					$_data->billing->state		= $this->input->post( 'billing_address_state' );
-					$_data->billing->postcode	= $this->input->post( 'billing_address_postcode' );
-					$_data->billing->country	= $this->input->post( 'billing_address_country' );
+					$this->form_validation->set_rules( 'billing_address_line_1',	'', 'xss_clean|trim|required' );
+					$this->form_validation->set_rules( 'billing_address_line_2',	'', 'xss_clean|trim' );
+					$this->form_validation->set_rules( 'billing_address_town',		'', 'xss_clean|trim|required' );
+					$this->form_validation->set_rules( 'billing_address_state',		'', 'xss_clean|trim' );
+					$this->form_validation->set_rules( 'billing_address_postcode',	'', 'xss_clean|trim|required' );
+					$this->form_validation->set_rules( 'billing_address_country',	'', 'xss_clean|trim|required' );
 
 				else :
 
-					$_data->billing				= new stdClass();
-					$_data->billing->line_1		= $this->input->post( 'delivery_address_line_1' );
-					$_data->billing->line_2		= $this->input->post( 'delivery_address_line_2' );
-					$_data->billing->town		= $this->input->post( 'delivery_address_town' );
-					$_data->billing->state		= $this->input->post( 'delivery_address_state' );
-					$_data->billing->postcode	= $this->input->post( 'delivery_address_postcode' );
-					$_data->billing->country	= $this->input->post( 'delivery_address_country' );
+					$this->form_validation->set_rules( 'billing_address_line_1',	'', 'xss_clean|trim' );
+					$this->form_validation->set_rules( 'billing_address_line_2',	'', 'xss_clean|trim' );
+					$this->form_validation->set_rules( 'billing_address_town',		'', 'xss_clean|trim' );
+					$this->form_validation->set_rules( 'billing_address_state',		'', 'xss_clean|trim' );
+					$this->form_validation->set_rules( 'billing_address_postcode',	'', 'xss_clean|trim' );
+					$this->form_validation->set_rules( 'billing_address_country',	'', 'xss_clean|trim' );
 
 				endif;
 
-				//	And the basket
-				$_data->basket = $_basket;
+				$this->form_validation->set_rules( 'payment_gateway', '', 'xss_clean|trim|required' );
 
-				//	Generate the order and proceed to payment
-				$_order = $this->shop_order_model->create( $_data, TRUE );
+				$this->form_validation->set_message( 'required', lang( 'fv_required' ) );
 
-				if ( $_order ) :
+				if ( $this->form_validation->run() ) :
 
-					//	Order created successfully proceed to payment
-					redirect( $this->_shop_url . 'checkout/payment/' . $_order->ref . '/' . $_order->code );
+					//	Prepare data
+					$_data = new stdClass();
+
+					//	Contact details
+					$_data->contact				= new stdClass();
+					$_data->contact->first_name	= $this->input->post( 'first_name' );
+					$_data->contact->last_name	= $this->input->post( 'last_name' );
+					$_data->contact->email		= $this->input->post( 'email' );
+					$_data->contact->telephone	= $this->input->post( 'telephone' );
+
+					//	Delivery Details
+					$_data->delivery			= new stdClass();
+					$_data->delivery->line_1	= $this->input->post( 'delivery_address_line_1' );
+					$_data->delivery->line_2	= $this->input->post( 'delivery_address_line_2' );
+					$_data->delivery->town		= $this->input->post( 'delivery_address_town' );
+					$_data->delivery->state		= $this->input->post( 'delivery_address_state' );
+					$_data->delivery->postcode	= $this->input->post( 'delivery_address_postcode' );
+					$_data->delivery->country	= $this->input->post( 'delivery_address_country' );
+
+					//	Billing details
+					if ( ! $this->input->post( 'same_billing_address' ) ) :
+
+						$_data->billing				= new stdClass();
+						$_data->billing->line_1		= $this->input->post( 'billing_address_line_1' );
+						$_data->billing->line_2		= $this->input->post( 'billing_address_line_2' );
+						$_data->billing->town		= $this->input->post( 'billing_address_town' );
+						$_data->billing->state		= $this->input->post( 'billing_address_state' );
+						$_data->billing->postcode	= $this->input->post( 'billing_address_postcode' );
+						$_data->billing->country	= $this->input->post( 'billing_address_country' );
+
+					else :
+
+						$_data->billing				= new stdClass();
+						$_data->billing->line_1		= $this->input->post( 'delivery_address_line_1' );
+						$_data->billing->line_2		= $this->input->post( 'delivery_address_line_2' );
+						$_data->billing->town		= $this->input->post( 'delivery_address_town' );
+						$_data->billing->state		= $this->input->post( 'delivery_address_state' );
+						$_data->billing->postcode	= $this->input->post( 'delivery_address_postcode' );
+						$_data->billing->country	= $this->input->post( 'delivery_address_country' );
+
+					endif;
+
+					//	And the basket
+					$_data->basket = $_basket;
+
+					//	Generate the order and proceed to payment
+					$_order = $this->shop_order_model->create( $_data, TRUE );
+
+					if ( $_order ) :
+
+						//	Order created successfully proceed to payment
+						if ( $this->shop_payment_gateway_model->do_payment( $_order->id, $this->input->post( 'payment_gateway' ), $this->input->post() ) ) :
+
+							//	Payment complete! Send the user to the processing page
+							$_shop_url = app_setting( 'url', 'shop' ) ? app_setting( 'url', 'shop' ) : 'shop/';
+							redirect( $_shop_url . 'checkout/processing/' . $_order->ref . '/' . $_order->code );
+
+						else :
+
+							//	Payment failed, mark this order as a failure too.
+							$this->shop_order_model->fail( $_order->id, $this->shop_payment_gateway_model->last_error() );
+							$this->data['error'] = '<strong>Sorry,</strong> something went wrong during checkout. ' . $this->shop_payment_gateway_model->last_error();
+
+						endif;
+
+					else :
+
+						$this->data['error'] = '<strong>Sorry,</strong> there was a problem processing your order. ' . $this->shop_order_model->last_error();
+
+					endif;
 
 				else :
 
-					$this->data['error'] = '<strong>Sorry,</strong> there was a problem processing your order. ' . $this->shop_order_model->last_error();
+					$this->data['error'] = lang( 'fv_there_were_errors' );
 
 				endif;
-
-			else :
-
-				$this->data['error'] = lang( 'fv_there_were_errors' );
 
 			endif;
-
 
 		endif;
 
 		// --------------------------------------------------------------------------
 
 		$this->data['page']->title = $this->_shop_name . ': Checkout';
-
-		// --------------------------------------------------------------------------
-
-		$this->load->model( 'system/country_model' );
-		$this->data['countries_flat'] = $this->country_model->get_all_flat();
 
 		// --------------------------------------------------------------------------
 
@@ -231,6 +267,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	 */
 	public function processing()
 	{
+		dumpanddie('processing. TODO: Get order, not relying on URL. Session?');
 		$this->data['order'] = $this->shop_order_model->get_by_ref( $this->input->get( 'ref' ) );
 
 		if ( ! $this->data['order'] ) :
@@ -433,6 +470,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	 */
 	public function cancel()
 	{
+		dumpanddie('Cancel. TODO: Get order, not relying on URL. Session?');
 		$this->data['order'] = $this->shop_order_model->get_by_ref( $this->input->get( 'ref' ) );
 
 		if ( ! $this->data['order'] ) :

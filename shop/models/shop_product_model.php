@@ -304,7 +304,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 			 * as if OUT_OF_STOCK was set.
 			 */
 
-			if ( $_data->variation[$index]->stock_status == 'IN_STOCK' && $_data->variation[$index]->quantity_available <= 0 ) :
+			if ( $_data->variation[$index]->stock_status == 'IN_STOCK' && ! is_null( $_data->variation[$index]->quantity_available ) && $_data->variation[$index]->quantity_available <= 0 ) :
 
 				$_data->variation[$index]->stock_status			= 'OUT_OF_STOCK';
 				$_data->variation[$index]->quantity_available	= NULL;
