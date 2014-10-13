@@ -20,6 +20,24 @@ require_once '_shop.php';
 
 class NAILS_Enquire extends NAILS_Shop_Controller
 {
+	public function __construct()
+	{
+		parent::__construct();
+
+		// --------------------------------------------------------------------------
+
+		//	Load appropriate assets
+		$_assets		= ! empty( $this->_skin_checkout->assets )		? $this->_skin_checkout->assets		: array();
+		$_css_inline	= ! empty( $this->_skin_checkout->css_inline )	? $this->_skin_checkout->css_inline	: array();
+		$_js_inline		= ! empty( $this->_skin_checkout->js_inline )	? $this->_skin_checkout->js_inline	: array();
+
+		$this->_load_skin_assets( $_assets, $_css_inline, $_js_inline, $this->_skin_checkout->url );
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
 	public function index()
 	{
 		//	TODO
@@ -147,7 +165,7 @@ class NAILS_Enquire extends NAILS_Shop_Controller
 				endforeach;
 
 				$_override				= array();
-				$_override['email_tpl'] = $this->_skin->path . 'views/email/delivery_enquiry';
+				$_override['email_tpl'] = $this->_skin_front->path . 'views/email/delivery_enquiry';
 
 				if ( app_notification_notify( 'delivery_enquiry', 'shop', $_data, $_override ) ) :
 
@@ -181,9 +199,9 @@ class NAILS_Enquire extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		$this->load->view( 'structure/header',							$this->data );
-		$this->load->view( $this->_skin->path . 'views/enquire/index',	$this->data );
-		$this->load->view( 'structure/footer',							$this->data );
+		$this->load->view( 'structure/header',									$this->data );
+		$this->load->view( $this->_skin_front->path . 'views/enquire/index',	$this->data );
+		$this->load->view( 'structure/footer',									$this->data );
 	}
 }
 

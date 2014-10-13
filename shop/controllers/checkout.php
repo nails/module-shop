@@ -27,6 +27,15 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	{
 		parent::__construct();
 		$this->load->model( 'shop/shop_payment_gateway_model' );
+
+		// --------------------------------------------------------------------------
+
+		//	Load appropriate assets
+		$_assets		= ! empty( $this->_skin_checkout->assets )		? $this->_skin_checkout->assets		: array();
+		$_css_inline	= ! empty( $this->_skin_checkout->css_inline )	? $this->_skin_checkout->css_inline	: array();
+		$_js_inline		= ! empty( $this->_skin_checkout->js_inline )	? $this->_skin_checkout->js_inline	: array();
+
+		$this->_load_skin_assets( $_assets, $_css_inline, $_js_inline, $this->_skin_checkout->url );
 	}
 
 
@@ -52,9 +61,9 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 			$this->data['error'] = '<strong>Error:</strong> No Payment Gateways are configured.';
 			$this->data['page']->title = $this->_shop_name . ': No Payment Gateways have been configured';
 
-			$this->load->view( 'structure/header',									$this->data );
-			$this->load->view( $this->_skin->path . 'views/checkout/no_gateway',	$this->data );
-			$this->load->view( 'structure/footer',									$this->data );
+			$this->load->view( 'structure/header',											$this->data );
+			$this->load->view( $this->_skin_chcjout->path . 'views/checkout/no_gateway',	$this->data );
+			$this->load->view( 'structure/footer',											$this->data );
 			return;
 
 		endif;
@@ -256,9 +265,9 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		$this->load->view( 'structure/header',							$this->data );
-		$this->load->view( $this->_skin->path . 'views/checkout/index',	$this->data );
-		$this->load->view( 'structure/footer',							$this->data );
+		$this->load->view( 'structure/header',										$this->data );
+		$this->load->view( $this->_skin_checkout->path . 'views/checkout/index',	$this->data );
+		$this->load->view( 'structure/footer',										$this->data );
 	}
 
 	// --------------------------------------------------------------------------
@@ -351,7 +360,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	 */
 	protected function _processing_unpaid()
 	{
-		$this->load->view( $this->_skin->path . 'views/checkout/processing/unpaid',	$this->data );
+		$this->load->view( $this->_skin_checkout->path . 'views/checkout/processing/unpaid',	$this->data );
 	}
 
 
@@ -368,7 +377,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 		$this->shop_payment_gateway_model->checkout_session_clear();
 
 		//	And load the view
-		$this->load->view( $this->_skin->path . 'views/checkout/processing/pending',	$this->data );
+		$this->load->view( $this->_skin_checkout->path . 'views/checkout/processing/pending',	$this->data );
 	}
 
 
@@ -390,7 +399,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 		$this->shop_payment_gateway_model->checkout_session_clear();
 
 		//	And load the view
-		$this->load->view( $this->_skin->path . 'views/checkout/processing/paid',	$this->data );
+		$this->load->view( $this->_skin_checkout->path . 'views/checkout/processing/paid',	$this->data );
 	}
 
 
@@ -421,7 +430,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 		$this->shop_payment_gateway_model->checkout_session_clear();
 
 		//	And load the view
-		$this->load->view( $this->_skin->path . 'views/checkout/processing/failed',	$this->data );
+		$this->load->view( $this->_skin_checkout->path . 'views/checkout/processing/failed',	$this->data );
 	}
 
 
@@ -452,7 +461,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 		$this->shop_payment_gateway_model->checkout_session_clear();
 
 		//	And load the view
-		$this->load->view( $this->_skin->path . 'views/checkout/processing/abandoned',	$this->data );
+		$this->load->view( $this->_skin_checkout->path . 'views/checkout/processing/abandoned',	$this->data );
 	}
 
 
@@ -483,7 +492,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 		$this->shop_payment_gateway_model->checkout_session_clear();
 
 		//	And load the view
-		$this->load->view( $this->_skin->path . 'views/checkout/processing/cancelled',	$this->data );
+		$this->load->view( $this->_skin_checkout->path . 'views/checkout/processing/cancelled',	$this->data );
 	}
 
 
@@ -514,7 +523,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 		$this->shop_payment_gateway_model->checkout_session_clear();
 
 		//	And load the view
-		$this->load->view( $this->_skin->path . 'views/checkout/processing/error',	$this->data );
+		$this->load->view( $this->_skin_checkout->path . 'views/checkout/processing/error',	$this->data );
 	}
 
 

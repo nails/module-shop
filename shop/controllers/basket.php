@@ -27,6 +27,15 @@ class NAILS_Basket extends NAILS_Shop_Controller
 		// --------------------------------------------------------------------------
 
 		$this->data['return'] = $this->input->get( 'return' ) ? $this->input->get_post( 'return' ) : $this->_shop_url . 'basket';
+
+		// --------------------------------------------------------------------------
+
+		//	Load appropriate assets
+		$_assets		= ! empty( $this->_skin_checkout->assets )		? $this->_skin_checkout->assets		: array();
+		$_css_inline	= ! empty( $this->_skin_checkout->css_inline )	? $this->_skin_checkout->css_inline	: array();
+		$_js_inline		= ! empty( $this->_skin_checkout->js_inline )	? $this->_skin_checkout->js_inline	: array();
+
+		$this->_load_skin_assets( $_assets, $_css_inline, $_js_inline, $this->_skin_checkout->url );
 	}
 
 
@@ -112,9 +121,9 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
 		// --------------------------------------------------------------------------
 
-		$this->load->view( 'structure/header',							$this->data );
-		$this->load->view( $this->_skin->path . 'views/basket/index',	$this->data );
-		$this->load->view( 'structure/footer',							$this->data );
+		$this->load->view( 'structure/header',									$this->data );
+		$this->load->view( $this->_skin_checkout->path . 'views/basket/index',	$this->data );
+		$this->load->view( 'structure/footer',									$this->data );
 	}
 
 

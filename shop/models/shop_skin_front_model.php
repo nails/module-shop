@@ -1,9 +1,9 @@
 <?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
- * Name:			shop_skin_model.php
+ * Name:			shop_skin_front_model.php
  *
- * Description:		This model finds and loads shop skins
+ * Description:		This model finds and loads shop "Front of house" skins
  *
  **/
 
@@ -15,7 +15,7 @@
  *
  **/
 
-class NAILS_Shop_skin_model extends NAILS_Model
+class NAILS_Shop_skin_front_model extends NAILS_Model
 {
 	protected $_available;
 	protected $_skins;
@@ -55,13 +55,13 @@ class NAILS_Shop_skin_model extends NAILS_Model
 		$this->_skin_locations[]	= array(
 										'path'	=> NAILS_PATH,
 										'url'	=> NAILS_URL,
-										'regex'	=> '/^skin-shop-(.*)$/'
+										'regex'	=> '/^shop-skin-front-(.*)$/'
 									);
 
 		//	App Skins
 		$this->_skin_locations[]	= array(
-										'path' => FCPATH . APPPATH . 'modules/shop/skins',
-										'url' => site_url( APPPATH . 'modules/shop/skins', page_is_secure() )
+										'path' => FCPATH . APPPATH . 'modules/shop/skins/front',
+										'url' => site_url( APPPATH . 'modules/shop/skins/front', page_is_secure() )
 									);
 	}
 
@@ -71,7 +71,7 @@ class NAILS_Shop_skin_model extends NAILS_Model
 
 	/**
 	 * Fetches all available shipping drivers
-	 * @param  boolean $refresh Fetchf rom refresh - skip the cache
+	 * @param  boolean $refresh Fetch from refresh - skip the cache
 	 * @return array
 	 */
 	public function get_available( $refresh = FALSE )
@@ -87,8 +87,10 @@ class NAILS_Shop_skin_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
-		//	Look for skins, where a skin has the same name, the last one found is the
-		//	one which is used
+		/**
+		 * Look for skins, where a skin has the same name, the last one found is the
+		 * one which is used
+		 */
 
 		$this->load->helper( 'directory' );
 
@@ -205,7 +207,7 @@ class NAILS_Shop_skin_model extends NAILS_Model
 
 	/**
 	 * Gets a single driver
-	 * @param  string  $slug    the driver's slug
+	 * @param  string  $slug    The driver's slug
 	 * @param  boolean $refresh Skip the cache
 	 * @return stdClass
 	 */
@@ -256,13 +258,13 @@ class NAILS_Shop_skin_model extends NAILS_Model
  *
  **/
 
-if ( ! defined( 'NAILS_ALLOW_EXTENSION_SHOP_SKIN_MODEL' ) ) :
+if ( ! defined( 'NAILS_ALLOW_EXTENSION_SHOP_SKIN_FRONT_MODEL' ) ) :
 
-	class Shop_skin_model extends NAILS_Shop_skin_model
+	class Shop_skin_front_model extends NAILS_Shop_skin_front_model
 	{
 	}
 
 endif;
 
-/* End of file shop_skin_model.php */
-/* Location: ./modules/shop/models/shop_skin_model.php */
+/* End of file shop_skin_front_model.php */
+/* Location: ./modules/shop/models/shop_skin_front_model.php */

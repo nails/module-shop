@@ -10,7 +10,8 @@
 
 class NAILS_Shop_Controller extends NAILS_Controller
 {
-	protected $_skin;
+	protected $_skin_front;
+	protected $_skin_checkout;
 
 
 	// --------------------------------------------------------------------------
@@ -52,65 +53,18 @@ class NAILS_Shop_Controller extends NAILS_Controller
 		$this->load->model( 'shop/shop_sale_model' );
 		$this->load->model( 'shop/shop_tag_model' );
 		$this->load->model( 'shop/shop_voucher_model' );
-		$this->load->model( 'shop/shop_skin_model' );
+		$this->load->model( 'shop/shop_skin_front_model' );
+		$this->load->model( 'shop/shop_skin_checkout_model' );
 
 		// --------------------------------------------------------------------------
 
-		//	Load up the shop's skin
-		$_skin = app_setting( 'skin', 'shop' ) ? app_setting( 'skin', 'shop' ) : 'skin-shop-gettingstarted';
+		//	"Front of house" Skin
+		$_skin = app_setting( 'skin_front', 'shop' ) ? app_setting( 'skin_front', 'shop' ) : 'shop-skin-front-classic';
+		$this->_load_skin( $_skin, 'front' );
 
-		$this->_skin = $this->shop_skin_model->get( $_skin );
-
-		if ( ! $this->_skin ) :
-
-			show_fatal_error( 'Failed to load shop skin "' . $_skin . '"', 'Shop skin "' . $_skin . '" failed to load at ' . APP_NAME . ', the following reason was given: ' . $this->shop_skin_model->last_error() );
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		//	Load skin assets
-
-		//	CSS and JS
-		if ( ! empty( $this->_skin->assets ) && is_array( $this->_skin->assets ) ) :
-
-			foreach ( $this->_skin->assets AS $asset ) :
-
-				if ( is_string( $asset ) ) :
-
-					$this->asset->load( $this->_skin->url . 'assets/' . $asset );
-
-				else :
-
-					$this->asset->load( $asset[0], $asset[1] );
-
-				endif;
-
-			endforeach;
-
-		endif;
-
-		//	CSS - Inline
-		if ( ! empty( $this->_skin->css_inline ) && is_array( $this->_skin->css_inline ) ) :
-
-			foreach ( $this->_skin->css_inline AS $asset ) :
-
-				$this->asset->inline( $asset, 'CSS_INLINE' );
-
-			endforeach;
-
-		endif;
-
-		//	JS - Inline
-		if ( ! empty( $this->_skin->js_inline ) && is_array( $this->_skin->js_inline ) ) :
-
-			foreach ( $this->_skin->js_inline AS $asset ) :
-
-				$this->asset->inline( $asset, 'JS_INLINE' );
-
-			endforeach;
-
-		endif;
+		//	"Checkout" Skin
+		$_skin = app_setting( 'skin_checkout', 'shop' ) ? app_setting( 'skin_checkout', 'shop' ) : 'shop-skin-checkout-classic';
+		$this->_load_skin( $_skin, 'checkout' );
 
 		// --------------------------------------------------------------------------
 
@@ -125,9 +79,111 @@ class NAILS_Shop_Controller extends NAILS_Controller
 		// --------------------------------------------------------------------------
 
 		//	Pass data to the views
-		$this->data['skin']			= $this->_skin;
 		$this->data['shop_name']	= $this->_shop_name;
 		$this->data['shop_url']		= $this->_shop_url;
+	}
+
+	// --------------------------------------------------------------------------
+
+
+	protected function _load_skin( $skin, $skin_type )
+	{
+		//	Sanity test; make sure we're loading a skin type which is supported
+		switch ( $skin_type ) :
+
+			case 'front' :
+
+				$this->_skin_front			=& $this->shop_skin_front_model->get( $skin );
+				$this->data['skin_front']	=& $this->_skin_front;
+
+				if ( ! $this->_skin_front ) :
+
+					$_error_subject = 'Failed to load shop front skin "' . $skin . '"';
+					$_error_message = 'Shop front skin "' . $skin . '" failed to load at ' . APP_NAME . ', the following reason was given: ' . $this->shop_skin_front_model->last_error();
+
+				endif;
+
+			break;
+
+			case 'checkout' :
+
+				$this->_skin_checkout			=& $this->shop_skin_checkout_model->get( $skin );
+				$this->data['skin_checkout']	=& $this->_skin_checkout;
+
+				if ( ! $this->_skin_checkout ) :
+
+					$_error_subject = 'Failed to load shop checkout skin "' . $skin . '"';
+					$_error_message = 'Shop checkout skin "' . $skin . '" failed to load at ' . APP_NAME . ', the following reason was given: ' . $this->shop_skin_checkout_model->last_error();
+
+				endif;
+
+			break;
+
+			default :
+
+				show_fatal_error( '"' . $skin_tye . '" is not a valid skin type', 'An invalid skin type was attempted on ' . APP_NAME );
+
+			break;
+
+		endswitch;
+
+		if ( ! empty( $_error_subject ) || ! empty( $_error_message ) ) :
+
+			show_fatal_error( $_error_subject, $_error_message );
+
+		endif;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	protected function _load_skin_assets( $assets, $css_inline, $js_inline, $url )
+	{
+		//	CSS and JS
+		if ( ! empty( $assets ) && is_array( $assets ) ) :
+
+			foreach ( $assets AS $asset ) :
+
+				if ( is_string( $asset ) ) :
+
+					$this->asset->load( $url . 'assets/' . $asset );
+
+				else :
+
+					$this->asset->load( $asset[0], $asset[1] );
+
+				endif;
+
+			endforeach;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		//	CSS - Inline
+		if ( ! empty( $css_inline ) && is_array( $css_inline ) ) :
+
+			foreach ( $css_inline AS $asset ) :
+
+				$this->asset->inline( $asset, 'CSS_INLINE' );
+
+			endforeach;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
+		//	JS - Inline
+		if ( ! empty( $js_inline ) && is_array( $js_inline ) ) :
+
+			foreach ( $js_inline AS $asset ) :
+
+				$this->asset->inline( $asset, 'JS_INLINE' );
+
+			endforeach;
+
+		endif;
 	}
 }
 
