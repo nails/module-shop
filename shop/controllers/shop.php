@@ -38,11 +38,11 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Load appropriate assets
 		//	=======================
 
-		$_assets		= ! empty( $this->_skin_checkout->assets )		? $this->_skin_checkout->assets		: array();
-		$_css_inline	= ! empty( $this->_skin_checkout->css_inline )	? $this->_skin_checkout->css_inline	: array();
-		$_js_inline		= ! empty( $this->_skin_checkout->js_inline )	? $this->_skin_checkout->js_inline	: array();
+		$_assets		= ! empty( $this->_skin_front->assets )		? $this->_skin_front->assets		: array();
+		$_css_inline	= ! empty( $this->_skin_front->css_inline )	? $this->_skin_front->css_inline	: array();
+		$_js_inline		= ! empty( $this->_skin_front->js_inline )	? $this->_skin_front->js_inline		: array();
 
-		$this->_load_skin_assets( $_assets, $_css_inline, $_js_inline, $this->_skin_checkout->url );
+		$this->_load_skin_assets( $_assets, $_css_inline, $_js_inline, $this->_skin_front->url );
 
 		// --------------------------------------------------------------------------
 
