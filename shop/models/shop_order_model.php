@@ -277,9 +277,35 @@ class NAILS_Shop_order_model extends NAILS_Model
 				$_temp['sale_price_user_value_ex_tax']	= $item->variant->price->sale_price->user->value_ex_tax;
 				$_temp['sale_price_user_value_tax']		= $item->variant->price->sale_price->user->value_tax;
 
+				/**
+				 * To order?
+				 * If this item is to order then make a note in the `extra_data column so it can be rendered on invoices etc
+				 */
+
+				if ( $item->variant->stock_status == 'TO_ORDER' ) :
+
+					//	Save the lead_time
+					if ( ! isset( $item->extra_data ) ) :
+
+						$item->extra_data = array();
+
+					elseif( isset( $item->extra_data ) && ! is_array( $item->extra_data ) ) :
+
+						$item->extra_data = (array) $item->extra_data;
+
+					endif;
+
+					$item->extra_data['to_order']				= new stdClass();
+					$item->extra_data['to_order']->is_to_order	= TRUE;
+					$item->extra_data['to_order']->lead_time	= $item->variant->lead_time;
+
+
+				endif;
+
+				//	Extra data
 				if ( isset( $item->extra_data ) && $item->extra_data ) :
 
-					$_temp['extra_data'] = serialize( $item->extra_data );
+					$_temp['extra_data'] = serialize( (array) $item->extra_data );
 
 				endif;
 
