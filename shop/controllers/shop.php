@@ -59,9 +59,8 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Sanitise/translate
 		switch ( $this->_product_sort->sort ) :
 
-			//	TODO: Finish sorting by price
-			case 'price_low_high' :	$this->_product_sort->sort_on = $this->shop_product_model->get_property_table_prefix() . '.XXX';		break;
-			case 'price_low_high' :	$this->_product_sort->sort_on = $this->shop_product_model->get_property_table_prefix() . '.XXX';		break;
+			case 'price-high-low' :	$this->_product_sort->sort_on = 'PRICE.DESC';															break;
+			case 'price-low-high' :	$this->_product_sort->sort_on = 'PRICE.ASC';															break;
 			case 'a-z' :			$this->_product_sort->sort_on = $this->shop_product_model->get_property_table_prefix() . '.label';		break;
 			case 'recent' :
 			default :				$this->_product_sort->sort_on =  $this->shop_product_model->get_property_table_prefix() . '.created';	break;
@@ -89,7 +88,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Sanitise
 		switch ( $this->_product_pagination->per_page ) :
 
-			case '20' :		$this->_product_pagination->per_page = 10;		break;
+			case '20' :		$this->_product_pagination->per_page = 20;		break;
 			case '40' :		$this->_product_pagination->per_page = 40;		break;
 			case '80' :		$this->_product_pagination->per_page = 80;		break;
 			case '100' :	$this->_product_pagination->per_page = 100;		break;

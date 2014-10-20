@@ -1744,6 +1744,20 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 **/
 	protected function _getcount_common( $data = array(), $_caller = NULL )
 	{
+		/**
+		 * If we're sorting on price then some magic needs to happen ahead
+		 * of calling _getcount_common();
+		 */
+
+		if ( isset( $data['sort'] ) && ( $data['sort'] == 'PRICE.ASC' || $data['sort'] == 'PRICE.DESC' ) ):
+
+			$_sort_on_price = explode( '.', $data['sort'] );
+			unset( $data['sort'] );
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
 		parent::_getcount_common( $data, $_caller );
 
 		// --------------------------------------------------------------------------
@@ -1775,9 +1789,13 @@ class NAILS_Shop_product_model extends NAILS_Model
 		$this->db->join( $this->_table_tax_rate . ' tr', 'p.tax_rate_id = tr.id', 'LEFT' );
 
 		//	Default sort
-		if ( empty( $data['sort'] ) ) :
+		if ( empty( $_sort_on_price ) && empty( $data['sort'] ) ) :
 
 			$this->db->order_by( $this->_table_prefix . '.label' );
+
+		elseif ( ! empty( $_sort_on_price ) ) :
+
+			$this->db->order_by( '(SELECT MIN(`price`) FROM `' . $this->_table_variation_price . '` vp WHERE vp.product_id = p.id )', $_sort_on_price[1] );
 
 		endif;
 

@@ -62,7 +62,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 			$this->data['page']->title = $this->_shop_name . ': No Payment Gateways have been configured';
 
 			$this->load->view( 'structure/header',											$this->data );
-			$this->load->view( $this->_skin_chcjout->path . 'views/checkout/no_gateway',	$this->data );
+			$this->load->view( $this->_skin_checkout->path . 'views/checkout/no_gateway',	$this->data );
 			$this->load->view( 'structure/footer',											$this->data );
 			return;
 
