@@ -875,7 +875,8 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 								foreach( $v->pricing AS &$price ) :
 
-									$price->variation_id = $v->id;
+									$price->variation_id	= $v->id;
+									$price->product_id		= $data->id;
 
 									$price = (array) $price;
 
