@@ -536,7 +536,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	 */
 	public function cancel()
 	{
-		$_order = $this->_get_order();
+		$_order = $this->_get_order(false);
 
 		if ( empty( $_order ) ) :
 
@@ -591,7 +591,12 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	// --------------------------------------------------------------------------
 
 
-	protected function _get_order()
+	/**
+	 * Fetches the order, used by the checkout process
+	 * @param  boolean $redirect Whether to redirect to the processing page if session order is found
+	 * @return mixed
+	 */
+	protected function _get_order($redirect = true)
 	{
 		$_order_ref = $this->input->get( 'ref' );
 
@@ -612,7 +617,14 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 				if ( $_order ) :
 
 					$this->shop_payment_gateway_model->checkout_session_clear();
-					redirect( $this->_shop_url . 'checkout/processing?ref=' . $_order->ref );
+					if ($redirect == true) {
+
+						redirect($this->_shop_url . 'checkout/processing?ref=' . $_order->ref);
+
+					} else {
+
+						return $_order;
+					}
 
 				endif;
 
