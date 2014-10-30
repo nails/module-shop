@@ -592,6 +592,50 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 
 	/**
+	 * Allows the customer to download an invoice
+	 * @return void
+	 */
+	public function invoice()
+	{
+		//	Fetch and check order
+		$this->load->model('shop/shop_order_model');
+
+		$this->data['order'] = $this->shop_order_model->get_by_ref($this->uri->rsegment(3));
+		if (!$this->data['order'] || $this->uri->rsegment(4) != md5($this->data['order']->code)) {
+
+			show_404();
+
+		}
+
+		// --------------------------------------------------------------------------
+
+		//	Load up the shop's skin
+		$skin = app_setting('skin_checkout', 'shop') ? app_setting('skin_checkout', 'shop') : 'shop-skin-checkout-classic';
+
+		$this->load->model('shop/shop_skin_checkout_model');
+		$skin = $this->shop_skin_checkout_model->get($skin);
+
+		if (!$skin) {
+
+			show_fatal_error('Failed to load shop skin "' . $skin . '"', 'Shop skin "' . $skin . '" failed to load at ' . APP_NAME . ', the following reason was given: ' . $this->shop_skin_checkout_model->last_error());
+
+		}
+
+		// --------------------------------------------------------------------------
+
+		//	Views
+		$this->data['for_user'] = 'CUSTOMER';
+		$this->load->library('pdf/pdf');
+		$this->pdf->set_paper_size('A4', 'landscape');
+		$this->pdf->load_view($skin->path . 'views/order/invoice', $this->data);
+		$this->pdf->download('INVOICE-' . $this->data['order']->ref . '.pdf');
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
 	 * Fetches the order, used by the checkout process
 	 * @param  boolean $redirect Whether to redirect to the processing page if session order is found
 	 * @return mixed
