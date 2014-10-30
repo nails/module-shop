@@ -1,9 +1,9 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
 /**
- * Name:			shop_brand_model.php
+ * Name:            shop_brand_model.php
  *
- * Description:		This model handles interfacing with shop brands
+ * Description:        This model handles interfacing with shop brands
  *
  **/
 
@@ -17,225 +17,232 @@
 
 class NAILS_Shop_brand_model extends NAILS_Model
 {
-	public function __construct()
-	{
-		parent::__construct();
+    public function __construct()
+    {
+        parent::__construct();
 
-		$this->_table			= NAILS_DB_PREFIX . 'shop_brand';
-		$this->_table_prefix	= 'sa';
+        $this->_table           = NAILS_DB_PREFIX . 'shop_brand';
+        $this->_table_prefix    = 'sa';
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		//	Shop's base URL
-		$this->_shop_url = app_setting( 'url', 'shop' ) ? app_setting( 'url', 'shop' ) : 'shop/';
-	}
+        //    Shop's base URL
+        $this->_shop_url = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	protected function _getcount_common( $data = array(), $_caller = NULL )
-	{
-		if ( empty( $data['sort'] ) ) :
+    protected function _getcount_common($data = array(), $_caller = null)
+    {
+        if (empty($data['sort'])) {
 
-			$data['sort'] = 'label';
+            $data['sort'] = 'label';
 
-		else :
+        } else {
 
-			$data = array( 'sort' => 'label' );
+            $data = array('sort' => 'label');
 
-		endif;
+        }
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		//	Only include active items?
-		if ( isset( $data['only_active'] ) ) :
+        //    Only include active items?
+        if (isset($data['only_active'])) {
 
-			$_only_active = (bool) $data['only_active'];
+            $_only_active = (bool) $data['only_active'];
 
-		else :
+        } else {
 
-			$_only_active = TRUE;
+            $_only_active = true;
 
-		endif;
+        }
 
-		if ( $_only_active ) :
+        if ($_only_active) {
 
-			if ( ! isset( $data['where'] ) ) :
+            if (!isset( $data['where'])) {
 
-				$data['where'] = array();
+                $data['where'] = array();
 
-			endif;
+            }
 
-			if ( is_array( $data['where'] ) ) :
+            if (is_array($data['where'])) {
 
-				$data['where'][] = array( 'is_active', TRUE );
+                $data['where'][] = array('is_active', true);
 
-			elseif ( is_string( $data['where'] ) ) :
+            } elseif (is_string($data['where'])) {
 
-				$data['where'] .= ' AND ' . $this->_table_prefix . '.is_active = 1';
+                $data['where'] .= ' AND ' . $this->_table_prefix . '.is_active = 1';
 
-			endif;
+            }
+        }
 
-		endif;
+        // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
+        if (!empty($data['include_count'])) {
 
-		if ( ! empty( $data['include_count'] ) ) :
+            if (empty($this->db->ar_select)) {
 
-			if ( empty( $this->db->ar_select ) ) :
+                //    No selects have been called, call this so that we don't *just* get the product count
+                $_prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
+                $this->db->select($_prefix . '*');
 
-				//	No selects have been called, call this so that we don't *just* get the product count
-				$_prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
-				$this->db->select( $_prefix . '*' );
+            }
 
-			endif;
+            $query  = 'SELECT COUNT(DISTINCT(`nspb`.`product_id`)) ';
+            $query .= 'FROM ' . NAILS_DB_PREFIX . 'shop_product_brand nspb ';
+            $query .= 'JOIN ' . NAILS_DB_PREFIX . 'shop_product nsp ON `nspb`.`product_id` = `nsp`.`id` ';
+            $query .= 'WHERE ';
+            $query .= '`nspb`.`brand_id` = `' . $this->_table_prefix . '`.`id` ';
+            $query .= 'AND `nsp`.`is_active` = 1 ';
+            $query .= 'AND `nsp`.`is_deleted` = 0';
 
-			$this->db->select( '(SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product_brand WHERE brand_id = ' . $this->_table_prefix . '.id) product_count' );
+            $this->db->select('(' . $query . ') product_count', false);
 
-		endif;
+        }
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		return parent::_getcount_common( $data, $_caller );
-	}
+        return parent::_getcount_common($data, $_caller);
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	public function get_by_id( $id, $data = array() )
-	{
-		if ( ! isset( $data['only_active'] ) ) :
+    public function get_by_id($id, $data = array())
+    {
+        if (!isset($data['only_active'])) {
 
-			$data['only_active'] = FALSE;
+            $data['only_active'] = false;
 
-		endif;
+        }
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		return parent::get_by_id( $id, $data );
-	}
+        return parent::get_by_id($id, $data);
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	public function get_by_ids( $ids, $data = array() )
-	{
-		if ( ! isset( $data['only_active'] ) ) :
+    public function get_by_ids($ids, $data = array())
+    {
+        if (!isset($data['only_active'])) {
 
-			$data['only_active'] = FALSE;
+            $data['only_active'] = false;
 
-		endif;
+        }
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		return parent::get_by_ids( $ids, $data );
-	}
+        return parent::get_by_ids($ids, $data);
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	public function get_by_slug( $slug, $data = array() )
-	{
-		if ( ! isset( $data['only_active'] ) ) :
+    public function get_by_slug($slug, $data = array())
+    {
+        if (!isset($data['only_active'])) {
 
-			$data['only_active'] = FALSE;
+            $data['only_active'] = false;
 
-		endif;
+        }
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		return parent::get_by_slug( $slug, $data );
-	}
+        return parent::get_by_slug($slug, $data);
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	public function get_by_slugs( $slugs, $data = array() )
-	{
-		if ( ! isset( $data['only_active'] ) ) :
+    public function get_by_slugs($slugs, $data = array())
+    {
+        if (!isset($data['only_active'])) {
 
-			$data['only_active'] = FALSE;
+            $data['only_active'] = false;
 
-		endif;
+        }
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		return parent::get_by_slugs( $slugs, $data );
-	}
+        return parent::get_by_slugs($slugs, $data);
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	public function get_by_id_or_slug( $id_slug, $data = array() )
-	{
-		if ( ! isset( $data['only_active'] ) ) :
+    public function get_by_id_or_slug($id_slug, $data = array())
+    {
+        if (!isset($data['only_active'])) {
 
-			$data['only_active'] = FALSE;
+            $data['only_active'] = false;
 
-		endif;
+        }
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		return parent::get_by_id_or_slug( $id_slug, $data );
-	}
+        return parent::get_by_id_or_slug($id_slug, $data);
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	public function create( $data = array(), $return_object = FALSE )
-	{
-		if ( ! empty( $data->label ) ) :
+    public function create($data = array(), $return_object = false)
+    {
+        if (!empty($data->label)) {
 
-			$data->slug = $this->_generate_slug( $data->label );
+            $data->slug = $this->_generate_slug($data->label);
 
-		endif;
+        }
 
-		return parent::create( $data, $return_object );
-	}
+        return parent::create($data, $return_object);
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	public function update( $id, $data = array() )
-	{
-		if ( ! empty( $data->label ) ) :
+    public function update($id, $data = array())
+    {
+        if (!empty($data->label)) {
 
-			$data->slug = $this->_generate_slug( $data->label, '', '', NULL, NULL, $id );
+            $data->slug = $this->_generate_slug($data->label, '', '', null, null, $id);
 
-		endif;
+        }
 
-		return parent::update( $id, $data );
-	}
+        return parent::update($id, $data);
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	public function format_url( $slug )
-	{
-		return site_url( $this->_shop_url . 'brand/' . $slug );
-	}
+    public function format_url($slug)
+    {
+        return site_url($this->_shop_url . 'brand/' . $slug);
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	protected function _format_object( &$object )
-	{
-		//	Type casting
-		$object->id				= (int) $object->id;
-		$object->created_by		= $object->created_by ? (int) $object->created_by : NULL;
-		$object->modified_by	= $object->modified_by ? (int) $object->modified_by : NULL;
-		$object->url			= $this->format_url( $object->slug );
-	}
+    protected function _format_object(&$object)
+    {
+        //    Type casting
+        $object->id             = (int) $object->id;
+        $object->created_by     = $object->created_by ? (int) $object->created_by : null;
+        $object->modified_by    = $object->modified_by ? (int) $object->modified_by : null;
+        $object->url            = $this->format_url($object->slug);
+    }
 }
 
 
@@ -266,13 +273,13 @@ class NAILS_Shop_brand_model extends NAILS_Model
  *
  **/
 
-if ( ! defined( 'NAILS_ALLOW_EXTENSION_SHOP_BRAND_MODEL' ) ) :
+if (!defined('NAILS_ALLOW_EXTENSION_SHOP_BRAND_MODEL')) {
 
-	class Shop_brand_model extends NAILS_Shop_brand_model
-	{
-	}
+    class Shop_brand_model extends NAILS_Shop_brand_model
+    {
+    }
 
-endif;
+}
 
 /* End of file shop_brand_model.php */
 /* Location: ./modules/shop/models/shop_brand_model.php */

@@ -605,39 +605,49 @@ class NAILS_Shop_category_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	protected function _getcount_common( $data = array(), $_caller = NULL )
-	{
-		if ( empty( $data['sort'] ) ) :
+    protected function _getcount_common($data = array(), $_caller = null)
+    {
+        if (empty( $data['sort'])) {
 
-			$data['sort'] = 'slug';
+            $data['sort'] = 'slug';
 
-		else :
+        } else {
 
-			$data = array( 'sort' => 'slug' );
+            $data = array('sort' => 'slug');
 
-		endif;
+        }
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		if ( ! empty( $data['include_count'] ) ) :
+        if (!empty( $data['include_count'])) {
 
-			if ( empty( $this->db->ar_select ) ) :
+            if (empty($this->db->ar_select)) {
 
-				//	No selects have been called, call this so that we don't *just* get the product count
-				$_prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
-				$this->db->select( $_prefix . '*' );
+                //   No selects have been called, call this so that we don't *just* get the product count
+                $_prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
+                $this->db->select($_prefix . '*');
 
-			endif;
+            }
 
-			//	TODO: Take into consideration inactive/deleted products
-			$this->db->select( '(SELECT COUNT(DISTINCT(product_id)) FROM ' . NAILS_DB_PREFIX .  'shop_product_category WHERE category_id = ' . $this->_table_prefix . '.id OR FIND_IN_SET ( category_id, ' . $this->_table_prefix . '.children_ids ) ) product_count' );
+            $query  = 'SELECT COUNT(DISTINCT(`nspc`.`product_id`)) ';
+            $query .= 'FROM ' . NAILS_DB_PREFIX . 'shop_product_category nspc ';
+            $query .= 'JOIN ' . NAILS_DB_PREFIX . 'shop_product nsp ON `nspc`.`product_id` = `nsp`.`id` ';
+            $query .= 'WHERE ';
+            $query .= '(';
+            $query .= '`nspc`.`category_id` = `' . $this->_table_prefix . '`.`id` ';
+            $query .= 'OR FIND_IN_SET (`nspc`.`category_id`, `' . $this->_table_prefix . '`.`children_ids`)';
+            $query .= ') ';
+            $query .= 'AND `nsp`.`is_active` = 1 ';
+            $query .= 'AND `nsp`.`is_deleted` = 0';
 
-		endif;
+            $this->db->select('(' . $query . ') product_count', false);
 
-		// --------------------------------------------------------------------------
+        }
 
-		return parent::_getcount_common( $data, $_caller );
-	}
+        // --------------------------------------------------------------------------
+
+        return parent::_getcount_common($data, $_caller);
+    }
 
 
 	// --------------------------------------------------------------------------
@@ -645,7 +655,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 
 	public function format_url( $slug )
 	{
-		return site_url( $this->_shop_url . 'category/' . $slug );
+		return site_url($this->_shop_url . 'category/' . $slug);
 	}
 
 

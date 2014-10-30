@@ -34,71 +34,78 @@ class NAILS_Shop_collection_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	protected function _getcount_common( $data = array(), $_caller = NULL )
-	{
-		if ( empty( $data['sort'] ) ) :
+    protected function _getcount_common($data = array(), $_caller = null)
+    {
+        if ( empty( $data['sort'] ) ) {
 
-			$data['sort'] = 'label';
+            $data['sort'] = 'label';
 
-		else :
+        } else {
 
-			$data = array( 'sort' => 'label' );
+            $data = array('sort' => 'label');
 
-		endif;
+        }
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		//	Only include active items?
-		if ( isset( $data['only_active'] ) ) :
+        //    Only include active items?
+        if (isset($data['only_active'])) {
 
-			$_only_active = (bool) $data['only_active'];
+            $_only_active = (bool) $data['only_active'];
 
-		else :
+        } else {
 
-			$_only_active = TRUE;
+            $_only_active = TRUE;
 
-		endif;
+        }
 
-		if ( $_only_active ) :
+        if ( $_only_active ) {
 
-			if ( ! isset( $data['where'] ) ) :
+            if (!isset($data['where'])) {
 
-				$data['where'] = array();
+                $data['where'] = array();
 
-			endif;
+            }
 
-			if ( is_array( $data['where'] ) ) :
+            if (is_array($data['where'])) {
 
-				$data['where'][] = array( 'is_active', TRUE );
+                $data['where'][] = array( 'is_active', true );
 
-			elseif ( is_string( $data['where'] ) ) :
+            } elseif (is_string($data['where'])) {
 
-				$data['where'] .= ' AND ' . $this->_table_prefix . '.is_active = 1';
+                $data['where'] .= ' AND ' . $this->_table_prefix . '.is_active = 1';
 
-			endif;
+            }
+        }
 
-		endif;
+        // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
+        if (!empty( $data['include_count'])) {
 
-		if ( ! empty( $data['include_count'] ) ) :
+            if (empty($this->db->ar_select)) {
 
-			if ( empty( $this->db->ar_select ) ) :
+                //    No selects have been called, call this so that we don't *just* get the product count
+                $_prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
+                $this->db->select($_prefix . '*');
 
-				//	No selects have been called, call this so that we don't *just* get the product count
-				$_prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
-				$this->db->select( $_prefix . '*' );
+            }
 
-			endif;
+            $query  = 'SELECT COUNT(DISTINCT(`nspc`.`product_id`)) ';
+            $query .= 'FROM ' . NAILS_DB_PREFIX . 'shop_product_collection nspc ';
+            $query .= 'JOIN ' . NAILS_DB_PREFIX . 'shop_product nsp ON `nspc`.`product_id` = `nsp`.`id` ';
+            $query .= 'WHERE ';
+            $query .= '`nspc`.`collection_id` = `' . $this->_table_prefix . '`.`id` ';
+            $query .= 'AND `nsp`.`is_active` = 1 ';
+            $query .= 'AND `nsp`.`is_deleted` = 0';
 
-			$this->db->select( '(SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product_collection WHERE collection_id = ' . $this->_table_prefix . '.id) product_count' );
+            $this->db->select('(' . $query . ') product_count', false);
 
-		endif;
+        }
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		return parent::_getcount_common( $data, $_caller );
-	}
+        return parent::_getcount_common($data, $_caller);
+    }
 
 
 	// --------------------------------------------------------------------------
