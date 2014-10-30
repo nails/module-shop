@@ -613,20 +613,6 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
 		endif;
 
-		//	Verify Transaction ID
-		if ( empty( $_payment_data['transaction_id'] ) ) :
-
-			$_error = 'Unable to extract payment transaction ID from request.';
-			_LOG( $_error );
-			$this->_set_error( $_error );
-			return FALSE;
-
-		else :
-
-			_LOG( 'Payment Transaction ID: #' . $_payment_data['transaction_id'] );
-
-		endif;
-
 		// --------------------------------------------------------------------------
 
 		//	Verify order exists
@@ -694,6 +680,19 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 		$this->load->model( 'shop/shop_order_payment_model' );
 
 		//	First check if this transaction has been dealt with before
+		if (empty($_data['transaction_id'])) {
+
+			$_error = 'Unable to extract payment transaction ID from request.';
+			_LOG($_error);
+			$this->_set_error($_error);
+			return false;
+
+		} else {
+
+			_LOG('Payment Transaction ID: #' . $_payment_data['transaction_id']);
+
+		}
+
 		$_payment = $this->shop_order_payment_model->get_by_transaction_id( $_data['transaction_id'], $gateway_name );
 
 		if ( $_payment ):

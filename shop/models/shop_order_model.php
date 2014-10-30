@@ -17,29 +17,6 @@
 
 class NAILS_Shop_order_model extends NAILS_Model
 {
-	protected $_table;
-	protected $_table_product;
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Model constructor
-	 *
-	 * @access public
-	 * @param none
-	 * @return void
-	 **/
-	public function __construct()
-	{
-		parent::__construct();
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
 	/**
 	 * Creates a new order in the system
 	 * @param  object  $data       The data required to create the order
@@ -652,53 +629,81 @@ class NAILS_Shop_order_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	/**
-	 * Fetch an object by it's ID
-	 *
-	 * @access public
-	 * @param int $id The ID of the object to fetch
-	 * @return	stdClass
-	 **/
-	public function get_by_id( $id )
-	{
-		$this->db->where( 'o.id', $id );
-		$_result = $this->get_all();
+    /**
+     * Fetch an object by it's ID
+     * @param  int   $id The ID of the object to fetch
+     * @return mixed     stdClass on success, false on failure
+     */
+    public function get_by_id($id)
+    {
+        $this->db->where('o.id', $id);
+        $result = $this->get_all();
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		if ( ! $_result )
-			return FALSE;
+        if (!$result) {
+            return false;
+        }
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		return $_result[0];
-	}
-
-
-	// --------------------------------------------------------------------------
+        return $result[0];
+    }
 
 
-	/**
-	 * Fetch an object by it's ID
-	 *
-	 * @access public
-	 * @param int $id The ID of the object to fetch
-	 * @return	stdClass
-	 **/
-	public function get_by_ref( $ref )
-	{
-		$this->db->where( 'o.ref', $ref );
-		$_result = $this->get_all();
+    // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
 
-		if ( ! $_result )
-			return FALSE;
+    /**
+     * Fetch objects by an array of IDs
+     * @param  array $ids The array of IDs to fetch
+     * @return array
+     */
+    public function get_by_ids($ids)
+    {
+        $this->db->where_in('o.id', $ids);
+        return $this->get_all();
+    }
 
-		// --------------------------------------------------------------------------
 
-		return $_result[0];
-	}
+    // --------------------------------------------------------------------------
+
+
+    /**
+     * Fetch an object by it's ref
+     * @param  int   $ref The ref of the object to fetch
+     * @return mixed      stdClass on success, false on failure
+     */
+    public function get_by_ref($ref)
+    {
+        $this->db->where('o.ref', $ref);
+        $result = $this->get_all();
+
+        // --------------------------------------------------------------------------
+
+        if (!$result) {
+            return false;
+        }
+
+        // --------------------------------------------------------------------------
+
+        return $result[0];
+    }
+
+
+    // --------------------------------------------------------------------------
+
+
+    /**
+     * Fetch objects by an array of Refs
+     * @param  array $ref The array of refs to fetch
+     * @return array
+     */
+    public function get_by_refs($refs)
+    {
+        $this->db->where_in('o.ref', $refs);
+        return $this->get_all();
+    }
 
 
 	// --------------------------------------------------------------------------
@@ -840,27 +845,67 @@ class NAILS_Shop_order_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	public function fulfil( $order_id, $data = array() )
-	{
-		$data['fulfilment_status']	= 'FULFILLED';
-		$data['fulfilled']			= date( 'Y-m-d H:i:s' );
+    public function fulfil($orderId, $data = array())
+    {
+        $data['fulfilment_status']	= 'FULFILLED';
+        $data['fulfilled']        	= date('Y-m-d H:i:s');
 
-		return $this->update( $order_id, $data );
-	}
+        return $this->update($orderId, $data);
+    }
+
+
+    // --------------------------------------------------------------------------
+
+
+    public function fulfilBatch($orderIds)
+    {
+        if (empty($orderIds)) {
+
+            $this->_set_error('No IDs were supplied.');
+            return false;
+        }
+
+        $this->db->set('fulfilment_status', 'FULFILLED');
+        $this->db->set('fulfilled', 'NOW()', false);
+        $this->db->where_in('id', $orderIds);
+        $this->db->set('modified', 'NOW()', false);
+        return $this->db->update(NAILS_DB_PREFIX . 'shop_order');
+    }
+
+
+    // --------------------------------------------------------------------------
+
+
+    public function unfulfil($orderId, $data = array())
+    {
+        $data['fulfilment_status']	= 'UNFULFILLED';
+        $data['fulfilled']          = NULL;
+
+        return $this->update($orderId, $data);
+    }
+
+
+    // --------------------------------------------------------------------------
+
+
+    public function unfulfilBatch($orderIds)
+    {
+        if (empty($orderIds)) {
+
+            $this->_set_error('No IDs were supplied.');
+            return false;
+        }
+
+        $this->db->set('fulfilment_status', 'UNFULFILLED');
+        $this->db->set('fulfilled', null);
+        $this->db->where_in('id', $orderIds);
+        $this->db->set('modified', 'NOW()', false);
+        return $this->db->update(NAILS_DB_PREFIX . 'shop_order');
+    }
 
 
 	// --------------------------------------------------------------------------
 
-
-	public function unfulfil( $order_id, $data = array() )
-	{
-		$data['fulfilment_status']	= 'UNFULFILLED';
-		$data['fulfilled']			= NULL;
-
-		return $this->update( $order_id, $data );
-	}
-
-	// --------------------------------------------------------------------------
 
 	public function pending( $order_id, $data = array() )
 	{
