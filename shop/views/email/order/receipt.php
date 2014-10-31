@@ -1,6 +1,11 @@
 <?php
 
-$_shop_url = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
+//  Shop's URL
+$shopUrl = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
+
+//  Country
+$this->load->model('system/country_model');
+$countriesFlat = $this->country_model->get_all_flat();
 
 ?>
 <p>
@@ -19,7 +24,7 @@ $_shop_url = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
                 <?=$order->ref?>
             </td>
             <td class="text-right">
-                <?=anchor( $_shop_url . 'checkout/invoice/' . $order->ref . '/' . md5($order->code), 'Download Invoice', 'class="button small" style="margin:0;"' )?>
+                <?=anchor($shopUrl . 'checkout/invoice/' . $order->ref . '/' . md5($order->code), 'Download Invoice', 'class="button small" style="margin:0;"')?>
             </td>
         </tr>
         <tr>
@@ -44,9 +49,19 @@ $_shop_url = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
             <?php
 
             echo '<strong>Delivery</strong>';
-            foreach ($order->shipping_address as $line) {
+            foreach ($order->shipping_address as $key => $line) {
+
                 if (!empty($line)) {
-                    echo '<br />' . $line;
+
+                    if ($key == 'country' && isset($countriesFlat[$line])) {
+
+                        echo '<br />' . $countriesFlat[$line];
+
+                    } else {
+
+                        echo '<br />' . $line;
+
+                    }
                 }
             }
 
@@ -56,9 +71,19 @@ $_shop_url = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
             <?php
 
             echo '<strong>Billing</strong>';
-            foreach ($order->billing_address as $line) {
+            foreach ($order->billing_address as $key => $line) {
+
                 if (!empty($line)) {
-                    echo '<br />' . $line;
+
+                    if ($key == 'country' && isset($countriesFlat[$line])) {
+
+                        echo '<br />' . $countriesFlat[$line];
+
+                    } else {
+
+                        echo '<br />' . $line;
+
+                    }
                 }
             }
 
@@ -110,11 +135,11 @@ $_shop_url = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
 <h2>Other Details</h2>
 <?php
 
-$_invoice_company       = app_setting( 'invoice_company',       'shop' );
-$_invoice_address       = app_setting( 'invoice_address',       'shop' );
-$_invoice_vat_no        = app_setting( 'invoice_vat_no',        'shop' );
-$_invoice_company_no    = app_setting( 'invoice_company_no',    'shop' );
-$_invoice_footer        = app_setting( 'invoice_footer',        'shop' );
+$_invoice_company       = app_setting('invoice_company', 'shop');
+$_invoice_address       = app_setting('invoice_address', 'shop');
+$_invoice_vat_no        = app_setting('invoice_vat_no', 'shop');
+$_invoice_company_no    = app_setting('invoice_company_no', 'shop');
+$_invoice_footer        = app_setting('invoice_footer', 'shop');
 
 if (!empty($_invoice_company)||!empty($_invoice_address)||!empty($_invoice_vat_no)||!empty($_invoice_company_no)) {
 
@@ -132,7 +157,7 @@ if (!empty($_invoice_company)||!empty($_invoice_address)||!empty($_invoice_vat_n
                     <?php
 
                         echo $_invoice_company  ? '<strong>' . $_invoice_company . '</strong>' : '<strong>' . APP_NAME . '</strong>';
-                        echo $_invoice_address  ? '<br />' . nl2br( $_invoice_address ) . '<br />' : '';
+                        echo $_invoice_address  ? '<br />' . nl2br($_invoice_address) . '<br />' : '';
                     ?>
                     </td>
                 </tr>

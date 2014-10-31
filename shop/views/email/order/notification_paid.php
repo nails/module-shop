@@ -1,3 +1,10 @@
+<?php
+
+//  Country
+$this->load->model('system/country_model');
+$countriesFlat = $this->country_model->get_all_flat();
+
+?>
 <p>
     An order has just been completed with <?=anchor('', APP_NAME)?>.
 </p>
@@ -13,7 +20,7 @@
                 <?=$order->ref?>
             </td>
             <td class="text-right">
-                <?=anchor( 'admin/shop/orders/download_invoice/' . $order->id, 'Download Invoice', 'class="button small" style="margin:0;"' )?>
+                <?=anchor('admin/shop/orders/download_invoice/' . $order->id, 'Download Invoice', 'class="button small" style="margin:0;"')?>
             </td>
         </tr>
         <tr>
@@ -38,9 +45,19 @@
             <?php
 
             echo '<strong>Delivery</strong>';
-            foreach ($order->shipping_address as $line) {
+            foreach ($order->shipping_address as $key => $line) {
+
                 if (!empty($line)) {
-                    echo '<br />' . $line;
+
+                    if ($key == 'country' && isset($countriesFlat[$line])) {
+
+                        echo '<br />' . $countriesFlat[$line];
+
+                    } else {
+
+                        echo '<br />' . $line;
+
+                    }
                 }
             }
 
@@ -50,9 +67,19 @@
             <?php
 
             echo '<strong>Billing</strong>';
-            foreach ($order->billing_address as $line) {
+            foreach ($order->billing_address as $key => $line) {
+
                 if (!empty($line)) {
-                    echo '<br />' . $line;
+
+                    if ($key == 'country' && isset($countriesFlat[$line])) {
+
+                        echo '<br />' . $countriesFlat[$line];
+
+                    } else {
+
+                        echo '<br />' . $line;
+
+                    }
                 }
             }
 
