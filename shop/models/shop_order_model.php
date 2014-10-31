@@ -163,6 +163,15 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
+		//	Order Note
+		if ( ! empty( $data->basket->note ) ) :
+
+			$_order->note = $data->basket->note;
+
+		endif;
+
+		// --------------------------------------------------------------------------
+
 		//	Set currency and exchange rates
 		$_order->currency		= SHOP_USER_CURRENCY_CODE;
 		$_order->base_currency	= SHOP_BASE_CURRENCY_CODE;

@@ -62,6 +62,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 			$this->add_shipping_details( $_saved_basket->shipping_details );
 			$this->add_payment_gateway( $_saved_basket->payment_gateway );
 			$this->add_voucher( $_saved_basket->voucher );
+			$this->addNote( $_saved_basket->note );
 
 		endif;
 
@@ -771,7 +772,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 
 	/**
-	 * Adds a voucher to a basket.§
+	 * Adds a voucher to a basket.
 	 * @param string $voucher_code The voucher's code
 	 */
 	public function add_voucher( $voucher_code )
@@ -789,6 +790,11 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		if ( $_voucher ) :
 
 			$this->_basket->voucher = $voucher;
+
+			//	Invalidate the basket cache
+			$this->_save_session();
+			$this->_unset_cache( $this->_cache_key );
+
 			return TRUE;
 
 		else :
@@ -811,6 +817,51 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	public function remove_voucher()
 	{
 		$this->_basket->voucher = $this->_default_voucher();
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Retrieves the note associated with an order
+	 * @return string
+	 */
+	public function getNote()
+	{
+		return $this->_basket->note;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Adds a note to the basket
+	 * @param string $note The note to add
+	 */
+	public function addNote($note)
+	{
+		$this->_basket->note = $note;
+
+		//	Invalidate the basket cache
+		$this->_save_session();
+		$this->_unset_cache($this->_cache_key);
+
+		return true;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Resets the basket's "note" object
+	 * @return void
+	 */
+	public function removeNote()
+	{
+		$this->_basket->note = $this->_default_note();
 	}
 
 
@@ -874,7 +925,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 
 	/**
-	 * Generates the 'save object' which is sued by the other _save_*() methods
+	 * Generates the 'save object' which is used by the other _save_*() methods
 	 * @return stdClass()
 	 */
 	protected function _save_object()
@@ -886,6 +937,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		$_save->shipping_details	= $this->_basket->shipping->details;
 		$_save->payment_gateway		= $this->_basket->payment_gateway;
 		$_save->voucher				= $this->_basket->voucher->id;
+		$_save->note				= $this->_basket->note;
 
 		return serialize( $_save );
 	}
@@ -991,6 +1043,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		$_out->shipping->details	= $this->_default_shipping_details();
 		$_out->payment_gateway		= $this->_default_payment_gateway();
 		$_out->voucher				= $this->_default_voucher();
+		$_out->note					= $this->_default_note();
 
 		$_out->totals					= new stdClass();
 		$_out->totals->base				= new stdClass();
@@ -1068,6 +1121,19 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		$_out->code	= NULL;
 
 		return $_out;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Returns an empty "note" object
+	 * @return string
+	 */
+	protected function _default_note()
+	{
+		return '';
 	}
 
 

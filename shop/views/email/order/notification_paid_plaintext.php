@@ -44,6 +44,12 @@ foreach ($order->billing_address as $line) {
     }
 }
 
+if (!empty($order->note)) {
+
+    echo "\n" . 'NOTE' . "\n";
+    echo $order->note . "\n";
+}
+
 ?>
 
 

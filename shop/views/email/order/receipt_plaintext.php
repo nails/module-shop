@@ -71,6 +71,13 @@ foreach ($order->billing_address as $key => $line) {
     }
 }
 
+
+if (!empty($order->note)) {
+
+    echo "\n" . 'NOTE' . "\n";
+    echo $order->note . "\n";
+}
+
 ?>
 
 
@@ -106,11 +113,6 @@ Sub Total: <?=$order->totals->user_formatted->item . "\n"?>
 Shipping:  <?=$order->totals->user_formatted->shipping . "\n"?>
 Tax:       <?=$order->totals->user_formatted->tax . "\n"?>
 Total:     <?=$order->totals->user_formatted->grand . "\n"?>
-
-
-OTHER DETAILS
--------------
-
 <?php
 
 $_invoice_company       = app_setting('invoice_company', 'shop');
@@ -119,7 +121,10 @@ $_invoice_vat_no        = app_setting('invoice_vat_no', 'shop');
 $_invoice_company_no    = app_setting('invoice_company_no', 'shop');
 $_invoice_footer        = app_setting('invoice_footer', 'shop');
 
-if (!empty($_invoice_company)||!empty($_invoice_address)||!empty($_invoice_vat_no)||!empty($_invoice_company_no)) {
+if (empty($_invoice_company)||!empty($_invoice_address)||!empty($_invoice_vat_no)||!empty($_invoice_company_no)) {
+
+    echo "\n\n" . 'OTHER DETAILS' . "\n";
+    echo '-------------' . "\n\n";
 
     if (!empty($_invoice_company)||!empty($_invoice_address)) {
 

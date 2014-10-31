@@ -305,6 +305,35 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
 
 	/**
+	 * Adds a note to the basket
+	 */
+    public function add_note()
+    {
+        $result = $this->shop_basket_model->addNote($this->input->get_post('note'));
+
+        if ($result) {
+
+            $msg    = '<strong>Success!</strong> Note was added to your basket.';
+            $status	= 'success';
+
+        } else {
+
+            $msg    = '<strong>Sorry,</strong> failed to save note.';
+            $status = 'error';
+
+        }
+
+        // --------------------------------------------------------------------------
+
+        $this->session->set_flashdata($status,$msg);
+        redirect($this->data['return']);
+    }
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
 	 * Remove any associated voucher from the user's basket
 	 *
 	 * @access	public

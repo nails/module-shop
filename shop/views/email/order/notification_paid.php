@@ -86,6 +86,12 @@ $countriesFlat = $this->country_model->get_all_flat();
             ?>
             </td>
         </tr>
+        <?php if (!empty($order->note)) { ?>
+        <tr>
+            <td class="left-header-cell">Note</td>
+            <td colspan="2"><?=$order->note?></td>
+        </tr>
+        <?php } ?>
     </tbody>
 </table>
 <p></p>

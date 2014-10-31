@@ -90,6 +90,12 @@ $countriesFlat = $this->country_model->get_all_flat();
             ?>
             </td>
         </tr>
+        <?php if (!empty($order->note)) { ?>
+        <tr>
+            <td class="left-header-cell">Note</td>
+            <td colspan="2"><?=$order->note?></td>
+        </tr>
+        <?php } ?>
     </tbody>
 </table>
 <p></p>
@@ -131,8 +137,6 @@ $countriesFlat = $this->country_model->get_all_flat();
         </tr>
     </tbody>
 </table>
-
-<h2>Other Details</h2>
 <?php
 
 $_invoice_company       = app_setting('invoice_company', 'shop');
@@ -144,6 +148,7 @@ $_invoice_footer        = app_setting('invoice_footer', 'shop');
 if (!empty($_invoice_company)||!empty($_invoice_address)||!empty($_invoice_vat_no)||!empty($_invoice_company_no)) {
 
     ?>
+    <h2>Other Details</h2>
     <table class="default-style">
         <tbody>
             <?php
