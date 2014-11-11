@@ -51,5 +51,14 @@ $config['email_types'][4]->template_body	= 'shop/email/order/receipt_partial_pay
 $config['email_types'][4]->template_footer	= '';
 $config['email_types'][4]->default_subject	= 'Thanks for your payment';
 
+$config['email_types'][5]					= new stdClass();
+$config['email_types'][5]->slug				= 'shop_order_fulfilled';
+$config['email_types'][5]->name				= 'Order Fulfilled';
+$config['email_types'][5]->description		= 'Sent to the customer when order is marked as fulfilled';
+$config['email_types'][5]->template_header	= '';
+$config['email_types'][5]->template_body	= 'shop/email/order/fulfilled';
+$config['email_types'][5]->template_footer	= '';
+$config['email_types'][5]->default_subject	= 'Order Fulfilled';
+
 /* End of file email_types.php */
 /* Location: ./module-shop/shop/config/email_types.php */
