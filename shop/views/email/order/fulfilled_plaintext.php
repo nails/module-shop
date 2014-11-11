@@ -7,8 +7,7 @@ $countriesFlat = $this->country_model->get_all_flat();
 ?>
 Thank you very much for your order with <?=APP_NAME?>.
 
-We have now received full payment for your order, please don't hesitate to contact us if you have any questions or concerns.
-
+Your order has been marked as fulfilled, indicating the dispatch of your goods. If you have any questions, please get in touch using the details below.
 
 YOUR ORDER
 ----------
