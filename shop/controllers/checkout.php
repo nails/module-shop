@@ -113,7 +113,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 				$this->form_validation->set_rules( 'first_name',				'', 'xss_clean|trim|required' );
 				$this->form_validation->set_rules( 'last_name',					'', 'xss_clean|trim|required' );
 				$this->form_validation->set_rules( 'email',						'', 'xss_clean|trim|required' );
-				$this->form_validation->set_rules( 'telephone',					'', 'xss_clean|trim' );
+				$this->form_validation->set_rules( 'telephone',					'', 'xss_clean|trim|required' );
 
 				if ( ! $this->input->post( 'same_billing_address' ) ) :
 
