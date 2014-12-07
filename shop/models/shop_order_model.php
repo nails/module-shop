@@ -856,7 +856,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
     public function fulfil($orderId, $data = array())
     {
-        
+
         // Fetch order details
         $order = $this->get_by_id($orderId);
 
@@ -867,25 +867,26 @@ class NAILS_Shop_order_model extends NAILS_Model
         $data['fulfilled']        	= date('Y-m-d H:i:s');
 
         // --------------------------------------------------------------------------
-        
+
         if ($this->update($orderId, $data)) {
-                
-    		$_email							= new stdClass();
-    		$_email->type					= 'shop_order_fulfilled';
-    		$_email->to_email				= $order->user->email;
-    		$_email->data					= array();
-    		$_email->data['order']			= $order;    
-    		$this->emailer->send($_email, true);
-            
+
+    		$email					= new stdClass();
+    		$email->type			= 'shop_order_fulfilled';
+    		$email->to_email		= $order->user->email;
+    		$email->data			= array();
+    		$email->data['order']	= $order;
+
+    		$this->emailer->send($email, true);
+
             return true;
-            
+
         } else {
-            
+
             $this->_set_error('Failed to update fulfilment status on this order.');
             return false;
 
         }
-        
+
     }
 
 
@@ -904,33 +905,33 @@ class NAILS_Shop_order_model extends NAILS_Model
         $this->db->set('fulfilled', 'NOW()', false);
         $this->db->where_in('id', $orderIds);
         $this->db->set('modified', 'NOW()', false);
-        
+
         if ($this->db->update(NAILS_DB_PREFIX . 'shop_order')) {
-            
+
             foreach ($orderIds as $o) {
-                
+
                 // Fetch order details
                 $order = $this->get_by_id($o);
-                
+
                 // --------------------------------------------------------------------------
-                
-        		$_email							= new stdClass();
-        		$_email->type					= 'shop_order_fulfilled';
-        		$_email->to_email				= $order->user->email;
-        		$_email->data					= array();
-        		$_email->data['order']			= $order;
-        		
-        		$this->emailer->send( $_email, false );
-                
+
+        		$email					= new stdClass();
+        		$email->type			= 'shop_order_fulfilled';
+        		$email->to_email		= $order->user->email;
+        		$email->data			= array();
+        		$email->data['order']	= $order;
+
+        		$this->emailer->send($email, true);
+
             }
-            
+
             return true;
-            
+
         } else {
-            
+
             $this->_set_error('Failed to update fulfilment status on batch.');
             return false;
-            
+
         }
     }
 
