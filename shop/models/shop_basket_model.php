@@ -1,4 +1,4 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php  if (!defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
  * Name:			shop_basket_model.php
@@ -41,30 +41,56 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Default, empty, basket
-		$this->_basket = $this->_default_basket();
+		$this->_basket = $this->defaultBasket();
 
 		//	Populate basket from session data?
-		$_saved_basket = @unserialize( $this->session->userdata( $this->_sess_var ) );
+		$_saved_basket = @unserialize($this->session->userdata($this->_sess_var));
 
-		if ( empty( $_saved_basket ) && $this->user_model->is_logged_in() ) :
+		if (empty($_saved_basket) && $this->user_model->is_logged_in()) {
 
 			//	Check the active_user data in case it exists there
-			$_saved_basket = @unserialize( active_user( 'shop_basket' ) );
+			$_saved_basket = @unserialize(active_user('shop_basket'));
+		}
 
-		endif;
-
-		if ( ! empty( $_saved_basket ) ) :
+		if (!empty($_saved_basket)) {
 
 			$this->_basket->items = $_saved_basket->items;
 
-			$this->add_order( $_saved_basket->order );
-			$this->add_customer_details( $_saved_basket->customer_details );
-			$this->add_shipping_details( $_saved_basket->shipping_details );
-			$this->add_payment_gateway( $_saved_basket->payment_gateway );
-			$this->add_voucher( $_saved_basket->voucher );
-			$this->addNote( $_saved_basket->note );
+			if (isset($_saved_basket->order)) {
 
-		endif;
+				$this->addOrder($_saved_basket->order);
+			}
+
+			if (isset($_saved_basket->customer_details)) {
+
+				$this->addCustomerDetails($_saved_basket->customer_details);
+			}
+
+			if (isset($_saved_basket->shipping_type)) {
+
+				$this->addShippingType($_saved_basket->shipping_type);
+			}
+
+			if (isset($_saved_basket->shipping_details)) {
+
+				$this->addShippingDetails($_saved_basket->shipping_details);
+			}
+
+			if (isset($_saved_basket->payment_gateway)) {
+
+				$this->addPaymentGateway($_saved_basket->payment_gateway);
+			}
+
+			if (isset($_saved_basket->voucher)) {
+
+				$this->addVoucher($_saved_basket->voucher);
+			}
+
+			if (isset($_saved_basket->note)) {
+
+				$this->addNote($_saved_basket->note);
+			}
+		}
 
 		// --------------------------------------------------------------------------
 
@@ -82,9 +108,9 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 */
 	public function get()
 	{
-		$_cache = $this->_get_cache( $this->_cache_key );
+		$_cache = $this->_get_cache($this->_cache_key);
 
-		if ( ! empty( $_cache ) ) :
+		if (!empty($_cache)) :
 
 			return $_cache;
 
@@ -98,21 +124,21 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	First loop through all the items and fetch product information
-		$this->load->model( 'shop/shop_product_model' );
+		$this->load->model('shop/shop_product_model');
 
 		//	This variable will hold any keys which need to be unset
 		$_unset = array();
 
-		foreach ( $_basket->items AS $basket_key => $item ) :
+		foreach ($_basket->items AS $basket_key => $item) :
 
-			$item->product = $this->shop_product_model->get_by_id( $item->product_id );
+			$item->product = $this->shop_product_model->get_by_id($item->product_id);
 
-			if ( ! empty( $item->product ) ) :
+			if (!empty($item->product)) :
 
 				//	Find the variant
-				foreach( $item->product->variations AS &$v ) :
+				foreach($item->product->variations AS &$v) :
 
-					if ( $v->id == $item->variant_id ) :
+					if ($v->id == $item->variant_id) :
 
 						$item->variant = $v;
 						break;
@@ -121,7 +147,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 				endforeach;
 
-				if ( empty( $item->variant ) ) :
+				if (empty($item->variant)) :
 
 					//	Bad variant ID, possible item has been deleted so don't get too angry
 					$_unset[] = $basket_key;
@@ -138,21 +164,21 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		endforeach;
 
 		//	Removing anything?
-		if ( ! empty( $_unset ) ) :
+		if (!empty($_unset)) :
 
-			foreach( $_unset AS $key ) :
+			foreach($_unset AS $key) :
 
 				//	Remove from the local basket object
-				unset( $_basket->items[$key] );
+				unset($_basket->items[$key]);
 
 				//	Also remove from the main basket object
-				unset( $this->_basket->items[$key] );
+				unset($this->_basket->items[$key]);
 
 			endforeach;
 
-			$_basket->items			= array_values( $_basket->items );
-			$this->_basket->items	= array_values( $this->_basket->items );
-			$_basket->items_removed	= count( $_unset );
+			$_basket->items			= array_values($_basket->items);
+			$this->_basket->items	= array_values($this->_basket->items);
+			$_basket->items_removed	= count($_unset);
 
 			// --------------------------------------------------------------------------
 
@@ -163,7 +189,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Calculate basket item costs
-		foreach ( $_basket->items AS $item ) :
+		foreach ($_basket->items AS $item) :
 
 			$_basket->totals->base->item += $item->quantity * $item->variant->price->price->base->value_ex_tax;
 			$_basket->totals->user->item += $item->quantity * $item->variant->price->price->user->value_ex_tax;
@@ -173,12 +199,19 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Calculate shipping costs
-		$this->load->model( 'shop/shop_shipping_driver_model' );
+		if ($_basket->shipping->type === 'DELIVER') {
 
-		$_shipping_costs = $this->shop_shipping_driver_model->calculate( $_basket );
+			$this->load->model('shop/shop_shipping_driver_model');
+			$_shipping_costs = $this->shop_shipping_driver_model->calculate($_basket);
 
-		$_basket->totals->base->shipping = $_shipping_costs->base;
-		$_basket->totals->user->shipping = $_shipping_costs->user;
+			$_basket->totals->base->shipping = $_shipping_costs->base;
+			$_basket->totals->user->shipping = $_shipping_costs->user;
+
+		} else {
+
+			$_basket->totals->base->shipping = 0;
+			$_basket->totals->user->shipping = 0;
+		}
 
 		// --------------------------------------------------------------------------
 
@@ -188,7 +221,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Calculate Tax costs
-		foreach ( $_basket->items AS $item ) :
+		foreach ($_basket->items AS $item) :
 
 			$_basket->totals->base->tax += $item->quantity * $item->variant->price->price->base->value_tax;
 			$_basket->totals->user->tax += $item->quantity * $item->variant->price->price->user->value_tax;
@@ -204,7 +237,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	If item prices are inclusive of tax then show the items total + tax
-		if ( ! app_setting( 'price_exclude_tax', 'shop' ) ) :
+		if (!app_setting('price_exclude_tax', 'shop')) :
 
 			$_basket->totals->base->item += $_basket->totals->base->tax;
 			$_basket->totals->user->item += $_basket->totals->user->tax;
@@ -214,20 +247,20 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Format totals
-		$_basket->totals->base_formatted->item		= $this->shop_currency_model->format_base( $_basket->totals->base->item );
-		$_basket->totals->base_formatted->shipping	= $this->shop_currency_model->format_base( $_basket->totals->base->shipping );
-		$_basket->totals->base_formatted->tax		= $this->shop_currency_model->format_base( $_basket->totals->base->tax );
-		$_basket->totals->base_formatted->grand		= $this->shop_currency_model->format_base( $_basket->totals->base->grand );
+		$_basket->totals->base_formatted->item		= $this->shop_currency_model->format_base($_basket->totals->base->item);
+		$_basket->totals->base_formatted->shipping	= $this->shop_currency_model->format_base($_basket->totals->base->shipping);
+		$_basket->totals->base_formatted->tax		= $this->shop_currency_model->format_base($_basket->totals->base->tax);
+		$_basket->totals->base_formatted->grand		= $this->shop_currency_model->format_base($_basket->totals->base->grand);
 
-		$_basket->totals->user_formatted->item		= $this->shop_currency_model->format_user( $_basket->totals->user->item );
-		$_basket->totals->user_formatted->shipping	= $this->shop_currency_model->format_user( $_basket->totals->user->shipping );
-		$_basket->totals->user_formatted->tax		= $this->shop_currency_model->format_user( $_basket->totals->user->tax );
-		$_basket->totals->user_formatted->grand		= $this->shop_currency_model->format_user( $_basket->totals->user->grand );
+		$_basket->totals->user_formatted->item		= $this->shop_currency_model->format_user($_basket->totals->user->item);
+		$_basket->totals->user_formatted->shipping	= $this->shop_currency_model->format_user($_basket->totals->user->shipping);
+		$_basket->totals->user_formatted->tax		= $this->shop_currency_model->format_user($_basket->totals->user->tax);
+		$_basket->totals->user_formatted->grand		= $this->shop_currency_model->format_user($_basket->totals->user->grand);
 
 		// --------------------------------------------------------------------------
 
 		//	Save to cache and spit it back
-		$this->_set_cache( $this->_cache_key, $_basket );
+		$this->_set_cache($this->_cache_key, $_basket);
 
 		return $_basket;
 	}
@@ -238,16 +271,16 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 	/**
 	 * Returns the number of items in the basket.
-	 * @param  boolean $respect_quantity If TRUE then the number of items in the basket is counted rather than just the number of items
+	 * @param  boolean $respect_quantity If true then the number of items in the basket is counted rather than just the number of items
 	 * @return int
 	 */
-	public function get_count( $respect_quantity = TRUE )
+	public function get_count($respect_quantity = true)
 	{
-		if ( $respect_quantity ) :
+		if ($respect_quantity) :
 
 			$_count = 0;
 
-			foreach ( $this->_basket->items AS $item ) :
+			foreach ($this->_basket->items AS $item) :
 
 				$_count += $item->quantity;
 
@@ -257,7 +290,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 		else:
 
-			return count( $this->_basket->items );
+			return count($this->_basket->items);
 
 		endif;
 	}
@@ -273,9 +306,9 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * @param  boolean $include_thousands Whether to include the thousand seperator or not
 	 * @return string
 	 */
-	public function get_total( $formatted = TRUE )
+	public function get_total($formatted = true)
 	{
-		if ( $formatted ) :
+		if ($formatted) :
 
 			return $_out->totals->user_formatted->grand;
 
@@ -297,11 +330,11 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * @param int $quantity   The quantity to add
 	 * @return boolean
 	 */
-	public function add( $variant_id, $quantity = 1 )
+	public function add($variant_id, $quantity = 1)
 	{
-		$quantity = intval( $quantity );
+		$quantity = intval($quantity);
 
-		if ( empty( $quantity ) ) :
+		if (empty($quantity)) :
 
 			$quantity = 1;
 
@@ -309,45 +342,45 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
-		if ( $quantity < 1 ) :
+		if ($quantity < 1) :
 
-			$this->_set_error( 'Quantity must be greater than 0.' );
-			return FALSE;
+			$this->_set_error('Quantity must be greater than 0.');
+			return false;
 
 		endif;
 
 		// --------------------------------------------------------------------------
 
-		$this->load->model( 'shop/shop_product_model' );
+		$this->load->model('shop/shop_product_model');
 
 		//	Check if item is already in the basket.
-		$_key = $this->_get_basket_key_by_variant_id( $variant_id );
+		$_key = $this->getBasketKeyByVariantId($variant_id);
 
 		// --------------------------------------------------------------------------
 
-		if ( $_key !== FALSE ) :
+		if ($_key !== false) :
 
 			//	Already in the basket, increment
-			return $this->increment( $variant_id, $quantity );
+			return $this->increment($variant_id, $quantity);
 
 		endif;
 
 		// --------------------------------------------------------------------------
 
 		//	Check the product ID is valid
-		$_product = $this->shop_product_model->get_by_variant_id( $variant_id );
+		$_product = $this->shop_product_model->get_by_variant_id($variant_id);
 
-		if ( ! $_product ) :
+		if (!$_product) :
 
-			$this->_set_error( 'No Product for that Variant ID.' );
-			return FALSE;
+			$this->_set_error('No Product for that Variant ID.');
+			return false;
 
 		endif;
 
-		$_variant = NULL;
-		foreach ( $_product->variations AS $variant ) :
+		$_variant = null;
+		foreach ($_product->variations AS $variant) :
 
-			if ( $variant_id == $variant->id ) :
+			if ($variant_id == $variant->id) :
 
 				$_variant = $variant;
 				break;
@@ -356,37 +389,37 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 		endforeach;
 
-		if ( ! $_variant ) :
+		if (!$_variant) :
 
-			$this->_set_error( 'Invalid Variant ID.' );
-			return FALSE;
+			$this->_set_error('Invalid Variant ID.');
+			return false;
 
 		endif;
 
 		// --------------------------------------------------------------------------
 
 		//	Check product is active
-		if ( ! $_product->is_active ) :
+		if (!$_product->is_active) :
 
-			$this->_set_error( 'Product is not available.' );
-			return FALSE;
+			$this->_set_error('Product is not available.');
+			return false;
 
 		endif;
 
 		// --------------------------------------------------------------------------
 
 		//	Check there are items
-		if ( ! is_null( $_variant->quantity_available ) && $_variant->quantity_available <= 0 ) :
+		if (!is_null($_variant->quantity_available) && $_variant->quantity_available <= 0) :
 
-			$this->_set_error( 'Product is not available.' );
-			return FALSE;
+			$this->_set_error('Product is not available.');
+			return false;
 
 		endif;
 
 		// --------------------------------------------------------------------------
 
 		//	Check quantity is available, if more are being requested, then reduce.
-		if ( ! is_null( $_variant->quantity_available ) && $quantity > $_variant->quantity_available ) :
+		if (!is_null($_variant->quantity_available) && $quantity > $_variant->quantity_available) :
 
 			$quantity = $_variant->quantity_available;
 
@@ -407,17 +440,17 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 		$this->_basket->items[]	= $_temp;
 
-		unset( $_temp );
+		unset($_temp);
 
 		// --------------------------------------------------------------------------
 
 		//	Invalidate the basket cache
-		$this->_save_session();
-		$this->_unset_cache( $this->_cache_key );
+		$this->saveSession();
+		$this->_unset_cache($this->_cache_key);
 
 		// --------------------------------------------------------------------------
 
-		return TRUE;
+		return true;
 	}
 
 
@@ -429,20 +462,20 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * @param  int $variant_id The variant's ID
 	 * @return boolean
 	 */
-	public function remove( $variant_id )
+	public function remove($variant_id)
 	{
-		$_key = $this->_get_basket_key_by_variant_id( $variant_id );
+		$_key = $this->getBasketKeyByVariantId($variant_id);
 
 		// --------------------------------------------------------------------------
 
-		if ( $_key !== FALSE ) :
+		if ($_key !== false) :
 
-			return $this->_remove_by_key( $_key );
+			return $this->removeByKey($_key);
 
 		else :
 
-			$this->_set_error( 'This item is not in your basket.' );
-			return FALSE;
+			$this->_set_error('This item is not in your basket.');
+			return false;
 
 		endif;
 	}
@@ -456,20 +489,20 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * @param  int $key The basket item's key
 	 * @return boolean
 	 */
-	protected function _remove_by_key( $key )
+	protected function removeByKey($key)
 	{
-		unset( $this->_basket->items[$key] );
-		$this->_basket->items = array_values( $this->_basket->items );
+		unset($this->_basket->items[$key]);
+		$this->_basket->items = array_values($this->_basket->items);
 
 		// --------------------------------------------------------------------------
 
 		//	Invalidate the basket cache
-		$this->_save_session();
-		$this->_unset_cache( $this->_cache_key );
+		$this->saveSession();
+		$this->_unset_cache($this->_cache_key);
 
 		// --------------------------------------------------------------------------
 
-		return TRUE;
+		return true;
 	}
 
 
@@ -482,23 +515,24 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * @param  int  $increment_by The amount to increment the item by
 	 * @return boolean
 	 */
-	public function increment( $variant_id, $increment_by = 1 )
+	public function increment($variant_id, $increment_by = 1)
 	{
-		$_key = $this->_get_basket_key_by_variant_id( $variant_id );
+		$_key = $this->getBasketKeyByVariantId($variant_id);
 
 		// --------------------------------------------------------------------------
 
-		if ( $_key !== FALSE ) :
+		if ($_key !== false) :
 
-			$_can_increment = TRUE;
-			$_max_increment = NULL;
+			$_can_increment = true;
+			$_max_increment = null;
 
-			//	Check we can increment the product
+			/**
+			 * Check we can increment the product
+			 * @TODO; work out what the maximum number of items this product type can
+			 * have. If $_max_increment is null assume no limit on incrementations
+			 */
 
-			//	TODO; work out what the maximum number of items this product type can
-			//	have. If $_max_increment is NULL assume no limit on incrementations
-
-			if ( $_can_increment && ( is_null( $_max_increment ) || $increment <= $_max_increment ) ) :
+			if ($_can_increment && (is_null($_max_increment) || $increment <= $_max_increment)) :
 
 				//	Increment
 				$this->_basket->items[$_key]->quantity += $increment_by;
@@ -506,24 +540,24 @@ class NAILS_Shop_basket_model extends NAILS_Model
 				// --------------------------------------------------------------------------
 
 				//	Invalidate the basket cache
-				$this->_save_session();
-				$this->_unset_cache( $this->_cache_key );
+				$this->saveSession();
+				$this->_unset_cache($this->_cache_key);
 
 				// --------------------------------------------------------------------------
 
-				return TRUE;
+				return true;
 
 			else :
 
-				$this->_set_error( 'You cannot increment this item that many times.' );
-				return FALSE;
+				$this->_set_error('You cannot increment this item that many times.');
+				return false;
 
 			endif;
 
 		else :
 
-			$this->_set_error( 'This item is not in your basket.' );
-			return FALSE;
+			$this->_set_error('This item is not in your basket.');
+			return false;
 
 		endif;
 	}
@@ -539,49 +573,48 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * @param  int  $decrement_by The amount to decrement the item by
 	 * @return boolean
 	 */
-	public function decrement( $variant_id, $decrement_by = 1 )
+	public function decrement($variant_id, $decrement_by = 1)
 	{
-		$_key = $this->_get_basket_key_by_variant_id( $variant_id );
+		$_key = $this->getBasketKeyByVariantId($variant_id);
 
 		// --------------------------------------------------------------------------
 
-		if ( $_key !== FALSE ) :
+		if ($_key !== false) :
 
 			$_max_decrement = $this->_basket->items[$_key]->quantity;
 
-			if ( $_max_decrement > 1 ) :
+			if ($_max_decrement > 1) :
 
-				if ( $decrement_by >= $_max_decrement ) :
+				if ($decrement_by >= $_max_decrement) :
 
-					//	The requested decrement will take the quantity to 0 or less
-					//	just remove it.
-
-					$this->remove( $variant_id );
+					//	The requested decrement will take the quantity to 0 or less just remove it.
+					$this->remove($variant_id);
 
 				else :
+
 					//	Decrement
 					$this->_basket->items[$_key]->quantity -= $decrement_by;
 
 					// --------------------------------------------------------------------------
 
 					//	Invalidate the basket cache
-					$this->_save_session();
-					$this->_unset_cache( $this->_cache_key );
+					$this->saveSession();
+					$this->_unset_cache($this->_cache_key);
 
 				endif;
 
 			else :
 
-				$this->remove( $variant_id );
+				$this->remove($variant_id);
 
 			endif;
 
-			return TRUE;
+			return true;
 
 		else :
 
-			$this->_set_error( 'This item is not in your basket.' );
-			return FALSE;
+			$this->_set_error('This item is not in your basket.');
+			return false;
 
 		endif;
 	}
@@ -594,7 +627,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * Returns the basket's "customer details" object.
 	 * @return stdClass
 	 */
-	public function get_customer_details()
+	public function getCustomerDetails()
 	{
 		return $this->_basket->customer->details;
 	}
@@ -607,12 +640,16 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * Sets the basket's "customer details" object.
 	 * @return boolean
 	 */
-	public function add_customer_details( $details )
+	public function addCustomerDetails($details)
 	{
 		//	TODO: verify?
 		$this->_basket->customer->details = $details;
 
-		return TRUE;
+		//	Invalidate the basket cache
+		$this->saveSession();
+		$this->_unset_cache($this->_cache_key);
+
+		return true;
 	}
 
 
@@ -621,11 +658,17 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 	/**
 	 * Resets the basket's "customer details" object.
-	 * @return void
+	 * @return boolean
 	 */
-	public function remove_customer_details()
+	public function removeCustomerDetails()
 	{
-		$this->_basket->customer->details = $this->_default_customer_details();
+		$this->_basket->customer->details = $this->defaultCustomerDetails();
+
+		//	Invalidate the basket cache
+		$this->saveSession();
+		$this->_unset_cache($this->_cache_key);
+
+		return true;
 	}
 
 
@@ -636,7 +679,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * Returns the basket's "shipping details" object.
 	 * @return stdClass
 	 */
-	public function get_shipping_details()
+	public function getShippingDetails()
 	{
 		return $this->_basket->shipping->details;
 	}
@@ -649,12 +692,16 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * Sets the basket's "shipping details" object.
 	 * @return boolean
 	 */
-	public function add_shipping_details( $details )
+	public function addShippingDetails($details)
 	{
 		//	TODO: verify?
 		$this->_basket->shipping->details = $details;
 
-		return TRUE;
+		//	Invalidate the basket cache
+		$this->saveSession();
+		$this->_unset_cache($this->_cache_key);
+
+		return true;
 	}
 
 
@@ -663,11 +710,76 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 	/**
 	 * Resets the basket's "shipping details" object.
-	 * @return void
+	 * @return boolean
 	 */
-	public function remove_shipping_details()
+	public function removeShippingDetails()
 	{
-		$this->_basket->shipping->details = $this->_default_shipping_details();
+		$this->_basket->shipping->details = $this->defaultShippingDetails();
+
+		//	Invalidate the basket cache
+		$this->saveSession();
+		$this->_unset_cache($this->_cache_key);
+
+		return true;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Returns the basket's "shipping type" object.
+	 * @return stdClass
+	 */
+	public function getShippingType()
+	{
+		return $this->_basket->shipping->type;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Sets the basket's "shipping type" object.
+	 * @return boolean
+	 */
+	public function addShippingType($deliveryType)
+	{
+		if ($deliveryType == 'COLLECT' || $deliveryType == 'DELIVER') {
+
+			$this->_basket->shipping->type = $deliveryType;
+
+			//	Invalidate the basket cache
+			$this->saveSession();
+			$this->_unset_cache($this->_cache_key);
+
+			return true;
+
+		} else {
+
+			$this->_set_error('"' . $deliveryType . '" is not a valid delivery type.');
+			return false;
+		}
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	/**
+	 * Resets the basket's "shipping details" object.
+	 * @return boolean
+	 */
+	public function removeShippingType()
+	{
+		$this->_basket->shipping->type = $this->defaultShippingType();
+
+		//	Invalidate the basket cache
+		$this->saveSession();
+		$this->_unset_cache($this->_cache_key);
+
+		return true;
 	}
 
 
@@ -678,7 +790,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * Returns the basket's "payment gatway" object.
 	 * @return stdClass
 	 */
-	public function get_payment_gateway()
+	public function getPaymentGateway()
 	{
 		return $this->_basket->payment_gateway;
 	}
@@ -691,12 +803,16 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * Sets the basket's "payment gateway" object.
 	 * @return boolean
 	 */
-	public function add_payment_gateway( $payment_gateway )
+	public function addPaymentGateway($payment_gateway)
 	{
 		//	TODO: verify?
 		$this->_basket->payment_gateway = $payment_gateway;
 
-		return TRUE;
+		//	Invalidate the basket cache
+		$this->saveSession();
+		$this->_unset_cache($this->_cache_key);
+
+		return true;
 	}
 
 
@@ -705,11 +821,17 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 	/**
 	 * Resets the basket's "payment gateway" object.
-	 * @return void
+	 * @return boolean
 	 */
-	public function remove_payment_gateway()
+	public function removePaymentGateway()
 	{
-		$this->_basket->payment_gateway = $this->_default_payment_gateway();
+		$this->_basket->payment_gateway = $this->defaultPaymentGateway();
+
+		//	Invalidate the basket cache
+		$this->saveSession();
+		$this->_unset_cache($this->_cache_key);
+
+		return true;
 	}
 
 
@@ -720,7 +842,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * Returns the basket's "order" object.
 	 * @return stdClass
 	 */
-	public function get_order()
+	public function getOrder()
 	{
 		return $this->_basket->order;
 	}
@@ -733,12 +855,16 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * Sets the basket's "order" object.
 	 * @return boolean
 	 */
-	public function add_order( $order )
+	public function addOrder($order)
 	{
 		//	TODO: verify?
 		$this->_basket->order = $order;
 
-		return TRUE;
+		//	Invalidate the basket cache
+		$this->saveSession();
+		$this->_unset_cache($this->_cache_key);
+
+		return true;
 	}
 
 
@@ -747,11 +873,17 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 	/**
 	 * Resets the basket's "order" object.
-	 * @return void
+	 * @return boolean
 	 */
-	public function remove_order()
+	public function removeOrder()
 	{
-		$this->_basket->order = $this->_default_order();
+		$this->_basket->order = $this->defaultOrder();
+
+		//	Invalidate the basket cache
+		$this->saveSession();
+		$this->_unset_cache($this->_cache_key);
+
+		return true;
 	}
 
 
@@ -762,7 +894,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * Returns the basket's "voucher" object.
 	 * @return stdClass
 	 */
-	public function get_voucher()
+	public function getVoucher()
 	{
 		return $this->_basket->voucher;
 	}
@@ -775,33 +907,34 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * Adds a voucher to a basket.
 	 * @param string $voucher_code The voucher's code
 	 */
-	public function add_voucher( $voucher_code )
+	public function addVoucher($voucher_code)
 	{
-		if ( empty( $voucher_code ) ) :
+		if (empty($voucher_code)) :
 
-			$this->_set_error( 'No voucher code supplied.' );
-			return FALSE;
+			$this->_set_error('No voucher code supplied.');
+			return false;
 
 		endif;
 
-		$this->load->model( 'shop/shop_voucher_model' );
-		$_voucher = $this->shop_voucher_model->validate( $voucher_code, $this->get() );
+		$this->load->model('shop/shop_voucher_model');
+		$_voucher = $this->shop_voucher_model->validate($voucher_code, $this->get());
 
-		if ( $_voucher ) :
+		if ($_voucher) :
 
 			$this->_basket->voucher = $voucher;
 
 			//	Invalidate the basket cache
-			$this->_save_session();
-			$this->_unset_cache( $this->_cache_key );
+			$this->saveSession();
+			$this->_unset_cache($this->_cache_key);
 
-			return TRUE;
+			return true;
 
 		else :
 
-			$this->remove_voucher();
-			$this->_set_error( $this->shop_voucher_model->last_error() );
-			return FALSE;
+			$this->removeVoucher();
+			$this->_set_error($this->shop_voucher_model->last_error());
+
+			return false;
 
 		endif;
 	}
@@ -814,9 +947,15 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * Resets the basket's "voucher" object.
 	 * @return void
 	 */
-	public function remove_voucher()
+	public function removeVoucher()
 	{
-		$this->_basket->voucher = $this->_default_voucher();
+		$this->_basket->voucher = $this->defaultVoucher();
+
+		//	Invalidate the basket cache
+		$this->saveSession();
+		$this->_unset_cache($this->_cache_key);
+
+		return true;
 	}
 
 
@@ -845,7 +984,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		$this->_basket->note = $note;
 
 		//	Invalidate the basket cache
-		$this->_save_session();
+		$this->saveSession();
 		$this->_unset_cache($this->_cache_key);
 
 		return true;
@@ -861,7 +1000,13 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 */
 	public function removeNote()
 	{
-		$this->_basket->note = $this->_default_note();
+		$this->_basket->note = $this->defaultNote();
+
+		//	Invalidate the basket cache
+		$this->saveSession();
+		$this->_unset_cache($this->_cache_key);
+
+		return true;
 	}
 
 
@@ -873,15 +1018,15 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * @param  int  $variant_id The ID of the variant
 	 * @return boolean
 	 */
-	public function is_in_basket( $variant_id )
+	public function isInBasket($variant_id)
 	{
-		if ( $this->_get_basket_key_by_variant_id( $variant_id ) !== FALSE ) :
+		if ($this->getBasketKeyByVariantId($variant_id) !== false) :
 
-			return TRUE;
+			return true;
 
 		else :
 
-			return FALSE;
+			return false;
 
 		endif;
 	}
@@ -890,17 +1035,17 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 
-	public function get_variant_quantity( $variant_id )
+	public function getVariantQuantity($variant_id)
 	{
-		$_key = $this->_get_basket_key_by_variant_id( $variant_id );
+		$_key = $this->getBasketKeyByVariantId($variant_id);
 
-		if ( $_key !== FALSE ) :
+		if ($_key !== false) :
 
 			return $this->_basket->items[$_key]->quantity;
 
 		else :
 
-			return FALSE;
+			return false;
 
 		endif;
 	}
@@ -916,8 +1061,8 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 */
 	public function save()
 	{
-		$this->_save_session();
-		$this->_save_user();
+		$this->saveSession();
+		$this->saveUser();
 	}
 
 
@@ -928,18 +1073,19 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * Generates the 'save object' which is used by the other _save_*() methods
 	 * @return stdClass()
 	 */
-	protected function _save_object()
+	protected function saveObject()
 	{
 		$_save						= new stdClass();
 		$_save->items				= $this->_basket->items;
 		$_save->order				= $this->_basket->order;
 		$_save->customer_details	= $this->_basket->customer->details;
+		$_save->shipping_type		= $this->_basket->shipping->type;
 		$_save->shipping_details	= $this->_basket->shipping->details;
 		$_save->payment_gateway		= $this->_basket->payment_gateway;
 		$_save->voucher				= $this->_basket->voucher->id;
 		$_save->note				= $this->_basket->note;
 
-		return serialize( $_save );
+		return serialize($_save);
 	}
 
 
@@ -950,11 +1096,11 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * Saves the 'save object' to the user's meta record
 	 * @return void
 	 */
-	protected function _save_session()
+	protected function saveSession()
 	{
-		if ( ! headers_sent() ) :
+		if (!headers_sent()) :
 
-			$this->session->set_userdata( $this->_sess_var, $this->_save_object() );
+			$this->session->set_userdata($this->_sess_var, $this->saveObject());
 
 		endif;
 	}
@@ -967,13 +1113,13 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * Saves the 'save object' to the user's meta record
 	 * @return void
 	 */
-	protected function _save_user()
+	protected function saveUser()
 	{
 		//	If logged in, save the basket to the user's meta data for safe keeping.
-		if ( $this->user_model->is_logged_in() ) :
+		if ($this->user_model->is_logged_in()) :
 
-			$_data = array( 'shop_basket' => $this->_save_object() );
-			$this->user_model->update( active_user( 'id' ), $_data );
+			$_data = array('shop_basket' => $this->saveObject());
+			$this->user_model->update(active_user('id'), $_data);
 
 		endif;
 	}
@@ -988,13 +1134,13 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 */
 	public function destroy()
 	{
-		$this->_basket = $this->_default_basket();
+		$this->_basket = $this->defaultBasket();
 
 		// --------------------------------------------------------------------------
 
 		//	Invalidate the basket cache
-		$this->_save_session();
-		$this->_unset_cache( $this->_cache_key );
+		$this->saveSession();
+		$this->_unset_cache($this->_cache_key);
 	}
 
 
@@ -1004,13 +1150,13 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	/**
 	 * Fetches a basket key using the variant's ID
 	 * @param  int $variant_id The ID of the variant
-	 * @return mixed           Int on success FALSE on failure
+	 * @return mixed           Int on success false on failure
 	 */
-	protected function _get_basket_key_by_variant_id( $variant_id )
+	protected function getBasketKeyByVariantId($variant_id)
 	{
-		foreach( $this->_basket->items AS $key => $item ) :
+		foreach($this->_basket->items AS $key => $item) :
 
-			if ( $variant_id == $item->variant_id ) :
+			if ($variant_id == $item->variant_id) :
 
 				return $key;
 				break;
@@ -1021,7 +1167,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
-		return FALSE;
+		return false;
 	}
 
 
@@ -1032,18 +1178,19 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * Returns a default, empty, basket object
 	 * @return stdClass
 	 */
-	protected function _default_basket()
+	protected function defaultBasket()
 	{
 		$_out						= new stdClass();
 		$_out->items				= array();
-		$_out->order				= $this->_default_order();
+		$_out->order				= $this->defaultOrder();
 		$_out->customer				= new stdClass();
-		$_out->customer->details	= $this->_default_customer_details();
+		$_out->customer->details	= $this->defaultCustomerDetails();
 		$_out->shipping				= new stdClass();
-		$_out->shipping->details	= $this->_default_shipping_details();
-		$_out->payment_gateway		= $this->_default_payment_gateway();
-		$_out->voucher				= $this->_default_voucher();
-		$_out->note					= $this->_default_note();
+		$_out->shipping->type		= $this->defaultShippingType();
+		$_out->shipping->details	= $this->defaultShippingDetails();
+		$_out->payment_gateway		= $this->defaultPaymentGateway();
+		$_out->voucher				= $this->defaultVoucher();
+		$_out->note					= $this->defaultNote();
 
 		$_out->totals					= new stdClass();
 		$_out->totals->base				= new stdClass();
@@ -1082,10 +1229,10 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * Returns a default, empty, basket "order" object
 	 * @return stdClass
 	 */
-	protected function _default_order()
+	protected function defaultOrder()
 	{
 		$_out		= new stdClass();
-		$_out->id	= NULL;
+		$_out->id	= null;
 
 		return $_out;
 	}
@@ -1098,10 +1245,10 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * Returns a default, empty, basket "payment gateway" object
 	 * @return stdClass
 	 */
-	protected function _default_payment_gateway()
+	protected function defaultPaymentGateway()
 	{
 		$_out		= new stdClass();
-		$_out->id	= NULL;
+		$_out->id	= null;
 
 		return $_out;
 	}
@@ -1114,11 +1261,11 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * Returns a default, empty, basket "voucher" object
 	 * @return stdClass
 	 */
-	protected function _default_voucher()
+	protected function defaultVoucher()
 	{
 		$_out		= new stdClass();
-		$_out->id	= NULL;
-		$_out->code	= NULL;
+		$_out->id	= null;
+		$_out->code	= null;
 
 		return $_out;
 	}
@@ -1131,7 +1278,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * Returns an empty "note" object
 	 * @return string
 	 */
-	protected function _default_note()
+	protected function defaultNote()
 	{
 		return '';
 	}
@@ -1144,15 +1291,24 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * Returns a default, empty, basket "customer details" object
 	 * @return stdClass
 	 */
-	protected function _default_customer_details()
+	protected function defaultCustomerDetails()
 	{
 		$_out				= new stdClass();
-		$_out->id			= NULL;
-		$_out->first_name	= NULL;
-		$_out->last_name	= NULL;
-		$_out->email		= NULL;
+		$_out->id			= null;
+		$_out->first_name	= null;
+		$_out->last_name	= null;
+		$_out->email		= null;
 
 		return $_out;
+	}
+
+
+	// --------------------------------------------------------------------------
+
+
+	protected function defaultShippingType()
+	{
+		return 'DELIVER';
 	}
 
 
@@ -1163,17 +1319,21 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 * Returns a default, empty, basket "shipping details" object
 	 * @return stdClass
 	 */
-	protected function _default_shipping_details()
+	protected function defaultShippingDetails()
 	{
-		//	Clear addressing as per: http://www.royalmail.com/personal/help-and-support/How-do-I-address-my-mail-correctly
+		/**
+		 * Clear addressing as per:
+		 * http://www.royalmail.com/personal/help-and-support/How-do-I-address-my-mail-correctly
+		 */
+
 		$_out				= new stdClass();
-		$_out->addressee	= NULL;	//	Named addresse
-		$_out->line_1		= NULL;	//	Building number and street name
-		$_out->line_2		= NULL;	//	Locality name, if required
-		$_out->town			= NULL;	//	Town
-		$_out->state		= NULL;	//	State
-		$_out->postcode		= NULL;	//	Postcode
-		$_out->country		= NULL;	//	Country
+		$_out->addressee	= null;	//	Named addresse
+		$_out->line_1		= null;	//	Building number and street name
+		$_out->line_2		= null;	//	Locality name, if required
+		$_out->town			= null;	//	Town
+		$_out->state		= null;	//	State
+		$_out->postcode		= null;	//	Postcode
+		$_out->country		= null;	//	Country
 
 		return $_out;
 	}
@@ -1187,7 +1347,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 */
 	public function __destruct()
 	{
-		$this->_save_user();
+		$this->saveUser();
 	}
 }
 
@@ -1219,7 +1379,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
  *
  **/
 
-if ( ! defined( 'NAILS_ALLOW_EXTENSION_SHOP_BASKET_MODEL' ) ) :
+if (!defined('NAILS_ALLOW_EXTENSION_SHOP_BASKET_MODEL')) :
 
 	class Shop_basket_model extends NAILS_Shop_basket_model
 	{

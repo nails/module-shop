@@ -1,9 +1,9 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
 /**
- * Name:		Shop - Basket
+ * Name:        Shop - Basket
  *
- * Description:	This controller handles the user's basket
+ * Description: This controller handles the user's basket
  *
  **/
 
@@ -15,381 +15,452 @@
  *
  **/
 
-//	Include _shop.php; executes common functionality
+//  Include _shop.php; executes common functionality
 require_once '_shop.php';
 
 class NAILS_Basket extends NAILS_Shop_Controller
 {
-	public function __construct()
-	{
-		parent::__construct();
-
-		// --------------------------------------------------------------------------
-
-		$this->data['return'] = $this->input->get( 'return' ) ? $this->input->get_post( 'return' ) : $this->_shop_url . 'basket';
-
-		// --------------------------------------------------------------------------
-
-		//	Load appropriate assets
-		$_assets		= ! empty( $this->_skin_checkout->assets )		? $this->_skin_checkout->assets		: array();
-		$_css_inline	= ! empty( $this->_skin_checkout->css_inline )	? $this->_skin_checkout->css_inline	: array();
-		$_js_inline		= ! empty( $this->_skin_checkout->js_inline )	? $this->_skin_checkout->js_inline	: array();
-
-		$this->_load_skin_assets( $_assets, $_css_inline, $_js_inline, $this->_skin_checkout->url );
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Render the user's basket
-	 *
-	 * @access	public
-	 * @return	void
-	 *
-	 **/
-	public function index()
-	{
-		$this->data['page']->title = $this->_shop_name . ': Your Basket';
-
-		// --------------------------------------------------------------------------
-
-		$this->data['basket'] = $this->shop_basket_model->get();
-
-		if ( ! empty( $this->data['basket']->items_removed ) && empty( $this->data['message'] ) ) :
-
-			if ( $this->data['basket']->items_removed > 1 ) :
-
-				$this->data['message'] = '<strong>Some items were removed.</strong> ' . $this->data['basket']->items_removed . ' items were removed from your basket because they are no longer available.';
-
-			else :
-
-				$this->data['message'] = '<strong>Some items were removed.</strong> An item was removed from your basket because it is no longer available.';
-
-			endif;
-
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		//	Continue shopping URL
-		//	Skins can render a button which takes the user to a sensible place to keep shopping
-
-		$this->data['continue_shopping_url'] = $this->_shop_url;
-
-		//	Most recently viewed item
-		$_recently_viewed = $this->shop_product_model->get_recently_viewed();
-
-		if ( ! empty( $_recently_viewed ) ) :
-
-			$_product_id = end( $_recently_viewed );
-			$_product		= $this->shop_product_model->get_by_id( $_product_id );
-
-			if ( $_product && $_product->is_active ) :
-
-				$this->data['continue_shopping_url'] .= 'product/' . $_product->slug;
-
-
-			endif;
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		//	Other recently viewed items
-		$this->data['recently_viewed'] = array();
-		if ( ! empty( $_recently_viewed ) ) :
-
-			$this->data['recently_viewed'] = $this->shop_product_model->get_by_ids( $_recently_viewed );
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		//	Abandon any previous orders
-		$this->load->model( 'shop/shop_payment_gateway_model' );
-		$_previous_order = $this->shop_payment_gateway_model->checkout_session_get();
-
-		if ( $_previous_order ) :
-
-			$this->shop_order_model->abandon( $_previous_order );
-			$this->shop_payment_gateway_model->checkout_session_clear();
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		$this->load->view( 'structure/header',									$this->data );
-		$this->load->view( $this->_skin_checkout->path . 'views/basket/index',	$this->data );
-		$this->load->view( 'structure/footer',									$this->data );
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Adds an item to the user's basket (fall back for when JS is not available)
-	 *
-	 * @access	public
-	 * @return	void
-	 *
-	 **/
-	public function add()
-	{
-		$_variant_id	= $this->input->get_post( 'variant_id' );
-		$_quantity		= (int) $this->input->get_post( 'quantity' );
-
-		if ( $this->shop_basket_model->add( $_variant_id, $_quantity ) ) :
-
-			$this->session->set_flashdata( 'success', '<strong>Success!</strong> Item was added to your basket.' );
-
-		else :
-
-			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> there was a problem adding to your basket: ' . $this->shop_basket_model->last_error() );
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		redirect( $this->data['return'] );
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Removes an item from the user's basket (fall back for when JS is not available)
-	 *
-	 * @access	public
-	 * @return	void
-	 *
-	 **/
-	public function remove()
-	{
-		$_variant_id = $this->input->get_post( 'variant_id' );
-
-		if ( $this->shop_basket_model->remove( $_variant_id ) ) :
-
-			$this->session->set_flashdata( 'success', '<strong>Success!</strong> Item was removed from your basket.' );
-
-		else :
-
-			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> there was a problem removing the item from your basket: ' . $this->shop_basket_model->last_error() );
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		redirect( $this->data['return'] );
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Empties a user's basket
-	 *
-	 * @access	public
-	 * @return	void
-	 *
-	 **/
-	public function destroy()
-	{
-		$this->shop_basket_model->destroy();
-
-		// --------------------------------------------------------------------------
-
-		redirect( $this->data['return'] );
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Increment an item in the user's basket (fall back for when JS is not available)
-	 *
-	 * @access	public
-	 * @return	void
-	 *
-	 **/
-	public function increment()
-	{
-		$_variant_id = $this->input->get_post( 'variant_id' );
-
-		if ( $this->shop_basket_model->increment( $_variant_id ) ) :
-
-			$this->session->set_flashdata( 'success', '<strong>Success!</strong> Quantity adjusted!' );
-
-		else :
-
-			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> could not adjust quantity. ' . $this->shop_basket_model->last_error() );
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		redirect( $this->data['return'] );
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Decrement an item in the user's basket (fall back for when JS is not available)
-	 *
-	 * @access	public
-	 * @return	void
-	 *
-	 **/
-	public function decrement()
-	{
-		$_variant_id = $this->input->get_post( 'variant_id' );
-
-		if ( $this->shop_basket_model->decrement( $_variant_id ) ) :
-
-			$this->session->set_flashdata( 'success', '<strong>Success!</strong> Quantity adjusted!' );
-
-		else :
-
-			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> could not adjust quantity. ' . $this->shop_basket_model->last_error() );
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		redirect( $this->data['return'] );
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Validate and add a voucher to a basket
-	 *
-	 * @access	public
-	 * @return	void
-	 *
-	 **/
-	public function add_voucher()
-	{
-		$_voucher = $this->shop_voucher_model->validate( $this->input->get_post( 'voucher' ), get_basket() );
-
-		if ( $_voucher ) :
-
-			//	Validated, add to basket
-			$this->session->set_flashdata( 'success', '<strong>Success!</strong> Voucher has been applied to your basket.' );
-			$this->shop_basket_model->add_voucher( $_voucher->code );
-
-		else :
-
-			//	Failed to validate, feedback
-			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> that voucher is not valid. ' . $this->shop_voucher_model->last_error() );
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		redirect( $this->data['return'] );
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Adds a note to the basket
-	 */
-    public function add_note()
+    public function __construct()
     {
-        $result = $this->shop_basket_model->addNote($this->input->get_post('note'));
+        parent::__construct();
 
-        if ($result) {
+        // --------------------------------------------------------------------------
 
-            $msg    = '<strong>Success!</strong> Note was added to your basket.';
-            $status	= 'success';
+        $return = $this->input->get('return') ? $this->input->get_post('return') : $this->_shop_url . 'basket';
+        $this->data['return'] = $return;
+
+        // --------------------------------------------------------------------------
+
+        //  Load appropriate assets
+        $assets    = !empty($this->_skin_checkout->assets)     ? $this->_skin_checkout->assets     : array();
+        $cssInline = !empty($this->_skin_checkout->css_inline) ? $this->_skin_checkout->css_inline : array();
+        $jsInline  = !empty($this->_skin_checkout->js_inline)  ? $this->_skin_checkout->js_inline  : array();
+
+        $this->_load_skin_assets($assets, $cssInline, $jsInline, $this->_skin_checkout->url);
+    }
+
+
+    // --------------------------------------------------------------------------
+
+
+    /**
+     * Render the user's basket
+     *
+     * @access  public
+     * @return  void
+     *
+     **/
+    public function index()
+    {
+        $this->data['page']->title = $this->_shop_name . ': Your Basket';
+
+        // --------------------------------------------------------------------------
+
+        $this->data['basket'] = $this->shop_basket_model->get();
+
+        if (!empty($this->data['basket']->items_removed) && empty($this->data['message'])) {
+
+            if ($this->data['basket']->items_removed > 1) {
+
+                $this->data['message']  = '<strong>Some items were removed.</strong> ';
+                $this->data['message'] .= $this->data['basket']->items_removed . ' items were removed from your ';
+                $this->data['message'] .= 'basket because they are no longer available.';
+
+            } else {
+
+                $this->data['message']  = '<strong>Some items were removed.</strong> An item was removed from your ';
+                $this->data['message'] .= 'basket because it is no longer available.';
+            }
+        }
+
+        // --------------------------------------------------------------------------
+
+        //  Continue shopping URL
+        //  Skins can render a button which takes the user to a sensible place to keep shopping
+
+        $this->data['continue_shopping_url'] = $this->_shop_url;
+
+        //  Most recently viewed item
+        $recentlyViewed = $this->shop_product_model->get_recently_viewed();
+
+        if (!empty($recentlyViewed)) {
+
+            $productId = end($recentlyViewed);
+            $product   = $this->shop_product_model->get_by_id($productId);
+
+            if ($product && $product->is_active) {
+
+                $this->data['continue_shopping_url'] .= 'product/' . $product->slug;
+            }
+        }
+
+        // --------------------------------------------------------------------------
+
+        //  Other recently viewed items
+        $this->data['recently_viewed'] = array();
+        if (!empty($recentlyViewed)) {
+
+            $this->data['recently_viewed'] = $this->shop_product_model->get_by_ids($recentlyViewed);
+        }
+
+        // --------------------------------------------------------------------------
+
+        //  Abandon any previous orders
+        $this->load->model('shop/shop_payment_gateway_model');
+        $previousOrder = $this->shop_payment_gateway_model->checkout_session_get();
+
+        if ($previousOrder) {
+
+            $this->shop_order_model->abandon($previousOrder);
+            $this->shop_payment_gateway_model->checkout_session_clear();
+        }
+
+        // --------------------------------------------------------------------------
+
+        $this->load->view('structure/header', $this->data);
+        $this->load->view($this->_skin_checkout->path . 'views/basket/index', $this->data);
+        $this->load->view('structure/footer', $this->data);
+    }
+
+
+    // --------------------------------------------------------------------------
+
+
+    /**
+     * Adds an item to the user's basket (fall back for when JS is not available)
+     *
+     * @access  public
+     * @return  void
+     *
+     **/
+    public function add()
+    {
+        $variantId    = $this->input->get_post('variant_id');
+        $quantity      = (int) $this->input->get_post('quantity');
+
+        if ($this->shop_basket_model->add($variantId, $quantity)) {
+
+            $status  = 'success';
+            $message = '<strong>Success!</strong> Item was added to your basket.';
 
         } else {
 
-            $msg    = '<strong>Sorry,</strong> failed to save note.';
-            $status = 'error';
+            $status   = 'error';
+            $message  = '<strong>Sorry,</strong> there was a problem adding to your basket: ';
+            $message .= $this->shop_basket_model->last_error();
+        }
+
+        // --------------------------------------------------------------------------
+
+        $this->session->set_flashdata($status, $message);
+        redirect($this->data['return']);
+    }
+
+
+    // --------------------------------------------------------------------------
+
+
+    /**
+     * Removes an item from the user's basket (fall back for when JS is not available)
+     *
+     * @access  public
+     * @return  void
+     *
+     **/
+    public function remove()
+    {
+        $variantId = $this->input->get_post('variant_id');
+
+        if ($this->shop_basket_model->remove($variantId)) {
+
+            $status  = 'success';
+            $message = '<strong>Success!</strong> Item was removed from your basket.';
+
+        } else {
+
+            $status   = 'error';
+            $message  = '<strong>Sorry,</strong> there was a problem removing the item from your basket: ';
+            $message .= $this->shop_basket_model->last_error();
+        }
+
+        // --------------------------------------------------------------------------
+
+        $this->session->set_flashdata($status, $message);
+        redirect($this->data['return']);
+    }
+
+
+    // --------------------------------------------------------------------------
+
+
+    /**
+     * Empties a user's basket
+     *
+     * @access  public
+     * @return  void
+     *
+     **/
+    public function destroy()
+    {
+        $this->shop_basket_model->destroy();
+        redirect($this->data['return']);
+    }
+
+
+    // --------------------------------------------------------------------------
+
+
+    /**
+     * Increment an item in the user's basket (fall back for when JS is not available)
+     *
+     * @access  public
+     * @return  void
+     *
+     **/
+    public function increment()
+    {
+        $variantId = $this->input->get_post('variant_id');
+
+        if ($this->shop_basket_model->increment($variantId)) {
+
+            $status  = 'success';
+            $message = '<strong>Success!</strong> Quantity adjusted!';
+
+        } else {
+
+            $status  = 'error';
+            $message = '<strong>Sorry,</strong> could not adjust quantity. ' . $this->shop_basket_model->last_error();
+        }
+
+        // --------------------------------------------------------------------------
+
+        $this->session->set_flashdata($status, $message);
+        redirect($this->data['return']);
+    }
+
+
+    // --------------------------------------------------------------------------
+
+
+    /**
+     * Decrement an item in the user's basket (fall back for when JS is not available)
+     *
+     * @access  public
+     * @return  void
+     *
+     **/
+    public function decrement()
+    {
+        $variantId = $this->input->get_post('variant_id');
+
+        if ($this->shop_basket_model->decrement($variantId)) {
+
+            $status  = 'success';
+            $message = '<strong>Success!</strong> Quantity adjusted!';
+
+        } else {
+
+            $status  = 'error';
+            $message = '<strong>Sorry,</strong> could not adjust quantity. ' . $this->shop_basket_model->last_error();
+        }
+
+        // --------------------------------------------------------------------------
+
+        $this->session->set_flashdata($status, $message);
+        redirect($this->data['return']);
+    }
+
+
+    // --------------------------------------------------------------------------
+
+
+    /**
+     * Validate and add a voucher to a basket
+     *
+     * @access  public
+     * @return  void
+     *
+     **/
+    public function add_voucher()
+    {
+        $voucher = $this->shop_voucher_model->validate($this->input->get_post('voucher'), get_basket());
+
+        if ($voucher) {
+
+            //  Validated, add to basket
+            if ($this->shop_basket_model->addVoucher($voucher->code)) {
+
+                $status  = 'success';
+                $message = '<strong>Success!</strong> Voucher has been applied to your basket.';
+
+            } else {
+
+                $status  = 'error';
+                $message = '<Strong>Sorry,</strong> failed to add voucher. ' . $this->shop_basket_model->last_error();
+            }
+
+        } else {
+
+            //  Failed to validate, feedback
+            $status  = 'error';
+            $message = '<strong>Sorry,</strong> that voucher is not valid. ' . $this->shop_voucher_model->last_error();
+        }
+
+        // --------------------------------------------------------------------------
+
+        $this->session->set_flashdata($status, $message);
+        redirect($this->data['return']);
+    }
+
+
+    // --------------------------------------------------------------------------
+
+
+    /**
+     * Remove any associated voucher from the user's basket
+     *
+     * @access  public
+     * @return  void
+     *
+     **/
+    public function remove_voucher()
+    {
+        if ($this->shop_basket_model->remove_voucher()) {
+
+            $status  = 'success';
+            $message = '<strong>Success!</strong> Your voucher was removed.';
+
+        } else {
+
+            $status  = 'error';
+            $message = '<strong>Sorry,</strong> failed to remove voucher. ' . $this->shop_basket_model->last_error();
 
         }
 
         // --------------------------------------------------------------------------
 
-        $this->session->set_flashdata($status,$msg);
+        $this->session->set_flashdata($status, $message);
         redirect($this->data['return']);
     }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	/**
-	 * Remove any associated voucher from the user's basket
-	 *
-	 * @access	public
-	 * @return	void
-	 *
-	 **/
-	public function remove_voucher()
-	{
-		$this->shop_basket_model->remove_voucher();
-		$this->session->set_flashdata( 'success', '<strong>Success!</strong> Your voucher was removed.' );
+    /**
+     * Adds a note to the basket
+     */
+    public function add_note()
+    {
+        if ($this->shop_basket_model->addNote($this->input->get_post('note'))) {
 
-		// --------------------------------------------------------------------------
+            $status  = 'success';
+            $message = '<strong>Success!</strong> Note was added to your basket.';
 
-		redirect( $this->data['return'] );
-	}
+        } else {
+
+            $status  = 'error';
+            $message = '<strong>Sorry,</strong> failed to save note. ' . $this->shop_basket_model->last_error();
+
+        }
+
+        // --------------------------------------------------------------------------
+
+        $this->session->set_flashdata($status, $message);
+        redirect($this->data['return']);
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	/**
-	 * Set the user's preferred currency
-	 *
-	 * @access	public
-	 * @return	void
-	 *
-	 **/
-	public function set_currency()
-	{
-		$_currency = $this->shop_currency_model->get_by_code( $this->input->get_post( 'currency' ) );
+    /**
+     * Set the user's preferred currency
+     *
+     * @access  public
+     * @return  void
+     *
+     **/
+    public function set_currency()
+    {
+        $currency = $this->shop_currency_model->get_by_code($this->input->get_post('currency'));
 
-		if ( $_currency ) :
+        if ($currency) {
 
-			//	Valid currency
-			$this->session->set_userdata( 'shop_currency', $_currency->code );
+            //  Valid currency
+            $this->session->set_userdata('shop_currency', $currency->code);
 
-			if ( $this->user_model->is_logged_in() ) :
+            if ($this->user_model->is_logged_in()) {
 
-				//	Save to the user object
-				$this->user_model->update( active_user( 'id' ), array( 'shop_currency' => $_currency->code ) );
+                //  Save to the user object
+                $this->user_model->update(active_user('id'), array('shop_currency' => $currency->code));
+            }
 
-			endif;
+            $status  = 'success';
+            $message = '<strong>Success!</strong> Your currency has been updated.';
 
-			$this->session->set_flashdata( 'success', '<strong>Success!</strong> Your currency has been updated.' );
+        } else {
 
-		else :
+            //  Failed to validate, feedback
+            $status  = 'error';
+            $message = '<strong>Sorry,</strong> that currency is not supported.';
+        }
 
-			//	Failed to validate, feedback
-			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> that currency is not supported.' );
+        // --------------------------------------------------------------------------
 
-		endif;
+        $this->session->set_flashdata($status, $message);
+        redirect($this->data['return']);
+    }
 
-		// --------------------------------------------------------------------------
 
-		redirect( $this->data['return'] );
-	}
+    // --------------------------------------------------------------------------
+
+
+    public function set_as_collection()
+    {
+        if ($this->shop_basket_model->addShippingType('COLLECT')) {
+
+            $status  = 'success';
+            $message = '<strong>Success!</strong> Your basket was set as a "collection" order.';
+
+        } else {
+
+            $status   = 'error';
+            $message  = '<strong>Sorry,</strong> failed to set your basket as a "collection" order. ';
+            $message .= $this->shop_basket_model->last_error();
+
+        }
+
+        // --------------------------------------------------------------------------
+
+        $this->session->set_flashdata($status, $message);
+        redirect($this->data['return']);
+    }
+
+
+    // --------------------------------------------------------------------------
+
+
+    public function set_as_delivery()
+    {
+        if ($this->shop_basket_model->addShippingType('DELIVER')) {
+
+            $status  = 'success';
+            $message = '<strong>Success!</strong> Your basket was set as a "delivery" order.';
+
+        } else {
+
+            $status   = 'error';
+            $message  = '<strong>Sorry,</strong> failed to set your basket as a "delivery" order. ';
+            $message .= $this->shop_basket_model->last_error();
+
+        }
+
+        // --------------------------------------------------------------------------
+
+        $this->session->set_flashdata($status, $message);
+        redirect($this->data['return']);
+    }
 }
 
 
@@ -420,13 +491,9 @@ class NAILS_Basket extends NAILS_Shop_Controller
  *
  **/
 
-if ( ! defined( 'NAILS_ALLOW_EXTENSION_BASKET' ) ) :
+if (!defined('NAILS_ALLOW_EXTENSION_BASKET')) {
 
-	class Basket extends NAILS_Basket
-	{
-	}
-
-endif;
-
-/* End of file basket.php */
-/* Location: ./modules/shop/controllers/basket.php */
+    class Basket extends NAILS_Basket
+    {
+    }
+}

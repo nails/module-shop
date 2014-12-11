@@ -172,6 +172,30 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
+		//	Does the order require shipping?
+		$_order->delivery_type = $data->basket->shipping->type;
+		if ($data->basket->shipping->type == 'DELIVER') {
+
+			//	Delivery order, check basket for physical items
+			$_order->requires_shipping = false;
+
+			foreach ($data->basket->items as $item) {
+
+				if ($item->product->type->is_physical && !$item->variant->ship_collection_only) {
+
+					$_order->requires_shipping = true;
+					break;
+				}
+			}
+
+		} else {
+
+			//	It's a collection order, do not ship
+			$_order->requires_shipping = false;
+		}
+
+		// --------------------------------------------------------------------------
+
 		//	Set currency and exchange rates
 		$_order->currency		= SHOP_USER_CURRENCY_CODE;
 		$_order->base_currency	= SHOP_BASE_CURRENCY_CODE;
