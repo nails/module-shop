@@ -1122,7 +1122,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 			_LOG( '!! Failed to send download links, alerting developers' );
 			_LOG( implode( "\n", $this->emailer->get_errors() ) );
 
-			send_developer_mail( 'Unable to send download email', 'Unable to send the email with download links to ' . $_email->to_email . '; order: #' . $order->id . "\n\nEmailer errors:\n\n" . print_r( $this->emailer->get_errors(), TRUE ) );
+			sendDeveloperMail('Unable to send download email', 'Unable to send the email with download links to ' . $_email->to_email . '; order: #' . $order->id . "\n\nEmailer errors:\n\n" . print_r($this->emailer->get_errors(), true));
 
 		endif;
 	}
@@ -1179,7 +1179,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 			$_message  = 'Unable to send the customer receipt to ' . $_email->to_email . '; order: #' . $order->id . "\n\n";
 			$_message .= 'Emailer errors:' . "\n\n" . print_r( $_email_errors, TRUE );
 
-			send_developer_mail( $_subject, $_message );
+			sendDeveloperMail($_subject, $_message);
 
 		endif;
 
@@ -1246,7 +1246,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 				$_message  = 'Unable to send the order notification to ' . $email . '; order: #' . $_order->id . "\n\n";
 				$_message .= 'Emailer errors:' . "\n\n" . print_r( $_email_errors, TRUE );
 
-				send_developer_mail( $_subject, $_message );
+				sendDeveloperMail($_subject, $_message);
 
 			endif;
 

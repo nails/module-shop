@@ -1244,7 +1244,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 					$_subject = 'Product missing price for base currency (' . SHOP_BASE_CURRENCY_CODE . ')';
 					$_message = 'Product #' . $product->id . ' does not contain a price for the shop\'s base currency, ' . SHOP_BASE_CURRENCY_CODE . '.';
-					show_fatal_error( $_subject, $_message );
+					showFatalError($_subject, $_message);
 
 				endif;
 
@@ -1252,7 +1252,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 					$_subject = 'Product missing price for currency (' . SHOP_USER_CURRENCY_CODE . ')';
 					$_message = 'Product #' . $product->id . ' does not contain a price for currency, ' . SHOP_USER_CURRENCY_CODE . '.';
-					show_fatal_error( $_subject, $_message );
+					showFatalError($_subject, $_message);
 
 				endif;
 
@@ -1280,7 +1280,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 						if ( ! $_price ) :
 
-							show_fatal_error( 'Failed to convert currency', 'Could not convert from ' . SHOP_BASE_CURRENCY_CODE . ' to ' . SHOP_USER_CURRENCY_CODE . '. ' . $this->shop_currency_model->last_error() );
+							showFatalError('Failed to convert currency', 'Could not convert from ' . SHOP_BASE_CURRENCY_CODE . ' to ' . SHOP_USER_CURRENCY_CODE . '. ' . $this->shop_currency_model->last_error());
 
 						endif;
 
@@ -1297,23 +1297,21 @@ class NAILS_Shop_product_model extends NAILS_Model
 					// --------------------------------------------------------------------------
 
 					//	Sale price, second
-					if ( empty( $_user_price->sale_price ) ) :
+					if ( empty( $_user_price->sale_price ) ) {
 
 						//	The user's sale_price is empty() so we should automatically calculate it from the base price
 						$_sale_price = $this->shop_currency_model->convert_base_to_user( $_base_price->sale_price );
 
-						if ( ! $_price ) :
+						if ( ! $_price ) {
 
-							show_fatal_error( 'Failed to convert currency', 'Could not convert from ' . SHOP_BASE_CURRENCY_CODE . ' to ' . SHOP_USER_CURRENCY_CODE . '. ' . $this->shop_currency_model->last_error() );
+							showFatalError('Failed to convert currency', 'Could not convert from ' . SHOP_BASE_CURRENCY_CODE . ' to ' . SHOP_USER_CURRENCY_CODE . '. ' . $this->shop_currency_model->last_error());
+						}
 
-						endif;
-
-					else :
+					} else {
 
 						//	A sale_price has been explicitly set for this currency, so render it as is
 						$_sale_price = $_user_price->sale_price;
-
-					endif;
+					}
 
 					//	Formatting not for visual purposes but to get value into the proper format
 					$v->price->sale_price->user->value = number_format( $_sale_price, SHOP_USER_CURRENCY_PRECISION, '.', '' );

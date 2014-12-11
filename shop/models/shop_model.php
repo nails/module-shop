@@ -173,7 +173,7 @@ class NAILS_Shop_model extends NAILS_Model
 
 			if ( ! $_base ) :
 
-				show_fatal_error( 'Could not define base currency', 'No base currency was set, so the system fell back to GBP, but could not find that either.' );
+				showFatalError('Could not define base currency', 'No base currency was set, so the system fell back to GBP, but could not find that either.');
 
 			else :
 

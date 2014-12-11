@@ -121,7 +121,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
 			default :
 
-				show_fatal_error( '"' . $skin_tye . '" is not a valid skin type', 'An invalid skin type was attempted on ' . APP_NAME );
+				showFatalError('"' . $skin_tye . '" is not a valid skin type', 'An invalid skin type was attempted on ' . APP_NAME);
 
 			break;
 
@@ -129,7 +129,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
 		if ( ! empty( $_error_subject ) || ! empty( $_error_message ) ) :
 
-			show_fatal_error( $_error_subject, $_error_message );
+			showFatalError($_error_subject, $_error_message);
 
 		endif;
 	}

@@ -384,11 +384,10 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 				//	First, check we've not already handled this payment. This should NOT happen.
 				$_payment = $this->shop_order_payment_model->get_by_transaction_id( $_transaction_id, $_gateway_name );
 
-				if ( $_payment ) :
+				if ( $_payment ) {
 
-					show_fatal_error( 'Transaction already processed.', 'Transaction with id: ' . $_transaction_id . ' has already been processed. Order ID: ' . $_order->id );
-
-				endif;
+					showFatalError('Transaction already processed.', 'Transaction with id: ' . $_transaction_id . ' has already been processed. Order ID: ' . $_order->id);
+				}
 
 				//	Define the payment data
 				$_payment_data						= array();
@@ -412,11 +411,10 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 				$_result = $this->shop_order_payment_model->create( $_data );
 
 				//	Bad news, fall over
-				if ( $_payment ) :
+				if ( $_payment ) {
 
-					show_fatal_error( 'Failed to create payment reference against order ' . $_order->id, 'The customer was charged but the payment failed to associate with the order. ' . $this->shop_order_payment_model->last_error() );
-
-				endif;
+					showFatalError('Failed to create payment reference against order ' . $_order->id, 'The customer was charged but the payment failed to associate with the order. ' . $this->shop_order_payment_model->last_error());
+				}
 
 				// --------------------------------------------------------------------------
 
@@ -425,7 +423,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
 					if ( ! $this->shop_order_model->paid( $_order->id ) ) :
 
-						send_developer_mail( 'Failed to mark order #' . $_order->id . ' as paid', 'The transaction for this order was successfull, but I was unable to mark the order as paid.' );
+						sendDeveloperMail('Failed to mark order #' . $_order->id . ' as paid', 'The transaction for this order was successfull, but I was unable to mark the order as paid.');
 
 					endif;
 
@@ -434,7 +432,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 					//	Process the order, i.e do any after sales stuff which needs done immediately
 					if ( ! $this->shop_order_model->process( $_order->id ) ) :
 
-						send_developer_mail( 'Failed to process order #' . $_order->id . ' as paid', 'The transaction for this order was successfull, but I was unable to processthe order.' );
+						sendDeveloperMail('Failed to process order #' . $_order->id . ' as paid', 'The transaction for this order was successfull, but I was unable to processthe order.');
 
 					endif;
 

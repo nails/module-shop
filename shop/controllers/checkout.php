@@ -617,8 +617,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
 		if (!$skin) {
 
-			show_fatal_error('Failed to load shop skin "' . $skin . '"', 'Shop skin "' . $skin . '" failed to load at ' . APP_NAME . ', the following reason was given: ' . $this->shop_skin_checkout_model->last_error());
-
+			showFatalError('Failed to load shop skin "' . $skin . '"', 'Shop skin "' . $skin . '" failed to load at ' . APP_NAME . ', the following reason was given: ' . $this->shop_skin_checkout_model->last_error());
 		}
 
 		// --------------------------------------------------------------------------
