@@ -127,8 +127,8 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
 		foreach( $_shipping_driver_locations AS $shipping_driver_location ) :
 
-			$_path	= $shipping_driver_location['path'];
-			$_shipping_drivers	= directory_map( $_path, 1 );
+			$_path = $shipping_driver_location['path'];
+			$_shipping_drivers = is_dir($_path) ? directory_map($_path, 1) : array();
 
 			if ( is_array( $_shipping_drivers ) ) :
 
