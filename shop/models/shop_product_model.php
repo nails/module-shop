@@ -56,7 +56,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
-		$this->_destructive_delete = FALSE;
+		$this->_destructive_delete = false;
 
 		// --------------------------------------------------------------------------
 
@@ -76,14 +76,14 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 * @param bool $return_obj Whether to return just the new ID or the full object
 	 * @return mixed
 	 **/
-	public function create( $data = array(), $return_obj = FALSE )
+	public function create( $data = array(), $return_obj = false )
 	{
 		//	Do all we need to do with the incoming data
 		$data = $this->_create_update_prep_data( $data );
 
 		if ( ! $data ) :
 
-			return FALSE;
+			return false;
 
 		endif;
 
@@ -127,7 +127,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 		if ( ! $_current ) :
 
 			$this->_set_error( 'Invalid product ID' );
-			return FALSE;
+			return false;
 
 		endif;
 
@@ -138,7 +138,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 		if ( ! $_data ) :
 
-			return FALSE;
+			return false;
 
 		endif;
 
@@ -152,11 +152,11 @@ class NAILS_Shop_product_model extends NAILS_Model
 		//	Wrap it all up
 		if ( $_id ) :
 
-			return TRUE;
+			return true;
 
 		else :
 
-			return FALSE;
+			return false;
 
 		endif;
 	}
@@ -169,9 +169,9 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 * Prepares data, ready for the DB
 	 * @param  array $data Raw data to use for the update/create
 	 * @param  int   $id   If updating, the ID of the item being updated
-	 * @return mixed stdClass on success, FALSE of failure
+	 * @return mixed stdClass on success, false of failure
 	 */
-	protected function _create_update_prep_data( $data, $id = NULL )
+	protected function _create_update_prep_data( $data, $id = null )
 	{
 		//	Quick check of incoming data
 		$_data = new stdClass();
@@ -179,7 +179,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 		if ( empty( $data['label'] ) ) :
 
 			$this->_set_error( 'Label is a required field.' );
-			return FALSE;
+			return false;
 
 		endif;
 
@@ -188,42 +188,42 @@ class NAILS_Shop_product_model extends NAILS_Model
 		//	Slug
 		//	====
 
-		$_data->slug = $this->_generate_slug( $data['label'], '', '', $this->_table, NULL, $id );
+		$_data->slug = $this->_generate_slug( $data['label'], '', '', $this->_table, null, $id );
 
 		//	Product Info
 		//	============
 
-		$_data->type_id = isset( $data['type_id'] ) ? (int) $data['type_id']	: NULL;
+		$_data->type_id = isset( $data['type_id'] ) ? (int) $data['type_id']	: null;
 
 		if ( ! $_data->type_id ) :
 
 			$this->_set_error( 'Product type must be defined.' );
-			return FALSE;
+			return false;
 
 		endif;
 
-		$_data->label		= isset( $data['label'] )		? trim( $data['label'] )		: NULL;
-		$_data->is_active	= isset( $data['is_active'] )	? (bool) $data['is_active']		: FALSE;
-		$_data->is_deleted	= isset( $data['is_deleted'] )	? (bool) $data['is_deleted']	: FALSE;
+		$_data->label		= isset( $data['label'] )		? trim( $data['label'] )		: null;
+		$_data->is_active	= isset( $data['is_active'] )	? (bool) $data['is_active']		: false;
+		$_data->is_deleted	= isset( $data['is_deleted'] )	? (bool) $data['is_deleted']	: false;
 		$_data->brands		= isset( $data['brands'] )		? $data['brands']				: array();
 		$_data->categories	= isset( $data['categories'] )	? $data['categories']			: array();
 		$_data->tags		= isset( $data['tags'] )		? $data['tags']					: array();
 
 		if ( app_setting( 'enable_external_products', 'shop' ) ) :
 
-			$_data->is_external				= isset( $data['is_external'] )				? (bool) $data['is_external']		: FALSE;
+			$_data->is_external				= isset( $data['is_external'] )				? (bool) $data['is_external']		: false;
 			$_data->external_vendor_label	= isset( $data['external_vendor_label'] )	? $data['external_vendor_label']	: '';
 			$_data->external_vendor_url		= isset( $data['external_vendor_url'] )		? $data['external_vendor_url']		: '';
 
 		endif;
 
-		$_data->tax_rate_id	= isset( $data['tax_rate_id'] ) &&	(int) $data['tax_rate_id']	? (int) $data['tax_rate_id']	: NULL;
+		$_data->tax_rate_id	= isset( $data['tax_rate_id'] ) &&	(int) $data['tax_rate_id']	? (int) $data['tax_rate_id']	: null;
 
 		// --------------------------------------------------------------------------
 
 		//	Description
 		//	===========
-		$_data->description	= isset( $data['description'] ) ? $data['description']	: NULL;
+		$_data->description	= isset( $data['description'] ) ? $data['description']	: null;
 
 		// --------------------------------------------------------------------------
 
@@ -233,7 +233,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 		if ( ! isset( $data['variation'] ) || ! $data['variation'] ) :
 
 			$this->_set_error( 'At least one variation is required.' );
-			return FALSE;
+			return false;
 
 		endif;
 
@@ -243,7 +243,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 		if ( ! $_product_type ) :
 
 			$this->_set_error( 'Invalid Product Type' );
-			return FALSE;
+			return false;
 
 		else :
 
@@ -270,8 +270,8 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 			endif;
 
-			$_data->variation[$index]->label	= isset( $v['label'] )	? $v['label']	: NULL;
-			$_data->variation[$index]->sku		= isset( $v['sku'] )	? $v['sku']		: NULL;
+			$_data->variation[$index]->label	= isset( $v['label'] )	? $v['label']	: null;
+			$_data->variation[$index]->sku		= isset( $v['sku'] )	? $v['sku']		: null;
 
 			$_sku_tracker[] = $_data->variation[$index]->sku;
 
@@ -284,16 +284,16 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 				case 'IN_STOCK' :
 
-					$_data->variation[$index]->quantity_available	= is_numeric( $v['quantity_available'] ) ? (int) $v['quantity_available'] : NULL;
-					$_data->variation[$index]->lead_time			= NULL;
+					$_data->variation[$index]->quantity_available	= is_numeric( $v['quantity_available'] ) ? (int) $v['quantity_available'] : null;
+					$_data->variation[$index]->lead_time			= null;
 
 				break;
 
 				case 'OUT_OF_STOCK' :
 
 					//	Shhh, be vewy qwiet, we're huntin' wabbits.
-					$_data->variation[$index]->quantity_available	= NULL;
-					$_data->variation[$index]->lead_time			= NULL;
+					$_data->variation[$index]->quantity_available	= null;
+					$_data->variation[$index]->lead_time			= null;
 
 				break;
 
@@ -307,8 +307,8 @@ class NAILS_Shop_product_model extends NAILS_Model
 			if ( $_data->variation[$index]->stock_status == 'IN_STOCK' && ! is_null( $_data->variation[$index]->quantity_available ) && $_data->variation[$index]->quantity_available <= 0 ) :
 
 				$_data->variation[$index]->stock_status			= 'OUT_OF_STOCK';
-				$_data->variation[$index]->quantity_available	= NULL;
-				$_data->variation[$index]->lead_time			= NULL;
+				$_data->variation[$index]->quantity_available	= null;
+				$_data->variation[$index]->lead_time			= null;
 
 			endif;
 
@@ -321,14 +321,14 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 				case 'TO_ORDER' :
 
-					$_data->variation[$index]->out_of_stock_to_order_lead_time = isset( $v['out_of_stock_to_order_lead_time'] ) ? $v['out_of_stock_to_order_lead_time'] : NULL;
+					$_data->variation[$index]->out_of_stock_to_order_lead_time = isset( $v['out_of_stock_to_order_lead_time'] ) ? $v['out_of_stock_to_order_lead_time'] : null;
 
 				break;
 
 				case 'OUT_OF_STOCK' :
 
 					//	Shhh, be vewy qwiet, we're huntin' wabbits.
-					$_data->variation[$index]->out_of_stock_to_order_lead_time = NULL;
+					$_data->variation[$index]->out_of_stock_to_order_lead_time = null;
 
 				break;
 
@@ -355,7 +355,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 							if (  $meta->id == $field_id ) :
 
-								$_allow_multiple = TRUE;
+								$_allow_multiple = true;
 								break;
 
 							endif;
@@ -396,24 +396,24 @@ class NAILS_Shop_product_model extends NAILS_Model
 			if ( isset( $v['pricing'] ) ) :
 
 				//	At the very least the base price must be defined
-				$_base_price_set = FALSE;
+				$_base_price_set = false;
 				foreach( $v['pricing'] AS $price_index => $price ) :
 
 					if ( empty( $price['currency'] ) ) :
 
 						$this->_set_error( '"Currency" field is required for all variant prices.' );
-						return FALSE;
+						return false;
 
 					endif;
 
 					$_data->variation[$index]->pricing[$price_index]				= new stdClass();
 					$_data->variation[$index]->pricing[$price_index]->currency		= $price['currency'];
-					$_data->variation[$index]->pricing[$price_index]->price			= ! empty( $price['price'] )		? (float) $price['price']		: NULL;
-					$_data->variation[$index]->pricing[$price_index]->sale_price	= ! empty( $price['sale_price'] )	? (float) $price['sale_price']	: NULL;
+					$_data->variation[$index]->pricing[$price_index]->price			= ! empty( $price['price'] )		? (float) $price['price']		: null;
+					$_data->variation[$index]->pricing[$price_index]->sale_price	= ! empty( $price['sale_price'] )	? (float) $price['sale_price']	: null;
 
 					if ( $price['currency'] == SHOP_BASE_CURRENCY_CODE ) :
 
-						$_base_price_set = TRUE;
+						$_base_price_set = true;
 
 					endif;
 
@@ -422,7 +422,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 				if ( ! $_base_price_set ) :
 
 					$this->_set_error( 'The ' . SHOP_BASE_CURRENCY_CODE . ' price must be set for all variants.' );
-					return FALSE;
+					return false;
 
 				endif;
 
@@ -455,13 +455,13 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 			if ( $_product_type->is_physical ) :
 
-				$_data->variation[$index]->shipping->collection_only	= isset( $v['shipping']['collection_only'] ) ? (bool) $v['shipping']['collection_only'] : FALSE;
-				$_data->variation[$index]->shipping->driver_data		= isset( $v['shipping']['driver_data'] ) ? $v['shipping']['driver_data'] : NULL;
+				$_data->variation[$index]->shipping->collection_only	= isset( $v['shipping']['collection_only'] ) ? (bool) $v['shipping']['collection_only'] : false;
+				$_data->variation[$index]->shipping->driver_data		= isset( $v['shipping']['driver_data'] ) ? $v['shipping']['driver_data'] : null;
 
 			else :
 
-				$_data->variation[$index]->shipping->collection_only	= FALSE;
-				$_data->variation[$index]->shipping->driver_data		= NULL;
+				$_data->variation[$index]->shipping->collection_only	= false;
+				$_data->variation[$index]->shipping->driver_data		= null;
 
 			endif;
 
@@ -477,7 +477,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 			//	should be the same, if not then it'll vary.
 
 			$this->_set_error( 'All variations which have defined SKUs must be unique.' );
-			return FALSE;
+			return false;
 
 		endif;
 
@@ -500,9 +500,14 @@ class NAILS_Shop_product_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	SEO
-		$_data->seo_title		= isset( $data['seo_title'] )		? $data['seo_title']		: NULL;
-		$_data->seo_description	= isset( $data['seo_description'] )	? $data['seo_description']	: NULL;
-		$_data->seo_keywords	= isset( $data['seo_keywords'] )	? $data['seo_keywords']		: NULL;
+		$_data->seo_title		= isset( $data['seo_title'] )		? $data['seo_title']		: null;
+		$_data->seo_description	= isset( $data['seo_description'] )	? $data['seo_description']	: null;
+		$_data->seo_keywords	= isset( $data['seo_keywords'] )	? $data['seo_keywords']		: null;
+
+		// --------------------------------------------------------------------------
+
+		//	Published date
+		$_data->published = isset($data['published']) ? user_mysql_rdatetime($data['published']) : null;
 
 		// --------------------------------------------------------------------------
 
@@ -516,7 +521,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 	/**
 	 * Actually executes the DB Call
 	 * @param  stdClass $data The object returned from _create_update_prep_data();
-	 * @return mixed    ID (int) on success, FALSE on failure
+	 * @return mixed    ID (int) on success, false on failure
 	 */
 	protected function _create_update_execute( $data )
 	{
@@ -531,7 +536,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 		else :
 
-			$_current = FALSE;
+			$_current = false;
 
 		endif;
 
@@ -544,7 +549,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 		//	Start the transaction, safety first!
 		$this->db->trans_begin();
-		$_rollback = FALSE;
+		$_rollback = false;
 
 		//	Add the product
 		$this->db->set( 'slug',				$data->slug );
@@ -557,6 +562,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 		$this->db->set( 'tax_rate_id',		$data->tax_rate_id );
 		$this->db->set( 'is_active',		$data->is_active );
 		$this->db->set( 'is_deleted',		$data->is_deleted );
+		$this->db->set( 'published',		$data->published );
 
 		if ( app_setting( 'enable_external_products', 'shop' ) ) :
 
@@ -568,7 +574,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 		if ( empty( $data->id ) ) :
 
-			$this->db->set( 'created',			'NOW()', FALSE );
+			$this->db->set( 'created',			'NOW()', false );
 
 			if ( $this->user_model->is_logged_in() ) :
 
@@ -578,7 +584,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 		endif;
 
-		$this->db->set( 'modified',			'NOW()', FALSE );
+		$this->db->set( 'modified',			'NOW()', false );
 
 		if ( $this->user_model->is_logged_in() ) :
 
@@ -625,7 +631,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 				if ( ! $this->db->delete( $_table ) ) :
 
 					$this->_set_error( 'Failed to clear old product ' . $_type . '.' );
-					$_rollback = TRUE;
+					$_rollback = true;
 					break;
 
 				endif;
@@ -672,7 +678,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 					if ( ! $this->db->insert_batch( $_table, $_temp ) ) :
 
 						$this->_set_error( 'Failed to add product ' . $_type . '.' );
-						$_rollback = TRUE;
+						$_rollback = true;
 
 					endif;
 
@@ -794,7 +800,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 						if ( ! $this->db->delete( $this->_table_variation_gallery ) ) :
 
 							$this->_set_error( 'Failed to clear gallery items for variant with label "' . $v->label . '"' );
-							$_rollback = TRUE;
+							$_rollback = true;
 
 						endif;
 
@@ -815,7 +821,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 								if ( ! $this->db->insert_batch( $this->_table_variation_gallery, $_temp ) ) :
 
 									$this->_set_error( 'Failed to update gallery items variant with label "' . $v->label . '"' );
-									$_rollback = TRUE;
+									$_rollback = true;
 
 								endif;
 
@@ -840,7 +846,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 							if ( ! $this->db->delete( $this->_table_variation_product_type_meta ) ) :
 
 								$this->_set_error( 'Failed to clear meta data for variant with label "' . $v->label . '"' );
-								$_rollback = TRUE;
+								$_rollback = true;
 
 							endif;
 
@@ -849,7 +855,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 								if ( ! $this->db->insert_batch( $this->_table_variation_product_type_meta, $v->meta ) ) :
 
 									$this->_set_error( 'Failed to update meta data for variant with label "' . $v->label . '"' );
-									$_rollback = TRUE;
+									$_rollback = true;
 
 								endif;
 
@@ -867,7 +873,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 							if ( ! $this->db->delete( $this->_table_variation_price ) ) :
 
 								$this->_set_error( 'Failed to clear price data for variant with label "' . $v->label . '"' );
-								$_rollback = TRUE;
+								$_rollback = true;
 
 							endif;
 
@@ -887,7 +893,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 									if ( ! $this->db->insert_batch( $this->_table_variation_price, $v->pricing ) ) :
 
 										$this->_set_error( 'Failed to update price data for variant with label "' . $v->label . '"' );
-										$_rollback = TRUE;
+										$_rollback = true;
 
 									endif;
 
@@ -900,7 +906,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 					else :
 
 						$this->_set_error( 'Unable to ' . $_action . ' variation with label "' . $v->label . '".' );
-						$_rollback = TRUE;
+						$_rollback = true;
 						break;
 
 					endif;
@@ -912,14 +918,14 @@ class NAILS_Shop_product_model extends NAILS_Model
 				//	Mark all untouched variants as deleted
 				if ( ! $_rollback ) :
 
-					$this->db->set( 'is_deleted', TRUE );
+					$this->db->set( 'is_deleted', true );
 					$this->db->where( 'product_id', $data->id );
 					$this->db->where_not_in( 'id', $_variant_id_tracker );
 
 					if ( ! $this->db->update( $this->_table_variation ) ) :
 
 						$this->_set_error( 'Unable to delete old variations.' );
-						$_rollback = TRUE;
+						$_rollback = true;
 
 					endif;
 
@@ -930,7 +936,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 		else :
 
 			$this->_set_error( 'Failed to ' . $_action . ' base product.' );
-			$_rollback = TRUE;
+			$_rollback = true;
 
 		endif;
 
@@ -938,10 +944,10 @@ class NAILS_Shop_product_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Wrap it all up
-		if ( $this->db->trans_status() === FALSE || $_rollback ) :
+		if ( $this->db->trans_status() === false || $_rollback ) :
 
 			$this->db->trans_rollback();
-			return FALSE;
+			return false;
 
 		else :
 
@@ -954,7 +960,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 			$this->db->select( 'id' );
 			$this->db->where( 'product_id', $data->id );
-			$this->db->where( 'is_deleted', FALSE );
+			$this->db->where( 'is_deleted', false );
 			$this->db->where( 'stock_status', 'IN_STOCK' );
 			$this->db->where( '(quantity_available IS NULL OR quantity_available > 0)' );
 			$_variants_available_raw = $this->db->get( $this->_table_variation	 )->result();
@@ -998,7 +1004,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 **/
 	public function delete( $id )
 	{
-		return parent::update( $id, array( 'is_deleted' => TRUE ) );
+		return parent::update( $id, array( 'is_deleted' => true ) );
 	}
 
 
@@ -1014,7 +1020,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 **/
 	public function restore( $id )
 	{
-		return parent::update( $id, array( 'is_deleted' => FALSE ) );
+		return parent::update( $id, array( 'is_deleted' => false ) );
 	}
 
 
@@ -1024,14 +1030,14 @@ class NAILS_Shop_product_model extends NAILS_Model
 	/**
 	 * Fetches all products
 	 * @access public
-	 * @param int $page The page number of the results, if NULL then no pagination
+	 * @param int $page The page number of the results, if null then no pagination
 	 * @param int $per_page How many items per page of paginated results
 	 * @param mixed $data Any data to pass to _getcount_common()
 	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
 	 * @param string $_caller Internal flag to pass to _getcount_common(), contains the calling method
 	 * @return array
 	 **/
-	public function get_all( $page = NULL, $per_page = NULL, $data = array(), $include_deleted = FALSE, $_caller = 'GET_ALL' )
+	public function get_all( $page = null, $per_page = null, $data = array(), $include_deleted = false, $_caller = 'GET_ALL' )
 	{
 	    $this->load->model('shop/shop_category_model');
 
@@ -1101,7 +1107,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 			else :
 
-				$product->featured_img = NULL;
+				$product->featured_img = null;
 
 			endif;
 
@@ -1125,7 +1131,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 			$this->db->where( 'pv.product_id', $product->id );
 			if ( empty( $data['include_deleted_variants'] ) ) :
 
-				$this->db->where( 'pv.is_deleted', FALSE );
+				$this->db->where( 'pv.is_deleted', false );
 
 			endif;
 			$this->db->order_by( 'pv.order' );
@@ -1195,7 +1201,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 				else :
 
-					$v->featured_img = NULL;
+					$v->featured_img = null;
 
 				endif;
 
@@ -1237,8 +1243,8 @@ class NAILS_Shop_product_model extends NAILS_Model
 				//	And an exact clone for the sale price
 				$v->price->sale_price = unserialize( serialize( $v->price->price ) );
 
-				$_base_price = isset( $v->price_raw->{SHOP_BASE_CURRENCY_CODE} ) ? $v->price_raw->{SHOP_BASE_CURRENCY_CODE} : NULL;
-				$_user_price = isset( $v->price_raw->{SHOP_USER_CURRENCY_CODE} ) ? $v->price_raw->{SHOP_USER_CURRENCY_CODE} : NULL;
+				$_base_price = isset( $v->price_raw->{SHOP_BASE_CURRENCY_CODE} ) ? $v->price_raw->{SHOP_BASE_CURRENCY_CODE} : null;
+				$_user_price = isset( $v->price_raw->{SHOP_USER_CURRENCY_CODE} ) ? $v->price_raw->{SHOP_USER_CURRENCY_CODE} : null;
 
 				if ( empty( $_base_price )  ) :
 
@@ -1473,21 +1479,21 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 					$product->price->user = new stdClass();
 
-					$product->price->user->max_price			= NULL;
-					$product->price->user->max_price_inc_tax	= NULL;
-					$product->price->user->max_price_ex_tax		= NULL;
+					$product->price->user->max_price			= null;
+					$product->price->user->max_price_inc_tax	= null;
+					$product->price->user->max_price_ex_tax		= null;
 
-					$product->price->user->min_price			= NULL;
-					$product->price->user->min_price_inc_tax	= NULL;
-					$product->price->user->min_price_ex_tax		= NULL;
+					$product->price->user->min_price			= null;
+					$product->price->user->min_price_inc_tax	= null;
+					$product->price->user->min_price_ex_tax		= null;
 
-					$product->price->user->max_sale_price			= NULL;
-					$product->price->user->max_sale_price_inc_tax	= NULL;
-					$product->price->user->max_sale_price_ex_tax	= NULL;
+					$product->price->user->max_sale_price			= null;
+					$product->price->user->max_sale_price_inc_tax	= null;
+					$product->price->user->max_sale_price_ex_tax	= null;
 
-					$product->price->user->min_sale_price			= NULL;
-					$product->price->user->min_sale_price_inc_tax	= NULL;
-					$product->price->user->min_sale_price_ex_tax	= NULL;
+					$product->price->user->min_sale_price			= null;
+					$product->price->user->min_sale_price_inc_tax	= null;
+					$product->price->user->min_sale_price_ex_tax	= null;
 
 				endif;
 
@@ -1495,21 +1501,21 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 					$product->price->user_formatted = new stdClass();
 
-					$product->price->user_formatted->max_price			= NULL;
-					$product->price->user_formatted->max_price_inc_tax	= NULL;
-					$product->price->user_formatted->max_price_ex_tax		= NULL;
+					$product->price->user_formatted->max_price			= null;
+					$product->price->user_formatted->max_price_inc_tax	= null;
+					$product->price->user_formatted->max_price_ex_tax		= null;
 
-					$product->price->user_formatted->min_price			= NULL;
-					$product->price->user_formatted->min_price_inc_tax	= NULL;
-					$product->price->user_formatted->min_price_ex_tax	= NULL;
+					$product->price->user_formatted->min_price			= null;
+					$product->price->user_formatted->min_price_inc_tax	= null;
+					$product->price->user_formatted->min_price_ex_tax	= null;
 
-					$product->price->user_formatted->max_sale_price			= NULL;
-					$product->price->user_formatted->max_sale_price_inc_tax	= NULL;
-					$product->price->user_formatted->max_sale_price_ex_tax	= NULL;
+					$product->price->user_formatted->max_sale_price			= null;
+					$product->price->user_formatted->max_sale_price_inc_tax	= null;
+					$product->price->user_formatted->max_sale_price_ex_tax	= null;
 
-					$product->price->user_formatted->min_sale_price			= NULL;
-					$product->price->user_formatted->min_sale_price_inc_tax	= NULL;
-					$product->price->user_formatted->min_sale_price_ex_tax	= NULL;
+					$product->price->user_formatted->min_sale_price			= null;
+					$product->price->user_formatted->min_sale_price_inc_tax	= null;
+					$product->price->user_formatted->min_sale_price_ex_tax	= null;
 
 				endif;
 
@@ -1604,8 +1610,8 @@ class NAILS_Shop_product_model extends NAILS_Model
 		$this->db->select( 'p.id p_id, v.id v_id, p.label p_label, v.label v_label, v.sku' );
 		$this->db->join( $this->_table . ' p', 'v.product_id = p.id' );
 		$this->db->order_by( 'p.label' );
-		$this->db->where( 'v.is_deleted', FALSE );
-		$this->db->where( 'p.is_deleted', FALSE );
+		$this->db->where( 'v.is_deleted', false );
+		$this->db->where( 'p.is_deleted', false );
 		$_items = $this->db->get( $this->_table_variation . ' v' )->result();
 
 		$_out = array();
@@ -1631,13 +1637,13 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 * Fetches an item by it's ID; overriding to specify the `include_inactive` flag by default
 	 * @param  int   $id   The ID of the product to fetch
 	 * @param  array $data An array of mutation options
-	 * @return mixed       FALSE on failre, stdClass on success
+	 * @return mixed       false on failre, stdClass on success
 	 */
 	public function get_by_id( $id, $data = array() )
 	{
 		if ( ! isset( $data['include_inactive'] ) ) :
 
-			$data['include_inactive'] = TRUE;
+			$data['include_inactive'] = true;
 
 		endif;
 
@@ -1658,7 +1664,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 	{
 		if ( ! isset( $data['include_inactive'] ) ) :
 
-			$data['include_inactive'] = TRUE;
+			$data['include_inactive'] = true;
 
 		endif;
 
@@ -1673,13 +1679,13 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 * Fetches an item by it's slug; overriding to specify the `include_inactive` flag by default
 	 * @param  string $slug The Slug of the product to fetch
 	 * @param  array  $data An array of mutation options
-	 * @return mixed        FALSE on failre, stdClass on success
+	 * @return mixed        false on failre, stdClass on success
 	 */
 	public function get_by_slug( $slug, $data = array() )
 	{
 		if ( ! isset( $data['include_inactive'] ) ) :
 
-			$data['include_inactive'] = TRUE;
+			$data['include_inactive'] = true;
 
 		endif;
 
@@ -1700,7 +1706,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 	{
 		if ( ! isset( $data['include_inactive'] ) ) :
 
-			$data['include_inactive'] = TRUE;
+			$data['include_inactive'] = true;
 
 		endif;
 
@@ -1715,7 +1721,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 	{
 		$this->db->select( 'product_id' );
 		$this->db->where( 'id', $variant_id );
-		$this->db->where( 'is_deleted', FALSE );
+		$this->db->where( 'is_deleted', false );
 		$_variant = $this->db->get( $this->_table_variation )->row();
 
 		if ( $_variant ) :
@@ -1724,7 +1730,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 		else :
 
-			return FALSE;
+			return false;
 
 		endif;
 	}
@@ -1741,7 +1747,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 * @param string $_caller The name of the calling method
 	 * @return void
 	 **/
-	protected function _getcount_common( $data = array(), $_caller = NULL )
+	protected function _getcount_common( $data = array(), $_caller = null )
 	{
 		/**
 		 * If we're sorting on price then some magic needs to happen ahead
@@ -1824,7 +1830,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 		//	Unless told otherwise, only return active items
 		if ( empty( $data['include_inactive'] ) ) :
 
-			$this->db->where( $this->_table_prefix . '.is_active', TRUE );
+			$this->db->where( $this->_table_prefix . '.is_active', true );
 
 		endif;
 
@@ -2054,13 +2060,13 @@ class NAILS_Shop_product_model extends NAILS_Model
 	/**
 	 * Fetches all products which feature a particular brand
 	 * @access public
-	 * @param int $page The page number of the results, if NULL then no pagination
+	 * @param int $page The page number of the results, if null then no pagination
 	 * @param int $per_page How many items per page of paginated results
 	 * @param mixed $data Any data to pass to _getcount_common()
 	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
 	 * @return array
 	 **/
-	public function get_for_brand( $brand_id, $page = NULL, $per_page = NULL, $data = array(), $include_deleted = FALSE )
+	public function get_for_brand( $brand_id, $page = null, $per_page = null, $data = array(), $include_deleted = false )
 	{
 		$data['brand_id'] = $brand_id;
 		return $this->get_all( $page, $per_page, $data, $include_deleted, 'GET_FOR_BRAND' );
@@ -2077,7 +2083,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
 	 * @return array
 	 **/
-	public function count_for_brand( $brand_id, $data = array(), $include_deleted = FALSE )
+	public function count_for_brand( $brand_id, $data = array(), $include_deleted = false )
 	{
 		$data['brand_id'] = $brand_id;
 		return $this->count_all( $data, $include_deleted, 'COUNT_FOR_BRAND' );
@@ -2090,13 +2096,13 @@ class NAILS_Shop_product_model extends NAILS_Model
 	/**
 	 * Fetches all products which feature a particular category
 	 * @access public
-	 * @param int $page The page number of the results, if NULL then no pagination
+	 * @param int $page The page number of the results, if null then no pagination
 	 * @param int $per_page How many items per page of paginated results
 	 * @param mixed $data Any data to pass to _getcount_common()
 	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
 	 * @return array
 	 **/
-	public function get_for_category( $category_id, $page = NULL, $per_page = NULL, $data = array(), $include_deleted = FALSE )
+	public function get_for_category( $category_id, $page = null, $per_page = null, $data = array(), $include_deleted = false )
 	{
 		//	Fetch this category's children also
 		$this->load->model( 'shop/shop_category_model' );
@@ -2115,7 +2121,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
 	 * @return array
 	 **/
-	public function count_for_category( $category_id, $data = array(), $include_deleted = FALSE )
+	public function count_for_category( $category_id, $data = array(), $include_deleted = false )
 	{
 		//	Fetch this category's children also
 		$this->load->model( 'shop/shop_category_model' );
@@ -2130,13 +2136,13 @@ class NAILS_Shop_product_model extends NAILS_Model
 	/**
 	 * Fetches all products which feature a particular collection
 	 * @access public
-	 * @param int $page The page number of the results, if NULL then no pagination
+	 * @param int $page The page number of the results, if null then no pagination
 	 * @param int $per_page How many items per page of paginated results
 	 * @param mixed $data Any data to pass to _getcount_common()
 	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
 	 * @return array
 	 **/
-	public function get_for_collection( $collection_id, $page = NULL, $per_page = NULL, $data = array(), $include_deleted = FALSE )
+	public function get_for_collection( $collection_id, $page = null, $per_page = null, $data = array(), $include_deleted = false )
 	{
 		$data['collection_id'] = $collection_id;
 		return $this->get_all( $page, $per_page, $data, $include_deleted, 'GET_FOR_COLLECTION' );
@@ -2153,7 +2159,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
 	 * @return array
 	 **/
-	public function count_for_collection( $collection_id, $data = array(), $include_deleted = FALSE )
+	public function count_for_collection( $collection_id, $data = array(), $include_deleted = false )
 	{
 		$data['collection_id'] = $collection_id;
 		return $this->count_all( $data, $include_deleted, 'COUNT_FOR_COLLECTION' );
@@ -2166,13 +2172,13 @@ class NAILS_Shop_product_model extends NAILS_Model
 	/**
 	 * Fetches all products which feature a particular range
 	 * @access public
-	 * @param int $page The page number of the results, if NULL then no pagination
+	 * @param int $page The page number of the results, if null then no pagination
 	 * @param int $per_page How many items per page of paginated results
 	 * @param mixed $data Any data to pass to _getcount_common()
 	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
 	 * @return array
 	 **/
-	public function get_for_range( $range_id, $page = NULL, $per_page = NULL, $data = array(), $include_deleted = FALSE )
+	public function get_for_range( $range_id, $page = null, $per_page = null, $data = array(), $include_deleted = false )
 	{
 		$data['range_id'] = $range_id;
 		return $this->get_all( $page, $per_page, $data, $include_deleted, 'GET_FOR_RANGE' );
@@ -2189,7 +2195,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
 	 * @return array
 	 **/
-	public function count_for_range( $range_id, $data = array(), $include_deleted = FALSE )
+	public function count_for_range( $range_id, $data = array(), $include_deleted = false )
 	{
 		$data['range_id'] = $range_id;
 		return $this->count_all( $data, $include_deleted, 'COUNT_FOR_RANGE' );
@@ -2202,13 +2208,13 @@ class NAILS_Shop_product_model extends NAILS_Model
 	/**
 	 * Fetches all products which feature a particular sale
 	 * @access public
-	 * @param int $page The page number of the results, if NULL then no pagination
+	 * @param int $page The page number of the results, if null then no pagination
 	 * @param int $per_page How many items per page of paginated results
 	 * @param mixed $data Any data to pass to _getcount_common()
 	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
 	 * @return array
 	 **/
-	public function get_for_sale( $sale_id, $page = NULL, $per_page = NULL, $data = array(), $include_deleted = FALSE )
+	public function get_for_sale( $sale_id, $page = null, $per_page = null, $data = array(), $include_deleted = false )
 	{
 		$data['sale_id'] = $sale_id;
 		return $this->get_all( $page, $per_page, $data, $include_deleted, 'GET_FOR_SALE' );
@@ -2225,7 +2231,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
 	 * @return array
 	 **/
-	public function count_for_sale( $sale_id, $data = array(), $include_deleted = FALSE )
+	public function count_for_sale( $sale_id, $data = array(), $include_deleted = false )
 	{
 		$data['sale_id'] = $sale_id;
 		return $this->count_all( $data, $include_deleted, 'COUNT_FOR_SALE' );
@@ -2238,13 +2244,13 @@ class NAILS_Shop_product_model extends NAILS_Model
 	/**
 	 * Fetches all products which feature a particular tag
 	 * @access public
-	 * @param int $page The page number of the results, if NULL then no pagination
+	 * @param int $page The page number of the results, if null then no pagination
 	 * @param int $per_page How many items per page of paginated results
 	 * @param mixed $data Any data to pass to _getcount_common()
 	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
 	 * @return array
 	 **/
-	public function get_for_tag( $tag_id, $page = NULL, $per_page = NULL, $data = array(), $include_deleted = FALSE )
+	public function get_for_tag( $tag_id, $page = null, $per_page = null, $data = array(), $include_deleted = false )
 	{
 		$data['tag_id'] = $tag_id;
 		return $this->get_all( $page, $per_page, $data, $include_deleted, 'GET_FOR_TAG' );
@@ -2261,7 +2267,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 	 * @param bool $include_deleted If non-destructive delete is enabled then this flag allows you to include deleted items
 	 * @return array
 	 **/
-	public function count_for_tag( $tag_id, $data = array(), $include_deleted = FALSE )
+	public function count_for_tag( $tag_id, $data = array(), $include_deleted = false )
 	{
 		$data['tag_id'] = $tag_id;
 		return $this->count_all( $data, $include_deleted, 'COUNT_FOR_TAG' );
@@ -2426,7 +2432,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 		//	If this product is already there, remove it
 		$_search = array_search( $product_id, $_recently_viewed );
-		if ( $_search !== FALSE ) :
+		if ( $_search !== false ) :
 
 			unset( $_recently_viewed[$_search] );
 
@@ -2508,8 +2514,8 @@ class NAILS_Shop_product_model extends NAILS_Model
 		 */
 
 		//	Fetch the products in the result set
-		$data['_do_not_select']		= TRUE;
-		$data['_ignore_filters']	= TRUE;
+		$data['_do_not_select']		= true;
+		$data['_ignore_filters']	= true;
 		$this->_getcount_common( $data, 'GET_FILTERS_FOR_PRODUCTS' );
 		$this->db->select( 'p.id, p.type_id' );
 		$_product_ids_raw	= $this->db->get( $_table )->result();
@@ -2716,7 +2722,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 		$variation->product_id			= (int) $variation->product_id;
 		$variation->order				= (int) $variation->order;
 		$variation->is_deleted			= (bool) $variation->is_deleted;
-		$variation->quantity_available	= is_numeric( $variation->quantity_available ) ? (int) $variation->quantity_available : NULL;
+		$variation->quantity_available	= is_numeric( $variation->quantity_available ) ? (int) $variation->quantity_available : null;
 
 		//	Gallery
 		if ( ! empty( $variation->gallery ) && is_array( $variation->gallery ) ) :

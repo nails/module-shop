@@ -133,9 +133,10 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Configure Conditionals and Sorting
 		//	==================================
 
-		$_data			= array();
-		$_data['where']	= array();
-		$_data['sort']	= $this->_product_sort->sort_on;
+		$_data            = array();
+		$_data['where']   = array();
+		$_data['where'][] = array('column' => 'p.published <=', 'value' => 'NOW()', 'escape' => false);
+		$_data['sort']    = $this->_product_sort->sort_on;
 
 		// --------------------------------------------------------------------------
 
