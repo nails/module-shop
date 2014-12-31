@@ -59,11 +59,26 @@ class NAILS_Shop extends NAILS_Shop_Controller
 		//	Sanitise/translate
 		switch ( $this->_product_sort->sort ) :
 
-			case 'price-high-low' :	$this->_product_sort->sort_on = 'PRICE.DESC';															break;
-			case 'price-low-high' :	$this->_product_sort->sort_on = 'PRICE.ASC';															break;
-			case 'a-z' :			$this->_product_sort->sort_on = $this->shop_product_model->get_property_table_prefix() . '.label';		break;
+			case 'price-high-low' :
+
+				$this->_product_sort->sort_on = 'PRICE.DESC';
+				break;
+
+			case 'price-low-high' :
+
+				$this->_product_sort->sort_on = 'PRICE.ASC';
+				break;
+
+			case 'a-z' :
+
+				$this->_product_sort->sort_on = $this->shop_product_model->get_property_table_prefix() . '.label';
+				break;
+
 			case 'recent' :
-			default :				$this->_product_sort->sort_on =  $this->shop_product_model->get_property_table_prefix() . '.created';	break;
+			default :
+
+				$this->_product_sort->sort_on =  'CREATED.DESC';
+				break;
 
 		endswitch;
 

@@ -1750,16 +1750,20 @@ class NAILS_Shop_product_model extends NAILS_Model
 	protected function _getcount_common( $data = array(), $_caller = null )
 	{
 		/**
-		 * If we're sorting on price then some magic needs to happen ahead
+		 * If we're sorting on price or recently added then some magic needs to happen ahead
 		 * of calling _getcount_common();
 		 */
 
-		if ( isset( $data['sort'] ) && ( $data['sort'] == 'PRICE.ASC' || $data['sort'] == 'PRICE.DESC' ) ):
+		$customSortStrings   = array();
+		$customSortStrings[] = 'PRICE.ASC';
+		$customSortStrings[] = 'PRICE.DESC';
+		$customSortStrings[] = 'CREATED.DESC';
 
-			$_sort_on_price = explode( '.', $data['sort'] );
-			unset( $data['sort'] );
+		if (isset($data['sort']) && in_array($data['sort'], $customSortStrings)) {
 
-		endif;
+			$customSort = explode('.', $data['sort']);
+			unset($data['sort']);
+		}
 
 		// --------------------------------------------------------------------------
 
@@ -1794,15 +1798,18 @@ class NAILS_Shop_product_model extends NAILS_Model
 		$this->db->join( $this->_table_tax_rate . ' tr', 'p.tax_rate_id = tr.id', 'LEFT' );
 
 		//	Default sort
-		if ( empty( $_sort_on_price ) && empty( $data['sort'] ) ) :
+		if (empty($customSort) && empty($data['sort'])) {
 
 			$this->db->order_by( $this->_table_prefix . '.label' );
 
-		elseif ( ! empty( $_sort_on_price ) ) :
+		} elseif (!empty($customSort) && $customSort[0] === 'PRICE') {
 
-			$this->db->order_by( '(SELECT MIN(`price`) FROM `' . $this->_table_variation_price . '` vp WHERE vp.product_id = p.id )', $_sort_on_price[1] );
+			$this->db->order_by('(SELECT MIN(`price`) FROM `' . $this->_table_variation_price . '` vp WHERE vp.product_id = p.id )', $customSort[1]);
 
-		endif;
+		} elseif (!empty($customSort) && $customSort[0] === 'CREATED') {
+
+			$this->db->order_by('p.created', 'DESC');
+		}
 
 		//	Search
 		if ( ! empty( $data['search'] ) ) :
