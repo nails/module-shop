@@ -748,7 +748,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 					endif;
 
-					$_enabled_driver = $this->shop_shipping_driver_model->get_enabled();
+					$_enabled_driver = $this->shop_shipping_driver_model->getEnabled();
 
 					if ( $_enabled_driver ) :
 
