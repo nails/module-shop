@@ -2648,6 +2648,20 @@ class NAILS_Shop_product_model extends NAILS_Model
 	// --------------------------------------------------------------------------
 
 	/**
+	 * Shortcut to get filters for search result
+	 * @param  int    $tagId The ID of the tag
+	 * @param  array  $data   A data array to pass to get_all
+	 * @return array
+	 */
+	public function getFiltersForProductsInSearch($search, $data = array())
+	{
+		$data['search'] = $search;
+		return $this->getFiltersForProducts($data);
+	}
+
+	// --------------------------------------------------------------------------
+
+	/**
 	 * Formats a variation object
 	 * @param  stdClass $variation The variation object to format
 	 * @return void

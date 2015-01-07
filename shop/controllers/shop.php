@@ -1190,7 +1190,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Sidebar Filters
         //  ===============
 
-        $this->data['sidebar_filters'] = $this->shop_product_model->getFiltersForProducts_in_search(
+        $this->data['sidebar_filters'] = $this->shop_product_model->getFiltersForProductsInSearch(
             $data['search'],
             $data
         );
