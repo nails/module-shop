@@ -1,191 +1,170 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-
-/**
- * Name:		NALS_SHOP_Controller
- *
- * Description:	This controller executes various bits of common Shop functionality
- *
- **/
-
+<?php
 
 class NAILS_Shop_Controller extends NAILS_Controller
 {
-	protected $_skin_front;
-	protected $_skin_checkout;
+    protected $_shop_name;
+    protected $_shop_url;
+    protected $_skin_front;
+    protected $_skin_checkout;
 
+    // --------------------------------------------------------------------------
 
-	// --------------------------------------------------------------------------
+    public function __construct()
+    {
+        parent::__construct();
 
+        // --------------------------------------------------------------------------
 
-	public function __construct()
-	{
-		parent::__construct();
+        //  Check this module is enabled in settings
+        if (!module_is_enabled('shop')) {
 
-		// --------------------------------------------------------------------------
+            //  Cancel execution, module isn't enabled
+            show_404();
+        }
 
-		//	Check this module is enabled in settings
-		if ( ! module_is_enabled( 'shop' ) ) :
+        // --------------------------------------------------------------------------
 
-			//	Cancel execution, module isn't enabled
-			show_404();
+        //  Load language file
+        $this->lang->load('shop');
 
-		endif;
+        // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
+        //  Load the models
+        $this->load->model('shop/shop_model');
+        $this->load->model('shop/shop_basket_model');
+        $this->load->model('shop/shop_brand_model');
+        $this->load->model('shop/shop_category_model');
+        $this->load->model('shop/shop_collection_model');
+        $this->load->model('shop/shop_currency_model');
+        $this->load->model('shop/shop_order_model');
+        $this->load->model('shop/shop_product_model');
+        $this->load->model('shop/shop_product_type_model');
+        $this->load->model('shop/shop_range_model');
+        $this->load->model('shop/shop_shipping_driver_model');
+        $this->load->model('shop/shop_sale_model');
+        $this->load->model('shop/shop_tag_model');
+        $this->load->model('shop/shop_voucher_model');
+        $this->load->model('shop/shop_skin_front_model');
+        $this->load->model('shop/shop_skin_checkout_model');
 
-		//	Load language file
-		$this->lang->load( 'shop' );
+        // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
+        //  "Front of house" Skin
+        $skin = app_setting('skin_front', 'shop');
+        $skin = !empty($skin) ? $skin : 'shop-skin-front-classic';
+        $this->_load_skin($skin, 'front');
 
-		//	Load the models
-		$this->load->model( 'shop/shop_model' );
-		$this->load->model( 'shop/shop_basket_model' );
-		$this->load->model( 'shop/shop_brand_model' );
-		$this->load->model( 'shop/shop_category_model' );
-		$this->load->model( 'shop/shop_collection_model' );
-		$this->load->model( 'shop/shop_currency_model' );
-		$this->load->model( 'shop/shop_order_model' );
-		$this->load->model( 'shop/shop_product_model' );
-		$this->load->model( 'shop/shop_product_type_model' );
-		$this->load->model( 'shop/shop_range_model' );
-		$this->load->model( 'shop/shop_shipping_driver_model' );
-		$this->load->model( 'shop/shop_sale_model' );
-		$this->load->model( 'shop/shop_tag_model' );
-		$this->load->model( 'shop/shop_voucher_model' );
-		$this->load->model( 'shop/shop_skin_front_model' );
-		$this->load->model( 'shop/shop_skin_checkout_model' );
+        //  "Checkout" Skin
+        $skin = app_setting('skin_checkout', 'shop');
+        $skin = !empty($skin) ? $skin : 'shop-skin-checkout-classic';
+        $this->_load_skin($skin, 'checkout');
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		//	"Front of house" Skin
-		$_skin = app_setting( 'skin_front', 'shop' ) ? app_setting( 'skin_front', 'shop' ) : 'shop-skin-front-classic';
-		$this->_load_skin( $_skin, 'front' );
+        //  Shop's name
+        $this->_shop_name = app_setting('name', 'shop') ? app_setting('name', 'shop') : 'Shop';
 
-		//	"Checkout" Skin
-		$_skin = app_setting( 'skin_checkout', 'shop' ) ? app_setting( 'skin_checkout', 'shop' ) : 'shop-skin-checkout-classic';
-		$this->_load_skin( $_skin, 'checkout' );
+        // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
+        //  Shop's base URL
+        $this->_shop_url = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
 
-		//	Shop's name
-		$this->_shop_name = app_setting( 'name', 'shop' ) ? app_setting( 'name', 'shop' ) : 'Shop';
+        // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
+        //  Pass data to the views
+        $this->data['shop_name'] = $this->_shop_name;
+        $this->data['shop_url']  = $this->_shop_url;
+    }
 
-		//	Shop's base URL
-		$this->_shop_url = app_setting( 'url', 'shop' ) ? app_setting( 'url', 'shop' ) : 'shop/';
+    // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
+    protected function _load_skin($skin, $skinType)
+    {
+        //  Sanity test; make sure we're loading a skin type which is supported
+        switch ($skinType) {
 
-		//	Pass data to the views
-		$this->data['shop_name']	= $this->_shop_name;
-		$this->data['shop_url']		= $this->_shop_url;
-	}
+            case 'front':
 
-	// --------------------------------------------------------------------------
+                $this->_skin_front        =& $this->shop_skin_front_model->get($skin);
+                $this->data['skin_front'] =& $this->_skin_front;
 
+                if (!$this->_skin_front) {
 
-	protected function _load_skin( $skin, $skin_type )
-	{
-		//	Sanity test; make sure we're loading a skin type which is supported
-		switch ( $skin_type ) :
+                    $errorSubject  = 'Failed to load shop front skin "' . $skin . '"';
+                    $errorMessage  = 'Shop front skin "' . $skin . '" failed to load at ' . APP_NAME;
+                    $errorMessage .= ', the following reason was given: ';
+                    $errorMessage .= $this->shop_skin_front_model->last_error();
+                }
+                break;
 
-			case 'front' :
+            case 'checkout':
 
-				$this->_skin_front			=& $this->shop_skin_front_model->get( $skin );
-				$this->data['skin_front']	=& $this->_skin_front;
+                $this->_skin_checkout        =& $this->shop_skin_checkout_model->get($skin);
+                $this->data['skin_checkout'] =& $this->_skin_checkout;
 
-				if ( ! $this->_skin_front ) :
+                if (!$this->_skin_checkout) {
 
-					$_error_subject = 'Failed to load shop front skin "' . $skin . '"';
-					$_error_message = 'Shop front skin "' . $skin . '" failed to load at ' . APP_NAME . ', the following reason was given: ' . $this->shop_skin_front_model->last_error();
+                    $errorSubject  = 'Failed to load shop checkout skin "' . $skin . '"';
+                    $errorMessage  = 'Shop checkout skin "' . $skin . '" failed to load at ' . APP_NAME;
+                    $errorMessage .= ', the following reason was given: ';
+                    $errorMessage .= $this->shop_skin_checkout_model->last_error();
+                }
+                break;
 
-				endif;
+            default:
 
-			break;
+                $subject = '"' . $skin_tye . '" is not a valid skin type';
+                $message = 'An invalid skin type was attempted on ' . APP_NAME;
+                showFatalError($subject, $message);
+                break;
+        }
 
-			case 'checkout' :
+        if (!empty($errorSubject) || !empty($errorMessage)) {
 
-				$this->_skin_checkout			=& $this->shop_skin_checkout_model->get( $skin );
-				$this->data['skin_checkout']	=& $this->_skin_checkout;
+            showFatalError($errorSubject, $errorMessage);
+        }
+    }
 
-				if ( ! $this->_skin_checkout ) :
+    // --------------------------------------------------------------------------
 
-					$_error_subject = 'Failed to load shop checkout skin "' . $skin . '"';
-					$_error_message = 'Shop checkout skin "' . $skin . '" failed to load at ' . APP_NAME . ', the following reason was given: ' . $this->shop_skin_checkout_model->last_error();
+    protected function _load_skin_assets($assets, $css_inline, $js_inline, $url)
+    {
+        //  CSS and JS
+        if (!empty($assets) && is_array($assets)) {
 
-				endif;
+            foreach ($assets as $asset) {
 
-			break;
+                if (is_string($asset)) {
 
-			default :
+                    $this->asset->load($url . 'assets/' . $asset);
 
-				showFatalError('"' . $skin_tye . '" is not a valid skin type', 'An invalid skin type was attempted on ' . APP_NAME);
+                } else {
 
-			break;
+                    $this->asset->load($asset[0], $asset[1]);
+                }
+            }
+        }
 
-		endswitch;
+        // --------------------------------------------------------------------------
 
-		if ( ! empty( $_error_subject ) || ! empty( $_error_message ) ) :
+        //  CSS - Inline
+        if (!empty($css_inline) && is_array($css_inline)) {
 
-			showFatalError($_error_subject, $_error_message);
+            foreach ($css_inline as $asset) {
 
-		endif;
-	}
+                $this->asset->inline($asset, 'CSS_INLINE');
+            }
+        }
 
+        // --------------------------------------------------------------------------
 
-	// --------------------------------------------------------------------------
+        //  JS - Inline
+        if (!empty($js_inline) && is_array($js_inline)) {
 
+            foreach ($js_inline as $asset) {
 
-	protected function _load_skin_assets( $assets, $css_inline, $js_inline, $url )
-	{
-		//	CSS and JS
-		if ( ! empty( $assets ) && is_array( $assets ) ) :
-
-			foreach ( $assets AS $asset ) :
-
-				if ( is_string( $asset ) ) :
-
-					$this->asset->load( $url . 'assets/' . $asset );
-
-				else :
-
-					$this->asset->load( $asset[0], $asset[1] );
-
-				endif;
-
-			endforeach;
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		//	CSS - Inline
-		if ( ! empty( $css_inline ) && is_array( $css_inline ) ) :
-
-			foreach ( $css_inline AS $asset ) :
-
-				$this->asset->inline( $asset, 'CSS_INLINE' );
-
-			endforeach;
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		//	JS - Inline
-		if ( ! empty( $js_inline ) && is_array( $js_inline ) ) :
-
-			foreach ( $js_inline AS $asset ) :
-
-				$this->asset->inline( $asset, 'JS_INLINE' );
-
-			endforeach;
-
-		endif;
-	}
+                $this->asset->inline($asset, 'JS_INLINE');
+            }
+        }
+    }
 }
-
-/* End of file _shop.php */
-/* Location: ./modules/shop/controllers/_shop.php */
