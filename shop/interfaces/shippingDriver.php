@@ -24,7 +24,7 @@ interface Shop_shipping_driver
 
     /**
      * Specified any product-wide shipping options
-     * @return [type] [description]
+     * @return array
      */
     public function optionsProduct();
 
