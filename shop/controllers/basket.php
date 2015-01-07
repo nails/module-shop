@@ -1,20 +1,5 @@
 <?php
 
-/**
- * Name:        Shop - Basket
- *
- * Description: This controller handles the user's basket
- *
- **/
-
-/**
- * OVERLOADING NAILS' AUTH MODULE
- *
- * Note the name of this class; done like this to allow apps to extend this class.
- * Read full explanation at the bottom of this file.
- *
- **/
-
 //  Include _shop.php; executes common functionality
 require_once '_shop.php';
 
@@ -81,7 +66,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         $this->data['continue_shopping_url'] = $this->_shop_url;
 
         //  Most recently viewed item
-        $recentlyViewed = $this->shop_product_model->get_recently_viewed();
+        $recentlyViewed = $this->shop_product_model->getRecentlyViewed();
 
         if (!empty($recentlyViewed)) {
 

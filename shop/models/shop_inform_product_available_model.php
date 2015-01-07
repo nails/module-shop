@@ -72,7 +72,7 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 
 		endif;
 
-		$_product = $this->shop_product_model->get_by_variant_id( $variant_id );
+		$_product = $this->shop_product_model->getByVariantId( $variant_id );
 
 		if ( ! $_product ) :
 

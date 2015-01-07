@@ -41,7 +41,7 @@ class NAILS_Notify extends NAILS_Shop_Controller
 	public function index()
 	{
 		$_variant_id = $this->uri->rsegment( '2' );
-		$this->data['product'] = $this->shop_product_model->get_by_variant_id( $_variant_id );
+		$this->data['product'] = $this->shop_product_model->getByVariantId( $_variant_id );
 
 		if ( ! $this->data['product'] ) :
 

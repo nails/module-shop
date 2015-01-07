@@ -368,7 +368,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Check the product ID is valid
-		$_product = $this->shop_product_model->get_by_variant_id($variant_id);
+		$_product = $this->shop_product_model->getByVariantId($variant_id);
 
 		if (!$_product) :
 
