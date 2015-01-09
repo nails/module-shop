@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * OVERLOADING NAILS' MODELS
+ *
+ * Note the name of this class; done like this to allow apps to extend this class.
+ * Read full explanation at the bottom of this file.
+ *
+ **/
+
 class NAILS_Shop_shipping_driver_model extends NAILS_Model
 {
     protected $available;
