@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * This class provides some common shop controller functionality
+ *
+ * @package     Nails
+ * @subpackage  module-shop
+ * @category    Controller
+ * @author      Nails Dev Team
+ * @link
+ */
+
 class NAILS_Shop_Controller extends NAILS_Controller
 {
     protected $_shop_name;

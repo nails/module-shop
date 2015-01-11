@@ -1,7 +1,13 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
 /**
- * Define app notifications for this module.
+ * This config file defines app notifications for this module.
+ *
+ * @package     Nails
+ * @subpackage  module-shop
+ * @category    Config
+ * @author      Nails Dev Team
+ * @link
  */
 
 $config['notification_definitions'] = array();
@@ -38,6 +44,3 @@ $config['notification_definitions']['shop']->options['delivery_enquiry']->tip			
 $config['notification_definitions']['shop']->options['delivery_enquiry']->email_subject	= 'New Delivery Enquiry';
 $config['notification_definitions']['shop']->options['delivery_enquiry']->email_tpl		= '';
 $config['notification_definitions']['shop']->options['delivery_enquiry']->email_message	= '';
-
-/* End of file app_notifications.php */
-/* Location: ./module-shop/shop/config/app_notifications.php */

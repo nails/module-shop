@@ -1,7 +1,13 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
 /**
- * Define email types for this module.
+ * This config file defines email types for this module.
+ *
+ * @package     Nails
+ * @subpackage  module-shop
+ * @category    Config
+ * @author      Nails Dev Team
+ * @link
  */
 
 $config['email_types'] = array();
@@ -59,6 +65,3 @@ $config['email_types'][5]->template_header	= '';
 $config['email_types'][5]->template_body	= 'shop/email/order/fulfilled';
 $config['email_types'][5]->template_footer	= '';
 $config['email_types'][5]->default_subject	= 'Order Fulfilled';
-
-/* End of file email_types.php */
-/* Location: ./module-shop/shop/config/email_types.php */

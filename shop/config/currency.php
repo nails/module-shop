@@ -1,13 +1,14 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-/*
-|--------------------------------------------------------------------------
-| CURRENCIES
-|--------------------------------------------------------------------------
-|
-| This config file contains a list of current world currencies.
-|
-*/
+/**
+ * This config file defines currencies
+ *
+ * @package     Nails
+ * @subpackage  module-shop
+ * @category    Config
+ * @author      Nails Dev Team
+ * @link
+ */
 
 $config['currency'] = array();
 
@@ -1498,6 +1499,3 @@ $config['currency']['ZWL']->label				= 'Zimbabwean Dollar';
 $config['currency']['ZWL']->decimal_precision	= 2;
 $config['currency']['ZWL']->decimal_symbol		= '.';
 $config['currency']['ZWL']->thousands_seperator	= ',';
-
-/* End of file currency.php */
-/* Location: ./module-shop/shop/config/currency.php */
