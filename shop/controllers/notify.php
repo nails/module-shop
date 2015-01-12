@@ -69,8 +69,8 @@ class NAILS_Notify extends NAILS_Shop_Controller
 
 		if ( $this->input->get( 'is_fancybox' ) ) :
 
-			$this->data['header_override'] = 'structure/header/blank';
-			$this->data['footer_override'] = 'structure/footer/blank';
+			$this->data[headerOverride] = 'structure/header/blank';
+			$this->data[footerOverride] = 'structure/footer/blank';
 
 		endif;
 
