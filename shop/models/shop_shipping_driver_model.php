@@ -52,7 +52,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
         //  App Shipping Drivers
         $this->shippingDriverLocations[] = array(
             'path' => FCPATH . APPPATH . 'modules/shop/shipping_drivers',
-            'url' => site_url(APPPATH . 'modules/shop/shipping_drivers', page_is_secure())
+            'url' => site_url(APPPATH . 'modules/shop/shipping_drivers', isPageSecure())
         );
     }
 

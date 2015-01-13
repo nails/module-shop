@@ -946,7 +946,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 			if ($_variants_available) :
 
-				if (!$this->load->model_is_loaded('shop_inform_product_available_model')) :
+				if (!$this->load->isModelLoaded('shop_inform_product_available_model')) :
 
 					$this->load->model('shop/shop_inform_product_available_model');
 

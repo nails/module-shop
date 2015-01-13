@@ -61,7 +61,7 @@ class NAILS_Shop_skin_front_model extends NAILS_Model
 		//	App Skins
 		$this->_skin_locations[]	= array(
 										'path' => FCPATH . APPPATH . 'modules/shop/skins/front',
-										'url' => site_url( APPPATH . 'modules/shop/skins/front', page_is_secure() )
+										'url' => site_url( APPPATH . 'modules/shop/skins/front', isPageSecure() )
 									);
 	}
 

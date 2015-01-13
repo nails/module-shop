@@ -155,7 +155,7 @@ class NAILS_Shop_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Load the currency model, if not already loaded
-		if ( ! $this->load->model_is_loaded( 'shop_currency_model' ) ) :
+		if ( ! $this->load->isModelLoaded( 'shop_currency_model' ) ) :
 
 			$this->load->model( 'shop/shop_currency_model' );
 
@@ -224,7 +224,7 @@ class NAILS_Shop_model extends NAILS_Model
 				//	Fetch currency
 
 				//	Load the currency model, if not already loaded
-				if ( ! $this->load->model_is_loaded( 'shop_currency_model' ) ) :
+				if ( ! $this->load->isModelLoaded( 'shop_currency_model' ) ) :
 
 					$this->load->model( 'shop/shop_currency_model' );
 
