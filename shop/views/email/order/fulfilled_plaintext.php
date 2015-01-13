@@ -1,7 +1,7 @@
 <?php
 
 //  Country
-$this->load->model('common/country_model');
+$this->load->model('country_model');
 $countriesFlat = $this->country_model->get_all_flat();
 
 ?>

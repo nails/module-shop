@@ -1242,7 +1242,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 		$_email->data['order']			= $order;
 		$_email->data['payment_data']	= $payment_data;
 
-		$this->load->model( 'common/app_notification_model' );
+		$this->load->model( 'app_notification_model' );
 		$_notify = $this->app_notification_model->get( 'orders', 'shop' );
 
 		foreach ( $_notify AS $email ) :

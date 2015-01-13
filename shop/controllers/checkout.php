@@ -51,7 +51,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 	 **/
 	public function index()
 	{
-		$this->load->model( 'common/country_model' );
+		$this->load->model( 'country_model' );
 
 		$this->data['countries_flat']	= $this->country_model->get_all_flat();
 		$this->data['payment_gateways']	= $this->shop_payment_gateway_model->get_enabled_formatted();
@@ -313,7 +313,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 			// --------------------------------------------------------------------------
 
 			//	Map the country codes to names
-			$this->load->model( 'common/country_model' );
+			$this->load->model( 'country_model' );
 			$this->data['country'] = $this->country_model->get_all_flat();
 
 			if ( $this->data['order']->shipping_address->country ) :
