@@ -69,7 +69,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 		$_out		= array();
 		$_currency	= $this->get_all();
 
-		foreach( $_currency AS $c ) :
+		foreach ( $_currency AS $c ) :
 
 			$_out[$c->code] = $c->label;
 
@@ -101,7 +101,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
 		if ( is_array( $_additional ) ) :
 
-			foreach( $_additional AS $additional ) :
+			foreach ( $_additional AS $additional ) :
 
 				if ( isset( $_currencies[$additional] ) ) :
 
@@ -130,7 +130,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 		$_out		= array();
 		$_currency	= $this->get_all_supported();
 
-		foreach( $_currency AS $c ) :
+		foreach ( $_currency AS $c ) :
 
 			$_out[$c->code] = $c->label;
 
@@ -570,7 +570,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 			$this->_rates	= array();
 			$_rates			= $this->db->get( NAILS_DB_PREFIX . 'shop_currency_exchange' )->result();
 
-			foreach( $_rates AS $rate ) :
+			foreach ( $_rates AS $rate ) :
 
 				$this->_rates[$rate->from . $rate->to] = $rate->rate;
 

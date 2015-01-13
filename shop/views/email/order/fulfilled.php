@@ -4,7 +4,7 @@
 $shopUrl = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
 
 //  Country
-$this->load->model('system/country_model');
+$this->load->model('common/country_model');
 $countriesFlat = $this->country_model->get_all_flat();
 
 ?>
@@ -12,7 +12,7 @@ $countriesFlat = $this->country_model->get_all_flat();
     Thank you very much for your order with <?=anchor('', APP_NAME)?>.
 </p>
 <p>
-    Your order has been marked as fulfilled, indicating the dispatch of your goods. 
+    Your order has been marked as fulfilled, indicating the dispatch of your goods.
     If you have any questions, please get in touch using the details below.
 </p>
 <h2>Your Order</h2>

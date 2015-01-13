@@ -254,7 +254,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 			//	Add the items
 			$_items = array();
 
-			foreach( $data->basket->items AS $item ) :
+			foreach ( $data->basket->items AS $item ) :
 
 				$_temp					= array();
 				$_temp['order_id']		= $_order->id;
@@ -607,7 +607,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 			if ( $_specifics ) :
 
 				//	We have some specifics
-				foreach( $_specifics AS $specific ) :
+				foreach ( $_specifics AS $specific ) :
 
 					if ( is_array( $specific['cols'] ) ) :
 
@@ -634,7 +634,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 				if ( isset( $search[ 'columns' ] ) && $search[ 'columns' ] ) :
 
 					//	We have some specifics
-					foreach( $search[ 'columns' ] AS $col ) :
+					foreach ( $search[ 'columns' ] AS $col ) :
 
 						if ( is_array( $col ) ) :
 
@@ -1104,7 +1104,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 		$_ids		= array();
 		$_expires	= 172800; //	48 hours
 
-		foreach( $items AS $item ) :
+		foreach ( $items AS $item ) :
 
 			$_temp			= new stdClass();
 			$_temp->title	= $item->title;
@@ -1242,7 +1242,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 		$_email->data['order']			= $order;
 		$_email->data['payment_data']	= $payment_data;
 
-		$this->load->model( 'system/app_notification_model' );
+		$this->load->model( 'common/app_notification_model' );
 		$_notify = $this->app_notification_model->get( 'orders', 'shop' );
 
 		foreach ( $_notify AS $email ) :

@@ -49,7 +49,7 @@ class NAILS_Notify extends NAILS_Shop_Controller
 
 		endif;
 
-		foreach( $this->data['product']->variations AS $v ) :
+		foreach ( $this->data['product']->variations AS $v ) :
 
 			if ( $v->id = $_variant_id ) :
 

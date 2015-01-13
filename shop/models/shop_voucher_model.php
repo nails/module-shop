@@ -440,7 +440,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 			if ( $_specifics ) :
 
 				//	We have some specifics
-				foreach( $_specifics AS $specific ) :
+				foreach ( $_specifics AS $specific ) :
 
 					if ( is_array( $specific['cols'] ) ) :
 
@@ -467,7 +467,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 				if ( isset( $search[ 'columns' ] ) && $search[ 'columns' ] ) :
 
 					//	We have some specifics
-					foreach( $search[ 'columns' ] AS $col ) :
+					foreach ( $search[ 'columns' ] AS $col ) :
 
 						if ( is_array( $col ) ) :
 

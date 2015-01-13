@@ -116,7 +116,7 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 					$this->db->where( $this->_table_prefix . '.variation_id', $variation_id );
 					$_result = $this->db->get( $this->_table . ' ' . $this->_table_prefix )->result();
 
-					foreach( $_result AS $result ) :
+					foreach ( $_result AS $result ) :
 
 						//	Have we already sent this notification?
 						$_sent_string = $_email->to_email . '|' . $_product_id . '|' . $variation_id;

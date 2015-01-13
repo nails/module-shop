@@ -77,7 +77,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 		$_available	= Omnipay::find();
 		$_out		= array();
 
-		foreach( $_available AS $gateway ) :
+		foreach ( $_available AS $gateway ) :
 
 			if ( array_search( $gateway, $this->_supported ) !== FALSE ) :
 
@@ -107,7 +107,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 		$_enabled	= array_filter( (array) app_setting( 'enabled_payment_gateways', 'shop' ) );
 		$_out		= array();
 
-		foreach( $_enabled AS $gateway ) :
+		foreach ( $_enabled AS $gateway ) :
 
 			if ( array_search( $gateway, $_available ) !== FALSE ) :
 
@@ -129,7 +129,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 		$_enabled_payment_gateways	= $this->get_enabled();
 		$_payment_gateways			= array();
 
-		foreach( $_enabled_payment_gateways AS $pg ) :
+		foreach ( $_enabled_payment_gateways AS $pg ) :
 
 			$_temp				= new stdClass();
 			$_temp->slug		= $this->shop_payment_gateway_model->get_correct_casing( $pg );
@@ -166,7 +166,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 		$_gateways	= $this->get_available();
 		$_name		= NULL;
 
-		foreach( $_gateways AS $gateway ) :
+		foreach ( $_gateways AS $gateway ) :
 
 			if ( trim( strtolower( $name ) ) == strtolower( $gateway ) ) :
 

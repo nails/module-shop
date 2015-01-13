@@ -316,7 +316,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 			//	No need to set variation ID, that will be set later on during execution
 			if (isset($v['meta'][$_data->type_id])) :
 
-				foreach($v['meta'][$_data->type_id] AS $field_id => $value) :
+				foreach ($v['meta'][$_data->type_id] AS $field_id => $value) :
 
 					if (!empty($value)) :
 
@@ -325,7 +325,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 						 * it and create multiple elements, if not, leave as is
 						 */
 
-						foreach($_product_type_meta AS $meta) :
+						foreach ($_product_type_meta AS $meta) :
 
 							if ( $meta->id == $field_id) :
 
@@ -371,7 +371,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 				//	At the very least the base price must be defined
 				$_base_price_set = false;
-				foreach($v['pricing'] AS $price_index => $price) :
+				foreach ($v['pricing'] AS $price_index => $price) :
 
 					if (empty($price['currency'])) :
 
@@ -408,7 +408,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 			if (isset($v['gallery'])) :
 
-				foreach($v['gallery'] AS $gallery_index => $image) :
+				foreach ($v['gallery'] AS $gallery_index => $image) :
 
 					$this->form_validation->set_rules('variation[' . $index . '][gallery][' . $gallery_index . ']',	'',	'xss_clean');
 
@@ -613,7 +613,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 					case 'attribute_id' :
 
-						foreach($_items AS $item) :
+						foreach ($_items AS $item) :
 
 							$_temp[] = array('product_id' => $data->id, 'attribute_id' => $item['attribute_id'], 'value' => $item['value']);
 
@@ -624,7 +624,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 					case 'object_id' :
 
 						$_counter = 0;
-						foreach($_items AS $item_id) :
+						foreach ($_items AS $item_id) :
 
 							$_temp[] = array('product_id' => $data->id, $_field => $item_id, 'order' => $_counter);
 							$_counter++;
@@ -635,7 +635,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 					default :
 
-						foreach($_items AS $item_id) :
+						foreach ($_items AS $item_id) :
 
 							$_temp[] = array('product_id' => $data->id, $_field => $item_id);
 
@@ -671,7 +671,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 				$_variant_id_tracker = array();
 
-				foreach($data->variation AS $index => $v) :
+				foreach ($data->variation AS $index => $v) :
 
 					//	Product Variation: Details
 					//	==========================
@@ -703,7 +703,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 					if (!empty($v->id)) :
 
 						//	A variation ID exists, find it and update just the specific field.
-						foreach($_current->variations AS $variation) :
+						foreach ($_current->variations AS $variation) :
 
 							if ($variation->id != $v->id) :
 
@@ -779,7 +779,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 						if  (!$_rollback) :
 
 							$_temp = array();
-							foreach($v->gallery AS $object_id) :
+							foreach ($v->gallery AS $object_id) :
 
 								$_temp[] = array(
 									'variation_id'	=> $v->id,
@@ -807,7 +807,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 						if (!$_rollback) :
 
-							foreach($v->meta AS &$meta) :
+							foreach ($v->meta AS &$meta) :
 
 								$meta['variation_id'] = $v->id;
 
@@ -851,7 +851,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 							if (!$_rollback) :
 
-								foreach($v->pricing AS &$price) :
+								foreach ($v->pricing AS &$price) :
 
 									$price->variation_id	= $v->id;
 									$price->product_id		= $data->id;
@@ -938,7 +938,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 			$_variants_available_raw = $this->db->get($this->_table_variation	)->result();
 			$_variants_available = array();
 
-			foreach($_variants_available_raw AS $v) :
+			foreach ($_variants_available_raw AS $v) :
 
 				$_variants_available[] = $v->id;
 
@@ -1033,7 +1033,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 			$this->db->where('pc.product_id', $product->id);
 			$this->db->join(NAILS_DB_PREFIX . 'shop_category c', 'c.id = pc.category_id');
 			$product->categories = $this->db->get($this->_table_category . ' pc')->result();
-			foreach($product->categories AS $category) :
+			foreach ($product->categories AS $category) :
 
                 $category->url = $this->shop_category_model->format_url($category->slug);
 
@@ -1054,7 +1054,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 			$_temp = $this->db->get($this->_table_gallery)->result();
 
 			$product->gallery = array();
-			foreach($_temp AS $image) :
+			foreach ($_temp AS $image) :
 
 				$product->gallery[] = (int) $image->object_id;
 
@@ -1098,7 +1098,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 			$this->db->order_by('pv.order');
 			$product->variations = $this->db->get($this->_table_variation . ' pv')->result();
 
-			foreach($product->variations AS &$v) :
+			foreach ($product->variations AS &$v) :
 
 				//	Meta
 				//	====
@@ -1110,7 +1110,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 				//	Merge `allow_multiple` fields into one
 				$v->meta = array();
-				foreach($_meta_raw AS $meta) :
+				foreach ($_meta_raw AS $meta) :
 
 					if (!isset($v->meta[$meta->meta_field_id])) :
 
@@ -1150,7 +1150,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 				$_temp = $this->db->get($this->_table_variation_gallery)->result();
 				$v->gallery = array();
 
-				foreach($_temp AS $image) :
+				foreach ($_temp AS $image) :
 
 					$v->gallery[] = $image->object_id;
 
@@ -1575,7 +1575,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 		$_out = array();
 
-		foreach($_items AS $item) :
+		foreach ($_items AS $item) :
 
 			$_key = $item->p_id . ':' . $item->v_id;
 			$_label = $item->p_label == $item->v_label ? $item->p_label : $item->p_label . ' - ' . $item->v_label;
@@ -2280,7 +2280,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 				$_categories_arr	= array();
 				$_counter			= 0;
 
-				foreach($product->categories AS $category) :
+				foreach ($product->categories AS $category) :
 
 					$_categories_arr[] = $category->label;
 
@@ -2444,7 +2444,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 		$_product_ids		= array();
 		$_product_type_ids	= array();
 
-		foreach($_product_ids_raw AS $pid) :
+		foreach ($_product_ids_raw AS $pid) :
 
 			$_product_ids[]			= $pid->id;
 			$_product_type_ids[]	= $pid->type_id;
@@ -2497,7 +2497,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 			$_variant_ids_raw	= $this->db->get($this->_table_variation)->result();
 			$_variant_ids		= array();
 
-			foreach($_variant_ids_raw AS $vid) :
+			foreach ($_variant_ids_raw AS $vid) :
 
 				$_variant_ids[] = $vid->id;
 
@@ -2543,7 +2543,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 				if (!empty($_temp->values)) :
 
-					foreach($_temp->values AS $v) :
+					foreach ($_temp->values AS $v) :
 
 						$v->label = $v->value;
 

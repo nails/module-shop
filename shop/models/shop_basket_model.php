@@ -136,7 +136,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 			if (!empty($item->product)) :
 
 				//	Find the variant
-				foreach($item->product->variations AS &$v) :
+				foreach ($item->product->variations AS &$v) :
 
 					if ($v->id == $item->variant_id) :
 
@@ -166,7 +166,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		//	Removing anything?
 		if (!empty($_unset)) :
 
-			foreach($_unset AS $key) :
+			foreach ($_unset AS $key) :
 
 				//	Remove from the local basket object
 				unset($_basket->items[$key]);
@@ -1154,7 +1154,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 */
 	protected function getBasketKeyByVariantId($variant_id)
 	{
-		foreach($this->_basket->items AS $key => $item) :
+		foreach ($this->_basket->items AS $key => $item) :
 
 			if ($variant_id == $item->variant_id) :
 

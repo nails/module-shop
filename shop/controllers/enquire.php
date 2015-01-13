@@ -64,7 +64,7 @@ class NAILS_Enquire extends NAILS_Shop_Controller
 		if ( $_variant_id ) :
 
 			//	Fetch the variation
-			foreach( $this->data['product']->variations AS $v ) :
+			foreach ( $this->data['product']->variations AS $v ) :
 
 				if ( $v->id = $_variant_id ) :
 
@@ -88,7 +88,7 @@ class NAILS_Enquire extends NAILS_Shop_Controller
 
 			//	Check that there are 'collection only' variations
 			$_collect_only_variations = array();
-			foreach( $this->data['product']->variations AS $v ) :
+			foreach ( $this->data['product']->variations AS $v ) :
 
 				if ( $v->shipping->collection_only ) :
 

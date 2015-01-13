@@ -4,7 +4,7 @@
 $shopUrl = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
 
 //  Country
-$this->load->model('system/country_model');
+$this->load->model('common/country_model');
 $countriesFlat = $this->country_model->get_all_flat();
 
 ?>
