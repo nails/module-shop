@@ -225,7 +225,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 
 			if ( $_children ) :
 
-				foreach ( $_children AS $child_id ) :
+				foreach ( $_children as $child_id ) :
 
 					$_child_data = new stdClass();
 
@@ -270,7 +270,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 			$_parents = array_filter( $_parents );
 			$_parents = array_unique( $_parents );
 
-			foreach ( $_parents AS $parent_id ) :
+			foreach ( $_parents as $parent_id ) :
 
 				$_data					= new stdClass();
 				$_data->children_ids	= implode( ',', $this->get_ids_of_children( $parent_id ) );
@@ -327,7 +327,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 
 		if ( parent::delete( $id ) ) :
 
-			foreach ( $_parents AS $parent_id ) :
+			foreach ( $_parents as $parent_id ) :
 
 				$_data					= new stdClass();
 				$_data->children_ids	= implode( ',', $this->get_ids_of_children( $parent_id ) );
@@ -435,7 +435,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 
 		if ( $only_immediate ) :
 
-			foreach ( $_children AS $child ) :
+			foreach ( $_children as $child ) :
 
 				$_return[] = $child->id;
 
@@ -445,7 +445,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 
 			if ( ! empty( $_children ) ) :
 
-				foreach ( $_children AS $child ) :
+				foreach ( $_children as $child ) :
 
 					$_temp		= array( $child->id );
 					$_return	= array_merge( $_return, $_temp, $this->get_ids_of_children( $child->id, FALSE ) );
@@ -584,11 +584,11 @@ class NAILS_Shop_category_model extends NAILS_Model
 		$_categories	= $this->get_all();
 		$_out			= array();
 
-		foreach ( $_categories AS $cat ) :
+		foreach ( $_categories as $cat ) :
 
 			$_out[$cat->id] = array();
 
-			foreach ( $cat->breadcrumbs AS $crumb ) :
+			foreach ( $cat->breadcrumbs as $crumb ) :
 
 				$_out[$cat->id][] = $crumb->label;
 

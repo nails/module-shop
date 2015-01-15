@@ -69,7 +69,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 		$_out		= array();
 		$_currency	= $this->get_all();
 
-		foreach ( $_currency AS $c ) :
+		foreach ( $_currency as $c ) :
 
 			$_out[$c->code] = $c->label;
 
@@ -101,7 +101,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
 		if ( is_array( $_additional ) ) :
 
-			foreach ( $_additional AS $additional ) :
+			foreach ( $_additional as $additional ) :
 
 				if ( isset( $_currencies[$additional] ) ) :
 
@@ -130,7 +130,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 		$_out		= array();
 		$_currency	= $this->get_all_supported();
 
-		foreach ( $_currency AS $c ) :
+		foreach ( $_currency as $c ) :
 
 			$_out[$c->code] = $c->label;
 
@@ -356,7 +356,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
 				if ( SHOP_BASE_CURRENCY_CODE == $_response->base ) :
 
-					foreach ( $_response->rates AS $to_currency => $rate ) :
+					foreach ( $_response->rates as $to_currency => $rate ) :
 
 						if ( array_search( $to_currency, $_additional_currencies ) !== FALSE ) :
 
@@ -386,7 +386,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 					endif;
 
 					$_base = 1;
-					foreach ( $_response->rates AS $code => $rate ) :
+					foreach ( $_response->rates as $code => $rate ) :
 
 						if ( $code == SHOP_BASE_CURRENCY_CODE ) :
 
@@ -397,7 +397,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
 					endforeach;
 
-					foreach ( $_response->rates AS $to_currency => $rate ) :
+					foreach ( $_response->rates as $to_currency => $rate ) :
 
 						if ( array_search( $to_currency, $_additional_currencies ) !== FALSE ) :
 
@@ -437,7 +437,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 					'modified'	=> date( 'Y-m-d H:i:s' )
 				);
 
-				foreach ( $_to_save AS $old ) :
+				foreach ( $_to_save as $old ) :
 
 					$_to_save_reverse[] = array(
 					'from'		=> $old['to'],
@@ -570,7 +570,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 			$this->_rates	= array();
 			$_rates			= $this->db->get( NAILS_DB_PREFIX . 'shop_currency_exchange' )->result();
 
-			foreach ( $_rates AS $rate ) :
+			foreach ( $_rates as $rate ) :
 
 				$this->_rates[$rate->from . $rate->to] = $rate->rate;
 

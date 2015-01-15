@@ -254,7 +254,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 			//	Add the items
 			$_items = array();
 
-			foreach ( $data->basket->items AS $item ) :
+			foreach ( $data->basket->items as $item ) :
 
 				$_temp					= array();
 				$_temp['order_id']		= $_order->id;
@@ -461,7 +461,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 		//	Needed by the _format_*() methods
 		$this->load->model( 'shop/shop_currency_model' );
 
-		foreach ( $_orders AS $order ) :
+		foreach ( $_orders as $order ) :
 
 			//	Format order object
 			$this->_format_order( $order );
@@ -582,7 +582,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 			if ( $_specifics ) :
 
 				$_temp = array();
-				foreach ( $_specifics AS $col => $value ) :
+				foreach ( $_specifics as $col => $value ) :
 
 					if ( isset( $search['columns'][ strtolower( $col )] ) ) :
 
@@ -607,7 +607,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 			if ( $_specifics ) :
 
 				//	We have some specifics
-				foreach ( $_specifics AS $specific ) :
+				foreach ( $_specifics as $specific ) :
 
 					if ( is_array( $specific['cols'] ) ) :
 
@@ -634,7 +634,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 				if ( isset( $search[ 'columns' ] ) && $search[ 'columns' ] ) :
 
 					//	We have some specifics
-					foreach ( $search[ 'columns' ] AS $col ) :
+					foreach ( $search[ 'columns' ] as $col ) :
 
 						if ( is_array( $col ) ) :
 
@@ -760,7 +760,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 		//	Needed by the _format_*() methods
 		$this->load->model( 'shop/shop_currency_model' );
 
-		foreach ( $_items AS $item ) :
+		foreach ( $_items as $item ) :
 
 			$this->_format_item( $item );
 
@@ -805,7 +805,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 		//	Needed by the _format_*() methods
 		$this->load->model( 'shop/shop_currency_model' );
 
-		foreach ( $_items AS $item ) :
+		foreach ( $_items as $item ) :
 
 			$this->_format_item( $item );
 
@@ -1039,7 +1039,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 		$_processors = array();
 
-		foreach ( $order->items AS $item ) :
+		foreach ( $order->items as $item ) :
 
 			_LOG( 'Processing item #' . $item->id . ': ' . $item->title . ' (' . $item->type->label . ')' );
 
@@ -1064,7 +1064,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
 			_LOG( 'Executing processors...' );
 
-			foreach ( $_processors AS $method => $products ) :
+			foreach ( $_processors as $method => $products ) :
 
 				_LOG( '... ' . $method . '(); with ' . count( $products ) . ' items.' );
 				call_user_func_array( array( $this, $method), array( &$products, &$order ) );
@@ -1104,7 +1104,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 		$_ids		= array();
 		$_expires	= 172800; //	48 hours
 
-		foreach ( $items AS $item ) :
+		foreach ( $items as $item ) :
 
 			$_temp			= new stdClass();
 			$_temp->title	= $item->title;
@@ -1245,7 +1245,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 		$this->load->model( 'app_notification_model' );
 		$_notify = $this->app_notification_model->get( 'orders', 'shop' );
 
-		foreach ( $_notify AS $email ) :
+		foreach ( $_notify as $email ) :
 
 			$_email->to_email = $email;
 

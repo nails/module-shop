@@ -237,11 +237,11 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 		// --------------------------------------------------------------------------
 
 		//	Load assets required by the payment gateways
-		foreach ( $this->data['payment_gateways'] AS $pg ) :
+		foreach ( $this->data['payment_gateways'] as $pg ) :
 
 			$_assets = $this->shop_payment_gateway_model->get_checkout_assets( $pg->slug );
 
-			foreach ( $_assets AS $asset ) :
+			foreach ( $_assets as $asset ) :
 
 				$_inline = array( 'JS_INLINE', 'JS-INLINE', 'CSS_INLINE', 'CSS-INLINE' );
 
@@ -288,7 +288,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 		else :
 
 			//	Fetch the product/variants associated with each order item
-			foreach ( $this->data['order']->items AS $item ) :
+			foreach ( $this->data['order']->items as $item ) :
 
 				$item->product = $this->shop_product_model->get_by_id( $item->product_id );
 

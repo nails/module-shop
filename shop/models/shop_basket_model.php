@@ -129,7 +129,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		//	This variable will hold any keys which need to be unset
 		$_unset = array();
 
-		foreach ($_basket->items AS $basket_key => $item) :
+		foreach ($_basket->items as $basket_key => $item) :
 
 			$item->product = $this->shop_product_model->get_by_id($item->product_id);
 
@@ -166,7 +166,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		//	Removing anything?
 		if (!empty($_unset)) :
 
-			foreach ($_unset AS $key) :
+			foreach ($_unset as $key) :
 
 				//	Remove from the local basket object
 				unset($_basket->items[$key]);
@@ -189,7 +189,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Calculate basket item costs
-		foreach ($_basket->items AS $item) :
+		foreach ($_basket->items as $item) :
 
 			$_basket->totals->base->item += $item->quantity * $item->variant->price->price->base->value_ex_tax;
 			$_basket->totals->user->item += $item->quantity * $item->variant->price->price->user->value_ex_tax;
@@ -221,7 +221,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Calculate Tax costs
-		foreach ($_basket->items AS $item) :
+		foreach ($_basket->items as $item) :
 
 			$_basket->totals->base->tax += $item->quantity * $item->variant->price->price->base->value_tax;
 			$_basket->totals->user->tax += $item->quantity * $item->variant->price->price->user->value_tax;
@@ -280,7 +280,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
 			$_count = 0;
 
-			foreach ($this->_basket->items AS $item) :
+			foreach ($this->_basket->items as $item) :
 
 				$_count += $item->quantity;
 
@@ -378,7 +378,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 		endif;
 
 		$_variant = null;
-		foreach ($_product->variations AS $variant) :
+		foreach ($_product->variations as $variant) :
 
 			if ($variant_id == $variant->id) :
 
@@ -1154,7 +1154,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 	 */
 	protected function getBasketKeyByVariantId($variant_id)
 	{
-		foreach ($this->_basket->items AS $key => $item) :
+		foreach ($this->_basket->items as $key => $item) :
 
 			if ($variant_id == $item->variant_id) :
 

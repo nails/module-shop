@@ -291,7 +291,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 
 		$this->load->model( 'shop/shop_product_type_model' );
 
-		foreach ( $_vouchers AS $voucher ) :
+		foreach ( $_vouchers as $voucher ) :
 
 			//	Fetch extra data
 			switch ( $voucher->discount_application ) :
@@ -415,7 +415,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 			if ( $_specifics ) :
 
 				$_temp = array();
-				foreach ( $_specifics AS $col => $value ) :
+				foreach ( $_specifics as $col => $value ) :
 
 					if ( isset( $search['columns'][ strtolower( $col )] ) ) :
 
@@ -440,7 +440,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 			if ( $_specifics ) :
 
 				//	We have some specifics
-				foreach ( $_specifics AS $specific ) :
+				foreach ( $_specifics as $specific ) :
 
 					if ( is_array( $specific['cols'] ) ) :
 
@@ -467,7 +467,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 				if ( isset( $search[ 'columns' ] ) && $search[ 'columns' ] ) :
 
 					//	We have some specifics
-					foreach ( $search[ 'columns' ] AS $col ) :
+					foreach ( $search[ 'columns' ] as $col ) :
 
 						if ( is_array( $col ) ) :
 
@@ -634,7 +634,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 
 			$_matched = FALSE;
 
-			foreach ( $basket->items AS $item ) :
+			foreach ( $basket->items as $item ) :
 
 				if ( $item->type->id == $_voucher->product_type_id ) :
 

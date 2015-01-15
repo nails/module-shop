@@ -35,7 +35,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
 	{
 		$_result = parent::get_all( $page, $per_page, $data, $include_deleted, $_caller );
 
-		foreach ( $_result AS $result ) :
+		foreach ( $_result as $result ) :
 
 			if ( isset( $data['include_associated_product_types'] ) ) :
 
@@ -84,7 +84,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
 		$this->db->group_by( $this->_table_prefix . '.id' );
 		$_result = $this->db->get( $this->_table_taxonomy . ' ' . $this->_table_taxonomy_prefix )->result();
 
-		foreach ( $_result AS $result ) :
+		foreach ( $_result as $result ) :
 
 			$this->_format_object( $result );
 
@@ -120,7 +120,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
 
 			$_data = array();
 
-			foreach ( $_associated_product_types AS $product_type_id ) :
+			foreach ( $_associated_product_types as $product_type_id ) :
 
 				$_data[] = array(
 					'product_type_id'	=> $product_type_id,
@@ -177,7 +177,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
 
 			$_data = array();
 
-			foreach ( $_associated_product_types AS $product_type_id ) :
+			foreach ( $_associated_product_types as $product_type_id ) :
 
 				$_data[] = array(
 					'product_type_id'	=> $product_type_id,

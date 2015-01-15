@@ -109,14 +109,14 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 
 			if ( $_product && $_product->is_active && ! $_product->is_deleted ) :
 
-				foreach ( $variation_ids AS $variation_id ) :
+				foreach ( $variation_ids as $variation_id ) :
 
 					$this->db->select( $this->_table_prefix . '.*' );
 					$this->db->where( $this->_table_prefix . '.product_id', $product_id );
 					$this->db->where( $this->_table_prefix . '.variation_id', $variation_id );
 					$_result = $this->db->get( $this->_table . ' ' . $this->_table_prefix )->result();
 
-					foreach ( $_result AS $result ) :
+					foreach ( $_result as $result ) :
 
 						//	Have we already sent this notification?
 						$_sent_string = $_email->to_email . '|' . $_product_id . '|' . $variation_id;
