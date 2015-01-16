@@ -136,7 +136,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 			if (!empty($item->product)) :
 
 				//	Find the variant
-				foreach ($item->product->variations AS &$v) :
+				foreach ($item->product->variations as &$v) :
 
 					if ($v->id == $item->variant_id) :
 

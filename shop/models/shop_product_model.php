@@ -807,7 +807,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 						if (!$_rollback) :
 
-							foreach ($v->meta AS &$meta) :
+							foreach ($v->meta as &$meta) :
 
 								$meta['variation_id'] = $v->id;
 
@@ -851,7 +851,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 							if (!$_rollback) :
 
-								foreach ($v->pricing AS &$price) :
+								foreach ($v->pricing as &$price) :
 
 									$price->variation_id	= $v->id;
 									$price->product_id		= $data->id;
@@ -1098,7 +1098,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 			$this->db->order_by('pv.order');
 			$product->variations = $this->db->get($this->_table_variation . ' pv')->result();
 
-			foreach ($product->variations AS &$v) :
+			foreach ($product->variations as &$v) :
 
 				//	Meta
 				//	====
@@ -2685,7 +2685,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 		//	Gallery
 		if (!empty($variation->gallery) && is_array($variation->gallery)) :
 
-			foreach ($variation->gallery AS &$object_id) :
+			foreach ($variation->gallery as &$object_id) :
 
 				$object_id	= (int) $object_id;
 

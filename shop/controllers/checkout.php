@@ -295,7 +295,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 				if ( ! empty( $item->product ) ) :
 
 					//	Find the variant
-					foreach ( $item->product->variations AS &$v ) :
+					foreach ( $item->product->variations as &$v ) :
 
 						if ( $v->id == $item->variant_id ) :
 
