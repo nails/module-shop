@@ -1,685 +1,677 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-/**
- * Name:		Shop - Checkout
- *
- * Description:	This controller handles the user's checkout experience
- *
- **/
-
-/**
- * OVERLOADING NAILS' AUTH MODULE
- *
- * Note the name of this class; done like this to allow apps to extend this class.
- * Read full explanation at the bottom of this file.
- *
- **/
-
-//	Include _shop.php; executes common functionality
+//  Include _shop.php; executes common functionality
 require_once '_shop.php';
+
+/**
+ * This class provides shop checkout functionality
+ *
+ * @package     Nails
+ * @subpackage  module-shop
+ * @category    Controller
+ * @author      Nails Dev Team
+ * @link
+ */
 
 class NAILS_Checkout extends NAILS_Shop_Controller
 {
-	/**
-	 * Construct the model
-	 */
-	public function __construct()
-	{
-		parent::__construct();
-		$this->load->model( 'shop/shop_payment_gateway_model' );
+    /**
+     * Construct the model
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->load->model('shop/shop_payment_gateway_model');
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		//	Load appropriate assets
-		$_assets		= ! empty( $this->_skin_checkout->assets )		? $this->_skin_checkout->assets		: array();
-		$_css_inline	= ! empty( $this->_skin_checkout->css_inline )	? $this->_skin_checkout->css_inline	: array();
-		$_js_inline		= ! empty( $this->_skin_checkout->js_inline )	? $this->_skin_checkout->js_inline	: array();
+        //  Load appropriate assets
+        $assets    = !empty($this->_skin_checkout->assets)     ? $this->_skin_checkout->assets     : array();
+        $cssInline = !empty($this->_skin_checkout->css_inline) ? $this->_skin_checkout->css_inline : array();
+        $jsInline  = !empty($this->_skin_checkout->js_inline)  ? $this->_skin_checkout->js_inline  : array();
 
-		$this->_load_skin_assets( $_assets, $_css_inline, $_js_inline, $this->_skin_checkout->url );
-	}
+        $this->_load_skin_assets($assets, $cssInline, $jsInline, $this->_skin_checkout->url);
+    }
 
+    // --------------------------------------------------------------------------
 
-	// --------------------------------------------------------------------------
+    /**
+     * Handle the checkout process
+     * @return  void
+     **/
+    public function index()
+    {
+        $this->load->model('country_model');
 
+        $this->data['countries_flat']   = $this->country_model->get_all_flat();
+        $this->data['payment_gateways'] = $this->shop_payment_gateway_model->get_enabled_formatted();
 
-	/**
-	 * Handle the checkout process
-	 *
-	 * @access	public
-	 * @return	void
-	 *
-	 **/
-	public function index()
-	{
-		$this->load->model( 'country_model' );
+        if (!count($this->data['payment_gateways'])) {
 
-		$this->data['countries_flat']	= $this->country_model->get_all_flat();
-		$this->data['payment_gateways']	= $this->shop_payment_gateway_model->get_enabled_formatted();
+            $subject = 'No Payment Gateways are configured.';
+            $message = 'A payment gateway must be configured in order to checkout.';
 
-		if ( ! count( $this->data['payment_gateways'] ) ) :
+            showFatalError($subject, $message);
+        }
 
-			$this->data['error'] = '<strong>Error:</strong> No Payment Gateways are configured.';
-			$this->data['page']->title = $this->_shop_name . ': No Payment Gateways have been configured';
+        // --------------------------------------------------------------------------
 
-			$this->load->view( 'structure/header',											$this->data );
-			$this->load->view( $this->_skin_checkout->path . 'views/checkout/no_gateway',	$this->data );
-			$this->load->view( 'structure/footer',											$this->data );
-			return;
+        $_basket = $this->shop_basket_model->get();
 
-		endif;
+        if (empty($_basket->items)) {
 
-		// --------------------------------------------------------------------------
+            $status  = 'error';
+            $message = '<strong>Sorry,</strong> you cannot checkout just now. Your basket is empty.';
+            $this->session->set_flashdata($status, $message);
+            redirect($this->_shop_url . 'basket');
+        }
 
-		$_basket = $this->shop_basket_model->get();
+        // --------------------------------------------------------------------------
 
-		if ( empty( $_basket->items ) ) :
+        //  Abandon any previous orders
+        $_previous_order = $this->shop_payment_gateway_model->checkout_session_get();
 
-			$this->session->set_flashdata( 'error', '<strong>Sorry,</strong> you cannot checkout just now. Your basket is empty.' );
-			redirect( $this->_shop_url . 'basket' );
+        if ($_previous_order) {
 
-		endif;
+            $this->shop_order_model->abandon($_previous_order);
+            $this->shop_payment_gateway_model->checkout_session_clear();
+        }
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		//	Abandon any previous orders
-		$_previous_order = $this->shop_payment_gateway_model->checkout_session_get();
+        if ($this->input->post()) {
 
-		if ( $_previous_order ) :
+            $paymentGateway = $this->input->post('payment_gateway');
 
-			$this->shop_order_model->abandon( $_previous_order );
-			$this->shop_payment_gateway_model->checkout_session_clear();
+            if (!$this->shop_payment_gateway_model->is_enabled($paymentGateway)) {
 
-		endif;
+                $this->data['error'] = '"' . $paymentGateway . '" is not a valid payment gateway.';
 
-		// --------------------------------------------------------------------------
+            } else {
 
-		if ( $this->input->post() ) :
+                $this->load->library('form_validation');
 
-			if ( ! $this->shop_payment_gateway_model->is_enabled( $this->input->post( 'payment_gateway' ) ) ) :
+                $this->form_validation->set_rules('delivery_address_line_1', '', 'xss_clean|trim|required');
+                $this->form_validation->set_rules('delivery_address_line_2', '', 'xss_clean|trim');
+                $this->form_validation->set_rules('delivery_address_town', '', 'xss_clean|trim|required');
+                $this->form_validation->set_rules('delivery_address_state', '', 'xss_clean|trim');
+                $this->form_validation->set_rules('delivery_address_postcode', '', 'xss_clean|trim|required');
+                $this->form_validation->set_rules('delivery_address_country', '', 'xss_clean|required');
 
-				$this->data['error'] = '"' . $this->input->post( 'payment_gateway' ) . '" is not a valid payment gateway.';
+                $this->form_validation->set_rules('first_name', '', 'xss_clean|trim|required');
+                $this->form_validation->set_rules('last_name', '', 'xss_clean|trim|required');
+                $this->form_validation->set_rules('email', '', 'xss_clean|trim|required');
+                $this->form_validation->set_rules('telephone', '', 'xss_clean|trim|required');
 
-			else :
+                if (!$this->input->post('same_billing_address')) {
 
-				$this->load->library( 'form_validation' );
+                    $this->form_validation->set_rules('billing_address_line_1', '', 'xss_clean|trim|required');
+                    $this->form_validation->set_rules('billing_address_line_2', '', 'xss_clean|trim');
+                    $this->form_validation->set_rules('billing_address_town', '', 'xss_clean|trim|required');
+                    $this->form_validation->set_rules('billing_address_state', '', 'xss_clean|trim');
+                    $this->form_validation->set_rules('billing_address_postcode', '', 'xss_clean|trim|required');
+                    $this->form_validation->set_rules('billing_address_country', '', 'xss_clean|trim|required');
 
-				$this->form_validation->set_rules( 'delivery_address_line_1',	'', 'xss_clean|trim|required' );
-				$this->form_validation->set_rules( 'delivery_address_line_2',	'', 'xss_clean|trim' );
-				$this->form_validation->set_rules( 'delivery_address_town',		'', 'xss_clean|trim|required' );
-				$this->form_validation->set_rules( 'delivery_address_state',	'', 'xss_clean|trim' );
-				$this->form_validation->set_rules( 'delivery_address_postcode',	'', 'xss_clean|trim|required' );
-				$this->form_validation->set_rules( 'delivery_address_country',	'', 'xss_clean|required' );
+                } else {
 
-				$this->form_validation->set_rules( 'first_name',				'', 'xss_clean|trim|required' );
-				$this->form_validation->set_rules( 'last_name',					'', 'xss_clean|trim|required' );
-				$this->form_validation->set_rules( 'email',						'', 'xss_clean|trim|required' );
-				$this->form_validation->set_rules( 'telephone',					'', 'xss_clean|trim|required' );
+                    $this->form_validation->set_rules('billing_address_line_1', '', 'xss_clean|trim');
+                    $this->form_validation->set_rules('billing_address_line_2', '', 'xss_clean|trim');
+                    $this->form_validation->set_rules('billing_address_town', '', 'xss_clean|trim');
+                    $this->form_validation->set_rules('billing_address_state', '', 'xss_clean|trim');
+                    $this->form_validation->set_rules('billing_address_postcode', '', 'xss_clean|trim');
+                    $this->form_validation->set_rules('billing_address_country', '', 'xss_clean|trim');
+                }
+
+                $this->form_validation->set_rules('payment_gateway', '', 'xss_clean|trim|required');
+
+                $this->form_validation->set_message('required', lang('fv_required'));
+
+                if ($this->form_validation->run()) {
+
+                    //  Prepare data
+                    $_data = new stdClass();
+
+                    //  Contact details
+                    $_data->contact             = new stdClass();
+                    $_data->contact->first_name = $this->input->post('first_name');
+                    $_data->contact->last_name  = $this->input->post('last_name');
+                    $_data->contact->email      = $this->input->post('email');
+                    $_data->contact->telephone  = $this->input->post('telephone');
+
+                    //  Delivery Details
+                    $_data->delivery           = new stdClass();
+                    $_data->delivery->line_1   = $this->input->post('delivery_address_line_1');
+                    $_data->delivery->line_2   = $this->input->post('delivery_address_line_2');
+                    $_data->delivery->town     = $this->input->post('delivery_address_town');
+                    $_data->delivery->state    = $this->input->post('delivery_address_state');
+                    $_data->delivery->postcode = $this->input->post('delivery_address_postcode');
+                    $_data->delivery->country  = $this->input->post('delivery_address_country');
 
-				if ( ! $this->input->post( 'same_billing_address' ) ) :
+                    //  Billing details
+                    if (!$this->input->post('same_billing_address')) {
 
-					$this->form_validation->set_rules( 'billing_address_line_1',	'', 'xss_clean|trim|required' );
-					$this->form_validation->set_rules( 'billing_address_line_2',	'', 'xss_clean|trim' );
-					$this->form_validation->set_rules( 'billing_address_town',		'', 'xss_clean|trim|required' );
-					$this->form_validation->set_rules( 'billing_address_state',		'', 'xss_clean|trim' );
-					$this->form_validation->set_rules( 'billing_address_postcode',	'', 'xss_clean|trim|required' );
-					$this->form_validation->set_rules( 'billing_address_country',	'', 'xss_clean|trim|required' );
+                        $_data->billing           = new stdClass();
+                        $_data->billing->line_1   = $this->input->post('billing_address_line_1');
+                        $_data->billing->line_2   = $this->input->post('billing_address_line_2');
+                        $_data->billing->town     = $this->input->post('billing_address_town');
+                        $_data->billing->state    = $this->input->post('billing_address_state');
+                        $_data->billing->postcode = $this->input->post('billing_address_postcode');
+                        $_data->billing->country  = $this->input->post('billing_address_country');
 
-				else :
+                    } else {
 
-					$this->form_validation->set_rules( 'billing_address_line_1',	'', 'xss_clean|trim' );
-					$this->form_validation->set_rules( 'billing_address_line_2',	'', 'xss_clean|trim' );
-					$this->form_validation->set_rules( 'billing_address_town',		'', 'xss_clean|trim' );
-					$this->form_validation->set_rules( 'billing_address_state',		'', 'xss_clean|trim' );
-					$this->form_validation->set_rules( 'billing_address_postcode',	'', 'xss_clean|trim' );
-					$this->form_validation->set_rules( 'billing_address_country',	'', 'xss_clean|trim' );
+                        $_data->billing           = new stdClass();
+                        $_data->billing->line_1   = $this->input->post('delivery_address_line_1');
+                        $_data->billing->line_2   = $this->input->post('delivery_address_line_2');
+                        $_data->billing->town     = $this->input->post('delivery_address_town');
+                        $_data->billing->state    = $this->input->post('delivery_address_state');
+                        $_data->billing->postcode = $this->input->post('delivery_address_postcode');
+                        $_data->billing->country  = $this->input->post('delivery_address_country');
+                    }
 
-				endif;
+                    //  And the basket
+                    $_data->basket = $_basket;
 
-				$this->form_validation->set_rules( 'payment_gateway', '', 'xss_clean|trim|required' );
+                    //  Generate the order and proceed to payment
+                    $_order = $this->shop_order_model->create($_data, TRUE);
 
-				$this->form_validation->set_message( 'required', lang( 'fv_required' ) );
+                    if ($_order) {
 
-				if ( $this->form_validation->run() ) :
+                        /**
+                         * Order created successfully, attempt payment. We need to keep track of the order ID
+                         * so that when we redirect the processing/cancel pages can pick up where we left off.
+                         */
 
-					//	Prepare data
-					$_data = new stdClass();
+                        $this->shop_payment_gateway_model->checkout_session_save(
+                            $_order->id,
+                            $_order->ref,
+                            $_order->code
+                        );
 
-					//	Contact details
-					$_data->contact				= new stdClass();
-					$_data->contact->first_name	= $this->input->post( 'first_name' );
-					$_data->contact->last_name	= $this->input->post( 'last_name' );
-					$_data->contact->email		= $this->input->post( 'email' );
-					$_data->contact->telephone	= $this->input->post( 'telephone' );
+                        if (
+                            $this->shop_payment_gateway_model->do_payment(
+                                $_order->id,
+                                $paymentGateway,
+                                $this->input->post()
+                            )
+                        ) {
 
-					//	Delivery Details
-					$_data->delivery			= new stdClass();
-					$_data->delivery->line_1	= $this->input->post( 'delivery_address_line_1' );
-					$_data->delivery->line_2	= $this->input->post( 'delivery_address_line_2' );
-					$_data->delivery->town		= $this->input->post( 'delivery_address_town' );
-					$_data->delivery->state		= $this->input->post( 'delivery_address_state' );
-					$_data->delivery->postcode	= $this->input->post( 'delivery_address_postcode' );
-					$_data->delivery->country	= $this->input->post( 'delivery_address_country' );
+                            /**
+                             * Payment complete! Mark order as paid and then process it, finally
+                             * send user to processing page for receipt
+                             */
 
-					//	Billing details
-					if ( ! $this->input->post( 'same_billing_address' ) ) :
+                            $this->shop_order_model->paid($_order->id);
+                            $this->shop_order_model->process($_order->id);
 
-						$_data->billing				= new stdClass();
-						$_data->billing->line_1		= $this->input->post( 'billing_address_line_1' );
-						$_data->billing->line_2		= $this->input->post( 'billing_address_line_2' );
-						$_data->billing->town		= $this->input->post( 'billing_address_town' );
-						$_data->billing->state		= $this->input->post( 'billing_address_state' );
-						$_data->billing->postcode	= $this->input->post( 'billing_address_postcode' );
-						$_data->billing->country	= $this->input->post( 'billing_address_country' );
+                            $_shop_url = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
+                            redirect($_shop_url . 'checkout/processing?ref=' . $_order->ref);
 
-					else :
+                        } else {
 
-						$_data->billing				= new stdClass();
-						$_data->billing->line_1		= $this->input->post( 'delivery_address_line_1' );
-						$_data->billing->line_2		= $this->input->post( 'delivery_address_line_2' );
-						$_data->billing->town		= $this->input->post( 'delivery_address_town' );
-						$_data->billing->state		= $this->input->post( 'delivery_address_state' );
-						$_data->billing->postcode	= $this->input->post( 'delivery_address_postcode' );
-						$_data->billing->country	= $this->input->post( 'delivery_address_country' );
+                            //  Payment failed, mark this order as a failure too.
+                            $this->shop_order_model->fail(
+                                $_order->id,
+                                $this->shop_payment_gateway_model->last_error()
+                            );
 
-					endif;
+                            $this->data['error']  = '<strong>Sorry,</strong> something went wrong during checkout. ';
+                            $this->data['error'] .= $this->shop_payment_gateway_model->last_error();
 
-					//	And the basket
-					$_data->basket = $_basket;
+                            $this->data['payment_error'] = $this->shop_payment_gateway_model->last_error();
 
-					//	Generate the order and proceed to payment
-					$_order = $this->shop_order_model->create( $_data, TRUE );
+                            $this->shop_payment_gateway_model->checkout_session_clear();
+                        }
 
-					if ( $_order ) :
+                    } else {
 
-						/**
-						 * Order created successfully, attempt payment. We need to keep track of the order ID
-						 * so that when we redirect the processing/cancel pages can pick up where we left off.
-						 */
+                        $this->data['error']  = '<strong>Sorry,</strong> there was a problem processing your order. ';
+                        $this->data['error'] .= $this->shop_order_model->last_error();
+                    }
 
-						$this->shop_payment_gateway_model->checkout_session_save( $_order->id, $_order->ref, $_order->code );
+                } else {
 
-						if ( $this->shop_payment_gateway_model->do_payment( $_order->id, $this->input->post( 'payment_gateway' ), $this->input->post() ) ) :
+                    $this->data['error'] = lang('fv_there_were_errors');
+                }
+            }
+        }
 
-							//	Payment complete! Mark order as paid and then process it, finally send user to processing page for receipt
-							$this->shop_order_model->paid( $_order->id );
-							$this->shop_order_model->process( $_order->id );
+        // --------------------------------------------------------------------------
 
-							$_shop_url = app_setting( 'url', 'shop' ) ? app_setting( 'url', 'shop' ) : 'shop/';
-							redirect( $_shop_url . 'checkout/processing?ref=' . $_order->ref );
+        //  Load assets required by the payment gateways
+        foreach ($this->data['payment_gateways'] as $pg) {
 
-						else :
+            $_assets = $this->shop_payment_gateway_model->get_checkout_assets($pg->slug);
 
-							//	Payment failed, mark this order as a failure too.
-							$this->shop_order_model->fail( $_order->id, $this->shop_payment_gateway_model->last_error() );
-							$this->data['error']			= '<strong>Sorry,</strong> something went wrong during checkout. ' . $this->shop_payment_gateway_model->last_error();
-							$this->data['payment_error']	= $this->shop_payment_gateway_model->last_error();
+            foreach ($_assets as $asset) {
 
-							$this->shop_payment_gateway_model->checkout_session_clear();
+                $_inline = array('JS_INLINE', 'JS-INLINE', 'CSS_INLINE', 'CSS-INLINE');
 
-						endif;
+                if (in_array($asset[2], $_inline)) {
 
-					else :
+                    $this->asset->inline($asset[0], $asset[2]);
 
-						$this->data['error'] = '<strong>Sorry,</strong> there was a problem processing your order. ' . $this->shop_order_model->last_error();
+                } else {
 
-					endif;
+                    $this->asset->load($asset[0], $asset[1], $asset[2]);
+                }
+            }
+        }
 
-				else :
+        // --------------------------------------------------------------------------
 
-					$this->data['error'] = lang( 'fv_there_were_errors' );
+        $this->data['page']->title = $this->_shop_name . ': Checkout';
 
-				endif;
+        // --------------------------------------------------------------------------
 
-			endif;
+        $this->load->view('structure/header', $this->data);
+        $this->load->view($this->_skin_checkout->path . 'views/checkout/index', $this->data);
+        $this->load->view('structure/footer', $this->data);
+    }
 
-		endif;
+    // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
+    /**
+     * Shown to the user once the payment gateway has been informed.
+     * @return void
+     */
+    public function processing()
+    {
+        $this->data['order'] = $this->_get_order();
 
-		//	Load assets required by the payment gateways
-		foreach ( $this->data['payment_gateways'] as $pg ) :
+        if (empty($this->data['order'])) {
 
-			$_assets = $this->shop_payment_gateway_model->get_checkout_assets( $pg->slug );
+            show_404();
 
-			foreach ( $_assets as $asset ) :
+        } else {
 
-				$_inline = array( 'JS_INLINE', 'JS-INLINE', 'CSS_INLINE', 'CSS-INLINE' );
+            //  Fetch the product/variants associated with each order item
+            foreach ($this->data['order']->items as $item) {
 
-				if ( in_array( $asset[2], $_inline ) ) :
+                $item->product = $this->shop_product_model->get_by_id($item->product_id);
 
-					$this->asset->inline( $asset[0], $asset[2] );
+                if (!empty($item->product)) {
 
-				else :
+                    //  Find the variant
+                    foreach ($item->product->variations as &$v) {
 
-					$this->asset->load( $asset[0], $asset[1], $asset[2] );
+                        if ($v->id == $item->variant_id) {
 
-				endif;
+                            $item->variant = $v;
+                            break;
+                        }
+                    }
+                }
+            }
 
-			endforeach;
+            // --------------------------------------------------------------------------
 
-		endforeach;
+            //  Map the country codes to names
+            $this->load->model('country_model');
+            $this->data['country'] = $this->country_model->get_all_flat();
 
-		// --------------------------------------------------------------------------
+            if ($this->data['order']->shipping_address->country) {
 
-		$this->data['page']->title = $this->_shop_name . ': Checkout';
+                $this->data['order']->shipping_address->country = $this->data['country'][$this->data['order']->shipping_address->country];
+            }
 
-		// --------------------------------------------------------------------------
+            if ($this->data['order']->billing_address->country) {
 
-		$this->load->view( 'structure/header',										$this->data );
-		$this->load->view( $this->_skin_checkout->path . 'views/checkout/index',	$this->data );
-		$this->load->view( 'structure/footer',										$this->data );
-	}
+                $this->data['order']->billing_address->country = $this->data['country'][$this->data['order']->billing_address->country];
+            }
 
-	// --------------------------------------------------------------------------
+            // --------------------------------------------------------------------------
 
+            //  Empty the basket
+            $this->shop_basket_model->destroy();
 
-	/**
-	 * Shown to the user once the payment gateway has been informed.
-	 * @return void
-	 */
-	public function processing()
-	{
-		$this->data['order'] = $this->_get_order();
+            // --------------------------------------------------------------------------
 
-		if ( empty( $this->data['order'] ) ) :
+            switch ($this->data['order']->status) {
 
-			show_404();
+                case 'UNPAID':
 
-		else :
+                    $this->_processing_unpaid();
+                    break;
 
-			//	Fetch the product/variants associated with each order item
-			foreach ( $this->data['order']->items as $item ) :
+                case 'PAID':
 
-				$item->product = $this->shop_product_model->get_by_id( $item->product_id );
+                    $this->_processing_paid();
+                    break;
 
-				if ( ! empty( $item->product ) ) :
+                case 'PENDING':
 
-					//	Find the variant
-					foreach ( $item->product->variations as &$v ) :
+                    $this->_processing_pending();
+                    break;
 
-						if ( $v->id == $item->variant_id ) :
+                case 'FAILED':
 
-							$item->variant = $v;
-							break;
+                    $this->_processing_failed();
+                    break;
 
-						endif;
+                case 'ABANDONED':
 
-					endforeach;
+                    $this->_processing_abandoned();
+                    break;
 
-				endif;
+                case 'CANCELLED':
 
-			endforeach;
+                    $this->_processing_cancelled();
+                    break;
 
-			// --------------------------------------------------------------------------
+                default:
 
-			//	Map the country codes to names
-			$this->load->model( 'country_model' );
-			$this->data['country'] = $this->country_model->get_all_flat();
+                    $this->_processing_error();
+                    break;
+            }
+        }
+    }
 
-			if ( $this->data['order']->shipping_address->country ) :
+    // --------------------------------------------------------------------------
 
-				$this->data['order']->shipping_address->country = $this->data['country'][$this->data['order']->shipping_address->country];
+    /**
+     * Renders the "unpaid" processing view.
+     * @return void
+     */
+    protected function _processing_unpaid()
+    {
+        $this->load->view($this->_skin_checkout->path . 'views/checkout/processing/unpaid', $this->data);
+    }
 
-			endif;
+    // --------------------------------------------------------------------------
 
-			if ( $this->data['order']->billing_address->country ) :
+    /**
+     * Renders the "pending" processing view.
+     * @return void
+     */
+    protected function _processing_pending()
+    {
+        //  Now we know what the state of play is, clear the session.
+        $this->shop_payment_gateway_model->checkout_session_clear();
 
-				$this->data['order']->billing_address->country = $this->data['country'][$this->data['order']->billing_address->country];
+        //  And load the view
+        $this->load->view($this->_skin_checkout->path . 'views/checkout/processing/pending', $this->data);
+    }
 
-			endif;
+    // --------------------------------------------------------------------------
 
-			// --------------------------------------------------------------------------
+    /**
+     * Renders the "paid" processing view.
+     * @return void
+     */
+    protected function _processing_paid()
+    {
+        $this->data['page']->title = 'Thanks for your order!';
+        $this->data['success']     = '<strong>Success!</strong> Your order has been processed.';
 
-			//	Empty the basket
-			$this->shop_basket_model->destroy();
+        // --------------------------------------------------------------------------
 
-			// --------------------------------------------------------------------------
+        //  Now we know what the state of play is, clear the session.
+        $this->shop_payment_gateway_model->checkout_session_clear();
 
-			switch( $this->data['order']->status ) :
+        //  And load the view
+        $this->load->view($this->_skin_checkout->path . 'views/checkout/processing/paid', $this->data);
+    }
 
-				case 'UNPAID' :		$this->_processing_unpaid();		break;
-				case 'PAID' :		$this->_processing_paid();			break;
-				case 'PENDING' :	$this->_processing_pending();		break;
-				case 'FAILED' :		$this->_processing_failed();		break;
-				case 'ABANDONED' :	$this->_processing_abandoned();		break;
-				case 'CANCELLED' :	$this->_processing_cancelled();		break;
-				default :			$this->_processing_error();			break;
+    // --------------------------------------------------------------------------
 
-			endswitch;
+    /**
+     * Renders the "failed" processing view.
+     * @return void
+     */
+    protected function _processing_failed()
+    {
+        if (!$this->data['error']) {
 
-		endif;
-	}
+            $this->data['error'] = '<strong>Sorry,</strong> there was a problem processing your order';
+        }
 
+        if (!isset($this->data['page']->title) || !$this->data['page']->title) {
 
-	// --------------------------------------------------------------------------
+            $this->data['page']->title = 'An error occurred';
+        }
 
+        // --------------------------------------------------------------------------
 
-	/**
-	 * Renders the "unpaid" processing view.
-	 * @return void
-	 */
-	protected function _processing_unpaid()
-	{
-		$this->load->view( $this->_skin_checkout->path . 'views/checkout/processing/unpaid',	$this->data );
-	}
+        //  Now we know what the state of play is, clear the session.
+        $this->shop_payment_gateway_model->checkout_session_clear();
 
+        //  And load the view
+        $this->load->view($this->_skin_checkout->path . 'views/checkout/processing/failed', $this->data);
+    }
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
+    /**
+     * Renders the "abandoned" processing view.
+     * @return void
+     */
+    protected function _processing_abandoned()
+    {
+        if (!$this->data['error']) {
 
-	/**
-	 * Renders the "pending" processing view.
-	 * @return void
-	 */
-	protected function _processing_pending()
-	{
-		//	Now we know what the state of play is, clear the session.
-		$this->shop_payment_gateway_model->checkout_session_clear();
+            $this->data['error'] = '<strong>Sorry,</strong> there was a problem processing your order';
+        }
 
-		//	And load the view
-		$this->load->view( $this->_skin_checkout->path . 'views/checkout/processing/pending',	$this->data );
-	}
+        if (!isset($this->data['page']->title) || !$this->data['page']->title) {
 
+            $this->data['page']->title = 'An error occurred';
+        }
 
-	// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
+        //  Now we know what the state of play is, clear the session.
+        $this->shop_payment_gateway_model->checkout_session_clear();
 
-	/**
-	 * Renders the "paid" processing view.
-	 * @return void
-	 */
-	protected function _processing_paid()
-	{
-		$this->data['page']->title	= 'Thanks for your order!';
-		$this->data['success']		= '<strong>Success!</strong> Your order has been processed.';
+        //  And load the view
+        $this->load->view($this->_skin_checkout->path . 'views/checkout/processing/abandoned', $this->data);
+    }
 
-		// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
-		//	Now we know what the state of play is, clear the session.
-		$this->shop_payment_gateway_model->checkout_session_clear();
+    /**
+     * Renders the "cancelled" processing view.
+     * @return void
+     */
+    protected function _processing_cancelled()
+    {
+        if (!$this->data['error']) {
 
-		//	And load the view
-		$this->load->view( $this->_skin_checkout->path . 'views/checkout/processing/paid',	$this->data );
-	}
+            $this->data['error'] = '<strong>Sorry,</strong> there was a problem processing your order';
+        }
 
+        if (!isset($this->data['page']->title) || !$this->data['page']->title) {
 
-	// --------------------------------------------------------------------------
+            $this->data['page']->title = 'An error occurred';
+        }
 
+        // --------------------------------------------------------------------------
 
-	/**
-	 * Renders the "failed" processing view.
-	 * @return void
-	 */
-	protected function _processing_failed()
-	{
-		if ( ! $this->data['error'] ) :
+        //  Now we know what the state of play is, clear the session.
+        $this->shop_payment_gateway_model->checkout_session_clear();
 
-			$this->data['error'] = '<strong>Sorry,</strong> there was a problem processing your order';
+        //  And load the view
+        $this->load->view($this->_skin_checkout->path . 'views/checkout/processing/cancelled', $this->data);
+    }
 
-		endif;
+    // --------------------------------------------------------------------------
 
-		if ( ! isset( $this->data['page']->title ) || ! $this->data['page']->title ) :
+    /**
+     * Renders the "error" processing view.
+     * @return void
+     */
+    protected function _processing_error($error = '')
+    {
+        if (!$this->data['error']) {
 
-			$this->data['page']->title = 'An error occurred';
+            $this->data['error'] = '<strong>Sorry,</strong> there was a problem processing your order. ' . $error;
+        }
 
-		endif;
+        if (!isset($this->data['page']->title) || !$this->data['page']->title) {
 
-		// --------------------------------------------------------------------------
+            $this->data['page']->title = 'An error occurred';
+        }
 
-		//	Now we know what the state of play is, clear the session.
-		$this->shop_payment_gateway_model->checkout_session_clear();
+        // --------------------------------------------------------------------------
 
-		//	And load the view
-		$this->load->view( $this->_skin_checkout->path . 'views/checkout/processing/failed',	$this->data );
-	}
+        //  Now we know what the state of play is, clear the session.
+        $this->shop_payment_gateway_model->checkout_session_clear();
 
+        //  And load the view
+        $this->load->view($this->_skin_checkout->path . 'views/checkout/processing/error', $this->data);
+    }
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
+    /**
+     * Marks an order as cancelled and redirects the user to the basket with feedback.
+     * @return void
+     */
+    public function cancel()
+    {
+        $_order = $this->_get_order(false);
 
-	/**
-	 * Renders the "abandoned" processing view.
-	 * @return void
-	 */
-	protected function _processing_abandoned()
-	{
-		if ( ! $this->data['error'] ) :
+        if (empty($_order)) {
 
-			$this->data['error'] = '<strong>Sorry,</strong> there was a problem processing your order';
+            show_404();
+        }
 
-		endif;
+        //  Can't cancel an order which has been paid
+        if ($_order->status == 'PAID') {
 
-		if ( ! isset( $this->data['page']->title ) || ! $this->data['page']->title ) :
+            $status   = 'error';
+            $message  = '<strong>Order cannot be cancelled.</strong>';
+            $message .= '<br />That order has already been paid and cannot be cancelled.';
 
-			$this->data['page']->title = 'An error occurred';
+        } else {
 
-		endif;
+            $this->shop_order_model->cancel($_order->id);
 
-		// --------------------------------------------------------------------------
+            $status   = 'message';
+            $message  = '<strong>Checkout was cancelled.</strong>';
+            $message .= '<br />At your request, we cancelled checkout - you have not been charged.';
 
-		//	Now we know what the state of play is, clear the session.
-		$this->shop_payment_gateway_model->checkout_session_clear();
+        }
 
-		//	And load the view
-		$this->load->view( $this->_skin_checkout->path . 'views/checkout/processing/abandoned',	$this->data );
-	}
+        $this->session->set_flashdata($status, $message);
+        redirect($this->_shop_url . 'basket');
+    }
 
+    // --------------------------------------------------------------------------
 
-	// --------------------------------------------------------------------------
+    public function confirm()
+    {
+        $order = $this->_get_order();
 
+        if (empty($order)) {
 
-	/**
-	 * Renders the "cancelled" processing view.
-	 * @return void
-	 */
-	protected function _processing_cancelled()
-	{
-		if ( ! $this->data['error'] ) :
+            show_404();
+        }
 
-			$this->data['error'] = '<strong>Sorry,</strong> there was a problem processing your order';
+        $result = $this->shop_payment_gateway_model->confirm_complete_payment($this->uri->rsegment(3), $order);
 
-		endif;
+        if ($result) {
 
-		if ( ! isset( $this->data['page']->title ) || ! $this->data['page']->title ) :
+            redirect($this->_shop_url . 'checkout/processing?ref=' . $order->ref);
 
-			$this->data['page']->title = 'An error occurred';
+        } else {
 
-		endif;
+            $status   = 'error';
+            $message  = 'An error occurred during checkout, you may have been charged. ';
+            $message .= $this->shop_payment_gateway_model->last_error();
 
-		// --------------------------------------------------------------------------
+            $this->session->set_flashdata($status, $message);
+            redirect($this->_shop_url . 'checkout');
+        }
+    }
 
-		//	Now we know what the state of play is, clear the session.
-		$this->shop_payment_gateway_model->checkout_session_clear();
+    // --------------------------------------------------------------------------
 
-		//	And load the view
-		$this->load->view( $this->_skin_checkout->path . 'views/checkout/processing/cancelled',	$this->data );
-	}
+    /**
+     * Allows the customer to download an invoice
+     * @return void
+     */
+    public function invoice()
+    {
+        //  Fetch and check order
+        $this->load->model('shop/shop_order_model');
 
+        $this->data['order'] = $this->shop_order_model->get_by_ref($this->uri->rsegment(3));
+        if (!$this->data['order'] || $this->uri->rsegment(4) != md5($this->data['order']->code)) {
 
-	// --------------------------------------------------------------------------
+            show_404();
+        }
 
+        // --------------------------------------------------------------------------
 
-	/**
-	 * Renders the "error" processing view.
-	 * @return void
-	 */
-	protected function _processing_error( $error = '' )
-	{
-		if ( ! $this->data['error'] ) :
+        //  Load up the shop's skin
+        $skin = app_setting('skin_checkout', 'shop') ? app_setting('skin_checkout', 'shop') : 'shop-skin-checkout-classic';
 
-			$this->data['error'] = '<strong>Sorry,</strong> there was a problem processing your order. ' . $error;
+        $this->load->model('shop/shop_skin_checkout_model');
+        $skin = $this->shop_skin_checkout_model->get($skin);
 
-		endif;
+        if (!$skin) {
 
-		if ( ! isset( $this->data['page']->title ) || ! $this->data['page']->title ) :
+            $subject  = 'Failed to load shop skin "' . $skin . '"';
+            $message  = 'Shop skin "' . $skin . '" failed to load at ' . APP_NAME . ', the following reason was given: ';
+            $message .= $this->shop_skin_checkout_model->last_error();
 
-			$this->data['page']->title = 'An error occurred';
+            showFatalError($subject, $message);
+        }
 
-		endif;
+        // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
+        //  Views
+        $this->data['for_user'] = 'CUSTOMER';
+        $this->load->library('pdf/pdf');
+        $this->pdf->set_paper_size('A4', 'landscape');
+        $this->pdf->load_view($skin->path . 'views/order/invoice', $this->data);
+        $this->pdf->download('INVOICE-' . $this->data['order']->ref . '.pdf');
+    }
 
-		//	Now we know what the state of play is, clear the session.
-		$this->shop_payment_gateway_model->checkout_session_clear();
+    // --------------------------------------------------------------------------
 
-		//	And load the view
-		$this->load->view( $this->_skin_checkout->path . 'views/checkout/processing/error',	$this->data );
-	}
+    /**
+     * Fetches the order, used by the checkout process
+     * @param  boolean $redirect Whether to redirect to the processing page if session order is found
+     * @return mixed
+     */
+    protected function _get_order($redirect = true)
+    {
+        $_order_ref = $this->input->get('ref');
 
+        if ($_order_ref) {
 
-	// --------------------------------------------------------------------------
+            $this->shop_payment_gateway_model->checkout_session_clear();
+            return $this->shop_order_model->get_by_ref($_order_ref);
 
+        } else {
 
-	/**
-	 * Marks an order as cancelled and redirects the user to the basket with feedback.
-	 * @return void
-	 */
-	public function cancel()
-	{
-		$_order = $this->_get_order(false);
+            //  No ref, try the session
+            $_order_id = $this->shop_payment_gateway_model->checkout_session_get();
 
-		if ( empty( $_order ) ) :
+            if ($_order_id) {
 
-			show_404();
+                $_order = $this->shop_order_model->get_by_id($_order_id);
 
-		endif;
+                if ($_order) {
 
-		//	Can't cancel an order which has been paid
-		if ( $_order->status == 'PAID' ) :
+                    $this->shop_payment_gateway_model->checkout_session_clear();
+                    if ($redirect == true) {
 
-			$this->session->set_flashdata( 'error', '<strong>Order cannot be cancelled.</strong><br />that order has already been paid and cannot be cancelled.' );
+                        redirect($this->_shop_url . 'checkout/processing?ref=' . $_order->ref);
 
-		else :
+                    } else {
 
-			$this->shop_order_model->cancel( $_order->id );
-			$this->session->set_flashdata( 'message', '<strong>Checkout was cancelled.</strong><br />At your request, we cancelled checkout - you have not been charged.' );
-
-		endif;
-
-		redirect( $this->_shop_url . 'basket' );
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	public function confirm()
-	{
-		$_order = $this->_get_order();
-
-		if ( empty( $_order ) ) :
-
-			show_404();
-
-		endif;
-
-		$_result = $this->shop_payment_gateway_model->confirm_complete_payment( $this->uri->rsegment( 3 ), $_order );
-
-		if ( $_result ) :
-
-			redirect( $this->_shop_url . 'checkout/processing?ref=' . $_order->ref );
-
-		else :
-
-			$this->session->set_flashdata( 'error', 'An error occurred during checkout, you may have been charged. ' . $this->shop_payment_gateway_model->last_error() );
-			redirect( $this->_shop_url . 'checkout' );
-
-		endif;
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Allows the customer to download an invoice
-	 * @return void
-	 */
-	public function invoice()
-	{
-		//	Fetch and check order
-		$this->load->model('shop/shop_order_model');
-
-		$this->data['order'] = $this->shop_order_model->get_by_ref($this->uri->rsegment(3));
-		if (!$this->data['order'] || $this->uri->rsegment(4) != md5($this->data['order']->code)) {
-
-			show_404();
-
-		}
-
-		// --------------------------------------------------------------------------
-
-		//	Load up the shop's skin
-		$skin = app_setting('skin_checkout', 'shop') ? app_setting('skin_checkout', 'shop') : 'shop-skin-checkout-classic';
-
-		$this->load->model('shop/shop_skin_checkout_model');
-		$skin = $this->shop_skin_checkout_model->get($skin);
-
-		if (!$skin) {
-
-			showFatalError('Failed to load shop skin "' . $skin . '"', 'Shop skin "' . $skin . '" failed to load at ' . APP_NAME . ', the following reason was given: ' . $this->shop_skin_checkout_model->last_error());
-		}
-
-		// --------------------------------------------------------------------------
-
-		//	Views
-		$this->data['for_user'] = 'CUSTOMER';
-		$this->load->library('pdf/pdf');
-		$this->pdf->set_paper_size('A4', 'landscape');
-		$this->pdf->load_view($skin->path . 'views/order/invoice', $this->data);
-		$this->pdf->download('INVOICE-' . $this->data['order']->ref . '.pdf');
-	}
-
-
-	// --------------------------------------------------------------------------
-
-
-	/**
-	 * Fetches the order, used by the checkout process
-	 * @param  boolean $redirect Whether to redirect to the processing page if session order is found
-	 * @return mixed
-	 */
-	protected function _get_order($redirect = true)
-	{
-		$_order_ref = $this->input->get( 'ref' );
-
-		if ( $_order_ref ) :
-
-			$this->shop_payment_gateway_model->checkout_session_clear();
-			return $this->shop_order_model->get_by_ref( $_order_ref );
-
-		else :
-
-			//	No ref, try the session
-			$_order_id = $this->shop_payment_gateway_model->checkout_session_get();
-
-			if ( $_order_id ) :
-
-				$_order = $this->shop_order_model->get_by_id( $_order_id );
-
-				if ( $_order ) :
-
-					$this->shop_payment_gateway_model->checkout_session_clear();
-					if ($redirect == true) {
-
-						redirect($this->_shop_url . 'checkout/processing?ref=' . $_order->ref);
-
-					} else {
-
-						return $_order;
-					}
-
-				endif;
-
-			endif;
-
-		endif;
-	}
+                        return $_order;
+                    }
+                }
+            }
+        }
+    }
 }
 
-
 // --------------------------------------------------------------------------
-
 
 /**
  * OVERLOADING NAILS' SHOP MODULE
@@ -705,13 +697,9 @@ class NAILS_Checkout extends NAILS_Shop_Controller
  *
  **/
 
-if ( ! defined( 'NAILS_ALLOW_EXTENSION_CHECKOUT' ) ) :
+if (!defined('NAILS_ALLOW_EXTENSION_CHECKOUT')) {
 
-	class Checkout extends NAILS_Checkout
-	{
-	}
-
-endif;
-
-/* End of file checkout.php */
-/* Location: ./application/modules/shop/controllers/checkout.php */
+    class Checkout extends NAILS_Checkout
+    {
+    }
+}

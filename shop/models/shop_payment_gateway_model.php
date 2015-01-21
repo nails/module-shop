@@ -423,7 +423,9 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
 					if ( ! $this->shop_order_model->paid( $_order->id ) ) :
 
-						sendDeveloperMail('Failed to mark order #' . $_order->id . ' as paid', 'The transaction for this order was successfull, but I was unable to mark the order as paid.');
+						$subject = 'Failed to mark order #' . $_order->id . ' as paid';
+						$message = 'The transaction for this order was successfull, but I was unable to mark the order as paid.';
+						sendDeveloperMail($subject, $message);
 
 					endif;
 
@@ -432,7 +434,9 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 					//	Process the order, i.e do any after sales stuff which needs done immediately
 					if ( ! $this->shop_order_model->process( $_order->id ) ) :
 
-						sendDeveloperMail('Failed to process order #' . $_order->id . ' as paid', 'The transaction for this order was successfull, but I was unable to processthe order.');
+						$subject = 'Failed to process order #' . $_order->id . ' as paid';
+						$message = 'The transaction for this order was successfull, but I was unable to processthe order.';
+						sendDeveloperMail($subject, $message);
 
 					endif;
 

@@ -1146,7 +1146,12 @@ class NAILS_Shop_order_model extends NAILS_Model
 			_LOG( '!! Failed to send download links, alerting developers' );
 			_LOG( implode( "\n", $this->emailer->get_errors() ) );
 
-			sendDeveloperMail('Unable to send download email', 'Unable to send the email with download links to ' . $_email->to_email . '; order: #' . $order->id . "\n\nEmailer errors:\n\n" . print_r($this->emailer->get_errors(), true));
+			$subject  = 'Unable to send download email';
+			$message  = 'Unable to send the email with download links to ' . $_email->to_email . '; ';
+			$message .= 'order #' . $order->id . "\n\nEmailer errors:\n\n";
+			$message .= print_r($this->emailer->get_errors(), true);
+
+			sendDeveloperMail($subject, $message);
 
 		endif;
 	}
