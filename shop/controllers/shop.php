@@ -3,6 +3,16 @@
 //  Include _shop.php; executes common functionality
 require_once '_shop.php';
 
+/**
+ * This class provides front end shop functionality
+ *
+ * @package     Nails
+ * @subpackage  module-shop
+ * @category    Controller
+ * @author      Nails Dev Team
+ * @link
+ */
+
 class NAILS_Shop extends NAILS_Shop_Controller
 {
     protected $product_sort;
@@ -19,26 +29,17 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        //  Load appropriate assets
-        //  =======================
-
-        $assets     = !empty($this->_skin_front->assets)     ? $this->_skin_front->assets     : array();
-        $css_inline = !empty($this->_skin_front->css_inline) ? $this->_skin_front->css_inline : array();
-        $js_inline  = !empty($this->_skin_front->js_inline)  ? $this->_skin_front->js_inline  : array();
-
-        $this->_load_skin_assets($assets, $css_inline, $js_inline, $this->_skin_front->url);
-
-        // --------------------------------------------------------------------------
-
         //  Product Sorting
         //  ===============
 
         //  Defaults
         $this->_product_sort       = new stdClass();
-        $this->_product_sort->sort = app_setting('default_product_sort', 'shop') ? app_setting('default_product_sort', 'shop') : 'recent';
+        $this->_product_sort->sort = app_setting('default_product_sort', 'shop');
+        $this->_product_sort->sort = $this->_product_sort->sort ? $this->_product_sort->sort : 'recent';
 
         //  Actual Values
-        $this->_product_sort->sort = $this->input->get_post('sort') ? $this->input->get_post('sort') : $this->_product_sort->sort;
+        $this->_product_sort->sort = $this->input->get_post('sort');
+        $this->_product_sort->sort = $this->_product_sort->sort ? $this->_product_sort->sort : $this->_product_sort->sort;
 
         //  Sanitise/translate
         switch ($this->_product_sort->sort) {
@@ -78,7 +79,8 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->_product_pagination->page     = 0;
         $this->_product_pagination->rsegment = 2;
         $this->_product_pagination->total    = 0;
-        $this->_product_pagination->per_page = app_setting('default_product_per_page', 'shop') ? app_setting('default_product_per_page', 'shop') : 25;
+        $this->_product_pagination->per_page = app_setting('default_product_per_page', 'shop');
+        $this->_product_pagination->per_page = $this->_product_pagination->per_page ? $this->_product_pagination->per_page : 25;
 
         //  Actual Values
         $this->_product_pagination->per_page = $this->input->get_post('per_page') ? $this->input->get_post('per_page') : $this->_product_pagination->per_page;

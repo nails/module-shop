@@ -12,10 +12,10 @@
 
 class NAILS_Shop_Controller extends NAILS_Controller
 {
-    protected $_shop_name;
-    protected $_shop_url;
-    protected $_skin_front;
-    protected $_skin_checkout;
+    protected $shopName;
+    protected $shopUrl;
+    protected $skinFront;
+    protected $skinCheckout;
 
     // --------------------------------------------------------------------------
 
@@ -62,43 +62,52 @@ class NAILS_Shop_Controller extends NAILS_Controller
         //  "Front of house" Skin
         $skin = app_setting('skin_front', 'shop');
         $skin = !empty($skin) ? $skin : 'shop-skin-front-classic';
-        $this->_load_skin($skin, 'front');
+        $this->loadSkin($skin, 'front');
 
         //  "Checkout" Skin
         $skin = app_setting('skin_checkout', 'shop');
         $skin = !empty($skin) ? $skin : 'shop-skin-checkout-classic';
-        $this->_load_skin($skin, 'checkout');
+        $this->loadSkin($skin, 'checkout');
 
         // --------------------------------------------------------------------------
 
         //  Shop's name
-        $this->_shop_name = app_setting('name', 'shop') ? app_setting('name', 'shop') : 'Shop';
+        $this->shopName = app_setting('name', 'shop') ? app_setting('name', 'shop') : 'Shop';
 
         // --------------------------------------------------------------------------
 
         //  Shop's base URL
-        $this->_shop_url = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
+        $this->shopUrl = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
 
         // --------------------------------------------------------------------------
 
         //  Pass data to the views
-        $this->data['shop_name'] = $this->_shop_name;
-        $this->data['shop_url']  = $this->_shop_url;
+        $this->data['shop_name'] = $this->shopName;
+        $this->data['shop_url']  = $this->shopUrl;
+
+        // --------------------------------------------------------------------------
+
+        //  Load appropriate skin assets
+        $assets     = !empty($this->_skin_front->assets)     ? $this->_skin_front->assets     : array();
+        $css_inline = !empty($this->_skin_front->css_inline) ? $this->_skin_front->css_inline : array();
+        $js_inline  = !empty($this->_skin_front->js_inline)  ? $this->_skin_front->js_inline  : array();
+
+        $this->loadSkinAssets($assets, $css_inline, $js_inline, $this->_skin_front->url);
     }
 
     // --------------------------------------------------------------------------
 
-    protected function _load_skin($skin, $skinType)
+    protected function loadSkin($skin, $skinType)
     {
         //  Sanity test; make sure we're loading a skin type which is supported
         switch ($skinType) {
 
             case 'front':
 
-                $this->_skin_front        =& $this->shop_skin_front_model->get($skin);
-                $this->data['skin_front'] =& $this->_skin_front;
+                $this->skinFront        =& $this->shop_skin_front_model->get($skin);
+                $this->data['skin_front'] =& $this->skinFront;
 
-                if (!$this->_skin_front) {
+                if (!$this->skinFront) {
 
                     $errorSubject  = 'Failed to load shop front skin "' . $skin . '"';
                     $errorMessage  = 'Shop front skin "' . $skin . '" failed to load at ' . APP_NAME;
@@ -109,10 +118,10 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
             case 'checkout':
 
-                $this->_skin_checkout        =& $this->shop_skin_checkout_model->get($skin);
-                $this->data['skin_checkout'] =& $this->_skin_checkout;
+                $this->skinCheckout        =& $this->shop_skin_checkout_model->get($skin);
+                $this->data['skin_checkout'] =& $this->skinCheckout;
 
-                if (!$this->_skin_checkout) {
+                if (!$this->skinCheckout) {
 
                     $errorSubject  = 'Failed to load shop checkout skin "' . $skin . '"';
                     $errorMessage  = 'Shop checkout skin "' . $skin . '" failed to load at ' . APP_NAME;
@@ -137,7 +146,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
     // --------------------------------------------------------------------------
 
-    protected function _load_skin_assets($assets, $css_inline, $js_inline, $url)
+    protected function loadSkinAssets($assets, $css_inline, $js_inline, $url)
     {
         //  CSS and JS
         if (!empty($assets) && is_array($assets)) {
@@ -162,7 +171,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
             foreach ($css_inline as $asset) {
 
-                $this->asset->inline($asset, 'CSS_INLINE');
+                $this->asset->inline($asset, 'CSS-INLINE');
             }
         }
 
@@ -173,7 +182,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
             foreach ($js_inline as $asset) {
 
-                $this->asset->inline($asset, 'JS_INLINE');
+                $this->asset->inline($asset, 'JS-INLINE');
             }
         }
     }

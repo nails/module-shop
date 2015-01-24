@@ -3,8 +3,21 @@
 //  Include _shop.php; executes common functionality
 require_once '_shop.php';
 
+/**
+ * This class provides basket functionality
+ *
+ * @package     Nails
+ * @subpackage  module-shop
+ * @category    Controller
+ * @author      Nails Dev Team
+ * @link
+ */
+
 class NAILS_Basket extends NAILS_Shop_Controller
 {
+    /**
+     * Construct the controller
+     */
     public function __construct()
     {
         parent::__construct();
@@ -13,27 +26,13 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         $return = $this->input->get('return') ? $this->input->get_post('return') : $this->_shop_url . 'basket';
         $this->data['return'] = $return;
-
-        // --------------------------------------------------------------------------
-
-        //  Load appropriate assets
-        $assets    = !empty($this->_skin_checkout->assets)     ? $this->_skin_checkout->assets     : array();
-        $cssInline = !empty($this->_skin_checkout->css_inline) ? $this->_skin_checkout->css_inline : array();
-        $jsInline  = !empty($this->_skin_checkout->js_inline)  ? $this->_skin_checkout->js_inline  : array();
-
-        $this->_load_skin_assets($assets, $cssInline, $jsInline, $this->_skin_checkout->url);
     }
-
 
     // --------------------------------------------------------------------------
 
-
     /**
      * Render the user's basket
-     *
-     * @access  public
-     * @return  void
-     *
+     * @return void
      **/
     public function index()
     {
@@ -60,8 +59,10 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        //  Continue shopping URL
-        //  Skins can render a button which takes the user to a sensible place to keep shopping
+        /**
+         * Continue shopping URL. Skins can render a button which takes the user to a
+         * sensible place to keep shopping
+         */
 
         $this->data['continue_shopping_url'] = $this->_shop_url;
 
@@ -107,16 +108,12 @@ class NAILS_Basket extends NAILS_Shop_Controller
         $this->load->view('structure/footer', $this->data);
     }
 
-
     // --------------------------------------------------------------------------
-
 
     /**
      * Adds an item to the user's basket (fall back for when JS is not available)
-     *
      * @access  public
-     * @return  void
-     *
+     * @return void
      **/
     public function add()
     {
@@ -141,16 +138,11 @@ class NAILS_Basket extends NAILS_Shop_Controller
         redirect($this->data['return']);
     }
 
-
     // --------------------------------------------------------------------------
-
 
     /**
      * Removes an item from the user's basket (fall back for when JS is not available)
-     *
-     * @access  public
-     * @return  void
-     *
+     * @return void
      **/
     public function remove()
     {
@@ -174,16 +166,11 @@ class NAILS_Basket extends NAILS_Shop_Controller
         redirect($this->data['return']);
     }
 
-
     // --------------------------------------------------------------------------
-
 
     /**
      * Empties a user's basket
-     *
-     * @access  public
-     * @return  void
-     *
+     * @return void
      **/
     public function destroy()
     {
@@ -191,16 +178,11 @@ class NAILS_Basket extends NAILS_Shop_Controller
         redirect($this->data['return']);
     }
 
-
     // --------------------------------------------------------------------------
-
 
     /**
      * Increment an item in the user's basket (fall back for when JS is not available)
-     *
-     * @access  public
-     * @return  void
-     *
+     * @return void
      **/
     public function increment()
     {
@@ -223,16 +205,11 @@ class NAILS_Basket extends NAILS_Shop_Controller
         redirect($this->data['return']);
     }
 
-
     // --------------------------------------------------------------------------
-
 
     /**
      * Decrement an item in the user's basket (fall back for when JS is not available)
-     *
-     * @access  public
-     * @return  void
-     *
+     * @return void
      **/
     public function decrement()
     {
@@ -255,16 +232,11 @@ class NAILS_Basket extends NAILS_Shop_Controller
         redirect($this->data['return']);
     }
 
-
     // --------------------------------------------------------------------------
-
 
     /**
      * Validate and add a voucher to a basket
-     *
-     * @access  public
-     * @return  void
-     *
+     * @return void
      **/
     public function add_voucher()
     {
@@ -297,16 +269,11 @@ class NAILS_Basket extends NAILS_Shop_Controller
         redirect($this->data['return']);
     }
 
-
     // --------------------------------------------------------------------------
-
 
     /**
      * Remove any associated voucher from the user's basket
-     *
-     * @access  public
-     * @return  void
-     *
+     * @return void
      **/
     public function remove_voucher()
     {
@@ -328,12 +295,11 @@ class NAILS_Basket extends NAILS_Shop_Controller
         redirect($this->data['return']);
     }
 
-
     // --------------------------------------------------------------------------
-
 
     /**
      * Adds a note to the basket
+     * @return void
      */
     public function add_note()
     {
@@ -355,16 +321,11 @@ class NAILS_Basket extends NAILS_Shop_Controller
         redirect($this->data['return']);
     }
 
-
     // --------------------------------------------------------------------------
-
 
     /**
      * Set the user's preferred currency
-     *
-     * @access  public
-     * @return  void
-     *
+     * @return void
      **/
     public function set_currency()
     {
@@ -397,10 +358,12 @@ class NAILS_Basket extends NAILS_Shop_Controller
         redirect($this->data['return']);
     }
 
-
     // --------------------------------------------------------------------------
 
-
+    /**
+     * Set a basket as a "for collection" order
+     * @return void
+     */
     public function set_as_collection()
     {
         if ($this->shop_basket_model->addShippingType('COLLECT')) {
@@ -413,7 +376,6 @@ class NAILS_Basket extends NAILS_Shop_Controller
             $status   = 'error';
             $message  = '<strong>Sorry,</strong> failed to set your basket as a "collection" order. ';
             $message .= $this->shop_basket_model->last_error();
-
         }
 
         // --------------------------------------------------------------------------
@@ -422,10 +384,12 @@ class NAILS_Basket extends NAILS_Shop_Controller
         redirect($this->data['return']);
     }
 
-
     // --------------------------------------------------------------------------
 
-
+    /**
+     * Set a basket as a "for delivery" order
+     * @return void
+     */
     public function set_as_delivery()
     {
         if ($this->shop_basket_model->addShippingType('DELIVER')) {
@@ -438,7 +402,6 @@ class NAILS_Basket extends NAILS_Shop_Controller
             $status   = 'error';
             $message  = '<strong>Sorry,</strong> failed to set your basket as a "delivery" order. ';
             $message .= $this->shop_basket_model->last_error();
-
         }
 
         // --------------------------------------------------------------------------
@@ -448,9 +411,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
     }
 }
 
-
 // --------------------------------------------------------------------------
-
 
 /**
  * OVERLOADING NAILS' SHOP MODULE

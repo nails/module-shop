@@ -1,115 +1,96 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-/**
- * Name:		Shop - Notify
- *
- * Description:	This controller handles the user's notify
- *
- **/
-
-/**
- * OVERLOADING NAILS' AUTH MODULE
- *
- * Note the name of this class; done like this to allow apps to extend this class.
- * Read full explanation at the bottom of this file.
- *
- **/
-
-//	Include _shop.php; executes common functionality
+//  Include _shop.php; executes common functionality
 require_once '_shop.php';
+
+/**
+ * This class provides notification functionality
+ *
+ * @package     Nails
+ * @subpackage  module-shop
+ * @category    Controller
+ * @author      Nails Dev Team
+ * @link
+ */
 
 class NAILS_Notify extends NAILS_Shop_Controller
 {
-	public function __construct()
-	{
-		parent::__construct();
+    /**
+     * Handle notification interface
+     * @return void
+     */
+    public function index()
+    {
+        $variantId = $this->uri->rsegment('2');
+        $this->data['product'] = $this->shop_product_model->getByVariantId($variantId);
 
-		// --------------------------------------------------------------------------
+        if (!$this->data['product']) {
 
-		//	Load appropriate assets
-		$_assets		= ! empty( $this->_skin_checkout->assets )		? $this->_skin_checkout->assets		: array();
-		$_css_inline	= ! empty( $this->_skin_checkout->css_inline )	? $this->_skin_checkout->css_inline	: array();
-		$_js_inline		= ! empty( $this->_skin_checkout->js_inline )	? $this->_skin_checkout->js_inline	: array();
+            show_404();
+        }
 
-		$this->_load_skin_assets( $_assets, $_css_inline, $_js_inline, $this->_skin_checkout->url );
-	}
+        foreach ($this->data['product']->variations as $v) {
 
+            if ($v->id = $variantId) {
 
-	// --------------------------------------------------------------------------
+                $this->data['variant'] = $v;
+            }
+        }
 
+        if (!$this->data['variant']) {
 
-	public function index()
-	{
-		$_variant_id = $this->uri->rsegment( '2' );
-		$this->data['product'] = $this->shop_product_model->getByVariantId( $_variant_id );
+            show_404();
+        }
 
-		if ( ! $this->data['product'] ) :
+        // --------------------------------------------------------------------------
 
-			show_404();
+        if ($this->input->get('is_fancybox')) {
 
-		endif;
+            $this->data['headerOverride'] = 'structure/header/blank';
+            $this->data['footerOverride'] = 'structure/footer/blank';
+        }
 
-		foreach ( $this->data['product']->variations as $v ) :
+        // --------------------------------------------------------------------------
 
-			if ( $v->id = $_variant_id ) :
+        if ($this->input->post()) {
 
-				$this->data['variant'] = $v;
+            $this->load->model('shop/shop_inform_product_available_model');
 
-			endif;
+            if ($this->shop_inform_product_available_model->add($variantId, $this->input->post('email'))) {
 
-		endforeach;
+                $this->data['success']  = '<strong>Success!</strong> You were added to the ';
+                $this->Data['success'] .= 'notification list for this item.';
+                $this->data['successfully_added'] = true;
 
-		if ( ! $this->data['variant'] ) :
+            } else {
 
-			show_404();
+                $this->data['error']  = '<strong>Sorry,</strong> could not add you to the mailing list. ';
+                $this->data['error'] .= $this->shop_inform_product_available_model->last_error();
+            }
+        }
 
-		endif;
+        // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
+        $label = $this->data['variant']->label;
+        $this->data['page']->title = $this->_shop_name . ': Notify when "' . $label . '" is back in stock';
 
-		if ( $this->input->get( 'is_fancybox' ) ) :
+        // --------------------------------------------------------------------------
 
-			$this->data['headerOverride'] = 'structure/header/blank';
-			$this->data['footerOverride'] = 'structure/footer/blank';
+        $this->load->view('structure/header', $this->data);
+        $this->load->view($this->_skin_front->path . 'views/notify/index', $this->data);
+        $this->load->view('structure/footer', $this->data);
+    }
 
-		endif;
+    // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
-
-		if ( $this->input->post() ) :
-
-			$this->load->model( 'shop/shop_inform_product_available_model' );
-
-			if ( $this->shop_inform_product_available_model->add( $_variant_id, $this->input->post( 'email' ) ) ) :
-
-				$this->data['success']				= '<strong>Success!</strong> You were added to the notification list for this item.';
-				$this->data['successfully_added']	= TRUE;
-
-			else :
-
-				$this->data['error'] = '<strong>Sorry,</strong> could not add you to the mailing list. ' . $this->shop_inform_product_available_model->last_error();
-
-			endif;
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		$this->data['page']->title = $this->_shop_name . ': Notify when "' . $this->data['variant']->label . '" is back in stock';
-
-		// --------------------------------------------------------------------------
-
-		$this->load->view( 'structure/header',								$this->data );
-		$this->load->view( $this->_skin_front->path . 'views/notify/index',	$this->data );
-		$this->load->view( 'structure/footer',								$this->data );
-	}
-
-	// --------------------------------------------------------------------------
-
-	public function _remap()
-	{
-		$this->index();
-	}
+    /**
+     * Map all calls to the index() method
+     * @return void
+     */
+    public function _remap()
+    {
+        $this->index();
+    }
 }
 
 
@@ -140,13 +121,9 @@ class NAILS_Notify extends NAILS_Shop_Controller
  *
  **/
 
-if ( ! defined( 'NAILS_ALLOW_EXTENSION_NOTIFY' ) ) :
+if (!defined('NAILS_ALLOW_EXTENSION_NOTIFY')) {
 
-	class Notify extends NAILS_Notify
-	{
-	}
-
-endif;
-
-/* End of file notify.php */
-/* Location: ./modules/shop/controllers/notify.php */
+    class Notify extends NAILS_Notify
+    {
+    }
+}

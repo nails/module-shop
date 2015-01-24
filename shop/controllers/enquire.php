@@ -1,213 +1,169 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-/**
- * Name:		Shop - enquire
- *
- * Description:	This controller handles the shop's enquire functionality
- *
- **/
-
-/**
- * OVERLOADING NAILS' AUTH MODULE
- *
- * Note the name of this class; done like this to allow apps to extend this class.
- * Read full explanation at the bottom of this file.
- *
- **/
-
-//	Include _shop.php; executes common functionality
+//  Include _shop.php; executes common functionality
 require_once '_shop.php';
+
+/**
+ * This class provides enquiry functionality
+ *
+ * @package     Nails
+ * @subpackage  module-shop
+ * @category    Controller
+ * @author      Nails Dev Team
+ * @link
+ */
 
 class NAILS_Enquire extends NAILS_Shop_Controller
 {
-	public function __construct()
-	{
-		parent::__construct();
+    /**
+     * Handle delivery enquiries
+     * @return void
+     */
+    public function delivery()
+    {
+        $productId = $this->uri->rsegment('3');
+        $variantId = $this->uri->rsegment('4');
 
-		// --------------------------------------------------------------------------
+        $this->data['product'] = $this->shop_product_model->get_by_id($productId);
+        $this->data['variant'] = null;
 
-		//	Load appropriate assets
-		$_assets		= ! empty( $this->_skin_checkout->assets )		? $this->_skin_checkout->assets		: array();
-		$_css_inline	= ! empty( $this->_skin_checkout->css_inline )	? $this->_skin_checkout->css_inline	: array();
-		$_js_inline		= ! empty( $this->_skin_checkout->js_inline )	? $this->_skin_checkout->js_inline	: array();
+        if (!$this->data['product']) {
 
-		$this->_load_skin_assets( $_assets, $_css_inline, $_js_inline, $this->_skin_checkout->url );
-	}
+            show_404();
+        }
 
+        if ($variantId) {
 
-	// --------------------------------------------------------------------------
+            //  Fetch the variation
+            foreach ($this->data['product']->variations as $v) {
 
+                if ($v->id = $variantId) {
 
-	public function index()
-	{
-		//	TODO
-	}
+                    $this->data['variant'] = $v;
+                    break;
+                }
+            }
 
+            //  Check it's "collection only"
+            if (!$this->data['variant'] || !$this->data['variant']->shipping->collection_only) {
 
-	// --------------------------------------------------------------------------
+                show_404();
+            }
+        }
 
+        if (!$this->data['variant']) {
 
-	public function delivery()
-	{
-		$_product_id = $this->uri->rsegment( '3' );
-		$_variant_id = $this->uri->rsegment( '4' );
+            //  Check that there are 'collection only' variations
+            $_collect_only_variations = array();
+            foreach ($this->data['product']->variations as $v) {
 
-		$this->data['product'] = $this->shop_product_model->get_by_id( $_product_id );
-		$this->data['variant'] = NULL;
+                if ($v->shipping->collection_only) {
 
-		if ( ! $this->data['product'] ) :
+                    $_collect_only_variations[] = $v;
+                }
+            }
 
-			show_404();
+            if (!count($_collect_only_variations)) {
 
-		endif;
+                show_404();
 
-		if ( $_variant_id ) :
+            } elseif (count($_collect_only_variations) == 1) {
 
-			//	Fetch the variation
-			foreach ( $this->data['product']->variations as $v ) :
+                $this->data['variant'] = $_collect_only_variations[0];
+            }
+        }
 
-				if ( $v->id = $_variant_id ) :
+        // --------------------------------------------------------------------------
 
-					$this->data['variant'] = $v;
-					break;
+        if ($this->input->get('is_fancybox')) {
 
-				endif;
+            $this->data['headerOverride'] = 'structure/header/blank';
+            $this->data['footerOverride'] = 'structure/footer/blank';
+        }
 
-			endforeach;
+        // --------------------------------------------------------------------------
 
-			//	Check it's "collection only"
-			if ( ! $this->data['variant'] || ! $this->data['variant']->shipping->collection_only ) :
+        if ($this->input->post()) {
 
-				show_404();
+            $this->load->library('form_validation');
 
-			endif;
+            $this->form_validation->set_rules('name', '', 'xss_clean|required');
+            $this->form_validation->set_rules('email', '', 'xss_clean|required|valid_email');
+            $this->form_validation->set_rules('telephone', '', 'xss_clean');
+            $this->form_validation->set_rules('address', '', 'xss_clean|required');
+            $this->form_validation->set_rules('notes', '', 'xss_clean');
 
-		endif;
 
-		if ( ! $this->data['variant'] ) :
+            $this->form_validation->set_message('required', lang('fv_required'));
+            $this->form_validation->set_message('valid_email', lang('fv_valid_email'));
 
-			//	Check that there are 'collection only' variations
-			$_collect_only_variations = array();
-			foreach ( $this->data['product']->variations as $v ) :
+            if ($this->form_validation->run()) {
 
-				if ( $v->shipping->collection_only ) :
+                $_data                        = array();
+                $_data['customer']            = new stdClass();
+                $_data['customer']->name      = $this->input->post('name');
+                $_data['customer']->email     = $this->input->post('email');
+                $_data['customer']->telephone = $this->input->post('telephone');
+                $_data['customer']->address   = $this->input->post('address');
+                $_data['customer']->notes     = $this->input->post('notes');
 
-					$_collect_only_variations[] = $v;
+                $_data['product']        = new stdClass();
+                $_data['product']->id    = $this->data['product']->id;
+                $_data['product']->slug  = $this->data['product']->slug;
+                $_data['product']->label = $this->data['product']->label;
 
-				endif;
+                foreach ($this->data['product']->variations as $v) {
 
-			endforeach;
+                    if ($v->id == $this->input->post('variant_id')) {
 
-			if ( ! count( $_collect_only_variations ) ) :
+                        $_data['variant']        = new stdClass();
+                        $_data['variant']->id    = $v->id;
+                        $_data['variant']->sku   = $v->sku;
+                        $_data['variant']->label = $v->label;
+                    }
+                }
 
-				show_404();
+                $_override              = array();
+                $_override['email_tpl'] = $this->_skin_front->path . 'views/email/delivery_enquiry';
 
-			elseif ( count( $_collect_only_variations ) == 1 ) :
+                if (app_notification_notify('delivery_enquiry', 'shop', $_data, $_override)) {
 
-				$this->data['variant'] = $_collect_only_variations[0];
+                    $this->data['success'] = '<strong>Success!</strong> Your enquiry was received successfully.';
 
-			endif;
+                } else {
 
-		endif;
+                    $this->data['error']  = '<strong>Sorry,</strong> failed to send enquiry. ';
+                    $this->data['error'] .= $this->app_notification_model->last_error();
+                }
 
-		// --------------------------------------------------------------------------
+            } else {
 
-		if ( $this->input->get( 'is_fancybox' ) ) :
+                $this->data['error'] = lang('fv_there_were_errors');
+            }
+        }
 
-			$this->data['headerOverride'] = 'structure/header/blank';
-			$this->data['footerOverride'] = 'structure/footer/blank';
+        // --------------------------------------------------------------------------
 
-		endif;
+        if ($this->data['variant']) {
 
-		// --------------------------------------------------------------------------
+            $this->data['page']->title  = $this->_shop_name . ': Delivery enquiry about ';
+            $this->data['page']->title .= '"' . $this->data['variant']->label . '"';
 
-		if ( $this->input->post() ) :
+        } else {
 
-			$this->load->library( 'form_validation' );
+            $this->data['page']->title  = $this->_shop_name . ': Delivery enquiry about ';
+            $this->data['page']->title .= '"' . $this->data['product']->label . '"';
+        }
 
-			$this->form_validation->set_rules( 'name',		'', 'xss_clean|required' );
-			$this->form_validation->set_rules( 'email',		'', 'xss_clean|required|valid_email' );
-			$this->form_validation->set_rules( 'telephone',	'', 'xss_clean' );
-			$this->form_validation->set_rules( 'address',	'', 'xss_clean|required' );
-			$this->form_validation->set_rules( 'notes',		'', 'xss_clean' );
+        // --------------------------------------------------------------------------
 
-
-			$this->form_validation->set_message( 'required',	lang( 'fv_required' ) );
-			$this->form_validation->set_message( 'valid_email',	lang( 'fv_valid_email' ) );
-
-			if ( $this->form_validation->run() ) :
-
-				$_data							= array();
-
-				$_data['customer']				= new stdClass();
-				$_data['customer']->name		= $this->input->post( 'name' );
-				$_data['customer']->email		= $this->input->post( 'email' );
-				$_data['customer']->telephone	= $this->input->post( 'telephone' );
-				$_data['customer']->address		= $this->input->post( 'address' );
-				$_data['customer']->notes		= $this->input->post( 'notes' );
-
-				$_data['product']				= new stdClass();
-				$_data['product']->id			= $this->data['product']->id;
-				$_data['product']->slug			= $this->data['product']->slug;
-				$_data['product']->label		= $this->data['product']->label;
-
-				foreach ( $this->data['product']->variations as $v ) :
-
-					if ( $v->id == $this->input->post( 'variant_id' ) ) :
-
-						$_data['variant']			= new stdClass();
-						$_data['variant']->id		= $v->id;
-						$_data['variant']->sku		= $v->sku;
-						$_data['variant']->label	= $v->label;
-
-					endif;
-
-				endforeach;
-
-				$_override				= array();
-				$_override['email_tpl'] = $this->_skin_front->path . 'views/email/delivery_enquiry';
-
-				if ( app_notification_notify( 'delivery_enquiry', 'shop', $_data, $_override ) ) :
-
-					$this->data['success'] = '<strong>Success!</strong> Your enquiry was received successfully.';
-
-				else :
-
-					$this->data['error'] = '<strong>Sorry,</strong> failed to send enquiry. ' . $this->app_notification_model->last_error();
-
-				endif;
-
-			else :
-
-				$this->data['error'] = lang( 'fv_there_were_errors' );
-
-			endif;
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		if ( $this->data['variant'] ) :
-
-			$this->data['page']->title = $this->_shop_name . ': Delivery enquiry about "' . $this->data['variant']->label . '"';
-
-		else :
-
-			$this->data['page']->title = $this->_shop_name . ': Delivery enquiry about "' . $this->data['product']->label . '"';
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		$this->load->view( 'structure/header',									$this->data );
-		$this->load->view( $this->_skin_front->path . 'views/enquire/index',	$this->data );
-		$this->load->view( 'structure/footer',									$this->data );
-	}
+        $this->load->view('structure/header', $this->data);
+        $this->load->view($this->_skin_front->path . 'views/enquire/index', $this->data);
+        $this->load->view('structure/footer', $this->data);
+    }
 }
 
-
 // --------------------------------------------------------------------------
-
 
 /**
  * OVERLOADING NAILS' SHOP MODULE
@@ -233,13 +189,9 @@ class NAILS_Enquire extends NAILS_Shop_Controller
  *
  **/
 
-if ( ! defined( 'NAILS_ALLOW_EXTENSION_ENQUIRE' ) ) :
+if (!defined('NAILS_ALLOW_EXTENSION_ENQUIRE')) {
 
-	class Enquire extends NAILS_Enquire
-	{
-	}
-
-endif;
-
-/* End of file enquire.php */
-/* Location: ./modules/shop/controllers/enquire.php */
+    class Enquire extends NAILS_Enquire
+    {
+    }
+}

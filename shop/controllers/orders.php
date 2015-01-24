@@ -1,86 +1,83 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
-/**
- * Name:		Shop - Orders
- *
- * Description:	This controller handles order, specifically invoice generation
- *
- **/
-
-/**
- * OVERLOADING NAILS' SHOP MODULE
- *
- * Note the name of this class; done like this to allow apps to extend this class.
- * Read full explanation at the bottom of this file.
- *
- **/
-
-//	Include _shop.php; executes common functionality
+//  Include _shop.php; executes common functionality
 require_once '_shop.php';
+
+/**
+ * This class provides order functionality
+ *
+ * @package     Nails
+ * @subpackage  module-shop
+ * @category    Controller
+ * @author      Nails Dev Team
+ * @link
+ */
 
 class NAILS_Orders extends NAILS_Shop_Controller
 {
-	public function invoice()
-	{
-		$this->data['order'] = $this->shop_order_model->get_by_ref( $this->uri->segment( 4 ) );
+    /**
+     * Renders the invoice
+     * @return void
+     */
+    public function invoice()
+    {
+        $this->data['order'] = $this->shop_order_model->get_by_ref($this->uri->segment(4));
 
-		//	Order exist?
-		if ( ! $this->data['order'] ) :
+        //  Order exist?
+        if (!$this->data['order']) {
 
-			return $this->_bad_invoice( 'Invoice does not exist.' );
+            return $this->badInvoice('Invoice does not exist.');
+        }
 
-		endif;
+        // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
+        //  User have permission?
+        $idMatch    = $this->data['order']->user->id && $this->data['order']->user->id != active_user('id');
+        $emailMatch = $this->data['order']->user->email && $this->data['order']->user->email != active_user('email');
 
-		//	User have permission?
-		$_id_match		= $this->data['order']->user->id && $this->data['order']->user->id != active_user( 'id' );
-		$_email_match	= $this->data['order']->user->email && $this->data['order']->user->email != active_user( 'email' );
+        if (!$this->user_model->is_admin() && !$idMatch && !$emailMatch) {
 
-		if ( ! $this->user_model->is_admin() && ! $_id_match && ! $_email_match ) :
+            return $this->badInvoice('Permission Denied.');
+        }
 
-			return $this->_bad_invoice( 'Permission Denied.' );
+        // --------------------------------------------------------------------------
 
-		endif;
+        //  Render PDF
+        if (isset($_GET['dl']) && !$_GET['dl']) {
 
-		// --------------------------------------------------------------------------
+            $this->load->view($this->_skin_front->path . 'views/order/invoice', $this->data);
 
-		//	Render PDF
-		if ( isset( $_GET['dl'] ) && ! $_GET['dl'] ) :
+        } else {
 
-			$this->load->view( $this->_skin_front->path . 'views/order/invoice', $this->data );
+            $this->load->library('pdf/pdf');
+            $this->pdf->load_view($this->_skin_front->path . 'views/order/invoice', $this->data);
+            $this->pdf->stream('INVOICE-' . $this->data['order']->ref . '.pdf');
+        }
+    }
 
-		else :
+    // --------------------------------------------------------------------------
 
-			$this->load->library( 'pdf/pdf' );
-			$this->pdf->load_view( $this->_skin_front->path . 'views/order/invoice', $this->data );
-			$this->pdf->stream( 'INVOICE-' . $this->data['order']->ref . '.pdf' );
+    /**
+     * Renders the "bad invoice" page
+     * @param  string $message The reason for the failure
+     * @return void
+     */
+    protected function badInvoice($message)
+    {
+        $this->output->set_content_type('application/json');
+        $this->output->set_header('Cache-Control: no-cache, must-revalidate');
+        $this->output->set_header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        $this->output->set_header($this->input->server('SERVER_PROTOCOL') . ' 400 Bad Request');
 
-		endif;
-	}
+        // --------------------------------------------------------------------------
 
+        $out = array(
+            'status'  => 400,
+            'message' => $message
+        );
 
-	// --------------------------------------------------------------------------
-
-
-	protected function _bad_invoice( $message )
-	{
-		$this->output->set_content_type( 'application/json' );
-		$this->output->set_header( 'Cache-Control: no-cache, must-revalidate' );
-		$this->output->set_header( 'Expires: Mon, 26 Jul 1997 05:00:00 GMT' );
-		$this->output->set_header( $this->input->server( 'SERVER_PROTOCOL' ) . ' 400 Bad Request' );
-
-		// --------------------------------------------------------------------------
-
-		$_out = array(
-
-			'status'	=> 400,
-			'message'	=> $message
-
-		);
-
-		$this->output->set_output( json_encode( $out ) );
-	}
+        $this->output->set_output(json_encode($out));
+    }
 }
 
 
@@ -111,13 +108,9 @@ class NAILS_Orders extends NAILS_Shop_Controller
  *
  **/
 
-if ( ! defined( 'NAILS_ALLOW_EXTENSION_ORDERS' ) ) :
+if (!defined('NAILS_ALLOW_EXTENSION_ORDERS')) {
 
-	class Orders extends NAILS_Orders
-	{
-	}
-
-endif;
-
-/* End of file orders.php */
-/* Location: ./application/modules/shop/controllers/orders.php */
+    class Orders extends NAILS_Orders
+    {
+    }
+}
