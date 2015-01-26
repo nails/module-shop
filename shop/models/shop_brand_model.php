@@ -27,7 +27,7 @@ class NAILS_Shop_brand_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //    Shop's base URL
-        $this->_shop_url = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
+        $this->shopUrl = $this->shop_model->getShopUrl();
     }
 
 
@@ -228,7 +228,7 @@ class NAILS_Shop_brand_model extends NAILS_Model
 
     public function format_url($slug)
     {
-        return site_url($this->_shop_url . 'brand/' . $slug);
+        return site_url($this->shopUrl . 'brand/' . $slug);
     }
 
 

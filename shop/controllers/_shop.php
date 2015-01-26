@@ -71,13 +71,9 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
         // --------------------------------------------------------------------------
 
-        //  Shop's name
-        $this->shopName = app_setting('name', 'shop') ? app_setting('name', 'shop') : 'Shop';
-
-        // --------------------------------------------------------------------------
-
-        //  Shop's base URL
-        $this->shopUrl = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
+        //  Shop's name and URL
+        $this->shopName = $this->shopUrl = $this->shop_model->getShopName();
+        $this->shopUrl  = $this->shopUrl = $this->shop_model->getShopUrl();
 
         // --------------------------------------------------------------------------
 
@@ -88,11 +84,11 @@ class NAILS_Shop_Controller extends NAILS_Controller
         // --------------------------------------------------------------------------
 
         //  Load appropriate skin assets
-        $assets     = !empty($this->_skin_front->assets)     ? $this->_skin_front->assets     : array();
-        $css_inline = !empty($this->_skin_front->css_inline) ? $this->_skin_front->css_inline : array();
-        $js_inline  = !empty($this->_skin_front->js_inline)  ? $this->_skin_front->js_inline  : array();
+        $assets    = !empty($this->skinFront->assets)     ? $this->skinFront->assets     : array();
+        $cssInline = !empty($this->skinFront->css_inline) ? $this->skinFront->css_inline : array();
+        $jsInline  = !empty($this->skinFront->js_inline)  ? $this->skinFront->js_inline  : array();
 
-        $this->loadSkinAssets($assets, $css_inline, $js_inline, $this->_skin_front->url);
+        $this->loadSkinAssets($assets, $cssInline, $jsInline, $this->skinFront->url);
     }
 
     // --------------------------------------------------------------------------
@@ -104,7 +100,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
             case 'front':
 
-                $this->skinFront        =& $this->shop_skin_front_model->get($skin);
+                $this->skinFront          =& $this->shop_skin_front_model->get($skin);
                 $this->data['skin_front'] =& $this->skinFront;
 
                 if (!$this->skinFront) {
@@ -118,7 +114,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
             case 'checkout':
 
-                $this->skinCheckout        =& $this->shop_skin_checkout_model->get($skin);
+                $this->skinCheckout          =& $this->shop_skin_checkout_model->get($skin);
                 $this->data['skin_checkout'] =& $this->skinCheckout;
 
                 if (!$this->skinCheckout) {
@@ -132,7 +128,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
             default:
 
-                $subject = '"' . $skin_tye . '" is not a valid skin type';
+                $subject = '"' . $skinType . '" is not a valid skin type';
                 $message = 'An invalid skin type was attempted on ' . APP_NAME;
                 showFatalError($subject, $message);
                 break;
@@ -146,7 +142,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
     // --------------------------------------------------------------------------
 
-    protected function loadSkinAssets($assets, $css_inline, $js_inline, $url)
+    protected function loadSkinAssets($assets, $cssInline, $jsInline, $url)
     {
         //  CSS and JS
         if (!empty($assets) && is_array($assets)) {
@@ -167,9 +163,9 @@ class NAILS_Shop_Controller extends NAILS_Controller
         // --------------------------------------------------------------------------
 
         //  CSS - Inline
-        if (!empty($css_inline) && is_array($css_inline)) {
+        if (!empty($cssInline) && is_array($cssInline)) {
 
-            foreach ($css_inline as $asset) {
+            foreach ($cssInline as $asset) {
 
                 $this->asset->inline($asset, 'CSS-INLINE');
             }
@@ -178,9 +174,9 @@ class NAILS_Shop_Controller extends NAILS_Controller
         // --------------------------------------------------------------------------
 
         //  JS - Inline
-        if (!empty($js_inline) && is_array($js_inline)) {
+        if (!empty($jsInline) && is_array($jsInline)) {
 
-            foreach ($js_inline as $asset) {
+            foreach ($jsInline as $asset) {
 
                 $this->asset->inline($asset, 'JS-INLINE');
             }

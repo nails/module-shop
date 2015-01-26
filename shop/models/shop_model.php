@@ -1,334 +1,381 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
 /**
- * Name:			shop_model.php
+ * This model provides basic shop methods and sets up constants etc
  *
- * Description:		This model primarily handles shop settings
- *
- **/
-
-/**
- * OVERLOADING NAILS' MODELS
- *
- * Note the name of this class; done like this to allow apps to extend this class.
- * Read full explanation at the bottom of this file.
- *
- **/
+ * @package     Nails
+ * @subpackage  module-shop
+ * @category    Model
+ * @author      Nails Dev Team
+ * @link
+ */
 
 class NAILS_Shop_model extends NAILS_Model
 {
-	protected $_settings;
-	protected $_base_currency;
+    protected $settings;
+    protected $base_currency;
 
+    // --------------------------------------------------------------------------
 
-	// --------------------------------------------------------------------------
+    /**
+     * Sets up shop constants
+     * @param array $config An optional configuration array
+     */
+    public function __construct($config = array())
+    {
+        parent::__construct();
 
+        // --------------------------------------------------------------------------
 
-	public function __construct( $config = array() )
-	{
-		parent::__construct();
+        $configSetSession = isset($config['set_session']) ? (bool) $config['set_session'] : true;
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		$_config_set_session = isset( $config['set_session'] ) ? (bool) $config['set_session'] : TRUE;
+        $base = $this->getBaseCurrency();
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		$_base = $this->get_base_currency();
+        //  Shop's base currency (i.e what the products are listed in etc)
+        if (!defined('SHOP_BASE_CURRENCY_SYMBOL')) {
 
-		// --------------------------------------------------------------------------
+            define('SHOP_BASE_CURRENCY_SYMBOL', $base->symbol);
+        }
 
-		//	Shop's base currency (i.e what the products are listed in etc)
-		if ( ! defined( 'SHOP_BASE_CURRENCY_SYMBOL' ) )		define( 'SHOP_BASE_CURRENCY_SYMBOL',		$_base->symbol );
-		if ( ! defined( 'SHOP_BASE_CURRENCY_SYMBOL_POS' ) )	define( 'SHOP_BASE_CURRENCY_SYMBOL_POS',	$_base->symbol_position );
-		if ( ! defined( 'SHOP_BASE_CURRENCY_PRECISION' ) )	define( 'SHOP_BASE_CURRENCY_PRECISION',		$_base->decimal_precision );
-		if ( ! defined( 'SHOP_BASE_CURRENCY_CODE' ) )		define( 'SHOP_BASE_CURRENCY_CODE',			$_base->code );
+        if (!defined('SHOP_BASE_CURRENCY_SYMBOL_POS')) {
 
-		//	Formatting constants
-		if ( ! defined( 'SHOP_BASE_CURRENCY_THOUSANDS' ) )	define( 'SHOP_BASE_CURRENCY_THOUSANDS',		$_base->thousands_seperator );
-		if ( ! defined( 'SHOP_BASE_CURRENCY_DECIMALS' ) )	define( 'SHOP_BASE_CURRENCY_DECIMALS',		$_base->decimal_symbol );
+            define('SHOP_BASE_CURRENCY_SYMBOL_POS', $base->symbol_position);
+        }
 
-		//	User's preferred currency
-		if ( $this->session->userdata( 'shop_currency' ) ) :
+        if (!defined('SHOP_BASE_CURRENCY_PRECISION')) {
 
-			//	Use the currency defined in the session
-			$_currency_code = $this->session->userdata( 'shop_currency' );
+            define('SHOP_BASE_CURRENCY_PRECISION', $base->decimal_precision);
+        }
 
-		elseif( active_user( 'shop_currency' ) ) :
+        if (!defined('SHOP_BASE_CURRENCY_CODE')) {
 
-			//	Use the currency defined in the user object
-			$_currency_code = active_user( 'shop_currency' );
+            define('SHOP_BASE_CURRENCY_CODE', $base->code);
+        }
 
-			if ( ! headers_sent() ) :
+        //  Formatting constants
+        if (!defined('SHOP_BASE_CURRENCY_THOUSANDS')) {
 
-				$this->session->set_userdata( 'shop_currency', $_currency_code );
+            define('SHOP_BASE_CURRENCY_THOUSANDS', $base->thousands_seperator);
+        }
 
-			endif;
+        if (!defined('SHOP_BASE_CURRENCY_DECIMALS')) {
 
-		else :
+            define('SHOP_BASE_CURRENCY_DECIMALS', $base->decimal_symbol);
+        }
 
-			//	Can we determine the user's location and set a currency based on that?
-			//	If not, fall back to base currency
+        //  User's preferred currency
+        if ($this->session->userdata('shop_currency')) {
 
-			$this->load->library( 'geo_ip/geo_ip' );
+            //  Use the currency defined in the session
+            $currencyCode = $this->session->userdata('shop_currency');
 
-			$_lookup = $this->geo_ip->country();
+        } elseif (active_user('shop_currency')) {
 
-			if ( ! empty( $_lookup->status ) && $_lookup->status == 200 ) :
+            //  Use the currency defined in the user object
+            $currencyCode = active_user('shop_currency');
 
-				//	We know the code, does it have a known currency?
-				$_country_currency = $this->shop_currency_model->get_by_country( $_lookup->country->iso );
+            if (!headers_sent()) {
 
-				if ( $_country_currency ) :
+                $this->session->set_userdata('shop_currency', $currencyCode);
+            }
 
-					$_currency_code = $_country_currency->code;
+        } else {
 
-				else :
+            /**
+             * Can we determine the user's location and set a currency based on that?
+             * If not, fall back to base currency
+             */
 
-					//	Fall back to default
-					$_currency_code = $_base->code;
+            $this->load->library('geo_ip/geo_ip');
 
-				endif;
+            $lookup = $this->geo_ip->country();
 
-			else :
+            if (!empty($lookup->status) && $lookup->status == 200) {
 
-				$_currency_code = $_base->code;
+                //  We know the code, does it have a known currency?
+                $countryCurrency = $this->shop_currency_model->get_by_country($lookup->country->iso);
 
-			endif;
+                if ($countryCurrency) {
 
-			//	Save to session
-			if ( ! headers_sent() ) :
+                    $currencyCode = $countryCurrency->code;
 
-				$this->session->set_userdata( 'shop_currency', $_currency_code );
+                } else {
 
-			endif;
+                    //  Fall back to default
+                    $currencyCode = $base->code;
+                }
 
-		endif;
+            } else {
 
-		//	Fetch the user's render currency
-		$_user_currency = $this->shop_currency_model->get_by_code( $_currency_code );
+                $currencyCode = $base->code;
+            }
 
-		if ( ! $_user_currency  ) :
+            //  Save to session
+            if (!headers_sent()) {
 
-			//	Bad currency code
-			$_user_currency = $_base;
+                $this->session->set_userdata('shop_currency', $currencyCode);
+            }
+        }
 
-			if ( ! headers_sent() ) :
+        //  Fetch the user's render currency
+        $userCurrency = $this->shop_currency_model->get_by_code($currencyCode);
 
-				$this->session->unset_userdata( 'shop_currency', $_currency_code );
+        if (!$userCurrency) {
 
-			endif;
+            //  Bad currency code
+            $userCurrency = $base;
 
-			if ( $this->user_model->is_logged_in() ) :
+            if (!headers_sent()) {
 
-				$this->user_model->update( active_user( 'id' ), array( 'shop_currency' => NULL ) );
+                $this->session->unset_userdata('shop_currency', $currencyCode);
+            }
 
-			endif;
+            if ($this->user_model->is_logged_in()) {
 
-		endif;
+                $this->user_model->update(active_user('id'), array('shop_currency' => null));
+            }
+        }
 
-		//	Set the user constants
-		if ( ! defined( 'SHOP_USER_CURRENCY_SYMBOL' ) )			define( 'SHOP_USER_CURRENCY_SYMBOL',		$_user_currency->symbol );
-		if ( ! defined( 'SHOP_USER_CURRENCY_SYMBOL_POS' ) )		define( 'SHOP_USER_CURRENCY_SYMBOL_POS',	$_user_currency->symbol_position );
-		if ( ! defined( 'SHOP_USER_CURRENCY_PRECISION' ) )		define( 'SHOP_USER_CURRENCY_PRECISION',		$_user_currency->decimal_precision );
-		if ( ! defined( 'SHOP_USER_CURRENCY_CODE' ) )			define( 'SHOP_USER_CURRENCY_CODE',			$_user_currency->code );
+        //  Set the user constants
+        if (!defined('SHOP_USER_CURRENCY_SYMBOL')) {
 
-		//	Formatting constants
-		if ( ! defined( 'SHOP_USER_CURRENCY_THOUSANDS' ) )		define( 'SHOP_USER_CURRENCY_THOUSANDS',		$_user_currency->thousands_seperator );
-		if ( ! defined( 'SHOP_USER_CURRENCY_DECIMALS' ) )		define( 'SHOP_USER_CURRENCY_DECIMALS',		$_user_currency->decimal_symbol );
-	}
+            define('SHOP_USER_CURRENCY_SYMBOL', $userCurrency->symbol);
+        }
 
+        if (!defined('SHOP_USER_CURRENCY_SYMBOL_POS')) {
 
-	// --------------------------------------------------------------------------
+            define('SHOP_USER_CURRENCY_SYMBOL_POS', $userCurrency->symbol_position);
+        }
 
+        if (!defined('SHOP_USER_CURRENCY_PRECISION')) {
 
-	public function get_base_currency()
-	{
-		$_cache = $this->_get_cache( 'base_currency' );
+            define('SHOP_USER_CURRENCY_PRECISION', $userCurrency->decimal_precision);
+        }
 
-		if ( $_cache ) :
+        if (!defined('SHOP_USER_CURRENCY_CODE')) {
 
-			return $_cache;
+            define('SHOP_USER_CURRENCY_CODE', $userCurrency->code);
+        }
 
-		endif;
+        //  Formatting constants
+        if (!defined('SHOP_USER_CURRENCY_THOUSANDS')) {
 
-		// --------------------------------------------------------------------------
+            define('SHOP_USER_CURRENCY_THOUSANDS', $userCurrency->thousands_seperator);
+        }
 
-		//	Load the currency model, if not already loaded
-		if ( ! $this->load->isModelLoaded( 'shop_currency_model' ) ) :
+        if (!defined('SHOP_USER_CURRENCY_DECIMALS')) {
 
-			$this->load->model( 'shop/shop_currency_model' );
+            define('SHOP_USER_CURRENCY_DECIMALS', $userCurrency->decimal_symbol);
+        }
+    }
 
-		endif;
+    // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
+    /**
+     * Get the shop's base currency
+     * @return stdClass
+     */
+    public function getBaseCurrency()
+    {
+        $cache = $this->_get_cache('base_currency');
 
-		//	Fetch base currency
-		$_base = $this->shop_currency_model->get_by_code( app_setting( 'base_currency', 'shop' ) );
+        if ($cache) {
 
-		//	If no base currency is found, default to GBP
-		if ( ! $_base ) :
+            return $cache;
+        }
 
-			$_base = $this->shop_currency_model->get_by_code( 'GBP' );
+        // --------------------------------------------------------------------------
 
-			if ( ! $_base ) :
+        //  Load the currency model
+        $this->load->model('shop/shop_currency_model');
 
-				showFatalError('Could not define base currency', 'No base currency was set, so the system fell back to GBP, but could not find that either.');
+        // --------------------------------------------------------------------------
 
-			else :
+        //  Fetch base currency
+        $base = $this->shop_currency_model->get_by_code(app_setting('base_currency', 'shop'));
 
-				set_app_setting( 'base_currency', 'shop', 'GBP' );
+        //  If no base currency is found, default to GBP
+        if (!$base) {
 
-			endif;
+            $base = $this->shop_currency_model->get_by_code('GBP');
 
-		endif;
+            if (!$base) {
 
-		//	Cache
-		$this->_set_cache( 'base_currency', $_base );
+                $subject = 'Could not define base currency';
+                $message = 'No base currency was set, so the system fell back to GBP, but could not find that either.';
+                showFatalError($subject, $message);
 
-		return $_base;
-	}
+            } else {
 
+                set_app_setting('base_currency', 'shop', 'GBP');
+            }
+        }
 
-	// --------------------------------------------------------------------------
+        //  Cache
+        $this->_set_cache('base_currency', $base);
 
+        return $base;
+    }
 
-	public function format_price( $price, $include_symbol = FALSE, $include_thousands = FALSE, $for_currency = NULL, $decode_symbol = FALSE )
-	{
-		//	Formatting for which currency? If null or emptyt, assume user currency
-		if ( NULL === $for_currency || ! $for_currency ) :
+    // --------------------------------------------------------------------------
 
-			$_code		= SHOP_USER_CURRENCY_CODE;
-			$_symbol	= SHOP_USER_CURRENCY_SYMBOL;
-			$_thousands	= $include_thousands ? SHOP_USER_CURRENCY_THOUSANDS : '';
-			$_precision	= SHOP_USER_CURRENCY_PRECISION;
-			$_decimals	= SHOP_USER_CURRENCY_DECIMALS;
-			$_position	= SHOP_USER_CURRENCY_SYMBOL_POS;
+    /**
+     * Returns the shop's base URL
+     * @return string
+     */
+    public function getShopUrl()
+    {
+        return app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
+    }
 
-		else :
+    // --------------------------------------------------------------------------
 
-			//	Fetch the currency in question - check cache first
-			$_currency = $this->_get_cache( 'format_price-' . $for_currency );
+    /**
+     * Returns the shop's name
+     * @return string
+     */
+    public function getShopName()
+    {
+        return app_setting('name', 'shop') ? app_setting('name', 'shop') : 'Shop';
+    }
 
-			if ( $_currency ) :
+    // --------------------------------------------------------------------------
 
-				$_code		= $_currency->code;
-				$_symbol	= $_currency->symbol;
-				$_thousands	= $include_thousands ? $_currency->thousands : '';
-				$_precision	= $_currency->precision;
-				$_decimals	= $_currency->decimals;
-				$_position	= $_currency->position;
+    /**
+     * Format a price according to it's currency settings
+     * @param  string  $price            The price to format
+     * @param  boolean $includeSymbol    Whether to include the currency symbol
+     * @param  boolean $includeThousands Whether to include the thousands seperator
+     * @param  string  $forCurrency      The currency code to format for
+     * @param  boolean $decodeSymbol     Whether to decode the symbl to it's HTML entity
+     * @return string
+     */
+    public function formatPrice($price, $includeSymbol = false, $includeThousands = false, $forCurrency = null, $decodeSymbol = false)
+    {
+        //  Formatting for which currency? If empty, assume user currency
+        if (empty($forCurrency)) {
 
-			else :
+            $code      = SHOP_USER_CURRENCY_CODE;
+            $symbol    = SHOP_USER_CURRENCY_SYMBOL;
+            $thousands = $includeThousands ? SHOP_USER_CURRENCY_THOUSANDS : '';
+            $precision = SHOP_USER_CURRENCY_PRECISION;
+            $decimals  = SHOP_USER_CURRENCY_DECIMALS;
+            $position  = SHOP_USER_CURRENCY_SYMBOL_POS;
 
-				//	Fetch currency
+        } else {
 
-				//	Load the currency model, if not already loaded
-				if ( ! $this->load->isModelLoaded( 'shop_currency_model' ) ) :
+            //  Fetch the currency in question - check cache first
+            $currency = $this->_get_cache('formatPrice-' . $forCurrency);
 
-					$this->load->model( 'shop/shop_currency_model' );
+            if ($currency) {
 
-				endif;
+                $code      = $currency->code;
+                $symbol    = $currency->symbol;
+                $thousands = $includeThousands ? $currency->thousands : '';
+                $precision = $currency->precision;
+                $decimals  = $currency->decimals;
+                $position  = $currency->position;
 
-				if ( is_numeric( $for_currency ) ) :
+            } else {
 
-					$_currency = $this->shop_currency_model->get_by_id( $for_currency );
+                //  Load the currency model, if not already loaded
+                if (!$this->load->isModelLoaded('shop_currency_model')) {
 
-				else :
+                    $this->load->model('shop/shop_currency_model');
+                }
 
-					$_currency = $this->shop_currency_model->get_by_code( $for_currency );
+                if (is_numeric($forCurrency)) {
 
-				endif;
+                    $currency = $this->shop_currency_model->get_by_id($forCurrency);
 
-				if ( $_currency ) :
+                } else {
 
-					$_code		= $_currency->code;
-					$_symbol	= $_currency->symbol;
-					$_thousands	= $include_thousands ? $_currency->thousands_seperator : '';
-					$_precision	= $_currency->decimal_precision;
-					$_decimals	= $_currency->decimal_symbol;
-					$_position	= $_currency->symbol_position;
+                    $currency = $this->shop_currency_model->get_by_code($forCurrency);
+                }
 
-					//	Cache it
-					$_cache				= new stdClass();
-					$_cache->code		= $_code;
-					$_cache->symbol		= $_symbol;
-					$_cache->thousands	= $_thousands;
-					$_cache->precision	= $_precision;
-					$_cache->decimals	= $_decimals;
-					$_cache->position	= $_position;
+                if ($currency) {
 
-					$this->_set_cache( 'format_price-' . $for_currency, $_cache );
+                    $code      = $currency->code;
+                    $symbol    = $currency->symbol;
+                    $thousands = $includeThousands ? $currency->thousands_seperator : '';
+                    $precision = $currency->decimal_precision;
+                    $decimals  = $currency->decimal_symbol;
+                    $position  = $currency->symbol_position;
 
-				else :
+                    //  Cache it
+                    $cache            = new stdClass();
+                    $cache->code      = $code;
+                    $cache->symbol    = $symbol;
+                    $cache->thousands = $thousands;
+                    $cache->precision = $precision;
+                    $cache->decimals  = $decimals;
+                    $cache->position  = $position;
 
-					return FALSE;
+                    $this->_set_cache('formatPrice-' . $forCurrency, $cache);
 
-				endif;
+                } else {
 
-			endif;
+                    return false;
+                }
+            }
+        }
 
-		endif;
+        // --------------------------------------------------------------------------
 
-		// --------------------------------------------------------------------------
+        $value = number_format($price, $precision, $decimals, $thousands);
 
-		$_value = number_format( $price, $_precision, $_decimals, $_thousands );
+        if ($includeSymbol) {
 
-		if ( $include_symbol ) :
+            if ($decodeSymbol) {
 
-			if ( $decode_symbol ) :
+                //  ENT_HTML5 added in PHP 5.4.0, use that if you can, if not replace certain strings manually
+                if (version_compare(phpversion(), '5.4.0', '>=')) {
 
-				//	ENT_HTML5 added in PHP 5.4.0, use that if you can, if not replace certain strings manually
-				if ( version_compare( phpversion(), '5.4.0', '>=' ) ) :
+                    $symbol = html_entity_decode($symbol, ENT_COMPAT | ENT_HTML5, 'UTF-8');
 
-					$_symbol = html_entity_decode( $_symbol, ENT_COMPAT | ENT_HTML5, 'UTF-8' );
+                } else {
 
-				else :
+                    $symbol = html_entity_decode($symbol, ENT_COMPAT, 'UTF-8');
 
-					$_symbol = html_entity_decode( $_symbol, ENT_COMPAT, 'UTF-8' );
+                    $replace             = array();
+                    $replace['&dollar;'] = '$';
 
-					$_replace				= array();
-					$_replace['&dollar;']	= '$';
+                    $symbol = str_replace(array_keys($replace), $replace, $symbol);
+                }
+            }
 
-					$_symbol = str_replace( array_keys( $_replace ), $_replace, $_symbol );
+            // --------------------------------------------------------------------------
 
-				endif;
+            if ($position == 'BEFORE') {
 
-			endif;
+                $return = $symbol . $value;
 
-			// --------------------------------------------------------------------------
+            } else {
 
-			if ( $_position == 'BEFORE' ) :
+                $return = $value . $symbol;
+            }
 
-				$_return =  $_symbol . $_value;
+            if (!$symbol || $symbol == '&curren;') {
 
-			else :
+                $return .= ' ' . $code;
+            }
 
-				$_return =   $_value . $_symbol;
+            // --------------------------------------------------------------------------
 
-			endif;
+            return $return;
 
-			if ( ! $_symbol || $_symbol == '&curren;' ) :
+        } else {
 
-				$_return .= ' ' . $_code;
-
-			endif;
-
-			// --------------------------------------------------------------------------
-
-			return $_return;
-
-		else :
-
-			return $_value;
-
-		endif;
-	}
+            return $value;
+        }
+    }
 }
 
-
 // --------------------------------------------------------------------------
-
 
 /**
  * OVERLOADING NAILS' MODELS
@@ -354,13 +401,9 @@ class NAILS_Shop_model extends NAILS_Model
  *
  **/
 
-if ( ! defined( 'NAILS_ALLOW_EXTENSION_SHOP_MODEL' ) ) :
+if (!defined('NAILS_ALLOW_EXTENSION_SHOP_MODEL')) {
 
-	class Shop_model extends NAILS_Shop_model
-	{
-	}
-
-endif;
-
-/* End of file shop_model.php */
-/* Location: /module-shop/shop/models/shop_model.php */
+    class Shop_model extends NAILS_Shop_model
+    {
+    }
+}

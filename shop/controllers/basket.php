@@ -24,7 +24,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        $return = $this->input->get('return') ? $this->input->get_post('return') : $this->_shop_url . 'basket';
+        $return = $this->input->get('return') ? $this->input->get_post('return') : $this->shopUrl . 'basket';
         $this->data['return'] = $return;
     }
 
@@ -36,7 +36,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
      **/
     public function index()
     {
-        $this->data['page']->title = $this->_shop_name . ': Your Basket';
+        $this->data['page']->title = $this->shopName . ': Your Basket';
 
         // --------------------------------------------------------------------------
 
@@ -64,7 +64,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
          * sensible place to keep shopping
          */
 
-        $this->data['continue_shopping_url'] = $this->_shop_url;
+        $this->data['continue_shopping_url'] = $this->shopUrl;
 
         //  Most recently viewed item
         $recentlyViewed = $this->shop_product_model->getRecentlyViewed();
@@ -104,7 +104,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->_skin_checkout->path . 'views/basket/index', $this->data);
+        $this->load->view($this->skinCheckout->path . 'views/basket/index', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 

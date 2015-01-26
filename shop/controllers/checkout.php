@@ -40,10 +40,10 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         if (!count($this->data['payment_gateways'])) {
 
             $this->data['error'] = '<strong>Error:</strong> No Payment Gateways are configured.';
-            $this->data['page']->title = $this->_shop_name . ': No Payment Gateways have been configured';
+            $this->data['page']->title = $this->shopName . ': No Payment Gateways have been configured';
 
             $this->load->view('structure/header', $this->data);
-            $this->load->view($this->_skin_checkout->path . 'views/checkout/no_gateway', $this->data);
+            $this->load->view($this->skinCheckout->path . 'views/checkout/no_gateway', $this->data);
             $this->load->view('structure/footer', $this->data);
             return;
         }
@@ -57,7 +57,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
             $status  = 'error';
             $message = '<strong>Sorry,</strong> you cannot checkout just now. Your basket is empty.';
             $this->session->set_flashdata($status, $message);
-            redirect($this->_shop_url . 'basket');
+            redirect($this->shopUrl . 'basket');
         }
 
         // --------------------------------------------------------------------------
@@ -245,12 +245,12 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        $this->data['page']->title = $this->_shop_name . ': Checkout';
+        $this->data['page']->title = $this->shopName . ': Checkout';
 
         // --------------------------------------------------------------------------
 
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->_skin_checkout->path . 'views/checkout/index', $this->data);
+        $this->load->view($this->skinCheckout->path . 'views/checkout/index', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 
@@ -362,7 +362,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
      */
     protected function processingUnpaid()
     {
-        $this->load->view($this->_skin_checkout->path . 'views/checkout/processing/unpaid', $this->data);
+        $this->load->view($this->skinCheckout->path . 'views/checkout/processing/unpaid', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -377,7 +377,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         $this->shop_payment_gateway_model->checkout_session_clear();
 
         //  And load the view
-        $this->load->view($this->_skin_checkout->path . 'views/checkout/processing/pending', $this->data);
+        $this->load->view($this->skinCheckout->path . 'views/checkout/processing/pending', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -397,7 +397,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         $this->shop_payment_gateway_model->checkout_session_clear();
 
         //  And load the view
-        $this->load->view($this->_skin_checkout->path . 'views/checkout/processing/paid', $this->data);
+        $this->load->view($this->skinCheckout->path . 'views/checkout/processing/paid', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -424,7 +424,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         $this->shop_payment_gateway_model->checkout_session_clear();
 
         //  And load the view
-        $this->load->view($this->_skin_checkout->path . 'views/checkout/processing/failed', $this->data);
+        $this->load->view($this->skinCheckout->path . 'views/checkout/processing/failed', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -451,7 +451,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         $this->shop_payment_gateway_model->checkout_session_clear();
 
         //  And load the view
-        $this->load->view($this->_skin_checkout->path . 'views/checkout/processing/abandoned', $this->data);
+        $this->load->view($this->skinCheckout->path . 'views/checkout/processing/abandoned', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -478,7 +478,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         $this->shop_payment_gateway_model->checkout_session_clear();
 
         //  And load the view
-        $this->load->view($this->_skin_checkout->path . 'views/checkout/processing/cancelled', $this->data);
+        $this->load->view($this->skinCheckout->path . 'views/checkout/processing/cancelled', $this->data);
     }
 
 
@@ -507,7 +507,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         $this->shop_payment_gateway_model->checkout_session_clear();
 
         //  And load the view
-        $this->load->view($this->_skin_checkout->path . 'views/checkout/processing/error', $this->data);
+        $this->load->view($this->skinCheckout->path . 'views/checkout/processing/error', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -542,7 +542,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         }
 
         $this->session->set_flashdata($status, $message);
-        redirect($this->_shop_url . 'basket');
+        redirect($this->shopUrl . 'basket');
     }
 
     // --------------------------------------------------------------------------
@@ -560,7 +560,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
         if ($result) {
 
-            redirect($this->_shop_url . 'checkout/processing?ref=' . $order->ref);
+            redirect($this->shopUrl . 'checkout/processing?ref=' . $order->ref);
 
         } else {
 
@@ -569,7 +569,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
             $message .= $this->shop_payment_gateway_model->last_error();
 
             $this->session->set_flashdata($status, $message);
-            redirect($this->_shop_url . 'checkout');
+            redirect($this->shopUrl . 'checkout');
         }
     }
 
@@ -648,7 +648,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
                     $this->shop_payment_gateway_model->checkout_session_clear();
                     if ($redirect) {
 
-                        redirect($this->_shop_url . 'checkout/processing?ref=' . $order->ref);
+                        redirect($this->shopUrl . 'checkout/processing?ref=' . $order->ref);
 
                     } else {
 

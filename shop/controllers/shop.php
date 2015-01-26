@@ -135,7 +135,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Page title
         //  ==========
 
-        $this->data['page']->title = $this->_shop_name;
+        $this->data['page']->title = $this->shopName;
 
         // --------------------------------------------------------------------------
 
@@ -189,7 +189,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         //  Load views
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->_skin_front->path . 'views/front/index', $this->data);
+        $this->load->view($this->skinFront->path . 'views/front/index', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 
@@ -202,7 +202,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
     public function brand()
     {
         //  Strip out the store's URL, leave just the brand's slug
-        $slug = preg_replace('#' . $this->_shop_url . 'brand/?#', '', uri_string());
+        $slug = preg_replace('#' . $this->shopUrl . 'brand/?#', '', uri_string());
 
         //  Strip out the pagination segment, if present
         $slug = preg_replace('#\/\d+$#', '', $slug);
@@ -235,7 +235,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Page title
         //  ==========
 
-        $this->data['page']->title = $this->_shop_name . ': Brands';
+        $this->data['page']->title = $this->shopName . ': Brands';
 
         // --------------------------------------------------------------------------
 
@@ -248,7 +248,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         //  Load views
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->_skin_front->path . 'views/front/brand/index', $this->data);
+        $this->load->view($this->skinFront->path . 'views/front/brand/index', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 
@@ -272,7 +272,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Page title
         //  ==========
 
-        $this->data['page']->title = $this->_shop_name . ': Brand: "' . $this->data['brand']->label . '"';
+        $this->data['page']->title = $this->shopName . ': Brand: "' . $this->data['brand']->label . '"';
 
         // --------------------------------------------------------------------------
 
@@ -328,7 +328,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         //  Load views
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->_skin_front->path . 'views/front/brand/single', $this->data);
+        $this->load->view($this->skinFront->path . 'views/front/brand/single', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 
@@ -341,7 +341,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
     public function category()
     {
         //  Strip out the store's URL, leave just the category's slug
-        $slug = preg_replace('#' . $this->_shop_url . 'category/?#', '', uri_string());
+        $slug = preg_replace('#' . $this->shopUrl . 'category/?#', '', uri_string());
 
         //  Strip out the pagination segment, if present
         $slug = preg_replace('#\/\d+$#', '', $slug);
@@ -374,7 +374,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Page title
         //  ==========
 
-        $this->data['page']->title = $this->_shop_name . ': Categories';
+        $this->data['page']->title = $this->shopName . ': Categories';
 
         // --------------------------------------------------------------------------
 
@@ -396,7 +396,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         //  Load views
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->_skin_front->path . 'views/front/category/index', $this->data);
+        $this->load->view($this->skinFront->path . 'views/front/category/index', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 
@@ -425,7 +425,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         //  SEO
         //  ===
-        $this->data['page']->title = $this->_shop_name . ': Category: "' . $this->data['category']->label . '"';
+        $this->data['page']->title = $this->shopName . ': Category: "' . $this->data['category']->label . '"';
         $this->data['page']->seo->description = $this->data['category']->seo_description;
         $this->data['page']->seo->keywords    = $this->data['category']->seo_keywords;
 
@@ -507,7 +507,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         //  Load views
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->_skin_front->path . 'views/front/category/single', $this->data);
+        $this->load->view($this->skinFront->path . 'views/front/category/single', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 
@@ -520,7 +520,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
     public function collection()
     {
         //  Strip out the store's URL, leave just the colelction's slug
-        $slug = preg_replace('#' . $this->_shop_url . 'collection/?#', '', uri_string());
+        $slug = preg_replace('#' . $this->shopUrl . 'collection/?#', '', uri_string());
 
         //  Strip out the pagination segment, if present
         $slug = preg_replace('#\/\d+$#', '', $slug);
@@ -553,7 +553,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Page title
         //  ==========
 
-        $this->data['page']->title = $this->_shop_name . ': Collections';
+        $this->data['page']->title = $this->shopName . ': Collections';
 
         // --------------------------------------------------------------------------
 
@@ -566,7 +566,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         //  Load views
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->_skin_front->path . 'views/front/collection/index', $this->data);
+        $this->load->view($this->skinFront->path . 'views/front/collection/index', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 
@@ -590,7 +590,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Page title
         //  ==========
 
-        $this->data['page']->title = $this->_shop_name . ': Collection: "' . $this->data['collection']->label . '"';
+        $this->data['page']->title = $this->shopName . ': Collection: "' . $this->data['collection']->label . '"';
 
         // --------------------------------------------------------------------------
 
@@ -649,7 +649,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         //  Load views
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->_skin_front->path . 'views/front/collection/single', $this->data);
+        $this->load->view($this->skinFront->path . 'views/front/collection/single', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 
@@ -662,7 +662,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
     protected function product()
     {
         //  Strip out the store's URL, leave just the product's slug
-        $slug = preg_replace('#' . $this->_shop_url . 'product/?#', '', uri_string());
+        $slug = preg_replace('#' . $this->shopUrl . 'product/?#', '', uri_string());
 
         if ($slug) {
 
@@ -706,7 +706,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  SEO
         //  ===
 
-        $this->data['page']->title             = $this->_shop_name . ': ';
+        $this->data['page']->title             = $this->shopName . ': ';
         $this->data['page']->title            .= $this->data['product']->seo_title ? $this->data['product']->seo_title : $this->data['product']->label;
         $this->data['page']->seo->description  = $this->data['product']->seo_description;
         $this->data['page']->seo->keywords     = $this->data['product']->seo_keywords;
@@ -715,7 +715,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         //  Load views
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->_skin_front->path . 'views/front/product/single', $this->data);
+        $this->load->view($this->skinFront->path . 'views/front/product/single', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 
@@ -728,7 +728,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
     public function range()
     {
         //  Strip out the store's URL, leave just the range's slug
-        $slug = preg_replace('#' . $this->_shop_url . 'range/?#', '', uri_string());
+        $slug = preg_replace('#' . $this->shopUrl . 'range/?#', '', uri_string());
 
         //  Strip out the pagination segment, if present
         $slug = preg_replace('#\/\d+$#', '', $slug);
@@ -761,7 +761,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Page title
         //  ==========
 
-        $this->data['page']->title = $this->_shop_name . ': Ranges';
+        $this->data['page']->title = $this->shopName . ': Ranges';
 
         // --------------------------------------------------------------------------
 
@@ -774,7 +774,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         //  Load views
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->_skin_front->path . 'views/front/range/index', $this->data);
+        $this->load->view($this->skinFront->path . 'views/front/range/index', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 
@@ -798,7 +798,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Page title
         //  ==========
 
-        $this->data['page']->title = $this->_shop_name . ': Range: "' . $this->data['range']->label . '"';
+        $this->data['page']->title = $this->shopName . ': Range: "' . $this->data['range']->label . '"';
 
         // --------------------------------------------------------------------------
 
@@ -854,7 +854,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         //  Load views
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->_skin_front->path . 'views/front/range/single', $this->data);
+        $this->load->view($this->skinFront->path . 'views/front/range/single', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 
@@ -867,7 +867,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
     public function sale()
     {
         //  Strip out the store's URL, leave just the sale's slug
-        $slug = preg_replace('#' . $this->_shop_url . 'sale/?#', '', uri_string());
+        $slug = preg_replace('#' . $this->shopUrl . 'sale/?#', '', uri_string());
 
         //  Strip out the pagination segment, if present
         $slug = preg_replace('#\/\d+$#', '', $slug);
@@ -900,7 +900,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Page title
         //  ==========
 
-        $this->data['page']->title = $this->_shop_name . ': Sales';
+        $this->data['page']->title = $this->shopName . ': Sales';
 
         // --------------------------------------------------------------------------
 
@@ -913,7 +913,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         //  Load views
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->_skin_front->path . 'views/front/sale/index', $this->data);
+        $this->load->view($this->skinFront->path . 'views/front/sale/index', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 
@@ -937,7 +937,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Page title
         //  ==========
 
-        $this->data['page']->title = $this->_shop_name . ': Sale: "' . $this->data['sale']->label . '"';
+        $this->data['page']->title = $this->shopName . ': Sale: "' . $this->data['sale']->label . '"';
 
         // --------------------------------------------------------------------------
 
@@ -992,7 +992,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->_skin_front->path . 'views/front/sale/single', $this->data);
+        $this->load->view($this->skinFront->path . 'views/front/sale/single', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 
@@ -1005,7 +1005,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
     public function tag()
     {
         //  Strip out the store's URL, leave just the tag's slug
-        $slug = preg_replace('#' . $this->_shop_url . 'tag/?#', '', uri_string());
+        $slug = preg_replace('#' . $this->shopUrl . 'tag/?#', '', uri_string());
 
         //  Strip out the pagination segment, if present
         $slug = preg_replace('#\/\d+$#', '', $slug);
@@ -1038,7 +1038,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Page title
         //  ==========
 
-        $this->data['page']->title = $this->_shop_name . ': Tags';
+        $this->data['page']->title = $this->shopName . ': Tags';
 
         // --------------------------------------------------------------------------
 
@@ -1051,7 +1051,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         //  Load views
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->_skin_front->path . 'views/front/tag/index', $this->data);
+        $this->load->view($this->skinFront->path . 'views/front/tag/index', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 
@@ -1075,7 +1075,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Page title
         //  ==========
 
-        $this->data['page']->title = $this->_shop_name . ': Tag: "' . $this->data['tag']->label . '"';
+        $this->data['page']->title = $this->shopName . ': Tag: "' . $this->data['tag']->label . '"';
 
         // --------------------------------------------------------------------------
 
@@ -1131,7 +1131,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         //  Load views
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->_skin_front->path . 'views/front/tag/single', $this->data);
+        $this->load->view($this->skinFront->path . 'views/front/tag/single', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 
@@ -1142,7 +1142,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Page title
         //  ==========
 
-        $this->data['page']->title = $this->_shop_name;
+        $this->data['page']->title = $this->shopName;
 
         if (!$this->input->get('s')) {
 
@@ -1201,7 +1201,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         //  Load views
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->_skin_front->path . 'views/front/search/index', $this->data);
+        $this->load->view($this->skinFront->path . 'views/front/search/index', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 
@@ -1219,9 +1219,9 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         $config = array();
 
-        if ($this->_shop_url) {
+        if ($this->shopUrl) {
 
-            $config['base_url'] = $this->_shop_url . $baseUrl;
+            $config['base_url'] = $this->shopUrl . $baseUrl;
 
         } else {
 

@@ -72,12 +72,12 @@ class NAILS_Notify extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         $label = $this->data['variant']->label;
-        $this->data['page']->title = $this->_shop_name . ': Notify when "' . $label . '" is back in stock';
+        $this->data['page']->title = $this->shopName . ': Notify when "' . $label . '" is back in stock';
 
         // --------------------------------------------------------------------------
 
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->_skin_front->path . 'views/notify/index', $this->data);
+        $this->load->view($this->skinFront->path . 'views/notify/index', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 

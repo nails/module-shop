@@ -124,7 +124,7 @@ class NAILS_Enquire extends NAILS_Shop_Controller
                 }
 
                 $_override              = array();
-                $_override['email_tpl'] = $this->_skin_front->path . 'views/email/delivery_enquiry';
+                $_override['email_tpl'] = $this->skinFront->path . 'views/email/delivery_enquiry';
 
                 if (app_notification_notify('delivery_enquiry', 'shop', $_data, $_override)) {
 
@@ -146,19 +146,19 @@ class NAILS_Enquire extends NAILS_Shop_Controller
 
         if ($this->data['variant']) {
 
-            $this->data['page']->title  = $this->_shop_name . ': Delivery enquiry about ';
+            $this->data['page']->title  = $this->shopName . ': Delivery enquiry about ';
             $this->data['page']->title .= '"' . $this->data['variant']->label . '"';
 
         } else {
 
-            $this->data['page']->title  = $this->_shop_name . ': Delivery enquiry about ';
+            $this->data['page']->title  = $this->shopName . ': Delivery enquiry about ';
             $this->data['page']->title .= '"' . $this->data['product']->label . '"';
         }
 
         // --------------------------------------------------------------------------
 
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->_skin_front->path . 'views/enquire/index', $this->data);
+        $this->load->view($this->skinFront->path . 'views/enquire/index', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 }

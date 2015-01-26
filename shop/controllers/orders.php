@@ -45,12 +45,12 @@ class NAILS_Orders extends NAILS_Shop_Controller
         //  Render PDF
         if (isset($_GET['dl']) && !$_GET['dl']) {
 
-            $this->load->view($this->_skin_front->path . 'views/order/invoice', $this->data);
+            $this->load->view($this->skinFront->path . 'views/order/invoice', $this->data);
 
         } else {
 
             $this->load->library('pdf/pdf');
-            $this->pdf->load_view($this->_skin_front->path . 'views/order/invoice', $this->data);
+            $this->pdf->load_view($this->skinFront->path . 'views/order/invoice', $this->data);
             $this->pdf->stream('INVOICE-' . $this->data['order']->ref . '.pdf');
         }
     }
