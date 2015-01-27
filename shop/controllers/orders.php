@@ -16,6 +16,19 @@ require_once '_shop.php';
 class NAILS_Orders extends NAILS_Shop_Controller
 {
     /**
+     * Cosntruct the controller
+     */
+    public function __construct()
+    {
+        parent::__construct();
+
+        //  Load the skin to use
+        $this->loadSkin('front');
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Renders the invoice
      * @return void
      */
@@ -45,12 +58,12 @@ class NAILS_Orders extends NAILS_Shop_Controller
         //  Render PDF
         if (isset($_GET['dl']) && !$_GET['dl']) {
 
-            $this->load->view($this->skinFront->path . 'views/order/invoice', $this->data);
+            $this->load->view($this->skin->path . 'views/order/invoice', $this->data);
 
         } else {
 
             $this->load->library('pdf/pdf');
-            $this->pdf->load_view($this->skinFront->path . 'views/order/invoice', $this->data);
+            $this->pdf->load_view($this->skin->path . 'views/order/invoice', $this->data);
             $this->pdf->stream('INVOICE-' . $this->data['order']->ref . '.pdf');
         }
     }

@@ -16,6 +16,19 @@ require_once '_shop.php';
 class NAILS_Notify extends NAILS_Shop_Controller
 {
     /**
+     * Cosntruct the controller
+     */
+    public function __construct()
+    {
+        parent::__construct();
+
+        //  Load the skin to use
+        $this->loadSkin('front');
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Handle notification interface
      * @return void
      */
@@ -77,7 +90,7 @@ class NAILS_Notify extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skinFront->path . 'views/notify/index', $this->data);
+        $this->load->view($this->skin->path . 'views/notify/index', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 

@@ -26,6 +26,11 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         $return = $this->input->get('return') ? $this->input->get_post('return') : $this->shopUrl . 'basket';
         $this->data['return'] = $return;
+
+        // --------------------------------------------------------------------------
+
+        //  Load the skin to use
+        $this->loadSkin('checkout');
     }
 
     // --------------------------------------------------------------------------
@@ -104,7 +109,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skinCheckout->path . 'views/basket/index', $this->data);
+        $this->load->view($this->skin->path . 'views/basket/index', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 
@@ -117,8 +122,8 @@ class NAILS_Basket extends NAILS_Shop_Controller
      **/
     public function add()
     {
-        $variantId    = $this->input->get_post('variant_id');
-        $quantity      = (int) $this->input->get_post('quantity');
+        $variantId = $this->input->get_post('variant_id');
+        $quantity  = (int) $this->input->get_post('quantity');
 
         if ($this->shop_basket_model->add($variantId, $quantity)) {
 

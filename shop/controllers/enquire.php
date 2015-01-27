@@ -16,6 +16,19 @@ require_once '_shop.php';
 class NAILS_Enquire extends NAILS_Shop_Controller
 {
     /**
+     * Cosntruct the controller
+     */
+    public function __construct()
+    {
+        parent::__construct();
+
+        //  Load the skin to use
+        $this->loadSkin('front');
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Handle delivery enquiries
      * @return void
      */
@@ -124,7 +137,7 @@ class NAILS_Enquire extends NAILS_Shop_Controller
                 }
 
                 $_override              = array();
-                $_override['email_tpl'] = $this->skinFront->path . 'views/email/delivery_enquiry';
+                $_override['email_tpl'] = $this->skin->path . 'views/email/delivery_enquiry';
 
                 if (app_notification_notify('delivery_enquiry', 'shop', $_data, $_override)) {
 
@@ -158,7 +171,7 @@ class NAILS_Enquire extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skinFront->path . 'views/enquire/index', $this->data);
+        $this->load->view($this->skin->path . 'views/enquire/index', $this->data);
         $this->load->view('structure/footer', $this->data);
     }
 }
