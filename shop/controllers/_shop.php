@@ -25,7 +25,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
         // --------------------------------------------------------------------------
 
         //  Check this module is enabled in settings
-        if (!isModuleEnabled('shop')) {
+        if (!isModuleEnabled('nailsapp/module-shop')) {
 
             //  Cancel execution, module isn't enabled
             show_404();
