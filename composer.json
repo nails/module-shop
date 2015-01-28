@@ -46,6 +46,7 @@
     {
         "nails" :
         {
+            "moduleName": "shop",
             "type": "module"
         }
     }
