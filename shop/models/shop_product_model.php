@@ -1169,7 +1169,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 				//	Raw Price
 				//	=========
 
-				$this->db->select('pvp.currency, pvp.price, pvp.sale_price');
+				$this->db->select('pvp.price, pvp.sale_price, pvp.currency');
 				$this->db->where('pvp.variation_id', $v->id);
 				$_price = $this->db->get($this->_table_variation_price . ' pvp')->result();
 
@@ -1179,6 +1179,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 				foreach ($_price as $price) :
 
 					$v->price_raw->{$price->currency} = $price;
+					$v->price_raw->{$price->currency}->currency_symbol = $this->shop_currency_model->get_by_code($price->currency)->symbol;
 
 				endforeach;
 
@@ -2747,6 +2748,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 			unset($variation->out_of_stock_to_order_lead_time);
 
 		endif;
+		
 	}
 }
 
