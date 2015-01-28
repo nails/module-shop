@@ -54,7 +54,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        switch($voucher->type) {
+        switch ($voucher->type) {
 
             case 'GIFT_CARD':
 
