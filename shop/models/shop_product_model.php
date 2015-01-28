@@ -609,7 +609,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 				endif;
 
 				$_temp = array();
-				switch($_field) :
+				switch ($_field) :
 
 					case 'attribute_id' :
 
