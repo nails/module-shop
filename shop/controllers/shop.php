@@ -192,6 +192,15 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
+        /**
+         * Take a note of this page, this is used in the single product page for the
+         * "go back" button. This avoids the use of javascript.
+         */
+
+        $this->session->set_userdata('shopLastBrowsePage', uri_string());
+
+        // --------------------------------------------------------------------------
+
         //  Load views
         $this->load->view('structure/header', $this->data);
         $this->load->view($this->skin->path . 'views/front/index', $this->data);
@@ -328,6 +337,15 @@ class NAILS_Shop extends NAILS_Shop_Controller
             $this->data['brand']->id,
             $data
         );
+
+        // --------------------------------------------------------------------------
+
+        /**
+         * Take a note of this page, this is used in the single product page for the
+         * "go back" button. This avoids the use of javascript.
+         */
+
+        $this->session->set_userdata('shopLastBrowsePage', uri_string());
 
         // --------------------------------------------------------------------------
 
@@ -510,6 +528,15 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
+        /**
+         * Take a note of this page, this is used in the single product page for the
+         * "go back" button. This avoids the use of javascript.
+         */
+
+        $this->session->set_userdata('shopLastBrowsePage', uri_string());
+
+        // --------------------------------------------------------------------------
+
         //  Load views
         $this->load->view('structure/header', $this->data);
         $this->load->view($this->skin->path . 'views/front/category/single', $this->data);
@@ -652,6 +679,15 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
+        /**
+         * Take a note of this page, this is used in the single product page for the
+         * "go back" button. This avoids the use of javascript.
+         */
+
+        $this->session->set_userdata('shopLastBrowsePage', uri_string());
+
+        // --------------------------------------------------------------------------
+
         //  Load views
         $this->load->view('structure/header', $this->data);
         $this->load->view($this->skin->path . 'views/front/collection/single', $this->data);
@@ -715,6 +751,17 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->data['page']->title            .= $this->data['product']->seo_title ? $this->data['product']->seo_title : $this->data['product']->label;
         $this->data['page']->seo->description  = $this->data['product']->seo_description;
         $this->data['page']->seo->keywords     = $this->data['product']->seo_keywords;
+
+        // --------------------------------------------------------------------------
+
+        /**
+         * This URL is set by the shop homepage and the *Single() controllers; it
+         * defines the last page that the user was on so that the "go back" button on
+         * the product page takes them somewhere meaningful.
+         */
+
+        $this->data['goBackUrl'] = $this->session->get_userdata('shopLastBrowsePage');
+        $this->data['goBackUrl'] = $this->data['goBackUrl'] ? site_url($this->data['goBackUrl']) : $this->shopUrl;
 
         // --------------------------------------------------------------------------
 
@@ -857,6 +904,15 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
+        /**
+         * Take a note of this page, this is used in the single product page for the
+         * "go back" button. This avoids the use of javascript.
+         */
+
+        $this->session->set_userdata('shopLastBrowsePage', uri_string());
+
+        // --------------------------------------------------------------------------
+
         //  Load views
         $this->load->view('structure/header', $this->data);
         $this->load->view($this->skin->path . 'views/front/range/single', $this->data);
@@ -996,6 +1052,15 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
+        /**
+         * Take a note of this page, this is used in the single product page for the
+         * "go back" button. This avoids the use of javascript.
+         */
+
+        $this->session->set_userdata('shopLastBrowsePage', uri_string());
+
+        // --------------------------------------------------------------------------
+
         $this->load->view('structure/header', $this->data);
         $this->load->view($this->skin->path . 'views/front/sale/single', $this->data);
         $this->load->view('structure/footer', $this->data);
@@ -1131,6 +1196,15 @@ class NAILS_Shop extends NAILS_Shop_Controller
             $this->data['tag']->id,
             $data
         );
+
+        // --------------------------------------------------------------------------
+
+        /**
+         * Take a note of this page, this is used in the single product page for the
+         * "go back" button. This avoids the use of javascript.
+         */
+
+        $this->session->set_userdata('shopLastBrowsePage', uri_string());
 
         // --------------------------------------------------------------------------
 
