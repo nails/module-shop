@@ -21,7 +21,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
     // --------------------------------------------------------------------------
 
     /**
-     * Announces this controller's details
+     * Announces this controller's navGroupings
      * @return stdClass
      */
     public static function announce()
