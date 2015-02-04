@@ -14,13 +14,13 @@ namespace Nails\Admin\Shop;
 
 class Sales extends \AdminController
 {
-   /**
-     * Announces this controller's navGroupings
+    /**
+     * Announces this controller's navGroups
      * @return stdClass
      */
     public static function announce()
     {
-        if (user_has_permission('admin.shop:0.sale_manage')) {
+        if (userHasPermission('admin.shop:0.sale_manage')) {
 
             $navGroup = new \Nails\Admin\Nav('Shop');
             $navGroup->addMethod('Manage Sales');

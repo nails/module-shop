@@ -20,8 +20,8 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
     // --------------------------------------------------------------------------
 
-    /**
-     * Announces this controller's navGroupings
+     /**
+     * Announces this controller's navGroups
      * @return stdClass
      */
     public static function announce()
@@ -33,7 +33,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         // --------------------------------------------------------------------------
 
-        $d = new stdClass();
+        $d = new \stdClass();
 
         // --------------------------------------------------------------------------
 
@@ -46,22 +46,22 @@ class NAILS_Shop extends NAILS_Admin_Controller
         //  Navigation options
         $d->funcs               = array();
 
-        if (user_has_permission('admin.shop:0.inventory_manage')) {
+        if (userHasPermission('admin.shop:0.inventory_manage')) {
 
             $d->funcs['inventory'] = 'Manage Inventory';
         }
 
-        if (user_has_permission('admin.shop:0.orders_manage')) {
+        if (userHasPermission('admin.shop:0.orders_manage')) {
 
             $d->funcs['orders'] = 'Manage Orders';
         }
 
-        if (user_has_permission('admin.shop:0.vouchers_manage')) {
+        if (userHasPermission('admin.shop:0.vouchers_manage')) {
 
             $d->funcs['vouchers'] = 'Manage Vouchers';
         }
 
-        if (user_has_permission('admin.shop:0.sale_manage')) {
+        if (userHasPermission('admin.shop:0.sale_manage')) {
 
             $d->funcs['sales'] = 'Manage Sales';
         }
@@ -69,12 +69,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
         //  @TODO: Handle permissions here?
         $d->funcs['manage'] = 'Other Managers';
 
-        if (user_has_permission('admin.shop:0.can_generate_reports')) {
+        if (userHasPermission('admin.shop:0.can_generate_reports')) {
 
             $d->funcs['reports'] = 'Generate Reports';
         }
 
-        if (user_has_permission('admin.shop:0.notifications_manage')) {
+        if (userHasPermission('admin.shop:0.notifications_manage')) {
 
             $d->funcs['product_availability_notifications'] = 'Product Availability Notifications';
         }
@@ -272,7 +272,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     public function inventory()
     {
-        if (!user_has_permission('admin.shop:0.inventory_manage')) {
+        if (!userHasPermission('admin.shop:0.inventory_manage')) {
 
             unauthorised();
         }
@@ -330,7 +330,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
         }
 
         //  Define and populate the pagination object
-        $this->data['pagination']             = new stdClass();
+        $this->data['pagination']             = new \stdClass();
         $this->data['pagination']->page       = $page;
         $this->data['pagination']->per_page   = $per_page;
         $this->data['pagination']->total_rows = $this->shop_product_model->count_all($data);
@@ -910,7 +910,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     public function orders()
     {
-        if (!user_has_permission('admin.shop:0.orders_manage')) {
+        if (!userHasPermission('admin.shop:0.orders_manage')) {
 
             unauthorised();
         }
@@ -979,7 +979,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
         $this->session->set_userdata($hash . 'order', $order[1]);
 
         //  Set values for the page
-        $this->data['search']               = new stdClass();
+        $this->data['search']               = new \stdClass();
         $this->data['search']->per_page     = $limit[0];
         $this->data['search']->sort         = $order[0];
         $this->data['search']->order        = $order[1];
@@ -1058,11 +1058,11 @@ class NAILS_Shop extends NAILS_Admin_Controller
         //  Fetch orders
         $this->load->model('shop/shop_order_model');
 
-        $this->data['orders']       = new stdClass();
+        $this->data['orders']       = new \stdClass();
         $this->data['orders']->data = $this->shop_order_model->get_all($order, $limit, $where, $search);
 
         //  Work out pagination
-        $this->data['orders']->pagination                   = new stdClass();
+        $this->data['orders']->pagination                   = new \stdClass();
         $this->data['orders']->pagination->total_results    = $this->shop_order_model->count_orders($where, $search);
 
         // --------------------------------------------------------------------------
@@ -1085,7 +1085,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _orders_view()
     {
-        if (!user_has_permission('admin.shop:0.orders_view')) {
+        if (!userHasPermission('admin.shop:0.orders_view')) {
 
             $this->session->set_flashdata('error', '<strong>Sorry,</strong> you do not have permission to view order details.');
             redirect('admin/shop/orders');
@@ -1117,7 +1117,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         // --------------------------------------------------------------------------
 
-        if ($this->input->get('is_fancybox')) {
+        if ($this->input->get('isFancybox')) {
 
             $this->data['headerOverride'] = 'structure/headerBlank';
             $this->data['footerOverride'] = 'structure/footerBlank';
@@ -1159,7 +1159,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _orders_reprocess()
     {
-        if (!user_has_permission('admin.shop:0.orders_reprocess')) {
+        if (!userHasPermission('admin.shop:0.orders_reprocess')) {
 
             $this->session->set_flashdata('error', '<strong>Sorry,</strong> you do not have permission to reprocess orders.');
             redirect('admin/shop/orders');
@@ -1215,7 +1215,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _orders_process()
     {
-        if (!user_has_permission('admin.shop:0.orders_process')) {
+        if (!userHasPermission('admin.shop:0.orders_process')) {
 
             $this->session->set_flashdata('error', '<strong>Sorry,</strong> you do not have permission to process order items.');
             redirect('admin/shop/orders');
@@ -1225,7 +1225,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         $order_id       = $this->uri->segment(5);
         $product_id = $this->uri->segment(6);
-        $is_fancybox    = $this->input->get('is_fancybox') ? '?is_fancybox=true' : '';
+        $isFancybox    = $this->input->get('isFancybox') ? '?isFancybox=true' : '';
 
         // --------------------------------------------------------------------------
 
@@ -1266,12 +1266,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
             // --------------------------------------------------------------------------
 
             $this->session->set_flashdata('success', '<strong>Success!</strong> Product\'s status was updated successfully.');
-            redirect('admin/shop/orders/view/' . $order_id . $is_fancybox);
+            redirect('admin/shop/orders/view/' . $order_id . $isFancybox);
 
         } else {
 
             $this->session->set_flashdata('error', '<strong>Sorry,</strong> I was not able to update the status of that product.');
-            redirect('admin/shop/orders/view/' . $order_id . $is_fancybox);
+            redirect('admin/shop/orders/view/' . $order_id . $isFancybox);
         }
     }
 
@@ -1283,7 +1283,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _orders_download_invoice()
     {
-        if (!user_has_permission('admin.shop:0.orders_view')) {
+        if (!userHasPermission('admin.shop:0.orders_view')) {
 
             $this->session->set_flashdata('error', '<strong>Sorry,</strong> you do not have permission to download orders.');
             redirect('admin/shop/orders');
@@ -1333,7 +1333,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _orders_fulfil()
     {
-        if (!user_has_permission('admin.shop:0.orders_edit')) {
+        if (!userHasPermission('admin.shop:0.orders_edit')) {
 
             $msg    = '<strong>Sorry,</strong> you do not have permission to edit orders.';
             $status = 'error';
@@ -1381,7 +1381,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _orders_fulfil_batch()
     {
-        if (!user_has_permission('admin.shop:0.orders_edit')) {
+        if (!userHasPermission('admin.shop:0.orders_edit')) {
 
             $msg    = '<strong>Sorry,</strong> you do not have permission to edit orders.';
             $status = 'error';
@@ -1418,7 +1418,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _orders_unfulfil()
     {
-        if (!user_has_permission('admin.shop:0.orders_edit')) {
+        if (!userHasPermission('admin.shop:0.orders_edit')) {
 
             $msg    = '<strong>Sorry,</strong> you do not have permission to edit orders.';
             $status = 'error';
@@ -1466,7 +1466,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _orders_unfulfil_batch()
     {
-        if (!user_has_permission('admin.shop:0.orders_edit')) {
+        if (!userHasPermission('admin.shop:0.orders_edit')) {
 
             $msg    = '<strong>Sorry,</strong> you do not have permission to edit orders.';
             $status = 'error';
@@ -1503,7 +1503,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     public function vouchers()
     {
-        if (!user_has_permission('admin.shop:0.vouchers_manage')) {
+        if (!userHasPermission('admin.shop:0.vouchers_manage')) {
 
             unauthorised();
         }
@@ -1563,7 +1563,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
         }
 
         //  Define and populate the pagination object
-        $this->data['pagination']             = new stdClass();
+        $this->data['pagination']             = new \stdClass();
         $this->data['pagination']->page       = $page;
         $this->data['pagination']->per_page   = $per_page;
         $this->data['pagination']->total_rows = $this->shop_voucher_model->count_all($data);
@@ -1586,7 +1586,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _vouchers_create()
     {
-        if (!user_has_permission('admin.shop:0.vouchers_create')) {
+        if (!userHasPermission('admin.shop:0.vouchers_create')) {
 
             $this->session->set_flashdata('error', '<strong>Sorry,</strong> you do not have permission to create vouchers.');
             redirect('admin/shop/vouchers');
@@ -1770,7 +1770,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _vouchers_activate()
     {
-        if (!user_has_permission('admin.shop:0.vouchers_activate')) {
+        if (!userHasPermission('admin.shop:0.vouchers_activate')) {
 
             $status  = 'error';
             $message = '<strong>Sorry,</strong> you do not have permission to activate vouchers.';
@@ -1805,7 +1805,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _vouchers_deactivate()
     {
-        if (!user_has_permission('admin.shop:0.vouchers_deactivate')) {
+        if (!userHasPermission('admin.shop:0.vouchers_deactivate')) {
 
             $status  = 'error';
             $message = '<strong>Sorry,</strong> you do not have permission to suspend vouchers.';
@@ -1840,7 +1840,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     public function sales()
     {
-        if (!user_has_permission('admin.shop:0.sale_manage')) {
+        if (!userHasPermission('admin.shop:0.sale_manage')) {
 
             unauthorised();
         }
@@ -1934,10 +1934,10 @@ class NAILS_Shop extends NAILS_Admin_Controller
         if (method_exists($this, '_manage_' . $method)) {
 
             //  Is fancybox?
-            $this->data['is_fancybox']  = $this->input->get('is_fancybox') ? '?is_fancybox=1' : '';
+            $this->data['isFancybox']  = $this->input->get('isFancybox') ? '?isFancybox=1' : '';
 
             //  Override the header and footer
-            if ($this->data['is_fancybox']) {
+            if ($this->data['isFancybox']) {
 
                 $this->data['headerOverride'] = 'structure/headerBlank';
                 $this->data['footerOverride'] = 'structure/footerBlank';
@@ -1976,7 +1976,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_attribute()
     {
-        if (!user_has_permission('admin.shop:0.attribute_manage')) {
+        if (!userHasPermission('admin.shop:0.attribute_manage')) {
 
             unauthorised();
         }
@@ -2029,7 +2029,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_attribute_create()
     {
-        if (!user_has_permission('admin.shop:0.attribute_create')) {
+        if (!userHasPermission('admin.shop:0.attribute_create')) {
 
             unauthorised();
         }
@@ -2047,14 +2047,14 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
             if ($this->form_validation->run()) {
 
-                $data               = new stdClass();
+                $data               = new \stdClass();
                 $data->label        = $this->input->post('label');
                 $data->description  = $this->input->post('description');
 
                 if ($this->shop_attribute_model->create($data)) {
 
                     $this->session->set_flashdata('success', '<strong>Success!</strong> Attribute created successfully.');
-                    redirect('admin/shop/manage/attribute' . $this->data['is_fancybox']);
+                    redirect('admin/shop/manage/attribute' . $this->data['isFancybox']);
 
                 } else {
 
@@ -2093,7 +2093,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_attribute_edit()
     {
-        if (!user_has_permission('admin.shop:0.attribute_edit')) {
+        if (!userHasPermission('admin.shop:0.attribute_edit')) {
 
             unauthorised();
         }
@@ -2120,14 +2120,14 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
             if ($this->form_validation->run()) {
 
-                $data               = new stdClass();
+                $data               = new \stdClass();
                 $data->label        = $this->input->post('label');
                 $data->description  = $this->input->post('description');
 
                 if ($this->shop_attribute_model->update($this->data['attribute']->id, $data)) {
 
                     $this->session->set_flashdata('success', '<strong>Success!</strong> Attribute saved successfully.');
-                    redirect('admin/shop/manage/attribute' . $this->data['is_fancybox']);
+                    redirect('admin/shop/manage/attribute' . $this->data['isFancybox']);
 
                 } else {
 
@@ -2166,7 +2166,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_attribute_delete()
     {
-        if (!user_has_permission('admin.shop:0.attribute_delete')) {
+        if (!userHasPermission('admin.shop:0.attribute_delete')) {
 
             unauthorised();
         }
@@ -2184,7 +2184,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
             $this->session->set_flashdata('error', '<strong>Sorry,</strong> there was a problem deleting the Attribute. ' . $this->shop_attribute_model->last_error());
         }
 
-        redirect('admin/shop/manage/attribute' . $this->data['is_fancybox']);
+        redirect('admin/shop/manage/attribute' . $this->data['isFancybox']);
     }
 
     // --------------------------------------------------------------------------
@@ -2195,7 +2195,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_brand()
     {
-        if (!user_has_permission('admin.shop:0.brand_manage')) {
+        if (!userHasPermission('admin.shop:0.brand_manage')) {
 
             unauthorised();
         }
@@ -2248,7 +2248,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_brand_create()
     {
-        if (!user_has_permission('admin.shop:0.brand_create')) {
+        if (!userHasPermission('admin.shop:0.brand_create')) {
 
             unauthorised();
         }
@@ -2273,7 +2273,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
             if ($this->form_validation->run()) {
 
-                $data                   = new stdClass();
+                $data                   = new \stdClass();
                 $data->label            = $this->input->post('label');
                 $data->logo_id          = (int) $this->input->post('logo_id') ? (int) $this->input->post('logo_id') : null;
                 $data->cover_id     = (int) $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
@@ -2287,7 +2287,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                     //  Redirect to clear form
                     $this->session->set_flashdata('success', '<strong>Success!</strong> Brand created successfully.');
-                    redirect('admin/shop/manage/brand' . $this->data['is_fancybox']);
+                    redirect('admin/shop/manage/brand' . $this->data['isFancybox']);
 
                 } else {
 
@@ -2326,7 +2326,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_brand_edit()
     {
-        if (!user_has_permission('admin.shop:0.brand_edit')) {
+        if (!userHasPermission('admin.shop:0.brand_edit')) {
 
             unauthorised();
         }
@@ -2360,7 +2360,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
             if ($this->form_validation->run()) {
 
-                $data                   = new stdClass();
+                $data                   = new \stdClass();
                 $data->label            = $this->input->post('label');
                 $data->logo_id          = (int) $this->input->post('logo_id') ? (int) $this->input->post('logo_id') : null;
                 $data->cover_id     = (int) $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
@@ -2373,7 +2373,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
                 if ($this->shop_brand_model->update($this->data['brand']->id, $data)) {
 
                     $this->session->set_flashdata('success', '<strong>Success!</strong> Brand saved successfully.');
-                    redirect('admin/shop/manage/brand' . $this->data['is_fancybox']);
+                    redirect('admin/shop/manage/brand' . $this->data['isFancybox']);
 
                 } else {
 
@@ -2412,7 +2412,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_brand_delete()
     {
-        if (!user_has_permission('admin.shop:0.brand_delete')) {
+        if (!userHasPermission('admin.shop:0.brand_delete')) {
 
             unauthorised();
         }
@@ -2430,7 +2430,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
             $this->session->set_flashdata('error', '<strong>Sorry,</strong> there was a problem deleting the Brand. ' . $this->shop_brand_model->last_error());
         }
 
-        redirect('admin/shop/manage/brand' . $this->data['is_fancybox']);
+        redirect('admin/shop/manage/brand' . $this->data['isFancybox']);
     }
 
     // --------------------------------------------------------------------------
@@ -2441,7 +2441,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_category()
     {
-        if (!user_has_permission('admin.shop:0.category_manage')) {
+        if (!userHasPermission('admin.shop:0.category_manage')) {
 
             unauthorised();
         }
@@ -2494,7 +2494,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_category_create()
     {
-        if (!user_has_permission('admin.shop:0.category_create')) {
+        if (!userHasPermission('admin.shop:0.category_create')) {
 
             unauthorised();
         }
@@ -2518,7 +2518,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
             if ($this->form_validation->run()) {
 
-                $data                   = new stdClass();
+                $data                   = new \stdClass();
                 $data->label            = $this->input->post('label');
                 $data->parent_id        = $this->input->post('parent_id');
                 $data->cover_id     = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
@@ -2530,7 +2530,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
                 if ($this->shop_category_model->create($data)) {
 
                     $this->session->set_flashdata('success', '<strong>Success!</strong> Category created successfully.');
-                    redirect('admin/shop/manage/category' . $this->data['is_fancybox']);
+                    redirect('admin/shop/manage/category' . $this->data['isFancybox']);
 
                 } else {
 
@@ -2569,7 +2569,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_category_edit()
     {
-        if (!user_has_permission('admin.shop:0.category_edit')) {
+        if (!userHasPermission('admin.shop:0.category_edit')) {
 
             unauthorised();
         }
@@ -2602,7 +2602,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
             if ($this->form_validation->run()) {
 
-                $data                   = new stdClass();
+                $data                   = new \stdClass();
                 $data->label            = $this->input->post('label');
                 $data->parent_id        = $this->input->post('parent_id');
                 $data->cover_id     = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
@@ -2614,7 +2614,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
                 if ($this->shop_category_model->update($this->data['category']->id, $data)) {
 
                     $this->session->set_flashdata('success', '<strong>Success!</strong> Category saved successfully.');
-                    redirect('admin/shop/manage/category' . $this->data['is_fancybox']);
+                    redirect('admin/shop/manage/category' . $this->data['isFancybox']);
 
                 } else {
 
@@ -2653,7 +2653,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_category_delete()
     {
-        if (!user_has_permission('admin.shop:0.category_delete')) {
+        if (!userHasPermission('admin.shop:0.category_delete')) {
 
             unauthorised();
         }
@@ -2671,7 +2671,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
             $this->session->set_flashdata('error', '<strong>Sorry,</strong> there was a problem deleting the Category. ' . $this->shop_category_model->last_error());
         }
 
-        redirect('admin/shop/manage/category' . $this->data['is_fancybox']);
+        redirect('admin/shop/manage/category' . $this->data['isFancybox']);
     }
 
     // --------------------------------------------------------------------------
@@ -2682,7 +2682,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_collection()
     {
-        if (!user_has_permission('admin.shop:0.collection_manage')) {
+        if (!userHasPermission('admin.shop:0.collection_manage')) {
 
             unauthorised();
         }
@@ -2735,7 +2735,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_collection_create()
     {
-        if (!user_has_permission('admin.shop:0.collection_create')) {
+        if (!userHasPermission('admin.shop:0.collection_create')) {
 
             unauthorised();
         }
@@ -2759,7 +2759,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
             if ($this->form_validation->run()) {
 
-                $data                   = new stdClass();
+                $data                   = new \stdClass();
                 $data->label            = $this->input->post('label');
                 $data->cover_id     = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
                 $data->description      = $this->input->post('description');
@@ -2771,7 +2771,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
                 if ($this->shop_collection_model->create($data)) {
 
                     $this->session->set_flashdata('success', '<strong>Success!</strong> Collection created successfully.');
-                    redirect('admin/shop/manage/collection' . $this->data['is_fancybox']);
+                    redirect('admin/shop/manage/collection' . $this->data['isFancybox']);
 
                 } else {
 
@@ -2810,7 +2810,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_collection_edit()
     {
-        if (!user_has_permission('admin.shop:0.collection_edit')) {
+        if (!userHasPermission('admin.shop:0.collection_edit')) {
 
             unauthorised();
         }
@@ -2843,7 +2843,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
             if ($this->form_validation->run()) {
 
-                $data                   = new stdClass();
+                $data                   = new \stdClass();
                 $data->label            = $this->input->post('label');
                 $data->cover_id     = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
                 $data->description      = $this->input->post('description');
@@ -2855,7 +2855,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
                 if ($this->shop_collection_model->update($this->data['collection']->id, $data)) {
 
                     $this->session->set_flashdata('success', '<strong>Success!</strong> Collection saved successfully.');
-                    redirect('admin/shop/manage/collection' . $this->data['is_fancybox']);
+                    redirect('admin/shop/manage/collection' . $this->data['isFancybox']);
 
                 } else {
 
@@ -2894,7 +2894,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_collection_delete()
     {
-        if (!user_has_permission('admin.shop:0.collection_delete')) {
+        if (!userHasPermission('admin.shop:0.collection_delete')) {
 
             unauthorised();
         }
@@ -2912,7 +2912,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
             $this->session->set_flashdata('error', '<strong>Sorry,</strong> there was a problem deleting the Collection. ' . $this->shop_collection_model->last_error());
         }
 
-        redirect('admin/shop/manage/collection' . $this->data['is_fancybox']);
+        redirect('admin/shop/manage/collection' . $this->data['isFancybox']);
     }
 
     // --------------------------------------------------------------------------
@@ -2923,7 +2923,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_range()
     {
-        if (!user_has_permission('admin.shop:0.range_manage')) {
+        if (!userHasPermission('admin.shop:0.range_manage')) {
 
             unauthorised();
         }
@@ -2976,7 +2976,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_range_create()
     {
-        if (!user_has_permission('admin.shop:0.range_create')) {
+        if (!userHasPermission('admin.shop:0.range_create')) {
 
             unauthorised();
         }
@@ -3000,7 +3000,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
             if ($this->form_validation->run()) {
 
-                $data                   = new stdClass();
+                $data                   = new \stdClass();
                 $data->label            = $this->input->post('label');
                 $data->cover_id     = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
                 $data->description      = $this->input->post('description');
@@ -3012,7 +3012,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
                 if ($this->shop_range_model->create($data)) {
 
                     $this->session->set_flashdata('success', '<strong>Success!</strong> Range created successfully.');
-                    redirect('admin/shop/manage/range' . $this->data['is_fancybox']);
+                    redirect('admin/shop/manage/range' . $this->data['isFancybox']);
 
                 } else {
 
@@ -3051,7 +3051,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_range_edit()
     {
-        if (!user_has_permission('admin.shop:0.range_edit')) {
+        if (!userHasPermission('admin.shop:0.range_edit')) {
 
             unauthorised();
         }
@@ -3084,7 +3084,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
             if ($this->form_validation->run()) {
 
-                $data                   = new stdClass();
+                $data                   = new \stdClass();
                 $data->label            = $this->input->post('label');
                 $data->cover_id     = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
                 $data->description      = $this->input->post('description');
@@ -3096,7 +3096,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
                 if ($this->shop_range_model->update($this->data['range']->id, $data)) {
 
                     $this->session->set_flashdata('success', '<strong>Success!</strong> Range saved successfully.');
-                    redirect('admin/shop/manage/range' . $this->data['is_fancybox']);
+                    redirect('admin/shop/manage/range' . $this->data['isFancybox']);
 
                 } else {
 
@@ -3135,7 +3135,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_range_delete()
     {
-        if (!user_has_permission('admin.shop:0.range_delete')) {
+        if (!userHasPermission('admin.shop:0.range_delete')) {
 
             unauthorised();
         }
@@ -3153,7 +3153,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
             $this->session->set_flashdata('error', '<strong>Sorry,</strong> there was a problem deleting the Range. ' . $this->shop_range_model->last_error());
         }
 
-        redirect('admin/shop/manage/range' . $this->data['is_fancybox']);
+        redirect('admin/shop/manage/range' . $this->data['isFancybox']);
     }
 
     // --------------------------------------------------------------------------
@@ -3164,7 +3164,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_tag()
     {
-        if (!user_has_permission('admin.shop:0.tag_manage')) {
+        if (!userHasPermission('admin.shop:0.tag_manage')) {
 
             unauthorised();
         }
@@ -3217,7 +3217,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_tag_create()
     {
-        if (!user_has_permission('admin.shop:0.tag_create')) {
+        if (!userHasPermission('admin.shop:0.tag_create')) {
 
             unauthorised();
         }
@@ -3240,7 +3240,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
             if ($this->form_validation->run()) {
 
-                $data                   = new stdClass();
+                $data                   = new \stdClass();
                 $data->label            = $this->input->post('label');
                 $data->cover_id     = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
                 $data->description      = $this->input->post('description');
@@ -3251,7 +3251,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
                 if ($this->shop_tag_model->create($data)) {
 
                     $this->session->set_flashdata('success', '<strong>Success!</strong> Tag created successfully.');
-                    redirect('admin/shop/manage/tag' . $this->data['is_fancybox']);
+                    redirect('admin/shop/manage/tag' . $this->data['isFancybox']);
 
                 } else {
 
@@ -3290,7 +3290,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_tag_edit()
     {
-        if (!user_has_permission('admin.shop:0.tag_edit')) {
+        if (!userHasPermission('admin.shop:0.tag_edit')) {
 
             unauthorised();
         }
@@ -3322,7 +3322,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
             if ($this->form_validation->run()) {
 
-                $data                   = new stdClass();
+                $data                   = new \stdClass();
                 $data->label            = $this->input->post('label');
                 $data->cover_id     = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
                 $data->description      = $this->input->post('description');
@@ -3333,7 +3333,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
                 if ($this->shop_tag_model->update($this->data['tag']->id, $data)) {
 
                     $this->session->set_flashdata('success', '<strong>Success!</strong> Tag saved successfully.');
-                    redirect('admin/shop/manage/tag' . $this->data['is_fancybox']);
+                    redirect('admin/shop/manage/tag' . $this->data['isFancybox']);
 
                 } else {
 
@@ -3372,7 +3372,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_tag_delete()
     {
-        if (!user_has_permission('admin.shop:0.tag_delete')) {
+        if (!userHasPermission('admin.shop:0.tag_delete')) {
 
             unauthorised();
         }
@@ -3390,7 +3390,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
             $this->session->set_flashdata('error', '<strong>Sorry,</strong> there was a problem deleting the Tag. ' . $this->shop_tag_model->last_error());
         }
 
-        redirect('admin/shop/manage/tag' . $this->data['is_fancybox']);
+        redirect('admin/shop/manage/tag' . $this->data['isFancybox']);
     }
 
     // --------------------------------------------------------------------------
@@ -3401,7 +3401,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_tax_rate()
     {
-        if (!user_has_permission('admin.shop:0.tax_rate_manage')) {
+        if (!userHasPermission('admin.shop:0.tax_rate_manage')) {
 
             unauthorised();
         }
@@ -3454,7 +3454,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_tax_rate_create()
     {
-        if (!user_has_permission('admin.shop:0.tax_rate_create')) {
+        if (!userHasPermission('admin.shop:0.tax_rate_create')) {
 
             unauthorised();
         }
@@ -3473,14 +3473,14 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
             if ($this->form_validation->run()) {
 
-                $data           = new stdClass();
+                $data           = new \stdClass();
                 $data->label    = $this->input->post('label');
                 $data->rate = $this->input->post('rate');
 
                 if ($this->shop_tax_rate_model->create($data)) {
 
                     $this->session->set_flashdata('success', '<strong>Success!</strong> Tax Rate created successfully.');
-                    redirect('admin/shop/manage/tax_rate' . $this->data['is_fancybox']);
+                    redirect('admin/shop/manage/tax_rate' . $this->data['isFancybox']);
 
                 } else {
 
@@ -3519,7 +3519,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_tax_rate_edit()
     {
-        if (!user_has_permission('admin.shop:0.tax_rate_edit')) {
+        if (!userHasPermission('admin.shop:0.tax_rate_edit')) {
 
             unauthorised();
         }
@@ -3547,14 +3547,14 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
             if ($this->form_validation->run()) {
 
-                $data           = new stdClass();
+                $data           = new \stdClass();
                 $data->label    = $this->input->post('label');
                 $data->rate = (float) $this->input->post('rate');
 
                 if ($this->shop_tax_rate_model->update($this->data['tax_rate']->id, $data)) {
 
                     $this->session->set_flashdata('success', '<strong>Success!</strong> Tax Rate saved successfully.');
-                    redirect('admin/shop/manage/tax_rate' . $this->data['is_fancybox']);
+                    redirect('admin/shop/manage/tax_rate' . $this->data['isFancybox']);
 
                 } else {
 
@@ -3593,7 +3593,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_tax_rate_delete()
     {
-        if (!user_has_permission('admin.shop:0.tax_rate_delete')) {
+        if (!userHasPermission('admin.shop:0.tax_rate_delete')) {
 
             unauthorised();
         }
@@ -3611,7 +3611,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
             $this->session->set_flashdata('error', '<strong>Sorry,</strong> there was a problem deleting the Tax Rate. ' . $this->shop_tax_rate_model->last_error());
         }
 
-        redirect('admin/shop/manage/tax_rate' . $this->data['is_fancybox']);
+        redirect('admin/shop/manage/tax_rate' . $this->data['isFancybox']);
     }
 
     // --------------------------------------------------------------------------
@@ -3622,7 +3622,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_product_type()
     {
-        if (!user_has_permission('admin.shop:0.product_type_manage')) {
+        if (!userHasPermission('admin.shop:0.product_type_manage')) {
 
             unauthorised();
         }
@@ -3675,7 +3675,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_product_type_create()
     {
-        if (!user_has_permission('admin.shop:0.product_type_create')) {
+        if (!userHasPermission('admin.shop:0.product_type_create')) {
 
             unauthorised();
         }
@@ -3698,7 +3698,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
             if ($this->form_validation->run()) {
 
-                $data                   = new stdClass();
+                $data                   = new \stdClass();
                 $data->label            = $this->input->post('label');
                 $data->description      = $this->input->post('description');
                 $data->is_physical      = (bool) $this->input->post('is_physical');
@@ -3710,7 +3710,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                     //  Redirect to clear form
                     $this->session->set_flashdata('success', '<strong>Success!</strong> Product Type created successfully.');
-                    redirect('admin/shop/manage/product_type' . $this->data['is_fancybox']);
+                    redirect('admin/shop/manage/product_type' . $this->data['isFancybox']);
 
                 } else {
 
@@ -3749,7 +3749,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_product_type_edit()
     {
-        if (!user_has_permission('admin.shop:0.product_type_edit')) {
+        if (!userHasPermission('admin.shop:0.product_type_edit')) {
 
             unauthorised();
         }
@@ -3780,7 +3780,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
             if ($this->form_validation->run()) {
 
-                $data                   = new stdClass();
+                $data                   = new \stdClass();
                 $data->label            = $this->input->post('label');
                 $data->description      = $this->input->post('description');
                 $data->is_physical      = (bool)$this->input->post('is_physical');
@@ -3791,7 +3791,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
                 if ($this->shop_product_type_model->update($this->data['product_type']->id, $data)) {
 
                     $this->session->set_flashdata('success', '<strong>Success!</strong> Product Type saved successfully.');
-                    redirect('admin/shop/product_type' . $this->data['is_fancybox']);
+                    redirect('admin/shop/product_type' . $this->data['isFancybox']);
 
                 } else {
 
@@ -3830,7 +3830,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_product_type_meta()
     {
-        if (!user_has_permission('admin.shop:0.product_type_meta__manage')) {
+        if (!userHasPermission('admin.shop:0.product_type_meta__manage')) {
 
             unauthorised();
         }
@@ -3883,7 +3883,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_product_type_meta_create()
     {
-        if (!user_has_permission('admin.shop:0.product_type_meta_create')) {
+        if (!userHasPermission('admin.shop:0.product_type_meta_create')) {
 
             unauthorised();
         }
@@ -3906,7 +3906,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
             if ($this->form_validation->run()) {
 
-                $data                               = new stdClass();
+                $data                               = new \stdClass();
                 $data->label                        = $this->input->post('label');
                 $data->admin_form_sub_label     = $this->input->post('admin_form_sub_label');
                 $data->admin_form_placeholder       = $this->input->post('admin_form_placeholder');
@@ -3918,7 +3918,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
                 if ($this->shop_product_type_meta_model->create($data)) {
 
                     $this->session->set_flashdata('success', '<strong>Success!</strong> Product Type Meta Field created successfully.');
-                    redirect('admin/shop/manage/product_type_meta' . $this->data['is_fancybox']);
+                    redirect('admin/shop/manage/product_type_meta' . $this->data['isFancybox']);
 
                 } else {
 
@@ -3957,7 +3957,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_product_type_meta_edit()
     {
-        if (!user_has_permission('admin.shop:0.product_type_meta_edit')) {
+        if (!userHasPermission('admin.shop:0.product_type_meta_edit')) {
 
             unauthorised();
         }
@@ -3990,7 +3990,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
             if ($this->form_validation->run()) {
 
-                $data                               = new stdClass();
+                $data                               = new \stdClass();
                 $data->label                        = $this->input->post('label');
                 $data->admin_form_sub_label     = $this->input->post('admin_form_sub_label');
                 $data->admin_form_placeholder       = $this->input->post('admin_form_placeholder');
@@ -4002,7 +4002,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
                 if ($this->shop_product_type_meta_model->update($this->data['meta_field']->id, $data)) {
 
                     $this->session->set_flashdata('success', '<strong>Success!</strong> Product Type Meta Field saved successfully.');
-                    redirect('admin/shop/manage/product_type_meta' . $this->data['is_fancybox']);
+                    redirect('admin/shop/manage/product_type_meta' . $this->data['isFancybox']);
 
                 } else {
 
@@ -4041,7 +4041,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _manage_product_type_meta_delete()
     {
-        if (!user_has_permission('admin.shop:0.product_type_meta_delete')) {
+        if (!userHasPermission('admin.shop:0.product_type_meta_delete')) {
 
             unauthorised();
         }
@@ -4059,7 +4059,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
             $this->session->set_flashdata('error', '<strong>Sorry,</strong> there was a problem deleting the Product Type. ' . $this->shop_product_type_model->last_error());
         }
 
-        redirect('admin/shop/manage/product_type_meta' . $this->data['is_fancybox']);
+        redirect('admin/shop/manage/product_type_meta' . $this->data['isFancybox']);
     }
 
     // --------------------------------------------------------------------------
@@ -4070,7 +4070,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     public function reports()
     {
-        if (!user_has_permission('admin.shop:0.can_generate_reports')) {
+        if (!userHasPermission('admin.shop:0.can_generate_reports')) {
 
             unauthorised();
         }
@@ -4080,7 +4080,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
         //  Default report sources
         $this->reportSources = array();
 
-        if (user_has_permission('admin.shop:0.inventory_manage')) {
+        if (userHasPermission('admin.shop:0.inventory_manage')) {
 
             $this->reportSources[] = array('Inventory', 'Out of Stock variants', 'out_of_stock_variants');
             $this->reportSources[] = array('Sales', 'Product Sales', 'product_sales');
@@ -4125,7 +4125,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         // --------------------------------------------------------------------------
 
-        if (!user_has_permission('admin.shop:0.can_generate_reports')) {
+        if (!userHasPermission('admin.shop:0.can_generate_reports')) {
 
             unauthorised();
         }
@@ -4240,14 +4240,14 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _report_source_out_of_stock_variants()
     {
-        if (!user_has_permission('admin.shop:0.inventory_manage')) {
+        if (!userHasPermission('admin.shop:0.inventory_manage')) {
 
             return false;
         }
 
         // --------------------------------------------------------------------------
 
-        $out            = new stdClass();
+        $out            = new \stdClass();
         $out->label = 'Out of Stock variants';
         $out->filename  = NAILS_DB_PREFIX . 'out_of_stock_variants';
         $out->fields    = array();
@@ -4283,14 +4283,14 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _report_source_product_sales()
     {
-        if (!user_has_permission('admin.shop:0.inventory_manage')) {
+        if (!userHasPermission('admin.shop:0.inventory_manage')) {
 
             return false;
         }
 
         // --------------------------------------------------------------------------
 
-        $out            = new stdClass();
+        $out            = new \stdClass();
         $out->label = 'Product Sales';
         $out->filename  = NAILS_DB_PREFIX . 'product_sales';
         $out->fields    = array();
@@ -4542,7 +4542,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     public function product_availability_notifications()
     {
-        if (!user_has_permission('admin.shop:0.notifications_manage')) {
+        if (!userHasPermission('admin.shop:0.notifications_manage')) {
 
             unauthorised();
         }
@@ -4601,7 +4601,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _product_availability_notifications_create()
     {
-        if (!user_has_permission('admin.shop:0.notification_create')) {
+        if (!userHasPermission('admin.shop:0.notification_create')) {
 
             unauthorised();
         }
@@ -4622,7 +4622,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                 $item = explode(':', $this->input->post('item'));
 
-                $data                   = new stdClass();
+                $data                   = new \stdClass();
                 $data->email            = $this->input->post('email');
                 $data->product_id       = isset($item[0]) ? (int) $item[0] : null;
                 $data->variation_id = isset($item[1]) ? (int) $item[1] : null;
@@ -4668,7 +4668,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _product_availability_notifications_edit()
     {
-        if (!user_has_permission('admin.shop:0.notification_edit')) {
+        if (!userHasPermission('admin.shop:0.notification_edit')) {
 
             unauthorised();
         }
@@ -4698,7 +4698,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                 $item = explode(':', $this->input->post('item'));
 
-                $data                   = new stdClass();
+                $data                   = new \stdClass();
                 $data->email            = $this->input->post('email');
                 $data->product_id       = isset($item[0]) ? (int) $item[0] : null;
                 $data->variation_id = isset($item[1]) ? (int) $item[1] : null;
@@ -4744,7 +4744,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
      */
     protected function _product_availability_notifications_delete()
     {
-        if (!user_has_permission('admin.shop:0.notifications_delete')) {
+        if (!userHasPermission('admin.shop:0.notifications_delete')) {
 
             unauthorised();
         }

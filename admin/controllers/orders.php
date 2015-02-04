@@ -14,13 +14,13 @@ namespace Nails\Admin\Shop;
 
 class Orders extends \AdminController
 {
-   /**
-     * Announces this controller's navGroupings
+    /**
+     * Announces this controller's navGroups
      * @return stdClass
      */
     public static function announce()
     {
-        if (user_has_permission('admin.shop:0.orders_manage')) {
+        if (userHasPermission('admin.shop:0.orders_manage')) {
 
             $navGroup = new \Nails\Admin\Nav('Shop');
             $navGroup->addMethod('Manage Orders');

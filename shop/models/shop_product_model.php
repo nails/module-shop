@@ -481,7 +481,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Published date
-		$_data->published = isset($data['published']) ? user_mysql_rdatetime($data['published']) : null;
+		$_data->published = isset($data['published']) ? userMysqlReverseDatetime($data['published']) : null;
 
 		// --------------------------------------------------------------------------
 
@@ -2748,7 +2748,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 			unset($variation->out_of_stock_to_order_lead_time);
 
 		endif;
-		
+
 	}
 }
 

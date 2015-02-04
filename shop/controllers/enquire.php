@@ -88,7 +88,7 @@ class NAILS_Enquire extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        if ($this->input->get('is_fancybox')) {
+        if ($this->input->get('isFancybox')) {
 
             $this->data['headerOverride'] = 'structure/header/blank';
             $this->data['footerOverride'] = 'structure/footer/blank';

@@ -14,8 +14,8 @@ namespace Nails\Admin\Shop;
 
 class Manage extends \AdminController
 {
-   /**
-     * Announces this controller's navGroupings
+    /**
+     * Announces this controller's navGroups
      * @return stdClass
      */
     public static function announce()

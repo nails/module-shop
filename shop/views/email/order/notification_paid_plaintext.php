@@ -11,7 +11,7 @@ REFERENCE
 
 
 PLACED
-<?=user_datetime($order->created)?>
+<?=userDatetime($order->created)?>
 
 
 CUSTOMER
