@@ -360,6 +360,101 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
         return $out;
     }
+    
+    // --------------------------------------------------------------------------
+
+    /**
+     * Takes a product variant ID and works out what the shipping would be on it
+     * @param  stdClass $variantId ID of the variant in question
+     * @return stdClass
+     */
+    public function calculateVariant($variantId)
+    {
+        $free       = new stdClass();
+        $free->base = (float) 0;
+        $free->user = (float) 0;
+
+        // --------------------------------------------------------------------------
+
+        //  Check that we have a valid item
+        $item = $this->shop_product_model->getByVariantId($variantId);
+
+        //  If for whatever reason we can't find the product, return free (no charge)
+        if (!$item) {
+            
+            return $free;
+        }
+
+        // --------------------------------------------------------------------------
+
+        if (!$this->isDriverLoaded()) {
+
+            //  No driver loaded, detect enabled driver and attempt to load
+            $enabledDriver = app_setting('enabled_shipping_driver', 'shop');
+
+            if (empty($enabledDriver) || !$this->load($enabledDriver)) {
+
+                //  No driver loaded, assume no charge for delivery
+                return $free;
+            }
+        }
+
+        // --------------------------------------------------------------------------
+
+        if (!is_callable(array($this->driver, 'calculateVariant'))) {
+
+            //  No method exists to calculate this charge, assume no charge
+            return $free;
+        }
+
+        // --------------------------------------------------------------------------
+
+        if (!empty($item->type->is_physical)) {
+
+            //  Item is not physical, assume no charge for delivery
+            return $free;
+        }
+        
+        // --------------------------------------------------------------------------
+
+        foreach ($item->variations as $v) {
+            
+            if ($v->id = $variantId) {
+                if (!empty($v->ship_collection_only)) {
+                    
+                    //  Item is collect only, assume no charge for delivery
+                    return $free;
+                }
+            }
+        }
+        
+        // --------------------------------------------------------------------------
+                
+        /**
+         * Have the driver calculate the cost of shipping, this should return a float
+         * which is in the base currency. Similar to the calculate() method
+         */
+
+        $cost = $this->driver->calculateVariant($variant);
+
+        if (is_int($cost) || is_numeric($cost)) {
+
+            $cost = (float) $cost;
+
+        } elseif (!is_float($cost)) {
+
+            $cost = 0;
+        }
+
+        $out       = new stdClass();
+        $out->base = $cost;
+
+        //  Convert the base price to the user's currency
+        $this->load->model('shop/shop_currency_model');
+        $out->user = $this->shop_currency_model->convert_base_to_user($cost);
+
+        return $out;
+    }
 
     // --------------------------------------------------------------------------
 
