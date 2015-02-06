@@ -82,8 +82,8 @@ class Settings extends \AdminController
         $this->data['currencies']       = $this->shop_currency_model->get_all();
         $this->data['tax_rates']        = $this->shop_tax_rate_model->get_all();
         $this->data['tax_rates_flat']   = $this->shop_tax_rate_model->get_all_flat();
-        $this->data['countries_flat']   = $this->country_model->get_all_flat();
-        $this->data['continents_flat']  = $this->country_model->get_all_continents_flat();
+        $this->data['countries_flat']   = $this->country_model->getAllFlat();
+        $this->data['continents_flat']  = $this->country_model->getAllContinentsFlat();
         array_unshift($this->data['tax_rates_flat'], 'No Tax');
 
         //  "Front of house" skins

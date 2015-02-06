@@ -2,7 +2,7 @@
 
 //  Country
 $this->load->model('country_model');
-$countriesFlat = $this->country_model->get_all_flat();
+$countriesFlat = $this->country_model->getAllFlat();
 
 ?>
 Thank you very much for your order with <?=APP_NAME?>.

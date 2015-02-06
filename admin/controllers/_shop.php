@@ -473,7 +473,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
         //  Assets
         $this->asset->library('uploadify');
         $this->asset->load('mustache.js/mustache.js', 'NAILS-BOWER');
-        $this->asset->load('nails.admin.shop.inventory.create_edit.min.js', true);
+        $this->asset->load('nails.admin.shop.inventory.createEdit.min.js', true);
 
         // --------------------------------------------------------------------------
 
@@ -825,7 +825,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
         //  Assets
         $this->asset->library('uploadify');
         $this->asset->load('mustache.js/mustache.js', 'NAILS-BOWER');
-        $this->asset->load('nails.admin.shop.inventory.create_edit.min.js', true);
+        $this->asset->load('nails.admin.shop.inventory.createEdit.min.js', true);
 
         // --------------------------------------------------------------------------
 
