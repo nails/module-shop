@@ -2371,7 +2371,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 		// --------------------------------------------------------------------------
 
 		//	Logged in?
-		if ($this->user->is_logged_in()) :
+		if ($this->user_model->is_logged_in()) :
 
 			$_data = array('shop_recently_viewed' => json_encode($_recently_viewed));
 			$this->user_model->update(active_user('id'), $_data);
