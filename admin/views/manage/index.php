@@ -74,7 +74,7 @@
 		else :
 
 			echo '<p class="system-alert message">';
-				echo '<strong>Sorry,</strong> it looks as if there are no manager options available for you to use. If you were expecting to see options here then please contact the shop manager.';
+				echo 'It looks as if there are no manager options available for you to use. If you were expecting to see options here then please contact the shop manager.';
 			echo '</p>';
 
 		endif;

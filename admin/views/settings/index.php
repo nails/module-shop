@@ -699,7 +699,7 @@
 					else :
 
 						echo '<p class="system-alert message">';
-							echo '<strong>Sorry,</strong> no configurable settings for the <strong>' . $skin_front_current->name . '</strong> "Front of House" skin.';
+							echo 'No configurable settings for the <strong>' . $skin_front_current->name . '</strong> "Front of House" skin.';
 						echo '</p>';
 
 					endif;
@@ -707,7 +707,7 @@
 				else :
 
 					echo '<p class="system-alert message">';
-						echo '<strong>Sorry,</strong> no configurable settings for this skin.';
+						echo 'No configurable settings for this skin.';
 					echo '</p>';
 
 				endif;
@@ -806,7 +806,7 @@
 					else :
 
 						echo '<p class="system-alert message">';
-							echo '<strong>Sorry,</strong> no configurable settings for the <Strong>' . $skin_checkout_current->name . '</strong> "Checkout" skin.';
+							echo 'No configurable settings for the <Strong>' . $skin_checkout_current->name . '</strong> "Checkout" skin.';
 						echo '</p>';
 
 					endif;
@@ -814,7 +814,7 @@
 				else :
 
 					echo '<p class="system-alert message">';
-						echo '<strong>Sorry,</strong> no configurable settings for this skin.';
+						echo 'No configurable settings for this skin.';
 					echo '</p>';
 
 				endif;

@@ -401,12 +401,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                 if ($product) {
 
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Draft product was created successfully.');
+                    $this->session->set_flashdata('success', 'Draft product was created successfully.');
                     redirect('admin/shop/inventory');
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem creating draft product. ' . $this->shop_product_model->last_error();
+                    $this->data['error'] = 'There was a problem creating draft product. ' . $this->shop_product_model->last_error();
 
                 }
 
@@ -427,12 +427,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                     if ($product) {
 
-                        $this->session->set_flashdata('success', '<strong>Success!</strong> Product was created successfully.');
+                        $this->session->set_flashdata('success', 'Product was created successfully.');
                         redirect('admin/shop/inventory');
 
                     } else {
 
-                        $this->data['error'] = '<strong>Sorry,</strong> there was a problem creating the Product. ' . $this->shop_product_model->last_error();
+                        $this->data['error'] = 'There was a problem creating the Product. ' . $this->shop_product_model->last_error();
 
                                     }
                 } else {
@@ -723,7 +723,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         if (!$this->data['item']) {
 
-            $this->session->set_flashdata('error', '<strong>Sorry,</strong> I could not find a product by that ID.');
+            $this->session->set_flashdata('error', 'I could not find a product by that ID.');
             redirect('admin/shop/inventory');
         }
 
@@ -781,12 +781,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                 if ($product) {
 
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Product was updated successfully.');
+                    $this->session->set_flashdata('success', 'Product was updated successfully.');
                     redirect('admin/shop/inventory');
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem updating the Product. ' . $this->shop_product_model->last_error();
+                    $this->data['error'] = 'There was a problem updating the Product. ' . $this->shop_product_model->last_error();
 
                 }
 
@@ -853,7 +853,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
         if (!$product) {
 
             $status = 'error';
-            $msg    = '<strong>Sorry,</strong> a product with that ID could not be found.';
+            $msg    = 'A product with that ID could not be found.';
             $this->session->set_flashdata($status, $msg);
             redirect('admin/shop/inventory/index');
         }
@@ -863,13 +863,13 @@ class NAILS_Shop extends NAILS_Admin_Controller
         if ($this->shop_product_model->delete($product->id)) {
 
             $status  = 'success';
-            $msg     = '<strong>Success!</strong> Product successfully deleted! You can restore this product by ';
+            $msg     = 'Product successfully deleted! You can restore this product by ';
             $msg    .= anchor('/admin/shop/inventory/restore/' . $product->id, 'clicking here') . '.';
 
         } else {
 
             $status  = 'error';
-            $msg     = '<strong>Sorry,</strong> that product could not be deleted. ';
+            $msg     = 'That product could not be deleted. ';
             $msg    .= $this->shop_product_model->last_error();
         }
 
@@ -890,11 +890,11 @@ class NAILS_Shop extends NAILS_Admin_Controller
     {
         if ($this->shop_product_model->restore($this->uri->segment(5))) {
 
-            $this->session->set_flashdata('success', '<strong>Success!</strong> Product successfully restored.');
+            $this->session->set_flashdata('success', 'Product successfully restored.');
 
         } else {
 
-            $this->session->set_flashdata('error', '<strong>Sorry,</strong> that product could not be restored.');
+            $this->session->set_flashdata('error', 'That product could not be restored.');
         }
 
         // --------------------------------------------------------------------------
@@ -1087,7 +1087,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
     {
         if (!userHasPermission('admin.shop:0.orders_view')) {
 
-            $this->session->set_flashdata('error', '<strong>Sorry,</strong> you do not have permission to view order details.');
+            $this->session->set_flashdata('error', 'You do not have permission to view order details.');
             redirect('admin/shop/orders');
         }
 
@@ -1100,7 +1100,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         if (!$this->data['order']) {
 
-            $this->session->set_flashdata('error', '<strong>Sorry,</strong> no order exists by that ID.');
+            $this->session->set_flashdata('error', 'No order exists by that ID.');
             redirect('admin/shop/orders');
         }
 
@@ -1161,7 +1161,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
     {
         if (!userHasPermission('admin.shop:0.orders_reprocess')) {
 
-            $this->session->set_flashdata('error', '<strong>Sorry,</strong> you do not have permission to reprocess orders.');
+            $this->session->set_flashdata('error', 'You do not have permission to reprocess orders.');
             redirect('admin/shop/orders');
         }
 
@@ -1173,7 +1173,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         if (!$order) {
 
-            $this->session->set_flashdata('error', '<strong>Sorry,</strong> I couldn\'t find an order by that ID.');
+            $this->session->set_flashdata('error', 'I couldn\'t find an order by that ID.');
             redirect('admin/shop/orders');
         }
 
@@ -1203,7 +1203,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         // --------------------------------------------------------------------------
 
-        $this->session->set_flashdata('success', '<strong>Success!</strong> Order was processed succesfully. The user has been sent a receipt.');
+        $this->session->set_flashdata('success', 'Order was processed succesfully. The user has been sent a receipt.');
         redirect('admin/shop/orders');
     }
 
@@ -1217,7 +1217,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
     {
         if (!userHasPermission('admin.shop:0.orders_process')) {
 
-            $this->session->set_flashdata('error', '<strong>Sorry,</strong> you do not have permission to process order items.');
+            $this->session->set_flashdata('error', 'You do not have permission to process order items.');
             redirect('admin/shop/orders');
         }
 
@@ -1265,12 +1265,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
             // --------------------------------------------------------------------------
 
-            $this->session->set_flashdata('success', '<strong>Success!</strong> Product\'s status was updated successfully.');
+            $this->session->set_flashdata('success', 'Product\'s status was updated successfully.');
             redirect('admin/shop/orders/view/' . $order_id . $isFancybox);
 
         } else {
 
-            $this->session->set_flashdata('error', '<strong>Sorry,</strong> I was not able to update the status of that product.');
+            $this->session->set_flashdata('error', 'I was not able to update the status of that product.');
             redirect('admin/shop/orders/view/' . $order_id . $isFancybox);
         }
     }
@@ -1285,7 +1285,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
     {
         if (!userHasPermission('admin.shop:0.orders_view')) {
 
-            $this->session->set_flashdata('error', '<strong>Sorry,</strong> you do not have permission to download orders.');
+            $this->session->set_flashdata('error', 'You do not have permission to download orders.');
             redirect('admin/shop/orders');
         }
 
@@ -1298,7 +1298,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         if (!$this->data['order']) {
 
-            $this->session->set_flashdata('error', '<strong>Sorry,</strong> no order exists by that ID.');
+            $this->session->set_flashdata('error', 'No order exists by that ID.');
             redirect('admin/shop/orders');
         }
 
@@ -1335,7 +1335,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
     {
         if (!userHasPermission('admin.shop:0.orders_edit')) {
 
-            $msg    = '<strong>Sorry,</strong> you do not have permission to edit orders.';
+            $msg    = 'You do not have permission to edit orders.';
             $status = 'error';
             $this->session->set_flashdata($status, $msg);
             redirect('admin/shop/orders');
@@ -1350,7 +1350,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         if (!$order) {
 
-            $msg    = '<strong>Sorry,</strong> no order exists by that ID.';
+            $msg    = 'No order exists by that ID.';
             $status = 'error';
             $this->session->set_flashdata($status, $msg);
             redirect('admin/shop/orders');
@@ -1360,12 +1360,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         if ($this->shop_order_model->fulfil($order->id)) {
 
-            $msg    = '<strong>Success!</strong> Order ' . $order->ref . ' was marked as fulfilled.';
+            $msg    = 'Order ' . $order->ref . ' was marked as fulfilled.';
             $status = 'success';
 
         } else {
 
-            $msg    = '<strong>Sorry,</strong> failed to mark order ' . $order->ref . ' as fulfilled.';
+            $msg    = 'Failed to mark order ' . $order->ref . ' as fulfilled.';
             $status = 'error';
         }
 
@@ -1383,7 +1383,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
     {
         if (!userHasPermission('admin.shop:0.orders_edit')) {
 
-            $msg    = '<strong>Sorry,</strong> you do not have permission to edit orders.';
+            $msg    = 'You do not have permission to edit orders.';
             $status = 'error';
             $this->session->set_flashdata($status, $msg);
             redirect('admin/shop/orders');
@@ -1396,12 +1396,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         if ($this->shop_order_model->fulfilBatch($this->input->get('ids'))) {
 
-            $msg    = '<strong>Success!</strong> Orders were marked as fulfilled.';
+            $msg    = 'Orders were marked as fulfilled.';
             $status = 'success';
 
         } else {
 
-            $msg     = '<strong>Sorry,</strong> failed to mark orders as fulfilled. ';
+            $msg     = 'Failed to mark orders as fulfilled. ';
             $msg    .= $this->shop_order_model->last_error();
             $status  = 'error';
         }
@@ -1420,7 +1420,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
     {
         if (!userHasPermission('admin.shop:0.orders_edit')) {
 
-            $msg    = '<strong>Sorry,</strong> you do not have permission to edit orders.';
+            $msg    = 'You do not have permission to edit orders.';
             $status = 'error';
             $this->session->set_flashdata($status, $msg);
             redirect('admin/shop/orders');
@@ -1435,7 +1435,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         if (!$order) {
 
-            $msg    = '<strong>Sorry,</strong> no order exists by that ID.';
+            $msg    = 'No order exists by that ID.';
             $status = 'error';
             $this->session->set_flashdata($status, $msg);
             redirect('admin/shop/orders');
@@ -1445,12 +1445,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         if ($this->shop_order_model->unfulfil($order->id)) {
 
-            $msg    = '<strong>Success!</strong> Order ' . $order->ref . ' was marked as unfulfilled.';
+            $msg    = 'Order ' . $order->ref . ' was marked as unfulfilled.';
             $status = 'success';
 
         } else {
 
-            $msg    = '<strong>Sorry,</strong> failed to mark order ' . $order->ref . ' as unfulfilled.';
+            $msg    = 'Failed to mark order ' . $order->ref . ' as unfulfilled.';
             $status = 'error';
         }
 
@@ -1468,7 +1468,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
     {
         if (!userHasPermission('admin.shop:0.orders_edit')) {
 
-            $msg    = '<strong>Sorry,</strong> you do not have permission to edit orders.';
+            $msg    = 'You do not have permission to edit orders.';
             $status = 'error';
             $this->session->set_flashdata($status, $msg);
             redirect('admin/shop/orders');
@@ -1481,12 +1481,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         if ($this->shop_order_model->unfulfilBatch($this->input->get('ids'))) {
 
-            $msg    = '<strong>Success!</strong> Orders were marked as unfulfilled.';
+            $msg    = 'Orders were marked as unfulfilled.';
             $status = 'success';
 
         } else {
 
-            $msg     = '<strong>Sorry,</strong> failed to mark orders as unfulfilled. ';
+            $msg     = 'Failed to mark orders as unfulfilled. ';
             $msg    .= $this->shop_order_model->last_error();
             $status  = 'error';
         }
@@ -1588,7 +1588,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
     {
         if (!userHasPermission('admin.shop:0.vouchers_create')) {
 
-            $this->session->set_flashdata('error', '<strong>Sorry,</strong> you do not have permission to create vouchers.');
+            $this->session->set_flashdata('error', 'You do not have permission to create vouchers.');
             redirect('admin/shop/vouchers');
         }
 
@@ -1726,12 +1726,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
                 //  Attempt to create
                 if ($this->shop_voucher_model->create($data)) {
 
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Voucher "' . $data['code'] . '" was created successfully.');
+                    $this->session->set_flashdata('success', 'Voucher "' . $data['code'] . '" was created successfully.');
                     redirect('admin/shop/vouchers');
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem creating the voucher. '  . $this->shop_voucher_model->last_error();
+                    $this->data['error'] = 'There was a problem creating the voucher. '  . $this->shop_voucher_model->last_error();
 
                                 }
             } else {
@@ -1773,7 +1773,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
         if (!userHasPermission('admin.shop:0.vouchers_activate')) {
 
             $status  = 'error';
-            $message = '<strong>Sorry,</strong> you do not have permission to activate vouchers.';
+            $message = 'You do not have permission to activate vouchers.';
 
         } else {
 
@@ -1782,12 +1782,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
             if ($this->shop_voucher_model->activate($id)) {
 
                 $status  = 'success';
-                $message = '<strong>Success!</strong> Voucher was activated successfully.';
+                $message = 'Voucher was activated successfully.';
 
             } else {
 
                 $status   = 'error';
-                $message  = '<strong>Sorry,</strong> There was a problem activating the voucher. ';
+                $message  = 'There was a problem activating the voucher. ';
                 $message .= $this->shop_voucher_model->last_error();
             }
         }
@@ -1808,7 +1808,7 @@ class NAILS_Shop extends NAILS_Admin_Controller
         if (!userHasPermission('admin.shop:0.vouchers_deactivate')) {
 
             $status  = 'error';
-            $message = '<strong>Sorry,</strong> you do not have permission to suspend vouchers.';
+            $message = 'You do not have permission to suspend vouchers.';
 
         } else {
 
@@ -1817,12 +1817,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
             if ($this->shop_voucher_model->suspend($id)) {
 
                 $status  = 'success';
-                $message = '<strong>Success!</strong> Voucher was suspended successfully.';
+                $message = 'Voucher was suspended successfully.';
 
             } else {
 
                 $status   = 'error';
-                $message  = '<strong>Sorry,</strong> There was a problem suspending the voucher. ';
+                $message  = 'There was a problem suspending the voucher. ';
                 $message .= $this->shop_voucher_model->last_error();
             }
         }
@@ -2053,12 +2053,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                 if ($this->shop_attribute_model->create($data)) {
 
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Attribute created successfully.');
+                    $this->session->set_flashdata('success', 'Attribute created successfully.');
                     redirect('admin/shop/manage/attribute' . $this->data['isFancybox']);
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem creating the Attribute. ' . $this->shop_category_model->last_error();
+                    $this->data['error'] = 'There was a problem creating the Attribute. ' . $this->shop_category_model->last_error();
 
                                 }
             } else {
@@ -2126,12 +2126,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                 if ($this->shop_attribute_model->update($this->data['attribute']->id, $data)) {
 
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Attribute saved successfully.');
+                    $this->session->set_flashdata('success', 'Attribute saved successfully.');
                     redirect('admin/shop/manage/attribute' . $this->data['isFancybox']);
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem saving the Attribute. ' . $this->shop_attribute_model->last_error();
+                    $this->data['error'] = 'There was a problem saving the Attribute. ' . $this->shop_attribute_model->last_error();
 
                                 }
             } else {
@@ -2177,11 +2177,11 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         if ($this->shop_attribute_model->delete($id)) {
 
-            $this->session->set_flashdata('success', '<strong>Success!</strong> Attribute was deleted successfully.');
+            $this->session->set_flashdata('success', 'Attribute was deleted successfully.');
 
         } else {
 
-            $this->session->set_flashdata('error', '<strong>Sorry,</strong> there was a problem deleting the Attribute. ' . $this->shop_attribute_model->last_error());
+            $this->session->set_flashdata('error', 'There was a problem deleting the Attribute. ' . $this->shop_attribute_model->last_error());
         }
 
         redirect('admin/shop/manage/attribute' . $this->data['isFancybox']);
@@ -2286,12 +2286,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
                 if ($this->shop_brand_model->create($data)) {
 
                     //  Redirect to clear form
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Brand created successfully.');
+                    $this->session->set_flashdata('success', 'Brand created successfully.');
                     redirect('admin/shop/manage/brand' . $this->data['isFancybox']);
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem creating the Brand. ' . $this->shop_brand_model->last_error();
+                    $this->data['error'] = 'There was a problem creating the Brand. ' . $this->shop_brand_model->last_error();
 
                                 }
             } else {
@@ -2372,17 +2372,17 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                 if ($this->shop_brand_model->update($this->data['brand']->id, $data)) {
 
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Brand saved successfully.');
+                    $this->session->set_flashdata('success', 'Brand saved successfully.');
                     redirect('admin/shop/manage/brand' . $this->data['isFancybox']);
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem saving the Brand. ' . $this->shop_brand_model->last_error();
+                    $this->data['error'] = 'There was a problem saving the Brand. ' . $this->shop_brand_model->last_error();
 
                                 }
             } else {
 
-                $this->data['error'] = '<strong>Sorry,</strong> there was a problem saving the Brand.';
+                $this->data['error'] = 'There was a problem saving the Brand.';
             }
         }
 
@@ -2423,11 +2423,11 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         if ($this->shop_brand_model->delete($id)) {
 
-            $this->session->set_flashdata('success', '<strong>Success!</strong> Brand was deleted successfully.');
+            $this->session->set_flashdata('success', 'Brand was deleted successfully.');
 
         } else {
 
-            $this->session->set_flashdata('error', '<strong>Sorry,</strong> there was a problem deleting the Brand. ' . $this->shop_brand_model->last_error());
+            $this->session->set_flashdata('error', 'There was a problem deleting the Brand. ' . $this->shop_brand_model->last_error());
         }
 
         redirect('admin/shop/manage/brand' . $this->data['isFancybox']);
@@ -2529,12 +2529,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                 if ($this->shop_category_model->create($data)) {
 
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Category created successfully.');
+                    $this->session->set_flashdata('success', 'Category created successfully.');
                     redirect('admin/shop/manage/category' . $this->data['isFancybox']);
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem creating the Category. ' . $this->shop_category_model->last_error();
+                    $this->data['error'] = 'There was a problem creating the Category. ' . $this->shop_category_model->last_error();
 
                                 }
             } else {
@@ -2613,12 +2613,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                 if ($this->shop_category_model->update($this->data['category']->id, $data)) {
 
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Category saved successfully.');
+                    $this->session->set_flashdata('success', 'Category saved successfully.');
                     redirect('admin/shop/manage/category' . $this->data['isFancybox']);
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem saving the Category. ' . $this->shop_category_model->last_error();
+                    $this->data['error'] = 'There was a problem saving the Category. ' . $this->shop_category_model->last_error();
 
                                 }
             } else {
@@ -2664,11 +2664,11 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         if ($this->shop_category_model->delete($id)) {
 
-            $this->session->set_flashdata('success', '<strong>Success!</strong> Category was deleted successfully.');
+            $this->session->set_flashdata('success', 'Category was deleted successfully.');
 
         } else {
 
-            $this->session->set_flashdata('error', '<strong>Sorry,</strong> there was a problem deleting the Category. ' . $this->shop_category_model->last_error());
+            $this->session->set_flashdata('error', 'There was a problem deleting the Category. ' . $this->shop_category_model->last_error());
         }
 
         redirect('admin/shop/manage/category' . $this->data['isFancybox']);
@@ -2770,12 +2770,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                 if ($this->shop_collection_model->create($data)) {
 
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Collection created successfully.');
+                    $this->session->set_flashdata('success', 'Collection created successfully.');
                     redirect('admin/shop/manage/collection' . $this->data['isFancybox']);
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem creating the Collection. ' . $this->shop_collection_model->last_error();
+                    $this->data['error'] = 'There was a problem creating the Collection. ' . $this->shop_collection_model->last_error();
 
                                 }
             } else {
@@ -2854,12 +2854,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                 if ($this->shop_collection_model->update($this->data['collection']->id, $data)) {
 
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Collection saved successfully.');
+                    $this->session->set_flashdata('success', 'Collection saved successfully.');
                     redirect('admin/shop/manage/collection' . $this->data['isFancybox']);
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem saving the Collection. ' . $this->shop_collection_model->last_error();
+                    $this->data['error'] = 'There was a problem saving the Collection. ' . $this->shop_collection_model->last_error();
 
                                 }
             } else {
@@ -2905,11 +2905,11 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         if ($this->shop_collection_model->delete($id)) {
 
-            $this->session->set_flashdata('success', '<strong>Success!</strong> Collection was deleted successfully.');
+            $this->session->set_flashdata('success', 'Collection was deleted successfully.');
 
         } else {
 
-            $this->session->set_flashdata('error', '<strong>Sorry,</strong> there was a problem deleting the Collection. ' . $this->shop_collection_model->last_error());
+            $this->session->set_flashdata('error', 'There was a problem deleting the Collection. ' . $this->shop_collection_model->last_error());
         }
 
         redirect('admin/shop/manage/collection' . $this->data['isFancybox']);
@@ -3011,12 +3011,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                 if ($this->shop_range_model->create($data)) {
 
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Range created successfully.');
+                    $this->session->set_flashdata('success', 'Range created successfully.');
                     redirect('admin/shop/manage/range' . $this->data['isFancybox']);
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem creating the Range. ' . $this->shop_range_model->last_error();
+                    $this->data['error'] = 'There was a problem creating the Range. ' . $this->shop_range_model->last_error();
 
                                 }
             } else {
@@ -3095,12 +3095,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                 if ($this->shop_range_model->update($this->data['range']->id, $data)) {
 
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Range saved successfully.');
+                    $this->session->set_flashdata('success', 'Range saved successfully.');
                     redirect('admin/shop/manage/range' . $this->data['isFancybox']);
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem saving the Range. ' . $this->shop_range_model->last_error();
+                    $this->data['error'] = 'There was a problem saving the Range. ' . $this->shop_range_model->last_error();
 
                                 }
             } else {
@@ -3146,11 +3146,11 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         if ($this->shop_range_model->delete($id)) {
 
-            $this->session->set_flashdata('success', '<strong>Success!</strong> Range was deleted successfully.');
+            $this->session->set_flashdata('success', 'Range was deleted successfully.');
 
         } else {
 
-            $this->session->set_flashdata('error', '<strong>Sorry,</strong> there was a problem deleting the Range. ' . $this->shop_range_model->last_error());
+            $this->session->set_flashdata('error', 'There was a problem deleting the Range. ' . $this->shop_range_model->last_error());
         }
 
         redirect('admin/shop/manage/range' . $this->data['isFancybox']);
@@ -3250,12 +3250,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                 if ($this->shop_tag_model->create($data)) {
 
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Tag created successfully.');
+                    $this->session->set_flashdata('success', 'Tag created successfully.');
                     redirect('admin/shop/manage/tag' . $this->data['isFancybox']);
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem creating the Tag. ' . $this->shop_tag_model->last_error();
+                    $this->data['error'] = 'There was a problem creating the Tag. ' . $this->shop_tag_model->last_error();
 
                                 }
             } else {
@@ -3332,12 +3332,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                 if ($this->shop_tag_model->update($this->data['tag']->id, $data)) {
 
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Tag saved successfully.');
+                    $this->session->set_flashdata('success', 'Tag saved successfully.');
                     redirect('admin/shop/manage/tag' . $this->data['isFancybox']);
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem saving the Tag. ' . $this->shop_tag_model->last_error();
+                    $this->data['error'] = 'There was a problem saving the Tag. ' . $this->shop_tag_model->last_error();
 
                                 }
             } else {
@@ -3383,11 +3383,11 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         if ($this->shop_tag_model->delete($id)) {
 
-            $this->session->set_flashdata('success', '<strong>Success!</strong> Tag was deleted successfully.');
+            $this->session->set_flashdata('success', 'Tag was deleted successfully.');
 
         } else {
 
-            $this->session->set_flashdata('error', '<strong>Sorry,</strong> there was a problem deleting the Tag. ' . $this->shop_tag_model->last_error());
+            $this->session->set_flashdata('error', 'There was a problem deleting the Tag. ' . $this->shop_tag_model->last_error());
         }
 
         redirect('admin/shop/manage/tag' . $this->data['isFancybox']);
@@ -3479,12 +3479,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                 if ($this->shop_tax_rate_model->create($data)) {
 
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Tax Rate created successfully.');
+                    $this->session->set_flashdata('success', 'Tax Rate created successfully.');
                     redirect('admin/shop/manage/tax_rate' . $this->data['isFancybox']);
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem creating the Tax Rate. ' . $this->shop_tax_rate_model->last_error();
+                    $this->data['error'] = 'There was a problem creating the Tax Rate. ' . $this->shop_tax_rate_model->last_error();
 
                                 }
             } else {
@@ -3553,12 +3553,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                 if ($this->shop_tax_rate_model->update($this->data['tax_rate']->id, $data)) {
 
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Tax Rate saved successfully.');
+                    $this->session->set_flashdata('success', 'Tax Rate saved successfully.');
                     redirect('admin/shop/manage/tax_rate' . $this->data['isFancybox']);
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem saving the Tax Rate. ' . $this->shop_tax_rate_model->last_error();
+                    $this->data['error'] = 'There was a problem saving the Tax Rate. ' . $this->shop_tax_rate_model->last_error();
 
                                 }
             } else {
@@ -3604,11 +3604,11 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         if ($this->shop_tax_rate_model->delete($id)) {
 
-            $this->session->set_flashdata('success', '<strong>Success!</strong> Tax Rate was deleted successfully.');
+            $this->session->set_flashdata('success', 'Tax Rate was deleted successfully.');
 
         } else {
 
-            $this->session->set_flashdata('error', '<strong>Sorry,</strong> there was a problem deleting the Tax Rate. ' . $this->shop_tax_rate_model->last_error());
+            $this->session->set_flashdata('error', 'There was a problem deleting the Tax Rate. ' . $this->shop_tax_rate_model->last_error());
         }
 
         redirect('admin/shop/manage/tax_rate' . $this->data['isFancybox']);
@@ -3709,12 +3709,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
                 if ($this->shop_product_type_model->create($data)) {
 
                     //  Redirect to clear form
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Product Type created successfully.');
+                    $this->session->set_flashdata('success', 'Product Type created successfully.');
                     redirect('admin/shop/manage/product_type' . $this->data['isFancybox']);
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem creating the Product Type. ' . $this->shop_product_model->last_error();
+                    $this->data['error'] = 'There was a problem creating the Product Type. ' . $this->shop_product_model->last_error();
 
                                 }
             } else {
@@ -3790,12 +3790,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                 if ($this->shop_product_type_model->update($this->data['product_type']->id, $data)) {
 
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Product Type saved successfully.');
+                    $this->session->set_flashdata('success', 'Product Type saved successfully.');
                     redirect('admin/shop/product_type' . $this->data['isFancybox']);
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem saving the Product Type. ' . $this->shop_product_type_model->last_error();
+                    $this->data['error'] = 'There was a problem saving the Product Type. ' . $this->shop_product_type_model->last_error();
 
                                 }
             } else {
@@ -3917,12 +3917,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                 if ($this->shop_product_type_meta_model->create($data)) {
 
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Product Type Meta Field created successfully.');
+                    $this->session->set_flashdata('success', 'Product Type Meta Field created successfully.');
                     redirect('admin/shop/manage/product_type_meta' . $this->data['isFancybox']);
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem creating the Product Type Meta Field. ' . $this->shop_product_type_meta_model->last_error();
+                    $this->data['error'] = 'There was a problem creating the Product Type Meta Field. ' . $this->shop_product_type_meta_model->last_error();
 
                                 }
             } else {
@@ -4001,12 +4001,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                 if ($this->shop_product_type_meta_model->update($this->data['meta_field']->id, $data)) {
 
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Product Type Meta Field saved successfully.');
+                    $this->session->set_flashdata('success', 'Product Type Meta Field saved successfully.');
                     redirect('admin/shop/manage/product_type_meta' . $this->data['isFancybox']);
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem saving the Product Type Meta Field. ' . $this->shop_product_type_meta_model->last_error();
+                    $this->data['error'] = 'There was a problem saving the Product Type Meta Field. ' . $this->shop_product_type_meta_model->last_error();
 
                                 }
             } else {
@@ -4052,11 +4052,11 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         if ($this->shop_product_type_meta_model->delete($id)) {
 
-            $this->session->set_flashdata('success', '<strong>Success!</strong> Product Type was deleted successfully.');
+            $this->session->set_flashdata('success', 'Product Type was deleted successfully.');
 
         } else {
 
-            $this->session->set_flashdata('error', '<strong>Sorry,</strong> there was a problem deleting the Product Type. ' . $this->shop_product_type_model->last_error());
+            $this->session->set_flashdata('error', 'There was a problem deleting the Product Type. ' . $this->shop_product_type_model->last_error());
         }
 
         redirect('admin/shop/manage/product_type_meta' . $this->data['isFancybox']);
@@ -4157,11 +4157,11 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
                 if (!method_exists($this, '_report_source_' . $source[2])) {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> that data source is not available.';
+                    $this->data['error'] = 'That data source is not available.';
 
                 } elseif ((!method_exists($this, '_report_format_' . $format[2]))) {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> that format type is not available.';
+                    $this->data['error'] = 'That format type is not available.';
 
                 } else {
 
@@ -4199,10 +4199,10 @@ class NAILS_Shop extends NAILS_Admin_Controller
                                 }
             } elseif ((!isset($this->reportSources[ $this->input->post('source') ]))) {
 
-                $this->data['error'] = '<strong>Sorry,</strong> invalid data source.';
+                $this->data['error'] = 'Invalid data source.';
             } elseif ((!isset($this->reportFormats[ $this->input->post('format') ]))) {
 
-                $this->data['error'] = '<strong>Sorry,</strong> invalid format type.';
+                $this->data['error'] = 'Invalid format type.';
 
             } else {
 
@@ -4630,12 +4630,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
                 if ($this->shop_inform_product_available_model->create($data)) {
 
                     //  Redirect to clear form
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Product Availability Notification created successfully.');
+                    $this->session->set_flashdata('success', 'Product Availability Notification created successfully.');
                     redirect('admin/shop/product_availability_notifications');
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem creating the Product Availability Notification. ' . $this->shop_inform_product_available_model->last_error();
+                    $this->data['error'] = 'There was a problem creating the Product Availability Notification. ' . $this->shop_inform_product_available_model->last_error();
 
                                 }
             } else {
@@ -4706,12 +4706,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
                 if ($this->shop_inform_product_available_model->update($this->data['notification']->id, $data)) {
 
                     //  Redirect to clear form
-                    $this->session->set_flashdata('success', '<strong>Success!</strong> Product Availability Notification updated successfully.');
+                    $this->session->set_flashdata('success', 'Product Availability Notification updated successfully.');
                     redirect('admin/shop/product_availability_notifications');
 
                 } else {
 
-                    $this->data['error'] = '<strong>Sorry,</strong> there was a problem updated the Product Availability Notification. ' . $this->shop_inform_product_available_model->last_error();
+                    $this->data['error'] = 'There was a problem updated the Product Availability Notification. ' . $this->shop_inform_product_available_model->last_error();
 
                                 }
             } else {
@@ -4755,11 +4755,11 @@ class NAILS_Shop extends NAILS_Admin_Controller
 
         if ($this->shop_inform_product_available_model->delete($id)) {
 
-            $this->session->set_flashdata('success', '<strong>Success!</strong> Product Availability Notification was deleted successfully.');
+            $this->session->set_flashdata('success', 'Product Availability Notification was deleted successfully.');
 
         } else {
 
-            $this->session->set_flashdata('error', '<strong>Sorry,</strong> there was a problem deleting the Product availability Notification. ' . $this->shop_inform_product_available_model->last_error());
+            $this->session->set_flashdata('error', 'There was a problem deleting the Product availability Notification. ' . $this->shop_inform_product_available_model->last_error());
         }
 
         redirect('admin/shop/product_availability_notifications');

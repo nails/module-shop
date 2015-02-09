@@ -69,7 +69,7 @@ class Settings extends \AdminController
 
             } else {
 
-                $this->data['error'] = '<strong>Sorry,</strong> I can\'t determine what type of update you are trying to perform.';
+                $this->data['error'] = 'I can\'t determine what type of update you are trying to perform.';
             }
         }
 
@@ -156,7 +156,7 @@ class Settings extends \AdminController
 
         if ($this->app_setting_model->set($settings, 'shop')) {
 
-            $this->data['success'] = '<strong>Success!</strong> Store settings have been saved.';
+            $this->data['success'] = 'Store settings have been saved.';
 
             // --------------------------------------------------------------------------
 
@@ -169,7 +169,7 @@ class Settings extends \AdminController
 
         } else {
 
-            $this->data['error'] = '<strong>Sorry,</strong> there was a problem saving settings.';
+            $this->data['error'] = 'There was a problem saving settings.';
         }
     }
 
@@ -192,11 +192,11 @@ class Settings extends \AdminController
 
         if ($this->app_setting_model->set($settings, 'shop')) {
 
-            $this->data['success'] = '<strong>Success!</strong> Browsing settings have been saved.';
+            $this->data['success'] = 'Browsing settings have been saved.';
 
         } else {
 
-            $this->data['error'] = '<strong>Sorry,</strong> there was a problem saving settings.';
+            $this->data['error'] = 'There was a problem saving settings.';
         }
     }
 
@@ -217,11 +217,11 @@ class Settings extends \AdminController
 
         if ($this->app_setting_model->set($settings, 'shop')) {
 
-            $this->data['success'] = '<strong>Success!</strong> Skin settings have been saved.';
+            $this->data['success'] = 'Skin settings have been saved.';
 
         } else {
 
-            $this->data['error'] = '<strong>Sorry,</strong> there was a problem saving settings.';
+            $this->data['error'] = 'There was a problem saving settings.';
         }
     }
 
@@ -264,11 +264,11 @@ class Settings extends \AdminController
 
         if ($success) {
 
-            $this->data['success'] = '<strong>Success!</strong> Skin settings have been saved.';
+            $this->data['success'] = 'Skin settings have been saved.';
 
         } else {
 
-            $this->data['error'] = '<strong>Sorry,</strong> there was a problem saving settings.';
+            $this->data['error'] = 'There was a problem saving settings.';
 
         }
     }
@@ -289,11 +289,11 @@ class Settings extends \AdminController
 
         if ($this->app_setting_model->set($settings, 'shop')) {
 
-            $this->data['success'] = '<strong>Success!</strong> Payment Gateway settings have been saved.';
+            $this->data['success'] = 'Payment Gateway settings have been saved.';
 
         } else {
 
-            $this->data['error'] = '<strong>Sorry,</strong> there was a problem saving settings.';
+            $this->data['error'] = 'There was a problem saving settings.';
         }
     }
 
@@ -333,12 +333,12 @@ class Settings extends \AdminController
         if ($rollback) {
 
             $this->db->trans_rollback();
-            $this->data['error'] = '<strong>Sorry,</strong> there was a problem saving currency settings. ' . $error;
+            $this->data['error'] = 'There was a problem saving currency settings. ' . $error;
 
         } else {
 
             $this->db->trans_commit();
-            $this->data['success'] = '<strong>Success!</strong> Currency settings were saved.';
+            $this->data['success'] = 'Currency settings were saved.';
 
             // --------------------------------------------------------------------------
 
@@ -379,11 +379,11 @@ class Settings extends \AdminController
 
         if ($this->app_setting_model->set($settings, 'shop')) {
 
-            $this->data['success'] = '<strong>Success!</strong> Shipping settings have been saved.';
+            $this->data['success'] = 'Shipping settings have been saved.';
 
         } else {
 
-            $this->data['error'] = '<strong>Sorry,</strong> there was a problem saving settings.';
+            $this->data['error'] = 'There was a problem saving settings.';
         }
     }
 
@@ -472,12 +472,12 @@ class Settings extends \AdminController
                     if ($this->db->trans_status() !== false && $result && $result_encrypted) {
 
                         $this->db->trans_commit();
-                        $this->data['success'] = '<strong>Success!</strong> ' . $this->data['gateway_name'] . ' Payment Gateway settings have been saved.';
+                        $this->data['success'] = '' . $this->data['gateway_name'] . ' Payment Gateway settings have been saved.';
 
                     } else {
 
                         $this->db->trans_rollback();
-                        $this->data['error'] = '<strong>Sorry,</strong> there was a problem saving the ' . $this->data['gateway_name'] . ' Payment Gateway settings.';
+                        $this->data['error'] = 'There was a problem saving the ' . $this->data['gateway_name'] . ' Payment Gateway settings.';
                     }
 
                 } else {
