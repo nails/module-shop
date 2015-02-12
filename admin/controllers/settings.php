@@ -29,6 +29,17 @@ class Settings extends \AdminController
     // --------------------------------------------------------------------------
 
     /**
+     * Construct the controller
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->load->model('shop/shop_model');
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Manage Shop settings
      * @return void
      */
@@ -106,9 +117,7 @@ class Settings extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Load views
-        $this->load->view('structure/header',       $this->data);
-        $this->load->view('admin/settings/shop',    $this->data);
-        $this->load->view('structure/footer',       $this->data);
+        \Nails\Admin\Helper::loadView('index');
     }
 
     // --------------------------------------------------------------------------
@@ -522,9 +531,7 @@ class Settings extends \AdminController
      */
     protected function _shop_pg_generic()
     {
-        $this->load->view('structure/header', $this->data);
-        $this->load->view('admin/settings/shop_pg/generic', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        \Nails\Admin\Helper::loadView('shop_pg/generic');
     }
 
     // --------------------------------------------------------------------------
@@ -540,9 +547,7 @@ class Settings extends \AdminController
 
         // --------------------------------------------------------------------------
 
-        $this->load->view('structure/header', $this->data);
-        $this->load->view('admin/settings/shop_pg/worldpay', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        \Nails\Admin\Helper::loadView('shop_pg/worldpay');
     }
 
     // --------------------------------------------------------------------------
@@ -554,9 +559,7 @@ class Settings extends \AdminController
     protected function _shop_pg_stripe()
     {
         //  Additional params
-        $this->load->view('structure/header', $this->data);
-        $this->load->view('admin/settings/shop_pg/stripe', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        \Nails\Admin\Helper::loadView('shop_pg/stripe');
     }
 
     // --------------------------------------------------------------------------
@@ -568,9 +571,7 @@ class Settings extends \AdminController
     protected function _shop_pg_paypal_express()
     {
         //  Additional params
-        $this->load->view('structure/header', $this->data);
-        $this->load->view('admin/settings/shop_pg/paypal_express', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        \Nails\Admin\Helper::loadView('shop_pg/paypal_express');
     }
 
     // --------------------------------------------------------------------------
@@ -605,6 +606,7 @@ class Settings extends \AdminController
 
         // --------------------------------------------------------------------------
 
+        dumpanddie('todo');
         $this->load->view('structure/header', $this->data);
         $this->load->view('admin/settings/shop_sd', array('body' => $body));
         $this->load->view('structure/footer', $this->data);

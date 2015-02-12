@@ -5,7 +5,7 @@
 
 			if ( userHasPermission( 'admin.shop:0.manage_create' ) ) :
 
-				echo anchor( 'admin/shop/product_availability_notifications/create', 'Add New Notification', 'class="awesome small green right"' );
+				echo anchor( 'admin/shop/availability/create', 'Add New Notification', 'class="awesome small green right"' );
 
 			endif;
 
@@ -69,7 +69,7 @@
 
 										if ( userHasPermission( 'admin.shop:0.notifications_edit' ) ) :
 
-											$_buttons[] = anchor( 'admin/shop/product_availability_notifications/edit/' . $item->id, lang( 'action_edit' ), 'class="awesome small"' );
+											$_buttons[] = anchor( 'admin/shop/availability/edit/' . $item->id, lang( 'action_edit' ), 'class="awesome small"' );
 
 										endif;
 
@@ -77,7 +77,7 @@
 
 										if ( userHasPermission( 'admin.shop:0.notifications_delete' ) ) :
 
-											$_buttons[] = anchor( 'admin/shop/product_availability_notifications/delete/' . $item->id, lang( 'action_delete' ), 'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."' );
+											$_buttons[] = anchor( 'admin/shop/availability/delete/' . $item->id, lang( 'action_delete' ), 'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."' );
 
 										endif;
 

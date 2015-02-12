@@ -24,7 +24,7 @@
 			<?=anchor( 'admin/shop/manage/product_type_meta' . $isFancybox, 'Overview' )?>
 		</li>
 		<li class="tab">
-			<?=anchor( 'admin/shop/manage/product_type_meta/create' . $isFancybox, 'Create Product Type Meta Field' )?>
+			<?=anchor( 'admin/shop/manage/productTypeMeta/create' . $isFancybox, 'Create Product Type Meta Field' )?>
 		</li>
 	</ul>
 	<section class="tabs pages">
@@ -53,7 +53,7 @@
 									echo '<td class="associated">';
 										foreach ( $field->associated_product_types as $association ) :
 
-											echo '<span class="badge">' . anchor( 'admin/shop/manage/product_type/edit/' . $association->id, $association->label ) . '</span>';
+											echo '<span class="badge">' . anchor( 'admin/shop/manage/productType/edit/' . $association->id, $association->label ) . '</span>';
 
 										endforeach;
 									echo '</td>';
@@ -62,13 +62,13 @@
 
 										if ( userHasPermission( 'admin.shop:0.product_type_meta_edit' ) ) :
 
-											echo anchor( 'admin/shop/manage/product_type_meta/edit/' . $field->id . $isFancybox, lang( 'action_edit' ), 'class="awesome small"' );
+											echo anchor( 'admin/shop/manage/productTypeMeta/edit/' . $field->id . $isFancybox, lang( 'action_edit' ), 'class="awesome small"' );
 
 										endif;
 
 										if ( userHasPermission( 'admin.shop:0.product_type_meta_delete' ) ) :
 
-											echo anchor( 'admin/shop/manage/product_type_meta/delete/' . $field->id . $isFancybox, lang( 'action_delete' ), 'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."' );
+											echo anchor( 'admin/shop/manage/productTypeMeta/delete/' . $field->id . $isFancybox, lang( 'action_delete' ), 'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."' );
 
 										endif;
 

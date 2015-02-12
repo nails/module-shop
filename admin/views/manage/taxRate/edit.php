@@ -24,7 +24,7 @@
 			<?=anchor( 'admin/shop/manage/tax_rate' . $isFancybox, 'Overview', 'class="confirm" data-title="Are you sure?" data-body="Any unsaved changes will be lost."' )?>
 		</li>
 		<li class="tab active">
-			<?=anchor( 'admin/shop/manage/tax_rate/create' . $isFancybox, 'Create Tax Rate' )?>
+			<?=anchor( 'admin/shop/manage/taxRate/create' . $isFancybox, 'Create Tax Rate' )?>
 		</li>
 	</ul>
 	<section class="tabs pages">
@@ -69,4 +69,4 @@
 </div>
 <?php
 
-	$this->load->view( 'admin/shop/manage/tax_rate/_footer' );
+	$this->load->view( 'admin/shop/manage/taxRate/_footer' );

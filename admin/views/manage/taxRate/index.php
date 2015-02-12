@@ -22,7 +22,7 @@
 			<?=anchor( 'admin/shop/manage/tax_rate' . $isFancybox, 'Overview' )?>
 		</li>
 		<li class="tab">
-			<?=anchor( 'admin/shop/manage/tax_rate/create' . $isFancybox, 'Create Tax Rate' )?>
+			<?=anchor( 'admin/shop/manage/taxRate/create' . $isFancybox, 'Create Tax Rate' )?>
 		</li>
 	</ul>
 	<section class="tabs pages">
@@ -60,13 +60,13 @@
 
 										if ( userHasPermission( 'admin.shop:0.tax_rate_edit' ) ) :
 
-											echo anchor( 'admin/shop/manage/tax_rate/edit/' . $tax_rate->id . $isFancybox, lang( 'action_edit' ), 'class="awesome small"' );
+											echo anchor( 'admin/shop/manage/taxRate/edit/' . $tax_rate->id . $isFancybox, lang( 'action_edit' ), 'class="awesome small"' );
 
 										endif;
 
 										if ( userHasPermission( 'admin.shop:0.tax_rate_delete' ) ) :
 
-											echo anchor( 'admin/shop/manage/tax_rate/delete/' . $tax_rate->id . $isFancybox, lang( 'action_delete' ), 'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."' );
+											echo anchor( 'admin/shop/manage/taxRate/delete/' . $tax_rate->id . $isFancybox, lang( 'action_delete' ), 'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."' );
 
 										endif;
 
@@ -94,4 +94,4 @@
 </div>
 <?php
 
-	$this->load->view( 'admin/shop/manage/tax_rate/_footer' );
+	$this->load->view( 'admin/shop/manage/taxRate/_footer' );

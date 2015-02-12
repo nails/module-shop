@@ -26,7 +26,7 @@
 			<?=anchor( 'admin/shop/manage/product_type' . $isFancybox, 'Overview' )?>
 		</li>
 		<li class="tab">
-			<?=anchor( 'admin/shop/manage/product_type/create' . $isFancybox, 'Create Product Type' )?>
+			<?=anchor( 'admin/shop/manage/productType/create' . $isFancybox, 'Create Product Type' )?>
 		</li>
 	</ul>
 	<section class="tabs pages">
@@ -77,13 +77,13 @@
 
 										if ( userHasPermission( 'admin.shop:0.product_type_edit' ) ) :
 
-											echo anchor( 'admin/shop/manage/product_type/edit/' . $product_type->id . $isFancybox, lang( 'action_edit' ), 'class="awesome small"' );
+											echo anchor( 'admin/shop/manage/productType/edit/' . $product_type->id . $isFancybox, lang( 'action_edit' ), 'class="awesome small"' );
 
 										endif;
 
 										if ( userHasPermission( 'admin.shop:0.product_type_delete' ) ) :
 
-											echo anchor( 'admin/shop/manage/product_type/delete/' . $product_type->id . $isFancybox, lang( 'action_delete' ), 'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."' );
+											echo anchor( 'admin/shop/manage/productType/delete/' . $product_type->id . $isFancybox, lang( 'action_delete' ), 'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."' );
 
 										endif;
 
@@ -111,4 +111,4 @@
 </div>
 <?php
 
-	$this->load->view( 'admin/shop/manage/product_type/_footer' );
+	$this->load->view( 'admin/shop/manage/productType/_footer' );

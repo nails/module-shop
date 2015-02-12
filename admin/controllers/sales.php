@@ -27,4 +27,72 @@ class Sales extends \AdminController
             return $navGroup;
         }
     }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Construct the controller
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->load->model('shop/shop_model');
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Browse sales
+     * @return void
+     */
+    public function index()
+    {
+        $this->data['page']->title = 'Manage Sales';
+
+        // --------------------------------------------------------------------------
+
+        \Nails\Admin\Helper::loadView('index');
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Create a new sale
+     * @return void
+     */
+    public function create()
+    {
+        $this->data['page']->title = 'Create Sale';
+
+        // --------------------------------------------------------------------------
+
+        \Nails\Admin\Helper::loadView('edit');
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Edit a sale
+     * @return void
+     */
+    public function edit()
+    {
+        $this->data['page']->title = 'Edit Sale "xxx"';
+
+        // --------------------------------------------------------------------------
+
+        \Nails\Admin\Helper::loadView('edit');
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Delete a sale
+     * @return void
+     */
+    public function delete()
+    {
+        $this->session->set_flashdata('message', '<strong>TODO:</strong> Delete a sale.');
+        redirect('admin/shop/sales/index');
+    }
 }

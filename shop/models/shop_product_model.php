@@ -1002,9 +1002,15 @@ class NAILS_Shop_product_model extends NAILS_Model
 	{
 	    $this->load->model('shop/shop_category_model');
 
-		$_products = parent::get_all($page, $perPage, $data, $includeDeleted, $_caller);
+		$products = parent::get_all($page, $perPage, $data, $includeDeleted, $_caller);
 
-		foreach ($_products as $product) :
+        //  Handle requests for the raw query object
+        if (!empty($data['RETURN_QUERY_OBJECT'])) {
+
+            return $posts;
+        }
+
+		foreach ($products as $product) :
 
 			//	Format
 			$this->formatProductObject($product);
@@ -1556,7 +1562,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
 		// --------------------------------------------------------------------------
 
-		return $_products;
+		return $products;
 	}
 
 	// --------------------------------------------------------------------------

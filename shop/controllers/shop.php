@@ -61,7 +61,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
             case 'a-z':
 
-                $this->_product_sort->sort_on = $this->shop_product_model->get_property_table_prefix() . '.label';
+                $this->_product_sort->sort_on = $this->shop_product_model->getTablePrefix() . '.label';
                 break;
 
             case 'recent':

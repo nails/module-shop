@@ -28,7 +28,7 @@
 			<?=anchor( 'admin/shop/manage/product_type' . $isFancybox, 'Overview', 'class="confirm" data-title="Are you sure?" data-body="Any unsaved changes will be lost."' )?>
 		</li>
 		<li class="tab active">
-			<?=anchor( 'admin/shop/manage/product_type/create' . $isFancybox, 'Create Product Type' )?>
+			<?=anchor( 'admin/shop/manage/productType/create' . $isFancybox, 'Create Product Type' )?>
 		</li>
 	</ul>
 	<section class="tabs pages">
@@ -125,4 +125,4 @@
 </div>
 <?php
 
-	$this->load->view( 'admin/shop/manage/product_type/_footer' );
+	$this->load->view( 'admin/shop/manage/productType/_footer' );

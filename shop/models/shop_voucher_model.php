@@ -174,6 +174,12 @@ class NAILS_Shop_voucher_model extends NAILS_Model
     {
         $result = parent::get_all($page, $perPage, $data, $includeDeleted, $_caller);
 
+        //  Handle requests for the raw query object
+        if (!empty($data['RETURN_QUERY_OBJECT'])) {
+
+            return $result;
+        }
+
         // --------------------------------------------------------------------------
 
         $this->load->model('shop/shop_product_type_model');
