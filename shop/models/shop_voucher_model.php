@@ -216,7 +216,6 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 
     /**
      * Applies common conditionals
-     * @t
      * @param  mixed  $where  A conditional to pass to $this->db->where()
      * @param  string $search Keywords to restrict the query by
      * @return void
@@ -224,12 +223,12 @@ class NAILS_Shop_voucher_model extends NAILS_Model
     protected function _getcount_common($data = array(), $_caller = null)
     {
         //  Search
-        if (!empty($data['search'])) :
+        if (!empty($data['keywords'])) :
 
             $data['like']   = array();
             $data['like'][] = array(
                 'column' => $this->_table_prefix . '.code',
-                'value'  => $data['search']
+                'value'  => $data['keywords']
             );
 
         endif;

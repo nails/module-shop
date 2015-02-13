@@ -48,47 +48,75 @@ class Vouchers extends \AdminController
      */
     public function index()
     {
+        if (!userHasPermission('admin.shop:0.vouchers_manage')) {
+
+            unauthorised();
+        }
+
+        // --------------------------------------------------------------------------
+
         //  Set method info
         $this->data['page']->title = 'Manage Vouchers';
 
-        //  Define the $data variable, this'll be passed to the get_all() and count_all() methods
-        $data = array('sort' => array());
+        // --------------------------------------------------------------------------
+
+        $tablePrefix = $this->shop_voucher_model->getTablePrefix();
 
         // --------------------------------------------------------------------------
 
-        //  Set useful vars
-        $page       = $this->input->get('page')     ? $this->input->get('page')     : 0;
-        $per_page   = $this->input->get('per_page') ? $this->input->get('per_page') : 50;
-        $sort_on    = $this->input->get('sort_on')  ? $this->input->get('sort_on')  : 'sv.created';
-        $sort_order = $this->input->get('order')    ? $this->input->get('order')    : 'desc';
-        $search     = $this->input->get('search')   ? $this->input->get('search')   : '';
-
-        //  Set sort variables for view and for $data
-        $this->data['sort_on']     = $data['sort']['column'] = $sort_on;
-        $this->data['sort_order']  = $data['sort']['order']  = $sort_order;
-        $this->data['search']      = $data['search']         = $search;
-
-        //  Restrict to certain columns
-        if ($this->input->get('show')) {
-
-            $data['where_in'] = array();
-            $data['where_in'][] = array('column' => 'sv.type', 'value' => $this->input->get('show'));
-        }
-
-        //  Define and populate the pagination object
-        $this->data['pagination']             = new \stdClass();
-        $this->data['pagination']->page       = $page;
-        $this->data['pagination']->per_page   = $per_page;
-        $this->data['pagination']->total_rows = $this->shop_voucher_model->count_all($data);
-
-        //  Fetch all the items for this page
-        $this->data['vouchers'] = $this->shop_voucher_model->get_all($page, $per_page, $data);
+        //  Get pagination and search/sort variables
+        $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
+        $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.created';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
+        $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
+        $filters   = $this->input->get('filters')  ? $this->input->get('filters')    : array();
 
         // --------------------------------------------------------------------------
 
-        $this->load->view('structure/header', $this->data);
-        $this->load->view('admin/shop/vouchers/index', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        //  Define the sortable columns and the filters
+        $sortColumns = array(
+            $tablePrefix . '.created'    => 'Created',
+            $tablePrefix . '.code'       => 'Code',
+            $tablePrefix . '.type'       => 'Type',
+            $tablePrefix . '.valid_from' => 'Valid From Date'
+        );
+
+        /**
+         * $filterColumns is an array where the index is the column to filter on and the
+         * value is an array of filter options. the option at the 0 index is the label to
+         * give the group
+         */
+
+        $filterColumns = array(
+            $tablePrefix . '.type' => array('Type', 'Normal', 'Limited Use', 'Gift Card')
+        );
+
+        // --------------------------------------------------------------------------
+
+        //  Define the $data variable for the queries
+        $data = array(
+            'sort'  => array(
+                'column' => $sortOn,
+                'order'  => $sortOrder
+            ),
+            'keywords' => $keywords,
+            'filters' => $keywords
+        );
+
+        // --------------------------------------------------------------------------
+
+        //  Get the items for the page
+        $totalRows              = $this->shop_voucher_model->count_all($data);
+        $this->data['vouchers'] = $this->shop_voucher_model->get_all($page, $perPage, $data);
+
+        //  Set Search and Pagination objects for the view
+        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords, $filterColumns);
+        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+
+        // --------------------------------------------------------------------------
+
+        \Nails\Admin\Helper::loadView('index');
     }
 
     // --------------------------------------------------------------------------
