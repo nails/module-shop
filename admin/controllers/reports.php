@@ -76,11 +76,30 @@ class Reports extends \AdminController
                 'Out of Stock variants',
                 'OutOfStockVariants'
             );
+        }
+
+        if (userHasPermission('admin.shop:0.order_manage')) {
+
             $this->sources[] = array(
                 'Sales',
-                'Product Sales',
-                'ProductSales'
+                'Product Sales - All time',
+                'ProductSalesAll'
             );
+            $this->sources[] = array(
+                'Sales',
+                'Product Sales - The Month',
+                'ProductSalesThisMonth'
+            );
+            $this->sources[] = array(
+                'Sales',
+                'Product Sales - Last Month',
+                'ProductSalesLastMonth'
+            );
+
+            /**
+             * @todo Have a reporting section in settings which allows the financial
+             * year data to be specified and build a source which respects these dates
+             */
         }
 
         // --------------------------------------------------------------------------
@@ -257,7 +276,8 @@ class Reports extends \AdminController
     protected function indexCli()
     {
         //  @TODO: Complete CLI functionality for report generating
-        echo 'Sorry, this functionality is not complete yet. If you are experiencing timeouts please increase the timeout limit for PHP.';
+        echo 'Sorry, this functionality is not complete yet. If you are experiencing ';
+        echo 'timeouts please increase the timeout limit for PHP.';
     }
 
     // --------------------------------------------------------------------------
@@ -306,23 +326,23 @@ class Reports extends \AdminController
     // --------------------------------------------------------------------------
 
     /**
-     * Report soure: Product sales
+     * Report soure: All recorded
      * @return stdClass
      */
-    protected function sourceProductSales()
+    protected function sourceProductSalesAll()
     {
-        if (!userHasPermission('admin.shop:0.inventory_manage')) {
+        if (!userHasPermission('admin.shop:0.order_manage')) {
 
             return false;
         }
 
         // --------------------------------------------------------------------------
 
-        $out            = new \stdClass();
-        $out->label = 'Product Sales';
-        $out->filename  = NAILS_DB_PREFIX . 'product_sales';
-        $out->fields    = array();
-        $out->data      = array();
+        $out           = new \stdClass();
+        $out->label    = 'Product Sales';
+        $out->filename = NAILS_DB_PREFIX . 'product_sales';
+        $out->fields   = array();
+        $out->data     = array();
 
         // --------------------------------------------------------------------------
 
@@ -343,6 +363,32 @@ class Reports extends \AdminController
         // --------------------------------------------------------------------------
 
         return $out;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Same as sourceProductSalesAll but restricted to the current month
+     * @return stdClass
+     */
+    protected function sourceProductSalesThisMonth()
+    {
+        $this->db->where('MONTH(o.created) = MONTH(CURDATE())');
+        $this->db->where('YEAR(o.created) = YEAR(CURDATE())');
+        return $this->sourceProductSalesAll();
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Same as sourceProductSalesAll but restricted to the previous month
+     * @return stdClass
+     */
+    protected function sourceProductSalesLastMonth()
+    {
+        $this->db->where('MONTH(o.created) = MONTH(CURDATE() - INTERVAL 1 MONTH)');
+        $this->db->where('YEAR(o.created) = YEAR(CURDATE() - INTERVAL 1 MONTH)');
+        return $this->sourceProductSalesAll();
     }
 
     // --------------------------------------------------------------------------

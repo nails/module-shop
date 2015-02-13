@@ -34,6 +34,7 @@ class Manage extends \AdminController
     {
         parent::__construct();
         $this->load->model('shop/shop_model');
+        $this->data['isFancybox'] = $this->input->get('isFancybox') ? true : false;
     }
 
     // --------------------------------------------------------------------------
@@ -959,7 +960,7 @@ class Manage extends \AdminController
      * Browse product ranges
      * @return void
      */
-    protected function range_Index()
+    protected function rangeIndex()
     {
         //  Fetch data
         $data = array('include_count' => true);
@@ -1779,7 +1780,7 @@ class Manage extends \AdminController
      * Manage product type meta data
      * @return void
      */
-    protected function productTypeMeta()
+    public function productTypeMeta()
     {
         if (!userHasPermission('admin.shop:0.product_type_meta__manage')) {
 
@@ -2006,7 +2007,7 @@ class Manage extends \AdminController
      */
     protected function routeRequest($prefix)
     {
-        $methodRaw = $this->uri->segment(4) ? $this->uri->segment(4) : 'index';
+        $methodRaw = $this->uri->segment(5) ? $this->uri->segment(5) : 'index';
         $method    = $prefix . underscore_to_camelcase($methodRaw, false);
 
         if (method_exists($this, $method)) {

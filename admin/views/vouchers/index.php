@@ -50,7 +50,7 @@
                                         echo '<small>Pending</small>';
                                     echo '</td>';
 
-                                } elseif ($voucher->is_active && strtotime($voucher->valid_from) < time()) {
+                                } elseif ($voucher->is_active && $voucher->valid_to && strtotime($voucher->valid_to) < time()) {
 
                                     echo '<td class="boolean error">';
                                         echo '<b class="fa fa-times-circle fa-lg"></b>';

@@ -443,16 +443,16 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 					// --------------------------------------------------------------------------
 
 					//	Send notifications to manager(s) and customer
-					$this->shop_order_model->send_order_notification( $_order, $_payment_data, FALSE );
-					$this->shop_order_model->send_receipt( $_order, $_payment_data, FALSE );
+					$this->shop_order_model->send_order_notification( $_order->id, $_payment_data, FALSE );
+					$this->shop_order_model->send_receipt( $_order->id, $_payment_data, FALSE );
 
 				else :
 
 					_LOG( 'Order is partially paid.' );
 
 					//	Send notifications to manager(s) and customer
-					$this->shop_order_model->send_order_notification( $_order, $_payment_data, TRUE );
-					$this->shop_order_model->send_receipt( $_order, $_payment_data, TRUE );
+					$this->shop_order_model->send_order_notification( $_order->id, $_payment_data, TRUE );
+					$this->shop_order_model->send_receipt( $_order->id, $_payment_data, TRUE );
 
 				endif;
 
@@ -756,16 +756,16 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 			// --------------------------------------------------------------------------
 
 			//	Send notifications to manager(s) and customer
-			$this->shop_order_model->send_order_notification( $order, $payment_data, FALSE );
-			$this->shop_order_model->send_receipt( $order, $payment_data, FALSE );
+			$this->shop_order_model->send_order_notification( $order->id, $payment_data, FALSE );
+			$this->shop_order_model->send_receipt( $order->id, $payment_data, FALSE );
 
 		else :
 
 			_LOG( 'Order is partially paid.' );
 
 			//	Send notifications to manager(s) and customer
-			$this->shop_order_model->send_order_notification( $order, $payment_data, TRUE );
-			$this->shop_order_model->send_receipt( $order, $payment_data, TRUE );
+			$this->shop_order_model->send_order_notification( $order->id, $payment_data, TRUE );
+			$this->shop_order_model->send_receipt( $order->id, $payment_data, TRUE );
 
 		endif;
 

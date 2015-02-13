@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Manage shop vouchers and gift cards
+ * Manage shop orders
  *
  * @package     Nails
  * @subpackage  module-shop
@@ -37,6 +37,7 @@ class Orders extends \AdminController
     {
         parent::__construct();
         $this->load->model('shop/shop_model');
+        $this->load->model('shop/shop_order_model');
     }
 
     // --------------------------------------------------------------------------
@@ -45,7 +46,7 @@ class Orders extends \AdminController
      * Browse shop orders
      * @return void
      */
-    public function index()
+    public function index2()
     {
         //  Set method info
         $this->data['page']->title = 'Manage Orders';
@@ -184,6 +185,86 @@ class Orders extends \AdminController
 
         \Nails\Admin\Helper::loadView('index');
     }
+    public function index()
+    {
+        if (!userHasPermission('admin.shop:0.orders_manage')) {
+
+            unauthorised();
+        }
+
+        // --------------------------------------------------------------------------
+
+        //  Set method info
+        $this->data['page']->title = 'Manage Orders';
+
+        // --------------------------------------------------------------------------
+
+        $tablePrefix = $this->shop_order_model->getTablePrefix();
+
+        // --------------------------------------------------------------------------
+
+        //  Get pagination and search/sort variables
+        $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
+        $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.created';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
+        $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
+
+        // --------------------------------------------------------------------------
+
+        //  Define the sortable columns and the filters
+        $sortColumns = array(
+            $tablePrefix . '.created'    => 'Created',
+            $tablePrefix . '.code'       => 'Code',
+            $tablePrefix . '.type'       => 'Type',
+            $tablePrefix . '.valid_from' => 'Valid From Date'
+        );
+
+        // --------------------------------------------------------------------------
+
+        //  Filter columns
+        $filters   = array();
+        $filters[] = \Nails\Admin\Helper::searchFilterObject(
+            $tablePrefix . '.type',
+            'View only',
+            array(
+                array('Normal', 'NORMAL'),
+                array('Limited Use', 'LIMITED_USE'),
+                array('Gift Card', 'GIFT_CARD')
+            )
+        );
+
+        // --------------------------------------------------------------------------
+
+        //  Define the $data variable for the queries
+        $data = array(
+            'sort' => array(
+                'column' => $sortOn,
+                'order'  => $sortOrder
+            ),
+            'keywords' => $keywords,
+            'filters'  => $filters
+        );
+
+        // --------------------------------------------------------------------------
+
+        //  Get the items for the page
+        $totalRows              = $this->shop_order_model->count_all($data);
+        $this->data['vouchers'] = $this->shop_order_model->get_all($page, $perPage, $data);
+
+        //  Set Search and Pagination objects for the view
+        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords, $filters);
+        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+
+        // --------------------------------------------------------------------------
+
+        $this->asset->load('nails.admin.shop.order.browse.min.js', 'NAILS');
+        $this->asset->inline('var _orders = new NAILS_Admin_Shop_Order_Browse()', 'JS');
+
+        // --------------------------------------------------------------------------
+
+        \Nails\Admin\Helper::loadView('index');
+    }
 
     // --------------------------------------------------------------------------
 
@@ -286,17 +367,17 @@ class Orders extends \AdminController
         // --------------------------------------------------------------------------
 
         //  PROCESSSSSS...
-        $this->shop_order_model->process($order);
+        $this->shop_order_model->process($order->id);
 
         // --------------------------------------------------------------------------
 
         //  Send a receipt to the customer
-        $this->shop_order_model->send_receipt($order);
+        $this->shop_order_model->send_receipt($order->id);
 
         // --------------------------------------------------------------------------
 
         //  Send a notification to the store owner(s)
-        $this->shop_order_model->send_order_notification($order);
+        $this->shop_order_model->send_order_notification($order->id);
 
         // --------------------------------------------------------------------------
 

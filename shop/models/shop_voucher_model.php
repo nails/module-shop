@@ -1,7 +1,7 @@
 <?php
 
 /**
- * this model provides voucher functionality to the Nails shop.
+ * This model provides voucher functionality to the Nails shop.
  *
  * @package     Nails
  * @subpackage  module-shop
@@ -161,18 +161,16 @@ class NAILS_Shop_voucher_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
-     * Fetches all vouchers
-     * @todo Use the parent method
-     * @param  boolean $onlyActive Whether to only include active vouchers or not
-     * @param  array   $order      The order to apply to the query
-     * @param  array   $limit      The limits to apply to the query
-     * @param  mixed   $where      A conditional to pass to $this->db->where()
-     * @param  string  $search     Keywords to restrict the query by
+     * Fetches all vouchers, optionally paginated.
+     * @param int    $page    The page number of the results, if null then no pagination
+     * @param int    $perPage How many items per page of paginated results
+     * @param mixed  $data    Any data to pass to _getcount_common()
+     * @param string $_caller Internal flag to pass to _getcount_common(), contains the calling method
      * @return array
-     */
-    public function get_all($page = null, $perPage = null, $data = array(), $includeDeleted = false, $_caller = 'GET_ALL')
+     **/
+    public function get_all($page = null, $perPage = null, $data = array(), $_caller = 'GET_ALL')
     {
-        $result = parent::get_all($page, $perPage, $data, $includeDeleted, $_caller);
+        $result = parent::get_all($page, $perPage, $data, false, $_caller);
 
         //  Handle requests for the raw query object
         if (!empty($data['RETURN_QUERY_OBJECT'])) {
@@ -251,8 +249,14 @@ class NAILS_Shop_voucher_model extends NAILS_Model
      */
     public function get_by_code($code, $data = array())
     {
-        $this->db->where($this->_table_prefix . '.code', $code);
-        $result = $this->get_all();
+        if (!isset($data['where'])) {
+
+            $data['where'] = array();
+        }
+
+        $data['where'][] = array($this->_table_prefix . '.code', $id);
+
+        $result = $this->get_all(null, null, $data, 'GET_BY_CODE');
 
         // --------------------------------------------------------------------------
 

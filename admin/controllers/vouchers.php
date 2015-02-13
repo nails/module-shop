@@ -70,7 +70,6 @@ class Vouchers extends \AdminController
         $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.created';
         $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
-        $filters   = $this->input->get('filters')  ? $this->input->get('filters')    : array();
 
         // --------------------------------------------------------------------------
 
@@ -82,26 +81,30 @@ class Vouchers extends \AdminController
             $tablePrefix . '.valid_from' => 'Valid From Date'
         );
 
-        /**
-         * $filterColumns is an array where the index is the column to filter on and the
-         * value is an array of filter options. the option at the 0 index is the label to
-         * give the group
-         */
+        // --------------------------------------------------------------------------
 
-        $filterColumns = array(
-            $tablePrefix . '.type' => array('Type', 'Normal', 'Limited Use', 'Gift Card')
+        //  Filter columns
+        $filters   = array();
+        $filters[] = \Nails\Admin\Helper::searchFilterObject(
+            $tablePrefix . '.type',
+            'View only',
+            array(
+                array('Normal', 'NORMAL'),
+                array('Limited Use', 'LIMITED_USE'),
+                array('Gift Card', 'GIFT_CARD')
+            )
         );
 
         // --------------------------------------------------------------------------
 
         //  Define the $data variable for the queries
         $data = array(
-            'sort'  => array(
+            'sort' => array(
                 'column' => $sortOn,
                 'order'  => $sortOrder
             ),
             'keywords' => $keywords,
-            'filters' => $keywords
+            'filters'  => $filters
         );
 
         // --------------------------------------------------------------------------
@@ -111,7 +114,7 @@ class Vouchers extends \AdminController
         $this->data['vouchers'] = $this->shop_voucher_model->get_all($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
-        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords, $filterColumns);
+        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords, $filters);
         $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
 
         // --------------------------------------------------------------------------
@@ -217,9 +220,8 @@ class Vouchers extends \AdminController
                     break;
             }
 
-            $this->form_validation->set_message('required',         lang('fv_required'));
+            $this->form_validation->set_message('required', lang('fv_required'));
             $this->form_validation->set_message('is_unique', 'Code already in use.');
-
 
             if ($this->form_validation->run($this)) {
 
@@ -238,7 +240,6 @@ class Vouchers extends \AdminController
                 if ($this->input->post('valid_to')) {
 
                     $data['valid_to'] = $this->input->post('valid_to');
-
                 }
 
                 //  Define specifics
@@ -247,19 +248,16 @@ class Vouchers extends \AdminController
                     $data['gift_card_balance']    = $this->input->post('discount_value');
                     $data['discount_type']        = 'AMOUNT';
                     $data['discount_application'] = 'ALL';
-
                 }
 
                 if ($this->input->post('type') == 'LIMITED_USE') {
 
                     $data['limited_use_limit'] = $this->input->post('limited_use_limit');
-
                 }
 
                 if ($this->input->post('discount_application') == 'PRODUCT_TYPES') {
 
                     $data['product_type_id'] = $this->input->post('product_type_id');
-
                 }
 
                 // --------------------------------------------------------------------------
@@ -272,9 +270,10 @@ class Vouchers extends \AdminController
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem creating the voucher. '  . $this->shop_voucher_model->last_error();
+                    $this->data['error']  = 'There was a problem creating the voucher. ';
+                    $this->Data['error'] .= $this->shop_voucher_model->last_error();
+                }
 
-                                }
             } else {
 
                 $this->data['error'] = lang('fv_there_were_errors');
@@ -288,19 +287,19 @@ class Vouchers extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Fetch data
+        $this->load->model('shop/shop_product_type_model');
         $this->data['product_types'] = $this->shop_product_type_model->get_all_flat();
 
         // --------------------------------------------------------------------------
 
         //  Load assets
-        $this->asset->load('nails.admin.shop.vouchers.min.js', true);
+        $this->asset->load('nails.admin.shop.vouchers.min.js', 'NAILS');
+        $this->asset->inline('voucher = new NAILS_Admin_Shop_Vouchers_Edit();', 'JS');
 
         // --------------------------------------------------------------------------
 
         //  Load views
-        $this->load->view('structure/header', $this->data);
-        $this->load->view('admin/shop/vouchers/create', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        \Nails\Admin\Helper::loadView('edit');
     }
 
     // --------------------------------------------------------------------------

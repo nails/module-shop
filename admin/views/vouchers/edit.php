@@ -1,4 +1,4 @@
-<div class="group-shop vouchers create">
+<div class="group-shop vouchers edit">
     <p>
         Use the following form to create a new voucher for use in the shop.
     </p>
@@ -12,7 +12,7 @@
             $field['key']      = 'type';
             $field['label']    = 'Type';
             $field['class']    = 'select2';
-            $field['required'] = TRUE;
+            $field['required'] = true;
 
             $options = array(
                 'NORMAL'      => 'Normal',
@@ -28,9 +28,10 @@
             $field                = array();
             $field['key']         = 'code';
             $field['label']       = 'Code';
-            $field['sub_label']   = '<a href="#" id="generate-code">Generate Valid Code</a>';
+            $field['info']        = '<a href="#" id="generate-code" class="awesome small">Generate Valid Code</a> ';
+            $field['info']       .= '<b id="generateCodeSpinner" class="fa fa-spin fa-spinner"></b>';
             $field['placeholder'] = 'Define the code for this voucher or generate one using the link on the left.';
-            $field['required']    = TRUE;
+            $field['required']    = true;
 
             echo form_field($field);
 
@@ -41,7 +42,7 @@
             $field['key']         = 'label';
             $field['label']       = 'Label/Description';
             $field['placeholder'] = 'The label is shown to the user when the voucher is applied.';
-            $field['required']    = TRUE;
+            $field['required']    = true;
 
             echo form_field($field);
 
@@ -52,7 +53,7 @@
             $field['key']      = 'discount_type';
             $field['label']    = 'Discount Type';
             $field['class']    = 'select2';
-            $field['required'] = TRUE;
+            $field['required'] = true;
 
             $options = array(
                 'PERCENTAGE' => 'Percentage',
@@ -68,7 +69,7 @@
             $field['key']         = 'discount_value';
             $field['label']       = 'Discount Value';
             $field['placeholder'] = 'Define the value of the discount as appropriate (i.e percentage or amount)';
-            $field['required']    = TRUE;
+            $field['required']    = true;
 
             echo form_field($field, 'If Discount Type is Percentage then specify a number 1-100, if it\'s a Specific Amount then define the amount.');
 
@@ -79,7 +80,7 @@
             $field['key']      = 'discount_application';
             $field['label']    = 'Applies to';
             $field['class']    = 'select2';
-            $field['required'] = TRUE;
+            $field['required'] = true;
 
             $options = array(
                 'PRODUCTS'      => 'Purchases Only',
@@ -99,7 +100,7 @@
             $field['default']     = date('Y-m-d H:i:s', strtotime('TODAY'));
             $field['placeholder'] = 'YYYY-MM-DD HH:MM:SS';
             $field['class']       = 'datetime1';
-            $field['required']    = TRUE;
+            $field['required']    = true;
 
             echo form_field($field);
 
@@ -108,7 +109,7 @@
             //  Valid To
             $field                = array();
             $field['key']         = 'valid_to';
-            $field['label']       = 'Valid To';
+            $field['label']       = 'Expires';
             $field['sub_label']   = 'Leave blank for no expiry date';
             $field['placeholder'] = 'YYYY-MM-DD HH:MM:SS';
             $field['class']       = 'datetime2';
@@ -132,7 +133,7 @@
             $field['key']         = 'limited_use_limit';
             $field['label']       = 'Limit number of uses';
             $field['placeholder'] = 'Define the number of times this voucher can be used.';
-            $field['required']    = TRUE;
+            $field['required']    = true;
 
             echo form_field($field);
 
@@ -146,7 +147,8 @@
                 echo '<p class="system-alert error">';
                     echo '<strong>No product types are defined</strong>';
                     echo '<br />At least one product type must be defined before you can create vouchers ';
-                    echo 'which apply to particular product types.';
+                    echo 'which apply to particular product types. ';
+                    echo anchor('admin/shop/manage/productType','Create Products Now') . '.';
                 echo '</p>';
 
             } else {
@@ -155,7 +157,7 @@
                 $field             = array();
                 $field['key']      = 'product_type_id';
                 $field['label']    = 'Limit to products of type';
-                $field['required'] = TRUE;
+                $field['required'] = true;
                 $field['class']    = 'select2';
 
                 echo form_field_dropdown($field, $product_types);
@@ -170,11 +172,3 @@
     </p>
     <?=form_close()?>
 </div>
-<script type="text/javascript">
-    $(function(){
-
-        var _shop_voucher = new NAILS_Admin_Shop_Vouchers;
-        _shop_voucher.init_create();
-
-    })
-</script>
