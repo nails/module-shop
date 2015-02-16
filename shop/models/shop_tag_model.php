@@ -96,7 +96,7 @@ class NAILS_Shop_tag_model extends NAILS_Model
     {
         if (!empty($data['label'])) {
 
-            $data->slug = $this->_generate_slug($data['label']);
+            $data['slug'] = $this->_generate_slug($data['label']);
         }
 
         if (empty($data['cover_id'])) {
@@ -119,7 +119,7 @@ class NAILS_Shop_tag_model extends NAILS_Model
     {
         if (!empty($data['label'])) {
 
-            $data->slug = $this->_generate_slug($data['label'], '', '', null, null, $id);
+            $data['slug'] = $this->_generate_slug($data['label'], '', '', null, null, $id);
         }
 
         if (empty($data['cover_id'])) {
