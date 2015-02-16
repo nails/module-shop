@@ -89,7 +89,7 @@ class Vouchers extends \AdminController
             $tablePrefix . '.code'       => 'Code',
             $tablePrefix . '.type'       => 'Type',
             $tablePrefix . '.valid_from' => 'Valid From Date'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -103,7 +103,7 @@ class Vouchers extends \AdminController
                 array('Limited Use', 'LIMITED_USE'),
                 array('Gift Card', 'GIFT_CARD')
            )
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -114,7 +114,7 @@ class Vouchers extends \AdminController
             ),
             'keywords' => $keywords,
             'filters'  => $filters
-       );
+        );
 
         // --------------------------------------------------------------------------
 

@@ -1,66 +1,132 @@
-<div class="search">
+<hr />
+<div class="search clearfix">
     <div class="mask">
-        <b class="fa fa-refresh fa-spin fa-2x"></b>
+        <b class="fa fa-refresh fa-2x"></b>
     </div>
     <?php
 
-        $_form = array(
-            'method'    => 'GET'
+        parse_str($this->input->server('QUERY_STRING'), $query);
+        unset($query['keywords']);
+        unset($query['sortOn']);
+        unset($query['sortOrder']);
+        unset($query['perPage']);
+        unset($query['page']);
+        unset($query['filter']);
+
+        $formAttr = array(
+            'method' => 'GET'
         );
-        echo form_open(null, $_form);
 
-        echo '<div class="search-text">';
-        echo form_input('search', $this->input->get('search'), 'autocomplete="off" placeholder="' . lang('admin_search_placeholder') . '"');
-        echo '</div>';
+        echo form_open(null, $formAttr);
 
-        // --------------------------------------------------------------------------
+        foreach ($query as $key => $value) {
 
-        if (count($categoriesFlat)) {
+            echo form_hidden($key, $value);
+        }
 
-            $options = array('All Categories') + $categoriesFlat;
+        if ($searchable) {
 
-            echo '<div class="search-category" style="position:relative;">';
-                echo '<div style="width:120px;position:absolute;left:0;top:8px;">Search only items in </div>';
-                echo '<div style="width:100%;padding-left:120px;padding-right:10px;box-sizing:border-box">';
-                    echo form_dropdown('category', $options, $category_id, 'class="select2" style="width:100%;"');
-                echo '</div>';
+            echo '<div class="search-text">';
+                echo form_input(
+                    'keywords',
+                    $keywords,
+                    'autocomplete="off" placeholder="Type your search term and hit enter"'
+                );
             echo '</div>';
         }
-        // --------------------------------------------------------------------------
-
-        $_sort = array(
-            'p.id'            => 'ID',
-            'p.label'        => 'Label',
-            'p.modified'    => 'Modified Date',
-            'pt.label'        => 'Type',
-            'p.is_active'    => 'Active State'
-        );
-        echo lang('admin_search_sort') . form_dropdown('sort_on', $_sort, $sort_on, 'class="select2"');
 
         // --------------------------------------------------------------------------
 
-        $_order = array(
-            'asc'    => 'Ascending',
-            'desc'    => 'Descending'
-        );
-        echo lang('admin_search_order_1') . form_dropdown('order', $_order, $sort_order, 'class="select2"') . lang('admin_search_order_2');
+        echo '<span style="padding-right: 1em;">';
+
+            if (!empty($sortColumns)) {
+
+                //  Sort Column
+                echo 'Sort results by';
+                echo form_dropdown('sortOn', $sortColumns, $sortOn);
+
+            } else {
+
+                echo 'Sort results';
+            }
+
+            //  Sort order
+            $options = array(
+                'asc'  => 'Ascending',
+                'desc' => 'Descending'
+            );
+
+            echo form_dropdown('sortOrder', $options, $sortOrder);
+
+        echo '</span>';
 
         // --------------------------------------------------------------------------
 
-        $_perpage = array(
-            10 => 10,
-            25 => 25,
-            50 => 50,
-            75 => 75,
-            100 => 100
-        );
-        echo form_dropdown('per_page', $_perpage, $pagination->per_page, 'class="select2" style="width:75px;');
-        echo lang('admin_search_per_page');
+        echo '<span style="padding-right: 1em;">';
+
+            //  Results per page
+            $options = array(
+                10  => 10,
+                25  => 25,
+                50  => 50,
+                75  => 75,
+                100 => 100
+            );
+
+            echo 'Show';
+            echo form_dropdown('perPage', $options, $perPage);
+            echo 'results per page.';
+
+        echo '</span>';
 
         // --------------------------------------------------------------------------
 
-        echo anchor(uri_string(), lang('action_reset'), 'class="awesome small right"');
-        echo form_submit('submit', lang('action_search'), 'class="awesome small right"');
+        //  Filters
+        if (!empty($filters)) {
+
+            echo '<hr />';
+            foreach ($filters as $filterIndex => $filter) {
+
+                echo '<span class="filterGroup">';
+                    echo '<span class="filterLabel">';
+                        echo $filter->label;
+                    echo '</span>';
+
+                    foreach ($filter->options as $optionIndex => $option) {
+
+                        //  Checked or not?
+                        if (!empty($_GET)) {
+
+                            $checked = !empty($_GET['filter'][$filterIndex][$optionIndex]);
+
+                        } else {
+
+                            $checked = $option->checked;
+                        }
+
+                        $checked = $checked ? 'checked="checked"' : '';
+
+                        echo '<label class="filterOption">';
+                            echo '<input type="checkbox" name="filter[' . $filterIndex . '][' . $optionIndex . ']" ' . $checked . ' value="1">';
+                            echo $option->label;
+                        echo '</label>';
+                    }
+
+                echo '</span>';
+            }
+        }
+
+        // --------------------------------------------------------------------------
+
+        echo '<div class="actions">';
+
+            $resetUrl  = uri_string();
+            $resetUrl .= $query ? '?' . http_build_query($query) : '';
+
+            echo anchor($resetUrl, 'Reset', 'class="awesome small grey"');
+            echo '<button type="submit" class="awesome small">Search</button>';
+
+        echo '</div>';
 
         // --------------------------------------------------------------------------
 
@@ -68,5 +134,3 @@
 
     ?>
 </div>
-
-<hr />

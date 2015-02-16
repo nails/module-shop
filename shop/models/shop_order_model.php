@@ -412,7 +412,7 @@ class NAILS_Shop_order_model extends NAILS_Model
      **/
     public function get_all($page = null, $perPage = null, $data = array(), $_caller = 'GET_ALL')
     {
-        $this->db->select('o.*');
+        $this->db->select($this->_table_prefix . '.*');
         $this->db->select('ue.email, u.first_name, u.last_name, u.gender, u.profile_img,ug.id user_group_id,ug.label user_group_label');
         $this->db->select('v.code v_code,v.label v_label, v.type v_type, v.discount_type v_discount_type, v.discount_value v_discount_value, v.discount_application v_discount_application');
         $this->db->select('v.product_type_id v_product_type_id, v.is_active v_is_active, v.is_deleted v_is_deleted, v.valid_from v_valid_from, v.valid_to v_valid_to');
@@ -434,7 +434,7 @@ class NAILS_Shop_order_model extends NAILS_Model
             $order->items = $this->get_items_for_order($order->id);
         }
 
-        return $_orders;
+        return $results;
     }
 
 
@@ -476,12 +476,43 @@ class NAILS_Shop_order_model extends NAILS_Model
         //  Search
         if (!empty($data['keywords'])) {
 
-            // $data['like']   = array();
-            // $data['like'][] = array(
-            //     'column' => $this->_table_prefix . '.code',
-            //     'value'  => $data['keywords']
-            //);
+            if (empty($data['or_like'])) {
 
+                $data['or_like'] = array();
+            }
+
+            $data['or_like'][] = array(
+                'column' => $this->_table_prefix . '.code',
+                'value'  => $data['keywords']
+            );
+            $data['or_like'][] = array(
+                'column' => $this->_table_prefix . '.user_email',
+                'value'  => $data['keywords']
+            );
+            $data['or_like'][] = array(
+                'column' => $this->_table_prefix . '.user_first_name',
+                'value'  => $data['keywords']
+            );
+            $data['or_like'][] = array(
+                'column' => $this->_table_prefix . '.user_last_name',
+                'value'  => $data['keywords']
+            );
+            $data['or_like'][] = array(
+                'column' => $this->_table_prefix . '.user_telephone',
+                'value'  => $data['keywords']
+            );
+            $data['or_like'][] = array(
+                'column' => 'ue.email',
+                'value'  => $data['keywords']
+            );
+            $data['like'][] = array(
+                'column' => 'u.first_name',
+                'value'  => $data['keywords']
+            );
+            $data['like'][] = array(
+                'column' => 'u.last_name',
+                'value'  => $data['keywords']
+            );
         }
 
         parent::_getcount_common($data, $_caller);
@@ -676,6 +707,36 @@ class NAILS_Shop_order_model extends NAILS_Model
     {
         $data = array('status' => 'CANCELLED');
         return $this->update($orderId, $data);
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Batch cancel some orders
+     * @param  array   $orderIds An array of order IDs to fulfill
+     * @return boolean
+     */
+    public function cancelBatch($orderIds)
+    {
+        if (empty($orderIds)) {
+
+            $this->_set_error('No IDs were supplied.');
+            return false;
+        }
+
+        $this->db->set('status', 'CANCELLED');
+        $this->db->where_in('id', $orderIds);
+        $this->db->set('modified', 'NOW()', false);
+
+        if ($this->db->update(NAILS_DB_PREFIX . 'shop_order')) {
+
+            return true;
+
+        } else {
+
+            $this->_set_error('Failed to cancel batch.');
+            return false;
+        }
     }
 
     // --------------------------------------------------------------------------
@@ -1161,7 +1222,7 @@ class NAILS_Shop_order_model extends NAILS_Model
      * @param  stdClass &$order The object to format
      * @return void
      */
-    protected function _format_object(&$order)
+    protected function _format_order(&$order)
     {
         //  User
         $order->user        = new \stdClass();

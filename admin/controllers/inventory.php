@@ -60,44 +60,74 @@ class Inventory extends \AdminController
      */
     public function index()
     {
-        //  Set method info
-        $this->data['page']->title = 'Manage Inventory';
+        if (!userHasPermission('admin.shop:0.orders_manage')) {
 
-        //  Define the $data variable, this'll be passed to the get_all() and count_all() methods
-        $data = array('where' => array(), 'sort' => array(), 'include_inactive' => true);
+            unauthorised();
+        }
 
         // --------------------------------------------------------------------------
 
-        //  Set useful vars
-        $page       = $this->input->get('page')     ? $this->input->get('page')     : 0;
-        $per_page   = $this->input->get('per_page') ? $this->input->get('per_page') : 50;
-        $sort_on    = $this->input->get('sort_on')  ? $this->input->get('sort_on')  : 'p.label';
-        $sort_order = $this->input->get('order')    ? $this->input->get('order')    : 'desc';
-        $search     = $this->input->get('search')   ? $this->input->get('search')   : '';
+        //  Set method info
+        $this->data['page']->title = 'Manage Inventory';
 
-        //  Set sort variables for view and for $data
-        $this->data['sort_on']     = $data['sort']['column'] = $sort_on;
-        $this->data['sort_order']  = $data['sort']['order']  = $sort_order;
-        $this->data['search']      = $data['search']         = $search;
-        $this->data['category_id'] = $data['category_id']    = $this->input->get('category');
+        // --------------------------------------------------------------------------
 
-        if (!empty($data['category_id'])) {
+        $tablePrefix = $this->shop_product_model->getTablePrefix();
 
-            $data['category_id'] = array($data['category_id']) + $this->shop_category_model->get_ids_of_children($data['category_id']);
+        // --------------------------------------------------------------------------
 
-        } else {
+        //  Get pagination and search/sort variables
+        $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
+        $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
+        $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
-            unset($data['category_id']);
+        // --------------------------------------------------------------------------
+
+        //  Define the sortable columns and the filters
+        $sortColumns = array(
+            $tablePrefix . '.id'        => 'ID',
+            $tablePrefix . '.label'     => 'Label',
+            $tablePrefix . '.modified'  => 'Modified Date',
+            $tablePrefix . '.is_active' => 'Active State',
+            'pt.label'                  => 'Type'
+        );
+
+        // --------------------------------------------------------------------------
+
+        //  Define the $data variable for the queries
+        $data = array(
+            'include_inactive' => true,
+            'where' => array(),
+            'sort' => array(
+                array($sortOn, $sortOrder)
+            ),
+            'keywords' => $keywords
+        );
+
+        // --------------------------------------------------------------------------
+
+        //  If we're restricting to a certain category...
+        if ($this->input->get('categoryId')) {
+
+            $categoryId          = $this->input->get('categoryId');
+            $childCategories     = $this->shop_category_model->get_ids_of_children($categoryId);
+            $data['category_id'] = array($categoryId) + $childCategories;
+
         }
 
-        //  Define and populate the pagination object
-        $this->data['pagination']             = new \stdClass();
-        $this->data['pagination']->page       = $page;
-        $this->data['pagination']->per_page   = $per_page;
-        $this->data['pagination']->total_rows = $this->shop_product_model->count_all($data);
+        //  Get the items for the page
+        $totalRows              = $this->shop_product_model->count_all($data);
+        $this->data['products'] = $this->shop_product_model->get_all($page, $perPage, $data);
 
-        //  Fetch all the items for this page
-        $this->data['products']       = $this->shop_product_model->get_all($page, $per_page, $data);
+        //  Set Search and Pagination objects for the view
+        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+
+        // --------------------------------------------------------------------------
+
+        //  Fetch other required bits of data
         $this->data['productTypes']   = $this->shop_product_type_model->get_all();
         $this->data['categoriesFlat'] = $this->shop_category_model->get_all_nested_flat();
 
@@ -127,8 +157,8 @@ class Inventory extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Fetch data, this data is used in both the view and the form submission
-        $this->data['currencies']       = $this->shop_currency_model->get_all_supported();
-        $this->data['product_types']    = $this->shop_product_type_model->get_all();
+        $this->data['currencies']    = $this->shop_currency_model->get_all_supported();
+        $this->data['product_types'] = $this->shop_product_type_model->get_all();
 
         if (!$this->data['product_types']) {
 
@@ -218,6 +248,7 @@ class Inventory extends \AdminController
         $this->load->model('shop/shop_collection_model');
         $this->load->model('shop/shop_range_model');
         $this->load->model('shop/shop_tag_model');
+        $this->load->model('shop/shop_tax_rate_model');
 
         // --------------------------------------------------------------------------
 
@@ -239,6 +270,19 @@ class Inventory extends \AdminController
         $this->asset->library('uploadify');
         $this->asset->load('mustache.js/mustache.js', 'NAILS-BOWER');
         $this->asset->load('nails.admin.shop.inventory.createEdit.min.js', true);
+
+        /*
+        var productTypes = <?=json_encode($product_types)?>;
+        var uploadToken  = '<?=$this->cdn->generate_api_upload_token(active_user('id')) ?>';
+        _CREATE_EDIT     = new NAILS_Admin_Shop_Inventory_Create_Edit();
+        _CREATE_EDIT.init(productTypes, uploadToken);
+        */
+
+        $uploadtoken = $this->cdn->generate_api_upload_token(active_user('id'));
+
+        $this->asset->inline('var _edit = new NAILS_Admin_Shop_Inventory_Create_Edit();', 'JS');
+        $this->asset->inline('_edit.init(' . json_encode($product_types) . ', "' . $uploadToken . '");', 'JS');
+
 
         // --------------------------------------------------------------------------
 

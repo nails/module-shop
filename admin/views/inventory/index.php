@@ -21,7 +21,6 @@
                         if (count($productTypes) > 1) {
 
                             echo '<th class="type">Type</th>';
-
                         }
                     ?>
                     <th class="datetime">Modified</th>
@@ -48,7 +47,6 @@
                                         } else {
 
                                             echo img(NAILS_ASSETS_URL . 'img/admin/modules/shop/image-icon.png');
-
                                         }
 
                                     ?>
@@ -67,7 +65,6 @@
                                     if (count($productTypes) > 1) {
 
                                         echo '<td class="type">' . $item->type->label . '</td>';
-
                                     }
                                 ?>
                                 <?php
@@ -84,7 +81,6 @@
                                         if (userHasPermission('admin.shop:0.inventory_edit')) {
 
                                             $_buttons[] = anchor('admin/shop/inventory/edit/' . $item->id, lang('action_edit'), 'class="awesome small"');
-
                                         }
 
                                         // --------------------------------------------------------------------------
@@ -92,7 +88,6 @@
                                         if (userHasPermission('admin.shop:0.inventory_delete')) {
 
                                             $_buttons[] = anchor('admin/shop/inventory/delete/' . $item->id, lang('action_delete'), 'class="awesome small red confirm" data-title="Are you sure?" data-body="You can undo this action."');
-
                                         }
 
                                         // --------------------------------------------------------------------------
@@ -102,13 +97,11 @@
                                             foreach ($_buttons aS $button) {
 
                                                 echo $button;
-
                                             }
 
                                         } else {
 
                                             echo '<span class="blank">There are no actions you can perform on this item.</span>';
-
                                         }
 
                                     ?>

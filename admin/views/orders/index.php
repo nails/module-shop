@@ -37,9 +37,9 @@
             <tbody>
                 <?php
 
-                    if ($orders->data) {
+                    if ($orders) {
 
-                        foreach ($orders->data as $order) {
+                        foreach ($orders as $order) {
 
                             ?>
                             <tr id="order-<?=$order->id?>">
@@ -110,14 +110,33 @@
 
                                     switch ($order->status) {
 
-                                        case 'UNPAID' :     $status = 'error';      break;
-                                        case 'PAID' :       $status = 'success';    break;
-                                        case 'ABANDONED' :  $status = '';           break;
-                                        case 'CANCELLED' :  $status = '';           break;
-                                        case 'FAILED' :     $status = 'error';      break;
-                                        case 'PENDING' :    $status = '';           break;
-                                        default :           $status = '';           break;
+                                        case 'UNPAID':
+                                            $status = 'error';
+                                            break;
 
+                                        case 'PAID':
+                                            $status = 'success';
+                                            break;
+
+                                        case 'ABANDONED':
+                                            $status = 'message';
+                                            break;
+
+                                        case 'CANCELLED':
+                                            $status = 'message';
+                                            break;
+
+                                        case 'FAILED':
+                                            $status = 'error';
+                                            break;
+
+                                        case 'PENDING':
+                                            $status = 'notice';
+                                           break;
+
+                                        default:
+                                            $status = '';
+                                            break;
                                     }
 
                                     echo '<td class="status ' . $status . '">';
@@ -198,18 +217,19 @@
         </table>
         <?php
 
-            if ($orders->data) {
+            if ($orders) {
 
                 $_options                     = array();
                 $_options['']                 = 'Choose';
                 $_options['mark-fulfilled']   = 'Mark Fulfilled';
                 $_options['mark-unfulfilled'] = 'Mark Unfulfilled';
+                $_options['mark-cancelled']   = 'Mark Cancelled';
                 $_options['download']         = 'Download';
 
                 echo '<div class="panel" id="batch-action">';
-                    echo 'With checked:';
+                    echo 'With checked: ';
                     echo form_dropdown('', $_options, null);
-                    echo '<a href="#" class="awesome small">Go</a>';
+                    echo ' <a href="#" class="awesome small">Go</a>';
                 echo '</div>';
             }
 

@@ -25,7 +25,7 @@ $countriesFlat = $this->country_model->getAllFlat();
         </tr>
         <tr>
             <td class="left-header-cell">Placed</td>
-            <td colspan="2"><?=userDatetime($order->created)?></td>
+            <td colspan="2"><?=toUserDatetime($order->created)?></td>
         </tr>
         <tr>
             <td class="left-header-cell">Customer</td>

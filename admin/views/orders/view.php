@@ -33,9 +33,8 @@
 
                                     } else {
 
-                                        //    TODO: Show voucher details
+                                        //  @todo: Show voucher details
                                         echo 'TODO: voucher display';
-
                                     }
 
                                 ?>
@@ -53,7 +52,6 @@
                                         echo '<small>';
                                             echo 'User checked out in ' . $order->currency . ': ' . $order->totals->user_formatted->grand;
                                         echo '</small>';
-
                                     }
 
                                 ?>
@@ -70,9 +68,8 @@
 
                                     } else {
 
-                                        //    TODO: Show voucher details
+                                        //  @todo: Show voucher details
                                         echo $order->note;
-
                                     }
 
                                 ?>
@@ -148,58 +145,55 @@
 
                                 if (time() - strtotime($order->created) > 3600) {
 
-                                    echo '<p><small>This order looks to be quite old now, it\'s likely the user abandoned checkout.</small></p>';
+                                    echo '<p>';
+                                        echo '<small>';
+                                            echo 'This order looks to be quite old now, it\'s likely the user abandoned checkout. ';
+                                        echo '</small>';
+                                    echo '</p>';
 
                                 }
+                                break;
 
-                            break;
-
-                            case 'PAID' :
+                            case 'PAID':
 
                                 echo '<h1><b class="fa fa-check-circle-o"></b> Paid</h1>';
                                 echo '<p>This order has been fully paid.</p>';
+                                break;
 
-                            break;
-
-                            case 'ABANDONED' :
+                            case 'ABANDONED':
 
                                 echo '<h1><b class="fa fa-times-circle"></b> Abandoned</h1>';
                                 echo '<p>This order was abandoned by the user prior to reaching checkout.</p>';
+                                break;
 
-                            break;
-
-                            case 'CANCELLED' :
+                            case 'CANCELLED':
 
                                 echo '<h1><b class="fa fa-times-circle"></b> Cancelled</h1>';
-                                echo '<p>The user cancelled this order during checkout.</p>';
+                                echo '<p>This order has been marked as cancelled.</p>';
+                                break;
 
-                            break;
-
-                            case 'FAILED' :
+                            case 'FAILED':
 
                                 echo '<h1><b class="fa fa-exclamation-triangle"></b> Failed</h1>';
                                 echo '<p>There was an issue processing this order. Failure details of the failure mayhave been provided from the payment gateway, if so these will be shown below.</p>';
 
                                 //    TODO: Show failure details
+                                break;
 
-                            break;
-
-                            case 'PENDING' :
+                            case 'PENDING':
 
                                 echo '<h1><b class="fa fa-clock-o fa-spin"></b> Pending</h1>';
                                 echo '<p>This order is pending action, details and further options may be shown below.</p>';
 
                                 //    TODO: Show pending reasons/actions
+                                break;
 
-                            break;
-
-                            default :
+                            default:
 
                                 $_status = ucwords(strtolower($order->status));
                                 echo '<h1>' . $_status . '</h1>';
                                 echo '<p>"' . $_status . '" is not an order status I understand, there may be a problem.</p>';
-
-                            break;
+                                break;
 
                         }
 

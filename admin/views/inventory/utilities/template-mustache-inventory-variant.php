@@ -118,8 +118,8 @@
                 $_field['tip']        = 'Specify the behaviour of the item when the quantity available of an item reaches 0.';
 
                 $_options                    = array();
-                $_options['TO_ORDER']        = 'Behave as if{ To Order';
-                $_options['OUT_OF_STOCK']    = 'Behave as if{ Out of Stock';
+                $_options['TO_ORDER']        = 'Behave as if: To Order';
+                $_options['OUT_OF_STOCK']    = 'Behave as if: Out of Stock';
 
                 echo form_field_dropdown($_field, $_options);
 

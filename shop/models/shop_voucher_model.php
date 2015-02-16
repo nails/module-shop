@@ -223,8 +223,12 @@ class NAILS_Shop_voucher_model extends NAILS_Model
         //  Search
         if (!empty($data['keywords'])) {
 
-            $data['like']   = array();
-            $data['like'][] = array(
+            if (empty($data['or_like'])) {
+
+                $data['or_like'] = array();
+            }
+
+            $data['or_like'][] = array(
                 'column' => $this->_table_prefix . '.code',
                 'value'  => $data['keywords']
            );

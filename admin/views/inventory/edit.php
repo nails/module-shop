@@ -1,5 +1,4 @@
 <div class="group-shop inventory edit">
-
     <?=form_open(null, 'id="product-form"')?>
     <ul class="tabs" data-tabgroup="main-product">
         <li class="tab active">
@@ -40,143 +39,143 @@
         <div class="tab page basics active fieldset" id="tab-basics">
             <?php
 
-                $_field                    = array();
-                $_field['key']            = 'type_id';
-                $_field['label']        = 'Type';
-                $_field['required']        = true;
-                $_field['class']        = 'type_id select2';
-                $_field['id']            = 'type_id';
-                $_field['info']            = '<a href="#" class="manage-types awesome orange small">Manage Product Types</a>';
-                $_field['default']        = !empty($item->type->id) ? $item->type->id : null;
+                $field             = array();
+                $field['key']      = 'type_id';
+                $field['label']    = 'Type';
+                $field['required'] = true;
+                $field['class']    = 'type_id select2';
+                $field['id']       = 'type_id';
+                $field['info']     = '<a href="#" class="manage-types awesome orange small">Manage Product Types</a>';
+                $field['default']  = !empty($item->type->id) ? $item->type->id : null;
 
                 if (count($product_types_flat) == 1) {
 
                     reset($product_types_flat);
                     $_id = key($product_types_flat);
 
-                    //    Only one product type, no need to render a drop down
-                    echo '<input type="hidden" name="' . $_field['key'] . '" value="' . $_id . '" class="' . $_field['key'] . '">';
+                    //  Only one product type, no need to render a drop down
+                    echo '<input type="hidden" name="' . $field['key'] . '" value="' . $_id . '" class="' . $field['key'] . '">';
 
                 } else {
 
-                    echo form_field_dropdown($_field, $product_types_flat);
+                    echo form_field_dropdown($field, $product_types_flat);
                 }
 
                 // --------------------------------------------------------------------------
 
-                $_field                    = array();
-                $_field['key']            = 'label';
-                $_field['label']        = 'Label';
-                $_field['required']        = true;
-                $_field['placeholder']    = 'Give this product a label';
-                $_field['default']        = !empty($item->label) ? $item->label : '';
+                $field                = array();
+                $field['key']         = 'label';
+                $field['label']       = 'Label';
+                $field['required']    = true;
+                $field['placeholder'] = 'Give this product a label';
+                $field['default']     = !empty($item->label) ? $item->label : '';
 
-                echo form_field($_field);
-
-                // --------------------------------------------------------------------------
-
-                $_field                    = array();
-                $_field['key']            = 'is_active';
-                $_field['label']        = 'Is Active';
-                $_field['default']        = true;
-                $_field['text_on']        = strtoupper(lang('yes'));
-                $_field['text_off']        = strtoupper(lang('no'));
-                $_field['default']        = isset($item->is_active) ? $item->is_active : true;
-
-                echo form_field_boolean($_field);
+                echo form_field($field);
 
                 // --------------------------------------------------------------------------
 
-                $_field                = array();
-                $_field['key']        = 'brands[]';
-                $_field['label']    = 'Brands';
-                $_field['class']    = 'brands select2';
-                $_field['info']        = '<a href="#" class="manage-brands awesome orange small">Manage Brands</a>';
-                $_tip                = 'If this product contains multiple brands (e.g a hamper) specify them all here.';
+                $field             = array();
+                $field['key']      = 'is_active';
+                $field['label']    = 'Is Active';
+                $field['default']  = true;
+                $field['text_on']  = strtoupper(lang('yes'));
+                $field['text_off'] = strtoupper(lang('no'));
+                $field['default']  = isset($item->is_active) ? $item->is_active : true;
 
-                //    Defaults
+                echo form_field_boolean($field);
+
+                // --------------------------------------------------------------------------
+
+                $field          = array();
+                $field['key']   = 'brands[]';
+                $field['label'] = 'Brands';
+                $field['class'] = 'brands select2';
+                $field['info']  = '<a href="#" class="manage-brands awesome orange small">Manage Brands</a>';
+                $tip            = 'If this product contains multiple brands (e.g a hamper) specify them all here.';
+
+                //  Defaults
                 if ($this->input->post('brands')) {
 
-                    $_field['default'] = $this->input->post('brands');
+                    $field['default'] = $this->input->post('brands');
 
                 } elseif (!empty($item->brands)) {
 
-                    $_field['default'] = array();
+                    $field['default'] = array();
 
-                    //    Build an array which matches the potential $_POST array
+                    //  Build an array which matches the potential $_POST array
                     foreach ($item->brands as $brand) {
 
-                        $_field['default'][] = $brand->id;
+                        $field['default'][] = $brand->id;
                     }
                 }
 
-                echo form_field_dropdown_multiple($_field, $brands, $_tip);
+                echo form_field_dropdown_multiple($field, $brands, $tip);
 
                 // --------------------------------------------------------------------------
 
-                $_field                = array();
-                $_field['key']        = 'categories[]';
-                $_field['label']    = 'Categories';
-                $_field['class']    = 'categories select2';
-                $_field['info']        = '<a href="#" class="manage-categories awesome orange small">Manage Categories</a>';
-                $_tip                = 'Specify which categories this product falls into.';
+                $field          = array();
+                $field['key']   = 'categories[]';
+                $field['label'] = 'Categories';
+                $field['class'] = 'categories select2';
+                $field['info']  = '<a href="#" class="manage-categories awesome orange small">Manage Categories</a>';
+                $tip            = 'Specify which categories this product falls into.';
 
-                //    Defaults
+                //  Defaults
                 if ($this->input->post('categories')) {
 
-                    $_field['default'] = $this->input->post('categories');
+                    $field['default'] = $this->input->post('categories');
 
                 } elseif (!empty($item->categories)) {
 
-                    $_field['default'] = array();
+                    $field['default'] = array();
 
-                    //    Build an array which matches the potential $_POST array
+                    //  Build an array which matches the potential $_POST array
                     foreach ($item->categories as $category) {
 
-                        $_field['default'][] = $category->id;
+                        $field['default'][] = $category->id;
                     }
                 }
 
-                echo form_field_dropdown_multiple($_field, $categories, $_tip);
+                echo form_field_dropdown_multiple($field, $categories, $tip);
 
                 // --------------------------------------------------------------------------
 
-                $_field                = array();
-                $_field['key']        = 'tags[]';
-                $_field['label']    = 'Tags';
-                $_field['class']    = 'tags select2';
-                $_field['info']        = '<a href="#" class="manage-tags awesome orange small">Manage Tags</a>';
-                $_tip                = 'Use tags to associate products together, e.g. events.';
+                $field          = array();
+                $field['key']   = 'tags[]';
+                $field['label'] = 'Tags';
+                $field['class'] = 'tags select2';
+                $field['info']  = '<a href="#" class="manage-tags awesome orange small">Manage Tags</a>';
+                $tip            = 'Use tags to associate products together, e.g. events.';
 
-                //    Defaults
+                //  Defaults
                 if ($this->input->post('tags')) {
 
-                    $_field['default'] = $this->input->post('tags');
+                    $field['default'] = $this->input->post('tags');
 
                 } elseif (!empty($item->tags)) {
 
-                    $_field['default'] = array();
+                    $field['default'] = array();
 
-                    //    Build an array which matches the potential $_POST array
+                    //  Build an array which matches the potential $_POST array
                     foreach ($item->tags as $tag) {
 
-                        $_field['default'][] = $tag->id;
+                        $field['default'][] = $tag->id;
                     }
                 }
 
-                echo form_field_dropdown_multiple($_field, $tags, $_tip);
+                echo form_field_dropdown_multiple($field, $tags, $tip);
 
                 // --------------------------------------------------------------------------
 
-                $_field                = array();
-                $_field['key']        = 'tax_rate_id';
-                $_field['label']    = 'Tax Rate';
-                $_field['class']    = 'tax_rate_id select2';
-                $_field['required']    = true;
-                $_field['info']        = '<a href="#" class="manage-tax-rates awesome orange small">Manage Tax Rates</a>';
-                $_field['default']    = !empty($item->tax_rate->id) ? $item->tax_rate->id : null;
+                $field             = array();
+                $field['key']      = 'tax_rate_id';
+                $field['label']    = 'Tax Rate';
+                $field['class']    = 'tax_rate_id select2';
+                $field['required'] = true;
+                $field['info']     = '<a href="#" class="manage-tax-rates awesome orange small">Manage Tax Rates</a>';
+                $field['default']  = !empty($item->tax_rate->id) ? $item->tax_rate->id : null;
 
-                echo form_field_dropdown($_field, $tax_rates);
+                echo form_field_dropdown($field, $tax_rates);
 
             ?>
         </div>
@@ -196,16 +195,16 @@
                     $publishedTime = date('Y-m-d H:i:00');
                 }
 
-                $_field                    = array();
-                $_field['key']            = 'published';
-                $_field['label']        = 'Published';
-                $_field['required']        = true;
-                $_field['placeholder']    = 'What date and time should this item be published on site.';
-                $_field['default']        = $publishedTime;
-                $_field['info']            = 'You can specify a date in the future if you wish, the system will not show ';
-                $_field['info']         .= 'products where the published date is in the future.';
+                $field                = array();
+                $field['key']         = 'published';
+                $field['label']       = 'Published';
+                $field['required']    = true;
+                $field['placeholder'] = 'What date and time should this item be published on site.';
+                $field['default']     = $publishedTime;
+                $field['info']        = 'You can specify a date in the future if you wish, the system will not show ';
+                $field['info']       .= 'products where the published date is in the future.';
 
-                echo form_field_datetime($_field);
+                echo form_field_datetime($field);
 
                 ?>
             </fieldset>
@@ -221,39 +220,39 @@
 
                     echo '<div id="is-external">';
 
-                        $_field                    = array();
-                        $_field['key']            = 'is_external';
-                        $_field['label']        = 'Is External';
-                        $_field['text_on']        = strtoupper(lang('yes'));
-                        $_field['text_off']        = strtoupper(lang('no'));
-                        $_field['default']        = isset($item->is_external) ? $item->is_external : false;
+                        $field             = array();
+                        $field['key']      = 'is_external';
+                        $field['label']    = 'Is External';
+                        $field['text_on']  = strtoupper(lang('yes'));
+                        $field['text_off'] = strtoupper(lang('no'));
+                        $field['default']  = isset($item->is_external) ? $item->is_external : false;
 
-                        echo form_field_boolean($_field);
+                        echo form_field_boolean($field);
 
                     echo '</div>';
 
-                    $_display = $_field['default'] || $this->input->post('is_external') ? 'block' : 'none';
+                    $_display = $field['default'] || $this->input->post('is_external') ? 'block' : 'none';
                     echo '<div id="is-external-fields" style="display:' . $_display . '">';
 
-                        $_field                    = array();
-                        $_field['key']            = 'external_vendor_label';
-                        $_field['label']        = 'External Vendor';
-                        $_field['sub_label']    = 'Max. 150 characters';
-                        $_field['placeholder']    = 'The name of the vendor';
-                        $_field['default']        = isset($item->external_vendor_label) ? $item->external_vendor_label : '';
+                        $field                = array();
+                        $field['key']         = 'external_vendor_label';
+                        $field['label']       = 'External Vendor';
+                        $field['sub_label']   = 'Max. 150 characters';
+                        $field['placeholder'] = 'The name of the vendor';
+                        $field['default']     = isset($item->external_vendor_label) ? $item->external_vendor_label : '';
 
-                        echo form_field($_field);
+                        echo form_field($field);
 
                         // --------------------------------------------------------------------------
 
-                        $_field                    = array();
-                        $_field['key']            = 'external_vendor_url';
-                        $_field['label']        = 'External Vendor URL';
-                        $_field['sub_label']    = 'Max. 500 characters';
-                        $_field['placeholder']    = 'The URL of the page to redirect the user to';
-                        $_field['default']        = isset($item->external_vendor_url) ? $item->external_vendor_url : '';
+                        $field                = array();
+                        $field['key']         = 'external_vendor_url';
+                        $field['label']       = 'External Vendor URL';
+                        $field['sub_label']   = 'Max. 500 characters';
+                        $field['placeholder'] = 'The URL of the page to redirect the user to';
+                        $field['default']     = isset($item->external_vendor_url) ? $item->external_vendor_url : '';
 
-                        echo form_field($_field);
+                        echo form_field($field);
 
                     echo '</div>';
 
@@ -266,13 +265,13 @@
         <div class="tab page description" id="tab-description">
         <?php
 
-            $_field                = array();
-            $_field['key']        = 'description';
-            $_field['default']    = !empty($item->description) ? $item->description : '';
+            $field            = array();
+            $field['key']     = 'description';
+            $field['default'] = !empty($item->description) ? $item->description : '';
 
 
-            echo form_error($_field['key'], '<p class="system-alert error">', '</p>');
-            echo form_textarea($_field['key'], set_value($_field['key'], $_field['default']), 'class="wysiwyg" id="productDescription"');
+            echo form_error($field['key'], '<p class="system-alert error">', '</p>');
+            echo form_textarea($field['key'], set_value($field['key'], $field['default']), 'class="wysiwyg" id="productDescription"');
 
         ?>
         </div>
@@ -287,15 +286,17 @@
             <div id="product-variations">
                 <?php
 
-                    //    Data which will be passed to template
-                    $_data                    = array();
-                    $_data['is_first']        = true;
-                    $_data['is_php']        = true;
-                    $_data['counter']        = 0;
-                    $_data['num_variants']    = 0;
+                    //  Data which will be passed to template
+                    $viewData                 = array();
+                    $viewData['is_first']     = true;
+                    $viewData['is_php']       = true;
+                    $viewData['counter']      = 0;
+                    $viewData['num_variants'] = 0;
 
-                    //    Render, if there's POST then make sure we render it enough times
-                    //    Otherwise check to see if there's $item data
+                    /**
+                     * Render, if there's POST then make sure we render it enough times,
+                     * otherwise check to see if there's $item data
+                     */
 
                     if ($this->input->post('variation')) {
 
@@ -305,7 +306,7 @@
 
                         $_variations = array();
 
-                        //    Build an array which matches the potential $_POST array
+                        //  Build an array which matches the potential $_POST array
                         foreach ($item->variations as $variation) {
 
                             $_variations[] = $variation;
@@ -320,22 +321,30 @@
 
                         foreach ($_variations as $variation) {
 
-                            $_data['variation']        = $variation;
-                            $_data['num_variants']    = count($_variations);
+                            $viewData['variation']    = $variation;
+                            $viewData['num_variants'] = count($_variations);
 
-                            $_template    = $this->load->view('admin/shop/inventory/utilities/template-mustache-inventory-variant', $_data, true);
+                            $template = \Nails\Admin\Helper::loadInlineView(
+                                'utilities/template-mustache-inventory-variant',
+                                $viewData,
+                                true
+                            );
 
-                            echo $this->mustache->render($_template, $_data);
+                            echo $this->mustache->render($template, $viewData);
 
-                            $_data['counter']++;
-                            $_data['is_first'] = false;
+                            $viewData['counter']++;
+                            $viewData['is_first'] = false;
                         }
 
                     } else {
 
-                        $_template    = $this->load->view('admin/shop/inventory/utilities/template-mustache-inventory-variant', $_data, true);
+                        $template = \Nails\Admin\Helper::loadInlineView(
+                            'utilities/template-mustache-inventory-variant',
+                            $viewData,
+                            true
+                        );
 
-                        echo $this->mustache->render($_template, $_data);
+                        echo $this->mustache->render($template, $viewData);
                     }
 
                 ?>
@@ -360,17 +369,17 @@
                 <small>
                 <?php
 
-                    $_max_upload    = ini_get('upload_max_filesize');
-                    $_max_upload    = return_bytes($_max_upload);
+                    $_max_upload   = ini_get('upload_max_filesize');
+                    $_max_upload   = return_bytes($_max_upload);
 
-                    $_max_post        = ini_get('post_max_size');
-                    $_max_post        = return_bytes($_max_post);
+                    $_max_post     = ini_get('post_max_size');
+                    $_max_post     = return_bytes($_max_post);
 
-                    $_memory_limit    = ini_get('memory_limit');
-                    $_memory_limit    = return_bytes($_memory_limit);
+                    $_memory_limit = ini_get('memory_limit');
+                    $_memory_limit = return_bytes($_memory_limit);
 
-                    $_upload_mb        = min($_max_upload, $_max_post, $_memory_limit);
-                    $_upload_mb        = format_bytes($_upload_mb);
+                    $_upload_mb    = min($_max_upload, $_max_post, $_memory_limit);
+                    $_upload_mb    = format_bytes($_upload_mb);
 
                     echo 'Images only, max file size is ' . $_upload_mb . '.';
 
@@ -386,8 +395,10 @@
             </p>
             <?php
 
-                //    Render, if there's POST then make sure we render it enough times
-                //    Otherwise check to see if there's $item data
+                /**
+                 * Render, if there's POST then make sure we render it enough times,
+                 * otherwise check to see if there's $item data
+                 */
 
                 if ($this->input->post('gallery')) {
 
@@ -417,14 +428,17 @@
                                 'objectId' => $image
                             );
 
-                            $this->load->view('admin/shop/inventory/utilities/template-mustache-gallery-item', $viewData);
+                            echo \Nails\Admin\Helper::loadInlineView(
+                                'utilities/template-mustache-gallery-item',
+                                $viewData,
+                                true
+                            );
                         }
                     }
 
                 ?>
             </ul>
         </div>
-
         <div class="tab page attributes" id="tab-attributes">
             <p>
                 Specify specific product attributes, e..g for a pair of jeans you might specify a 'Style' attribute and
@@ -441,8 +455,10 @@
                 <tbody id="product-attributes">
                     <?php
 
-                        //    Render, if there's POST then make sure we render it enough times
-                        //    Otherwise check to see if there's $item data
+                        /**
+                         * Render, if there's POST then make sure we render it enough times,
+                         * otherwise check to see if there's $item data
+                         */
 
                         if ($this->input->post('attributes')) {
 
@@ -452,12 +468,12 @@
 
                             $_attributes = array();
 
-                            //    Build an array which matches the potential $_POST array
+                            //  Build an array which matches the potential $_POST array
                             foreach ($item->attributes as $attribute) {
 
-                                $_temp                    = array();
-                                $_temp['attribute_id']    = $attribute->id;
-                                $_temp['value']            = $attribute->value;
+                                $_temp                 = array();
+                                $_temp['attribute_id'] = $attribute->id;
+                                $_temp['value']        = $attribute->value;
 
                                 $_attributes[] = $_temp;
                             }
@@ -469,14 +485,18 @@
 
                         if (!empty($_attributes)) {
 
-                            $_counter = 0;
+                            $counter = 0;
                             foreach ($_attributes as $attribute) {
 
-                                $_data = array('attribute' => $attribute, 'counter' => $_counter);
+                                $viewData = array('attribute' => $attribute, 'counter' => $counter);
 
-                                $this->load->view('admin/shop/inventory/utilities/template-mustache-attribute', $_data);
+                                echo \Nails\Admin\Helper::loadInlineView(
+                                    'utilities/template-mustache-attribute',
+                                    $viewData,
+                                    true
+                                );
 
-                                $_counter++;
+                                $counter++;
                             }
                         }
 
@@ -509,8 +529,10 @@
                 <select name="ranges[]" class="ranges select2" multiple="multiple" style="width:100%">
                 <?php
 
-                    //    Render, if there's POST then make sure we render it enough times
-                    //    Otherwise check to see if there's $item data
+                    /**
+                     * Render, if there's POST then make sure we render it enough times,
+                     * otherwise check to see if there's $item data
+                     */
 
                     if ($this->input->post('ranges')) {
 
@@ -520,7 +542,7 @@
 
                         $_selected = array();
 
-                        //    Build an array which matches the potential $_POST array
+                        //  Build an array which matches the potential $_POST array
                         foreach ($item->ranges as $range) {
 
                             $_selected[] = $range->id;
@@ -548,9 +570,7 @@
             <p>
                 <a href="#" class="awesome small orange manage-ranges">Manage Ranges</a>
             </p>
-
             <hr />
-
             <p>
                 <strong>Collections</strong>
             </p>
@@ -558,8 +578,8 @@
                 <select name="collections[]" class="collections select2" multiple="multiple" style="width:100%">
                 <?php
 
-                    //    Render, if there's POST then make sure we render it enough times
-                    //    Otherwise check to see if there's $item data
+                    //  Render, if there's POST then make sure we render it enough times
+                    //  Otherwise check to see if there's $item data
 
                     if ($this->input->post('collections')) {
 
@@ -569,7 +589,7 @@
 
                         $_selected = array();
 
-                        //    Build an array which matches the potential $_POST array
+                        //  Build an array which matches the potential $_POST array
                         foreach ($item->collections as $collection) {
 
                             $_selected[] = $collection->id;
@@ -598,7 +618,6 @@
                 <a href="#" class="awesome small orange manage-collections">Manage Collections</a>
             </p>
         </div>
-
         <div class="tab page seo" id="tab-seo">
             <p>
                 Define some meta information here which will help search engines understand the product. Keep it
@@ -608,37 +627,37 @@
                 <legend>Search Engine Optimisation</legend>
                 <?php
 
-                    $_field                    = array();
-                    $_field['key']            = 'seo_title';
-                    $_field['label']        = 'Title';
-                    $_field['sub_label']    = 'Max. 150 characters';
-                    $_field['placeholder']    = 'Search Engine Optimised title';
-                    $_field['default']        = !empty($item->seo_title) ? $item->seo_title : '';
+                    $field                = array();
+                    $field['key']         = 'seo_title';
+                    $field['label']       = 'Title';
+                    $field['sub_label']   = 'Max. 150 characters';
+                    $field['placeholder'] = 'Search Engine Optimised title';
+                    $field['default']     = !empty($item->seo_title) ? $item->seo_title : '';
 
-                    echo form_field($_field, 'Keep this below 100 characters');
-
-                    // --------------------------------------------------------------------------
-
-                    $_field                    = array();
-                    $_field['key']            = 'seo_description';
-                    $_field['label']        = 'Description';
-                    $_field['sub_label']    = 'Max. 300 characters';
-                    $_field['placeholder']    = 'Search Engine Optimised description';
-                    $_field['type']            = 'textarea';
-                    $_field['default']        = !empty($item->seo_description) ? $item->seo_description : '';
-
-                    echo form_field($_field, 'Keep this relevant and below 140 characters');
+                    echo form_field($field, 'Keep this below 100 characters');
 
                     // --------------------------------------------------------------------------
 
-                    $_field                    = array();
-                    $_field['key']            = 'seo_keywords';
-                    $_field['label']        = 'Keywords';
-                    $_field['sub_label']    = 'Max. 150 characters';
-                    $_field['placeholder']    = 'Comma separated keywords';
-                    $_field['default']        = !empty($item->seo_keywords) ? $item->seo_keywords : '';
+                    $field                = array();
+                    $field['key']         = 'seo_description';
+                    $field['label']       = 'Description';
+                    $field['sub_label']   = 'Max. 300 characters';
+                    $field['placeholder'] = 'Search Engine Optimised description';
+                    $field['type']        = 'textarea';
+                    $field['default']     = !empty($item->seo_description) ? $item->seo_description : '';
 
-                    echo form_field($_field, 'Comma seperated keywords. Try to keep to 10 or fewer.');
+                    echo form_field($field, 'Keep this relevant and below 140 characters');
+
+                    // --------------------------------------------------------------------------
+
+                    $field                = array();
+                    $field['key']         = 'seo_keywords';
+                    $field['label']       = 'Keywords';
+                    $field['sub_label']   = 'Max. 150 characters';
+                    $field['placeholder'] = 'Comma separated keywords';
+                    $field['default']     = !empty($item->seo_keywords) ? $item->seo_keywords : '';
+
+                    echo form_field($field, 'Comma seperated keywords. Try to keep to 10 or fewer.');
 
                 ?>
             </fieldset>
@@ -655,34 +674,24 @@
     </p>
     <?=form_close()?>
 </div>
-
-<script type="text/javascript">
-    var _CREATE_EDIT;
-    $(function(){
-
-        var productTypes = <?=json_encode($product_types)?>;
-        var uploadToken  = '<?=$this->cdn->generate_api_upload_token(active_user('id')) ?>';
-        _CREATE_EDIT     = new NAILS_Admin_Shop_Inventory_Create_Edit();
-        _CREATE_EDIT.init(productTypes, uploadToken);
-
-    });
-</script>
-
 <script type="text/template" id="template-variation">
 <?php
 
-    $_data                    = array();
-    $_data['is_first']        = false;
-    $_data['is_php']        = false;
-    $_data['counter']        = false;
-    $_data['variation']        = null;
-    $_data['num_variants']    = null;
+    $viewData                 = array();
+    $viewData['is_first']     = false;
+    $viewData['is_php']       = false;
+    $viewData['counter']      = false;
+    $viewData['variation']    = null;
+    $viewData['num_variants'] = null;
 
-    $this->load->view('admin/shop/inventory/utilities/template-mustache-inventory-variant', $_data);
+    echo \Nails\Admin\Helper::loadInlineView(
+        'utilities/template-mustache-inventory-variant',
+        $viewData,
+        true
+    );
 
 ?>
 </script>
-
 <div id="dialog-confirm-delete" title="Confirm Delete" style="display:none;">
     <p>
         <span class="ui-icon ui-icon-alert" style="float: left; margin: 0 7px 0 0;"></span>
@@ -696,7 +705,6 @@
         Products must have at least one variation.
     </p>
 </div>
-
 <script type="text/template" id="template-uploadify">
     <li class="gallery-item uploadify-queue-item" id="${fileID}" data-instance_id="${instanceID}" data-file_id="${fileID}">
         <a href="#" data-instance_id="${instanceID}" data-file_id="${fileID}" class="remove"></a>
@@ -704,24 +712,32 @@
         <div class="data data-cancel">CANCELLED</div>
     </li>
 </script>
-
 <script type="text/template" id="template-gallery-item">
 <?php
 
-    $this->load->view('admin/shop/inventory/utilities/template-mustache-gallery-item', array('objectId' => null));
+    $viewData             = array();
+    $viewData['objectId'] = false;
+
+    echo \Nails\Admin\Helper::loadInlineView(
+        'utilities/template-mustache-gallery-item',
+        $viewData,
+        true
+    );
 
 ?>
 </script>
-
 <script type="text/template" id="template-attribute">
 <?php
 
-    $_data = array('attribute' => null);
-    $this->load->view('admin/shop/inventory/utilities/template-mustache-attribute', $_data);
+    $viewData = array('attribute' => null);
+    echo \Nails\Admin\Helper::loadInlineView(
+        'utilities/template-mustache-attribute',
+        $viewData,
+        true
+    );
 
 ?>
 </script>
-
 <div id="help-variation-examples" style="display:none;">
     <h1>Variations Explained</h1>
     <p>
@@ -792,4 +808,3 @@
         be sold as such.
     </p>
 </div>
-

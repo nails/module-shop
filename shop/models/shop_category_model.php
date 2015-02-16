@@ -566,12 +566,12 @@ class NAILS_Shop_category_model extends NAILS_Model
      */
     public function get_all_nested_flat($separator = ' &rsaquo; ')
     {
-        $categories = $this->get_all();
+        $categories = $this->get_all(null, null);
         $out        = array();
 
         foreach ($categories as $cat) {
 
-            $_out[$cat->id] = array();
+            $out[$cat->id] = array();
 
             foreach ($cat->breadcrumbs as $crumb) {
 
@@ -581,7 +581,7 @@ class NAILS_Shop_category_model extends NAILS_Model
             $out[$cat->id] = implode($separator, $out[$cat->id]);
         }
 
-        return $_out;
+        return $out;
     }
 
     // --------------------------------------------------------------------------
@@ -603,7 +603,7 @@ class NAILS_Shop_category_model extends NAILS_Model
                 $data['sort'] = array();
             }
 
-            $data['sort'][] = array($this->_table_prefix . '.label', 'ASC');
+            $data['sort'][] = array($this->_table_prefix . '.slug', 'ASC');
         }
 
         // --------------------------------------------------------------------------
@@ -637,12 +637,16 @@ class NAILS_Shop_category_model extends NAILS_Model
         //  Search
         if (!empty($data['keywords'])) {
 
-            $data['like']   = array();
-            $data['like'][] = array(
+            if (empty($data['or_like'])) {
+
+                $data['or_like'] = array();
+            }
+
+            $data['or_like'][] = array(
                 'column' => $this->_table_prefix . '.label',
                 'value'  => $data['keywords']
             );
-            $data['like'][] = array(
+            $data['or_like'][] = array(
                 'column' => $this->_table_prefix . '.description',
                 'value'  => $data['keywords']
             );

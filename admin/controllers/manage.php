@@ -367,7 +367,7 @@ class Manage extends \AdminController
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
         $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
-        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
         // --------------------------------------------------------------------------
@@ -648,8 +648,8 @@ class Manage extends \AdminController
         //  Get pagination and search/sort variables
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
-        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
-        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.slug';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
         // --------------------------------------------------------------------------
@@ -927,7 +927,7 @@ class Manage extends \AdminController
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
         $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
-        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
         // --------------------------------------------------------------------------
@@ -1205,7 +1205,7 @@ class Manage extends \AdminController
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
         $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
-        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
         // --------------------------------------------------------------------------
@@ -1482,7 +1482,7 @@ class Manage extends \AdminController
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
         $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
-        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
         // --------------------------------------------------------------------------
@@ -1755,7 +1755,7 @@ class Manage extends \AdminController
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
         $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
-        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
         // --------------------------------------------------------------------------
@@ -2012,7 +2012,7 @@ class Manage extends \AdminController
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
         $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
-        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
         // --------------------------------------------------------------------------
@@ -2270,7 +2270,7 @@ class Manage extends \AdminController
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
         $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
-        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
         // --------------------------------------------------------------------------
@@ -2286,6 +2286,7 @@ class Manage extends \AdminController
 
         //  Define the $data variable for the queries
         $data = array(
+            'includeAssociatedProductTypes' => true,
             'sort' => array(
                 array($sortOn, $sortOrder)
             ),

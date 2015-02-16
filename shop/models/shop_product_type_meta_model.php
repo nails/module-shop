@@ -39,15 +39,15 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
      **/
     public function get_all($page = null, $per_page = null, $data = array(), $include_deleted = false, $_caller = 'GET_ALL')
     {
-        $result = parent::get_all($page, $per_page, $data, $include_deleted, $_caller);
+        $fields = parent::get_all($page, $per_page, $data, $include_deleted, $_caller);
 
         //  Handle requests for the raw query object
         if (!empty($data['RETURN_QUERY_OBJECT'])) {
 
-            return $result;
+            return $fields;
         }
 
-        foreach ($result as $result) {
+        foreach ($fields as $field) {
 
             if (isset($data['includeAssociatedProductTypes'])) {
 
@@ -55,12 +55,12 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
                 $this->db->join(NAILS_DB_PREFIX . 'shop_product_type pt', 'pt.id = ' . $this->_table_taxonomy_prefix . '.product_type_id');
                 $this->db->group_by('pt.id');
                 $this->db->order_by('pt.label');
-                $this->db->where($this->_table_taxonomy_prefix . '.meta_field_id', $result->id);
-                $result->associated_product_types = $this->db->get($this->_table_taxonomy . ' ' . $this->_table_taxonomy_prefix)->result();
+                $this->db->where($this->_table_taxonomy_prefix . '.meta_field_id', $field->id);
+                $field->associated_product_types = $this->db->get($this->_table_taxonomy . ' ' . $this->_table_taxonomy_prefix)->result();
             }
         }
 
-        return $result;
+        return $fields;
     }
 
     // --------------------------------------------------------------------------
@@ -90,8 +90,12 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
         //  Search
         if (!empty($data['keywords'])) {
 
-            $data['like']   = array();
-            $data['like'][] = array(
+            if (empty($data['or_like'])) {
+
+                $data['or_like'] = array();
+            }
+
+            $data['or_like'][] = array(
                 'column' => $this->_table_prefix . '.label',
                 'value'  => $data['keywords']
             );

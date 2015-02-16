@@ -17,7 +17,7 @@ REFERENCE
 
 
 PLACED
-<?=userDatetime($order->created)?>
+<?=toUserDatetime($order->created)?>
 
 
 CUSTOMER

@@ -89,21 +89,40 @@ class Orders extends \AdminController
             $tablePrefix . '.code'       => 'Code',
             $tablePrefix . '.type'       => 'Type',
             $tablePrefix . '.valid_from' => 'Valid From Date'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
         //  Filter columns
         $filters   = array();
         $filters[] = \Nails\Admin\Helper::searchFilterObject(
-            $tablePrefix . '.type',
-            'View only',
+            $tablePrefix . '.status',
+            'Status',
             array(
-                array('Normal', 'NORMAL'),
-                array('Limited Use', 'LIMITED_USE'),
-                array('Gift Card', 'GIFT_CARD')
+                array('Paid', 'PAID', true),
+                array('Unpaid', 'UNPAID', true),
+                array('Abandoned', 'ABANDONED'),
+                array('Cancelled', 'CANCELLED'),
+                array('Failed', 'FAILED'),
+                array('Pending', 'PENDING')
            )
-       );
+        );
+        $filters[] = \Nails\Admin\Helper::searchFilterObject(
+            $tablePrefix . '.fulfilment_status',
+            'Fulfilled',
+            array(
+                array('Yes', 'FULFILLED'),
+                array('No', 'UNFULFILLED')
+           )
+        );
+        $filters[] = \Nails\Admin\Helper::searchFilterObject(
+            $tablePrefix . '.delivery_type',
+            'Delivery Type',
+            array(
+                array('Delivery', 'DELIVER'),
+                array('Collection', 'COLLECT')
+           )
+        );
 
         // --------------------------------------------------------------------------
 
@@ -114,13 +133,13 @@ class Orders extends \AdminController
             ),
             'keywords' => $keywords,
             'filters'  => $filters
-       );
+        );
 
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows              = $this->shop_order_model->count_all($data);
-        $this->data['vouchers'] = $this->shop_order_model->get_all($page, $perPage, $data);
+        $totalRows            = $this->shop_order_model->count_all($data);
+        $this->data['orders'] = $this->shop_order_model->get_all($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords, $filters);
@@ -544,6 +563,91 @@ class Orders extends \AdminController
         } else {
 
             $msg     = 'Failed to mark orders as unfulfilled. ';
+            $msg    .= $this->shop_order_model->last_error();
+            $status  = 'error';
+        }
+
+        $this->session->set_flashdata($status, $msg);
+        redirect('admin/shop/orders');
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Mark an order as cancelled
+     * @return void
+     */
+    public function cancel()
+    {
+        if (!userHasPermission('admin.shop:0.orders_edit')) {
+
+            $msg    = 'You do not have permission to edit orders.';
+            $status = 'error';
+            $this->session->set_flashdata($status, $msg);
+            redirect('admin/shop/orders');
+        }
+
+        // --------------------------------------------------------------------------
+
+        //    Fetch and check order
+        $this->load->model('shop/shop_order_model');
+
+        $order = $this->shop_order_model->get_by_id($this->uri->segment(5));
+
+        if (!$order) {
+
+            $msg    = 'No order exists by that ID.';
+            $status = 'error';
+            $this->session->set_flashdata($status, $msg);
+            redirect('admin/shop/orders');
+        }
+
+        // --------------------------------------------------------------------------
+
+        if ($this->shop_order_model->cancel($order->id)) {
+
+            $msg    = 'Order ' . $order->ref . ' was marked as cancelled.';
+            $status = 'success';
+
+        } else {
+
+            $msg    = 'Failed to mark order ' . $order->ref . ' as cancelled.';
+            $status = 'error';
+        }
+
+        $this->session->set_flashdata($status, $msg);
+        redirect('admin/shop/orders/view/' . $order->id);
+    }
+
+    //---------------------------------------------------------------------------
+
+    /**
+     * Batch unfulfil orders
+     * @return void
+     */
+    public function cancel_batch()
+    {
+        if (!userHasPermission('admin.shop:0.orders_edit')) {
+
+            $msg    = 'You do not have permission to edit orders.';
+            $status = 'error';
+            $this->session->set_flashdata($status, $msg);
+            redirect('admin/shop/orders');
+        }
+
+        // --------------------------------------------------------------------------
+
+        //    Fetch and check orders
+        $this->load->model('shop/shop_order_model');
+
+        if ($this->shop_order_model->cancelBatch($this->input->get('ids'))) {
+
+            $msg    = 'Orders were marked as cancelled.';
+            $status = 'success';
+
+        } else {
+
+            $msg     = 'Failed to mark orders as cancelled. ';
             $msg    .= $this->shop_order_model->last_error();
             $status  = 'error';
         }
