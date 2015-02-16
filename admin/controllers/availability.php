@@ -35,6 +35,16 @@ class Availability extends \AdminController
         parent::__construct();
         $this->load->model('shop/shop_model');
         $this->load->model('shop/shop_inform_product_available_model');
+
+        // --------------------------------------------------------------------------
+
+        //  @todo Move this into a common constructor
+        $this->shopName = $this->shopUrl = $this->shop_model->getShopName();
+        $this->shopUrl  = $this->shopUrl = $this->shop_model->getShopUrl();
+
+        //  Pass data to the views
+        $this->data['shopName'] = $this->shopName;
+        $this->data['shopUrl']  = $this->shopUrl;
     }
 
     // --------------------------------------------------------------------------
@@ -54,8 +64,16 @@ class Availability extends \AdminController
 
         // --------------------------------------------------------------------------
 
-        $this->asset->load('nails.admin.shop.productavailabilitynotification.browse.min.js', true);
-        $this->asset->inline('var _SHOP_PRODUCT_AVAILABILITY_NOTIFICATION_BROWSE = new NAILS_Admin_Shop_Product_Availability_Notification_Browse()', 'JS');
+        $this->asset->load('nails.admin.shop.productavailabilitynotification.browse.min.js', 'NAILS');
+        $this->asset->inline('var _availabilty = new NAILS_Admin_Shop_Product_Availability_Notification_Browse()', 'JS');
+
+        // --------------------------------------------------------------------------
+
+        //  Add a header button
+        if (userHasPermission('admin.shop:0.manage_create')) {
+
+            \Nails\Admin\Helper::addHeaderButton('admin/shop/availability/create', 'Add New Notification');
+        }
 
         // --------------------------------------------------------------------------
 
@@ -70,7 +88,7 @@ class Availability extends \AdminController
      */
     public function create()
     {
-        if (!userHasPermission('admin.shop:0.notification_create')) {
+        if (!userHasPermission('admin.shop{0.notification_create')) {
 
             unauthorised();
         }
@@ -91,22 +109,22 @@ class Availability extends \AdminController
 
                 $item = explode(':', $this->input->post('item'));
 
-                $data                   = new \stdClass();
-                $data->email            = $this->input->post('email');
-                $data->product_id       = isset($item[0]) ? (int) $item[0] : null;
+                $data               = new \stdClass();
+                $data->email        = $this->input->post('email');
+                $data->product_id   = isset($item[0]) ? (int) $item[0] : null;
                 $data->variation_id = isset($item[1]) ? (int) $item[1] : null;
 
                 if ($this->shop_inform_product_available_model->create($data)) {
 
                     //  Redirect to clear form
                     $this->session->set_flashdata('success', 'Product Availability Notification created successfully.');
-                    redirect('admin/shop/product_availability_notifications');
+                    redirect('admin/shop/availability');
 
                 } else {
 
                     $this->data['error'] = 'There was a problem creating the Product Availability Notification. ' . $this->shop_inform_product_available_model->last_error();
+                }
 
-                                }
             } else {
 
                 $this->data['error'] = lang('fv_there_were_errors');
@@ -135,7 +153,7 @@ class Availability extends \AdminController
      */
     public function edit()
     {
-        if (!userHasPermission('admin.shop:0.notification_edit')) {
+        if (!userHasPermission('admin.shop{0.notification_edit')) {
 
             unauthorised();
         }
@@ -165,22 +183,23 @@ class Availability extends \AdminController
 
                 $item = explode(':', $this->input->post('item'));
 
-                $data                   = new \stdClass();
-                $data->email            = $this->input->post('email');
-                $data->product_id       = isset($item[0]) ? (int) $item[0] : null;
+                $data               = new \stdClass();
+                $data->email        = $this->input->post('email');
+                $data->product_id   = isset($item[0]) ? (int) $item[0] : null;
                 $data->variation_id = isset($item[1]) ? (int) $item[1] : null;
 
                 if ($this->shop_inform_product_available_model->update($this->data['notification']->id, $data)) {
 
                     //  Redirect to clear form
                     $this->session->set_flashdata('success', 'Product Availability Notification updated successfully.');
-                    redirect('admin/shop/product_availability_notifications');
+                    redirect('admin/shop/availability');
 
                 } else {
 
                     $this->data['error'] = 'There was a problem updated the Product Availability Notification. ' . $this->shop_inform_product_available_model->last_error();
 
-                                }
+                }
+
             } else {
 
                 $this->data['error'] = lang('fv_there_were_errors');
@@ -209,7 +228,7 @@ class Availability extends \AdminController
      */
     public function delete()
     {
-        if (!userHasPermission('admin.shop:0.notifications_delete')) {
+        if (!userHasPermission('admin.shop{0.notifications_delete')) {
 
             unauthorised();
         }
@@ -227,6 +246,6 @@ class Availability extends \AdminController
             $this->session->set_flashdata('error', 'There was a problem deleting the Product availability Notification. ' . $this->shop_inform_product_available_model->last_error());
         }
 
-        redirect('admin/shop/product_availability_notifications');
+        redirect('admin/shop/availability');
     }
 }

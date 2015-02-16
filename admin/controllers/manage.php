@@ -35,6 +35,16 @@ class Manage extends \AdminController
         parent::__construct();
         $this->load->model('shop/shop_model');
         $this->data['isFancybox'] = $this->input->get('isFancybox') ? true : false;
+
+        // --------------------------------------------------------------------------
+
+        //  @todo Move this into a common constructor
+        $this->shopName = $this->shopUrl = $this->shop_model->getShopName();
+        $this->shopUrl  = $this->shopUrl = $this->shop_model->getShopUrl();
+
+        //  Pass data to the views
+        $this->data['shopName'] = $this->shopName;
+        $this->data['shopUrl']  = $this->shopUrl;
     }
 
     // --------------------------------------------------------------------------
@@ -56,7 +66,7 @@ class Manage extends \AdminController
      */
     public function attribute()
     {
-        if (!userHasPermission('admin.shop:0.attribute_manage')) {
+        if (!userHasPermission('admin.shop{0.attribute_manage')) {
 
             unauthorised();
         }
@@ -68,6 +78,7 @@ class Manage extends \AdminController
 
         // --------------------------------------------------------------------------
 
+        $this->data['page']->title = 'Manage &rsaquo; Attributes ';
         $this->routeRequest('attribute');
     }
 
@@ -97,7 +108,7 @@ class Manage extends \AdminController
      */
     protected function attributeCreate()
     {
-        if (!userHasPermission('admin.shop:0.attribute_create')) {
+        if (!userHasPermission('admin.shop{0.attribute_create')) {
 
             unauthorised();
         }
@@ -115,9 +126,9 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data               = new \stdClass();
-                $data->label        = $this->input->post('label');
-                $data->description  = $this->input->post('description');
+                $data              = new \stdClass();
+                $data->label       = $this->input->post('label');
+                $data->description = $this->input->post('description');
 
                 if ($this->shop_attribute_model->create($data)) {
 
@@ -127,8 +138,8 @@ class Manage extends \AdminController
                 } else {
 
                     $this->data['error'] = 'There was a problem creating the Attribute. ' . $this->shop_category_model->last_error();
+                }
 
-                                }
             } else {
 
                 $this->data['error'] = lang('fv_there_were_errors');
@@ -159,7 +170,7 @@ class Manage extends \AdminController
      */
     protected function attributeEdit()
     {
-        if (!userHasPermission('admin.shop:0.attribute_edit')) {
+        if (!userHasPermission('admin.shop{0.attribute_edit')) {
 
             unauthorised();
         }
@@ -186,9 +197,9 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data               = new \stdClass();
-                $data->label        = $this->input->post('label');
-                $data->description  = $this->input->post('description');
+                $data              = new \stdClass();
+                $data->label       = $this->input->post('label');
+                $data->description = $this->input->post('description');
 
                 if ($this->shop_attribute_model->update($this->data['attribute']->id, $data)) {
 
@@ -198,8 +209,8 @@ class Manage extends \AdminController
                 } else {
 
                     $this->data['error'] = 'There was a problem saving the Attribute. ' . $this->shop_attribute_model->last_error();
+                }
 
-                                }
             } else {
 
                 $this->data['error'] = lang('fv_there_were_errors');
@@ -230,7 +241,7 @@ class Manage extends \AdminController
      */
     protected function attributeDelete()
     {
-        if (!userHasPermission('admin.shop:0.attribute_delete')) {
+        if (!userHasPermission('admin.shop{0.attribute_delete')) {
 
             unauthorised();
         }
@@ -259,7 +270,7 @@ class Manage extends \AdminController
      */
     public function brand()
     {
-        if (!userHasPermission('admin.shop:0.brand_manage')) {
+        if (!userHasPermission('admin.shop{0.brand_manage')) {
 
             unauthorised();
         }
@@ -271,6 +282,7 @@ class Manage extends \AdminController
 
         // --------------------------------------------------------------------------
 
+        $this->data['page']->title = 'Manage &rsaquo; Brands ';
         $this->routeRequest('brand');
     }
 
@@ -300,7 +312,7 @@ class Manage extends \AdminController
      */
     protected function brandCreate()
     {
-        if (!userHasPermission('admin.shop:0.brand_create')) {
+        if (!userHasPermission('admin.shop{0.brand_create')) {
 
             unauthorised();
         }
@@ -325,15 +337,15 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data                   = new \stdClass();
-                $data->label            = $this->input->post('label');
-                $data->logo_id          = (int) $this->input->post('logo_id') ? (int) $this->input->post('logo_id') : null;
-                $data->cover_id     = (int) $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
-                $data->description      = $this->input->post('description');
-                $data->is_active        = (bool) $this->input->post('is_active');
-                $data->seo_title        = $this->input->post('seo_title');
-                $data->seo_description  = $this->input->post('seo_description');
-                $data->seo_keywords = $this->input->post('seo_keywords');
+                $data                  = new \stdClass();
+                $data->label           = $this->input->post('label');
+                $data->logo_id         = (int) $this->input->post('logo_id') ? (int) $this->input->post('logo_id') : null;
+                $data->cover_id        = (int) $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
+                $data->description     = $this->input->post('description');
+                $data->is_active       = (bool) $this->input->post('is_active');
+                $data->seo_title       = $this->input->post('seo_title');
+                $data->seo_description = $this->input->post('seo_description');
+                $data->seo_keywords    = $this->input->post('seo_keywords');
 
                 if ($this->shop_brand_model->create($data)) {
 
@@ -344,8 +356,8 @@ class Manage extends \AdminController
                 } else {
 
                     $this->data['error'] = 'There was a problem creating the Brand. ' . $this->shop_brand_model->last_error();
+                }
 
-                                }
             } else {
 
                 $this->data['error'] = lang('fv_there_were_errors');
@@ -376,7 +388,7 @@ class Manage extends \AdminController
      */
     protected function brandEdit()
     {
-        if (!userHasPermission('admin.shop:0.brand_edit')) {
+        if (!userHasPermission('admin.shop{0.brand_edit')) {
 
             unauthorised();
         }
@@ -410,15 +422,15 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data                   = new \stdClass();
-                $data->label            = $this->input->post('label');
-                $data->logo_id          = (int) $this->input->post('logo_id') ? (int) $this->input->post('logo_id') : null;
-                $data->cover_id     = (int) $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
-                $data->description      = $this->input->post('description');
-                $data->is_active        = (bool) $this->input->post('is_active');
-                $data->seo_title        = $this->input->post('seo_title');
-                $data->seo_description  = $this->input->post('seo_description');
-                $data->seo_keywords = $this->input->post('seo_keywords');
+                $data                  = new \stdClass();
+                $data->label           = $this->input->post('label');
+                $data->logo_id         = (int) $this->input->post('logo_id') ? (int) $this->input->post('logo_id') : null;
+                $data->cover_id        = (int) $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
+                $data->description     = $this->input->post('description');
+                $data->is_active       = (bool) $this->input->post('is_active');
+                $data->seo_title       = $this->input->post('seo_title');
+                $data->seo_description = $this->input->post('seo_description');
+                $data->seo_keywords    = $this->input->post('seo_keywords');
 
                 if ($this->shop_brand_model->update($this->data['brand']->id, $data)) {
 
@@ -428,8 +440,8 @@ class Manage extends \AdminController
                 } else {
 
                     $this->data['error'] = 'There was a problem saving the Brand. ' . $this->shop_brand_model->last_error();
+                }
 
-                                }
             } else {
 
                 $this->data['error'] = 'There was a problem saving the Brand.';
@@ -460,7 +472,7 @@ class Manage extends \AdminController
      */
     protected function brandDelete()
     {
-        if (!userHasPermission('admin.shop:0.brand_delete')) {
+        if (!userHasPermission('admin.shop{0.brand_delete')) {
 
             unauthorised();
         }
@@ -489,7 +501,7 @@ class Manage extends \AdminController
      */
     public function category()
     {
-        if (!userHasPermission('admin.shop:0.category_manage')) {
+        if (!userHasPermission('admin.shop{0.category_manage')) {
 
             unauthorised();
         }
@@ -501,6 +513,7 @@ class Manage extends \AdminController
 
         // --------------------------------------------------------------------------
 
+        $this->data['page']->title = 'Manage &rsaquo; Categories ';
         $this->routeRequest('category');
     }
 
@@ -530,7 +543,7 @@ class Manage extends \AdminController
      */
     protected function categoryCreate()
     {
-        if (!userHasPermission('admin.shop:0.category_create')) {
+        if (!userHasPermission('admin.shop{0.category_create')) {
 
             unauthorised();
         }
@@ -554,14 +567,14 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data                   = new \stdClass();
-                $data->label            = $this->input->post('label');
-                $data->parent_id        = $this->input->post('parent_id');
-                $data->cover_id     = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
-                $data->description      = $this->input->post('description');
-                $data->seo_title        = $this->input->post('seo_title');
-                $data->seo_description  = $this->input->post('seo_description');
-                $data->seo_keywords = $this->input->post('seo_keywords');
+                $data                  = new \stdClass();
+                $data->label           = $this->input->post('label');
+                $data->parent_id       = $this->input->post('parent_id');
+                $data->cover_id        = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
+                $data->description     = $this->input->post('description');
+                $data->seo_title       = $this->input->post('seo_title');
+                $data->seo_description = $this->input->post('seo_description');
+                $data->seo_keywords    = $this->input->post('seo_keywords');
 
                 if ($this->shop_category_model->create($data)) {
 
@@ -571,8 +584,8 @@ class Manage extends \AdminController
                 } else {
 
                     $this->data['error'] = 'There was a problem creating the Category. ' . $this->shop_category_model->last_error();
+                }
 
-                                }
             } else {
 
                 $this->data['error'] = lang('fv_there_were_errors');
@@ -603,7 +616,7 @@ class Manage extends \AdminController
      */
     protected function categoryEdit()
     {
-        if (!userHasPermission('admin.shop:0.category_edit')) {
+        if (!userHasPermission('admin.shop{0.category_edit')) {
 
             unauthorised();
         }
@@ -636,14 +649,14 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data                   = new \stdClass();
-                $data->label            = $this->input->post('label');
-                $data->parent_id        = $this->input->post('parent_id');
-                $data->cover_id     = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
-                $data->description      = $this->input->post('description');
-                $data->seo_title        = $this->input->post('seo_title');
-                $data->seo_description  = $this->input->post('seo_description');
-                $data->seo_keywords = $this->input->post('seo_keywords');
+                $data                  = new \stdClass();
+                $data->label           = $this->input->post('label');
+                $data->parent_id       = $this->input->post('parent_id');
+                $data->cover_id        = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
+                $data->description     = $this->input->post('description');
+                $data->seo_title       = $this->input->post('seo_title');
+                $data->seo_description = $this->input->post('seo_description');
+                $data->seo_keywords    = $this->input->post('seo_keywords');
 
                 if ($this->shop_category_model->update($this->data['category']->id, $data)) {
 
@@ -653,8 +666,8 @@ class Manage extends \AdminController
                 } else {
 
                     $this->data['error'] = 'There was a problem saving the Category. ' . $this->shop_category_model->last_error();
+                }
 
-                                }
             } else {
 
                 $this->data['error'] = lang('fv_there_were_errors');
@@ -685,7 +698,7 @@ class Manage extends \AdminController
      */
     protected function categoryDelete()
     {
-        if (!userHasPermission('admin.shop:0.category_delete')) {
+        if (!userHasPermission('admin.shop{0.category_delete')) {
 
             unauthorised();
         }
@@ -714,7 +727,7 @@ class Manage extends \AdminController
      */
     public function collection()
     {
-        if (!userHasPermission('admin.shop:0.collection_manage')) {
+        if (!userHasPermission('admin.shop{0.collection_manage')) {
 
             unauthorised();
         }
@@ -726,6 +739,7 @@ class Manage extends \AdminController
 
         // --------------------------------------------------------------------------
 
+        $this->data['page']->title = 'Manage &rsaquo; Collections ';
         $this->routeRequest('collection');
     }
 
@@ -755,7 +769,7 @@ class Manage extends \AdminController
      */
     protected function collectionCreate()
     {
-        if (!userHasPermission('admin.shop:0.collection_create')) {
+        if (!userHasPermission('admin.shop{0.collection_create')) {
 
             unauthorised();
         }
@@ -779,14 +793,14 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data                   = new \stdClass();
-                $data->label            = $this->input->post('label');
-                $data->cover_id     = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
-                $data->description      = $this->input->post('description');
-                $data->seo_title        = $this->input->post('seo_title');
-                $data->seo_description  = $this->input->post('seo_description');
-                $data->seo_keywords = $this->input->post('seo_keywords');
-                $data->is_active        = (bool) $this->input->post('is_active');
+                $data                  = new \stdClass();
+                $data->label           = $this->input->post('label');
+                $data->cover_id        = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
+                $data->description     = $this->input->post('description');
+                $data->seo_title       = $this->input->post('seo_title');
+                $data->seo_description = $this->input->post('seo_description');
+                $data->seo_keywords    = $this->input->post('seo_keywords');
+                $data->is_active       = (bool) $this->input->post('is_active');
 
                 if ($this->shop_collection_model->create($data)) {
 
@@ -796,8 +810,8 @@ class Manage extends \AdminController
                 } else {
 
                     $this->data['error'] = 'There was a problem creating the Collection. ' . $this->shop_collection_model->last_error();
+                }
 
-                                }
             } else {
 
                 $this->data['error'] = lang('fv_there_were_errors');
@@ -828,7 +842,7 @@ class Manage extends \AdminController
      */
     protected function collectionEdit()
     {
-        if (!userHasPermission('admin.shop:0.collection_edit')) {
+        if (!userHasPermission('admin.shop{0.collection_edit')) {
 
             unauthorised();
         }
@@ -861,14 +875,14 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data                   = new \stdClass();
-                $data->label            = $this->input->post('label');
-                $data->cover_id     = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
-                $data->description      = $this->input->post('description');
-                $data->seo_title        = $this->input->post('seo_title');
-                $data->seo_description  = $this->input->post('seo_description');
-                $data->seo_keywords = $this->input->post('seo_keywords');
-                $data->is_active        = (bool) $this->input->post('is_active');
+                $data                  = new \stdClass();
+                $data->label           = $this->input->post('label');
+                $data->cover_id        = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
+                $data->description     = $this->input->post('description');
+                $data->seo_title       = $this->input->post('seo_title');
+                $data->seo_description = $this->input->post('seo_description');
+                $data->seo_keywords    = $this->input->post('seo_keywords');
+                $data->is_active       = (bool) $this->input->post('is_active');
 
                 if ($this->shop_collection_model->update($this->data['collection']->id, $data)) {
 
@@ -878,8 +892,8 @@ class Manage extends \AdminController
                 } else {
 
                     $this->data['error'] = 'There was a problem saving the Collection. ' . $this->shop_collection_model->last_error();
+                }
 
-                                }
             } else {
 
                 $this->data['error'] = lang('fv_there_were_errors');
@@ -910,7 +924,7 @@ class Manage extends \AdminController
      */
     protected function collectionDelete()
     {
-        if (!userHasPermission('admin.shop:0.collection_delete')) {
+        if (!userHasPermission('admin.shop{0.collection_delete')) {
 
             unauthorised();
         }
@@ -939,7 +953,7 @@ class Manage extends \AdminController
      */
     public function range()
     {
-        if (!userHasPermission('admin.shop:0.range_manage')) {
+        if (!userHasPermission('admin.shop{0.range_manage')) {
 
             unauthorised();
         }
@@ -951,6 +965,7 @@ class Manage extends \AdminController
 
         // --------------------------------------------------------------------------
 
+        $this->data['page']->title = 'Manage &rsaquo; Ranges ';
         $this->routeRequest('range');
     }
 
@@ -980,7 +995,7 @@ class Manage extends \AdminController
      */
     protected function rangeCreate()
     {
-        if (!userHasPermission('admin.shop:0.range_create')) {
+        if (!userHasPermission('admin.shop{0.range_create')) {
 
             unauthorised();
         }
@@ -1004,14 +1019,14 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data                   = new \stdClass();
-                $data->label            = $this->input->post('label');
-                $data->cover_id     = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
-                $data->description      = $this->input->post('description');
-                $data->seo_title        = $this->input->post('seo_title');
-                $data->seo_description  = $this->input->post('seo_description');
-                $data->seo_keywords = $this->input->post('seo_keywords');
-                $data->is_active        = (bool) $this->input->post('is_active');
+                $data                  = new \stdClass();
+                $data->label           = $this->input->post('label');
+                $data->cover_id        = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
+                $data->description     = $this->input->post('description');
+                $data->seo_title       = $this->input->post('seo_title');
+                $data->seo_description = $this->input->post('seo_description');
+                $data->seo_keywords    = $this->input->post('seo_keywords');
+                $data->is_active       = (bool) $this->input->post('is_active');
 
                 if ($this->shop_range_model->create($data)) {
 
@@ -1021,8 +1036,8 @@ class Manage extends \AdminController
                 } else {
 
                     $this->data['error'] = 'There was a problem creating the Range. ' . $this->shop_range_model->last_error();
+                }
 
-                                }
             } else {
 
                 $this->data['error'] = lang('fv_there_were_errors');
@@ -1053,7 +1068,7 @@ class Manage extends \AdminController
      */
     protected function rangeEdit()
     {
-        if (!userHasPermission('admin.shop:0.range_edit')) {
+        if (!userHasPermission('admin.shop{0.range_edit')) {
 
             unauthorised();
         }
@@ -1086,14 +1101,14 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data                   = new \stdClass();
-                $data->label            = $this->input->post('label');
-                $data->cover_id     = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
-                $data->description      = $this->input->post('description');
-                $data->seo_title        = $this->input->post('seo_title');
-                $data->seo_description  = $this->input->post('seo_description');
-                $data->seo_keywords = $this->input->post('seo_keywords');
-                $data->is_active        = (bool) $this->input->post('is_active');
+                $data                  = new \stdClass();
+                $data->label           = $this->input->post('label');
+                $data->cover_id        = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
+                $data->description     = $this->input->post('description');
+                $data->seo_title       = $this->input->post('seo_title');
+                $data->seo_description = $this->input->post('seo_description');
+                $data->seo_keywords    = $this->input->post('seo_keywords');
+                $data->is_active       = (bool) $this->input->post('is_active');
 
                 if ($this->shop_range_model->update($this->data['range']->id, $data)) {
 
@@ -1103,8 +1118,8 @@ class Manage extends \AdminController
                 } else {
 
                     $this->data['error'] = 'There was a problem saving the Range. ' . $this->shop_range_model->last_error();
+                }
 
-                                }
             } else {
 
                 $this->data['error'] = lang('fv_there_were_errors');
@@ -1135,7 +1150,7 @@ class Manage extends \AdminController
      */
     protected function rangeDelete()
     {
-        if (!userHasPermission('admin.shop:0.range_delete')) {
+        if (!userHasPermission('admin.shop{0.range_delete')) {
 
             unauthorised();
         }
@@ -1164,7 +1179,7 @@ class Manage extends \AdminController
      */
     public function tag()
     {
-        if (!userHasPermission('admin.shop:0.tag_manage')) {
+        if (!userHasPermission('admin.shop{0.tag_manage')) {
 
             unauthorised();
         }
@@ -1176,6 +1191,7 @@ class Manage extends \AdminController
 
         // --------------------------------------------------------------------------
 
+        $this->data['page']->title = 'Manage &rsaquo; Tags ';
         $this->routeRequest('tag');
     }
 
@@ -1205,7 +1221,7 @@ class Manage extends \AdminController
      */
     protected function tagCreate()
     {
-        if (!userHasPermission('admin.shop:0.tag_create')) {
+        if (!userHasPermission('admin.shop{0.tag_create')) {
 
             unauthorised();
         }
@@ -1228,13 +1244,13 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data                   = new \stdClass();
-                $data->label            = $this->input->post('label');
-                $data->cover_id     = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
-                $data->description      = $this->input->post('description');
-                $data->seo_title        = $this->input->post('seo_title');
-                $data->seo_description  = $this->input->post('seo_description');
-                $data->seo_keywords = $this->input->post('seo_keywords');
+                $data                  = new \stdClass();
+                $data->label           = $this->input->post('label');
+                $data->cover_id        = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
+                $data->description     = $this->input->post('description');
+                $data->seo_title       = $this->input->post('seo_title');
+                $data->seo_description = $this->input->post('seo_description');
+                $data->seo_keywords    = $this->input->post('seo_keywords');
 
                 if ($this->shop_tag_model->create($data)) {
 
@@ -1244,8 +1260,8 @@ class Manage extends \AdminController
                 } else {
 
                     $this->data['error'] = 'There was a problem creating the Tag. ' . $this->shop_tag_model->last_error();
+                }
 
-                                }
             } else {
 
                 $this->data['error'] = lang('fv_there_were_errors');
@@ -1276,7 +1292,7 @@ class Manage extends \AdminController
      */
     protected function tagEdit()
     {
-        if (!userHasPermission('admin.shop:0.tag_edit')) {
+        if (!userHasPermission('admin.shop{0.tag_edit')) {
 
             unauthorised();
         }
@@ -1308,13 +1324,13 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data                   = new \stdClass();
-                $data->label            = $this->input->post('label');
-                $data->cover_id     = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
-                $data->description      = $this->input->post('description');
-                $data->seo_title        = $this->input->post('seo_title');
-                $data->seo_description  = $this->input->post('seo_description');
-                $data->seo_keywords = $this->input->post('seo_keywords');
+                $data                  = new \stdClass();
+                $data->label           = $this->input->post('label');
+                $data->cover_id        = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
+                $data->description     = $this->input->post('description');
+                $data->seo_title       = $this->input->post('seo_title');
+                $data->seo_description = $this->input->post('seo_description');
+                $data->seo_keywords    = $this->input->post('seo_keywords');
 
                 if ($this->shop_tag_model->update($this->data['tag']->id, $data)) {
 
@@ -1324,8 +1340,8 @@ class Manage extends \AdminController
                 } else {
 
                     $this->data['error'] = 'There was a problem saving the Tag. ' . $this->shop_tag_model->last_error();
+                }
 
-                                }
             } else {
 
                 $this->data['error'] = lang('fv_there_were_errors');
@@ -1356,7 +1372,7 @@ class Manage extends \AdminController
      */
     protected function tagDelete()
     {
-        if (!userHasPermission('admin.shop:0.tag_delete')) {
+        if (!userHasPermission('admin.shop{0.tag_delete')) {
 
             unauthorised();
         }
@@ -1385,7 +1401,7 @@ class Manage extends \AdminController
      */
     public function taxRate()
     {
-        if (!userHasPermission('admin.shop:0.tax_rate_manage')) {
+        if (!userHasPermission('admin.shop{0.tax_rate_manage')) {
 
             unauthorised();
         }
@@ -1397,6 +1413,7 @@ class Manage extends \AdminController
 
         // --------------------------------------------------------------------------
 
+        $this->data['page']->title = 'Manage &rsaquo; Tax Rates ';
         $this->routeRequest('taxRate');
     }
 
@@ -1426,7 +1443,7 @@ class Manage extends \AdminController
      */
     protected function taxRateCreate()
     {
-        if (!userHasPermission('admin.shop:0.tax_rate_create')) {
+        if (!userHasPermission('admin.shop{0.tax_rate_create')) {
 
             unauthorised();
         }
@@ -1445,20 +1462,20 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data           = new \stdClass();
-                $data->label    = $this->input->post('label');
-                $data->rate = $this->input->post('rate');
+                $data        = new \stdClass();
+                $data->label = $this->input->post('label');
+                $data->rate  = $this->input->post('rate');
 
                 if ($this->shop_tax_rate_model->create($data)) {
 
                     $this->session->set_flashdata('success', 'Tax Rate created successfully.');
-                    redirect('admin/shop/manage/tax_rate' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/taxRate' . $this->data['isFancybox']);
 
                 } else {
 
                     $this->data['error'] = 'There was a problem creating the Tax Rate. ' . $this->shop_tax_rate_model->last_error();
+                }
 
-                                }
             } else {
 
                 $this->data['error'] = lang('fv_there_were_errors');
@@ -1489,7 +1506,7 @@ class Manage extends \AdminController
      */
     protected function taxRateEdit()
     {
-        if (!userHasPermission('admin.shop:0.tax_rate_edit')) {
+        if (!userHasPermission('admin.shop{0.tax_rate_edit')) {
 
             unauthorised();
         }
@@ -1517,20 +1534,20 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data           = new \stdClass();
-                $data->label    = $this->input->post('label');
-                $data->rate = (float) $this->input->post('rate');
+                $data        = new \stdClass();
+                $data->label = $this->input->post('label');
+                $data->rate  = (float) $this->input->post('rate');
 
                 if ($this->shop_tax_rate_model->update($this->data['tax_rate']->id, $data)) {
 
                     $this->session->set_flashdata('success', 'Tax Rate saved successfully.');
-                    redirect('admin/shop/manage/tax_rate' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/taxRate' . $this->data['isFancybox']);
 
                 } else {
 
                     $this->data['error'] = 'There was a problem saving the Tax Rate. ' . $this->shop_tax_rate_model->last_error();
+                }
 
-                                }
             } else {
 
                 $this->data['error'] = lang('fv_there_were_errors');
@@ -1561,7 +1578,7 @@ class Manage extends \AdminController
      */
     protected function taxRateDelete()
     {
-        if (!userHasPermission('admin.shop:0.tax_rate_delete')) {
+        if (!userHasPermission('admin.shop{0.tax_rate_delete')) {
 
             unauthorised();
         }
@@ -1579,7 +1596,7 @@ class Manage extends \AdminController
             $this->session->set_flashdata('error', 'There was a problem deleting the Tax Rate. ' . $this->shop_tax_rate_model->last_error());
         }
 
-        redirect('admin/shop/manage/tax_rate' . $this->data['isFancybox']);
+        redirect('admin/shop/manage/taxRate' . $this->data['isFancybox']);
     }
 
     // --------------------------------------------------------------------------
@@ -1590,7 +1607,7 @@ class Manage extends \AdminController
      */
     public function productType()
     {
-        if (!userHasPermission('admin.shop:0.product_type_manage')) {
+        if (!userHasPermission('admin.shop{0.product_type_manage')) {
 
             unauthorised();
         }
@@ -1602,6 +1619,7 @@ class Manage extends \AdminController
 
         // --------------------------------------------------------------------------
 
+        $this->data['page']->title = 'Manage &rsaquo; Product Types ';
         $this->routeRequest('productType');
     }
 
@@ -1631,7 +1649,7 @@ class Manage extends \AdminController
      */
     protected function productTypeCreate()
     {
-        if (!userHasPermission('admin.shop:0.product_type_create')) {
+        if (!userHasPermission('admin.shop{0.product_type_create')) {
 
             unauthorised();
         }
@@ -1654,25 +1672,25 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data                   = new \stdClass();
-                $data->label            = $this->input->post('label');
-                $data->description      = $this->input->post('description');
-                $data->is_physical      = (bool) $this->input->post('is_physical');
-                $data->ipn_method       = $this->input->post('ipn_method');
-                $data->max_per_order    = (int) $this->input->post('max_per_order');
-                $data->max_variations   = (int) $this->input->post('max_variations');
+                $data                 = new \stdClass();
+                $data->label          = $this->input->post('label');
+                $data->description    = $this->input->post('description');
+                $data->is_physical    = (bool) $this->input->post('is_physical');
+                $data->ipn_method     = $this->input->post('ipn_method');
+                $data->max_per_order  = (int) $this->input->post('max_per_order');
+                $data->max_variations = (int) $this->input->post('max_variations');
 
                 if ($this->shop_product_type_model->create($data)) {
 
                     //  Redirect to clear form
                     $this->session->set_flashdata('success', 'Product Type created successfully.');
-                    redirect('admin/shop/manage/product_type' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/productType' . $this->data['isFancybox']);
 
                 } else {
 
                     $this->data['error'] = 'There was a problem creating the Product Type. ' . $this->shop_product_model->last_error();
+                }
 
-                                }
             } else {
 
                 $this->data['error'] = lang('fv_there_were_errors');
@@ -1703,7 +1721,7 @@ class Manage extends \AdminController
      */
     protected function productTypeEdit()
     {
-        if (!userHasPermission('admin.shop:0.product_type_edit')) {
+        if (!userHasPermission('admin.shop{0.product_type_edit')) {
 
             unauthorised();
         }
@@ -1734,13 +1752,13 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data                   = new \stdClass();
-                $data->label            = $this->input->post('label');
-                $data->description      = $this->input->post('description');
-                $data->is_physical      = (bool)$this->input->post('is_physical');
-                $data->ipn_method       = $this->input->post('ipn_method');
-                $data->max_per_order    = (int) $this->input->post('max_per_order');
-                $data->max_variations   = (int) $this->input->post('max_variations');
+                $data                 = new \stdClass();
+                $data->label          = $this->input->post('label');
+                $data->description    = $this->input->post('description');
+                $data->is_physical    = (bool)$this->input->post('is_physical');
+                $data->ipn_method     = $this->input->post('ipn_method');
+                $data->max_per_order  = (int) $this->input->post('max_per_order');
+                $data->max_variations = (int) $this->input->post('max_variations');
 
                 if ($this->shop_product_type_model->update($this->data['product_type']->id, $data)) {
 
@@ -1750,8 +1768,8 @@ class Manage extends \AdminController
                 } else {
 
                     $this->data['error'] = 'There was a problem saving the Product Type. ' . $this->shop_product_type_model->last_error();
+                }
 
-                                }
             } else {
 
                 $this->data['error'] = lang('fv_there_were_errors');
@@ -1777,23 +1795,37 @@ class Manage extends \AdminController
     // --------------------------------------------------------------------------
 
     /**
+     * Delete a product type
+     * @return void
+     */
+    public function productTypeDelete()
+    {
+        $this->session->set_flashdata('message', '<strong>Coming Soon!</strong><br />The ability to delete product types via the admin interface is on the roadmap and will be available soon.');
+        redirect('admin/shop/manage/productType' . $this->data['isFancybox']);
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Manage product type meta data
      * @return void
      */
     public function productTypeMeta()
     {
-        if (!userHasPermission('admin.shop:0.product_type_meta__manage')) {
+        if (!userHasPermission('admin.shop{0.product_type_meta__manage')) {
 
             unauthorised();
         }
 
         // --------------------------------------------------------------------------
 
-        //  Load model
+        //  Load models
         $this->load->model('shop/shop_product_type_model');
+        $this->load->model('shop/shop_product_type_meta_model');
 
         // --------------------------------------------------------------------------
 
+        $this->data['page']->title = 'Manage &rsaquo; Product Type Meta Fields ';
         $this->routeRequest('productTypeMeta');
     }
 
@@ -1823,7 +1855,7 @@ class Manage extends \AdminController
      */
     protected function productTypeMetaCreate()
     {
-        if (!userHasPermission('admin.shop:0.product_type_meta_create')) {
+        if (!userHasPermission('admin.shop{0.product_type_meta_create')) {
 
             unauthorised();
         }
@@ -1846,25 +1878,25 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data                               = new \stdClass();
-                $data->label                        = $this->input->post('label');
+                $data                           = new \stdClass();
+                $data->label                    = $this->input->post('label');
                 $data->admin_form_sub_label     = $this->input->post('admin_form_sub_label');
-                $data->admin_form_placeholder       = $this->input->post('admin_form_placeholder');
-                $data->admin_form_tip               = $this->input->post('admin_form_tip');
+                $data->admin_form_placeholder   = $this->input->post('admin_form_placeholder');
+                $data->admin_form_tip           = $this->input->post('admin_form_tip');
                 $data->associated_product_types = $this->input->post('associated_product_types');
-                $data->allow_multiple               = (bool) $this->input->post('allow_multiple');
-                $data->is_filter                    = (bool) $this->input->post('is_filter');
+                $data->allow_multiple           = (bool) $this->input->post('allow_multiple');
+                $data->is_filter                = (bool) $this->input->post('is_filter');
 
                 if ($this->shop_product_type_meta_model->create($data)) {
 
                     $this->session->set_flashdata('success', 'Product Type Meta Field created successfully.');
-                    redirect('admin/shop/manage/product_type_meta' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/productTypeMeta' . $this->data['isFancybox']);
 
                 } else {
 
                     $this->data['error'] = 'There was a problem creating the Product Type Meta Field. ' . $this->shop_product_type_meta_model->last_error();
+                }
 
-                                }
             } else {
 
                 $this->data['error'] = lang('fv_there_were_errors');
@@ -1879,7 +1911,7 @@ class Manage extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['product_types']    = $this->shop_product_type_model->get_all();
+        $this->data['product_types'] = $this->shop_product_type_model->get_all();
 
         // --------------------------------------------------------------------------
 
@@ -1895,7 +1927,7 @@ class Manage extends \AdminController
      */
     protected function productTypeMetaEdit()
     {
-        if (!userHasPermission('admin.shop:0.product_type_meta_edit')) {
+        if (!userHasPermission('admin.shop{0.product_type_meta_edit')) {
 
             unauthorised();
         }
@@ -1928,25 +1960,25 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data                               = new \stdClass();
-                $data->label                        = $this->input->post('label');
+                $data                           = new \stdClass();
+                $data->label                    = $this->input->post('label');
                 $data->admin_form_sub_label     = $this->input->post('admin_form_sub_label');
-                $data->admin_form_placeholder       = $this->input->post('admin_form_placeholder');
-                $data->admin_form_tip               = $this->input->post('admin_form_tip');
+                $data->admin_form_placeholder   = $this->input->post('admin_form_placeholder');
+                $data->admin_form_tip           = $this->input->post('admin_form_tip');
                 $data->associated_product_types = $this->input->post('associated_product_types');
-                $data->allow_multiple               = (bool) $this->input->post('allow_multiple');
-                $data->is_filter                    = (bool) $this->input->post('is_filter');
+                $data->allow_multiple           = (bool) $this->input->post('allow_multiple');
+                $data->is_filter                = (bool) $this->input->post('is_filter');
 
                 if ($this->shop_product_type_meta_model->update($this->data['meta_field']->id, $data)) {
 
                     $this->session->set_flashdata('success', 'Product Type Meta Field saved successfully.');
-                    redirect('admin/shop/manage/product_type_meta' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/productTypeMeta' . $this->data['isFancybox']);
 
                 } else {
 
                     $this->data['error'] = 'There was a problem saving the Product Type Meta Field. ' . $this->shop_product_type_meta_model->last_error();
+                }
 
-                                }
             } else {
 
                 $this->data['error'] = lang('fv_there_were_errors');
@@ -1961,7 +1993,7 @@ class Manage extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['product_types']    = $this->shop_product_type_model->get_all();
+        $this->data['product_types'] = $this->shop_product_type_model->get_all();
 
         // --------------------------------------------------------------------------
 
@@ -1977,7 +2009,7 @@ class Manage extends \AdminController
      */
     protected function productTypeMetaDelete()
     {
-        if (!userHasPermission('admin.shop:0.product_type_meta_delete')) {
+        if (!userHasPermission('admin.shop{0.product_type_meta_delete')) {
 
             unauthorised();
         }
@@ -1995,7 +2027,7 @@ class Manage extends \AdminController
             $this->session->set_flashdata('error', 'There was a problem deleting the Product Type. ' . $this->shop_product_type_model->last_error());
         }
 
-        redirect('admin/shop/manage/product_type_meta' . $this->data['isFancybox']);
+        redirect('admin/shop/manage/productTypeMeta' . $this->data['isFancybox']);
     }
 
     // --------------------------------------------------------------------------

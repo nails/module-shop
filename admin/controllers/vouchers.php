@@ -20,7 +20,7 @@ class Vouchers extends \AdminController
      */
     public static function announce()
     {
-        if (userHasPermission('admin.shop:0.vouchers_manage')) {
+        if (userHasPermission('admin.shop{0.vouchers_manage')) {
 
             $navGroup = new \Nails\Admin\Nav('Shop');
             $navGroup->addMethod('Manage Vouchers');
@@ -38,6 +38,16 @@ class Vouchers extends \AdminController
         parent::__construct();
         $this->load->model('shop/shop_model');
         $this->load->model('shop/shop_voucher_model');
+
+        // --------------------------------------------------------------------------
+
+        //  @todo Move this into a common constructor
+        $this->shopName = $this->shopUrl = $this->shop_model->getShopName();
+        $this->shopUrl  = $this->shopUrl = $this->shop_model->getShopUrl();
+
+        //  Pass data to the views
+        $this->data['shopName'] = $this->shopName;
+        $this->data['shopUrl']  = $this->shopUrl;
     }
 
     // --------------------------------------------------------------------------
@@ -48,7 +58,7 @@ class Vouchers extends \AdminController
      */
     public function index()
     {
-        if (!userHasPermission('admin.shop:0.vouchers_manage')) {
+        if (!userHasPermission('admin.shop{0.vouchers_manage')) {
 
             unauthorised();
         }
@@ -79,7 +89,7 @@ class Vouchers extends \AdminController
             $tablePrefix . '.code'       => 'Code',
             $tablePrefix . '.type'       => 'Type',
             $tablePrefix . '.valid_from' => 'Valid From Date'
-        );
+       );
 
         // --------------------------------------------------------------------------
 
@@ -92,8 +102,8 @@ class Vouchers extends \AdminController
                 array('Normal', 'NORMAL'),
                 array('Limited Use', 'LIMITED_USE'),
                 array('Gift Card', 'GIFT_CARD')
-            )
-        );
+           )
+       );
 
         // --------------------------------------------------------------------------
 
@@ -102,10 +112,10 @@ class Vouchers extends \AdminController
             'sort' => array(
                 'column' => $sortOn,
                 'order'  => $sortOrder
-            ),
+           ),
             'keywords' => $keywords,
             'filters'  => $filters
-        );
+       );
 
         // --------------------------------------------------------------------------
 
@@ -116,6 +126,13 @@ class Vouchers extends \AdminController
         //  Set Search and Pagination objects for the view
         $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords, $filters);
         $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+
+        // --------------------------------------------------------------------------
+
+        if (userHasPermission('admin.shop:0.voucher_create')) {
+
+            \Nails\Admin\Helper::addHeaderButton('admin/shop/voucher/create', 'Create Voucher');
+        }
 
         // --------------------------------------------------------------------------
 
@@ -130,7 +147,7 @@ class Vouchers extends \AdminController
      */
     public function create()
     {
-        if (!userHasPermission('admin.shop:0.vouchers_create')) {
+        if (!userHasPermission('admin.shop{0.vouchers_create')) {
 
             $this->session->set_flashdata('error', 'You do not have permission to create vouchers.');
             redirect('admin/shop/vouchers');
@@ -310,7 +327,7 @@ class Vouchers extends \AdminController
      */
     public function activate()
     {
-        if (!userHasPermission('admin.shop:0.vouchers_activate')) {
+        if (!userHasPermission('admin.shop{0.vouchers_activate')) {
 
             $status  = 'error';
             $message = 'You do not have permission to activate vouchers.';
@@ -345,7 +362,7 @@ class Vouchers extends \AdminController
      */
     public function deactivate()
     {
-        if (!userHasPermission('admin.shop:0.vouchers_deactivate')) {
+        if (!userHasPermission('admin.shop{0.vouchers_deactivate')) {
 
             $status  = 'error';
             $message = 'You do not have permission to suspend vouchers.';

@@ -1,71 +1,75 @@
 <div class="group-shop manage attributes edit">
-	<?php
+    <?php
 
-		if ( $isFancybox ) :
+        if ($isFancybox) {
 
-			echo '<h1>' . $page->title . '</h1>';
-			$_class = 'system-alert';
+            echo '<h1>' . $page->title . '</h1>';
+            $class = 'system-alert';
 
-		else :
+        } else {
 
-			$_class = '';
+            $class = '';
+        }
 
-		endif;
+        echo form_open(uri_string() . $isFancybox);
 
-		echo form_open( uri_string() . $isFancybox );
+    ?>
+    <p class="<?=$class?>">
+        Manage which attributes are available for your products.
+    </p>
+    <?=$isFancybox ? '' : '<hr />'?>
+    <ul class="tabs disabled">
+        <li class="tab">
+            <?=anchor('admin/shop/manage/attribute' . $isFancybox, 'Overview', 'class="confirm" data-title="Are you sure?" data-body="Any unsaved changes will be lost."')?>
+        </li>
+        <li class="tab active">
+            <?=anchor('admin/shop/manage/attribute/create' . $isFancybox, 'Create Attribute')?>
+        </li>
+    </ul>
+    <section class="tabs pages">
+        <div class="tab page active">
+            <fieldset>
+                <legend>Basic Details</legend>
+                <?php
 
-	?>
-	<p class="<?=$_class?>">
-		Manage which attributes are available for your products.
-	</p>
-	<?=$isFancybox ? '' : '<hr />'?>
-	<ul class="tabs disabled">
-		<li class="tab">
-			<?=anchor( 'admin/shop/manage/attribute' . $isFancybox, 'Overview', 'class="confirm" data-title="Are you sure?" data-body="Any unsaved changes will be lost."' )?>
-		</li>
-		<li class="tab active">
-			<?=anchor( 'admin/shop/manage/attribute/create' . $isFancybox, 'Create Attribute' )?>
-		</li>
-	</ul>
-	<section class="tabs pages">
-		<div class="tab page active">
-			<fieldset>
-				<legend>Basic Details</legend>
-				<p>
-					These fields describe the attribute.
-				</p>
-				<?php
+                    $field                = array();
+                    $field['key']         = 'label';
+                    $field['label']       = 'Label';
+                    $field['required']    = true;
+                    $field['placeholder'] = 'The attribute\'s label';
+                    $field['default']     = isset($attribute->label) ? $attribute->label : '';
 
-					$_field					= array();
-					$_field['key']			= 'label';
-					$_field['label']		= 'Label';
-					$_field['required']		= TRUE;
-					$_field['placeholder']	= 'The attribute\'s label';
-					$_field['default']		= isset( $attribute->label ) ? $attribute->label : '';
+                    echo form_field($field);
 
-					echo form_field( $_field );
+                    // --------------------------------------------------------------------------
 
-					// --------------------------------------------------------------------------
+                    $field                = array();
+                    $field['key']         = 'description';
+                    $field['label']       = 'Description';
+                    $field['type']        = 'textarea';
+                    $field['placeholder'] = 'The attribute\'s description';
+                    $field['default']     = isset($attribute->description) ? $attribute->description : '';
 
-					$_field					= array();
-					$_field['key']			= 'description';
-					$_field['label']		= 'Description';
-					$_field['type']			= 'textarea';
-					$_field['placeholder']	= 'The attribute\'s description';
-					$_field['default']		= isset( $attribute->description ) ? $attribute->description : '';
+                    echo form_field($field);
 
-					echo form_field( $_field );
+                ?>
+            </fieldset>
+            <p style="margin-top:1em;">
+            <?php
 
-				?>
-			</fieldset>
-			<p style="margin-top:1em;">
-				<?=form_submit( 'submit', 'Save', 'class="awesome"' )?>
-				<?=anchor( 'admin/shop/manage/attribute' . $isFancybox, 'Cancel', 'class="awesome red confirm" data-title="Are you sure?" data-body="All unsaved changes will be lost."' )?>
-			</p>
-		</div>
-	</section>
-	<?=form_close();?>
+                echo form_submit('submit', 'Save', 'class="awesome"');
+                echo anchor(
+                    'admin/shop/manage/attribute' . $isFancybox,
+                    'Cancel',
+                    'class="awesome red confirm" data-title="Are you sure?" data-body="All unsaved changes will be lost."'
+                );
+
+            ?>
+            </p>
+        </div>
+    </section>
+    <?=form_close();?>
 </div>
 <?php
 
-	$this->load->view( 'admin/shop/manage/attribute/_footer' );
+    echo \Nails\Admin\Helper::loadInlineView('utilities/footer', array('items' => $attributes));

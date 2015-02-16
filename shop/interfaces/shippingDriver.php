@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * this interface is implemented by all Shop shipping drivers
+ *
+ * @package     Nails
+ * @subpackage  module-shop
+ * @category    Interface
+ * @author      Nails Dev Team
+ * @link
+ */
+
 interface Shop_shipping_driver
 {
     /**

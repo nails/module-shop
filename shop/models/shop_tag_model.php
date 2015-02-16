@@ -1,123 +1,126 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
 /**
- * Name:			shop_tag_model.php
+ * This model manages Shop Product tags
  *
- * Description:		This model handles interfacing with shop tags
- *
- **/
-
-/**
- * OVERLOADING NAILS' MODELS
- *
- * Note the name of this class; done like this to allow apps to extend this class.
- * Read full explanation at the bottom of this file.
- *
- **/
+ * @package  Nails
+ * @subpackage  module-shop
+ * @category    Model
+ * @author    Nails Dev Team
+ * @link
+ */
 
 class NAILS_Shop_tag_model extends NAILS_Model
 {
-		public function __construct()
-	{
-		parent::__construct();
+        public function __construct()
+    {
+        parent::__construct();
 
-		$this->_table			= NAILS_DB_PREFIX . 'shop_tag';
-		$this->_table_prefix	= 'st';
+        $this->_table          = NAILS_DB_PREFIX . 'shop_tag';
+        $this->_table_prefix    = 'st';
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		//	Shop's base URL
-		$this->shopUrl = $this->shop_model->getShopUrl();
-	}
-
-
-	// --------------------------------------------------------------------------
+        //  Shop's base URL
+        $this->shopUrl = $this->shop_model->getShopUrl();
+    }
 
 
-	protected function _getcount_common( $data = array(), $_caller = NULL )
-	{
-		if ( empty( $data['sort'] ) ) :
-
-			$data['sort'] = 'label';
-
-		else :
-
-			$data = array( 'sort' => 'label' );
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		if ( ! empty( $data['include_count'] ) ) :
-
-			if ( empty( $this->db->ar_select ) ) :
-
-				//	No selects have been called, call this so that we don't *just* get the product count
-				$_prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
-				$this->db->select( $_prefix . '*' );
-
-			endif;
-
-			$this->db->select( '(SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product_tag WHERE tag_id = ' . $this->_table_prefix . '.id) product_count' );
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		return parent::_getcount_common( $data, $_caller );
-	}
+    // --------------------------------------------------------------------------
 
 
-	// --------------------------------------------------------------------------
+    protected function _getcount_common($data = array(), $_caller = null)
+    {
+        if (empty($data['sort'])) {
+
+            $data['sort'] = 'label';
+
+        } else {
+
+            $data = array('sort' => 'label');
+
+        }
+
+        // --------------------------------------------------------------------------
+
+        if (!empty($data['include_count'])) {
+
+            if (empty($this->db->ar_select)) {
+
+                //  No selects have been called, call this so that we don't *just* get the product count
+                $_prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
+                $this->db->select($_prefix . '*');
+
+            }
+
+            $this->db->select('(SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product_tag WHERE tag_id = ' . $this->_table_prefix . '.id) product_count');
+
+        }
+
+        // --------------------------------------------------------------------------
+
+        return parent::_getcount_common($data, $_caller);
+    }
 
 
-	public function create( $data = array(), $return_object = FALSE )
-	{
-		if ( ! empty( $data->label ) ) :
-
-			$data->slug = $this->_generate_slug( $data->label );
-
-		endif;
-
-		return parent::create( $data, $return_object );
-	}
+    // --------------------------------------------------------------------------
 
 
-	// --------------------------------------------------------------------------
+    public function create($data = array(), $return_object = false)
+    {
+        if (!empty($data->label)) {
+
+            $data->slug = $this->_generate_slug($data->label);
+        }
+
+        if (empty($data->cover_id)) {
+
+            $data->cover_id = null;
+        }
+
+        return parent::create($data, $return_object);
+    }
 
 
-	public function update( $id, $data = array() )
-	{
-		if ( ! empty( $data->label ) ) :
-
-			$data->slug = $this->_generate_slug( $data->label, '', '', NULL, NULL, $id );
-
-		endif;
-
-		return parent::update( $id, $data );
-	}
+    // --------------------------------------------------------------------------
 
 
-	// --------------------------------------------------------------------------
+    public function update($id, $data = array())
+    {
+        if (!empty($data->label)) {
+
+            $data->slug = $this->_generate_slug($data->label, '', '', null, null, $id);
+        }
+
+        if (empty($data->cover_id)) {
+
+            $data->cover_id = null;
+        }
+
+        return parent::update($id, $data);
+    }
 
 
-	public function format_url( $slug )
-	{
-		return site_url( $this->shopUrl . 'tag/' . $slug );
-	}
+    // --------------------------------------------------------------------------
 
 
-	// --------------------------------------------------------------------------
+    public function format_url($slug)
+    {
+        return site_url($this->shopUrl . 'tag/' . $slug);
+    }
 
 
-	protected function _format_object( &$object )
-	{
-		//	Type casting
-		$object->id				= (int) $object->id;
-		$object->created_by		= $object->created_by ? (int) $object->created_by : NULL;
-		$object->modified_by	= $object->modified_by ? (int) $object->modified_by : NULL;
-		$object->url			= $this->format_url( $object->slug );
-	}
+    // --------------------------------------------------------------------------
+
+
+    protected function _format_object(&$object)
+    {
+        //  Type casting
+        $object->id          = (int) $object->id;
+        $object->created_by  = $object->created_by ? (int) $object->created_by : null;
+        $object->modified_by    = $object->modified_by ? (int) $object->modified_by : null;
+        $object->url            = $this->format_url($object->slug);
+    }
 }
 
 
@@ -148,13 +151,13 @@ class NAILS_Shop_tag_model extends NAILS_Model
  *
  **/
 
-if ( ! defined( 'NAILS_ALLOW_EXTENSION_SHOP_TAG_MODEL' ) ) :
+if (!defined('NAILS_ALLOW_EXTENSION_SHOP_TAG_MODEL')) {
 
-	class Shop_tag_model extends NAILS_Shop_tag_model
-	{
-	}
+    class Shop_tag_model extends NAILS_Shop_tag_model
+    {
+    }
 
-endif;
+}
 
 /* End of file shop_tag_model.php */
 /* Location: ./modules/shop/models/shop_tag_model.php */

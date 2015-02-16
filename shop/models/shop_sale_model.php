@@ -1,66 +1,61 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
 /**
- * Name:			shop_sale_model.php
+ * This model manages Shop Product sales
  *
- * Description:		This model handles interfacing with shop sales
- *
- **/
-
-/**
- * OVERLOADING NAILS' MODELS
- *
- * Note the name of this class; done like this to allow apps to extend this class.
- * Read full explanation at the bottom of this file.
- *
- **/
+ * @package     Nails
+ * @subpackage  module-shop
+ * @category    Model
+ * @author      Nails Dev Team
+ * @link
+ */
 
 class NAILS_Shop_sale_model extends NAILS_Model
 {
-	public function __construct()
-	{
-		parent::__construct();
+    public function __construct()
+    {
+        parent::__construct();
 
-		$this->_table			= NAILS_DB_PREFIX . 'shop_sale';
-		$this->_table_prefix	= 'ss';
-	}
-
-
-	// --------------------------------------------------------------------------
+        $this->_table           = NAILS_DB_PREFIX . 'shop_sale';
+        $this->_table_prefix    = 'ss';
+    }
 
 
-	protected function _getcount_common( $data = array(), $_caller = NULL )
-	{
-		if ( empty( $data['sort'] ) ) :
+    // --------------------------------------------------------------------------
 
-			$data['sort'] = 'label';
 
-		else :
+    protected function _getcount_common($data = array(), $_caller = null)
+    {
+        if (empty($data['sort'])) {
 
-			$data = array( 'sort' => 'label' );
+            $data['sort'] = 'label';
 
-		endif;
+        } else {
 
-		// --------------------------------------------------------------------------
+            $data = array('sort' => 'label');
 
-		if ( ! empty( $data['include_count'] ) ) :
+        }
 
-			if ( empty( $this->db->ar_select ) ) :
+        // --------------------------------------------------------------------------
 
-				//	No selects have been called, call this so that we don't *just* get the product count
-				$_prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
-				$this->db->select( $_prefix . '*' );
+        if (!empty($data['include_count'])) {
 
-			endif;
+            if (empty($this->db->ar_select)) {
 
-			$this->db->select( '(SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product_sale sps LEFT JOIN ' . NAILS_DB_PREFIX . 'shop_product p ON p.id = sps.product_id  WHERE sps.sale_id = s.id AND p.is_active = 1) product_count' );
+                //  No selects have been called, call this so that we don't *just* get the product count
+                $_prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
+                $this->db->select($_prefix . '*');
 
-		endif;
+            }
 
-		// --------------------------------------------------------------------------
+            $this->db->select('(SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product_sale sps LEFT JOIN ' . NAILS_DB_PREFIX . 'shop_product p ON p.id = sps.product_id  WHERE sps.sale_id = s.id AND p.is_active = 1) product_count');
 
-		return parent::_getcount_common( $data, $_caller );
-	}
+        }
+
+        // --------------------------------------------------------------------------
+
+        return parent::_getcount_common($data, $_caller);
+    }
 }
 
 
@@ -91,13 +86,13 @@ class NAILS_Shop_sale_model extends NAILS_Model
  *
  **/
 
-if ( ! defined( 'NAILS_ALLOW_EXTENSION_SHOP_SALE_MODEL' ) ) :
+if (!defined('NAILS_ALLOW_EXTENSION_SHOP_SALE_MODEL')) {
 
-	class Shop_sale_model extends NAILS_Shop_sale_model
-	{
-	}
+    class Shop_sale_model extends NAILS_Shop_sale_model
+    {
+    }
 
-endif;
+}
 
 /* End of file shop_sale_model.php */
 /* Location: ./modules/shop/models/shop_sale_model.php */

@@ -12,8 +12,15 @@
         <table>
             <thead>
                 <tr>
-                    <th class="checkbox">
-                        <input type="checkbox" id="toggle-all" />
+                    <th class="checkAll">
+                    <?php
+
+                        if (!empty($orders)) {
+
+                            echo '<input type="checkbox" id="toggle-all" />';
+                        }
+
+                    ?>
                     </th>
                     <th class="ref">Ref</th>
                     <th class="datetime">Placed</th>
@@ -30,13 +37,13 @@
             <tbody>
                 <?php
 
-                    if ( $orders->data ) :
+                    if ($orders->data) {
 
-                        foreach ( $orders->data as $order ) :
+                        foreach ($orders->data as $order) {
 
                             ?>
                             <tr id="order-<?=$order->id?>">
-                                <td class="checkbox">
+                                <td class="checkAll">
                                     <input type="checkbox" class="batch-checkbox" value="<?=$order->id?>" />
                                 </td>
                                 <td class="ref"><?=$order->ref?></td>
@@ -51,11 +58,11 @@
 
                                     echo $order->totals->base_formatted->item;
 
-                                    if ( $order->currency !== $order->base_currency ) :
+                                    if ($order->currency !== $order->base_currency) {
 
                                         echo '<small>' . $order->totals->user_formatted->item . '</small>';
 
-                                    endif;
+                                    }
 
                                 ?>
                                 </td>
@@ -64,11 +71,11 @@
 
                                     echo $order->totals->base_formatted->tax;
 
-                                    if ( $order->currency !== $order->base_currency ) :
+                                    if ($order->currency !== $order->base_currency) {
 
                                         echo '<small>' . $order->totals->user_formatted->tax . '</small>';
 
-                                    endif;
+                                    }
 
                                 ?>
                                 </td>
@@ -77,11 +84,11 @@
 
                                     echo $order->totals->base_formatted->shipping;
 
-                                    if ( $order->currency !== $order->base_currency ) :
+                                    if ($order->currency !== $order->base_currency) {
 
                                         echo '<small>' . $order->totals->user_formatted->shipping . '</small>';
 
-                                    endif;
+                                    }
 
                                 ?>
                                 </td>
@@ -90,18 +97,18 @@
 
                                     echo $order->totals->base_formatted->grand;
 
-                                    if ( $order->currency !== $order->base_currency ) :
+                                    if ($order->currency !== $order->base_currency) {
 
                                         echo '<small>' . $order->totals->user_formatted->grand . '</small>';
 
-                                    endif;
+                                    }
 
                                 ?>
                                 </td>
                                 <?php
 
 
-                                    switch ( $order->status ) :
+                                    switch ($order->status) {
 
                                         case 'UNPAID' :     $status = 'error';      break;
                                         case 'PAID' :       $status = 'success';    break;
@@ -111,7 +118,7 @@
                                         case 'PENDING' :    $status = '';           break;
                                         default :           $status = '';           break;
 
-                                    endswitch;
+                                    }
 
                                     echo '<td class="status ' . $status . '">';
                                         echo $order->status;
@@ -129,44 +136,54 @@
 
                                         // --------------------------------------------------------------------------
 
-                                        if ( userHasPermission( 'admin.shop:0.orders_view' ) ) :
+                                        if (userHasPermission('admin.shop:0.orders_view')) {
 
-                                            $_buttons[] = anchor( 'admin/shop/orders/view/' . $order->id, lang( 'action_view' ), 'class="awesome green small"' );
-                                            $_buttons[] = anchor( 'admin/shop/orders/download_invoice/' . $order->id, 'Download', 'class="awesome small"' );
-
-                                        endif;
+                                            $_buttons[] = anchor(
+                                                'admin/shop/orders/view/' . $order->id,
+                                                lang('action_view'),
+                                                'class="awesome green small"'
+                                            );
+                                            $_buttons[] = anchor(
+                                                'admin/shop/orders/download_invoice/' . $order->id,
+                                                'Download',
+                                                'class="awesome small"'
+                                            );
+                                        }
 
                                         // --------------------------------------------------------------------------
 
-                                        // if ( userHasPermission( 'admin.shop:0.orders_reprocess' ) ) :
+                                        // if (userHasPermission('admin.shop:0.orders_reprocess')) {
 
-                                        //  $_buttons[] = anchor( 'admin/shop/orders/reprocess/' . $order->id, 'Process', 'class="awesome small orange confirm" data-title="Are you sure?" data-body="Processing the order again may result in multiple dispatch of items."' );
-
-                                        // endif;
+                                        //      $_buttons[] = anchor(
+                                        //         'admin/shop/orders/reprocess/' . $order->id,
+                                        //         'Process',
+                                        //         'class="awesome small orange confirm" data-title="Are you sure?" data-body="Processing the order again may result in multiple dispatch of items."'
+                                        //     );
+                                        // }
 
                                         // --------------------------------------------------------------------------
 
-                                        if ( $_buttons ) :
+                                        if ($_buttons) {
 
-                                            foreach ( $_buttons aS $button ) :
+                                            foreach ($_buttons aS $button) {
 
                                                 echo $button;
+                                            }
 
-                                            endforeach;
-                                        else :
+                                        } else {
 
                                             echo '<span class="blank">There are no actions you can perform on this item.</span>';
-
-                                        endif;
+                                        }
 
                                     ?>
                                 </td>
                             </tr>
                             <?php
 
-                        endforeach;
+                        }
 
-                    else :
+                    } else {
+
                         ?>
                         <tr>
                             <td colspan="11" class="no-data">
@@ -174,30 +191,27 @@
                             </td>
                         </tr>
                         <?php
-                    endif;
+                    }
 
                 ?>
             </tbody>
         </table>
         <?php
 
-            if ( $orders->data ) :
+            if ($orders->data) {
 
-                $_options                       = array();
-                $_options['']                   = 'Choose';
-                $_options['mark-fulfilled']     = 'Mark Fulfilled';
-                $_options['mark-unfulfilled']   = 'Mark Unfulfilled';
-                $_options['download']           = 'Download';
+                $_options                     = array();
+                $_options['']                 = 'Choose';
+                $_options['mark-fulfilled']   = 'Mark Fulfilled';
+                $_options['mark-unfulfilled'] = 'Mark Unfulfilled';
+                $_options['download']         = 'Download';
 
-                ?>
-                <div class="panel" id="batch-action">
-                    With checked:
-                    <?=form_dropdown( '', $_options, NULL )?>
-                    <a href="#" class="awesome small">Go</a>
-                </div>
-                <?php
-
-            endif;
+                echo '<div class="panel" id="batch-action">';
+                    echo 'With checked:';
+                    echo form_dropdown('', $_options, null);
+                    echo '<a href="#" class="awesome small">Go</a>';
+                echo '</div>';
+            }
 
         ?>
     </div>
@@ -207,16 +221,15 @@
 
     ?>
 </div>
-
 <script type="text/javascript">
 
-    function mark_fulfilled( order_id )
+    function mark_fulfilled(order_id)
     {
-        $( '#order-' + order_id ).find( 'td.fulfilment' ).removeClass( 'no' ).addClass( 'yes' ).text( '<?=lang( 'yes' )?>' );
+        $('#order-' + order_id).find('td.fulfilment').removeClass('no').addClass('yes').text('<?=lang('yes')?>');
     }
 
-    function mark_unfulfilled( order_id )
+    function mark_unfulfilled(order_id)
     {
-        $( '#order-' + order_id ).find( 'td.fulfilment' ).removeClass( 'yes' ).addClass( 'no' ).text( '<?=lang( 'no' )?>' );
+        $('#order-' + order_id).find('td.fulfilment').removeClass('yes').addClass('no').text('<?=lang('no')?>');
     }
 </script>

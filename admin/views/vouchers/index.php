@@ -1,15 +1,6 @@
 <div class="group-shop vouchers browse">
     <p>
         Browse all vouchers (including gift cards) which are associated with the shop.
-        <?php
-
-            if (userHasPermission('admin.shop:0.vouchers_create')) :
-
-                echo anchor('admin/shop/vouchers/create', 'Create Voucher', 'class="awesome small green right"');
-
-            endif;
-
-        ?>
     </p>
     <?php
 
@@ -152,14 +143,14 @@
 
                                     if ($voucher->is_active) {
 
-                                        if (userHasPermission('admin.shop:0.vouchers_deactivate')) {
+                                        if (userHasPermission('admin.shop{0.vouchers_deactivate')) {
 
                                             $buttons[] = anchor('admin/shop/vouchers/deactivate/' . $voucher->id, 'Suspend', 'class="awesome small red confirm"');
                                         }
 
                                     } else {
 
-                                        if (userHasPermission('admin.shop:0.vouchers_activate')) {
+                                        if (userHasPermission('admin.shop{0.vouchers_activate')) {
 
                                             $buttons[] = anchor('admin/shop/vouchers/activate/' . $voucher->id, 'Activate', 'class="awesome small green"');
                                         }

@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * This model manages the Shop Product feed
+ *
+ * @package     Nails
+ * @subpackage  module-shop
+ * @category    Model
+ * @author      Nails Dev Team
+ * @link
+ */
+
 class NAILS_Shop_feed_model extends NAILS_Model
 {
     public function generate($provider, $format)
@@ -7,64 +17,64 @@ class NAILS_Shop_feed_model extends NAILS_Model
         $methodProvider = strtolower($provider);
         $methodFormat   = ucfirst(strtolower($format));
         $method         = $methodProvider . 'Write' . $methodFormat;
-                
+
         if (method_exists($this, $method)) {
-            
+
             $data = $this->getShopData();
-            
+
             $xml = $this->{$method}($data);
             if ($xml) {
-                
+
                 $this->load->helper('file');
                 $cacheFile = DEPLOY_CACHE_DIR . 'shop-feed-' . $provider . '.' . $format;
 
                 if (!write_file($cacheFile, $xml)) {
 
                     $this->_set_error('Failed to write shop feed to disk "' . $provider . '" in format "' . $xml . '"');
-                     
+
                 } else {
-                    
+
                     return true;
                 }
-                
+
             } else {
-                
+
                 $this->_set_error('Failed to generate data for "' . $provider . '" in format "' . $xml . '"');
                 return false;
             }
-            
+
         } else {
-            
+
             $this->_set_error('Invalid feed parameters.');
             return false;
-        }     
+        }
     }
-    
+
     // --------------------------------------------------------------------------
-    
+
     public function serve($provider, $format)
     {
         //  Check cache for file, if it exists, server it up with the appropriate cache headers, if not, generate and thens erve
         $cacheFile = DEPLOY_CACHE_DIR . 'shop-feed-' . $provider . '.' . $format;
-        
+
         if (is_file($cacheFile)) {
-            
+
             return @file_get_contents($cacheFile);
         }
-        
+
         //  File doesn't exist, attempt to generate
         if ($this->generate($provider, $format)) {
-            
+
             return @file_get_contents($cacheFile);
-            
+
         } else {
-            
+
             return false;
-        } 
+        }
     }
-    
+
     // --------------------------------------------------------------------------
-    
+
     /**
      * Render the feed
      * @return array
@@ -73,11 +83,11 @@ class NAILS_Shop_feed_model extends NAILS_Model
     {
         $products = $this->shop_product_model->get_all();
         $out      = array();
-        
+
         foreach($products as $p) {
             foreach($p->variations as $v) {
-                
-                $temp = new stdClass();
+
+                $temp = new \stdClass();
 
                 //  General product fields
                 $temp->title       = $v->label;
@@ -87,63 +97,63 @@ class NAILS_Shop_feed_model extends NAILS_Model
                 $temp->variantId   = $v->id;
                 $temp->condition   = 'new';
                 $temp->sku         = $v->sku;
-                
+
                 // --------------------------------------------------------------------------
-                
+
                 //  Work out the brand
                 if (isset($p->brands[0])) {
-    
+
                     $temp->brand = $p->brands[0]->label;
-                    
+
                 } else {
-                    
+
                     $temp->brand = app_setting('invoice_company','shop');
                 }
-                
+
                 // --------------------------------------------------------------------------
-                
+
                 //  Work out the product type (category)
                 if (!empty($p->categories)) {
 
                     $category = array();
                     foreach ($p->categories as $c) {
-                     
+
                         $category[] = $c->label;
                     }
-                    
+
                     $temp->category = implode (", ", $category);
-                    
+
                 } else {
-                    
+
                     $temp->category = '';
                 }
-                
+
                 // --------------------------------------------------------------------------
-                
+
                 //  Set the product image
                 if ($p->featured_img) {
-                 
+
                     $temp->image = cdn_serve($p->featured_img);
 
                 } else {
-                    
+
                     $temp->image = '';
                 }
-                
+
                 // --------------------------------------------------------------------------
-                
+
                 //  Stock status
                 if ($v->stock_status == 'IN_STOCK') {
-                    
+
                     $temp->availability = 'in stock';
-                    
-                }else{
-                    
-                    $temp->availability = 'out of stock';    
+
+                } else {
+
+                    $temp->availability = 'out of stock';
                 }
-                
+
                 // --------------------------------------------------------------------------
-                
+
                 $shippingData = $this->shop_shipping_driver_model->calculateVariant($v->id);
 
                 //   Calculate price and price of shipping
@@ -151,22 +161,22 @@ class NAILS_Shop_feed_model extends NAILS_Model
                 $temp->shipping_country = app_setting('warehouse_addr_country', 'shop');
                 $temp->shipping_service = 'Standard';
                 $temp->shipping_price = $shippingData->base . ' ' . app_setting('base_currency','shop');
-                
+
                 // --------------------------------------------------------------------------
-                
+
                 $out[] = $temp;
-                
+
             }
         }
-        
+
         return $out;
     }
-    
+
     // --------------------------------------------------------------------------
-    
+
     protected function googleWriteXml($data)
     {
-        
+
         $xml = '<?xml version="1.0" encoding="utf-16"?>';
         $xml .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/2.0">';
         $xml .= '<channel>';
@@ -175,9 +185,9 @@ class NAILS_Shop_feed_model extends NAILS_Model
         $xml .= '<link><![CDATA[' . BASE_URL . ']]></link>';
         $xml .= '';
         $xml .= '';
-        
+
         foreach ($data as $item) {
-            
+
             $xml .= '<item>';
                 $xml .= '<g:id>' . $item->productId . '.' . $item->variantId . '</g:id>';
                 $xml .= '<title><![CDATA[' . $item->title . ']]></title>';
@@ -197,11 +207,11 @@ class NAILS_Shop_feed_model extends NAILS_Model
                 $xml .= '</g:shipping>';
             $xml .= '</item>';
         }
-        
+
         $xml .= '</channel>';
         $xml .= '</rss>';
-        
-        return $xml;        
+
+        return $xml;
     }
 }
 
@@ -234,8 +244,8 @@ class NAILS_Shop_feed_model extends NAILS_Model
  **/
 
 if (!defined('NAILS_ALLOW_EXTENSION_SHOP_FEED_MODEL')) {
-    
-	class Shop_feed_model extends NAILS_Shop_feed_model
-	{
-	}
+
+    class Shop_feed_model extends NAILS_Shop_feed_model
+    {
+    }
 }

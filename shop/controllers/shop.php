@@ -38,7 +38,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  ===============
 
         //  Defaults
-        $this->_product_sort       = new stdClass();
+        $this->_product_sort       = new \stdClass();
         $this->_product_sort->sort = app_setting('default_product_sort', 'shop');
         $this->_product_sort->sort = $this->_product_sort->sort ? $this->_product_sort->sort : 'recent';
 
@@ -80,7 +80,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  ==================
 
         //  Defaults
-        $this->_product_pagination           = new stdClasS();
+        $this->_product_pagination           = new \stdClass();
         $this->_product_pagination->page     = 0;
         $this->_product_pagination->rsegment = 2;
         $this->_product_pagination->total    = 0;
@@ -188,7 +188,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
             $this->_product_pagination->page,
             $this->_product_pagination->per_page,
             $data
-        );
+       );
 
         // --------------------------------------------------------------------------
 
@@ -326,7 +326,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
             $this->_product_pagination->page,
             $this->_product_pagination->per_page,
             $data
-        );
+       );
 
         // --------------------------------------------------------------------------
 
@@ -336,7 +336,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->data['sidebar_filters'] = $this->shop_product_model->getFiltersForProductsInBrand(
             $this->data['brand']->id,
             $data
-        );
+       );
 
         // --------------------------------------------------------------------------
 
@@ -461,7 +461,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
             $this->data['category']->id,
             true,
             $data
-        );
+       );
 
         // --------------------------------------------------------------------------
 
@@ -471,7 +471,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->data['category_siblings'] = $this->shop_category_model->get_siblings(
             $this->data['category']->id,
             $data
-        );
+       );
 
         // --------------------------------------------------------------------------
 
@@ -500,7 +500,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->_product_pagination->total    = $this->shop_product_model->countForCategory(
             $this->data['category']->id,
             $data
-        );
+       );
 
         $this->configurePagination($this->_product_pagination->total, 'category/' . $this->data['category']->slug);
 
@@ -514,7 +514,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
             $this->_product_pagination->page,
             $this->_product_pagination->per_page,
             $data
-        );
+       );
 
         // --------------------------------------------------------------------------
 
@@ -524,7 +524,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->data['sidebar_filters'] = $this->shop_product_model->getFiltersForProductsInCategory(
             $this->data['category']->id,
             $data
-        );
+       );
 
         // --------------------------------------------------------------------------
 
@@ -651,7 +651,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->_product_pagination->total    = $this->shop_product_model->countForCollection(
             $this->data['collection']->id,
             $data
-        );
+       );
 
         $this->configurePagination($this->_product_pagination->total, 'collection/' . $this->data['collection']->slug);
 
@@ -665,7 +665,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
             $this->_product_pagination->page,
             $this->_product_pagination->per_page,
             $data
-        );
+       );
 
         // --------------------------------------------------------------------------
 
@@ -675,7 +675,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->data['sidebar_filters'] = $this->shop_product_model->getFiltersForProductsInCollection(
             $this->data['collection']->id,
             $data
-        );
+       );
 
         // --------------------------------------------------------------------------
 
@@ -890,7 +890,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
             $this->_product_pagination->page,
             $this->_product_pagination->per_page,
             $data
-        );
+       );
 
         // --------------------------------------------------------------------------
 
@@ -900,7 +900,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->data['sidebar_filters'] = $this->shop_product_model->getFiltersForProductsInRange(
             $this->data['range']->id,
             $data
-        );
+       );
 
         // --------------------------------------------------------------------------
 
@@ -1038,7 +1038,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
             $this->_product_pagination->page,
             $this->_product_pagination->per_page,
             $data
-        );
+       );
 
         // --------------------------------------------------------------------------
 
@@ -1048,7 +1048,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->data['sidebar_filters'] = $this->shop_product_model->getFiltersForProductsInSale(
             $this->data['sale']->id,
             $data
-        );
+       );
 
         // --------------------------------------------------------------------------
 
@@ -1185,7 +1185,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
             $this->_product_pagination->page,
             $this->_product_pagination->per_page,
             $data
-        );
+       );
 
         // --------------------------------------------------------------------------
 
@@ -1195,7 +1195,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->data['sidebar_filters'] = $this->shop_product_model->getFiltersForProductsInTag(
             $this->data['tag']->id,
             $data
-        );
+       );
 
         // --------------------------------------------------------------------------
 
@@ -1264,7 +1264,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
             $this->_product_pagination->page,
             $this->_product_pagination->per_page,
             $data
-        );
+       );
 
         // --------------------------------------------------------------------------
 
@@ -1274,7 +1274,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->data['sidebar_filters'] = $this->shop_product_model->getFiltersForProductsInSearch(
             $data['search'],
             $data
-        );
+       );
 
         // --------------------------------------------------------------------------
 

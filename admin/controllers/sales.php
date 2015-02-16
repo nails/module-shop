@@ -20,7 +20,7 @@ class Sales extends \AdminController
      */
     public static function announce()
     {
-        if (userHasPermission('admin.shop:0.sale_manage')) {
+        if (userHasPermission('admin.shop{0.sale_manage')) {
 
             $navGroup = new \Nails\Admin\Nav('Shop');
             $navGroup->addMethod('Manage Sales');
@@ -37,6 +37,16 @@ class Sales extends \AdminController
     {
         parent::__construct();
         $this->load->model('shop/shop_model');
+
+        // --------------------------------------------------------------------------
+
+        //  @todo Move this into a common constructor
+        $this->shopName = $this->shopUrl = $this->shop_model->getShopName();
+        $this->shopUrl  = $this->shopUrl = $this->shop_model->getShopUrl();
+
+        //  Pass data to the views
+        $this->data['shopName'] = $this->shopName;
+        $this->data['shopUrl']  = $this->shopUrl;
     }
 
     // --------------------------------------------------------------------------

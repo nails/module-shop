@@ -25,7 +25,7 @@ class Reports extends \AdminController
      */
     public static function announce()
     {
-        if (userHasPermission('admin.shop:0.can_generate_reports')) {
+        if (userHasPermission('admin.shop{0.can_generate_reports')) {
 
             $navGroup = new \Nails\Admin\Nav('Shop');
             $navGroup->addMethod('Generate Reports');
@@ -55,7 +55,7 @@ class Reports extends \AdminController
          *    0 => 'Source Title',
          *    1 => 'Source Description',
          *    2 => 'sourceMethod'
-         * )
+         *)
          *
          * The source method should be a callable method which is prefixed with
          * source, using the above as an example, the method would be:
@@ -69,32 +69,32 @@ class Reports extends \AdminController
 
         $this->sources = array();
 
-        if (userHasPermission('admin.shop:0.inventory_manage')) {
+        if (userHasPermission('admin.shop{0.inventory_manage')) {
 
             $this->sources[] = array(
                 'Inventory',
                 'Out of Stock variants',
                 'OutOfStockVariants'
-            );
+           );
         }
 
-        if (userHasPermission('admin.shop:0.order_manage')) {
+        if (userHasPermission('admin.shop{0.order_manage')) {
 
             $this->sources[] = array(
                 'Sales',
                 'Product Sales - All time',
                 'ProductSalesAll'
-            );
+           );
             $this->sources[] = array(
                 'Sales',
                 'Product Sales - The Month',
                 'ProductSalesThisMonth'
-            );
+           );
             $this->sources[] = array(
                 'Sales',
                 'Product Sales - Last Month',
                 'ProductSalesLastMonth'
-            );
+           );
 
             /**
              * @todo Have a reporting section in settings which allows the financial
@@ -114,7 +114,7 @@ class Reports extends \AdminController
          *    0 => 'Format Title',
          *    1 => 'Format Description',
          *    2 => 'FormatMethod'
-         * )
+         *)
          *
          * The format method should be a callable method which is prefixed with
          * format, using the above as an example, the method would be:
@@ -151,6 +151,16 @@ class Reports extends \AdminController
             'JSON',
             'Export as a JSON array',
             'Json');
+
+        // --------------------------------------------------------------------------
+
+        //  @todo Move this into a common constructor
+        $this->shopName = $this->shopUrl = $this->shop_model->getShopName();
+        $this->shopUrl  = $this->shopUrl = $this->shop_model->getShopUrl();
+
+        //  Pass data to the views
+        $this->data['shopName'] = $this->shopName;
+        $this->data['shopUrl']  = $this->shopUrl;
     }
 
     // --------------------------------------------------------------------------
@@ -168,7 +178,7 @@ class Reports extends \AdminController
 
         // --------------------------------------------------------------------------
 
-        if (!userHasPermission('admin.shop:0.can_generate_reports')) {
+        if (!userHasPermission('admin.shop{0.can_generate_reports')) {
 
             unauthorised();
         }
@@ -288,18 +298,18 @@ class Reports extends \AdminController
      */
     protected function sourceOutOfStockVariants()
     {
-        if (!userHasPermission('admin.shop:0.inventory_manage')) {
+        if (!userHasPermission('admin.shop{0.inventory_manage')) {
 
             return false;
         }
 
         // --------------------------------------------------------------------------
 
-        $out            = new \stdClass();
-        $out->label = 'Out of Stock variants';
-        $out->filename  = NAILS_DB_PREFIX . 'out_of_stock_variants';
-        $out->fields    = array();
-        $out->data      = array();
+        $out           = new \stdClass();
+        $out->label    = 'Out of Stock variants';
+        $out->filename = NAILS_DB_PREFIX . 'out_of_stock_variants';
+        $out->fields   = array();
+        $out->data     = array();
 
         // --------------------------------------------------------------------------
 
@@ -331,7 +341,7 @@ class Reports extends \AdminController
      */
     protected function sourceProductSalesAll()
     {
-        if (!userHasPermission('admin.shop:0.order_manage')) {
+        if (!userHasPermission('admin.shop{0.order_manage')) {
 
             return false;
         }
@@ -475,8 +485,8 @@ class Reports extends \AdminController
 
         } else {
 
-            $out    = array();
-            $out[]  = $data->filename . '.html';
+            $out   = array();
+            $out[] = $data->filename . '.html';
             $out[] = \Nails\Admin\Helper::loadView('format/html', false, true);
 
             return $out;

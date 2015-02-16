@@ -45,7 +45,6 @@ foreach ($order->shipping_address as $key => $line) {
         } else {
 
             echo $line . "\n";
-
         }
     }
 }
@@ -66,7 +65,6 @@ foreach ($order->billing_address as $key => $line) {
         } else {
 
             echo $line . "\n";
-
         }
     }
 }
@@ -115,11 +113,11 @@ Tax:       <?=$order->totals->user_formatted->tax . "\n"?>
 Total:     <?=$order->totals->user_formatted->grand . "\n"?>
 <?php
 
-$_invoice_company       = app_setting('invoice_company', 'shop');
-$_invoice_address       = app_setting('invoice_address', 'shop');
-$_invoice_vat_no        = app_setting('invoice_vat_no', 'shop');
-$_invoice_company_no    = app_setting('invoice_company_no', 'shop');
-$_invoice_footer        = app_setting('invoice_footer', 'shop');
+$_invoice_company    = app_setting('invoice_company', 'shop');
+$_invoice_address    = app_setting('invoice_address', 'shop');
+$_invoice_vat_no     = app_setting('invoice_vat_no', 'shop');
+$_invoice_company_no = app_setting('invoice_company_no', 'shop');
+$_invoice_footer     = app_setting('invoice_footer', 'shop');
 
 if (empty($_invoice_company)||!empty($_invoice_address)||!empty($_invoice_vat_no)||!empty($_invoice_company_no)) {
 
@@ -132,7 +130,6 @@ if (empty($_invoice_company)||!empty($_invoice_address)||!empty($_invoice_vat_no
         echo $_invoice_company  ? $_invoice_company : APP_NAME;
         echo $_invoice_address  ? "\n" . $_invoice_address : '';
         echo "\n\n";
-
     };
 
     if (!empty($_invoice_vat_no)) {
@@ -148,12 +145,10 @@ if (empty($_invoice_company)||!empty($_invoice_address)||!empty($_invoice_vat_no
         echo 'COMPANY NUMBER' . "\n";
         echo $_invoice_company_no ? $_invoice_company_no : '';
         echo "\n\n";
-
     };
 }
 
 if (!empty($_invoice_footer)) {
 
     echo "\n\n" . $_invoice_footer;
-
 }

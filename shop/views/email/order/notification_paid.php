@@ -56,7 +56,6 @@ $countriesFlat = $this->country_model->getAllFlat();
                     } else {
 
                         echo '<br />' . $line;
-
                     }
                 }
             }
@@ -78,7 +77,6 @@ $countriesFlat = $this->country_model->getAllFlat();
                     } else {
 
                         echo '<br />' . $line;
-
                     }
                 }
             }

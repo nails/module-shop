@@ -6,7 +6,7 @@
 
         $form = array(
             'method' => 'GET'
-        );
+       );
         echo form_open(null, $form);
 
         echo '<div class="search-text">';
@@ -14,7 +14,7 @@
             'search',
             $this->input->get('search'),
             'autocomplete="off" placeholder="' . lang('admin_search_placeholder') . '"'
-        );
+       );
         echo '</div>';
 
         // --------------------------------------------------------------------------
@@ -24,7 +24,7 @@
             'sv.code'      => 'Code',
             'sv.modified'  => 'Last Used',
             'sv.is_active' => 'Active State'
-        );
+       );
         echo lang('admin_search_sort');
         echo form_dropdown('sort_on', $sort, $sort_on, 'class="select2"');
 
@@ -33,7 +33,7 @@
         $order = array(
             'asc'   => 'Ascending',
             'desc'  => 'Descending'
-        );
+       );
         echo lang('admin_search_order_1');
         echo form_dropdown('order', $order, $sort_order, 'class="select2"') . lang('admin_search_order_2');
 
@@ -45,7 +45,7 @@
             50  => 50,
             75  => 75,
             100 => 100
-        );
+       );
         echo form_dropdown('per_page', $perPage, $pagination->per_page, 'class="select2" style="width:75px;');
         echo lang('admin_search_per_page');
 

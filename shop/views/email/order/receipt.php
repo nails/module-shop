@@ -60,7 +60,6 @@ $countriesFlat = $this->country_model->getAllFlat();
                     } else {
 
                         echo '<br />' . $line;
-
                     }
                 }
             }
@@ -82,7 +81,6 @@ $countriesFlat = $this->country_model->getAllFlat();
                     } else {
 
                         echo '<br />' . $line;
-
                     }
                 }
             }
@@ -139,11 +137,11 @@ $countriesFlat = $this->country_model->getAllFlat();
 </table>
 <?php
 
-$_invoice_company       = app_setting('invoice_company', 'shop');
-$_invoice_address       = app_setting('invoice_address', 'shop');
-$_invoice_vat_no        = app_setting('invoice_vat_no', 'shop');
-$_invoice_company_no    = app_setting('invoice_company_no', 'shop');
-$_invoice_footer        = app_setting('invoice_footer', 'shop');
+$_invoice_company    = app_setting('invoice_company', 'shop');
+$_invoice_address    = app_setting('invoice_address', 'shop');
+$_invoice_vat_no     = app_setting('invoice_vat_no', 'shop');
+$_invoice_company_no = app_setting('invoice_company_no', 'shop');
+$_invoice_footer     = app_setting('invoice_footer', 'shop');
 
 if (!empty($_invoice_company)||!empty($_invoice_address)||!empty($_invoice_vat_no)||!empty($_invoice_company_no)) {
 
@@ -213,5 +211,4 @@ if (!empty($_invoice_footer)) {
     echo '<p>';
     echo '<small>' . $_invoice_footer . '</small>';
     echo '</p>';
-
 }

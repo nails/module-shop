@@ -1,98 +1,105 @@
 <div class="group-shop manage tags overview">
-	<?php
+    <?php
 
-		if ( $isFancybox ) :
+        if ($isFancybox) {
 
-			echo '<h1>' . $page->title . '</h1>';
-			$_class = 'system-alert';
+            echo '<h1>' . $page->title . '</h1>';
+            $class = 'system-alert';
 
-		else :
+        } else {
 
-			$_class = '';
+            $class = '';
+        }
 
-		endif;
+    ?>
+    <p class="<?=$class?>">
+        Manage the which tags are available for your products. Tags help the shop determine related products.
+    </p>
+    <?=$isFancybox ? '' : '<hr />'?>
+    <ul class="tabs disabled">
+        <li class="tab active">
+            <?=anchor('admin/shop/manage/tag' . $isFancybox, 'Overview')?>
+        </li>
+        <li class="tab">
+            <?=anchor('admin/shop/manage/tag/create' . $isFancybox, 'Create Tag')?>
+        </li>
+    </ul>
+    <section class="tabs pages">
+        <div class="tab page active">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="label">Label &amp; Description</th>
+                            <th class="count">Products</th>
+                            <th class="modified">Modified</th>
+                            <th class="actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php
 
-	?>
-	<p class="<?=$_class?>">
-		Manage the which tags are available for your products. Tags help the shop determine related products.
-	</p>
-	<?=$isFancybox ? '' : '<hr />'?>
-	<ul class="tabs disabled">
-		<li class="tab active">
-			<?=anchor( 'admin/shop/manage/tag' . $isFancybox, 'Overview' )?>
-		</li>
-		<li class="tab">
-			<?=anchor( 'admin/shop/manage/tag/create' . $isFancybox, 'Create Tag' )?>
-		</li>
-	</ul>
-	<section class="tabs pages">
-		<div class="tab page active">
-			<div class="table-responsive">
-				<table>
-					<thead>
-						<tr>
-							<th class="label">Label &amp; Description</th>
-							<th class="count">Products</th>
-							<th class="modified">Modified</th>
-							<th class="actions">Actions</th>
-						</tr>
-					</thead>
-					<tbody>
-					<?php
+                        if ($tags) {
 
-						if ( $tags ) :
+                            foreach ($tags as $tag) {
 
-							foreach ( $tags as $tag ) :
+                                echo '<tr>';
+                                    echo '<td class="label">';
 
-								echo '<tr>';
-									echo '<td class="label">';
+                                    echo $tag->label;
+                                    echo $tag->description ? '<small>' . character_limiter(strip_tags($tag->description), 225) . '</small>' : '<small>No Description</small>';
 
-									echo $tag->label;
-									echo $tag->description ? '<small>' . character_limiter( strip_tags( $tag->description ), 225 ) . '</small>' : '<small>No Description</small>';
+                                    echo '</td>';
+                                    echo '<td class="count">';
+                                        echo !isset($tag->product_count) ? 'Unknown' : $tag->product_count;
+                                    echo '</td>';
+                                    echo \Nails\Admin\Helper::loadDatetimeCell($tag->modified);
+                                    echo '<td class="actions">';
 
-									echo '</td>';
-									echo '<td class="count">';
-										echo ! isset( $tag->product_count ) ? 'Unknown' : $tag->product_count;
-									echo '</td>';
-									echo \Nails\Admin\Helper::loadDatetimeCell($tag->modified);
-									echo '<td class="actions">';
+                                        if (userHasPermission('admin.shop:0.tag_edit')) {
 
-										if ( userHasPermission( 'admin.shop:0.tag_edit' ) ) :
+                                            echo anchor(
+                                                'admin/shop/manage/tag/edit/' . $tag->id . $isFancybox,
+                                                lang('action_edit'),
+                                                'class="awesome small"'
+                                            );
+                                        }
 
-											echo anchor( 'admin/shop/manage/tag/edit/' . $tag->id . $isFancybox, lang( 'action_edit' ), 'class="awesome small"' );
+                                        if (userHasPermission('admin.shop:0.tag_delete')) {
 
-										endif;
+                                            echo anchor(
+                                                'admin/shop/manage/tag/delete/' . $tag->id . $isFancybox,
+                                                lang('action_delete'),
+                                                'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."'
+                                            );
+                                        }
 
-										if ( userHasPermission( 'admin.shop:0.tag_delete' ) ) :
+                                        echo anchor(
+                                            $shopUrl . 'tag/' . $tag->slug,
+                                            lang('action_view'),
+                                            'class="awesome small orange" target="_blank"'
+                                        );
 
-											echo anchor( 'admin/shop/manage/tag/delete/' . $tag->id . $isFancybox, lang( 'action_delete' ), 'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."' );
+                                    echo '</td>';
+                                echo '</tr>';
+                            }
 
-										endif;
+                        } else {
 
-										echo anchor( $shop_url . 'tag/' . $tag->slug, lang( 'action_view' ), 'class="awesome small orange" target="_blank"' );
+                            echo '<tr>';
+                                echo '<td colspan="4" class="no-data">';
+                                    echo 'No Tags Found';
+                                echo '</td>';
+                            echo '</tr>';
+                        }
 
-									echo '</td>';
-								echo '</tr>';
-
-							endforeach;
-
-						else :
-
-							echo '<tr>';
-								echo '<td colspan="4" class="no-data">';
-									echo 'No Tags, add one!';
-								echo '</td>';
-							echo '</tr>';
-
-						endif;
-
-					?>
-					</tbody>
-				</table>
-			</div>
-		</div>
-	</section>
+                    ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
 </div>
 <?php
 
-	$this->load->view( 'admin/shop/manage/tag/_footer' );
+    echo \Nails\Admin\Helper::loadInlineView('utilities/footer', array('items' => $tags));

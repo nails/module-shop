@@ -1,233 +1,229 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
 /**
- * Name:			shop_skin_front_model.php
+ * This model manages the Shop Front of House skin
  *
- * Description:		This model finds and loads shop "Front of house" skins
- *
- **/
-
-/**
- * OVERLOADING NAILS' MODELS
- *
- * Note the name of this class; done like this to allow apps to extend this class.
- * Read full explanation at the bottom of this file.
- *
- **/
+ * @package     Nails
+ * @subpackage  module-shop
+ * @category    Model
+ * @author      Nails Dev Team
+ * @link
+ * @todo Remove this in favour of a generic Nails skin model
+ */
 
 class NAILS_Shop_skin_front_model extends NAILS_Model
 {
-	protected $_available;
-	protected $_skins;
-	protected $_skin_locations;
+    protected $_available;
+    protected $_skins;
+    protected $_skin_locations;
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	/**
-	 * Construct the model.
-	 */
-	public function __construct()
-	{
-		parent::__construct();
+    /**
+     * Construct the model.
+     */
+    public function __construct()
+    {
+        parent::__construct();
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		$this->_available = NULL;
+        $this->_available = null;
 
-		/**
-		 * Skin locations
-		 * The model will search these directories for skins; to add more directories extend this
-		 * This must be an array with 2 indexes:
-		 * `path`	=> The absolute path to the directory containing the skins (required)
-		 * `url`	=> The URL to access the skin (required)
-		 * `regex`	=> If the directory doesn't only contain skin then specify a regex to filter by
-		 */
+        /**
+         * Skin locations
+         * The model will search these directories for skins; to add more directories extend this
+         * This must be an array with 2 indexes:
+         * `path`   => The absolute path to the directory containing the skins (required)
+         * `url`    => The URL to access the skin (required)
+         * `regex`  => If the directory doesn't only contain skin then specify a regex to filter by
+         */
 
-		if ( empty( $this->_skin_locations ) ) :
+        if (empty($this->_skin_locations)) {
 
-			$this->_skin_locations = array();
+            $this->_skin_locations = array();
 
-		endif;
+        }
 
-		//	'Official' skins
-		$this->_skin_locations[]	= array(
-										'path'	=> NAILS_PATH,
-										'url'	=> NAILS_URL,
-										'regex'	=> '/^shop-skin-front-(.*)$/'
-									);
+        //  'Official' skins
+        $this->_skin_locations[]    = array(
+                                        'path'  => NAILS_PATH,
+                                        'url'   => NAILS_URL,
+                                        'regex' => '/^shop-skin-front-(.*)$/'
+                                    );
 
-		//	App Skins
-		$this->_skin_locations[]	= array(
-										'path' => FCPATH . APPPATH . 'modules/shop/skins/front',
-										'url' => site_url( APPPATH . 'modules/shop/skins/front', isPageSecure() )
-									);
-	}
+        //  App Skins
+        $this->_skin_locations[]    = array(
+                                        'path' => FCPATH . APPPATH . 'modules/shop/skins/front',
+                                        'url' => site_url(APPPATH . 'modules/shop/skins/front', isPageSecure())
+                                    );
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	/**
-	 * Fetches all available shipping drivers
-	 * @param  boolean $refresh Fetch from refresh - skip the cache
-	 * @return array
-	 */
-	public function get_available( $refresh = FALSE )
-	{
-		if ( ! is_null( $this->_available ) && ! $refresh ) :
+    /**
+     * Fetches all available shipping drivers
+     * @param  boolean $refresh Fetch from refresh - skip the cache
+     * @return array
+     */
+    public function get_available($refresh = false)
+    {
+        if (!is_null($this->_available) && !$refresh) {
 
-			return $this->_available;
+            return $this->_available;
 
-		endif;
+        }
 
-		//	Reset
-		$this->_available = array();
+        //  Reset
+        $this->_available = array();
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		/**
-		 * Look for skins, where a skin has the same name, the last one found is the
-		 * one which is used
-		 */
+        /**
+         * Look for skins, where a skin has the same name, the last one found is the
+         * one which is used
+         */
 
-		$this->load->helper( 'directory' );
+        $this->load->helper('directory');
 
-		//	Take a fresh copy
-		$_skin_locations = $this->_skin_locations;
+        //  Take a fresh copy
+        $_skin_locations = $this->_skin_locations;
 
-		//	Sanitise
-		for ( $i = 0; $i < count( $_skin_locations ); $i++ ) :
+        //  Sanitise
+        for ($i = 0; $i < count($_skin_locations); $i++) :
 
-			//	Ensure path is present and has a trailing slash
-			if ( isset( $_skin_locations[$i]['path'] ) ) :
+            //  Ensure path is present and has a trailing slash
+            if (isset($_skin_locations[$i]['path'])) {
 
-				$_skin_locations[$i]['path'] = substr( $_skin_locations[$i]['path'], -1, 1 ) == '/' ? $_skin_locations[$i]['path'] : $_skin_locations[$i]['path'] . '/';
+                $_skin_locations[$i]['path'] = substr($_skin_locations[$i]['path'], -1, 1) == '/' ? $_skin_locations[$i]['path'] : $_skin_locations[$i]['path'] . '/';
 
-			else :
+            } else {
 
-				unset( $_skin_locations[$i] );
+                unset($_skin_locations[$i]);
 
-			endif;
+            }
 
-			//	Ensure URL is present and has a trailing slash
-			if ( isset( $_skin_locations[$i]['url'] ) ) :
+            //  Ensure URL is present and has a trailing slash
+            if (isset($_skin_locations[$i]['url'])) {
 
-				$_skin_locations[$i]['url'] = substr( $_skin_locations[$i]['url'], -1, 1 ) == '/' ? $_skin_locations[$i]['url'] : $_skin_locations[$i]['url'] . '/';
+                $_skin_locations[$i]['url'] = substr($_skin_locations[$i]['url'], -1, 1) == '/' ? $_skin_locations[$i]['url'] : $_skin_locations[$i]['url'] . '/';
 
-			else :
+            } else {
 
-				unset( $_skin_locations[$i] );
+                unset($_skin_locations[$i]);
 
-			endif;
+            }
 
-		endfor;
+        endfor;
 
-		//	Reset array keys, possible that some may have been removed
-		$_skin_locations = array_values( $_skin_locations );
+        //  Reset array keys, possible that some may have been removed
+        $_skin_locations = array_values($_skin_locations);
 
-		foreach ( $_skin_locations as $skin_location ) :
+        foreach ($_skin_locations as $skin_location) {
 
-			$_path	= $skin_location['path'];
-			$_skins	= is_dir($_path) ? directory_map($_path, 1) : array();
+            $_path  = $skin_location['path'];
+            $_skins = is_dir($_path) ? directory_map($_path, 1) : array();
 
-			if ( is_array( $_skins ) ) :
+            if (is_array($_skins)) {
 
-				foreach ( $_skins as $skin ) :
+                foreach ($_skins as $skin) {
 
-					//	do we need to filter out non skins?
-					if ( ! empty( $skin_location['regex'] ) ) :
+                    //  do we need to filter out non skins?
+                    if (!empty($skin_location['regex'])) {
 
-						if ( ! preg_match( $skin_location['regex'], $skin ) ) :
+                        if (!preg_match($skin_location['regex'], $skin)) {
 
-							log_message( 'debug', '"' . $skin . '" is not a shop skin.' );
-							continue;
+                            log_message('debug', '"' . $skin . '" is not a shop skin.');
+                            continue;
 
-						endif;
+                        }
 
-					endif;
+                    }
 
-					// --------------------------------------------------------------------------
+                    // --------------------------------------------------------------------------
 
-					//	Exists?
-					if ( file_exists( $_path . $skin . '/config.json' ) ) :
+                    //  Exists?
+                    if (file_exists($_path . $skin . '/config.json')) {
 
-						$_config = @json_decode( file_get_contents( $_path . $skin . '/config.json' ) );
+                        $_config = @json_decode(file_get_contents($_path . $skin . '/config.json'));
 
-					else :
+                    } else {
 
-						log_message( 'error', 'Could not find configuration file for skin "' . $_path . $skin. '".' );
-						continue;
+                        log_message('error', 'Could not find configuration file for skin "' . $_path . $skin. '".');
+                        continue;
 
-					endif;
+                    }
 
-					//	Valid?
-					if ( empty( $_config ) ) :
+                    //  Valid?
+                    if (empty($_config)) {
 
-						log_message( 'error', 'Configuration file for skin "' . $_path . $skin. '" contains invalid JSON.' );
-						continue;
+                        log_message('error', 'Configuration file for skin "' . $_path . $skin. '" contains invalid JSON.');
+                        continue;
 
-					elseif ( ! is_object( $_config ) ) :
+                    } elseif (!is_object($_config)) {
 
-						log_message( 'error', 'Configuration file for skin "' . $_path . $skin. '" contains invalid data.' );
-						continue;
+                        log_message('error', 'Configuration file for skin "' . $_path . $skin. '" contains invalid data.');
+                        continue;
 
-					endif;
+                    }
 
-					// --------------------------------------------------------------------------
+                    // --------------------------------------------------------------------------
 
-					//	All good!
+                    //  All good!
 
-					//	Set the slug
-					$_config->slug = $skin;
+                    //  Set the slug
+                    $_config->slug = $skin;
 
-					//	Set the path
-					$_config->path = $_path . $skin . '/';
+                    //  Set the path
+                    $_config->path = $_path . $skin . '/';
 
-					//	Set the URL
-					$_config->url = $skin_location['url'] . $skin . '/';
+                    //  Set the URL
+                    $_config->url = $skin_location['url'] . $skin . '/';
 
-					$this->_available[$skin] = $_config;
+                    $this->_available[$skin] = $_config;
 
-				endforeach;
+                }
 
-			endif;
+            }
 
-		endforeach;
+        }
 
-		$this->_available = array_values( $this->_available );
+        $this->_available = array_values($this->_available);
 
-		return $this->_available;
-	}
+        return $this->_available;
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	/**
-	 * Gets a single driver
-	 * @param  string  $slug    The driver's slug
-	 * @param  boolean $refresh Skip the cache
-	 * @return stdClass
-	 */
-	public function get( $slug, $refresh = FALSE )
-	{
-		$_skins = $this->get_available( $refresh );
+    /**
+     * Gets a single driver
+     * @param  string  $slug    The driver's slug
+     * @param  boolean $refresh Skip the cache
+     * @return stdClass
+     */
+    public function get($slug, $refresh = false)
+    {
+        $_skins = $this->get_available($refresh);
 
-		foreach ( $_skins as $skin ) :
+        foreach ($_skins as $skin) {
 
-			if ( $skin->slug == $slug ) :
+            if ($skin->slug == $slug) {
 
-				return $skin;
+                return $skin;
 
-			endif;
+            }
 
-		endforeach;
+        }
 
-		$this->_set_error( '"' . $slug . '" was not found.' );
-		return FALSE;
-	}
+        $this->_set_error('"' . $slug . '" was not found.');
+        return false;
+    }
 }
 
 
@@ -258,13 +254,13 @@ class NAILS_Shop_skin_front_model extends NAILS_Model
  *
  **/
 
-if ( ! defined( 'NAILS_ALLOW_EXTENSION_SHOP_SKIN_FRONT_MODEL' ) ) :
+if (!defined('NAILS_ALLOW_EXTENSION_SHOP_SKIN_FRONT_MODEL')) {
 
-	class Shop_skin_front_model extends NAILS_Shop_skin_front_model
-	{
-	}
+    class Shop_skin_front_model extends NAILS_Shop_skin_front_model
+    {
+    }
 
-endif;
+}
 
 /* End of file shop_skin_front_model.php */
 /* Location: ./modules/shop/models/shop_skin_front_model.php */

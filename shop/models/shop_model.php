@@ -307,7 +307,7 @@ class NAILS_Shop_model extends NAILS_Model
                     $position  = $currency->symbol_position;
 
                     //  Cache it
-                    $cache            = new stdClass();
+                    $cache            = new \stdClass();
                     $cache->code      = $code;
                     $cache->symbol    = $symbol;
                     $cache->thousands = $thousands;

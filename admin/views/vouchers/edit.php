@@ -18,7 +18,7 @@
                 'NORMAL'      => 'Normal',
                 'LIMITED_USE' => 'Limited use',
                 'GIFT_CARD'   => 'Gift Card'
-           );
+          );
 
             echo form_field_dropdown($field, $options);
 
@@ -58,7 +58,7 @@
             $options = array(
                 'PERCENTAGE' => 'Percentage',
                 'AMOUNT'     => 'Specific amount'
-           );
+          );
 
             echo form_field_dropdown($field, $options);
 
@@ -87,7 +87,7 @@
                 'PRODUCT_TYPES' => 'Certain Type of Product Only',
                 'SHIPPING'      => 'Shipping Costs Only',
                 'ALL'           => 'Both Products and Shipping'
-           );
+          );
 
             echo form_field_dropdown($field, $options);
 

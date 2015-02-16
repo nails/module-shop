@@ -221,15 +221,15 @@ class NAILS_Shop_voucher_model extends NAILS_Model
     protected function _getcount_common($data = array(), $_caller = null)
     {
         //  Search
-        if (!empty($data['keywords'])) :
+        if (!empty($data['keywords'])) {
 
             $data['like']   = array();
             $data['like'][] = array(
                 'column' => $this->_table_prefix . '.code',
                 'value'  => $data['keywords']
-            );
+           );
 
-        endif;
+        }
 
         parent::_getcount_common($data, $_caller);
 
@@ -324,7 +324,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
             !is_null($voucher->valid_to)
             && $voucher->valid_to != '0000-00-00 00:00:00'
             && strtotime($voucher->valid_to) < time()
-        ) {
+       ) {
 
             $this->_set_error('Voucher has expired.');
             return false;
@@ -480,7 +480,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 
         $data = array(
             'is_active' => true
-        );
+       );
 
         return $this->update($voucher->id, $data);
     }
@@ -504,7 +504,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 
         $data = array(
             'is_active' => false
-        );
+       );
 
         return $this->update($voucher->id, $data);
     }
@@ -542,7 +542,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
         $voucher->gift_card_balance = (float) $voucher->gift_card_balance;
 
         //  Creator
-        $voucher->creator               = new stdClass();
+        $voucher->creator               = new \stdClass();
         $voucher->creator->id           = (int) $voucher->created_by;
         $voucher->creator->email        = $voucher->email;
         $voucher->creator->first_name   = $voucher->first_name;

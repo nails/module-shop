@@ -1,19 +1,14 @@
 <?php
 
 /**
- * Name:            shop_brand_model.php
+ * This model manages Shop Product attributes
  *
- * Description:        This model handles interfacing with shop brands
- *
- **/
-
-/**
- * OVERLOADING NAILS' MODELS
- *
- * Note the name of this class; done like this to allow apps to extend this class.
- * Read full explanation at the bottom of this file.
- *
- **/
+ * @package     Nails
+ * @subpackage  module-shop
+ * @category    Model
+ * @author      Nails Dev Team
+ * @link
+ */
 
 class NAILS_Shop_brand_model extends NAILS_Model
 {
@@ -21,12 +16,12 @@ class NAILS_Shop_brand_model extends NAILS_Model
     {
         parent::__construct();
 
-        $this->_table           = NAILS_DB_PREFIX . 'shop_brand';
-        $this->_table_prefix    = 'sa';
+        $this->_table        = NAILS_DB_PREFIX . 'shop_brand';
+        $this->_table_prefix = 'sa';
 
         // --------------------------------------------------------------------------
 
-        //    Shop's base URL
+        //  Shop's base URL
         $this->shopUrl = $this->shop_model->getShopUrl();
     }
 
@@ -43,12 +38,11 @@ class NAILS_Shop_brand_model extends NAILS_Model
         } else {
 
             $data = array('sort' => 'label');
-
         }
 
         // --------------------------------------------------------------------------
 
-        //    Only include active items?
+        //  Only include active items?
         if (isset($data['only_active'])) {
 
             $_only_active = (bool) $data['only_active'];
@@ -61,7 +55,7 @@ class NAILS_Shop_brand_model extends NAILS_Model
 
         if ($_only_active) {
 
-            if (!isset( $data['where'])) {
+            if (!isset($data['where'])) {
 
                 $data['where'] = array();
 
@@ -84,7 +78,7 @@ class NAILS_Shop_brand_model extends NAILS_Model
 
             if (empty($this->db->ar_select)) {
 
-                //    No selects have been called, call this so that we don't *just* get the product count
+                //  No selects have been called, call this so that we don't *just* get the product count
                 $_prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
                 $this->db->select($_prefix . '*');
 
@@ -237,9 +231,9 @@ class NAILS_Shop_brand_model extends NAILS_Model
 
     protected function _format_object(&$object)
     {
-        //    Type casting
-        $object->id             = (int) $object->id;
-        $object->created_by     = $object->created_by ? (int) $object->created_by : null;
+        //  Type casting
+        $object->id          = (int) $object->id;
+        $object->created_by  = $object->created_by ? (int) $object->created_by : null;
         $object->modified_by    = $object->modified_by ? (int) $object->modified_by : null;
         $object->url            = $this->format_url($object->slug);
     }

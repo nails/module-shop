@@ -1,12 +1,14 @@
 <?php
 
 /**
- * OVERLOADING NAILS' MODELS
+ * This model abstracts Shop Shipping Drivers
  *
- * Note the name of this class; done like this to allow apps to extend this class.
- * Read full explanation at the bottom of this file.
- *
- **/
+ * @package     Nails
+ * @subpackage  module-shop
+ * @category    Model
+ * @author      Nails Dev Team
+ * @link
+ */
 
 class NAILS_Shop_shipping_driver_model extends NAILS_Model
 {
@@ -47,13 +49,13 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
             'path'  => NAILS_PATH,
             'url'   => NAILS_URL,
             'regex' => '/^shop-shipping-driver-(.*)$/'
-        );
+       );
 
         //  App Shipping Drivers
         $this->shippingDriverLocations[] = array(
             'path' => FCPATH . APPPATH . 'modules/shop/shipping_drivers',
             'url' => site_url(APPPATH . 'modules/shop/shipping_drivers', isPageSecure())
-        );
+       );
     }
 
     // --------------------------------------------------------------------------
@@ -294,7 +296,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
      */
     public function calculate($basket)
     {
-        $free       = new stdClass();
+        $free       = new \stdClass();
         $free->base = (float) 0;
         $free->user = (float) 0;
 
@@ -351,7 +353,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
             $cost = 0;
         }
 
-        $out       = new stdClass();
+        $out       = new \stdClass();
         $out->base = $cost;
 
         //  Convert the base price to the user's currency
@@ -360,7 +362,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
         return $out;
     }
-    
+
     // --------------------------------------------------------------------------
 
     /**
@@ -370,7 +372,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
      */
     public function calculateVariant($variantId)
     {
-        $free       = new stdClass();
+        $free       = new \stdClass();
         $free->base = (float) 0;
         $free->user = (float) 0;
 
@@ -381,7 +383,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
         //  If for whatever reason we can't find the product, return free (no charge)
         if (!$item) {
-            
+
             return $free;
         }
 
@@ -414,22 +416,22 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
             //  Item is not physical, assume no charge for delivery
             return $free;
         }
-        
+
         // --------------------------------------------------------------------------
 
         foreach ($item->variations as $v) {
-            
+
             if ($v->id = $variantId) {
                 if (!empty($v->ship_collection_only)) {
-                    
+
                     //  Item is collect only, assume no charge for delivery
                     return $free;
                 }
             }
         }
-        
+
         // --------------------------------------------------------------------------
-                
+
         /**
          * Have the driver calculate the cost of shipping, this should return a float
          * which is in the base currency. Similar to the calculate() method
@@ -446,7 +448,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
             $cost = 0;
         }
 
-        $out       = new stdClass();
+        $out       = new \stdClass();
         $out->base = $cost;
 
         //  Convert the base price to the user's currency

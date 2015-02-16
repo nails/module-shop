@@ -87,7 +87,7 @@ class NAILS_Orders extends NAILS_Shop_Controller
         $out = array(
             'status'  => 400,
             'message' => $message
-        );
+       );
 
         $this->output->set_output(json_encode($out));
     }

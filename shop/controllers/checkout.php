@@ -125,17 +125,17 @@ class NAILS_Checkout extends NAILS_Shop_Controller
                 if ($this->form_validation->run()) {
 
                     //  Prepare data
-                    $data = new stdClass();
+                    $data = new \stdClass();
 
                     //  Contact details
-                    $data->contact             = new stdClass();
+                    $data->contact             = new \stdClass();
                     $data->contact->first_name = $this->input->post('first_name');
                     $data->contact->last_name  = $this->input->post('last_name');
                     $data->contact->email      = $this->input->post('email');
                     $data->contact->telephone  = $this->input->post('telephone');
 
                     //  Delivery Details
-                    $data->delivery           = new stdClass();
+                    $data->delivery           = new \stdClass();
                     $data->delivery->line_1   = $this->input->post('delivery_address_line_1');
                     $data->delivery->line_2   = $this->input->post('delivery_address_line_2');
                     $data->delivery->town     = $this->input->post('delivery_address_town');
@@ -146,7 +146,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
                     //  Billing details
                     if (!$this->input->post('same_billing_address')) {
 
-                        $data->billing           = new stdClass();
+                        $data->billing           = new \stdClass();
                         $data->billing->line_1   = $this->input->post('billing_address_line_1');
                         $data->billing->line_2   = $this->input->post('billing_address_line_2');
                         $data->billing->town     = $this->input->post('billing_address_town');
@@ -156,7 +156,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
                     } else {
 
-                        $data->billing           = new stdClass();
+                        $data->billing           = new \stdClass();
                         $data->billing->line_1   = $this->input->post('delivery_address_line_1');
                         $data->billing->line_2   = $this->input->post('delivery_address_line_2');
                         $data->billing->town     = $this->input->post('delivery_address_town');
@@ -184,20 +184,20 @@ class NAILS_Checkout extends NAILS_Shop_Controller
                             $order->id,
                             $this->input->post('payment_gateway'),
                             $this->input->post()
-                        );
+                       );
 
                         if ($result) {
 
                             /**
-                             * Payment complete! Mark order as paid and then process it, finally send user to
+                             * Payment complete!Mark order as paid and then process it, finally send user to
                              * processing page for receipt
                              */
 
                             $this->shop_order_model->paid($order->id);
                             $this->shop_order_model->process($order->id);
 
-                            $shop_url = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
-                            redirect($shop_url . 'checkout/processing?ref=' . $order->ref);
+                            $shopUrl = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
+                            redirect($shopUrl . 'checkout/processing?ref=' . $order->ref);
 
                         } else {
 

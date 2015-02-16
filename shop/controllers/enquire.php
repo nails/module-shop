@@ -113,14 +113,14 @@ class NAILS_Enquire extends NAILS_Shop_Controller
             if ($this->form_validation->run()) {
 
                 $_data                        = array();
-                $_data['customer']            = new stdClass();
+                $_data['customer']            = new \stdClass();
                 $_data['customer']->name      = $this->input->post('name');
                 $_data['customer']->email     = $this->input->post('email');
                 $_data['customer']->telephone = $this->input->post('telephone');
                 $_data['customer']->address   = $this->input->post('address');
                 $_data['customer']->notes     = $this->input->post('notes');
 
-                $_data['product']        = new stdClass();
+                $_data['product']        = new \stdClass();
                 $_data['product']->id    = $this->data['product']->id;
                 $_data['product']->slug  = $this->data['product']->slug;
                 $_data['product']->label = $this->data['product']->label;
@@ -129,7 +129,7 @@ class NAILS_Enquire extends NAILS_Shop_Controller
 
                     if ($v->id == $this->input->post('variant_id')) {
 
-                        $_data['variant']        = new stdClass();
+                        $_data['variant']        = new \stdClass();
                         $_data['variant']->id    = $v->id;
                         $_data['variant']->sku   = $v->sku;
                         $_data['variant']->label = $v->label;

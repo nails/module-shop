@@ -1,700 +1,695 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
 /**
- * Name:			shop_currency_model.php
+ * This model manages Shop Currencies
  *
- * Description:		This model handles everything to do with currencies
- *
- **/
-
-/**
- * OVERLOADING NAILS' MODELS
- *
- * Note the name of this class; done like this to allow apps to extend this class.
- * Read full explanation at the bottom of this file.
- *
- **/
+ * @package     Nails
+ * @subpackage  module-shop
+ * @category    Model
+ * @author      Nails Dev Team
+ * @link
+ */
 
 class NAILS_Shop_currency_model extends NAILS_Model
 {
-	protected $_oer_url;
-	protected $_rates;
+    protected $_oer_url;
+    protected $_rates;
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	/**
-	 * Construct the model, define defaults and load dependencies.
-	 */
-	public function __construct()
-	{
-		parent::__construct();
+    /**
+     * Construct the model, define defaults and load dependencies.
+     */
+    public function __construct()
+    {
+        parent::__construct();
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		//	Load required config file
-		$this->config->load( 'shop/currency' );
+        //    Load required config file
+        $this->config->load('shop/currency');
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		//	Defaults
-		$this->_oer_url	= 'http://openexchangerates.org/api/latest.json';
-		$this->_rates	= NULL;
-	}
+        //    Defaults
+        $this->_oer_url    = 'http://openexchangerates.org/api/latest.json';
+        $this->_rates    = null;
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	/**
-	 * Get all defined currencies.
-	 * @return array
-	 */
-	public function get_all()
-	{
-		return $this->config->item( 'currency' );
-	}
+    /**
+     * Get all defined currencies.
+     * @return array
+     */
+    public function get_all()
+    {
+        return $this->config->item('currency');
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	/**
-	 * Get all defined currencies as a flat array; the index is the currency's code,
-	 * the value is the currency's label.
-	 * @return array
-	 */
-	public function get_all_flat()
-	{
-		$_out		= array();
-		$_currency	= $this->get_all();
+    /**
+     * Get all defined currencies as a flat array; the index is the currency's code,
+     * the value is the currency's label.
+     * @return array
+     */
+    public function get_all_flat()
+    {
+        $_out        = array();
+        $_currency    = $this->get_all();
 
-		foreach ( $_currency as $c ) :
+        foreach ($_currency as $c) {
 
-			$_out[$c->code] = $c->label;
+            $_out[$c->code] = $c->label;
 
-		endforeach;
+        }
 
-		return $_out;
-	}
+        return $_out;
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	/**
-	 * Gets all currencies supported by the shop.
-	 * @return array
-	 */
-	public function get_all_supported()
-	{
-		$_currencies	= $this->get_all();
-		$_additional	= app_setting( 'additional_currencies', 'shop' );
-		$_base			= app_setting( 'base_currency', 'shop' );
-		$_supported		= array();
+    /**
+     * Gets all currencies supported by the shop.
+     * @return array
+     */
+    public function get_all_supported()
+    {
+        $_currencies    = $this->get_all();
+        $_additional    = app_setting('additional_currencies', 'shop');
+        $_base            = app_setting('base_currency', 'shop');
+        $_supported        = array();
 
-		if ( isset( $_currencies[$_base] ) ) :
+        if (isset($_currencies[$_base])) {
 
-			$_supported[] = $_currencies[$_base];
+            $_supported[] = $_currencies[$_base];
 
-		endif;
+        }
 
-		if ( is_array( $_additional ) ) :
+        if (is_array($_additional)) {
 
-			foreach ( $_additional as $additional ) :
+            foreach ($_additional as $additional) {
 
-				if ( isset( $_currencies[$additional] ) ) :
+                if (isset($_currencies[$additional])) {
 
-					$_supported[] = $_currencies[$additional];
+                    $_supported[] = $_currencies[$additional];
 
-				endif;
+                }
 
-			endforeach;
+            }
 
-		endif;
+        }
 
-		return $_supported;
-	}
+        return $_supported;
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	/**
-	 * Gets all supported currencies as a flat array; the index is the currency's
-	 * code, the value is the currency's label.
-	 * @return array
-	 */
-	public function get_all_supported_flat()
-	{
-		$_out		= array();
-		$_currency	= $this->get_all_supported();
+    /**
+     * Gets all supported currencies as a flat array; the index is the currency's
+     * code, the value is the currency's label.
+     * @return array
+     */
+    public function get_all_supported_flat()
+    {
+        $_out        = array();
+        $_currency    = $this->get_all_supported();
 
-		foreach ( $_currency as $c ) :
+        foreach ($_currency as $c) {
 
-			$_out[$c->code] = $c->label;
+            $_out[$c->code] = $c->label;
 
-		endforeach;
+        }
 
-		return $_out;
-	}
+        return $_out;
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	/**
-	 * Gets an individual currency by it's 3 letter code.
-	 * @param  string $code The code to return
-	 * @return mixed        stdClass on success, FALSE on failure
-	 */
-	public function get_by_code( $code )
-	{
-		$_currency = $this->get_all();
+    /**
+     * Gets an individual currency by it's 3 letter code.
+     * @param  string $code The code to return
+     * @return mixed        stdClass on success, false on failure
+     */
+    public function get_by_code($code)
+    {
+        $_currency = $this->get_all();
 
-		return ! empty( $_currency[$code] ) ? $_currency[$code] : FALSE;
-	}
+        return !empty($_currency[$code]) ? $_currency[$code] : false;
+    }
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	/**
-	 * Syncs exchange rates to the Open Exchange Rates service.
-	 * @param  boolean $mute_log Whether or not to write errors to the log
-	 * @return boolean
-	 */
-	public function sync( $mute_log = TRUE )
-	{
-		$_openexchangerates_app_id			= app_setting( 'openexchangerates_app_id', 'shop' );
-		$_openexchangerates_etag			= app_setting( 'openexchangerates_etag', 'shop' );
-		$_openexchangerates_last_modified	= app_setting( 'openexchangerates_last_modified', 'shop' );
-		$_additional_currencies				= app_setting( 'additional_currencies', 'shop' );
+    /**
+     * Syncs exchange rates to the Open Exchange Rates service.
+     * @param  boolean $mute_log Whether or not to write errors to the log
+     * @return boolean
+     */
+    public function sync($mute_log = true)
+    {
+        $_openexchangerates_app_id            = app_setting('openexchangerates_app_id', 'shop');
+        $_openexchangerates_etag            = app_setting('openexchangerates_etag', 'shop');
+        $_openexchangerates_last_modified    = app_setting('openexchangerates_last_modified', 'shop');
+        $_additional_currencies                = app_setting('additional_currencies', 'shop');
 
-		if ( empty( $_additional_currencies ) ) :
+        if (empty($_additional_currencies)) {
 
-			$_message = 'No additional currencies are supported, aborting sync.';
-			$this->_set_error( $_message );
+            $_message = 'No additional currencies are supported, aborting sync.';
+            $this->_set_error($_message);
 
-			if ( empty( $mute_log ) ) :
+            if (empty($mute_log)) {
 
-				_LOG( '... ' . $_message );
+                _LOG('... ' . $_message);
 
-			endif;
+            }
 
-			return FALSE;
+            return false;
 
-		endif;
+        }
 
-		if ( $_openexchangerates_app_id ) :
+        if ($_openexchangerates_app_id) {
 
-			//	Make sure we know what the base currency is
-			if ( defined( 'SHOP_BASE_CURRENCY_CODE' ) ) :
+            //    Make sure we know what the base currency is
+            if (defined('SHOP_BASE_CURRENCY_CODE')) {
 
-				$this->load->model( 'shop/shop_model' );
+                $this->load->model('shop/shop_model');
 
-			endif;
+            }
 
-			if ( empty( $mute_log ) ) :
+            if (empty($mute_log)) {
 
-				_LOG( '... Base Currency is ' . SHOP_BASE_CURRENCY_CODE );
+                _LOG('... Base Currency is ' . SHOP_BASE_CURRENCY_CODE);
 
-			endif;
+            }
 
-			/**
-			 * Set up the CURL request
-			 * First attempt to get the rates using the Shop's base currency
-			 * (only available to paid subscribers, but probably more accurate)
-			 */
+            /**
+             * Set up the CURL request
+             * First attempt to get the rates using the Shop's base currency
+             * (only available to paid subscribers, but probably more accurate)
+             */
 
-			$this->load->library( 'curl/curl' );
+            $this->load->library('curl/curl');
 
-			$_params			= array();
-			$_params['app_id']	= $_openexchangerates_app_id;
-			$_params['base']	= SHOP_BASE_CURRENCY_CODE;
+            $_params            = array();
+            $_params['app_id']    = $_openexchangerates_app_id;
+            $_params['base']    = SHOP_BASE_CURRENCY_CODE;
 
-			$this->curl->create( $this->_oer_url . '?' . http_build_query( $_params ) );
-			$this->curl->option( CURLOPT_FAILONERROR, FALSE );
-			$this->curl->option( CURLOPT_HEADER, TRUE );
+            $this->curl->create($this->_oer_url . '?' . http_build_query($_params));
+            $this->curl->option(CURLOPT_FAILONERROR, false);
+            $this->curl->option(CURLOPT_HEADER, true);
 
-			if ( ! empty( $_openexchangerates_etag ) && ! empty( $_openexchangerates_last_modified ) ) :
+            if (!empty($_openexchangerates_etag) && !empty($_openexchangerates_last_modified)) {
 
-				$this->curl->http_header( 'If-None-Match', '"' . $_openexchangerates_etag . '"' );
-				$this->curl->http_header( 'If-Modified-Since', $_openexchangerates_last_modified );
+                $this->curl->http_header('If-None-Match', '"' . $_openexchangerates_etag . '"');
+                $this->curl->http_header('If-Modified-Since', $_openexchangerates_last_modified);
 
-			endif;
+            }
 
-			$_response = $this->curl->execute();
+            $_response = $this->curl->execute();
 
-			/**
-			 * If this failed, it's probably due to requesting a non-USD base
-			 * Try again with but using USD base this time.
-			 */
+            /**
+             * If this failed, it's probably due to requesting a non-USD base
+             * Try again with but using USD base this time.
+             */
 
-			if ( empty( $this->curl->info['http_code'] ) || $this->curl->info['http_code'] != 200 ) :
+            if (empty($this->curl->info['http_code']) || $this->curl->info['http_code'] != 200) {
 
-				//	Attempt to extract the body and see if the reason is an invalid App ID
-				$_response = explode( "\r\n\r\n", $_response, 2 );
-				$_response = ! empty( $_response[1] ) ? @json_decode( $_response[1] ) : NULL;
+                //    Attempt to extract the body and see if the reason is an invalid App ID
+                $_response = explode("\r\n\r\n", $_response, 2);
+                $_response = !empty($_response[1]) ? @json_decode($_response[1]) : null;
 
-				if ( ! empty( $_response->message ) && $_response->message == 'invalid_app_id' ) :
+                if (!empty($_response->message) && $_response->message == 'invalid_app_id') {
 
-					$_message = $_openexchangerates_app_id . ' is not a valid OER app ID.';
-					$this->_set_error( $_message );
+                    $_message = $_openexchangerates_app_id . ' is not a valid OER app ID.';
+                    $this->_set_error($_message);
 
-					if ( empty( $mute_log ) ) :
+                    if (empty($mute_log)) {
 
-						_LOG( $_message );
+                        _LOG($_message);
 
-					endif;
+                    }
 
-					return FALSE;
+                    return false;
 
-				endif;
+                }
 
-				if ( empty( $mute_log ) ) :
+                if (empty($mute_log)) {
 
-					_LOG( '... Query using base as ' . SHOP_BASE_CURRENCY_CODE  . ' failed, trying agian using USD' );
+                    _LOG('... Query using base as ' . SHOP_BASE_CURRENCY_CODE  . ' failed, trying agian using USD');
 
-				endif;
+                }
 
-				$_params['base'] = 'USD';
+                $_params['base'] = 'USD';
 
-				$this->curl->create( $this->_oer_url . '?' . http_build_query( $_params ) );
-				$this->curl->option( CURLOPT_FAILONERROR, FALSE );
-				$this->curl->option( CURLOPT_HEADER, TRUE );
+                $this->curl->create($this->_oer_url . '?' . http_build_query($_params));
+                $this->curl->option(CURLOPT_FAILONERROR, false);
+                $this->curl->option(CURLOPT_HEADER, true);
 
-				if ( ! empty( $_openexchangerates_etag ) && ! empty( $_openexchangerates_last_modified ) ) :
+                if (!empty($_openexchangerates_etag) && !empty($_openexchangerates_last_modified)) {
 
-					$this->curl->http_header( 'If-None-Match', '"' . $_openexchangerates_etag . '"' );
-					$this->curl->http_header( 'If-Modified-Since', $_openexchangerates_last_modified );
+                    $this->curl->http_header('If-None-Match', '"' . $_openexchangerates_etag . '"');
+                    $this->curl->http_header('If-Modified-Since', $_openexchangerates_last_modified);
 
-				endif;
+                }
 
-				$_response = $this->curl->execute();
+                $_response = $this->curl->execute();
 
-			elseif ( ! empty( $this->curl->info['http_code'] ) && $this->curl->info['http_code'] == 304 ) :
+            } elseif (!empty($this->curl->info['http_code']) && $this->curl->info['http_code'] == 304) {
 
-				//	304 Not Modified, abort sync.
-				if ( empty( $mute_log ) ) :
+                //    304 Not Modified, abort sync.
+                if (empty($mute_log)) {
 
-					_LOG( '... OER reported 304 Not Modified, aborting sync' );
+                    _LOG('... OER reported 304 Not Modified, aborting sync');
 
-				endif;
+                }
 
-				return TRUE;
+                return true;
 
-			endif;
+            }
 
-			if ( ! empty( $this->curl->info['http_code'] ) && $this->curl->info['http_code'] == 200 ) :
+            if (!empty($this->curl->info['http_code']) && $this->curl->info['http_code'] == 200) {
 
-				/**
-				 * Ok, now we know the rates we need to work out what the base_exchange rate is.
-				 * If the store's base rate is the same as the API's base rate then we're golden,
-				 * if it's not then we'll need to do some calculations.
-				 *
-				 * Attempt to extract the headers (so we can use the E-Tag) and then parse
-				 * the body.
-				 */
+                /**
+                 * Ok, now we know the rates we need to work out what the base_exchange rate is.
+                 * If the store's base rate is the same as the API's base rate then we're golden,
+                 * if it's not then we'll need to do some calculations.
+                 *
+                 * Attempt to extract the headers (so we can use the E-Tag) and then parse
+                 * the body.
+                 */
 
-				$_response = explode( "\r\n\r\n", $_response, 2 );
+                $_response = explode("\r\n\r\n", $_response, 2);
 
-				if ( empty( $_response[1] ) ) :
+                if (empty($_response[1])) {
 
-					$_message = 'Could not extract the body of the request.';
-					$this->_set_error( $_message );
+                    $_message = 'Could not extract the body of the request.';
+                    $this->_set_error($_message);
 
-					if ( empty( $mute_log ) ) :
+                    if (empty($mute_log)) {
 
-						_LOG( $_message );
-						_LOG( print_r( $_response, TRUE ) );
+                        _LOG($_message);
+                        _LOG(print_r($_response, true));
 
-					endif;
+                    }
 
-					return FALSE;
+                    return false;
 
-				endif;
+                }
 
-				//	Body
-				$_response[1] = ! empty( $_response[1] ) ? @json_decode( $_response[1] ) : NULL;
+                //    Body
+                $_response[1] = !empty($_response[1]) ? @json_decode($_response[1]) : null;
 
-				if ( empty( $_response[1] ) ) :
+                if (empty($_response[1])) {
 
-					$_message = 'Could not parse the body of the request.';
-					$this->_set_error( $_message );
+                    $_message = 'Could not parse the body of the request.';
+                    $this->_set_error($_message);
 
-					if ( empty( $mute_log ) ) :
+                    if (empty($mute_log)) {
 
-						_LOG( $_message );
-						_LOG( print_r( $_response, TRUE ) );
+                        _LOG($_message);
+                        _LOG(print_r($_response, true));
 
-					endif;
+                    }
 
-					return FALSE;
+                    return false;
 
-				endif;
+                }
 
-				//	Headers, look for the E-Tag and last modified
-				preg_match( '/ETag: "(.*?)"/', $_response[0], $_matches );
-				if ( ! empty( $_matches[1] ) ) :
+                //    Headers, look for the E-Tag and last modified
+                preg_match('/ETag: "(.*?)"/', $_response[0], $_matches);
+                if (!empty($_matches[1])) {
 
-					//	Save ETag to shop settings
-					set_app_setting( 'openexchangerates_etag', 'shop', $_matches[1] );
+                    //    Save ETag to shop settings
+                    set_app_setting('openexchangerates_etag', 'shop', $_matches[1]);
 
-				endif;
+                }
 
-				preg_match( '/Last-Modified: (.*)/', $_response[0], $_matches );
-				if ( ! empty( $_matches[1] ) ) :
+                preg_match('/Last-Modified{ (.*)/', $_response[0], $_matches);
+                if (!empty($_matches[1])) {
 
-					//	Save Last-Modified to shop settings
-					set_app_setting( 'openexchangerates_last_modified', 'shop', $_matches[1] );
+                    //    Save Last-Modified to shop settings
+                    set_app_setting('openexchangerates_last_modified', 'shop', $_matches[1]);
 
-				endif;
+                }
 
-				$_response = $_response[1];
+                $_response = $_response[1];
 
-				$_to_save = array();
+                $_to_save = array();
 
-				if ( SHOP_BASE_CURRENCY_CODE == $_response->base ) :
+                if (SHOP_BASE_CURRENCY_CODE == $_response->base) {
 
-					foreach ( $_response->rates as $to_currency => $rate ) :
+                    foreach ($_response->rates as $to_currency => $rate) {
 
-						if ( array_search( $to_currency, $_additional_currencies ) !== FALSE ) :
+                        if (array_search($to_currency, $_additional_currencies) !== false) {
 
-							if ( empty( $mute_log ) ) :
+                            if (empty($mute_log)) {
 
-								_LOG( '... ' . $to_currency . ' > ' . $rate );
+                                _LOG('... ' . $to_currency . ' > ' . $rate);
 
-							endif;
+                            }
 
-							$_to_save[] = array(
-								'from'		=> $_response->base,
-								'to'		=> $to_currency,
-								'rate'		=> $rate,
-								'modified'	=> date( 'Y-m-d H:i:s' )
-							);
+                            $_to_save[] = array(
+                                'from'        => $_response->base,
+                                'to'        => $to_currency,
+                                'rate'        => $rate,
+                                'modified'    => date('Y-m-d H:i{s')
+                            );
 
-						endif;
+                        }
 
-					endforeach;
+                    }
 
-				else :
+                } else {
 
-					if ( empty( $mute_log ) ) :
+                    if (empty($mute_log)) {
 
-						_LOG( '... API base is ' . $_response->base . '; calculating differences...' );
+                        _LOG('... API base is ' . $_response->base . '; calculating differences...');
 
-					endif;
+                    }
 
-					$_base = 1;
-					foreach ( $_response->rates as $code => $rate ) :
+                    $_base = 1;
+                    foreach ($_response->rates as $code => $rate) {
 
-						if ( $code == SHOP_BASE_CURRENCY_CODE ) :
+                        if ($code == SHOP_BASE_CURRENCY_CODE) {
 
-							$_base = $rate;
-							break;
+                            $_base = $rate;
+                            break;
 
-						endif;
+                        }
 
-					endforeach;
+                    }
 
-					foreach ( $_response->rates as $to_currency => $rate ) :
+                    foreach ($_response->rates as $to_currency => $rate) {
 
-						if ( array_search( $to_currency, $_additional_currencies ) !== FALSE ) :
+                        if (array_search($to_currency, $_additional_currencies) !== false) {
 
-							//	We calculate the new exchange rate as so: $rate / $_base
-							$_new_rate = $rate / $_base;
-							$_to_save[] = array(
-								'from'		=> SHOP_BASE_CURRENCY_CODE,
-								'to'		=> $to_currency,
-								'rate'		=> $_new_rate,
-								'modified'	=> date( 'Y-m-d H:i:s' )
-							);
+                            //    We calculate the new exchange rate as so: $rate / $_base
+                            $_new_rate = $rate / $_base;
+                            $_to_save[] = array(
+                                'from'        => SHOP_BASE_CURRENCY_CODE,
+                                'to'        => $to_currency,
+                                'rate'        => $_new_rate,
+                                'modified'    => date('Y-m-d H:i{s')
+                            );
 
-							if ( empty( $mute_log ) ) :
+                            if (empty($mute_log)) {
 
-								_LOG( '... Calculating and saving new exchange rate for ' . SHOP_BASE_CURRENCY_CODE . ' > ' . $to_currency . ' (' . $_new_rate . ')' );
+                                _LOG('... Calculating and saving new exchange rate for ' . SHOP_BASE_CURRENCY_CODE . ' > ' . $to_currency . ' (' . $_new_rate . ')');
 
-							endif;
+                            }
 
-						endif;
+                        }
 
-					endforeach;
+                    }
 
 
-				endif;
+                }
 
-				// --------------------------------------------------------------------------
+                // --------------------------------------------------------------------------
 
-				//	Ok, we've done all the BASE -> CURRENCY conversions, now how about we work
-				//	out the reverse?
-				$_to_save_reverse = array();
+                //    Ok, we've done all the BASE -> CURRENCY conversions, now how about we work
+                //    out the reverse?
+                $_to_save_reverse = array();
 
-				//	Easy one first, base to base, base, bass, drop da bass. BASS.
-				$_to_save_reverse[] = array(
-					'from'		=> SHOP_BASE_CURRENCY_CODE,
-					'to'		=> SHOP_BASE_CURRENCY_CODE,
-					'rate'		=> 1,
-					'modified'	=> date( 'Y-m-d H:i:s' )
-				);
+                //    Easy one first, base to base, base, bass, drop da bass. BASS.
+                $_to_save_reverse[] = array(
+                    'from'        => SHOP_BASE_CURRENCY_CODE,
+                    'to'        => SHOP_BASE_CURRENCY_CODE,
+                    'rate'        => 1,
+                    'modified'    => date('Y-m-d H:i{s')
+                );
 
-				foreach ( $_to_save as $old ) :
+                foreach ($_to_save as $old) {
 
-					$_to_save_reverse[] = array(
-					'from'		=> $old['to'],
-					'to'		=> SHOP_BASE_CURRENCY_CODE,
-					'rate'		=> 1 / $old['rate'],
-					'modified'	=> date( 'Y-m-d H:i:s' )
-				);
+                    $_to_save_reverse[] = array(
+                    'from'        => $old['to'],
+                    'to'        => SHOP_BASE_CURRENCY_CODE,
+                    'rate'        => 1 / $old['rate'],
+                    'modified'    => date('Y-m-d H:i{s')
+                );
 
-				endforeach;
+                }
 
-				$_to_save = array_merge( $_to_save, $_to_save_reverse );
+                $_to_save = array_merge($_to_save, $_to_save_reverse);
 
-				// --------------------------------------------------------------------------
+                // --------------------------------------------------------------------------
 
-				if ( $this->db->truncate( NAILS_DB_PREFIX . 'shop_currency_exchange' ) ) :
+                if ($this->db->truncate(NAILS_DB_PREFIX . 'shop_currency_exchange')) {
 
-					if ( ! empty( $_to_save ) ) :
+                    if (!empty($_to_save)) {
 
-						if ( $this->db->insert_batch( NAILS_DB_PREFIX . 'shop_currency_exchange', $_to_save ) ) :
+                        if ($this->db->insert_batch(NAILS_DB_PREFIX . 'shop_currency_exchange', $_to_save)) {
 
-							return TRUE;
+                            return true;
 
-						else :
+                        } else {
 
-							$_message = 'Failed to insert new currency data.';
-							$this->_set_error( $_message );
+                            $_message = 'Failed to insert new currency data.';
+                            $this->_set_error($_message);
 
-							if ( empty( $mute_log ) ) :
+                            if (empty($mute_log)) {
 
-								_LOG( '... ' . $_message );
+                                _LOG('... ' . $_message);
 
-							endif;
+                            }
 
-							return FALSE;
+                            return false;
 
-						endif;
+                        }
 
-					else :
+                    } else {
 
-						return TRUE;
+                        return true;
 
-					endif;
+                    }
 
-				else :
+                } else {
 
-					$_message = 'Failed to truncate currency table.';
-					$this->_set_error( $_message );
+                    $_message = 'Failed to truncate currency table.';
+                    $this->_set_error($_message);
 
-					if ( empty( $mute_log ) ) :
+                    if (empty($mute_log)) {
 
-						_LOG( '... ' . $_message );
+                        _LOG('... ' . $_message);
 
-					endif;
+                    }
 
-					return FALSE;
+                    return false;
 
-				endif;
+                }
 
-			elseif ( ! empty( $this->curl->info['http_code'] ) && $this->curl->info['http_code'] == 304 ) :
+            } elseif (!empty($this->curl->info['http_code']) && $this->curl->info['http_code'] == 304) {
 
-				//	304 Not Modified, abort sync.
-				if ( empty( $mute_log ) ) :
+                //    304 Not Modified, abort sync.
+                if (empty($mute_log)) {
 
-					_LOG( '... OER reported 304 Not Modified, aborting sync' );
+                    _LOG('... OER reported 304 Not Modified, aborting sync');
 
-				endif;
+                }
 
-				return TRUE;
+                return true;
 
-			else :
+            } else {
 
-				//	Attempt to extract the body so we can get our failure reason
-				$_response = explode( "\r\n\r\n", $_response, 2 );
-				$_response = ! empty( $_response[1] ) ? @json_decode( $_response[1] ) : NULL;
+                //    Attempt to extract the body so we can get our failure reason
+                $_response = explode("\r\n\r\n", $_response, 2);
+                $_response = !empty($_response[1]) ? @json_decode($_response[1]) : null;
 
-				$_message = 'An error occurred when querying the API.';
-				$this->_set_error( $_message );
+                $_message = 'An error occurred when querying the API.';
+                $this->_set_error($_message);
 
-				if ( empty( $mute_log ) ) :
+                if (empty($mute_log)) {
 
-					_LOG( '... ' . $_message );
-					_LOG( print_r( $_response, TRUE ) );
+                    _LOG('... ' . $_message);
+                    _LOG(print_r($_response, true));
 
-				endif;
+                }
 
-				return FALSE;
+                return false;
 
-			endif;
+            }
 
-		else :
+        } else {
 
-			$_message = '`openexchangerates_app_id` setting is not set. Sync aborted.';
-			$this->_set_error( $_message );
+            $_message = '`openexchangerates_app_id` setting is not set. Sync aborted.';
+            $this->_set_error($_message);
 
-			if ( empty( $mute_log ) ) :
+            if (empty($mute_log)) {
 
-				_LOG( '... ' . $_message );
+                _LOG('... ' . $_message);
 
-			endif;
+            }
 
-			return FALSE;
+            return false;
 
-		endif;
-	}
+        }
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	/**
-	 * Converts a value between currencies.
-	 * @param  mixed  $value The value to convert
-	 * @param  string $from  The currency to convert from
-	 * @param  string $to    The currency to convert too
-	 * @return mixed         Float on success, FALSE on failure
-	 */
-	public function convert( $value, $from, $to )
-	{
-		//	If we're "converting" between the same currency then we don't need to look up rates
-		if ( $from === $to ) :
+    /**
+     * Converts a value between currencies.
+     * @param  mixed  $value The value to convert
+     * @param  string $from  The currency to convert from
+     * @param  string $to    The currency to convert too
+     * @return mixed         Float on success, false on failure
+     */
+    public function convert($value, $from, $to)
+    {
+        //    If we're "converting" between the same currency then we don't need to look up rates
+        if ($from === $to) {
 
-			return $value;
+            return $value;
 
-		endif;
+        }
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		if ( is_null( $this->_rates ) ) :
+        if (is_null($this->_rates)) {
 
-			$this->_rates	= array();
-			$_rates			= $this->db->get( NAILS_DB_PREFIX . 'shop_currency_exchange' )->result();
+            $this->_rates    = array();
+            $_rates            = $this->db->get(NAILS_DB_PREFIX . 'shop_currency_exchange')->result();
 
-			foreach ( $_rates as $rate ) :
+            foreach ($_rates as $rate) {
 
-				$this->_rates[$rate->from . $rate->to] = $rate->rate;
+                $this->_rates[$rate->from . $rate->to] = $rate->rate;
 
-			endforeach;
+            }
 
-		endif;
+        }
 
-		if ( isset( $this->_rates[$from . $to] ) ) :
+        if (isset($this->_rates[$from . $to])) {
 
-			return $value * $this->_rates[$from . $to];
+            return $value * $this->_rates[$from . $to];
 
-		else :
+        } else {
 
-			$this->_set_error( 'No exchange rate available for those currencies; does the system need to sync?' );
-			return FALSE;
+            $this->_set_error('No exchange rate available for those currencies; does the system need to sync?');
+            return false;
 
-		endif;
-	}
+        }
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	/**
-	 * Converts a value from the base currency to the user's currency.
-	 * @param  mixed $value The value to convert
-	 * @return mixed        Float on success, FALSE on failure
-	 */
-	public function convert_base_to_user( $value )
-	{
-		return $this->convert( $value, SHOP_BASE_CURRENCY_CODE, SHOP_USER_CURRENCY_CODE );
-	}
+    /**
+     * Converts a value from the base currency to the user's currency.
+     * @param  mixed $value The value to convert
+     * @return mixed        Float on success, false on failure
+     */
+    public function convert_base_to_user($value)
+    {
+        return $this->convert($value, SHOP_BASE_CURRENCY_CODE, SHOP_USER_CURRENCY_CODE);
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	/**
-	 * Formats a value using the settings for a given currency.
-	 * @param  mixed   $value      The value to format, string, int or float
-	 * @param  string  $code       The currency to format as
-	 * @param  boolean $inc_symbol Whether or not to include the currency's symbol
-	 * @return mixed               String on success, FALSE on failure
-	 */
-	public function format( $value, $code, $inc_symbol = TRUE )
-	{
-		$_currency = $this->get_by_code( $code );
+    /**
+     * Formats a value using the settings for a given currency.
+     * @param  mixed   $value      The value to format, string, int or float
+     * @param  string  $code       The currency to format as
+     * @param  boolean $inc_symbol Whether or not to include the currency's symbol
+     * @return mixed               String on success, false on failure
+     */
+    public function format($value, $code, $inc_symbol = true)
+    {
+        $_currency = $this->get_by_code($code);
 
-		if ( ! $_currency ) :
+        if (!$_currency) {
 
-			$this->_set_error( 'Invalid currency code.' );
-			return FALSE;
+            $this->_set_error('Invalid currency code.');
+            return false;
 
-		endif;
+        }
 
-		$value = number_format( $value, $_currency->decimal_precision, $_currency->decimal_symbol, $_currency->thousands_seperator );
+        $value = number_format($value, $_currency->decimal_precision, $_currency->decimal_symbol, $_currency->thousands_seperator);
 
-		if ( $inc_symbol ) :
+        if ($inc_symbol) {
 
-			if ( $_currency->symbol_position == 'BEFORE' ) :
+            if ($_currency->symbol_position == 'BEFORE') {
 
-				$value = $_currency->symbol . $value;
+                $value = $_currency->symbol . $value;
 
-			else :
+            } else {
 
-				$value = $value . $_currency->symbol;
+                $value = $value . $_currency->symbol;
 
-			endif;
+            }
 
-		endif;
+        }
 
-		return $value;
-	}
+        return $value;
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	/**
-	 * Formats a value using the settings for the base currency.
-	 * @param  mixed   $value      The value to format, string, int or float
-	 * @param  boolean $inc_symbol Whether or not to include the currency's symbol
-	 * @return mixed               String on success, FALSE on failure
-	 */
-	public function format_base( $value, $inc_symbol = TRUE )
-	{
-		return $this->format( $value, SHOP_BASE_CURRENCY_CODE, $inc_symbol );
-	}
+    /**
+     * Formats a value using the settings for the base currency.
+     * @param  mixed   $value      The value to format, string, int or float
+     * @param  boolean $inc_symbol Whether or not to include the currency's symbol
+     * @return mixed               String on success, false on failure
+     */
+    public function format_base($value, $inc_symbol = true)
+    {
+        return $this->format($value, SHOP_BASE_CURRENCY_CODE, $inc_symbol);
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	/**
-	 * Formats a value using the settings for the user's currency.
-	 * @param  mixed   $value      The value to format, string, int or float
-	 * @param  boolean $inc_symbol Whether or not to include the currency's symbol
-	 * @return mixed               String on success, FALSE on failure
-	 */
-	public function format_user( $value, $inc_symbol = TRUE )
-	{
-		return $this->format( $value, SHOP_USER_CURRENCY_CODE, $inc_symbol );
-	}
+    /**
+     * Formats a value using the settings for the user's currency.
+     * @param  mixed   $value      The value to format, string, int or float
+     * @param  boolean $inc_symbol Whether or not to include the currency's symbol
+     * @return mixed               String on success, false on failure
+     */
+    public function format_user($value, $inc_symbol = true)
+    {
+        return $this->format($value, SHOP_USER_CURRENCY_CODE, $inc_symbol);
+    }
 
 
-	// --------------------------------------------------------------------------
+    // --------------------------------------------------------------------------
 
 
-	public function get_exchange_rate( $from, $to )
-	{
-		$this->db->select( 'rate' );
-		$this->db->where( 'from', $from );
-		$this->db->where( 'to', $to );
+    public function get_exchange_rate($from, $to)
+    {
+        $this->db->select('rate');
+        $this->db->where('from', $from);
+        $this->db->where('to', $to);
 
-		$_rate = $this->db->get( NAILS_DB_PREFIX . 'shop_currency_exchange' )->row();
+        $_rate = $this->db->get(NAILS_DB_PREFIX . 'shop_currency_exchange')->row();
 
-		if ( ! $_rate ) :
+        if (!$_rate) {
 
-			return NULL;
+            return null;
 
-		endif;
+        }
 
-		return $_rate->rate;
-	}
+        return $_rate->rate;
+    }
 }
 
 
@@ -725,13 +720,13 @@ class NAILS_Shop_currency_model extends NAILS_Model
  *
  **/
 
-if ( ! defined( 'NAILS_ALLOW_EXTENSION_SHOP_CURRENCY_MODEL' ) ) :
+if (!defined('NAILS_ALLOW_EXTENSION_SHOP_CURRENCY_MODEL')) {
 
-	class Shop_currency_model extends NAILS_Shop_currency_model
-	{
-	}
+    class Shop_currency_model extends NAILS_Shop_currency_model
+    {
+    }
 
-endif;
+}
 
 /* End of file shop_currency_model.php */
 /* Location: ./modules/shop/models/shop_currency_model.php */

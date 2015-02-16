@@ -35,6 +35,16 @@ class Settings extends \AdminController
     {
         parent::__construct();
         $this->load->model('shop/shop_model');
+
+        // --------------------------------------------------------------------------
+
+        //  @todo Move this into a common constructor
+        $this->shopName = $this->shopUrl = $this->shop_model->getShopName();
+        $this->shopUrl  = $this->shopUrl = $this->shop_model->getShopUrl();
+
+        //  Pass data to the views
+        $this->data['shopName'] = $this->shopName;
+        $this->data['shopUrl']  = $this->shopUrl;
     }
 
     // --------------------------------------------------------------------------
@@ -278,7 +288,6 @@ class Settings extends \AdminController
         } else {
 
             $this->data['error'] = 'There was a problem saving settings.';
-
         }
     }
 
@@ -329,14 +338,14 @@ class Settings extends \AdminController
 
         if (!$this->app_setting_model->set($settings, 'shop')) {
 
-            $error      = $this->app_setting_model->last_error();
-            $rollback   = true;
+            $error    = $this->app_setting_model->last_error();
+            $rollback = true;
         }
 
         if (!$this->app_setting_model->set($settings_encrypted, 'shop', null, true)) {
 
-            $error      = $this->app_setting_model->last_error();
-            $rollback   = true;
+            $error    = $this->app_setting_model->last_error();
+            $rollback = true;
         }
 
         if ($rollback) {

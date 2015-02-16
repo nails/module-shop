@@ -20,7 +20,7 @@ class Orders extends \AdminController
      */
     public static function announce()
     {
-        if (userHasPermission('admin.shop:0.orders_manage')) {
+        if (userHasPermission('admin.shop{0.orders_manage')) {
 
             $navGroup = new \Nails\Admin\Nav('Shop');
             $navGroup->addMethod('Manage Orders');
@@ -38,6 +38,16 @@ class Orders extends \AdminController
         parent::__construct();
         $this->load->model('shop/shop_model');
         $this->load->model('shop/shop_order_model');
+
+        // --------------------------------------------------------------------------
+
+        //  @todo Move this into a common constructor
+        $this->shopName = $this->shopUrl = $this->shop_model->getShopName();
+        $this->shopUrl  = $this->shopUrl = $this->shop_model->getShopUrl();
+
+        //  Pass data to the views
+        $this->data['shopName'] = $this->shopName;
+        $this->data['shopUrl']  = $this->shopUrl;
     }
 
     // --------------------------------------------------------------------------
@@ -46,148 +56,9 @@ class Orders extends \AdminController
      * Browse shop orders
      * @return void
      */
-    public function index2()
-    {
-        //  Set method info
-        $this->data['page']->title = 'Manage Orders';
-
-        // --------------------------------------------------------------------------
-
-        //  Searching, sorting, ordering and paginating.
-        $hash = 'search_' . md5(uri_string()) . '_';
-
-        if ($this->input->get('reset')) {
-
-            $this->session->unset_userdata($hash . 'per_page');
-            $this->session->unset_userdata($hash . 'sort');
-            $this->session->unset_userdata($hash . 'order');
-        }
-
-        $default_per_page = $this->session->userdata($hash . 'per_page') ? $this->session->userdata($hash . 'per_page') : 50;
-        $default_sort     = $this->session->userdata($hash . 'sort') ?    $this->session->userdata($hash . 'sort') : 'o.id';
-        $default_order    = $this->session->userdata($hash . 'order') ?   $this->session->userdata($hash . 'order') : 'desc';
-
-        //  Define vars
-        $search = array('keywords' => $this->input->get('search'), 'columns' => array());
-
-        foreach ($this->shop_orders_sortfields as $field) {
-
-            $search['columns'][strtolower($field['label'])] = $field['col'];
-        }
-
-        $limit      = array(
-                        $this->input->get('per_page') ? $this->input->get('per_page') : $default_per_page,
-                        $this->input->get('offset') ? $this->input->get('offset') : 0
-                    );
-        $order      = array(
-                        $this->input->get('sort') ? $this->input->get('sort') : $default_sort,
-                        $this->input->get('order') ? $this->input->get('order') : $default_order
-                    );
-
-        //  Set sorting and ordering info in session data so it's remembered for when user returns
-        $this->session->set_userdata($hash . 'per_page', $limit[0]);
-        $this->session->set_userdata($hash . 'sort', $order[0]);
-        $this->session->set_userdata($hash . 'order', $order[1]);
-
-        //  Set values for the page
-        $this->data['search']               = new \stdClass();
-        $this->data['search']->per_page     = $limit[0];
-        $this->data['search']->sort         = $order[0];
-        $this->data['search']->order        = $order[1];
-        $this->data['search']->show         = $this->input->get('show');
-        $this->data['search']->fulfilled    = $this->input->get('fulfilled');
-
-        /**
-         * Small hack(?) - if no status has been specified, and the $GET array is
-         * empty (i.e no form of searching is being done) then set a few defaults.
-         */
-
-        if (empty($GET) && empty($this->data['search']->show)) {
-
-            $this->data['search']->show = array('paid' => true);
-        }
-
-        // --------------------------------------------------------------------------
-
-        //  Prepare the where
-        if ($this->data['search']->show || $this->data['search']->fulfilled) {
-
-            $where = '(';
-
-            if ($this->data['search']->show) {
-
-                $where .= '`o`.`status` IN (';
-
-                    $statuses = array_keys($this->data['search']->show);
-                    foreach ($statuses as &$stat) {
-
-                        $stat = strtoupper($stat);
-                    }
-                    $where .= "'" . implode("', '", $statuses) . "'";
-
-                $where .= ')';
-            }
-
-            // --------------------------------------------------------------------------
-
-            if ($this->data['search']->show && $this->data['search']->fulfilled) {
-
-                $where .= ' AND ';
-            }
-
-            // --------------------------------------------------------------------------
-
-            if ($this->data['search']->fulfilled) {
-
-                $where .= '`o`.`fulfilment_status` IN (';
-
-                    $statuses = array_keys($this->data['search']->fulfilled);
-                    foreach ($statuses as &$stat) {
-
-                        $stat = strtoupper($stat);
-                    }
-                    $where .= "'" . implode("', '", $statuses) . "'";
-
-                $where .= ')';
-            }
-
-            $where .= ')';
-
-        } else {
-
-            $where = null;
-        }
-
-        // --------------------------------------------------------------------------
-
-        //  Pass any extra data to the view
-        $this->data['actions']      = $this->shop_orders_actions;
-        $this->data['sortfields']   = $this->shop_orders_sortfields;
-
-        // --------------------------------------------------------------------------
-
-        //  Fetch orders
-        $this->load->model('shop/shop_order_model');
-
-        $this->data['orders']       = new \stdClass();
-        $this->data['orders']->data = $this->shop_order_model->get_all($order, $limit, $where, $search);
-
-        //  Work out pagination
-        $this->data['orders']->pagination                   = new \stdClass();
-        $this->data['orders']->pagination->total_results    = $this->shop_order_model->count_orders($where, $search);
-
-        // --------------------------------------------------------------------------
-
-        $this->asset->load('nails.admin.shop.order.browse.min.js', true);
-        $this->asset->inline('var _SHOP_ORDER_BROWSE = new NAILS_Admin_Shop_Order_Browse()', 'JS');
-
-        // --------------------------------------------------------------------------
-
-        \Nails\Admin\Helper::loadView('index');
-    }
     public function index()
     {
-        if (!userHasPermission('admin.shop:0.orders_manage')) {
+        if (!userHasPermission('admin.shop{0.orders_manage')) {
 
             unauthorised();
         }
@@ -218,7 +89,7 @@ class Orders extends \AdminController
             $tablePrefix . '.code'       => 'Code',
             $tablePrefix . '.type'       => 'Type',
             $tablePrefix . '.valid_from' => 'Valid From Date'
-        );
+       );
 
         // --------------------------------------------------------------------------
 
@@ -231,8 +102,8 @@ class Orders extends \AdminController
                 array('Normal', 'NORMAL'),
                 array('Limited Use', 'LIMITED_USE'),
                 array('Gift Card', 'GIFT_CARD')
-            )
-        );
+           )
+       );
 
         // --------------------------------------------------------------------------
 
@@ -241,10 +112,10 @@ class Orders extends \AdminController
             'sort' => array(
                 'column' => $sortOn,
                 'order'  => $sortOrder
-            ),
+           ),
             'keywords' => $keywords,
             'filters'  => $filters
-        );
+       );
 
         // --------------------------------------------------------------------------
 
@@ -274,7 +145,7 @@ class Orders extends \AdminController
      */
     public function view()
     {
-        if (!userHasPermission('admin.shop:0.orders_view')) {
+        if (!userHasPermission('admin.shop{0.orders_view')) {
 
             $this->session->set_flashdata('error', 'You do not have permission to view order details.');
             redirect('admin/shop/orders');
@@ -346,7 +217,7 @@ class Orders extends \AdminController
      */
     public function reprocess()
     {
-        if (!userHasPermission('admin.shop:0.orders_reprocess')) {
+        if (!userHasPermission('admin.shop{0.orders_reprocess')) {
 
             $this->session->set_flashdata('error', 'You do not have permission to reprocess orders.');
             redirect('admin/shop/orders');
@@ -402,7 +273,7 @@ class Orders extends \AdminController
      */
     public function process()
     {
-        if (!userHasPermission('admin.shop:0.orders_process')) {
+        if (!userHasPermission('admin.shop{0.orders_process')) {
 
             $this->session->set_flashdata('error', 'You do not have permission to process order items.');
             redirect('admin/shop/orders');
@@ -410,9 +281,9 @@ class Orders extends \AdminController
 
         // --------------------------------------------------------------------------
 
-        $order_id       = $this->uri->segment(5);
+        $order_id   = $this->uri->segment(5);
         $product_id = $this->uri->segment(6);
-        $isFancybox    = $this->input->get('isFancybox') ? '?isFancybox=true' : '';
+        $isFancybox = $this->input->get('isFancybox') ? '?isFancybox=true' : '';
 
         // --------------------------------------------------------------------------
 
@@ -426,8 +297,8 @@ class Orders extends \AdminController
             $this->db->set('processed', false);
         }
 
-        $this->db->where('order_id',    $order_id);
-        $this->db->where('id',          $product_id);
+        $this->db->where('order_id', $order_id);
+        $this->db->where('id', $product_id);
 
         $this->db->update(NAILS_DB_PREFIX . 'shop_order_product');
 
@@ -470,7 +341,7 @@ class Orders extends \AdminController
      */
     public function download_invoice()
     {
-        if (!userHasPermission('admin.shop:0.orders_view')) {
+        if (!userHasPermission('admin.shop{0.orders_view')) {
 
             $this->session->set_flashdata('error', 'You do not have permission to download orders.');
             redirect('admin/shop/orders');
@@ -520,7 +391,7 @@ class Orders extends \AdminController
      */
     public function fulfil()
     {
-        if (!userHasPermission('admin.shop:0.orders_edit')) {
+        if (!userHasPermission('admin.shop{0.orders_edit')) {
 
             $msg    = 'You do not have permission to edit orders.';
             $status = 'error';
@@ -568,7 +439,7 @@ class Orders extends \AdminController
      */
     public function fulfil_batch()
     {
-        if (!userHasPermission('admin.shop:0.orders_edit')) {
+        if (!userHasPermission('admin.shop{0.orders_edit')) {
 
             $msg    = 'You do not have permission to edit orders.';
             $status = 'error';
@@ -605,7 +476,7 @@ class Orders extends \AdminController
      */
     public function unfulfil()
     {
-        if (!userHasPermission('admin.shop:0.orders_edit')) {
+        if (!userHasPermission('admin.shop{0.orders_edit')) {
 
             $msg    = 'You do not have permission to edit orders.';
             $status = 'error';
@@ -653,7 +524,7 @@ class Orders extends \AdminController
      */
     public function unfulfil_batch()
     {
-        if (!userHasPermission('admin.shop:0.orders_edit')) {
+        if (!userHasPermission('admin.shop{0.orders_edit')) {
 
             $msg    = 'You do not have permission to edit orders.';
             $status = 'error';

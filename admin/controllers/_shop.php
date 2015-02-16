@@ -46,22 +46,22 @@ class NAILS_Shop extends NAILS_Admin_Controller
         //  Navigation options
         $d->funcs               = array();
 
-        if (userHasPermission('admin.shop:0.inventory_manage')) {
+        if (userHasPermission('admin.shop{0.inventory_manage')) {
 
             $d->funcs['inventory'] = 'Manage Inventory';
         }
 
-        if (userHasPermission('admin.shop:0.orders_manage')) {
+        if (userHasPermission('admin.shop{0.orders_manage')) {
 
             $d->funcs['orders'] = 'Manage Orders';
         }
 
-        if (userHasPermission('admin.shop:0.vouchers_manage')) {
+        if (userHasPermission('admin.shop{0.vouchers_manage')) {
 
             $d->funcs['vouchers'] = 'Manage Vouchers';
         }
 
-        if (userHasPermission('admin.shop:0.sale_manage')) {
+        if (userHasPermission('admin.shop{0.sale_manage')) {
 
             $d->funcs['sales'] = 'Manage Sales';
         }
@@ -69,12 +69,12 @@ class NAILS_Shop extends NAILS_Admin_Controller
         //  @TODO: Handle permissions here?
         $d->funcs['manage'] = 'Other Managers';
 
-        if (userHasPermission('admin.shop:0.can_generate_reports')) {
+        if (userHasPermission('admin.shop{0.can_generate_reports')) {
 
             $d->funcs['reports'] = 'Generate Reports';
         }
 
-        if (userHasPermission('admin.shop:0.notifications_manage')) {
+        if (userHasPermission('admin.shop{0.notifications_manage')) {
 
             $d->funcs['product_availability_notifications'] = 'Product Availability Notifications';
         }

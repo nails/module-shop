@@ -60,16 +60,16 @@ ITEMS
 
 foreach ($order->items as $item) {
 
-    echo strtoupper( $item->product_label ) . "\n";
-    echo $item->product_label != $item->variant_label ? strtoupper( $item->variant_label ) : '';
+    echo strtoupper($item->product_label) . "\n";
+    echo $item->product_label != $item->variant_label ? strtoupper($item->variant_label) : '';
     echo $item->sku ? "\nSKU:       " . $item->sku : '';
 
     echo "\nQuantity:  " . $item->quantity;
     echo "\nUnit Cost: " . $item->price->user_formatted->value_inc_tax;
     echo "\n\n";
 
-    echo strtoupper( $item->product_label ) . "\n";
-    echo $item->product_label != $item->variant_label ? strtoupper( $item->variant_label ) : '';
+    echo strtoupper($item->product_label) . "\n";
+    echo $item->product_label != $item->variant_label ? strtoupper($item->variant_label) : '';
     echo $item->sku ? "\nSKU:       " . $item->sku : '';
 
     echo "\nQuantity:  " . $item->quantity;

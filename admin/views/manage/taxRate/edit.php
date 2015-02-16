@@ -1,72 +1,79 @@
 <div class="group-shop manage tax-rate edit">
-	<?php
+    <?php
 
-		if ( $isFancybox ) :
+        if ($isFancybox) {
 
-			echo '<h1>' . $page->title . '</h1>';
-			$_class = 'system-alert';
+            echo '<h1>' . $page->title . '</h1>';
+            $class = 'system-alert';
 
-		else :
+        } else {
 
-			$_class = '';
+            $class = '';
+        }
 
-		endif;
+        echo form_open(uri_string() . $isFancybox);
 
-		echo form_open( uri_string() . $isFancybox );
+    ?>
+    <p class="<?=$class?>">
+        Manage which tax rates the shop supports.
+    </p>
+    <?=$isFancybox ? '' : '<hr />'?>
+    <ul class="tabs disabled">
+        <li class="tab">
+            <?=anchor('admin/shop/manage/tax_rate' . $isFancybox, 'Overview', 'class="confirm" data-title="Are you sure?" data-body="Any unsaved changes will be lost."')?>
+        </li>
+        <li class="tab active">
+            <?=anchor('admin/shop/manage/taxRate/create' . $isFancybox, 'Create Tax Rate')?>
+        </li>
+    </ul>
+    <section class="tabs pages">
+        <div class="tab page active">
+            <fieldset>
+                <legend>Basic Details</legend>
+                <p>
+                    These fields describe the tax rate.
+                </p>
+                <?php
 
-	?>
-	<p class="<?=$_class?>">
-		Manage which tax rates the shop supports.
-	</p>
-	<?=$isFancybox ? '' : '<hr />'?>
-	<ul class="tabs disabled">
-		<li class="tab">
-			<?=anchor( 'admin/shop/manage/tax_rate' . $isFancybox, 'Overview', 'class="confirm" data-title="Are you sure?" data-body="Any unsaved changes will be lost."' )?>
-		</li>
-		<li class="tab active">
-			<?=anchor( 'admin/shop/manage/taxRate/create' . $isFancybox, 'Create Tax Rate' )?>
-		</li>
-	</ul>
-	<section class="tabs pages">
-		<div class="tab page active">
-			<fieldset>
-				<legend>Basic Details</legend>
-				<p>
-					These fields describe the tax rate.
-				</p>
-				<?php
+                    $field                = array();
+                    $field['key']         = 'label';
+                    $field['label']       = 'Label';
+                    $field['required']    = true;
+                    $field['placeholder'] = 'The tax rate\'s label';
+                    $field['default']     = isset($tax_rate->label) ? $tax_rate->label : '';
 
-					$_field					= array();
-					$_field['key']			= 'label';
-					$_field['label']		= 'Label';
-					$_field['required']		= TRUE;
-					$_field['placeholder']	= 'The tax rate\'s label';
-					$_field['default']		= isset( $tax_rate->label ) ? $tax_rate->label : '';
+                    echo form_field($field);
 
-					echo form_field( $_field );
+                    // --------------------------------------------------------------------------
 
-					// --------------------------------------------------------------------------
+                    $field                = array();
+                    $field['key']         = 'rate';
+                    $field['label']       = 'Rate';
+                    $field['required']    = true;
+                    $field['placeholder'] = 'The tax rate\'s rate';
+                    $field['default']     = isset($tax_rate->rate) ? $tax_rate->rate : '';
+                    $field['info']        = 'This should be expressed as a decimal between 0 and 1. For example, 17.5% would be entered as 0.175.';
 
-					$_field					= array();
-					$_field['key']			= 'rate';
-					$_field['label']		= 'Rate';
-					$_field['required']		= TRUE;
-					$_field['placeholder']	= 'The tax rate\'s rate';
-					$_field['default']		= isset( $tax_rate->rate ) ? $tax_rate->rate : '';
-					$_field['info']			= 'This should be expressed as a decimal between 0 and 1. For example, 17.5% would be entered as 0.175.';
+                    echo form_field($field);
 
-					echo form_field( $_field );
+                ?>
+            </fieldset>
+            <p style="margin-top:1em;">
+            <?php
 
-				?>
-			</fieldset>
-			<p style="margin-top:1em;">
-				<?=form_submit( 'submit', 'Save', 'class="awesome"' )?>
-				<?=anchor( 'admin/shop/manage/tax_rate' . $isFancybox, 'Cancel', 'class="awesome red confirm" data-title="Are you sure?" data-body="All unsaved changes will be lost."' )?>
-			</p>
-		</div>
-	</section>
-	<?=form_close();?>
+                echo form_submit('submit', 'Save', 'class="awesome"');
+                echo anchor(
+                    'admin/shop/manage/tax_rate' . $isFancybox,
+                    'Cancel',
+                    'class="awesome red confirm" data-title="Are you sure?" data-body="All unsaved changes will be lost."'
+                );
+
+            ?>
+            </p>
+        </div>
+    </section>
+    <?=form_close();?>
 </div>
 <?php
 
-	$this->load->view( 'admin/shop/manage/taxRate/_footer' );
+    echo \Nails\Admin\Helper::loadInlineView('utilities/footer', array('items' => $tax_rates));

@@ -1,67 +1,62 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
 /**
- * Name:		Shop_product_type_model
+ * This model manages Shop Product Types
  *
- * Description:	The user group model handles user's passwords
- *
- **/
-
-/**
- * OVERLOADING NAILS' MODELS
- *
- * Note the name of this class; done like this to allow apps to extend this class.
- * Read full explanation at the bottom of this file.
- *
- **/
+ * @package     Nails
+ * @subpackage  module-shop
+ * @category    Model
+ * @author      Nails Dev Team
+ * @link
+ */
 
 class NAILS_Shop_product_type_model extends NAILS_Model
 {
-	public function __construct()
-	{
-		parent::__construct();
+    public function __construct()
+    {
+        parent::__construct();
 
-		$this->_table				= NAILS_DB_PREFIX . 'shop_product_type';
-		$this->_table_prefix		= 'spt';
-		$this->_destructive_delete	= FALSE;
-	}
-
-
-	// --------------------------------------------------------------------------
+        $this->_table               = NAILS_DB_PREFIX . 'shop_product_type';
+        $this->_table_prefix        = 'spt';
+        $this->_destructive_delete  = false;
+    }
 
 
-	protected function _getcount_common( $data = array(), $_caller = NULL )
-	{
-		if ( empty( $data['sort'] ) ) :
+    // --------------------------------------------------------------------------
 
-			$data['sort'] = 'label';
 
-		else :
+    protected function _getcount_common($data = array(), $_caller = null)
+    {
+        if (empty($data['sort'])) {
 
-			$data = array( 'sort' => 'label' );
+            $data['sort'] = 'label';
 
-		endif;
+        } else {
 
-		// --------------------------------------------------------------------------
+            $data = array('sort' => 'label');
 
-		if ( ! empty( $data['include_count'] ) ) :
+        }
 
-			if ( empty( $this->db->ar_select ) ) :
+        // --------------------------------------------------------------------------
 
-				//	No selects have been called, call this so that we don't *just* get the product count
-				$_prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
-				$this->db->select( $_prefix . '*' );
+        if (!empty($data['include_count'])) {
 
-			endif;
+            if (empty($this->db->ar_select)) {
 
-			$this->db->select( '(SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product WHERE type_id = ' . $this->_table_prefix . '.id) product_count' );
+                //  No selects have been called, call this so that we don't *just* get the product count
+                $_prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
+                $this->db->select($_prefix . '*');
 
-		endif;
+            }
 
-		// --------------------------------------------------------------------------
+            $this->db->select('(SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product WHERE type_id = ' . $this->_table_prefix . '.id) product_count');
 
-		return parent::_getcount_common( $data, $_caller );
-	}
+        }
+
+        // --------------------------------------------------------------------------
+
+        return parent::_getcount_common($data, $_caller);
+    }
 }
 
 
@@ -92,13 +87,13 @@ class NAILS_Shop_product_type_model extends NAILS_Model
  *
  **/
 
-if ( ! defined( 'NAILS_ALLOW_EXTENSION_SHOP_PRODUCT_TYPE_MODEL' ) ) :
+if (!defined('NAILS_ALLOW_EXTENSION_SHOP_PRODUCT_TYPE_MODEL')) {
 
-	class Shop_product_type_model extends NAILS_Shop_product_type_model
-	{
-	}
+    class Shop_product_type_model extends NAILS_Shop_product_type_model
+    {
+    }
 
-endif;
+}
 
 /* End of file shop_product_type_model.php */
 /* Location: ./modules/shop/models/shop_product_type_model.php */

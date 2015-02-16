@@ -1,16 +1,6 @@
 <div class="group-shop inventory browse">
     <p>
         Browse the shop's inventory.
-        <?php
-
-            if ( userHasPermission( 'admin.shop:0.inventory_create' ) ) :
-
-                echo anchor( 'admin/shop/inventory/import', 'Import Items', 'class="awesome small orange right"' );
-                echo anchor( 'admin/shop/inventory/create', 'Add New Item', 'class="awesome small green right"' );
-
-            endif;
-
-        ?>
     </p>
     <?php
 
@@ -28,11 +18,11 @@
                     <th class="label">Label &amp; Description</th>
                     <?php
 
-                        if ( count( $productTypes ) > 1 ) :
+                        if (count($productTypes) > 1) {
 
                             echo '<th class="type">Type</th>';
 
-                        endif;
+                        }
                     ?>
                     <th class="datetime">Modified</th>
                     <th class="actions">Actions</th>
@@ -41,25 +31,25 @@
             <tbody>
                 <?php
 
-                    if ( ! empty( $products ) ) :
+                    if (!empty($products)) {
 
-                        foreach ( $products as $item ) :
+                        foreach ($products as $item) {
 
                             ?>
                             <tr id="product-<?=$item->id?>">
-                                <td class="id"><?=number_format( $item->id )?></td>
+                                <td class="id"><?=number_format($item->id)?></td>
                                 <td class="image">
                                     <?php
 
-                                        if ( ! empty( $item->gallery[0] ) ) :
+                                        if (!empty($item->gallery[0])) {
 
-                                            echo anchor( cdn_serve( $item->gallery[0] ), img( cdn_scale( $item->gallery[0], 75, 75 ) ), 'class="fancybox"' );
+                                            echo anchor(cdn_serve($item->gallery[0]), img(cdn_scale($item->gallery[0], 75, 75)), 'class="fancybox"');
 
-                                        else :
+                                        } else {
 
-                                            echo img( NAILS_ASSETS_URL . 'img/admin/modules/shop/image-icon.png' );
+                                            echo img(NAILS_ASSETS_URL . 'img/admin/modules/shop/image-icon.png');
 
-                                        endif;
+                                        }
 
                                     ?>
                                 </td>
@@ -70,15 +60,15 @@
                                 ?>
                                 <td class="label">
                                     <?=$item->label?>
-                                    <small><?=word_limiter( strip_tags( $item->description ), 30 )?></small>
+                                    <small><?=word_limiter(strip_tags($item->description), 30)?></small>
                                 </td>
                                 <?php
 
-                                    if ( count( $productTypes ) > 1 ) :
+                                    if (count($productTypes) > 1) {
 
                                         echo '<td class="type">' . $item->type->label . '</td>';
 
-                                    endif;
+                                    }
                                 ?>
                                 <?php
 
@@ -91,44 +81,44 @@
                                         //  Render buttons
                                         $_buttons = array();
 
-                                        if ( userHasPermission( 'admin.shop:0.inventory_edit' ) ) :
+                                        if (userHasPermission('admin.shop:0.inventory_edit')) {
 
-                                            $_buttons[] = anchor( 'admin/shop/inventory/edit/' . $item->id, lang( 'action_edit' ), 'class="awesome small"' );
+                                            $_buttons[] = anchor('admin/shop/inventory/edit/' . $item->id, lang('action_edit'), 'class="awesome small"');
 
-                                        endif;
-
-                                        // --------------------------------------------------------------------------
-
-                                        if ( userHasPermission( 'admin.shop:0.inventory_delete' ) ) :
-
-                                            $_buttons[] = anchor( 'admin/shop/inventory/delete/' . $item->id, lang( 'action_delete' ), 'class="awesome small red confirm" data-title="Are you sure?" data-body="You can undo this action."' );
-
-                                        endif;
+                                        }
 
                                         // --------------------------------------------------------------------------
 
-                                        if ( $_buttons ) :
+                                        if (userHasPermission('admin.shop:0.inventory_delete')) {
 
-                                            foreach ( $_buttons aS $button ) :
+                                            $_buttons[] = anchor('admin/shop/inventory/delete/' . $item->id, lang('action_delete'), 'class="awesome small red confirm" data-title="Are you sure?" data-body="You can undo this action."');
+
+                                        }
+
+                                        // --------------------------------------------------------------------------
+
+                                        if ($_buttons) {
+
+                                            foreach ($_buttons aS $button) {
 
                                                 echo $button;
 
-                                            endforeach;
+                                            }
 
-                                        else :
+                                        } else {
 
                                             echo '<span class="blank">There are no actions you can perform on this item.</span>';
 
-                                        endif;
+                                        }
 
                                     ?>
                                 </td>
                             </tr>
                             <?php
 
-                        endforeach;
+                        }
 
-                    else :
+                    } else {
                         ?>
                         <tr>
                             <td colspan="7" class="no-data">
@@ -136,7 +126,7 @@
                             </td>
                         </tr>
                         <?php
-                    endif;
+                    }
 
                 ?>
             </tbody>

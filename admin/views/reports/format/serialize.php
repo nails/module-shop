@@ -1,3 +1,3 @@
 <?php
 
-	echo serialize( $data );
+    echo serialize($data);

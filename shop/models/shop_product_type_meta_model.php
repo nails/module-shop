@@ -1,39 +1,34 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
 /**
- * Name:			shop_product_type_meta_model.php
+ * This model manages Shop Product Type Meta fields
  *
- * Description:		This model handles everything to do with product tyoe meta types
- *
- **/
-
-/**
- * OVERLOADING NAILS' MODELS
- *
- * Note the name of this class; done like this to allow apps to extend this class.
- * Read full explanation at the bottom of this file.
- *
- **/
+ * @package     Nails
+ * @subpackage  module-shop
+ * @category    Model
+ * @author      Nails Dev Team
+ * @link
+ */
 
 class NAILS_Shop_product_type_meta_model extends NAILS_Model
 {
-	public function __construct()
-	{
-		parent::__construct();
+    public function __construct()
+    {
+        parent::__construct();
 
-		$this->_table					= NAILS_DB_PREFIX . 'shop_product_type_meta_field';
-		$this->_table_prefix			= 'ptmf';
-		$this->_table_taxonomy			= NAILS_DB_PREFIX . 'shop_product_type_meta_taxonomy';
-		$this->_table_taxonomy_prefix	= 'ptmt';
-	}
-
-
-	// --------------------------------------------------------------------------
+        $this->_table                   = NAILS_DB_PREFIX . 'shop_product_type_meta_field';
+        $this->_table_prefix            = 'ptmf';
+        $this->_table_taxonomy          = NAILS_DB_PREFIX . 'shop_product_type_meta_taxonomy';
+        $this->_table_taxonomy_prefix   = 'ptmt';
+    }
 
 
-	public function get_all( $page = NULL, $per_page = NULL, $data = array(), $include_deleted = FALSE, $_caller = 'GET_ALL' )
-	{
-		$_result = parent::get_all( $page, $per_page, $data, $include_deleted, $_caller );
+    // --------------------------------------------------------------------------
+
+
+    public function get_all($page = null, $per_page = null, $data = array(), $include_deleted = false, $_caller = 'GET_ALL')
+    {
+        $_result = parent::get_all($page, $per_page, $data, $include_deleted, $_caller);
 
         //  Handle requests for the raw query object
         if (!empty($data['RETURN_QUERY_OBJECT'])) {
@@ -41,170 +36,170 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
             return $_result;
         }
 
-		foreach ( $_result as $result ) :
+        foreach ($_result as $result) {
 
-			if ( isset( $data['include_associated_product_types'] ) ) :
+            if (isset($data['include_associated_product_types'])) {
 
-				$this->db->select( 'pt.id,pt.label' );
-				$this->db->join( NAILS_DB_PREFIX . 'shop_product_type pt', 'pt.id = ' . $this->_table_taxonomy_prefix . '.product_type_id' );
-				$this->db->group_by( 'pt.id' );
-				$this->db->order_by( 'pt.label' );
-				$this->db->where( $this->_table_taxonomy_prefix . '.meta_field_id', $result->id );
-				$result->associated_product_types = $this->db->get( $this->_table_taxonomy . ' ' . $this->_table_taxonomy_prefix )->result();
+                $this->db->select('pt.id,pt.label');
+                $this->db->join(NAILS_DB_PREFIX . 'shop_product_type pt', 'pt.id = ' . $this->_table_taxonomy_prefix . '.product_type_id');
+                $this->db->group_by('pt.id');
+                $this->db->order_by('pt.label');
+                $this->db->where($this->_table_taxonomy_prefix . '.meta_field_id', $result->id);
+                $result->associated_product_types = $this->db->get($this->_table_taxonomy . ' ' . $this->_table_taxonomy_prefix)->result();
 
-			endif;
+            }
 
-		endforeach;
+        }
 
-		return $_result;
-	}
-
-
-	// --------------------------------------------------------------------------
+        return $_result;
+    }
 
 
-	public function get_by_product_type_id( $type_id )
-	{
-		$this->db->where( $this->_table_taxonomy_prefix . '.product_type_id', $type_id );
-		return $this->_get_by_product_type();
-	}
+    // --------------------------------------------------------------------------
 
 
-	// --------------------------------------------------------------------------
+    public function get_by_product_type_id($type_id)
+    {
+        $this->db->where($this->_table_taxonomy_prefix . '.product_type_id', $type_id);
+        return $this->_get_by_product_type();
+    }
 
 
-	public function get_by_product_type_ids( $type_ids )
-	{
-		$this->db->where_in( $this->_table_taxonomy_prefix . '.product_type_id', $type_ids );
-		return $this->_get_by_product_type();
-	}
+    // --------------------------------------------------------------------------
 
 
-	// --------------------------------------------------------------------------
+    public function get_by_product_type_ids($type_ids)
+    {
+        $this->db->where_in($this->_table_taxonomy_prefix . '.product_type_id', $type_ids);
+        return $this->_get_by_product_type();
+    }
 
 
-	protected function _get_by_product_type()
-	{
-		$this->db->select( $this->_table_prefix . '.*' );
-		$this->db->join( $this->_table  . ' ' . $this->_table_prefix, $this->_table_prefix . '.id = ' . $this->_table_taxonomy_prefix . '.meta_field_id' );
-		$this->db->group_by( $this->_table_prefix . '.id' );
-		$_result = $this->db->get( $this->_table_taxonomy . ' ' . $this->_table_taxonomy_prefix )->result();
-
-		foreach ( $_result as $result ) :
-
-			$this->_format_object( $result );
-
-		endforeach;
-
-		return $_result;
-	}
+    // --------------------------------------------------------------------------
 
 
-	// --------------------------------------------------------------------------
+    protected function _get_by_product_type()
+    {
+        $this->db->select($this->_table_prefix . '.*');
+        $this->db->join($this->_table  . ' ' . $this->_table_prefix, $this->_table_prefix . '.id = ' . $this->_table_taxonomy_prefix . '.meta_field_id');
+        $this->db->group_by($this->_table_prefix . '.id');
+        $_result = $this->db->get($this->_table_taxonomy . ' ' . $this->_table_taxonomy_prefix)->result();
+
+        foreach ($_result as $result) {
+
+            $this->_format_object($result);
+
+        }
+
+        return $_result;
+    }
 
 
-	public function create( $data = array(), $return_object = FALSE )
-	{
-		$this->db->trans_begin();
-
-		$_associated_product_types = isset( $data->associated_product_types ) ? $data->associated_product_types : array();
-		unset( $data->associated_product_types );
-
-		$_result = parent::create( $data );
-
-		if ( ! $_result ) :
-
-			$this->_set_error( 'Failed to create parent object.' );
-			$this->db->trans_rollback();
-			return FALSE;
-
-		endif;
-
-		$_id = $this->db->insert_id();
-
-		if ( $_associated_product_types ) :
-
-			$_data = array();
-
-			foreach ( $_associated_product_types as $product_type_id ) :
-
-				$_data[] = array(
-					'product_type_id'	=> $product_type_id,
-					'meta_field_id'		=> $_id
-				);
-
-			endforeach;
-
-			if ( ! $this->db->insert_batch( $this->_table_taxonomy, $_data ) ) :
-
-				$this->_set_error( 'Failed to add new product type/meta field relationships.' );
-				$this->db->trans_rollback();
-				return FALSE;
-
-			endif;
-
-		endif;
-
-		$this->db->trans_commit();
-		return $_result;
-	}
+    // --------------------------------------------------------------------------
 
 
-	// --------------------------------------------------------------------------
+    public function create($data = array(), $return_object = false)
+    {
+        $this->db->trans_begin();
+
+        $_associated_product_types = isset($data->associated_product_types) ? $data->associated_product_types : array();
+        unset($data->associated_product_types);
+
+        $_result = parent::create($data);
+
+        if (!$_result) {
+
+            $this->_set_error('Failed to create parent object.');
+            $this->db->trans_rollback();
+            return false;
+
+        }
+
+        $_id = $this->db->insert_id();
+
+        if ($_associated_product_types) {
+
+            $_data = array();
+
+            foreach ($_associated_product_types as $product_type_id) {
+
+                $_data[] = array(
+                    'product_type_id'   => $product_type_id,
+                    'meta_field_id'     => $_id
+                );
+
+            }
+
+            if (!$this->db->insert_batch($this->_table_taxonomy, $_data)) {
+
+                $this->_set_error('Failed to add new product type/meta field relationships.');
+                $this->db->trans_rollback();
+                return false;
+
+            }
+
+        }
+
+        $this->db->trans_commit();
+        return $_result;
+    }
 
 
-	public function update( $id, $data = array() )
-	{
-		$this->db->trans_begin();
+    // --------------------------------------------------------------------------
 
-		$_associated_product_types = isset( $data->associated_product_types ) ? $data->associated_product_types : array();
-		unset( $data->associated_product_types );
 
-		$_result = parent::update( $id, $data );
+    public function update($id, $data = array())
+    {
+        $this->db->trans_begin();
 
-		if ( ! $_result ) :
+        $_associated_product_types = isset($data->associated_product_types) ? $data->associated_product_types : array();
+        unset($data->associated_product_types);
 
-			$this->_set_error( 'Failed to update parent object.' );
-			$this->db->trans_rollback();
-			return FALSE;
+        $_result = parent::update($id, $data);
 
-		endif;
+        if (!$_result) {
 
-		$this->db->where( 'meta_field_id', $id );
-		if ( ! $this->db->delete( $this->_table_taxonomy ) ) :
+            $this->_set_error('Failed to update parent object.');
+            $this->db->trans_rollback();
+            return false;
 
-			$this->_set_error( 'Failed to remove existing product type/meta field relationships.' );
-			$this->db->trans_rollback();
-			return FALSE;
+        }
 
-		endif;
+        $this->db->where('meta_field_id', $id);
+        if (!$this->db->delete($this->_table_taxonomy)) {
 
-		if ( $_associated_product_types ) :
+            $this->_set_error('Failed to remove existing product type/meta field relationships.');
+            $this->db->trans_rollback();
+            return false;
 
-			$_data = array();
+        }
 
-			foreach ( $_associated_product_types as $product_type_id ) :
+        if ($_associated_product_types) {
 
-				$_data[] = array(
-					'product_type_id'	=> $product_type_id,
-					'meta_field_id'		=> $id
-				);
+            $_data = array();
 
-			endforeach;
+            foreach ($_associated_product_types as $product_type_id) {
 
-			if ( ! $this->db->insert_batch( $this->_table_taxonomy, $_data ) ) :
+                $_data[] = array(
+                    'product_type_id'   => $product_type_id,
+                    'meta_field_id'     => $id
+                );
 
-				$this->_set_error( 'Failed to add new product type/meta field relationships.' );
-				$this->db->trans_rollback();
-				return FALSE;
+            }
 
-			endif;
+            if (!$this->db->insert_batch($this->_table_taxonomy, $_data)) {
 
-		endif;
+                $this->_set_error('Failed to add new product type/meta field relationships.');
+                $this->db->trans_rollback();
+                return false;
 
-		$this->db->trans_commit();
-		return TRUE;
-	}
+            }
+
+        }
+
+        $this->db->trans_commit();
+        return true;
+    }
 }
 
 
@@ -235,13 +230,13 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
  *
  **/
 
-if ( ! defined( 'NAILS_ALLOW_EXTENSION_SHOP_PRODUCT_TYPE_META_MODEL' ) ) :
+if (!defined('NAILS_ALLOW_EXTENSION_SHOP_PRODUCT_TYPE_META_MODEL')) {
 
-	class Shop_product_type_meta_model extends NAILS_Shop_product_type_meta_model
-	{
-	}
+    class Shop_product_type_meta_model extends NAILS_Shop_product_type_meta_model
+    {
+    }
 
-endif;
+}
 
 /* End of file shop_product_type_meta_model.php */
 /* Location: ./modules/shop/models/shop_product_type_meta_model.php */

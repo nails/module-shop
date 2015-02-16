@@ -20,7 +20,7 @@ class Inventory extends \AdminController
      */
     public static function announce()
     {
-        if (userHasPermission('admin.shop:0.inventory_manage')) {
+        if (userHasPermission('admin.shop{0.inventory_manage')) {
 
             $navGroup = new \Nails\Admin\Nav('Shop');
             $navGroup->addMethod('Manage Inventory');
@@ -40,6 +40,16 @@ class Inventory extends \AdminController
         $this->load->model('shop/shop_category_model');
         $this->load->model('shop/shop_product_model');
         $this->load->model('shop/shop_product_type_model');
+
+        // --------------------------------------------------------------------------
+
+        //  @todo Move this into a common constructor
+        $this->shopName = $this->shopUrl = $this->shop_model->getShopName();
+        $this->shopUrl  = $this->shopUrl = $this->shop_model->getShopUrl();
+
+        //  Pass data to the views
+        $this->data['shopName'] = $this->shopName;
+        $this->data['shopUrl']  = $this->shopUrl;
     }
 
     // --------------------------------------------------------------------------
@@ -90,6 +100,14 @@ class Inventory extends \AdminController
         $this->data['products']       = $this->shop_product_model->get_all($page, $per_page, $data);
         $this->data['productTypes']   = $this->shop_product_type_model->get_all();
         $this->data['categoriesFlat'] = $this->shop_category_model->get_all_nested_flat();
+
+        // --------------------------------------------------------------------------
+
+        if (userHasPermission('admin.shop:0.inventory_create')) {
+
+            \Nails\Admin\Helper::addHeaderButton('admin/shop/inventory/import', 'Import Items', 'orange');
+            \Nails\Admin\Helper::addHeaderButton('admin/shop/inventory/create', 'Add New Item');
+        }
 
         // --------------------------------------------------------------------------
 
@@ -156,10 +174,9 @@ class Inventory extends \AdminController
                 } else {
 
                     $this->data['error'] = 'There was a problem creating draft product. ' . $this->shop_product_model->last_error();
-
                 }
 
-            }else{
+            } else {
 
                 //  Form validation, this'll be fun...
                 $this->load->library('form_validation');
@@ -183,14 +200,13 @@ class Inventory extends \AdminController
 
                         $this->data['error'] = 'There was a problem creating the Product. ' . $this->shop_product_model->last_error();
 
-                                    }
+                    }
+
                 } else {
 
                     $this->data['error'] = lang('fv_there_were_errors');
                 }
-
             }
-
         }
 
         // --------------------------------------------------------------------------
@@ -206,14 +222,14 @@ class Inventory extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Fetch additional data
-        $this->data['product_types_flat']       = $this->shop_product_type_model->get_all_flat();
-        $this->data['tax_rates']                = $this->shop_tax_rate_model->get_all_flat();
-        $this->data['attributes']               = $this->shop_attribute_model->get_all_flat();
-        $this->data['brands']                   = $this->shop_brand_model->get_all_flat();
-        $this->data['categories']               = $this->shop_category_model->get_all_nested_flat();
-        $this->data['collections']              = $this->shop_collection_model->get_all();
-        $this->data['ranges']                   = $this->shop_range_model->get_all();
-        $this->data['tags']                     = $this->shop_tag_model->get_all_flat();
+        $this->data['product_types_flat'] = $this->shop_product_type_model->get_all_flat();
+        $this->data['tax_rates']          = $this->shop_tax_rate_model->get_all_flat();
+        $this->data['attributes']         = $this->shop_attribute_model->get_all_flat();
+        $this->data['brands']             = $this->shop_brand_model->get_all_flat();
+        $this->data['categories']         = $this->shop_category_model->get_all_nested_flat();
+        $this->data['collections']        = $this->shop_collection_model->get_all();
+        $this->data['ranges']             = $this->shop_range_model->get_all();
+        $this->data['tags']               = $this->shop_tag_model->get_all_flat();
 
         $this->data['tax_rates'] = array('No Tax') + $this->data['tax_rates'];
 
@@ -358,8 +374,8 @@ class Inventory extends \AdminController
 
                         if (!empty($option['validation'])) {
 
-                            $option_validation  = explode('|', $option['validation']);
-                            $rules              = array_merge($rules, $option_validation);
+                            $option_validation = explode('|', $option['validation']);
+                            $rules             = array_merge($rules, $option_validation);
                         }
 
                         if (!empty($option['required'])) {
@@ -403,10 +419,10 @@ class Inventory extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Set messages
-        $this->form_validation->set_message('required',         lang('fv_required'));
-        $this->form_validation->set_message('numeric',              lang('fv_numeric'));
-        $this->form_validation->set_message('is_natural',           lang('fv_is_natural'));
-        $this->form_validation->set_message('max_length',           lang('fv_max_length'));
+        $this->form_validation->set_message('required', lang('fv_required'));
+        $this->form_validation->set_message('numeric', lang('fv_numeric'));
+        $this->form_validation->set_message('is_natural', lang('fv_is_natural'));
+        $this->form_validation->set_message('max_length', lang('fv_max_length'));
     }
 
     // --------------------------------------------------------------------------
@@ -486,7 +502,6 @@ class Inventory extends \AdminController
                 } else {
 
                     $this->data['error'] = 'There was a problem updating the Product. ' . $this->shop_product_model->last_error();
-
                 }
 
             } else {
@@ -524,7 +539,7 @@ class Inventory extends \AdminController
         //  Assets
         $this->asset->library('uploadify');
         $this->asset->load('mustache.js/mustache.js', 'NAILS-BOWER');
-        $this->asset->load('nails.admin.shop.inventory.createEdit.min.js', true);
+        $this->asset->load('nails.admin.shop.inventory.createEdit.min.js', 'NAILS');
 
         // --------------------------------------------------------------------------
 
@@ -559,15 +574,15 @@ class Inventory extends \AdminController
 
         if ($this->shop_product_model->delete($product->id)) {
 
-            $status  = 'success';
-            $msg     = 'Product successfully deleted! You can restore this product by ';
-            $msg    .= anchor('/admin/shop/inventory/restore/' . $product->id, 'clicking here') . '.';
+            $status = 'success';
+            $msg    = 'Product successfully deleted!You can restore this product by ';
+            $msg   .= anchor('/admin/shop/inventory/restore/' . $product->id, 'clicking here') . '.';
 
         } else {
 
-            $status  = 'error';
-            $msg     = 'That product could not be deleted. ';
-            $msg    .= $this->shop_product_model->last_error();
+            $status = 'error';
+            $msg    = 'That product could not be deleted. ';
+            $msg   .= $this->shop_product_model->last_error();
         }
 
         $this->session->set_flashdata($status, $msg);

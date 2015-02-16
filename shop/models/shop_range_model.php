@@ -1,91 +1,86 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
 
 /**
- * Name:			shop_range_model.php
+ * This model manages Shop Product ranges
  *
- * Description:		This model handles interfacing with shop rages
- *
- **/
-
-/**
- * OVERLOADING NAILS' MODELS
- *
- * Note the name of this class; done like this to allow apps to extend this class.
- * Read full explanation at the bottom of this file.
- *
- **/
+ * @package     Nails
+ * @subpackage  module-shop
+ * @category    Model
+ * @author      Nails Dev Team
+ * @link
+ */
 
 class NAILS_Shop_range_model extends NAILS_Model
 {
-	public function __construct()
-	{
-		parent::__construct();
+    public function __construct()
+    {
+        parent::__construct();
 
-		$this->_table			= NAILS_DB_PREFIX . 'shop_range';
-		$this->_table_prefix	= 'sr';
+        $this->_table           = NAILS_DB_PREFIX . 'shop_range';
+        $this->_table_prefix    = 'sr';
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		//	Shop's base URL
-		$this->shopUrl = $this->shop_model->getShopUrl();
-	}
-
-
-	// --------------------------------------------------------------------------
+        //  Shop's base URL
+        $this->shopUrl = $this->shop_model->getShopUrl();
+    }
 
 
-	protected function _getcount_common( $data = array(), $_caller = null)
-	{
-		if ( empty( $data['sort'] ) ) {
+    // --------------------------------------------------------------------------
 
-			$data['sort'] = 'label';
 
-		} else {
+    protected function _getcount_common($data = array(), $_caller = null)
+    {
+        if (empty($data['sort'])) {
 
-			$data = array('sort' => 'label');
+            $data['sort'] = 'label';
 
-		}
+        } else {
 
-		// --------------------------------------------------------------------------
+            $data = array('sort' => 'label');
 
-		//	Only include active items?
-		if (isset($data['only_active'])) {
+        }
 
-			$_only_active = (bool) $data['only_active'];
+        // --------------------------------------------------------------------------
 
-		} else {
+        //  Only include active items?
+        if (isset($data['only_active'])) {
 
-			$_only_active = true;
+            $_only_active = (bool) $data['only_active'];
 
-		}
+        } else {
 
-		if ($_only_active) :
+            $_only_active = true;
 
-			if (!isset($data['where'])) {
+        }
 
-				$data['where'] = array();
+        if ($_only_active) {
 
-			}
+            if (!isset($data['where'])) {
 
-			if (is_array($data['where'])) {
+                $data['where'] = array();
 
-				$data['where'][] = array('is_active', true);
+            }
 
-			} elseif (is_string($data['where'])) {
+            if (is_array($data['where'])) {
 
-				$data['where'] .= ' AND ' . $this->_table_prefix . '.is_active = 1';
+                $data['where'][] = array('is_active', true);
 
-			}
+            } elseif (is_string($data['where'])) {
 
-		endif;
+                $data['where'] .= ' AND ' . $this->_table_prefix . '.is_active = 1';
 
-		// --------------------------------------------------------------------------
+            }
 
-        if (!empty( $data['include_count'])) {
+        }
+
+        // --------------------------------------------------------------------------
+
+        if (!empty($data['include_count'])) {
 
             if (empty($this->db->ar_select)) {
 
-                //    No selects have been called, call this so that we don't *just* get the product count
+                //  No selects have been called, call this so that we don't *just* get the product count
                 $_prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
                 $this->db->select($_prefix . '*');
 
@@ -103,147 +98,156 @@ class NAILS_Shop_range_model extends NAILS_Model
 
         }
 
-		// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-		return parent::_getcount_common($data, $_caller);
-	}
-
-
-	// --------------------------------------------------------------------------
+        return parent::_getcount_common($data, $_caller);
+    }
 
 
-	public function get_by_id( $id, $data = array() )
-	{
-		if ( ! isset( $data['only_active'] ) ) :
-
-			$data['only_active'] = FALSE;
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		return parent::get_by_id( $id, $data );
-	}
+    // --------------------------------------------------------------------------
 
 
-	// --------------------------------------------------------------------------
+    public function get_by_id($id, $data = array())
+    {
+        if (!isset($data['only_active'])) {
+
+            $data['only_active'] = false;
+
+        }
+
+        // --------------------------------------------------------------------------
+
+        return parent::get_by_id($id, $data);
+    }
 
 
-	public function get_by_ids( $ids, $data = array() )
-	{
-		if ( ! isset( $data['only_active'] ) ) :
-
-			$data['only_active'] = FALSE;
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		return parent::get_by_ids( $ids, $data );
-	}
+    // --------------------------------------------------------------------------
 
 
-	// --------------------------------------------------------------------------
+    public function get_by_ids($ids, $data = array())
+    {
+        if (!isset($data['only_active'])) {
+
+            $data['only_active'] = false;
+
+        }
+
+        // --------------------------------------------------------------------------
+
+        return parent::get_by_ids($ids, $data);
+    }
 
 
-	public function get_by_slug( $slug, $data = array() )
-	{
-		if ( ! isset( $data['only_active'] ) ) :
-
-			$data['only_active'] = FALSE;
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		return parent::get_by_slug( $slug, $data );
-	}
+    // --------------------------------------------------------------------------
 
 
-	// --------------------------------------------------------------------------
+    public function get_by_slug($slug, $data = array())
+    {
+        if (!isset($data['only_active'])) {
+
+            $data['only_active'] = false;
+
+        }
+
+        // --------------------------------------------------------------------------
+
+        return parent::get_by_slug($slug, $data);
+    }
 
 
-	public function get_by_slugs( $slugs, $data = array() )
-	{
-		if ( ! isset( $data['only_active'] ) ) :
-
-			$data['only_active'] = FALSE;
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		return parent::get_by_slugs( $slugs, $data );
-	}
+    // --------------------------------------------------------------------------
 
 
-	// --------------------------------------------------------------------------
+    public function get_by_slugs($slugs, $data = array())
+    {
+        if (!isset($data['only_active'])) {
+
+            $data['only_active'] = false;
+
+        }
+
+        // --------------------------------------------------------------------------
+
+        return parent::get_by_slugs($slugs, $data);
+    }
 
 
-	public function get_by_id_or_slug( $id_slug, $data = array() )
-	{
-		if ( ! isset( $data['only_active'] ) ) :
-
-			$data['only_active'] = FALSE;
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		return parent::get_by_id_or_slug( $id_slug, $data );
-	}
+    // --------------------------------------------------------------------------
 
 
-	// --------------------------------------------------------------------------
+    public function get_by_id_or_slug($id_slug, $data = array())
+    {
+        if (!isset($data['only_active'])) {
+
+            $data['only_active'] = false;
+
+        }
+
+        // --------------------------------------------------------------------------
+
+        return parent::get_by_id_or_slug($id_slug, $data);
+    }
 
 
-	public function create( $data = array(), $return_object = FALSE )
-	{
-		if ( ! empty( $data->label ) ) :
-
-			$data->slug = $this->_generate_slug( $data->label );
-
-		endif;
-
-		return parent::create( $data, $return_object );
-	}
+    // --------------------------------------------------------------------------
 
 
-	// --------------------------------------------------------------------------
+    public function create($data = array(), $return_object = false)
+    {
+        if (!empty($data->label)) {
+
+            $data->slug = $this->_generate_slug($data->label);
+        }
+
+        if (empty($data->cover_id)) {
+
+            $data->cover_id = null;
+        }
+
+        return parent::create($data, $return_object);
+    }
 
 
-	public function update( $id, $data = array() )
-	{
-		if ( ! empty( $data->label ) ) :
-
-			$data->slug = $this->_generate_slug( $data->label, '', '', NULL, NULL, $id );
-
-		endif;
-
-		return parent::update( $id, $data );
-	}
+    // --------------------------------------------------------------------------
 
 
-	// --------------------------------------------------------------------------
+    public function update($id, $data = array())
+    {
+        if (!empty($data->label)) {
+
+            $data->slug = $this->_generate_slug($data->label, '', '', null, null, $id);
+
+        }
+
+        if (empty($data->cover_id)) {
+
+            $data->cover_id = null;
+        }
+
+        return parent::update($id, $data);
+    }
 
 
-	public function format_url( $slug )
-	{
-		return site_url( $this->shopUrl . 'range/' . $slug );
-	}
+    // --------------------------------------------------------------------------
 
 
-	// --------------------------------------------------------------------------
+    public function format_url($slug)
+    {
+        return site_url($this->shopUrl . 'range/' . $slug);
+    }
 
 
-	protected function _format_object( &$object )
-	{
-		//	Type casting
-		$object->id				= (int) $object->id;
-		$object->created_by		= $object->created_by ? (int) $object->created_by : NULL;
-		$object->modified_by	= $object->modified_by ? (int) $object->modified_by : NULL;
-		$object->url			= $this->format_url( $object->slug );
-	}
+    // --------------------------------------------------------------------------
+
+
+    protected function _format_object(&$object)
+    {
+        //  Type casting
+        $object->id             = (int) $object->id;
+        $object->created_by     = $object->created_by ? (int) $object->created_by : null;
+        $object->modified_by    = $object->modified_by ? (int) $object->modified_by : null;
+        $object->url            = $this->format_url($object->slug);
+    }
 }
 
 
@@ -274,13 +278,13 @@ class NAILS_Shop_range_model extends NAILS_Model
  *
  **/
 
-if ( ! defined( 'NAILS_ALLOW_EXTENSION_SHOP_RANGE_MODEL' ) ) :
+if (!defined('NAILS_ALLOW_EXTENSION_SHOP_RANGE_MODEL')) {
 
-	class Shop_range_model extends NAILS_Shop_range_model
-	{
-	}
+    class Shop_range_model extends NAILS_Shop_range_model
+    {
+    }
 
-endif;
+}
 
 /* End of file shop_range_model.php */
 /* Location: ./modules/shop/models/shop_range_model.php */

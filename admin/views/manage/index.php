@@ -1,91 +1,81 @@
 <div class="group-shop manage index">
-	<p class="<?=$isFancybox ? 'system-alert' : ''?>">
-		Choose which Manager you'd like to utilise.
-	</p>
-	<?=$isFancybox ? '' : '<hr />'?>
-	<?php
+    <p class="<?=$isFancybox ? 'system-alert' : ''?>">
+        Choose which Manager you'd like to utilise.
+    </p>
+    <?=$isFancybox ? '' : '<hr />'?>
+    <?php
 
-		//	Gather manager options available to this user
-		$_option = array();
+        //    Gather manager options available to this user
+        $option = array();
 
-		if ( userHasPermission( 'admin.shop:0.attribute_manage' ) ) :
+        if (userHasPermission('admin.shop:0.attribute_manage')) {
 
-			$_options[] = anchor( 'admin/shop/manage/attribute' . $isFancybox, 'Attributes' );
+            $options[] = anchor('admin/shop/manage/attribute' . $isFancybox, 'Attributes');
+        }
 
-		endif;
+        if (userHasPermission('admin.shop:0.brand_manage')) {
 
-		if ( userHasPermission( 'admin.shop:0.brand_manage' ) ) :
+            $options[] = anchor('admin/shop/manage/brand' . $isFancybox, 'Brands');
+        }
 
-			$_options[] = anchor( 'admin/shop/manage/brand' . $isFancybox, 'Brands' );
+        if (userHasPermission('admin.shop:0.category_manage')) {
 
-		endif;
+            $options[] = anchor('admin/shop/manage/category' . $isFancybox, 'Categories');
+        }
 
-		if ( userHasPermission( 'admin.shop:0.category_manage' ) ) :
+        if (userHasPermission('admin.shop:0.collection_manage')) {
 
-			$_options[] = anchor( 'admin/shop/manage/category' . $isFancybox, 'Categories' );
+            $options[] = anchor('admin/shop/manage/collection' . $isFancybox, 'Collections');
+        }
 
-		endif;
+        if (userHasPermission('admin.shop:0.range_manage')) {
 
-		if ( userHasPermission( 'admin.shop:0.collection_manage' ) ) :
+            $options[] = anchor('admin/shop/manage/range' . $isFancybox, 'Ranges');
+        }
 
-			$_options[] = anchor( 'admin/shop/manage/collection' . $isFancybox, 'Collections' );
+        if (userHasPermission('admin.shop:0.tag_manage')) {
 
-		endif;
+            $options[] = anchor('admin/shop/manage/tag' . $isFancybox, 'Tags');
+        }
 
-		if ( userHasPermission( 'admin.shop:0.range_manage' ) ) :
+        if (userHasPermission('admin.shop:0.tax_rate_manage')) {
 
-			$_options[] = anchor( 'admin/shop/manage/range' . $isFancybox, 'Ranges' );
+            $options[] = anchor('admin/shop/manage/taxRate' . $isFancybox, 'Tax Rates');
+        }
 
-		endif;
+        if (userHasPermission('admin.shop:0.product_type_manage')) {
 
-		if ( userHasPermission( 'admin.shop:0.tag_manage' ) ) :
+            $options[] = anchor('admin/shop/manage/productType' . $isFancybox, 'Product Types');
+        }
 
-			$_options[] = anchor( 'admin/shop/manage/tag' . $isFancybox, 'Tags' );
+        if (userHasPermission('admin.shop:0.product_type_meta_manage')) {
 
-		endif;
+            $options[] = anchor('admin/shop/manage/productTypeMeta' . $isFancybox, 'Product Type Meta');
+        }
 
-		if ( userHasPermission( 'admin.shop:0.tax_rate_manage' ) ) :
+        // --------------------------------------------------------------------------
 
-			$_options[] = anchor( 'admin/shop/manage/taxRate' . $isFancybox, 'Tax Rates' );
+        if (!empty($options)) {
 
-		endif;
+            echo '<ul class="options clearfix">';
+            foreach ($options as $option) {
 
-		if ( userHasPermission( 'admin.shop:0.product_type_manage' ) ) :
+                echo '<li class="col-xs-12 col-sm-6 col-md-4 col-lg-3">';
+                    echo '<div class="option">';
+                        echo $option;
+                    echo '</div>';
+                echo '</li>';
+            }
+            echo '</ul>';
 
-			$_options[] = anchor( 'admin/shop/manage/productType' . $isFancybox, 'Product Types' );
+        } else {
 
-		endif;
+            echo '<p class="system-alert message">';
+                echo 'It looks as if there are no manager options available for you to use. If you ';
+                echo 'were expecting to see options here then please contact the shop manager.';
+            echo '</p>';
+        }
 
-		if ( userHasPermission( 'admin.shop:0.product_type_meta_manage' ) ) :
-
-			$_options[] = anchor( 'admin/shop/manage/productTypeMeta' . $isFancybox, 'Product Type Meta' );
-
-		endif;
-
-		// --------------------------------------------------------------------------
-
-		if ( ! empty( $_options ) ) :
-
-			echo '<ul class="options clearfix">';
-			foreach ($_options as $option) {
-
-				echo '<li class="col-xs-12 col-sm-6 col-md-4 col-lg-3">';
-					echo '<div class="option">';
-						echo $option;
-					echo '</div>';
-				echo '</li>';
-			}
-			echo '</ul>';
-
-		else :
-
-			echo '<p class="system-alert message">';
-				echo 'It looks as if there are no manager options available for you to use. If you ';
-				echo 'were expecting to see options here then please contact the shop manager.';
-			echo '</p>';
-
-		endif;
-
-	?>
-	</ul>
+    ?>
+    </ul>
 </div>

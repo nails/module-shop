@@ -1,140 +1,139 @@
 <div class="group-shop product-availability-notifications browse">
-	<p>
-		The following people have requested notification when items are back in stock.
-		<?php
+    <p>
+        The following people have requested notification when items are back in stock.
+    </p>
+    <hr />
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th class="checkAll">
+                    <?php
 
-			if ( userHasPermission( 'admin.shop:0.manage_create' ) ) :
+                        if (!empty($notifications)) {
 
-				echo anchor( 'admin/shop/availability/create', 'Add New Notification', 'class="awesome small green right"' );
+                            echo '<input type="checkbox" id="toggle-all" />';
 
-			endif;
+                        }
 
-		?>
-	</p>
-	<hr />
-	<div class="table-responsive">
-		<table>
-			<thead>
-				<tr>
-					<th class="checkbox">
-						<input type="checkbox" id="toggle-all" />
-					</th>
-					<th class="user">User</th>
-					<th class="product">Product</th>
-					<th class="created">Created</th>
-					<th class="actions text-center">Actions</th>
-				</tr>
-			</thead>
-			<tbody>
-				<?php
+                    ?>
+                    </th>
+                    <th class="user">User</th>
+                    <th class="product">Product</th>
+                    <th class="created">Created</th>
+                    <th class="actions text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
 
-					if ( ! empty( $notifications ) ) :
+                    if (!empty($notifications)) {
 
-						foreach ( $notifications as $item ) :
+                        foreach ($notifications as $item) {
 
-							?>
-							<tr id="notification-<?=$item->id?>">
-								<td class="checkbox">
-									<input type="checkbox" class="batch-checkbox" value="<?=$item->id?>" />
-								</td>
+                            ?>
+                            <tr id="notification-<?=$item->id?>">
+                                <td class="checkAll">
+                                    <input type="checkbox" class="batch-checkbox" value="<?=$item->id?>" />
+                                </td>
 
-								<?php
+                                <?php
 
-									echo \Nails\Admin\Helper::loadUserCell($item->user);
+                                    echo \Nails\Admin\Helper::loadUserCell($item->user);
 
-								?>
-								<td class="product">
-								<?php
+                                ?>
+                                <td class="product">
+                                <?php
 
-									echo '<strong>' . anchor( 'admin/shop/inventory/edit/' . $item->product->id, $item->product->label ) . '</strong>';
+                                    echo '<strong>' . anchor('admin/shop/inventory/edit/' . $item->product->id, $item->product->label) . '</strong>';
 
-									if ( $item->product->label != $item->variation->label ) :
+                                    if ($item->product->label != $item->variation->label) {
 
-										echo '<br />' . $item->variation->label;
+                                        echo '<br />' . $item->variation->label;
 
-									endif;
+                                    }
 
-								?>
-								</td>
-								<?php
+                                ?>
+                                </td>
+                                <?php
 
-									echo \Nails\Admin\Helper::loadDatetimeCell($item->created);
+                                    echo \Nails\Admin\Helper::loadDatetimeCell($item->created);
 
-								?>
-								<td class="actions text-center">
-									<?php
+                                ?>
+                                <td class="actions text-center">
+                                    <?php
 
-										//	Render buttons
-										$_buttons = array();
+                                        //    Render buttons
+                                        $_buttons = array();
 
-										if ( userHasPermission( 'admin.shop:0.notifications_edit' ) ) :
+                                        if (userHasPermission('admin.shop:0.notifications_edit')) {
 
-											$_buttons[] = anchor( 'admin/shop/availability/edit/' . $item->id, lang( 'action_edit' ), 'class="awesome small"' );
+                                            $_buttons[] = anchor('admin/shop/availability/edit/' . $item->id, lang('action_edit'), 'class="awesome small"');
 
-										endif;
+                                        }
 
-										// --------------------------------------------------------------------------
+                                        // --------------------------------------------------------------------------
 
-										if ( userHasPermission( 'admin.shop:0.notifications_delete' ) ) :
+                                        if (userHasPermission('admin.shop:0.notifications_delete')) {
 
-											$_buttons[] = anchor( 'admin/shop/availability/delete/' . $item->id, lang( 'action_delete' ), 'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."' );
+                                            $_buttons[] = anchor('admin/shop/availability/delete/' . $item->id, lang('action_delete'), 'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."');
 
-										endif;
+                                        }
 
-										// --------------------------------------------------------------------------
+                                        // --------------------------------------------------------------------------
 
-										if ( $_buttons ) :
+                                        if ($_buttons) {
 
-											foreach ( $_buttons aS $button ) :
+                                            foreach ($_buttons aS $button) {
 
-												echo $button;
+                                                echo $button;
 
-											endforeach;
+                                            }
 
-										else :
+                                        } else {
 
-											echo '<span class="blank">There are no actions you can perform on this item.</span>';
+                                            echo '<span class="blank">There are no actions you can perform on this item.</span>';
 
-										endif;
+                                        }
 
-									?>
-								</td>
-							</tr>
-							<?php
+                                    ?>
+                                </td>
+                            </tr>
+                            <?php
 
-						endforeach;
+                        }
 
-					else :
-						?>
-						<tr>
-							<td colspan="5" class="no-data">
-								<p>No Product Availability Notifications Found</p>
-							</td>
-						</tr>
-						<?php
-					endif;
+                    } else {
+                        ?>
+                        <tr>
+                            <td colspan="5" class="no-data">
+                                <p>No Product Availability Notifications Found</p>
+                            </td>
+                        </tr>
+                        <?php
+                    }
 
-				?>
-			</tbody>
-		</table>
-		<?php
+                ?>
+            </tbody>
+        </table>
+        <?php
 
-			if ( ! empty( $notifications ) ) :
+            if (!empty($notifications)) {
 
-				$_options			= array();
-				$_options['']		= 'Choose';
-				$_options['delete']	= 'Delete';
+                $_options            = array();
+                $_options['']        = 'Choose';
+                $_options['delete']    = 'Delete';
 
-				?>
-				<div class="panel" id="batch-action">
-					With checked:
-					<?=form_dropdown( '', $_options, NULL )?>
-					<a href="#" class="awesome small">Go</a>
-				</div>
-				<?php
+                ?>
+                <div class="panel" id="batch-action">
+                    With checked:
+                    <?=form_dropdown('', $_options, null)?>
+                    <a href="#" class="awesome small">Go</a>
+                </div>
+                <?php
 
-			endif;
+            }
 
-		?>
-	</div>
+        ?>
+    </div>
 </div>

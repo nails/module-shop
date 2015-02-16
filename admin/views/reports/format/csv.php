@@ -1,18 +1,18 @@
 <?php
 
-	echo implode( ',', $fields ) . "\n";
+    echo implode(',', $fields) . "\n";
 
 
-	for ( $i=0; $i< count( $data ); $i++ ) :
+    for ($i=0; $i< count($data); $i++) :
 
-		$_data = array_values($data[$i]);
-		for ( $x=0; $x < count( $_data ); $x++ ) :
+        $_data = array_values($data[$i]);
+        for ($x=0; $x < count($_data); $x++) :
 
-			echo $x == 0 ? '' : ',';
-			echo '"' . str_replace( '"', '""', $_data[$x] ) . '"';
+            echo $x == 0 ? '' : ',';
+            echo '"' . str_replace('"', '""', $_data[$x]) . '"';
 
-		endfor;
+        endfor;
 
-		echo "\n";
+        echo "\n";
 
-	endfor;
+    endfor;

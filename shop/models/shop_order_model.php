@@ -234,7 +234,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         $order->created  = date('Y-m-d H:i:s');
-        $order->modified = date('Y-m-d H:i{s');
+        $order->modified = date('Y-m-d H{i{s');
 
         // --------------------------------------------------------------------------
 
@@ -474,15 +474,15 @@ class NAILS_Shop_order_model extends NAILS_Model
     protected function _getcount_common($data = array(), $_caller = null)
     {
         //  Search
-        if (!empty($data['keywords'])) :
+        if (!empty($data['keywords'])) {
 
             // $data['like']   = array();
             // $data['like'][] = array(
             //     'column' => $this->_table_prefix . '.code',
             //     'value'  => $data['keywords']
-            // );
+            //);
 
-        endif;
+        }
 
         parent::_getcount_common($data, $_caller);
 
@@ -710,7 +710,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         $data = array(
             'fulfilment_status' => 'FULFILLED',
             'fulfilled'         => date('Y-m-d H:i:s')
-        );
+       );
 
         // --------------------------------------------------------------------------
 
@@ -799,7 +799,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         $data = array(
             'fulfilment_status' => 'UNFULFILLED',
             'fulfilled'         => null
-        );
+       );
 
         return $this->update($orderId, $data);
     }
