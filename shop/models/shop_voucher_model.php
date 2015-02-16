@@ -228,7 +228,6 @@ class NAILS_Shop_voucher_model extends NAILS_Model
                 'column' => $this->_table_prefix . '.code',
                 'value'  => $data['keywords']
            );
-
         }
 
         parent::_getcount_common($data, $_caller);

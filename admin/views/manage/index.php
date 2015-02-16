@@ -1,8 +1,8 @@
 <div class="group-shop manage index">
-    <p class="<?=$isFancybox ? 'system-alert' : ''?>">
+    <p class="<?=$isModal ? 'system-alert' : ''?>">
         Choose which Manager you'd like to utilise.
     </p>
-    <?=$isFancybox ? '' : '<hr />'?>
+    <?=$isModal ? '' : '<hr />'?>
     <?php
 
         //    Gather manager options available to this user
@@ -10,47 +10,47 @@
 
         if (userHasPermission('admin.shop:0.attribute_manage')) {
 
-            $options[] = anchor('admin/shop/manage/attribute' . $isFancybox, 'Attributes');
+            $options[] = anchor('admin/shop/manage/attribute' . $isModal, 'Attributes');
         }
 
         if (userHasPermission('admin.shop:0.brand_manage')) {
 
-            $options[] = anchor('admin/shop/manage/brand' . $isFancybox, 'Brands');
+            $options[] = anchor('admin/shop/manage/brand' . $isModal, 'Brands');
         }
 
         if (userHasPermission('admin.shop:0.category_manage')) {
 
-            $options[] = anchor('admin/shop/manage/category' . $isFancybox, 'Categories');
+            $options[] = anchor('admin/shop/manage/category' . $isModal, 'Categories');
         }
 
         if (userHasPermission('admin.shop:0.collection_manage')) {
 
-            $options[] = anchor('admin/shop/manage/collection' . $isFancybox, 'Collections');
+            $options[] = anchor('admin/shop/manage/collection' . $isModal, 'Collections');
         }
 
         if (userHasPermission('admin.shop:0.range_manage')) {
 
-            $options[] = anchor('admin/shop/manage/range' . $isFancybox, 'Ranges');
+            $options[] = anchor('admin/shop/manage/range' . $isModal, 'Ranges');
         }
 
         if (userHasPermission('admin.shop:0.tag_manage')) {
 
-            $options[] = anchor('admin/shop/manage/tag' . $isFancybox, 'Tags');
+            $options[] = anchor('admin/shop/manage/tag' . $isModal, 'Tags');
         }
 
         if (userHasPermission('admin.shop:0.tax_rate_manage')) {
 
-            $options[] = anchor('admin/shop/manage/taxRate' . $isFancybox, 'Tax Rates');
+            $options[] = anchor('admin/shop/manage/taxRate' . $isModal, 'Tax Rates');
         }
 
         if (userHasPermission('admin.shop:0.product_type_manage')) {
 
-            $options[] = anchor('admin/shop/manage/productType' . $isFancybox, 'Product Types');
+            $options[] = anchor('admin/shop/manage/productType' . $isModal, 'Product Types');
         }
 
         if (userHasPermission('admin.shop:0.product_type_meta_manage')) {
 
-            $options[] = anchor('admin/shop/manage/productTypeMeta' . $isFancybox, 'Product Type Meta');
+            $options[] = anchor('admin/shop/manage/productTypeMeta' . $isModal, 'Product Type Meta');
         }
 
         // --------------------------------------------------------------------------

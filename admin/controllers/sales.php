@@ -20,7 +20,7 @@ class Sales extends \AdminController
      */
     public static function announce()
     {
-        if (userHasPermission('admin.shop{0.sale_manage')) {
+        if (userHasPermission('admin.shop:0.sale_manage')) {
 
             $navGroup = new \Nails\Admin\Nav('Shop');
             $navGroup->addMethod('Manage Sales');

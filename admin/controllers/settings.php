@@ -505,7 +505,7 @@ class Settings extends \AdminController
             }
 
             //  Handle modal viewing
-            if ($this->input->get('isFancybox')) {
+            if ($this->input->get('isModal')) {
 
                 $this->data['headerOverride'] = 'structure/headerBlank';
                 $this->data['footerOverride'] = 'structure/footerBlank';
@@ -606,7 +606,7 @@ class Settings extends \AdminController
 
         // --------------------------------------------------------------------------
 
-        if ($this->input->get('isFancybox')) {
+        if ($this->input->get('isModal')) {
 
             $this->data['headerOverride'] = 'structure/headerBlank';
             $this->data['footerOverride'] = 'structure/footerBlank';

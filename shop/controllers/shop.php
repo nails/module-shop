@@ -413,7 +413,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         $data = array('include_count' => true);
         $this->data['categories']        = $this->shop_category_model->get_all(null, null, $data);
-        $this->data['categories_nested'] = $this->shop_category_model->get_all_nested(null, $data);
+        $this->data['categories_nested'] = $this->shop_category_model->get_all_nested($data);
 
         // --------------------------------------------------------------------------
 
@@ -444,7 +444,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Generate missing SEO content
         //  ============================
 
-        $this->shop_category_model->generate_seo_content($this->data['category']);
+        $this->shop_category_model->generateSeoContent($this->data['category']);
 
         //  SEO
         //  ===

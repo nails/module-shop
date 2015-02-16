@@ -20,7 +20,7 @@ class Orders extends \AdminController
      */
     public static function announce()
     {
-        if (userHasPermission('admin.shop{0.orders_manage')) {
+        if (userHasPermission('admin.shop:0.orders_manage')) {
 
             $navGroup = new \Nails\Admin\Nav('Shop');
             $navGroup->addMethod('Manage Orders');
@@ -58,7 +58,7 @@ class Orders extends \AdminController
      */
     public function index()
     {
-        if (!userHasPermission('admin.shop{0.orders_manage')) {
+        if (!userHasPermission('admin.shop:0.orders_manage')) {
 
             unauthorised();
         }
@@ -110,9 +110,8 @@ class Orders extends \AdminController
         //  Define the $data variable for the queries
         $data = array(
             'sort' => array(
-                'column' => $sortOn,
-                'order'  => $sortOrder
-           ),
+                array($sortOn, $sortOrder)
+            ),
             'keywords' => $keywords,
             'filters'  => $filters
        );
@@ -145,7 +144,7 @@ class Orders extends \AdminController
      */
     public function view()
     {
-        if (!userHasPermission('admin.shop{0.orders_view')) {
+        if (!userHasPermission('admin.shop:0.orders_view')) {
 
             $this->session->set_flashdata('error', 'You do not have permission to view order details.');
             redirect('admin/shop/orders');
@@ -177,7 +176,7 @@ class Orders extends \AdminController
 
         // --------------------------------------------------------------------------
 
-        if ($this->input->get('isFancybox')) {
+        if ($this->input->get('isModal')) {
 
             $this->data['headerOverride'] = 'structure/headerBlank';
             $this->data['footerOverride'] = 'structure/footerBlank';
@@ -217,7 +216,7 @@ class Orders extends \AdminController
      */
     public function reprocess()
     {
-        if (!userHasPermission('admin.shop{0.orders_reprocess')) {
+        if (!userHasPermission('admin.shop:0.orders_reprocess')) {
 
             $this->session->set_flashdata('error', 'You do not have permission to reprocess orders.');
             redirect('admin/shop/orders');
@@ -273,7 +272,7 @@ class Orders extends \AdminController
      */
     public function process()
     {
-        if (!userHasPermission('admin.shop{0.orders_process')) {
+        if (!userHasPermission('admin.shop:0.orders_process')) {
 
             $this->session->set_flashdata('error', 'You do not have permission to process order items.');
             redirect('admin/shop/orders');
@@ -283,7 +282,7 @@ class Orders extends \AdminController
 
         $order_id   = $this->uri->segment(5);
         $product_id = $this->uri->segment(6);
-        $isFancybox = $this->input->get('isFancybox') ? '?isFancybox=true' : '';
+        $isModal = $this->input->get('isModal') ? '?isModal=true' : '';
 
         // --------------------------------------------------------------------------
 
@@ -324,12 +323,12 @@ class Orders extends \AdminController
             // --------------------------------------------------------------------------
 
             $this->session->set_flashdata('success', 'Product\'s status was updated successfully.');
-            redirect('admin/shop/orders/view/' . $order_id . $isFancybox);
+            redirect('admin/shop/orders/view/' . $order_id . $isModal);
 
         } else {
 
             $this->session->set_flashdata('error', 'I was not able to update the status of that product.');
-            redirect('admin/shop/orders/view/' . $order_id . $isFancybox);
+            redirect('admin/shop/orders/view/' . $order_id . $isModal);
         }
     }
 
@@ -341,7 +340,7 @@ class Orders extends \AdminController
      */
     public function download_invoice()
     {
-        if (!userHasPermission('admin.shop{0.orders_view')) {
+        if (!userHasPermission('admin.shop:0.orders_view')) {
 
             $this->session->set_flashdata('error', 'You do not have permission to download orders.');
             redirect('admin/shop/orders');
@@ -391,7 +390,7 @@ class Orders extends \AdminController
      */
     public function fulfil()
     {
-        if (!userHasPermission('admin.shop{0.orders_edit')) {
+        if (!userHasPermission('admin.shop:0.orders_edit')) {
 
             $msg    = 'You do not have permission to edit orders.';
             $status = 'error';
@@ -439,7 +438,7 @@ class Orders extends \AdminController
      */
     public function fulfil_batch()
     {
-        if (!userHasPermission('admin.shop{0.orders_edit')) {
+        if (!userHasPermission('admin.shop:0.orders_edit')) {
 
             $msg    = 'You do not have permission to edit orders.';
             $status = 'error';
@@ -476,7 +475,7 @@ class Orders extends \AdminController
      */
     public function unfulfil()
     {
-        if (!userHasPermission('admin.shop{0.orders_edit')) {
+        if (!userHasPermission('admin.shop:0.orders_edit')) {
 
             $msg    = 'You do not have permission to edit orders.';
             $status = 'error';
@@ -524,7 +523,7 @@ class Orders extends \AdminController
      */
     public function unfulfil_batch()
     {
-        if (!userHasPermission('admin.shop{0.orders_edit')) {
+        if (!userHasPermission('admin.shop:0.orders_edit')) {
 
             $msg    = 'You do not have permission to edit orders.';
             $status = 'error';

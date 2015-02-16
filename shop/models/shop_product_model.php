@@ -228,7 +228,7 @@ class NAILS_Shop_product_model extends NAILS_Model
         }
 
         $this->load->model('shop/shop_product_type_meta_model');
-        $_product_type_meta = $this->shop_product_type_meta_model->get_by_product_type_id($_product_type->id);
+        $_product_type_meta = $this->shop_product_type_meta_model->getByProductTypeId($_product_type->id);
 
         $_sku_tracker = array();
 
@@ -2523,7 +2523,7 @@ class NAILS_Shop_product_model extends NAILS_Model
              */
 
             $this->load->model('shop/shop_product_type_meta_model');
-            $_meta_fields = $this->shop_product_type_meta_model->get_by_product_type_ids($_product_type_ids);
+            $_meta_fields = $this->shop_product_type_meta_model->getByProductTypeIds($_product_type_ids);
 
             /**
              * Now start adding to the filters array; this is basically just the

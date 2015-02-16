@@ -12,29 +12,38 @@
 
 class NAILS_Shop_tax_rate_model extends NAILS_Model
 {
+    /**
+     * Construct the model
+     */
     public function __construct()
     {
         parent::__construct();
 
-        $this->_table               = NAILS_DB_PREFIX . 'shop_tax_rate';
-        $this->_table_prefix        = 'str';
-        $this->_destructive_delete  = false;
+        $this->_table              = NAILS_DB_PREFIX . 'shop_tax_rate';
+        $this->_table_prefix       = 'str';
+        $this->_destructive_delete = false;
     }
-
 
     // --------------------------------------------------------------------------
 
-
+    /**
+     * This method applies the conditionals which are common across the get_*()
+     * methods and the count() method.
+     * @param array  $data    Data passed from the calling method
+     * @param string $_caller The name of the calling method
+     * @return void
+     **/
     protected function _getcount_common($data = array(), $_caller = null)
     {
+        //  Default sort
         if (empty($data['sort'])) {
 
-            $data['sort'] = 'label';
+            if (empty($data['sort'])) {
 
-        } else {
+                $data['sort'] = array();
+            }
 
-            $data = array('sort' => 'label');
-
+            $data['sort'][] = array($this->_table_prefix . '.label', 'ASC');
         }
 
         // --------------------------------------------------------------------------
@@ -44,24 +53,31 @@ class NAILS_Shop_tax_rate_model extends NAILS_Model
             if (empty($this->db->ar_select)) {
 
                 //  No selects have been called, call this so that we don't *just* get the product count
-                $_prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
-                $this->db->select($_prefix . '*');
-
+                $this->db->select($this->_table_prefix . '.*');
             }
 
             $this->db->select('(SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product WHERE tax_rate_id = ' . $this->_table_prefix . '.id) product_count');
-
         }
 
         // --------------------------------------------------------------------------
 
-        return parent::_getcount_common($data, $_caller);
+        //  Search
+        if (!empty($data['keywords'])) {
+
+            $data['like']   = array();
+            $data['like'][] = array(
+                'column' => $this->_table_prefix . '.label',
+                'value'  => $data['keywords']
+            );
+        }
+
+        // --------------------------------------------------------------------------
+
+        parent::_getcount_common($data, $_caller);
     }
 }
 
-
 // --------------------------------------------------------------------------
-
 
 /**
  * OVERLOADING NAILS' MODELS
@@ -92,8 +108,4 @@ if (!defined('NAILS_ALLOW_EXTENSION_SHOP_TAX_RATE_MODEL')) {
     class Shop_tax_rate_model extends NAILS_Shop_tax_rate_model
     {
     }
-
 }
-
-/* End of file shop_tax_rate_model.php */
-/* Location: ./modules/shop/models/shop_tax_rate_model.php */

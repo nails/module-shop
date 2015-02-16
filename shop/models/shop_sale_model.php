@@ -12,18 +12,26 @@
 
 class NAILS_Shop_sale_model extends NAILS_Model
 {
+    /**
+     * Construct the model
+     */
     public function __construct()
     {
         parent::__construct();
 
-        $this->_table           = NAILS_DB_PREFIX . 'shop_sale';
-        $this->_table_prefix    = 'ss';
+        $this->_table        = NAILS_DB_PREFIX . 'shop_sale';
+        $this->_table_prefix = 'ss';
     }
-
 
     // --------------------------------------------------------------------------
 
-
+    /**
+     * This method applies the conditionals which are common across the get_*()
+     * methods and the count() method.
+     * @param array  $data    Data passed from the calling method
+     * @param string $_caller The name of the calling method
+     * @return void
+     **/
     protected function _getcount_common($data = array(), $_caller = null)
     {
         if (empty($data['sort'])) {
@@ -33,7 +41,6 @@ class NAILS_Shop_sale_model extends NAILS_Model
         } else {
 
             $data = array('sort' => 'label');
-
         }
 
         // --------------------------------------------------------------------------
@@ -45,22 +52,18 @@ class NAILS_Shop_sale_model extends NAILS_Model
                 //  No selects have been called, call this so that we don't *just* get the product count
                 $_prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
                 $this->db->select($_prefix . '*');
-
             }
 
             $this->db->select('(SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product_sale sps LEFT JOIN ' . NAILS_DB_PREFIX . 'shop_product p ON p.id = sps.product_id  WHERE sps.sale_id = s.id AND p.is_active = 1) product_count');
-
         }
 
         // --------------------------------------------------------------------------
 
-        return parent::_getcount_common($data, $_caller);
+        parent::_getcount_common($data, $_caller);
     }
 }
 
-
 // --------------------------------------------------------------------------
-
 
 /**
  * OVERLOADING NAILS' MODELS
@@ -91,8 +94,4 @@ if (!defined('NAILS_ALLOW_EXTENSION_SHOP_SALE_MODEL')) {
     class Shop_sale_model extends NAILS_Shop_sale_model
     {
     }
-
 }
-
-/* End of file shop_sale_model.php */
-/* Location: ./modules/shop/models/shop_sale_model.php */

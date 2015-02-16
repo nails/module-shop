@@ -34,7 +34,11 @@ class Manage extends \AdminController
     {
         parent::__construct();
         $this->load->model('shop/shop_model');
-        $this->data['isFancybox'] = $this->input->get('isFancybox') ? true : false;
+
+        // --------------------------------------------------------------------------
+
+        //  Used by redirects and some views to keep the user in the modal
+        $this->data['isModal'] = $this->input->get('isModal') ? '?isModal=1' : false;
 
         // --------------------------------------------------------------------------
 
@@ -45,6 +49,15 @@ class Manage extends \AdminController
         //  Pass data to the views
         $this->data['shopName'] = $this->shopName;
         $this->data['shopUrl']  = $this->shopUrl;
+
+        // --------------------------------------------------------------------------
+
+        //  Header/Footer overrides for when shown in a modal
+        if ($this->input->get('isModal')) {
+
+            $this->data['headerOverride'] = 'structure/headerBlank';
+            $this->data['footerOverride'] = 'structure/footerBlank';
+        }
     }
 
     // --------------------------------------------------------------------------
@@ -66,7 +79,7 @@ class Manage extends \AdminController
      */
     public function attribute()
     {
-        if (!userHasPermission('admin.shop{0.attribute_manage')) {
+        if (!userHasPermission('admin.shop:0.attribute_manage')) {
 
             unauthorised();
         }
@@ -90,9 +103,55 @@ class Manage extends \AdminController
      */
     protected function attributeIndex()
     {
-        //  Fetch data
-        $data = array('include_count' => true);
-        $this->data['attributes'] = $this->shop_attribute_model->get_all(null, null, $data);
+        //  Get the table prefix from the model
+        $tablePrefix = $this->shop_attribute_model->getTablePrefix();
+
+        // --------------------------------------------------------------------------
+
+        //  Get pagination and search/sort variables
+        $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
+        $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
+        $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
+
+        // --------------------------------------------------------------------------
+
+        //  Define the sortable columns and the filters
+        $sortColumns = array(
+            $tablePrefix . '.label'   => 'Label',
+            $tablePrefix . '.created' => 'Created',
+            $tablePrefix . '.modified' => 'Modified'
+       );
+
+        // --------------------------------------------------------------------------
+
+        //  Define the $data variable for the queries
+        $data = array(
+            'include_count' => true,
+            'sort' => array(
+                array($sortOn, $sortOrder)
+            ),
+            'keywords' => $keywords
+        );
+
+        // --------------------------------------------------------------------------
+
+        //  Get the items for the page
+        $totalRows                = $this->shop_attribute_model->count_all($data);
+        $this->data['attributes'] = $this->shop_attribute_model->get_all($page, $perPage, $data);
+
+        //  Set Search and Pagination objects for the view
+        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+
+        // --------------------------------------------------------------------------
+
+        //  Add header button
+        if (userHasPermission('admin.shop:0.attribute_create')) {
+
+            \Nails\Admin\Helper::addHeaderButton('admin/shop/manage/attribute/create', 'Create Attribute');
+        }
 
         // --------------------------------------------------------------------------
 
@@ -108,7 +167,7 @@ class Manage extends \AdminController
      */
     protected function attributeCreate()
     {
-        if (!userHasPermission('admin.shop{0.attribute_create')) {
+        if (!userHasPermission('admin.shop:0.attribute_create')) {
 
             unauthorised();
         }
@@ -126,18 +185,19 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data              = new \stdClass();
-                $data->label       = $this->input->post('label');
-                $data->description = $this->input->post('description');
+                $data                = array();
+                $data['label']       = $this->input->post('label');
+                $data['description'] = $this->input->post('description');
 
                 if ($this->shop_attribute_model->create($data)) {
 
                     $this->session->set_flashdata('success', 'Attribute created successfully.');
-                    redirect('admin/shop/manage/attribute' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/attribute' . $this->data['isModal']);
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem creating the Attribute. ' . $this->shop_category_model->last_error();
+                    $this->data['error']  = 'There was a problem creating the Attribute. ';
+                    $this->data['error'] .= $this->shop_category_model->last_error();
                 }
 
             } else {
@@ -170,7 +230,7 @@ class Manage extends \AdminController
      */
     protected function attributeEdit()
     {
-        if (!userHasPermission('admin.shop{0.attribute_edit')) {
+        if (!userHasPermission('admin.shop:0.attribute_edit')) {
 
             unauthorised();
         }
@@ -197,18 +257,19 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data              = new \stdClass();
+                $data              = array();
                 $data->label       = $this->input->post('label');
                 $data->description = $this->input->post('description');
 
                 if ($this->shop_attribute_model->update($this->data['attribute']->id, $data)) {
 
                     $this->session->set_flashdata('success', 'Attribute saved successfully.');
-                    redirect('admin/shop/manage/attribute' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/attribute' . $this->data['isModal']);
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem saving the Attribute. ' . $this->shop_attribute_model->last_error();
+                    $this->data['error']  = 'There was a problem saving the Attribute. ';
+                    $this->data['error'] .= $this->shop_attribute_model->last_error();
                 }
 
             } else {
@@ -241,7 +302,7 @@ class Manage extends \AdminController
      */
     protected function attributeDelete()
     {
-        if (!userHasPermission('admin.shop{0.attribute_delete')) {
+        if (!userHasPermission('admin.shop:0.attribute_delete')) {
 
             unauthorised();
         }
@@ -252,14 +313,17 @@ class Manage extends \AdminController
 
         if ($this->shop_attribute_model->delete($id)) {
 
-            $this->session->set_flashdata('success', 'Attribute was deleted successfully.');
+            $status  = 'success';
+            $message = 'Attribute was deleted successfully.';
 
         } else {
 
-            $this->session->set_flashdata('error', 'There was a problem deleting the Attribute. ' . $this->shop_attribute_model->last_error());
+            $status  = 'error';
+            $message = 'There was a problem deleting the attribute. ' . $this->shop_attribute_model->last_error();
         }
 
-        redirect('admin/shop/manage/attribute' . $this->data['isFancybox']);
+        $this->session->set_flashdata($status, $message);
+        redirect('admin/shop/manage/attribute' . $this->data['isModal']);
     }
 
     // --------------------------------------------------------------------------
@@ -270,7 +334,7 @@ class Manage extends \AdminController
      */
     public function brand()
     {
-        if (!userHasPermission('admin.shop{0.brand_manage')) {
+        if (!userHasPermission('admin.shop:0.brand_manage')) {
 
             unauthorised();
         }
@@ -294,9 +358,55 @@ class Manage extends \AdminController
      */
     protected function brandIndex()
     {
-        //  Fetch data
-        $data = array('include_count' => true, 'only_active' => false);
-        $this->data['brands'] = $this->shop_brand_model->get_all(null, null, $data);
+        //  Get the table prefix from the model
+        $tablePrefix = $this->shop_brand_model->getTablePrefix();
+
+        // --------------------------------------------------------------------------
+
+        //  Get pagination and search/sort variables
+        $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
+        $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
+        $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
+
+        // --------------------------------------------------------------------------
+
+        //  Define the sortable columns and the filters
+        $sortColumns = array(
+            $tablePrefix . '.label'   => 'Label',
+            $tablePrefix . '.created' => 'Created',
+            $tablePrefix . '.modified' => 'Modified'
+       );
+
+        // --------------------------------------------------------------------------
+
+        //  Define the $data variable for the queries
+        $data = array(
+            'include_count' => true,
+            'sort' => array(
+                array($sortOn, $sortOrder)
+            ),
+            'keywords' => $keywords
+       );
+
+        // --------------------------------------------------------------------------
+
+        //  Get the items for the page
+        $totalRows            = $this->shop_brand_model->count_all($data);
+        $this->data['brands'] = $this->shop_brand_model->get_all($page, $perPage, $data);
+
+        //  Set Search and Pagination objects for the view
+        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+
+        // --------------------------------------------------------------------------
+
+        //  Add header button
+        if (userHasPermission('admin.shop:0.brand_create')) {
+
+            \Nails\Admin\Helper::addHeaderButton('admin/shop/manage/brand/create', 'Create Brand');
+        }
 
         // --------------------------------------------------------------------------
 
@@ -312,7 +422,7 @@ class Manage extends \AdminController
      */
     protected function brandCreate()
     {
-        if (!userHasPermission('admin.shop{0.brand_create')) {
+        if (!userHasPermission('admin.shop:0.brand_create')) {
 
             unauthorised();
         }
@@ -333,29 +443,30 @@ class Manage extends \AdminController
             $this->form_validation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
 
             $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length',   lang('fv_max_length'));
+            $this->form_validation->set_message('max_length', lang('fv_max_length'));
 
             if ($this->form_validation->run()) {
 
-                $data                  = new \stdClass();
-                $data->label           = $this->input->post('label');
-                $data->logo_id         = (int) $this->input->post('logo_id') ? (int) $this->input->post('logo_id') : null;
-                $data->cover_id        = (int) $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
-                $data->description     = $this->input->post('description');
-                $data->is_active       = (bool) $this->input->post('is_active');
-                $data->seo_title       = $this->input->post('seo_title');
-                $data->seo_description = $this->input->post('seo_description');
-                $data->seo_keywords    = $this->input->post('seo_keywords');
+                $data                    = array();
+                $data['label']           = $this->input->post('label');
+                $data['logo_id']         = (int) $this->input->post('logo_id') ? (int) $this->input->post('logo_id') : null;
+                $data['cover_id']        = (int) $this->input->post('cover_id');
+                $data['description']     = $this->input->post('description');
+                $data['is_active']       = (bool) $this->input->post('is_active');
+                $data['seo_title']       = $this->input->post('seo_title');
+                $data['seo_description'] = $this->input->post('seo_description');
+                $data['seo_keywords']    = $this->input->post('seo_keywords');
 
                 if ($this->shop_brand_model->create($data)) {
 
                     //  Redirect to clear form
                     $this->session->set_flashdata('success', 'Brand created successfully.');
-                    redirect('admin/shop/manage/brand' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/brand' . $this->data['isModal']);
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem creating the Brand. ' . $this->shop_brand_model->last_error();
+                    $this->data['error']  = 'There was a problem creating the Brand. ';
+                    $this->data['error'] .= $this->shop_brand_model->last_error();
                 }
 
             } else {
@@ -388,7 +499,7 @@ class Manage extends \AdminController
      */
     protected function brandEdit()
     {
-        if (!userHasPermission('admin.shop{0.brand_edit')) {
+        if (!userHasPermission('admin.shop:0.brand_edit')) {
 
             unauthorised();
         }
@@ -418,28 +529,29 @@ class Manage extends \AdminController
             $this->form_validation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
 
             $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length',   lang('fv_max_length'));
+            $this->form_validation->set_message('max_length', lang('fv_max_length'));
 
             if ($this->form_validation->run()) {
 
-                $data                  = new \stdClass();
-                $data->label           = $this->input->post('label');
-                $data->logo_id         = (int) $this->input->post('logo_id') ? (int) $this->input->post('logo_id') : null;
-                $data->cover_id        = (int) $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
-                $data->description     = $this->input->post('description');
-                $data->is_active       = (bool) $this->input->post('is_active');
-                $data->seo_title       = $this->input->post('seo_title');
-                $data->seo_description = $this->input->post('seo_description');
-                $data->seo_keywords    = $this->input->post('seo_keywords');
+                $data                    = array();
+                $data['label']           = $this->input->post('label');
+                $data['logo_id']         = (int) $this->input->post('logo_id') ? (int) $this->input->post('logo_id') : null;
+                $data['cover_id']        = (int) $this->input->post('cover_id');
+                $data['description']     = $this->input->post('description');
+                $data['is_active']       = (bool) $this->input->post('is_active');
+                $data['seo_title']       = $this->input->post('seo_title');
+                $data['seo_description'] = $this->input->post('seo_description');
+                $data['seo_keywords']    = $this->input->post('seo_keywords');
 
                 if ($this->shop_brand_model->update($this->data['brand']->id, $data)) {
 
                     $this->session->set_flashdata('success', 'Brand saved successfully.');
-                    redirect('admin/shop/manage/brand' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/brand' . $this->data['isModal']);
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem saving the Brand. ' . $this->shop_brand_model->last_error();
+                    $this->data['error']  = 'There was a problem saving the Brand. ';
+                    $this->data['error'] .= $this->shop_brand_model->last_error();
                 }
 
             } else {
@@ -472,7 +584,7 @@ class Manage extends \AdminController
      */
     protected function brandDelete()
     {
-        if (!userHasPermission('admin.shop{0.brand_delete')) {
+        if (!userHasPermission('admin.shop:0.brand_delete')) {
 
             unauthorised();
         }
@@ -483,14 +595,17 @@ class Manage extends \AdminController
 
         if ($this->shop_brand_model->delete($id)) {
 
-            $this->session->set_flashdata('success', 'Brand was deleted successfully.');
+            $status  = 'success';
+            $message = 'Brand was deleted successfully.';
 
         } else {
 
-            $this->session->set_flashdata('error', 'There was a problem deleting the Brand. ' . $this->shop_brand_model->last_error());
+            $status  = 'error';
+            $message = 'There was a problem deleting the Brand. ' . $this->shop_brand_model->last_error();
         }
 
-        redirect('admin/shop/manage/brand' . $this->data['isFancybox']);
+        $this->session->set_flashdata($status, $message);
+        redirect('admin/shop/manage/brand' . $this->data['isModal']);
     }
 
     // --------------------------------------------------------------------------
@@ -501,7 +616,7 @@ class Manage extends \AdminController
      */
     public function category()
     {
-        if (!userHasPermission('admin.shop{0.category_manage')) {
+        if (!userHasPermission('admin.shop:0.category_manage')) {
 
             unauthorised();
         }
@@ -525,9 +640,56 @@ class Manage extends \AdminController
      */
     protected function categoryIndex()
     {
-        //  Fetch data
-        $data = array('include_count' => true);
-        $this->data['categories'] = $this->shop_category_model->get_all(null, null, $data);
+        //  Get the table prefix from the model
+        $tablePrefix = $this->shop_category_model->getTablePrefix();
+
+        // --------------------------------------------------------------------------
+
+        //  Get pagination and search/sort variables
+        $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
+        $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
+        $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
+
+        // --------------------------------------------------------------------------
+
+        //  Define the sortable columns and the filters
+        $sortColumns = array(
+            $tablePrefix . '.slug'    => 'Label (maintain hierarchy)',
+            $tablePrefix . '.label'   => 'Label',
+            $tablePrefix . '.created' => 'Created',
+            $tablePrefix . '.modified' => 'Modified'
+       );
+
+        // --------------------------------------------------------------------------
+
+        //  Define the $data variable for the queries
+        $data = array(
+            'include_count' => true,
+            'sort' => array(
+                array($sortOn, $sortOrder)
+            ),
+            'keywords' => $keywords
+       );
+
+        // --------------------------------------------------------------------------
+
+        //  Get the items for the page
+        $totalRows                = $this->shop_category_model->count_all($data);
+        $this->data['categories'] = $this->shop_category_model->get_all($page, $perPage, $data);
+
+        //  Set Search and Pagination objects for the view
+        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+
+        // --------------------------------------------------------------------------
+
+        //  Add header button
+        if (userHasPermission('admin.shop:0.category_create')) {
+
+            \Nails\Admin\Helper::addHeaderButton('admin/shop/manage/category/create', 'Create Category');
+        }
 
         // --------------------------------------------------------------------------
 
@@ -543,7 +705,7 @@ class Manage extends \AdminController
      */
     protected function categoryCreate()
     {
-        if (!userHasPermission('admin.shop{0.category_create')) {
+        if (!userHasPermission('admin.shop:0.category_create')) {
 
             unauthorised();
         }
@@ -563,27 +725,28 @@ class Manage extends \AdminController
             $this->form_validation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
 
             $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length',   lang('fv_max_length'));
+            $this->form_validation->set_message('max_length', lang('fv_max_length'));
 
             if ($this->form_validation->run()) {
 
-                $data                  = new \stdClass();
-                $data->label           = $this->input->post('label');
-                $data->parent_id       = $this->input->post('parent_id');
-                $data->cover_id        = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
-                $data->description     = $this->input->post('description');
-                $data->seo_title       = $this->input->post('seo_title');
-                $data->seo_description = $this->input->post('seo_description');
-                $data->seo_keywords    = $this->input->post('seo_keywords');
+                $data                    = array();
+                $data['label']           = $this->input->post('label');
+                $data['parent_id']       = $this->input->post('parent_id');
+                $data['cover_id']        = $this->input->post('cover_id');
+                $data['description']     = $this->input->post('description');
+                $data['seo_title']       = $this->input->post('seo_title');
+                $data['seo_description'] = $this->input->post('seo_description');
+                $data['seo_keywords']    = $this->input->post('seo_keywords');
 
                 if ($this->shop_category_model->create($data)) {
 
                     $this->session->set_flashdata('success', 'Category created successfully.');
-                    redirect('admin/shop/manage/category' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/category' . $this->data['isModal']);
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem creating the Category. ' . $this->shop_category_model->last_error();
+                    $this->data['error']  = 'There was a problem creating the Category. ';
+                    $this->data['error'] .= $this->shop_category_model->last_error();
                 }
 
             } else {
@@ -616,7 +779,7 @@ class Manage extends \AdminController
      */
     protected function categoryEdit()
     {
-        if (!userHasPermission('admin.shop{0.category_edit')) {
+        if (!userHasPermission('admin.shop:0.category_edit')) {
 
             unauthorised();
         }
@@ -645,27 +808,28 @@ class Manage extends \AdminController
             $this->form_validation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
 
             $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length',   lang('fv_max_length'));
+            $this->form_validation->set_message('max_length', lang('fv_max_length'));
 
             if ($this->form_validation->run()) {
 
-                $data                  = new \stdClass();
-                $data->label           = $this->input->post('label');
-                $data->parent_id       = $this->input->post('parent_id');
-                $data->cover_id        = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
-                $data->description     = $this->input->post('description');
-                $data->seo_title       = $this->input->post('seo_title');
-                $data->seo_description = $this->input->post('seo_description');
-                $data->seo_keywords    = $this->input->post('seo_keywords');
+                $data                    = array();
+                $data['label']           = $this->input->post('label');
+                $data['parent_id']       = $this->input->post('parent_id');
+                $data['cover_id']        = $this->input->post('cover_id');
+                $data['description']     = $this->input->post('description');
+                $data['seo_title']       = $this->input->post('seo_title');
+                $data['seo_description'] = $this->input->post('seo_description');
+                $data['seo_keywords']    = $this->input->post('seo_keywords');
 
                 if ($this->shop_category_model->update($this->data['category']->id, $data)) {
 
                     $this->session->set_flashdata('success', 'Category saved successfully.');
-                    redirect('admin/shop/manage/category' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/category' . $this->data['isModal']);
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem saving the Category. ' . $this->shop_category_model->last_error();
+                    $this->data['error']  = 'There was a problem saving the Category. ';
+                    $this->data['error'] .= $this->shop_category_model->last_error();
                 }
 
             } else {
@@ -698,7 +862,7 @@ class Manage extends \AdminController
      */
     protected function categoryDelete()
     {
-        if (!userHasPermission('admin.shop{0.category_delete')) {
+        if (!userHasPermission('admin.shop:0.category_delete')) {
 
             unauthorised();
         }
@@ -709,14 +873,17 @@ class Manage extends \AdminController
 
         if ($this->shop_category_model->delete($id)) {
 
-            $this->session->set_flashdata('success', 'Category was deleted successfully.');
+            $status  = 'success';
+            $message = 'Category was deleted successfully.';
 
         } else {
 
-            $this->session->set_flashdata('error', 'There was a problem deleting the Category. ' . $this->shop_category_model->last_error());
+            $status  = 'error';
+            $message = 'There was a problem deleting the Category. ' . $this->shop_category_model->last_error();
         }
 
-        redirect('admin/shop/manage/category' . $this->data['isFancybox']);
+        $this->session->set_flashdata($status, $message);
+        redirect('admin/shop/manage/category' . $this->data['isModal']);
     }
 
     // --------------------------------------------------------------------------
@@ -727,7 +894,7 @@ class Manage extends \AdminController
      */
     public function collection()
     {
-        if (!userHasPermission('admin.shop{0.collection_manage')) {
+        if (!userHasPermission('admin.shop:0.collection_manage')) {
 
             unauthorised();
         }
@@ -751,9 +918,56 @@ class Manage extends \AdminController
      */
     protected function collectionIndex()
     {
-        //  Fetch data
-        $data = array('include_count' => true, 'only_active' => false);
-        $this->data['collections'] = $this->shop_collection_model->get_all(null, null, $data);
+        //  Get the table prefix from the model
+        $tablePrefix = $this->shop_collection_model->getTablePrefix();
+
+        // --------------------------------------------------------------------------
+
+        //  Get pagination and search/sort variables
+        $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
+        $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
+        $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
+
+        // --------------------------------------------------------------------------
+
+        //  Define the sortable columns and the filters
+        $sortColumns = array(
+            $tablePrefix . '.label'   => 'Label',
+            $tablePrefix . '.created' => 'Created',
+            $tablePrefix . '.modified' => 'Modified'
+       );
+
+        // --------------------------------------------------------------------------
+
+        //  Define the $data variable for the queries
+        $data = array(
+            'only_active' => false,
+            'include_count' => true,
+            'sort' => array(
+                array($sortOn, $sortOrder)
+            ),
+            'keywords' => $keywords
+       );
+
+        // --------------------------------------------------------------------------
+
+        //  Get the items for the page
+        $totalRows                 = $this->shop_collection_model->count_all($data);
+        $this->data['collections'] = $this->shop_collection_model->get_all($page, $perPage, $data);
+
+        //  Set Search and Pagination objects for the view
+        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+
+        // --------------------------------------------------------------------------
+
+        //  Add header button
+        if (userHasPermission('admin.shop:0.collection_create')) {
+
+            \Nails\Admin\Helper::addHeaderButton('admin/shop/manage/collection/create', 'Create Collection');
+        }
 
         // --------------------------------------------------------------------------
 
@@ -769,7 +983,7 @@ class Manage extends \AdminController
      */
     protected function collectionCreate()
     {
-        if (!userHasPermission('admin.shop{0.collection_create')) {
+        if (!userHasPermission('admin.shop:0.collection_create')) {
 
             unauthorised();
         }
@@ -789,27 +1003,28 @@ class Manage extends \AdminController
             $this->form_validation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
 
             $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length',   lang('fv_max_length'));
+            $this->form_validation->set_message('max_length', lang('fv_max_length'));
 
             if ($this->form_validation->run()) {
 
-                $data                  = new \stdClass();
-                $data->label           = $this->input->post('label');
-                $data->cover_id        = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
-                $data->description     = $this->input->post('description');
-                $data->seo_title       = $this->input->post('seo_title');
-                $data->seo_description = $this->input->post('seo_description');
-                $data->seo_keywords    = $this->input->post('seo_keywords');
-                $data->is_active       = (bool) $this->input->post('is_active');
+                $data                    = array();
+                $data['label']           = $this->input->post('label');
+                $data['cover_id']        = $this->input->post('cover_id');
+                $data['description']     = $this->input->post('description');
+                $data['seo_title']       = $this->input->post('seo_title');
+                $data['seo_description'] = $this->input->post('seo_description');
+                $data['seo_keywords']    = $this->input->post('seo_keywords');
+                $data['is_active']       = (bool) $this->input->post('is_active');
 
                 if ($this->shop_collection_model->create($data)) {
 
                     $this->session->set_flashdata('success', 'Collection created successfully.');
-                    redirect('admin/shop/manage/collection' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/collection' . $this->data['isModal']);
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem creating the Collection. ' . $this->shop_collection_model->last_error();
+                    $this->data['error']  = 'There was a problem creating the Collection. ';
+                    $this->data['error'] .= $this->shop_collection_model->last_error();
                 }
 
             } else {
@@ -842,7 +1057,7 @@ class Manage extends \AdminController
      */
     protected function collectionEdit()
     {
-        if (!userHasPermission('admin.shop{0.collection_edit')) {
+        if (!userHasPermission('admin.shop:0.collection_edit')) {
 
             unauthorised();
         }
@@ -871,27 +1086,28 @@ class Manage extends \AdminController
             $this->form_validation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
 
             $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length',   lang('fv_max_length'));
+            $this->form_validation->set_message('max_length', lang('fv_max_length'));
 
             if ($this->form_validation->run()) {
 
-                $data                  = new \stdClass();
-                $data->label           = $this->input->post('label');
-                $data->cover_id        = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
-                $data->description     = $this->input->post('description');
-                $data->seo_title       = $this->input->post('seo_title');
-                $data->seo_description = $this->input->post('seo_description');
-                $data->seo_keywords    = $this->input->post('seo_keywords');
-                $data->is_active       = (bool) $this->input->post('is_active');
+                $data                    = array();
+                $data['label']           = $this->input->post('label');
+                $data['cover_id']        = $this->input->post('cover_id');
+                $data['description']     = $this->input->post('description');
+                $data['seo_title']       = $this->input->post('seo_title');
+                $data['seo_description'] = $this->input->post('seo_description');
+                $data['seo_keywords']    = $this->input->post('seo_keywords');
+                $data['is_active']       = (bool) $this->input->post('is_active');
 
                 if ($this->shop_collection_model->update($this->data['collection']->id, $data)) {
 
                     $this->session->set_flashdata('success', 'Collection saved successfully.');
-                    redirect('admin/shop/manage/collection' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/collection' . $this->data['isModal']);
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem saving the Collection. ' . $this->shop_collection_model->last_error();
+                    $this->data['error']  = 'There was a problem saving the Collection. ';
+                    $this->data['error'] .= $this->shop_collection_model->last_error();
                 }
 
             } else {
@@ -924,7 +1140,7 @@ class Manage extends \AdminController
      */
     protected function collectionDelete()
     {
-        if (!userHasPermission('admin.shop{0.collection_delete')) {
+        if (!userHasPermission('admin.shop:0.collection_delete')) {
 
             unauthorised();
         }
@@ -935,14 +1151,17 @@ class Manage extends \AdminController
 
         if ($this->shop_collection_model->delete($id)) {
 
-            $this->session->set_flashdata('success', 'Collection was deleted successfully.');
+            $status  = 'success';
+            $message = 'Collection was deleted successfully.';
 
         } else {
 
-            $this->session->set_flashdata('error', 'There was a problem deleting the Collection. ' . $this->shop_collection_model->last_error());
+            $status  = 'error';
+            $message = 'There was a problem deleting the Collection. ' . $this->shop_collection_model->last_error();
         }
 
-        redirect('admin/shop/manage/collection' . $this->data['isFancybox']);
+        $this->session->set_flashdata($status, $message);
+        redirect('admin/shop/manage/collection' . $this->data['isModal']);
     }
 
     // --------------------------------------------------------------------------
@@ -953,7 +1172,7 @@ class Manage extends \AdminController
      */
     public function range()
     {
-        if (!userHasPermission('admin.shop{0.range_manage')) {
+        if (!userHasPermission('admin.shop:0.range_manage')) {
 
             unauthorised();
         }
@@ -977,9 +1196,55 @@ class Manage extends \AdminController
      */
     protected function rangeIndex()
     {
-        //  Fetch data
-        $data = array('include_count' => true);
-        $this->data['ranges'] = $this->shop_range_model->get_all(null, null, $data);
+        //  Get the table prefix from the model
+        $tablePrefix = $this->shop_range_model->getTablePrefix();
+
+        // --------------------------------------------------------------------------
+
+        //  Get pagination and search/sort variables
+        $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
+        $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
+        $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
+
+        // --------------------------------------------------------------------------
+
+        //  Define the sortable columns and the filters
+        $sortColumns = array(
+            $tablePrefix . '.label'   => 'Label',
+            $tablePrefix . '.created' => 'Created',
+            $tablePrefix . '.modified' => 'Modified'
+       );
+
+        // --------------------------------------------------------------------------
+
+        //  Define the $data variable for the queries
+        $data = array(
+            'include_count' => true,
+            'sort' => array(
+                array($sortOn, $sortOrder)
+            ),
+            'keywords' => $keywords
+       );
+
+        // --------------------------------------------------------------------------
+
+        //  Get the items for the page
+        $totalRows            = $this->shop_range_model->count_all($data);
+        $this->data['ranges'] = $this->shop_range_model->get_all($page, $perPage, $data);
+
+        //  Set Search and Pagination objects for the view
+        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+
+        // --------------------------------------------------------------------------
+
+        //  Add header button
+        if (userHasPermission('admin.shop:0.range_create')) {
+
+            \Nails\Admin\Helper::addHeaderButton('admin/shop/manage/range/create', 'Create Range');
+        }
 
         // --------------------------------------------------------------------------
 
@@ -995,7 +1260,7 @@ class Manage extends \AdminController
      */
     protected function rangeCreate()
     {
-        if (!userHasPermission('admin.shop{0.range_create')) {
+        if (!userHasPermission('admin.shop:0.range_create')) {
 
             unauthorised();
         }
@@ -1015,27 +1280,28 @@ class Manage extends \AdminController
             $this->form_validation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
 
             $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length',   lang('fv_max_length'));
+            $this->form_validation->set_message('max_length', lang('fv_max_length'));
 
             if ($this->form_validation->run()) {
 
-                $data                  = new \stdClass();
-                $data->label           = $this->input->post('label');
-                $data->cover_id        = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
-                $data->description     = $this->input->post('description');
-                $data->seo_title       = $this->input->post('seo_title');
-                $data->seo_description = $this->input->post('seo_description');
-                $data->seo_keywords    = $this->input->post('seo_keywords');
-                $data->is_active       = (bool) $this->input->post('is_active');
+                $data                    = array();
+                $data['label']           = $this->input->post('label');
+                $data['cover_id']        = $this->input->post('cover_id');
+                $data['description']     = $this->input->post('description');
+                $data['seo_title']       = $this->input->post('seo_title');
+                $data['seo_description'] = $this->input->post('seo_description');
+                $data['seo_keywords']    = $this->input->post('seo_keywords');
+                $data['is_active']       = (bool) $this->input->post('is_active');
 
                 if ($this->shop_range_model->create($data)) {
 
                     $this->session->set_flashdata('success', 'Range created successfully.');
-                    redirect('admin/shop/manage/range' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/range' . $this->data['isModal']);
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem creating the Range. ' . $this->shop_range_model->last_error();
+                    $this->data['error']  = 'There was a problem creating the Range. ';
+                    $this->data['error'] .= $this->shop_range_model->last_error();
                 }
 
             } else {
@@ -1068,7 +1334,7 @@ class Manage extends \AdminController
      */
     protected function rangeEdit()
     {
-        if (!userHasPermission('admin.shop{0.range_edit')) {
+        if (!userHasPermission('admin.shop:0.range_edit')) {
 
             unauthorised();
         }
@@ -1097,27 +1363,28 @@ class Manage extends \AdminController
             $this->form_validation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
 
             $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length',   lang('fv_max_length'));
+            $this->form_validation->set_message('max_length', lang('fv_max_length'));
 
             if ($this->form_validation->run()) {
 
-                $data                  = new \stdClass();
-                $data->label           = $this->input->post('label');
-                $data->cover_id        = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
-                $data->description     = $this->input->post('description');
-                $data->seo_title       = $this->input->post('seo_title');
-                $data->seo_description = $this->input->post('seo_description');
-                $data->seo_keywords    = $this->input->post('seo_keywords');
-                $data->is_active       = (bool) $this->input->post('is_active');
+                $data                    = array();
+                $data['label']           = $this->input->post('label');
+                $data['cover_id']        = $this->input->post('cover_id');
+                $data['description']     = $this->input->post('description');
+                $data['seo_title']       = $this->input->post('seo_title');
+                $data['seo_description'] = $this->input->post('seo_description');
+                $data['seo_keywords']    = $this->input->post('seo_keywords');
+                $data['is_active']       = (bool) $this->input->post('is_active');
 
                 if ($this->shop_range_model->update($this->data['range']->id, $data)) {
 
                     $this->session->set_flashdata('success', 'Range saved successfully.');
-                    redirect('admin/shop/manage/range' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/range' . $this->data['isModal']);
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem saving the Range. ' . $this->shop_range_model->last_error();
+                    $this->data['error']  = 'There was a problem saving the Range. ';
+                    $this->data['error'] .= $this->shop_range_model->last_error();
                 }
 
             } else {
@@ -1150,7 +1417,7 @@ class Manage extends \AdminController
      */
     protected function rangeDelete()
     {
-        if (!userHasPermission('admin.shop{0.range_delete')) {
+        if (!userHasPermission('admin.shop:0.range_delete')) {
 
             unauthorised();
         }
@@ -1161,14 +1428,17 @@ class Manage extends \AdminController
 
         if ($this->shop_range_model->delete($id)) {
 
-            $this->session->set_flashdata('success', 'Range was deleted successfully.');
+            $status  = 'success';
+            $message = 'Range was deleted successfully.';
 
         } else {
 
-            $this->session->set_flashdata('error', 'There was a problem deleting the Range. ' . $this->shop_range_model->last_error());
+            $status  = 'error';
+            $message = 'There was a problem deleting the Range. ' . $this->shop_range_model->last_error();
         }
 
-        redirect('admin/shop/manage/range' . $this->data['isFancybox']);
+        $this->session->set_flashdata($status, $message);
+        redirect('admin/shop/manage/range' . $this->data['isModal']);
     }
 
     // --------------------------------------------------------------------------
@@ -1179,7 +1449,7 @@ class Manage extends \AdminController
      */
     public function tag()
     {
-        if (!userHasPermission('admin.shop{0.tag_manage')) {
+        if (!userHasPermission('admin.shop:0.tag_manage')) {
 
             unauthorised();
         }
@@ -1203,9 +1473,55 @@ class Manage extends \AdminController
      */
     protected function tagIndex()
     {
-        //  Fetch data
-        $data = array('include_count' => true);
-        $this->data['tags'] = $this->shop_tag_model->get_all(null,null, $data);
+        //  Get the table prefix from the model
+        $tablePrefix = $this->shop_tag_model->getTablePrefix();
+
+        // --------------------------------------------------------------------------
+
+        //  Get pagination and search/sort variables
+        $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
+        $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
+        $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
+
+        // --------------------------------------------------------------------------
+
+        //  Define the sortable columns and the filters
+        $sortColumns = array(
+            $tablePrefix . '.label'   => 'Label',
+            $tablePrefix . '.created' => 'Created',
+            $tablePrefix . '.modified' => 'Modified'
+       );
+
+        // --------------------------------------------------------------------------
+
+        //  Define the $data variable for the queries
+        $data = array(
+            'include_count' => true,
+            'sort' => array(
+                array($sortOn, $sortOrder)
+            ),
+            'keywords' => $keywords
+       );
+
+        // --------------------------------------------------------------------------
+
+        //  Get the items for the page
+        $totalRows          = $this->shop_tag_model->count_all($data);
+        $this->data['tags'] = $this->shop_tag_model->get_all($page, $perPage, $data);
+
+        //  Set Search and Pagination objects for the view
+        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+
+        // --------------------------------------------------------------------------
+
+        //  Add header button
+        if (userHasPermission('admin.shop:0.tag_create')) {
+
+            \Nails\Admin\Helper::addHeaderButton('admin/shop/manage/tag/create', 'Create Tag');
+        }
 
         // --------------------------------------------------------------------------
 
@@ -1221,7 +1537,7 @@ class Manage extends \AdminController
      */
     protected function tagCreate()
     {
-        if (!userHasPermission('admin.shop{0.tag_create')) {
+        if (!userHasPermission('admin.shop:0.tag_create')) {
 
             unauthorised();
         }
@@ -1240,26 +1556,27 @@ class Manage extends \AdminController
             $this->form_validation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
 
             $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length',   lang('fv_max_length'));
+            $this->form_validation->set_message('max_length', lang('fv_max_length'));
 
             if ($this->form_validation->run()) {
 
-                $data                  = new \stdClass();
-                $data->label           = $this->input->post('label');
-                $data->cover_id        = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
-                $data->description     = $this->input->post('description');
-                $data->seo_title       = $this->input->post('seo_title');
-                $data->seo_description = $this->input->post('seo_description');
-                $data->seo_keywords    = $this->input->post('seo_keywords');
+                $data                    = array();
+                $data['label']           = $this->input->post('label');
+                $data['cover_id']        = $this->input->post('cover_id');
+                $data['description']     = $this->input->post('description');
+                $data['seo_title']       = $this->input->post('seo_title');
+                $data['seo_description'] = $this->input->post('seo_description');
+                $data['seo_keywords']    = $this->input->post('seo_keywords');
 
                 if ($this->shop_tag_model->create($data)) {
 
                     $this->session->set_flashdata('success', 'Tag created successfully.');
-                    redirect('admin/shop/manage/tag' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/tag' . $this->data['isModal']);
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem creating the Tag. ' . $this->shop_tag_model->last_error();
+                    $this->data['error']  = 'There was a problem creating the Tag. ';
+                    $this->data['error'] .= $this->shop_tag_model->last_error();
                 }
 
             } else {
@@ -1292,7 +1609,7 @@ class Manage extends \AdminController
      */
     protected function tagEdit()
     {
-        if (!userHasPermission('admin.shop{0.tag_edit')) {
+        if (!userHasPermission('admin.shop:0.tag_edit')) {
 
             unauthorised();
         }
@@ -1320,26 +1637,27 @@ class Manage extends \AdminController
             $this->form_validation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
 
             $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length',   lang('fv_max_length'));
+            $this->form_validation->set_message('max_length', lang('fv_max_length'));
 
             if ($this->form_validation->run()) {
 
-                $data                  = new \stdClass();
-                $data->label           = $this->input->post('label');
-                $data->cover_id        = $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
-                $data->description     = $this->input->post('description');
-                $data->seo_title       = $this->input->post('seo_title');
-                $data->seo_description = $this->input->post('seo_description');
-                $data->seo_keywords    = $this->input->post('seo_keywords');
+                $data                    = array();
+                $data['label']           = $this->input->post('label');
+                $data['cover_id']        = $this->input->post('cover_id');
+                $data['description']     = $this->input->post('description');
+                $data['seo_title']       = $this->input->post('seo_title');
+                $data['seo_description'] = $this->input->post('seo_description');
+                $data['seo_keywords']    = $this->input->post('seo_keywords');
 
                 if ($this->shop_tag_model->update($this->data['tag']->id, $data)) {
 
                     $this->session->set_flashdata('success', 'Tag saved successfully.');
-                    redirect('admin/shop/manage/tag' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/tag' . $this->data['isModal']);
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem saving the Tag. ' . $this->shop_tag_model->last_error();
+                    $this->data['error']  = 'There was a problem saving the Tag. ';
+                    $this->data['error'] .= $this->shop_tag_model->last_error();
                 }
 
             } else {
@@ -1372,7 +1690,7 @@ class Manage extends \AdminController
      */
     protected function tagDelete()
     {
-        if (!userHasPermission('admin.shop{0.tag_delete')) {
+        if (!userHasPermission('admin.shop:0.tag_delete')) {
 
             unauthorised();
         }
@@ -1383,14 +1701,17 @@ class Manage extends \AdminController
 
         if ($this->shop_tag_model->delete($id)) {
 
-            $this->session->set_flashdata('success', 'Tag was deleted successfully.');
+            $status  = 'success';
+            $message = 'Tag was deleted successfully.';
 
         } else {
 
-            $this->session->set_flashdata('error', 'There was a problem deleting the Tag. ' . $this->shop_tag_model->last_error());
+            $status  = 'error';
+            $message = 'There was a problem deleting the Tag. ' . $this->shop_tag_model->last_error();
         }
 
-        redirect('admin/shop/manage/tag' . $this->data['isFancybox']);
+        $this->session->set_flashdata($status, $message);
+        redirect('admin/shop/manage/tag' . $this->data['isModal']);
     }
 
     // --------------------------------------------------------------------------
@@ -1401,7 +1722,7 @@ class Manage extends \AdminController
      */
     public function taxRate()
     {
-        if (!userHasPermission('admin.shop{0.tax_rate_manage')) {
+        if (!userHasPermission('admin.shop:0.tax_rate_manage')) {
 
             unauthorised();
         }
@@ -1425,9 +1746,55 @@ class Manage extends \AdminController
      */
     protected function taxRateIndex()
     {
-        //  Fetch data
-        $data = array('include_count' => true);
-        $this->data['tax_rates'] = $this->shop_tax_rate_model->get_all(null, null, $data);
+        //  Get the table prefix from the model
+        $tablePrefix = $this->shop_tax_rate_model->getTablePrefix();
+
+        // --------------------------------------------------------------------------
+
+        //  Get pagination and search/sort variables
+        $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
+        $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
+        $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
+
+        // --------------------------------------------------------------------------
+
+        //  Define the sortable columns and the filters
+        $sortColumns = array(
+            $tablePrefix . '.label'   => 'Label',
+            $tablePrefix . '.created' => 'Created',
+            $tablePrefix . '.modified' => 'Modified'
+       );
+
+        // --------------------------------------------------------------------------
+
+        //  Define the $data variable for the queries
+        $data = array(
+            'include_count' => true,
+            'sort' => array(
+                array($sortOn, $sortOrder)
+            ),
+            'keywords' => $keywords
+       );
+
+        // --------------------------------------------------------------------------
+
+        //  Get the items for the page
+        $totalRows              = $this->shop_tax_rate_model->count_all($data);
+        $this->data['taxRates'] = $this->shop_tax_rate_model->get_all($page, $perPage, $data);
+
+        //  Set Search and Pagination objects for the view
+        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+
+        // --------------------------------------------------------------------------
+
+        //  Add header button
+        if (userHasPermission('admin.shop:0.tax_rate_create')) {
+
+            \Nails\Admin\Helper::addHeaderButton('admin/shop/manage/taxRate/create', 'Create Tax Rate');
+        }
 
         // --------------------------------------------------------------------------
 
@@ -1443,7 +1810,7 @@ class Manage extends \AdminController
      */
     protected function taxRateCreate()
     {
-        if (!userHasPermission('admin.shop{0.tax_rate_create')) {
+        if (!userHasPermission('admin.shop:0.tax_rate_create')) {
 
             unauthorised();
         }
@@ -1469,11 +1836,12 @@ class Manage extends \AdminController
                 if ($this->shop_tax_rate_model->create($data)) {
 
                     $this->session->set_flashdata('success', 'Tax Rate created successfully.');
-                    redirect('admin/shop/manage/taxRate' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/taxRate' . $this->data['isModal']);
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem creating the Tax Rate. ' . $this->shop_tax_rate_model->last_error();
+                    $this->data['error']  = 'There was a problem creating the Tax Rate. ';
+                    $this->data['error'] .= $this->shop_tax_rate_model->last_error();
                 }
 
             } else {
@@ -1490,7 +1858,7 @@ class Manage extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['tax_rates'] = $this->shop_tax_rate_model->get_all();
+        $this->data['taxRates'] = $this->shop_tax_rate_model->get_all();
 
         // --------------------------------------------------------------------------
 
@@ -1506,7 +1874,7 @@ class Manage extends \AdminController
      */
     protected function taxRateEdit()
     {
-        if (!userHasPermission('admin.shop{0.tax_rate_edit')) {
+        if (!userHasPermission('admin.shop:0.tax_rate_edit')) {
 
             unauthorised();
         }
@@ -1541,11 +1909,12 @@ class Manage extends \AdminController
                 if ($this->shop_tax_rate_model->update($this->data['tax_rate']->id, $data)) {
 
                     $this->session->set_flashdata('success', 'Tax Rate saved successfully.');
-                    redirect('admin/shop/manage/taxRate' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/taxRate' . $this->data['isModal']);
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem saving the Tax Rate. ' . $this->shop_tax_rate_model->last_error();
+                    $this->data['error']  = 'There was a problem saving the Tax Rate. ';
+                    $this->data['error'] .= $this->shop_tax_rate_model->last_error();
                 }
 
             } else {
@@ -1562,7 +1931,7 @@ class Manage extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['tax_rates'] = $this->shop_tax_rate_model->get_all();
+        $this->data['taxRates'] = $this->shop_tax_rate_model->get_all();
 
         // --------------------------------------------------------------------------
 
@@ -1578,7 +1947,7 @@ class Manage extends \AdminController
      */
     protected function taxRateDelete()
     {
-        if (!userHasPermission('admin.shop{0.tax_rate_delete')) {
+        if (!userHasPermission('admin.shop:0.tax_rate_delete')) {
 
             unauthorised();
         }
@@ -1589,14 +1958,17 @@ class Manage extends \AdminController
 
         if ($this->shop_tax_rate_model->delete($id)) {
 
-            $this->session->set_flashdata('success', 'Tax Rate was deleted successfully.');
+            $status  = 'success';
+            $message = 'Tax Rate was deleted successfully.';
 
         } else {
 
-            $this->session->set_flashdata('error', 'There was a problem deleting the Tax Rate. ' . $this->shop_tax_rate_model->last_error());
+            $status  = 'error';
+            $message = 'There was a problem deleting the Tax Rate. ' . $this->shop_tax_rate_model->last_error();
         }
 
-        redirect('admin/shop/manage/taxRate' . $this->data['isFancybox']);
+        $this->session->set_flashdata($status, $message);
+        redirect('admin/shop/manage/taxRate' . $this->data['isModal']);
     }
 
     // --------------------------------------------------------------------------
@@ -1607,7 +1979,7 @@ class Manage extends \AdminController
      */
     public function productType()
     {
-        if (!userHasPermission('admin.shop{0.product_type_manage')) {
+        if (!userHasPermission('admin.shop:0.product_type_manage')) {
 
             unauthorised();
         }
@@ -1631,9 +2003,55 @@ class Manage extends \AdminController
      */
     protected function productTypeIndex()
     {
-        //  Fetch data
-        $data = array('include_count' => true);
-        $this->data['product_types'] = $this->shop_product_type_model->get_all(null, null, $data);
+        //  Get the table prefix from the model
+        $tablePrefix = $this->shop_product_type_model->getTablePrefix();
+
+        // --------------------------------------------------------------------------
+
+        //  Get pagination and search/sort variables
+        $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
+        $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
+        $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
+
+        // --------------------------------------------------------------------------
+
+        //  Define the sortable columns and the filters
+        $sortColumns = array(
+            $tablePrefix . '.label'   => 'Label',
+            $tablePrefix . '.created' => 'Created',
+            $tablePrefix . '.modified' => 'Modified'
+       );
+
+        // --------------------------------------------------------------------------
+
+        //  Define the $data variable for the queries
+        $data = array(
+            'include_count' => true,
+            'sort' => array(
+                array($sortOn, $sortOrder)
+            ),
+            'keywords' => $keywords
+       );
+
+        // --------------------------------------------------------------------------
+
+        //  Get the items for the page
+        $totalRows                 = $this->shop_product_type_model->count_all($data);
+        $this->data['productTypes'] = $this->shop_product_type_model->get_all($page, $perPage, $data);
+
+        //  Set Search and Pagination objects for the view
+        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+
+        // --------------------------------------------------------------------------
+
+        //  Add header button
+        if (userHasPermission('admin.shop:0.product_type_create')) {
+
+            \Nails\Admin\Helper::addHeaderButton('admin/shop/manage/productType/create', 'Create Product Type');
+        }
 
         // --------------------------------------------------------------------------
 
@@ -1649,7 +2067,7 @@ class Manage extends \AdminController
      */
     protected function productTypeCreate()
     {
-        if (!userHasPermission('admin.shop{0.product_type_create')) {
+        if (!userHasPermission('admin.shop:0.product_type_create')) {
 
             unauthorised();
         }
@@ -1684,11 +2102,12 @@ class Manage extends \AdminController
 
                     //  Redirect to clear form
                     $this->session->set_flashdata('success', 'Product Type created successfully.');
-                    redirect('admin/shop/manage/productType' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/productType' . $this->data['isModal']);
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem creating the Product Type. ' . $this->shop_product_model->last_error();
+                    $this->data['error']  = 'There was a problem creating the Product Type. ';
+                    $this->data['error'] .= $this->shop_product_model->last_error();
                 }
 
             } else {
@@ -1705,7 +2124,7 @@ class Manage extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['product_types'] = $this->shop_product_type_model->get_all();
+        $this->data['productTypes'] = $this->shop_product_type_model->get_all();
 
         // --------------------------------------------------------------------------
 
@@ -1721,7 +2140,7 @@ class Manage extends \AdminController
      */
     protected function productTypeEdit()
     {
-        if (!userHasPermission('admin.shop{0.product_type_edit')) {
+        if (!userHasPermission('admin.shop:0.product_type_edit')) {
 
             unauthorised();
         }
@@ -1763,11 +2182,12 @@ class Manage extends \AdminController
                 if ($this->shop_product_type_model->update($this->data['product_type']->id, $data)) {
 
                     $this->session->set_flashdata('success', 'Product Type saved successfully.');
-                    redirect('admin/shop/product_type' . $this->data['isFancybox']);
+                    redirect('admin/shop/product_type' . $this->data['isModal']);
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem saving the Product Type. ' . $this->shop_product_type_model->last_error();
+                    $this->data['error']  = 'There was a problem saving the Product Type. ';
+                    $this->data['error'] .= $this->shop_product_type_model->last_error();
                 }
 
             } else {
@@ -1784,7 +2204,7 @@ class Manage extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['product_types'] = $this->shop_product_type_model->get_all();
+        $this->data['productTypes'] = $this->shop_product_type_model->get_all();
 
         // --------------------------------------------------------------------------
 
@@ -1800,8 +2220,12 @@ class Manage extends \AdminController
      */
     public function productTypeDelete()
     {
-        $this->session->set_flashdata('message', '<strong>Coming Soon!</strong><br />The ability to delete product types via the admin interface is on the roadmap and will be available soon.');
-        redirect('admin/shop/manage/productType' . $this->data['isFancybox']);
+        $status   = 'message';
+        $message  = '<strong>Coming Soon!</strong><br />The ability to delete product types via ';
+        $message .= 'the admin interface is on the roadmap and will be available soon.';
+        $this->session->set_flashdata($status, $message);
+
+        redirect('admin/shop/manage/productType' . $this->data['isModal']);
     }
 
     // --------------------------------------------------------------------------
@@ -1812,7 +2236,7 @@ class Manage extends \AdminController
      */
     public function productTypeMeta()
     {
-        if (!userHasPermission('admin.shop{0.product_type_meta__manage')) {
+        if (!userHasPermission('admin.shop:0.product_type_meta__manage')) {
 
             unauthorised();
         }
@@ -1837,9 +2261,54 @@ class Manage extends \AdminController
      */
     protected function productTypeMetaIndex()
     {
-        //  Fetch data
-        $data = array('include_associated_product_types' => true);
-        $this->data['meta_fields'] = $this->shop_product_type_meta_model->get_all(null, null, $data);
+        //  Get the table prefix from the model
+        $tablePrefix = $this->shop_product_type_meta_model->getTablePrefix();
+
+        // --------------------------------------------------------------------------
+
+        //  Get pagination and search/sort variables
+        $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
+        $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
+        $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
+
+        // --------------------------------------------------------------------------
+
+        //  Define the sortable columns and the filters
+        $sortColumns = array(
+            $tablePrefix . '.label'   => 'Label',
+            $tablePrefix . '.created' => 'Created',
+            $tablePrefix . '.modified' => 'Modified'
+       );
+
+        // --------------------------------------------------------------------------
+
+        //  Define the $data variable for the queries
+        $data = array(
+            'sort' => array(
+                array($sortOn, $sortOrder)
+            ),
+            'keywords' => $keywords
+       );
+
+        // --------------------------------------------------------------------------
+
+        //  Get the items for the page
+        $totalRows                = $this->shop_product_type_meta_model->count_all($data);
+        $this->data['metaFields'] = $this->shop_product_type_meta_model->get_all($page, $perPage, $data);
+
+        //  Set Search and Pagination objects for the view
+        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+
+        // --------------------------------------------------------------------------
+
+        //  Add header button
+        if (userHasPermission('admin.shop:0.product_type_meta_create')) {
+
+            \Nails\Admin\Helper::addHeaderButton('admin/shop/manage/productTypeMeta/create', 'Create Product Type Meta Field');
+        }
 
         // --------------------------------------------------------------------------
 
@@ -1855,7 +2324,7 @@ class Manage extends \AdminController
      */
     protected function productTypeMetaCreate()
     {
-        if (!userHasPermission('admin.shop{0.product_type_meta_create')) {
+        if (!userHasPermission('admin.shop:0.product_type_meta_create')) {
 
             unauthorised();
         }
@@ -1878,23 +2347,24 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data                           = new \stdClass();
-                $data->label                    = $this->input->post('label');
-                $data->admin_form_sub_label     = $this->input->post('admin_form_sub_label');
-                $data->admin_form_placeholder   = $this->input->post('admin_form_placeholder');
-                $data->admin_form_tip           = $this->input->post('admin_form_tip');
-                $data->associated_product_types = $this->input->post('associated_product_types');
-                $data->allow_multiple           = (bool) $this->input->post('allow_multiple');
-                $data->is_filter                = (bool) $this->input->post('is_filter');
+                $data                             = array();
+                $data['label']                    = $this->input->post('label');
+                $data['admin_form_sub_label']     = $this->input->post('admin_form_sub_label');
+                $data['admin_form_placeholder']   = $this->input->post('admin_form_placeholder');
+                $data['admin_form_tip']           = $this->input->post('admin_form_tip');
+                $data['associated_product_types'] = $this->input->post('associated_product_types');
+                $data['allow_multiple']           = (bool) $this->input->post('allow_multiple');
+                $data['is_filter']                = (bool) $this->input->post('is_filter');
 
                 if ($this->shop_product_type_meta_model->create($data)) {
 
                     $this->session->set_flashdata('success', 'Product Type Meta Field created successfully.');
-                    redirect('admin/shop/manage/productTypeMeta' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/productTypeMeta' . $this->data['isModal']);
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem creating the Product Type Meta Field. ' . $this->shop_product_type_meta_model->last_error();
+                    $this->data['error']  = 'There was a problem creating the Product Type Meta Field. ';
+                    $this->data['error'] .= $this->shop_product_type_meta_model->last_error();
                 }
 
             } else {
@@ -1911,7 +2381,7 @@ class Manage extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['product_types'] = $this->shop_product_type_model->get_all();
+        $this->data['productTypes'] = $this->shop_product_type_model->get_all();
 
         // --------------------------------------------------------------------------
 
@@ -1927,14 +2397,14 @@ class Manage extends \AdminController
      */
     protected function productTypeMetaEdit()
     {
-        if (!userHasPermission('admin.shop{0.product_type_meta_edit')) {
+        if (!userHasPermission('admin.shop:0.product_type_meta_edit')) {
 
             unauthorised();
         }
 
         // --------------------------------------------------------------------------
 
-        $data = array('include_associated_product_types' => true);
+        $data = array('includeAssociatedProductTypes' => true);
         $this->data['meta_field'] = $this->shop_product_type_meta_model->get_by_id($this->uri->segment(6), $data);
 
         if (empty($this->data['meta_field'])) {
@@ -1960,23 +2430,24 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data                           = new \stdClass();
-                $data->label                    = $this->input->post('label');
-                $data->admin_form_sub_label     = $this->input->post('admin_form_sub_label');
-                $data->admin_form_placeholder   = $this->input->post('admin_form_placeholder');
-                $data->admin_form_tip           = $this->input->post('admin_form_tip');
-                $data->associated_product_types = $this->input->post('associated_product_types');
-                $data->allow_multiple           = (bool) $this->input->post('allow_multiple');
-                $data->is_filter                = (bool) $this->input->post('is_filter');
+                $data                             = array();
+                $data['label']                    = $this->input->post('label');
+                $data['admin_form_sub_label']     = $this->input->post('admin_form_sub_label');
+                $data['admin_form_placeholder']   = $this->input->post('admin_form_placeholder');
+                $data['admin_form_tip']           = $this->input->post('admin_form_tip');
+                $data['associated_product_types'] = $this->input->post('associated_product_types');
+                $data['allow_multiple']           = (bool) $this->input->post('allow_multiple');
+                $data['is_filter']                = (bool) $this->input->post('is_filter');
 
                 if ($this->shop_product_type_meta_model->update($this->data['meta_field']->id, $data)) {
 
                     $this->session->set_flashdata('success', 'Product Type Meta Field saved successfully.');
-                    redirect('admin/shop/manage/productTypeMeta' . $this->data['isFancybox']);
+                    redirect('admin/shop/manage/productTypeMeta' . $this->data['isModal']);
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem saving the Product Type Meta Field. ' . $this->shop_product_type_meta_model->last_error();
+                    $this->data['error']  = 'There was a problem saving the Product Type Meta Field. ';
+                    $this->data['error'] .= $this->shop_product_type_meta_model->last_error();
                 }
 
             } else {
@@ -1993,7 +2464,7 @@ class Manage extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['product_types'] = $this->shop_product_type_model->get_all();
+        $this->data['productTypes'] = $this->shop_product_type_model->get_all();
 
         // --------------------------------------------------------------------------
 
@@ -2009,7 +2480,7 @@ class Manage extends \AdminController
      */
     protected function productTypeMetaDelete()
     {
-        if (!userHasPermission('admin.shop{0.product_type_meta_delete')) {
+        if (!userHasPermission('admin.shop:0.product_type_meta_delete')) {
 
             unauthorised();
         }
@@ -2020,14 +2491,17 @@ class Manage extends \AdminController
 
         if ($this->shop_product_type_meta_model->delete($id)) {
 
-            $this->session->set_flashdata('success', 'Product Type was deleted successfully.');
+            $status  = 'success';
+            $message = 'Product Type was deleted successfully.';
 
         } else {
 
-            $this->session->set_flashdata('error', 'There was a problem deleting the Product Type. ' . $this->shop_product_type_model->last_error());
+            $status  = 'error';
+            $message = 'There was a problem deleting the Product Type. ' . $this->shop_product_type_model->last_error();
         }
 
-        redirect('admin/shop/manage/productTypeMeta' . $this->data['isFancybox']);
+        $this->session->set_flashdata($status, $message);
+        redirect('admin/shop/manage/productTypeMeta' . $this->data['isModal']);
     }
 
     // --------------------------------------------------------------------------

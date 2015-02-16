@@ -16,8 +16,8 @@ class NAILS_Shop_range_model extends NAILS_Model
     {
         parent::__construct();
 
-        $this->_table           = NAILS_DB_PREFIX . 'shop_range';
-        $this->_table_prefix    = 'sr';
+        $this->_table        = NAILS_DB_PREFIX . 'shop_range';
+        $this->_table_prefix = 'sr';
 
         // --------------------------------------------------------------------------
 
@@ -25,20 +25,26 @@ class NAILS_Shop_range_model extends NAILS_Model
         $this->shopUrl = $this->shop_model->getShopUrl();
     }
 
-
     // --------------------------------------------------------------------------
 
-
+    /**
+     * This method applies the conditionals which are common across the get_*()
+     * methods and the count() method.
+     * @param array  $data    Data passed from the calling method
+     * @param string $_caller The name of the calling method
+     * @return void
+     **/
     protected function _getcount_common($data = array(), $_caller = null)
     {
+        //  Default sort
         if (empty($data['sort'])) {
 
-            $data['sort'] = 'label';
+            if (empty($data['sort'])) {
 
-        } else {
+                $data['sort'] = array();
+            }
 
-            $data = array('sort' => 'label');
-
+            $data['sort'][] = array($this->_table_prefix . '.label', 'ASC');
         }
 
         // --------------------------------------------------------------------------
@@ -46,32 +52,21 @@ class NAILS_Shop_range_model extends NAILS_Model
         //  Only include active items?
         if (isset($data['only_active'])) {
 
-            $_only_active = (bool) $data['only_active'];
+            $onlyActive = (bool) $data['only_active'];
 
         } else {
 
-            $_only_active = true;
-
+            $onlyActive = true;
         }
 
-        if ($_only_active) {
+        if ($onlyActive) {
 
             if (!isset($data['where'])) {
 
                 $data['where'] = array();
-
             }
 
-            if (is_array($data['where'])) {
-
-                $data['where'][] = array('is_active', true);
-
-            } elseif (is_string($data['where'])) {
-
-                $data['where'] .= ' AND ' . $this->_table_prefix . '.is_active = 1';
-
-            }
-
+            $data['where'][] = array('is_active', true);
         }
 
         // --------------------------------------------------------------------------
@@ -81,38 +76,54 @@ class NAILS_Shop_range_model extends NAILS_Model
             if (empty($this->db->ar_select)) {
 
                 //  No selects have been called, call this so that we don't *just* get the product count
-                $_prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
-                $this->db->select($_prefix . '*');
-
+                $this->db->select($this->_table_prefix . '.*');
             }
 
-            $query  = 'SELECT COUNT(DISTINCT(`nspr`.`product_id`)) ';
-            $query .= 'FROM ' . NAILS_DB_PREFIX . 'shop_product_range nspr ';
-            $query .= 'JOIN ' . NAILS_DB_PREFIX . 'shop_product nsp ON `nspr`.`product_id` = `nsp`.`id` ';
-            $query .= 'WHERE ';
-            $query .= '`nspr`.`range_id` = `' . $this->_table_prefix . '`.`id` ';
-            $query .= 'AND `nsp`.`is_active` = 1 ';
-            $query .= 'AND `nsp`.`is_deleted` = 0';
+            $sql  = 'SELECT COUNT(DISTINCT(`nspr`.`product_id`)) ';
+            $sql .= 'FROM ' . NAILS_DB_PREFIX . 'shop_product_range nspr ';
+            $sql .= 'JOIN ' . NAILS_DB_PREFIX . 'shop_product nsp ON `nspr`.`product_id` = `nsp`.`id` ';
+            $sql .= 'WHERE ';
+            $sql .= '`nspr`.`range_id` = `' . $this->_table_prefix . '`.`id` ';
+            $sql .= 'AND `nsp`.`is_active` = 1 ';
+            $sql .= 'AND `nsp`.`is_deleted` = 0';
 
-            $this->db->select('(' . $query . ') product_count', false);
-
+            $this->db->select('(' . $sql . ') product_count', false);
         }
 
         // --------------------------------------------------------------------------
 
-        return parent::_getcount_common($data, $_caller);
-    }
+        //  Search
+        if (!empty($data['keywords'])) {
 
+            $data['like']   = array();
+            $data['like'][] = array(
+                'column' => $this->_table_prefix . '.label',
+                'value'  => $data['keywords']
+            );
+            $data['like'][] = array(
+                'column' => $this->_table_prefix . '.description',
+                'value'  => $data['keywords']
+            );
+        }
+
+        // --------------------------------------------------------------------------
+
+        parent::_getcount_common($data, $_caller);
+    }
 
     // --------------------------------------------------------------------------
 
-
+    /**
+     * Returns a range by its ID
+     * @param  integer $id   The range's ID
+     * @param  array   $data An array of data to pass to _getcount_common();
+     * @return mixed         stdClass on success, false on failure
+     */
     public function get_by_id($id, $data = array())
     {
         if (!isset($data['only_active'])) {
 
             $data['only_active'] = false;
-
         }
 
         // --------------------------------------------------------------------------
@@ -120,16 +131,19 @@ class NAILS_Shop_range_model extends NAILS_Model
         return parent::get_by_id($id, $data);
     }
 
-
     // --------------------------------------------------------------------------
 
-
+    /**
+     * Return an array of ranges by their IDs
+     * @param  array  $ids  An array if IDs
+     * @param  array  $data An array of data to pass to _getcount_common();
+     * @return array
+     */
     public function get_by_ids($ids, $data = array())
     {
         if (!isset($data['only_active'])) {
 
             $data['only_active'] = false;
-
         }
 
         // --------------------------------------------------------------------------
@@ -137,16 +151,19 @@ class NAILS_Shop_range_model extends NAILS_Model
         return parent::get_by_ids($ids, $data);
     }
 
-
     // --------------------------------------------------------------------------
 
-
+    /**
+     * Returns a range by its slug
+     * @param  string $slug the range's slug
+     * @param  array  $data An array of data to pass to _getcount_common();
+     * @return mixed        stdClass on success, false on failure
+     */
     public function get_by_slug($slug, $data = array())
     {
         if (!isset($data['only_active'])) {
 
             $data['only_active'] = false;
-
         }
 
         // --------------------------------------------------------------------------
@@ -154,16 +171,19 @@ class NAILS_Shop_range_model extends NAILS_Model
         return parent::get_by_slug($slug, $data);
     }
 
-
     // --------------------------------------------------------------------------
 
-
+    /**
+     * Returns an array of ranges by their IDs
+     * @param  array  $slugs An array of IDs
+     * @param  array  $data  An array of data to pass to _getcount_common();
+     * @return array
+     */
     public function get_by_slugs($slugs, $data = array())
     {
         if (!isset($data['only_active'])) {
 
             $data['only_active'] = false;
-
         }
 
         // --------------------------------------------------------------------------
@@ -171,46 +191,57 @@ class NAILS_Shop_range_model extends NAILS_Model
         return parent::get_by_slugs($slugs, $data);
     }
 
-
     // --------------------------------------------------------------------------
 
-
-    public function get_by_id_or_slug($id_slug, $data = array())
+    /**
+     * Returns a range by its ID or slug
+     * @param  mixed  $idSlug The range's ID or slug
+     * @param  array  $data   An array of data to pass to _getcount_common();
+     * @return mixed          stdClass on success, false on failure
+     */
+    public function get_by_id_or_slug($idSlug, $data = array())
     {
         if (!isset($data['only_active'])) {
 
             $data['only_active'] = false;
-
         }
 
         // --------------------------------------------------------------------------
 
-        return parent::get_by_id_or_slug($id_slug, $data);
+        return parent::get_by_id_or_slug($idSlug, $data);
     }
-
 
     // --------------------------------------------------------------------------
 
-
+    /**
+     * Creates a new range
+     * @param  array   $data         The array of data to create the range with
+     * @param  boolean $returnObject Whether to return the full range object or just the ID
+     * @return mixed
+     */
     public function create($data = array(), $return_object = false)
     {
-        if (!empty($data->label)) {
+        if (!empty($data['label'])) {
 
-            $data->slug = $this->_generate_slug($data->label);
+            $data['slug'] = $this->_generate_slug($data['label']);
         }
 
-        if (empty($data->cover_id)) {
+        if (empty($data['cover_id'])) {
 
-            $data->cover_id = null;
+            $data['cover_id'] = null;
         }
 
         return parent::create($data, $return_object);
     }
 
-
     // --------------------------------------------------------------------------
 
-
+    /**
+     * Updates an existing range
+     * @param  integer $id   The ID of the range to update
+     * @param  array   $data An array of data to update the range with
+     * @return boolean
+     */
     public function update($id, $data = array())
     {
         if (!empty($data->label)) {
@@ -227,32 +258,36 @@ class NAILS_Shop_range_model extends NAILS_Model
         return parent::update($id, $data);
     }
 
-
     // --------------------------------------------------------------------------
 
-
+    /**
+     * Formats a range's URL
+     * @param  string $slug The range's slug
+     * @return string
+     */
     public function format_url($slug)
     {
         return site_url($this->shopUrl . 'range/' . $slug);
     }
 
-
     // --------------------------------------------------------------------------
 
-
+    /**
+     * Formats a range object
+     * @param  stdClass &$object The range object to format
+     * @return void
+     */
     protected function _format_object(&$object)
     {
         //  Type casting
-        $object->id             = (int) $object->id;
-        $object->created_by     = $object->created_by ? (int) $object->created_by : null;
-        $object->modified_by    = $object->modified_by ? (int) $object->modified_by : null;
-        $object->url            = $this->format_url($object->slug);
+        $object->id          = (int) $object->id;
+        $object->created_by  = $object->created_by ? (int) $object->created_by : null;
+        $object->modified_by = $object->modified_by ? (int) $object->modified_by : null;
+        $object->url         = $this->format_url($object->slug);
     }
 }
 
-
 // --------------------------------------------------------------------------
-
 
 /**
  * OVERLOADING NAILS' MODELS
@@ -283,8 +318,4 @@ if (!defined('NAILS_ALLOW_EXTENSION_SHOP_RANGE_MODEL')) {
     class Shop_range_model extends NAILS_Shop_range_model
     {
     }
-
 }
-
-/* End of file shop_range_model.php */
-/* Location: ./modules/shop/models/shop_range_model.php */

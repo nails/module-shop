@@ -12,6 +12,9 @@
 
 class NAILS_Shop_category_model extends NAILS_Model
 {
+    /**
+     * Construct the model
+     */
     public function __construct()
     {
         parent::__construct();
@@ -25,22 +28,26 @@ class NAILS_Shop_category_model extends NAILS_Model
         $this->shopUrl = $this->shop_model->getShopUrl();
     }
 
-
     // --------------------------------------------------------------------------
 
-
-    public function create($data, $return_object = false)
+    /**
+     * Create a new category
+     * @param  array   $data         The data array to create the category with
+     * @param  boolean $returnObject Whether to return the new category's ID or the full category object
+     * @return mixed
+     */
+    public function create($data, $returnObject = false)
     {
         //  Some basic sanity testing
-        if (empty($data->label)) {
+        if (empty($data['label'])) {
 
             $this->_set_error('"label" is a required field.');
             return false;
         }
 
-        if (empty($data->cover_id)) {
+        if (empty($data['cover_id'])) {
 
-            $data->cover_id = null;
+            $data['cover_id'] = null;
         }
 
         // --------------------------------------------------------------------------
@@ -48,7 +55,7 @@ class NAILS_Shop_category_model extends NAILS_Model
         $this->db->trans_begin();
 
         //  Create a new blank object to work with
-        $_data = array('label' => $data->label);
+        $_data = array('label' => $data['label']);
         $_id   = parent::create($_data);
 
         if (!$_id) {
@@ -61,7 +68,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 
             $this->db->trans_commit();
 
-            if ($return_object) {
+            if ($returnObject) {
 
                 return $this->get_by_id($_id);
 
@@ -77,77 +84,76 @@ class NAILS_Shop_category_model extends NAILS_Model
         }
     }
 
-
     // --------------------------------------------------------------------------
 
-
+    /**
+     * Update an existing category
+     * @param  integer $id   The category's ID
+     * @param  array   $data An aray of data to update the category with
+     * @return boolean
+     */
     public function update($id, $data = array())
     {
-        $_data = new \stdClass();
-
-        // --------------------------------------------------------------------------
+        $_data = array();
 
         //  Prep the data
-        if (empty($data->label)) {
+        if (empty($data['label'])) {
 
             $this->_set_error('"label" is a required field.');
             return false;
 
         } else {
 
-            $_data->label = trim($data->label);
+            $_data['label'] = trim($data['label']);
         }
 
-        if (isset($data->parent_id)) {
+        if (isset($data['parent_id'])) {
 
-            $_data->parent_id = (int) $data->parent_id;
+            $_data['parent_id'] = $data['parent_id'] ? $data['parent_id'] : null;
 
-            if (empty($_data->parent_id)) {
-
-                $_data->parent_id = null;
-            }
-
-            if ($_data->parent_id == $id) {
+            if ($_data['parent_id'] == $id) {
 
                 $this->_set_error('"parent_id" cannot be the same as the category\'s ID.');
                 return false;
             }
         }
 
-        if (!empty($data->cover_id)) {
+        if (isset($data['cover_id'])) {
 
-            $_data->cover_id = $data->cover_id;
+            $_data['cover_id'] = $data['cover_id'] ? $data['cover_id'] : null;
         }
 
-        if (isset($data->description)) {
+        if (isset($data['description'])) {
 
-            $_data->description = $data->description;
+            $_data['description'] = $data['description'];
         }
 
-        if (isset($data->seo_title)) {
+        if (isset($data['seo_title'])) {
 
-            $_data->seo_title = strip_tags($data->seo_title);
+            $_data['seo_title'] = strip_tags($data['seo_title']);
         }
 
-        if (isset($data->seo_description)) {
+        if (isset($data['seo_description'])) {
 
-            $_data->seo_description = strip_tags($data->seo_description);
+            $_data['seo_description'] = strip_tags($data['seo_description']);
         }
 
-        if (isset($data->seo_keywords)) {
+        if (isset($data['seo_keywords'])) {
 
-            $_data->seo_keywords = strip_tags($data->seo_keywords);
+            $_data['seo_keywords'] = strip_tags($data['seo_keywords']);
         }
 
         // --------------------------------------------------------------------------
 
-        //  Generate the slug
-        //  If there's a parent then prefix the slug with the parent's slug
+        /**
+         * Generate the slug
+         * If there's a parent then prefix the slug with the parent's slug
+         */
 
-        if (!empty($_data->parent_id)) {
+        if (!empty($_data['parent_id'])) {
 
             $this->db->select('slug');
-            $this->db->where('id', $_data->parent_id);
+            $this->db->where('id', $_data['parent_id']);
             $_parent = $this->db->get($this->_table)->row();
 
             if (empty($_parent)) {
@@ -155,33 +161,30 @@ class NAILS_Shop_category_model extends NAILS_Model
                 $_prefix = '';
 
                 //  Also, invalid aprent, so null out parent_id
-                $_data->parent_id = null;
+                $_data['parent_id'] = null;
 
             } else {
 
                 $_prefix = $_parent->slug . '/';
-
             }
 
         } else {
 
             //  No parent == no prefix
             $_prefix = '';
-
         }
 
-        $_data->slug        = $this->_generate_slug($_data->label, $_prefix, '', null, null, $id);
-        $_data->slug_end    = array_pop(explode('/', $_data->slug));
+        $_data['slug']     = $this->_generate_slug($_data['label'], $_prefix, '', null, null, $id);
+        $_data['slug_end'] = array_pop(explode('/', $_data['slug']));
 
         // --------------------------------------------------------------------------
 
         //  Find all childen
-        $_data->children_ids = implode(',', $this->get_ids_of_children($id));
+        $_data['children_ids'] = implode(',', $this->get_ids_of_children($id));
 
-        if (empty($_data->children_ids)) {
+        if (empty($_data['children_ids'])) {
 
-            $_data->children_ids = null;
-
+            $_data['children_ids'] = null;
         }
 
         //  And all the [old] parents
@@ -194,16 +197,15 @@ class NAILS_Shop_category_model extends NAILS_Model
 
         if (parent::update($id, $_data)) {
 
-            //  Success!Generate this category's breadcrumbs
-            $_data              = new \stdClass();
-            $_data->breadcrumbs = json_encode($this->_generate_breadcrumbs($id));
+            //  Success! Generate this category's breadcrumbs
+            $_data                = array();
+            $_data['breadcrumbs'] = json_encode($this->generateBreadcrumbs($id));
 
             if (!parent::update($id, $_data)) {
 
                 $this->db->trans_rollback();
                 $this->_set_error('Failed to update category breadcrumbs.');
                 return false;
-
             }
 
             // --------------------------------------------------------------------------
@@ -218,11 +220,9 @@ class NAILS_Shop_category_model extends NAILS_Model
                     $_child_data = new \stdClass();
 
                     //  Breadcrumbs is easy
-                    $_child_data->breadcrumbs = json_encode($this->_generate_breadcrumbs($child_id));
+                    $_child_data->breadcrumbs = json_encode($this->generateBreadcrumbs($child_id));
 
-                    //  Slugs are slightly harder, we need to get the child's parent's slug
-                    //  and use it as a prefix
-
+                    //  Slugs are slightly harder, we need to get the child's parent's slug and use it as a prefix
                     $this->db->select('parent_id, label');
                     $this->db->where('id', $child_id);
                     $_child = $this->db->get($this->_table)->row();
@@ -234,9 +234,8 @@ class NAILS_Shop_category_model extends NAILS_Model
                         $_parent = $this->db->get($this->_table)->row();
                         $_prefix = empty($_parent) ? '' : $_parent->slug . '/';
 
-                        $_child_data->slug      = $this->_generate_slug($_child->label, $_prefix, '', null, null, $child_id);
-                        $_child_data->slug_end  = array_pop(explode('/', $_child_data->slug));
-
+                        $_child_data->slug     = $this->_generate_slug($_child->label, $_prefix, '', null, null, $child_id);
+                        $_child_data->slug_end = array_pop(explode('/', $_child_data->slug));
                     }
 
                     if (!parent::update($child_id, $_child_data)) {
@@ -244,11 +243,8 @@ class NAILS_Shop_category_model extends NAILS_Model
                         $this->db->trans_rollback();
                         $this->_set_error('Failed to update child category.');
                         return false;
-
                     }
-
                 }
-
             }
 
             // --------------------------------------------------------------------------
@@ -260,13 +256,12 @@ class NAILS_Shop_category_model extends NAILS_Model
 
             foreach ($_parents as $parent_id) {
 
-                $_data                  = new \stdClass();
-                $_data->children_ids    = implode(',', $this->get_ids_of_children($parent_id));
+                $_data                 = array();
+                $_data['children_ids'] = implode(',', $this->get_ids_of_children($parent_id));
 
-                if (empty($_data->children_ids)) {
+                if (empty($_data['children_ids'])) {
 
-                    $_data->children_ids = null;
-
+                    $_data['children_ids'] = null;
                 }
 
                 if (!parent::update($parent_id, $_data)) {
@@ -274,9 +269,7 @@ class NAILS_Shop_category_model extends NAILS_Model
                     $this->db->trans_rollback();
                     $this->_set_error('Failed to update parent\'s children IDs.');
                     return false;
-
                 }
-
             }
 
             // --------------------------------------------------------------------------
@@ -288,26 +281,27 @@ class NAILS_Shop_category_model extends NAILS_Model
 
             $this->db->trans_rollback();
             return false;
-
         }
     }
 
-
     // --------------------------------------------------------------------------
 
-
+    /**
+     * Delete a category and its children
+     * @param  integer $id The ID of the category to delete
+     * @return boolean
+     */
     public function delete($id)
     {
-        $_current = $this->get_by_id($id);
+        $current = $this->get_by_id($id);
 
-        if (!$_current) {
+        if (!$current) {
 
             $this->_set_error('Invalid Category ID');
             return false;
-
         }
 
-        $_parents = $this->get_ids_of_parents($id);
+        $parents = $this->get_ids_of_parents($id);
 
         // --------------------------------------------------------------------------
 
@@ -315,25 +309,22 @@ class NAILS_Shop_category_model extends NAILS_Model
 
         if (parent::delete($id)) {
 
-            foreach ($_parents as $parent_id) {
+            foreach ($parents as $parentId) {
 
-                $_data                  = new \stdClass();
-                $_data->children_ids    = implode(',', $this->get_ids_of_children($parent_id));
+                $data                 = array();
+                $data['children_ids'] = implode(',', $this->get_ids_of_children($parentId));
 
-                if (empty($_data->children_ids)) {
+                if (empty($data['children_ids'])) {
 
-                    $_data->children_ids = null;
-
+                    $data['children_ids'] = null;
                 }
 
-                if (!parent::update($parent_id, $_data)) {
+                if (!parent::update($parentId, $data)) {
 
                     $this->db->trans_rollback();
                     $this->_set_error('Failed to update parent\'s children IDs.');
                     return false;
-
                 }
-
             }
 
             $this->db->trans_commit();
@@ -344,194 +335,196 @@ class NAILS_Shop_category_model extends NAILS_Model
             $this->_set_error('Invalid Category ID');
             $this->db->trans_rollback();
             return false;
-
         }
-
     }
-
 
     // --------------------------------------------------------------------------
 
-
-    protected function _generate_breadcrumbs($id)
+    /**
+     * Generate breadcrumbs for a category
+     * @param  integer $id The category's ID
+     * @return array
+     */
+    protected function generateBreadcrumbs($id)
     {
         //  Fetch current
         $this->db->select('id,slug,label');
         $this->db->where('id', $id);
-        $_current = $this->db->get($this->_table)->result();
+        $current = $this->db->get($this->_table)->result();
 
-        if (empty($_current)) {
+        if (empty($current)) {
 
             return false;
-
         }
 
         //  Fetch parents
-        $_parents = $this->get_ids_of_parents($id);
+        $parents = $this->get_ids_of_parents($id);
 
-        if (!empty($_parents)) {
+        if (!empty($parents)) {
 
             $this->db->select('id,slug,label');
-            $this->db->where_in('id', $_parents);
-            $_parents = $this->db->get($this->_table)->result();
-
+            $this->db->where_in('id', $parents);
+            $parents = $this->db->get($this->_table)->result();
         }
 
         //  Finally, build breadcrumbs
-        return array_merge($_parents, $_current);
+        return array_merge($parents, $current);
     }
-
 
     // --------------------------------------------------------------------------
 
-
+    /**
+     * Returns an array of the IDs of all aprent categories
+     * @param  integer $id The ID of the category whose parents to search for
+     * @return array
+     */
     public function get_ids_of_parents($id)
     {
-        $_return = array();
+        $return = array();
 
         $this->db->select('parent_id');
         $this->db->where('id', $id);
-        $_parent = $this->db->get($this->_table)->row();
+        $parent = $this->db->get($this->_table)->row();
 
-        if (!empty($_parent->parent_id)) {
+        if (!empty($parent->parent_id)) {
 
-            $_temp      = array($_parent->parent_id);
-            $_return    = array_merge($_return, $_temp, $this->get_ids_of_parents($_parent->parent_id));
-
+            $temp   = array($parent->parent_id);
+            $return = array_merge($return, $temp, $this->get_ids_of_parents($parent->parent_id));
         }
 
-        return array_unique(array_filter($_return));
+        return array_unique(array_filter($return));
     }
-
 
     // --------------------------------------------------------------------------
 
-
     /**
      * Fetches the IDs of a category's descendants
-     * @param  int   $id             The ID of the starting category
-     * @param  boolean $only_immediate Whether to recurscively fetch all descendants, or just the immediate descendants
+     * @param  int     $id            The ID of the starting category
+     * @param  boolean $onlyImmediate Whether to recurscively fetch all descendants, or just the immediate descendants
      * @return array
      */
-    public function get_ids_of_children($id, $only_immediate = false)
+    public function get_ids_of_children($id, $onlyImmediate = false)
     {
-        $_return = array();
+        $return = array();
 
         $this->db->select('id');
         $this->db->where('parent_id', $id);
-        $_children = $this->db->get($this->_table)->result();
+        $children = $this->db->get($this->_table)->result();
 
-        if ($only_immediate) {
+        if ($onlyImmediate) {
 
-            foreach ($_children as $child) {
+            foreach ($children as $child) {
 
-                $_return[] = $child->id;
-
+                $return[] = $child->id;
             }
 
         } else {
 
-            if (!empty($_children)) {
+            if (!empty($children)) {
 
-                foreach ($_children as $child) {
+                foreach ($children as $child) {
 
-                    $_temp      = array($child->id);
-                    $_return    = array_merge($_return, $_temp, $this->get_ids_of_children($child->id, false));
-
+                    $_temp   = array($child->id);
+                    $return = array_merge($return, $_temp, $this->get_ids_of_children($child->id, false));
                 }
-
             }
-
         }
 
-        return array_unique(array_filter($_return));
+        return array_unique(array_filter($return));
     }
 
-
     // --------------------------------------------------------------------------
-
 
     /**
-     * Gets a category's descendants in object form
-     * @param  int   $category_id   The ID of the category
-     * @param  boolean $only_immediate Whether to recurscively fetch all descendants, or just the immediate descendants
+     * Returns a category's descendants in object form
+     * @param  integer $categoryId    The ID of the category
+     * @param  boolean $onlyImmediate Whether to only looka s far as the immediate children
+     * @param  array   $data          An array of data to pass to get_by_ids()
      * @return array
      */
-    public function get_children($category_id, $only_immediate = false, $_data = array())
+    public function get_children($categoryId, $onlyImmediate = false, $data = array())
     {
-        $_children = $this->get_ids_of_children($category_id, $only_immediate);
+        $children = $this->get_ids_of_children($categoryId, $onlyImmediate);
 
-        if (!empty($_children)) {
+        if (!empty($children)) {
 
-            return $this->get_by_ids($_children, $_data);
-
+            return $this->get_by_ids($children, $data);
         }
 
         return array();
     }
 
-
     // --------------------------------------------------------------------------
 
-
-    public function get_ids_of_siblings($category_id)
+    /**
+     * Returns an array of a category's siblings' IDs
+     * @param  integer $categoryId The category's ID
+     * @return array
+     */
+    public function get_ids_of_siblings($categoryId)
     {
         $this->db->select('parent_id');
-        $this->db->where('id', $category_id);
-        $_parent = $this->db->get($this->_table)->row();
+        $this->db->where('id', $categoryId);
+        $parent = $this->db->get($this->_table)->row();
 
-        if (!$_parent) {
+        if (!empty($parent->parent_id)) {
 
             return array();
-
         }
 
-        $this->db->where('id !=', $category_id);
-        return $this->get_ids_of_children($_parent->parent_id, true);
+        $this->db->where('id !=', $categoryId);
+        return $this->get_ids_of_children($parent->parent_id, true);
     }
-
 
     // --------------------------------------------------------------------------
 
-
-    public function get_siblings($category_id, $_data = array())
+    /**
+     * Returns an array of a category's siblings
+     * @param  integer $categoryId The category's ID
+     * @param  array   $data       An array of data to pass to get_by_ids()
+     * @return array
+     */
+    public function get_siblings($categoryId, $data = array())
     {
-        $_children = $this->get_ids_of_siblings($category_id);
+        $children = $this->get_ids_of_siblings($categoryId);
 
-        if (!empty($_children)) {
+        if (!empty($children)) {
 
-            return $this->get_by_ids($_children, $_data);
-
+            return $this->get_by_ids($children, $data);
         }
 
         return array();
     }
 
-
     // --------------------------------------------------------------------------
 
-
-    public function get_all_nested($_parent_id = null, $data = array())
+    /**
+     * Returns an array of all categories, nested
+     * @param  array  $data An array of data to pass to get_all()
+     * @return array
+     */
+    public function get_all_nested($data = array())
     {
-        return $this->_nest_items($this->get_all(null, null, $data), null);
+        return $this->nestItems($this->get_all(null, null, $data), null);
     }
 
-
     // --------------------------------------------------------------------------
 
-
+    /**
+     * Get all top level categories (i.e., those without a parent)
+     * @param  array  $data an aray of data to pass to get_all()
+     * @return array
+     */
     public function get_top_level($data = array())
     {
         if (empty($data['where'])) {
 
             $data['where'][] = array('column' => 'parent_id', 'value' => null);
-
         }
 
         if (!isset($data['include_count'])) {
 
             $data['include_count'] = true;
-
         }
 
         // --------------------------------------------------------------------------
@@ -539,70 +532,78 @@ class NAILS_Shop_category_model extends NAILS_Model
         return $this->get_all(null, null, $data);
     }
 
-
     // --------------------------------------------------------------------------
 
-
     /**
-     *  Hat tip to Timur; http://stackoverflow.com/a/9224696/789224
-     **/
-    protected function _nest_items(&$list, $parent = null)
+     * Nest items
+     * Hat tip to Timur: http://stackoverflow.com/a/9224696/789224
+     * @param  array   &$list  An array of items to nest
+     * @param  integer $parent The parent's ID
+     * @return array
+     */
+    protected function nestItems(&$list, $parent = null)
     {
         $result = array();
 
-        for ($i = 0, $c = count($list); $i < $c; $i++) :
+        for ($i = 0, $c = count($list); $i < $c; $i++) {
 
             if ($list[$i]->parent_id == $parent) {
 
-                $list[$i]->children = $this->_nest_items($list, $list[$i]->id);
+                $list[$i]->children = $this->nestItems($list, $list[$i]->id);
                 $result[]           = $list[$i];
-
             }
-
-        endfor;
+        }
 
         return $result;
     }
 
     // --------------------------------------------------------------------------
 
-
+    /**
+     * Get all nested categories as a flat array
+     * @param  string $separator The string ot use as the category separator
+     * @return array
+     */
     public function get_all_nested_flat($separator = ' &rsaquo; ')
     {
-        $_categories    = $this->get_all();
-        $_out           = array();
+        $categories = $this->get_all();
+        $out        = array();
 
-        foreach ($_categories as $cat) {
+        foreach ($categories as $cat) {
 
             $_out[$cat->id] = array();
 
             foreach ($cat->breadcrumbs as $crumb) {
 
-                $_out[$cat->id][] = $crumb->label;
-
+                $out[$cat->id][] = $crumb->label;
             }
 
-            $_out[$cat->id] = implode($separator, $_out[$cat->id]);
-
+            $out[$cat->id] = implode($separator, $out[$cat->id]);
         }
 
         return $_out;
     }
 
-
     // --------------------------------------------------------------------------
 
-
+    /**
+     * This method applies the conditionals which are common across the get_*()
+     * methods and the count() method.
+     * @param array  $data    Data passed from the calling method
+     * @param string $_caller The name of the calling method
+     * @return void
+     **/
     protected function _getcount_common($data = array(), $_caller = null)
     {
+        //  Default sort
         if (empty($data['sort'])) {
 
-            $data['sort'] = 'slug';
+            if (empty($data['sort'])) {
 
-        } else {
+                $data['sort'] = array();
+            }
 
-            $data = array('sort' => 'slug');
-
+            $data['sort'][] = array($this->_table_prefix . '.label', 'ASC');
         }
 
         // --------------------------------------------------------------------------
@@ -612,9 +613,8 @@ class NAILS_Shop_category_model extends NAILS_Model
             if (empty($this->db->ar_select)) {
 
                 //   No selects have been called, call this so that we don't *just* get the product count
-                $_prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
-                $this->db->select($_prefix . '*');
-
+                $prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
+                $this->db->select($prefix . '*');
             }
 
             $query  = 'SELECT COUNT(DISTINCT(`nspc`.`product_id`)) ';
@@ -634,21 +634,38 @@ class NAILS_Shop_category_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        return parent::_getcount_common($data, $_caller);
-    }
+        //  Search
+        if (!empty($data['keywords'])) {
 
+            $data['like']   = array();
+            $data['like'][] = array(
+                'column' => $this->_table_prefix . '.label',
+                'value'  => $data['keywords']
+            );
+            $data['like'][] = array(
+                'column' => $this->_table_prefix . '.description',
+                'value'  => $data['keywords']
+            );
+        }
+
+        // --------------------------------------------------------------------------
+
+        parent::_getcount_common($data, $_caller);
+    }
 
     // --------------------------------------------------------------------------
 
-
+    /**
+     * Formats a category's URL
+     * @param  string $slug The category's slug
+     * @return string
+     */
     public function format_url($slug)
     {
         return site_url($this->shopUrl . 'category/' . $slug);
     }
 
-
     // --------------------------------------------------------------------------
-
 
     /**
      * If the seo_description or seo_keywords fields are empty this method will
@@ -656,7 +673,7 @@ class NAILS_Shop_category_model extends NAILS_Model
      * @param  object $category A category object
      * @return void
      */
-    public function generate_seo_content(&$category)
+    public function generateSeoContent(&$category)
     {
         /**
          * Autogenerate some SEO content if it's not been set
@@ -668,58 +685,57 @@ class NAILS_Shop_category_model extends NAILS_Model
             //  Base string
             $category->seo_description = 'Buy ' . $category->label . ' at ' . APP_NAME;
             $category->seo_description = htmlentities($category->seo_description);
-
         }
 
         if (empty($category->seo_keywords)) {
 
             //  Extract common keywords
             $this->lang->load('shop/shop');
-            $_common = explode(',', lang('shop_common_words'));
-            $_common = array_unique($_common);
-            $_common = array_filter($_common);
+            $common = explode(',', lang('shop_common_words'));
+            $common = array_unique($common);
+            $common = array_filter($common);
 
             //  Remove them and return the most popular words
-            $_description = strtolower($category->description);
-            $_description = str_replace("\n", ' ', strip_tags($_description));
-            $_description = str_word_count($_description, 1);
-            $_description = array_count_values($_description    );
-            arsort($_description);
-            $_description = array_keys($_description);
-            $_description = array_diff($_description, $_common);
-            $_description = array_slice($_description, 0, 10);
+            $description = strtolower($category->description);
+            $description = str_replace("\n", ' ', strip_tags($description));
+            $description = str_word_count($description, 1);
+            $description = array_count_values($description    );
+            arsort($description);
+            $description = array_keys($description);
+            $description = array_diff($description, $common);
+            $description = array_slice($description, 0, 10);
 
-            $category->seo_keywords = implode(',', $_description);
+            $category->seo_keywords = implode(',', $description);
 
             //  Encode entities
             $category->seo_keywords = htmlentities($category->seo_keywords);
-
         }
     }
 
-
     // --------------------------------------------------------------------------
 
-
+    /**
+     * Format a category object
+     * @param  stdClass &$object The category object to format
+     * @return void
+     */
     protected function _format_object(&$object)
     {
         //  Type casting
-        $object->id             = (int) $object->id;
-        $object->parent_id      = $object->parent_id ? (int) $object->parent_id : null;
-        $object->created_by     = $object->created_by ? (int) $object->created_by : null;
-        $object->modified_by    = $object->modified_by ? (int) $object->modified_by : null;
-        $object->children       = array();
+        $object->id          = (int) $object->id;
+        $object->parent_id   = $object->parent_id ? (int) $object->parent_id : null;
+        $object->created_by  = $object->created_by ? (int) $object->created_by : null;
+        $object->modified_by = $object->modified_by ? (int) $object->modified_by : null;
+        $object->children    = array();
 
-        $object->breadcrumbs    = (array) @json_decode($object->breadcrumbs);
+        $object->breadcrumbs = (array) @json_decode($object->breadcrumbs);
 
-        $object->depth          = count(explode('/', $object->slug)) - 1;
-        $object->url            = $this->format_url($object->slug);
+        $object->depth = count(explode('/', $object->slug)) - 1;
+        $object->url   = $this->format_url($object->slug);
     }
 }
 
-
 // --------------------------------------------------------------------------
-
 
 /**
  * OVERLOADING NAILS' MODELS
@@ -750,8 +766,4 @@ if (!defined('NAILS_ALLOW_EXTENSION_SHOP_CATEGORY_MODEL')) {
     class Shop_category_model extends NAILS_Shop_category_model
     {
     }
-
 }
-
-/* End of file shop_category_model.php */
-/* Location: ./modules/shop/models/shop_category_model.php */

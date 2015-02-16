@@ -1,113 +1,97 @@
 <div class="group-shop manage brands overview">
-    <?php
-
-        if ($isFancybox) {
-
-            echo '<h1>' . $page->title . '</h1>';
-            $_class = 'system-alert';
-
-        } else {
-
-            $_class = '';
-
-        }
-
-    ?>
-    <p class="<?=$_class?>">
+    <p>
         Manage which brands are available for your products.
     </p>
-    <?=$isFancybox ? '' : '<hr />'?>
-    <ul class="tabs disabled">
-        <li class="tab active">
-            <?=anchor('admin/shop/manage/brand' . $isFancybox, 'Overview')?>
-        </li>
-        <li class="tab">
-            <?=anchor('admin/shop/manage/brand/create' . $isFancybox, 'Create Brand')?>
-        </li>
-    </ul>
-    <section class="tabs pages">
-        <div class="tab page active">
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th class="label">Label &amp; Description</th>
-                            <th class="count">Products</th>
-                            <th class="modified">Modified</th>
-                            <th class="active">Active</th>
-                            <th class="actions">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    <?php
+    <?php
 
-                        if ($brands) {
+        echo \Nails\Admin\Helper::loadSearch($search);
+        echo \Nails\Admin\Helper::loadPagination($pagination);
 
-                            foreach ($brands as $brand) {
+    ?>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th class="label">Label &amp; Description</th>
+                    <th class="count">Products</th>
+                    <th class="modified">Modified</th>
+                    <th class="active">Active</th>
+                    <th class="actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php
 
-                                echo '<tr>';
-                                    echo '<td class="label">';
+                if ($brands) {
 
-                                        echo '<div class="thumbnail">';
-                                        if ($brand->logo_id) {
+                    foreach ($brands as $brand) {
 
-                                            echo anchor(cdn_serve($brand->logo_id), img(cdn_thumb($brand->logo_id, 32, 32)), 'class="fancybox"');
+                        echo '<tr>';
+                            echo '<td class="label">';
 
-                                        } else {
+                                echo '<div class="thumbnail">';
+                                if ($brand->logo_id) {
 
-                                            echo img(NAILS_ASSETS_URL . 'img/admin/modules/shop/manager/no-image.jpg');
+                                    echo anchor(cdn_serve($brand->logo_id), img(cdn_thumb($brand->logo_id, 32, 32)), 'class="fancybox"');
 
-                                        }
-                                        echo '</div>';
+                                } else {
 
-                                        echo '<div class="content">';
-                                            echo $brand->label;
-                                            echo $brand->description ? '<small>' . character_limiter(strip_tags($brand->description), 225) . '</small>' : '<small>No Description</small>';
-                                        echo '</div>';
+                                    echo img(NAILS_ASSETS_URL . 'img/admin/modules/shop/manager/no-image.jpg');
 
-                                    echo '</td>';
-                                    echo '<td class="count">';
-                                        echo !isset($brand->product_count) ? 'Unknown' : $brand->product_count;
-                                    echo '</td>';
+                                }
+                                echo '</div>';
 
-                                    echo \Nails\Admin\Helper::loadDatetimeCell($brand->modified);
-                                    echo \Nails\Admin\Helper::loadBoolCell($brand->is_active);
+                                echo '<div class="content">';
+                                    echo $brand->label;
+                                    echo $brand->description ? '<small>' . character_limiter(strip_tags($brand->description), 225) . '</small>' : '<small>No Description</small>';
+                                echo '</div>';
 
-                                    echo '<td class="actions">';
+                            echo '</td>';
+                            echo '<td class="count">';
+                                echo !isset($brand->product_count) ? 'Unknown' : $brand->product_count;
+                            echo '</td>';
 
-                                        if (userHasPermission('admin.shop:0.brand_edit')) {
+                            echo \Nails\Admin\Helper::loadDatetimeCell($brand->modified);
+                            echo \Nails\Admin\Helper::loadBoolCell($brand->is_active);
 
-                                            echo anchor('admin/shop/manage/brand/edit/' . $brand->id . $isFancybox, lang('action_edit'), 'class="awesome small"');
+                            echo '<td class="actions">';
 
-                                        }
+                                if (userHasPermission('admin.shop:0.brand_edit')) {
 
-                                        if (userHasPermission('admin.shop:0.brand_delete')) {
+                                    echo anchor('admin/shop/manage/brand/edit/' . $brand->id . $isModal, lang('action_edit'), 'class="awesome small"');
 
-                                            echo anchor('admin/shop/manage/brand/delete/' . $brand->id . $isFancybox, lang('action_delete'), 'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."');
+                                }
 
-                                        }
+                                if (userHasPermission('admin.shop:0.brand_delete')) {
 
-                                        echo anchor($shopUrl . 'brand/' . $brand->slug, lang('action_view'), 'class="awesome small orange" target="_blank"');
+                                    echo anchor('admin/shop/manage/brand/delete/' . $brand->id . $isModal, lang('action_delete'), 'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."');
 
-                                    echo '</td>';
-                                echo '</tr>';
-                            }
+                                }
 
-                        } else {
+                                echo anchor($shopUrl . 'brand/' . $brand->slug, lang('action_view'), 'class="awesome small orange" target="_blank"');
 
-                            echo '<tr>';
-                                echo '<td colspan="5" class="no-data">';
-                                    echo 'No Brands Found';
-                                echo '</td>';
-                            echo '</tr>';
-                        }
+                            echo '</td>';
+                        echo '</tr>';
+                    }
 
-                    ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
+                } else {
+
+                    echo '<tr>';
+                        echo '<td colspan="5" class="no-data">';
+                            echo 'No Brands Found';
+                        echo '</td>';
+                    echo '</tr>';
+                }
+
+            ?>
+            </tbody>
+        </table>
+    </div>
+    <?php
+
+        echo \Nails\Admin\Helper::loadPagination($pagination);
+
+    ?>
 </div>
 <?php
 

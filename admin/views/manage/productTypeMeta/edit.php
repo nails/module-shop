@@ -1,156 +1,124 @@
 <div class="group-shop manage product-type-meta edit">
-    <?php
+    <?=form_open(uri_string() . $isModal)?>
+    <fieldset>
+        <legend>Basic Details</legend>
+        <?php
 
-        if ($isFancybox) {
+            // --------------------------------------------------------------------------
 
-            echo '<h1>' . $page->title . '</h1>';
-            $class = 'system-alert';
+            $field                = array();
+            $field['key']         = 'label';
+            $field['label']       = 'Label';
+            $field['required']    = true;
+            $field['default']     = isset($meta_field->label) ? $meta_field->label : '';
+            $field['placeholder'] = 'The label to give this field, e.g., Colour';
 
-        } else {
+            echo form_field($field);
 
-            $class = '';
-        }
+            // --------------------------------------------------------------------------
 
-        echo form_open(uri_string() . $isFancybox);
+            $field                = array();
+            $field['key']         = 'admin_form_sub_label';
+            $field['label']       = 'Admin: Sub Label';
+            $field['placeholder'] = 'The sub label, shown beneath the text on the left using a smaller font size on the Inventory Create and Edit pages';
+            $field['default']     = isset($meta_field->admin_form_sub_label) ? $meta_field->admin_form_sub_label : '';
 
-    ?>
-    <p class="<?=$class?>">
-        Product Type Meta fields allow the shop to store additional information for variants. The store
-        also uses this data to provide a user friendly filtering system which responds to the products
-        available in the current view.
-    </p>
-    <?=$isFancybox ? '' : '<hr />'?>
-    <ul class="tabs disabled">
-        <li class="tab">
-            <?=anchor('admin/shop/manage/product_type_meta' . $isFancybox, 'Overview', 'class="confirm" data-title="Are you sure?" data-body="Any unsaved changes will be lost."')?>
-        </li>
-        <li class="tab active">
-            <?=anchor('admin/shop/manage/productTypeMeta/create' . $isFancybox, 'Create Product Type')?>
-        </li>
-    </ul>
-    <section class="tabs pages">
-        <div class="tab page active">
-            <fieldset>
-                <legend>Basic Details</legend>
-                <?php
+            echo form_field($field);
 
-                    // --------------------------------------------------------------------------
+            // --------------------------------------------------------------------------
 
-                    $field                = array();
-                    $field['key']         = 'label';
-                    $field['label']       = 'Label';
-                    $field['required']    = true;
-                    $field['default']     = isset($meta_field->label) ? $meta_field->label : '';
-                    $field['placeholder'] = 'The label to give this field, e.g., Colour';
+            $field                = array();
+            $field['key']         = 'admin_form_placeholder';
+            $field['label']       = 'Admin: Placeholder';
+            $field['default']     = isset($meta_field->admin_form_placeholder) ? $meta_field->admin_form_placeholder : '';
+            $field['placeholder'] = 'Placeholder text in admin on the Inventory Create and Edit pages, in the same way that this one is being shown now';
 
-                    echo form_field($field);
+            echo form_field($field);
 
-                    // --------------------------------------------------------------------------
+            // --------------------------------------------------------------------------
 
-                    $field                = array();
-                    $field['key']         = 'admin_form_sub_label';
-                    $field['label']       = 'Admin: Sub Label';
-                    $field['placeholder'] = 'The sub label, shown beneath the text on the left using a smaller font size on the Inventory Create and Edit pages';
-                    $field['default']     = isset($meta_field->admin_form_sub_label) ? $meta_field->admin_form_sub_label : '';
+            $field                = array();
+            $field['key']         = 'admin_form_tip';
+            $field['label']       = 'Admin: Tip';
+            $field['placeholder'] = 'Tip for this field when rendered on the Inventory Create and Edit pages';
+            $field['default']     = isset($meta_field->admin_form_tip) ? $meta_field->admin_form_tip : '';
+            $field['tip']         = 'This text will be shown as a tooltip in admin, in the same way that this one is being shown now';
 
-                    echo form_field($field);
+            echo form_field($field);
 
-                    // --------------------------------------------------------------------------
+            // --------------------------------------------------------------------------
 
-                    $field                = array();
-                    $field['key']         = 'admin_form_placeholder';
-                    $field['label']       = 'Admin: Placeholder';
-                    $field['default']     = isset($meta_field->admin_form_placeholder) ? $meta_field->admin_form_placeholder : '';
-                    $field['placeholder'] = 'Placeholder text in admin on the Inventory Create and Edit pages, in the same way that this one is being shown now';
+            $field             = array();
+            $field['key']      = 'allow_multiple';
+            $field['label']    = 'Allow Multiple Selections';
+            $field['tip']      = 'Allow admin to specify more than one value per variant.';
+            $field['text_on']  = lang('yes');
+            $field['text_off'] = lang('no');
+            $field['default']  = isset($meta_field->allow_multiple) ? $meta_field->allow_multiple : false;
 
-                    echo form_field($field);
+            echo form_field_boolean($field);
 
-                    // --------------------------------------------------------------------------
+            // --------------------------------------------------------------------------
 
-                    $field                = array();
-                    $field['key']         = 'admin_form_tip';
-                    $field['label']       = 'Admin: Tip';
-                    $field['placeholder'] = 'Tip for this field when rendered on the Inventory Create and Edit pages';
-                    $field['default']     = isset($meta_field->admin_form_tip) ? $meta_field->admin_form_tip : '';
-                    $field['tip']         = 'This text will be shown as a tooltip in admin, in the same way that this one is being shown now';
+            $field             = array();
+            $field['key']      = 'is_filter';
+            $field['label']    = 'Is Filter';
+            $field['tip']      = 'Allow this field to act as a product filter on the front end.';
+            $field['text_on']  = lang('yes');
+            $field['text_off'] = lang('no');
+            $field['default']  = isset($meta_field->allow_multiple) ? $meta_field->allow_multiple : false;
 
-                    echo form_field($field);
+            echo form_field_boolean($field);
 
-                    // --------------------------------------------------------------------------
-
-                    $field             = array();
-                    $field['key']      = 'allow_multiple';
-                    $field['label']    = 'Allow Multiple Selections';
-                    $field['tip']      = 'Allow admin to specify more than one value per variant.';
-                    $field['text_on']  = lang('yes');
-                    $field['text_off'] = lang('no');
-                    $field['default']  = isset($meta_field->allow_multiple) ? $meta_field->allow_multiple : false;
-
-                    echo form_field_boolean($field);
-
-                    // --------------------------------------------------------------------------
-
-                    $field             = array();
-                    $field['key']      = 'is_filter';
-                    $field['label']    = 'Is Filter';
-                    $field['tip']      = 'Allow this field to act as a product filter on the front end.';
-                    $field['text_on']  = lang('yes');
-                    $field['text_off'] = lang('no');
-                    $field['default']  = isset($meta_field->allow_multiple) ? $meta_field->allow_multiple : false;
-
-                    echo form_field_boolean($field);
-
-                ?>
-            </fieldset>
-            <fieldset>
-                <legend>Associated Product Types</legend>
-                <p>
-                    Specify which product types should inherit this meta field. Meta fields form the
-                    basis of the sidebar filters in the front end.
-                </p>
-                <select name="associated_product_types[]" multiple="multiple" class="select2" data-placeholder="Select product types">
-                    <option value=""></option>
-                    <?php
-
-                        $selected = array();
-
-                        if ($this->input->post('associated_product_types')) {
-
-                            $selected[] = $this->input->post('associated_product_types');
-
-                        } elseif (isset($meta_field->associated_product_types)) {
-
-                            foreach ($meta_field->associated_product_types as $product_type) {
-
-                                $selected[] = $product_type->id;
-                            }
-                        }
-
-                        foreach ($product_types as $type) {
-
-                            $is_selected = array_search($type->id, $selected) !== false ? 'selected="selected"' : '';
-
-                            echo '<option value="' . $type->id . '" ' .$is_selected . '>';
-                                echo $type->label;
-                            echo '</option>';
-                        }
-
-                    ?>
-                </select>
-            </fieldset>
-            <p style="margin-top:1em;">
+        ?>
+    </fieldset>
+    <fieldset>
+        <legend>Associated Product Types</legend>
+        <p>
+            Specify which product types should inherit this meta field. Meta fields form the
+            basis of the sidebar filters in the front end.
+        </p>
+        <select name="associated_product_types[]" multiple="multiple" class="select2" data-placeholder="Select product types">
+            <option value=""></option>
             <?php
 
-                echo form_submit('submit', 'Save', 'class="awesome"');
-                anchor(
-                    'admin/shop/manage/product_type_meta' . $isFancybox,
-                    'Cancel',
-                    'class="awesome red confirm" data-title="Are you sure?" data-body="All unsaved changes will be lost."'
-                );
+                $selected = array();
+
+                if ($this->input->post('associated_product_types')) {
+
+                    $selected[] = $this->input->post('associated_product_types');
+
+                } elseif (isset($meta_field->associated_product_types)) {
+
+                    foreach ($meta_field->associated_product_types as $productType) {
+
+                        $selected[] = $productType->id;
+                    }
+                }
+
+                foreach ($productTypes as $type) {
+
+                    $is_selected = array_search($type->id, $selected) !== false ? 'selected="selected"' : '';
+
+                    echo '<option value="' . $type->id . '" ' .$is_selected . '>';
+                        echo $type->label;
+                    echo '</option>';
+                }
 
             ?>
-            </p>
-        </div>
-    </section>
+        </select>
+    </fieldset>
+    <p style="margin-top:1em;">
+    <?php
+
+        echo form_submit('submit', 'Save', 'class="awesome"');
+        anchor(
+            'admin/shop/manage/product_type_meta' . $isModal,
+            'Cancel',
+            'class="awesome red confirm" data-title="Are you sure?" data-body="All unsaved changes will be lost."'
+        );
+
+    ?>
+    </p>
     <?=form_close();?>
 </div>

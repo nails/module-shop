@@ -1,10 +1,10 @@
 <div class="group-settings shop-pg">
-    <p <?=$this->input->get('isFancybox') ? 'class="system-alert"' : ''?>>
+    <p <?=$this->input->get('isModal') ? 'class="system-alert"' : ''?>>
         Configure the <?=$gateway_name?> payment gateway. The following fields can be either found or
         set within the "Installation Administration" area of <?=$gateway_name?>'s Merchant interface.
     </p>
     <hr />
-    <?=form_open('admin/settings/shop_pg/' . $gateway_slug . '?isFancybox=' . $this->input->get('isFancybox'))?>
+    <?=form_open('admin/settings/shop_pg/' . $gateway_slug . '?isModal=' . $this->input->get('isModal'))?>
         <ul class="tabs">
             <li class="tab active">
                 <a href="#" data-tab="tab-customise">Customise</a>

@@ -20,7 +20,7 @@ class Inventory extends \AdminController
      */
     public static function announce()
     {
-        if (userHasPermission('admin.shop{0.inventory_manage')) {
+        if (userHasPermission('admin.shop:0.inventory_manage')) {
 
             $navGroup = new \Nails\Admin\Nav('Shop');
             $navGroup->addMethod('Manage Inventory');
@@ -145,7 +145,7 @@ class Inventory extends \AdminController
 
         foreach ($this->data['product_types'] as $type) {
 
-            $this->data['product_types_meta'][$type->id] = $this->shop_product_type_meta_model->get_by_product_type_id($type->id);
+            $this->data['product_types_meta'][$type->id] = $this->shop_product_type_meta_model->getByProductTypeId($type->id);
         }
 
         // --------------------------------------------------------------------------
@@ -466,7 +466,7 @@ class Inventory extends \AdminController
 
         foreach ($this->data['product_types'] as $type) {
 
-            $this->data['product_types_meta'][$type->id] = $this->shop_product_type_meta_model->get_by_product_type_id($type->id);
+            $this->data['product_types_meta'][$type->id] = $this->shop_product_type_meta_model->getByProductTypeId($type->id);
         }
 
         // --------------------------------------------------------------------------

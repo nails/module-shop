@@ -20,7 +20,7 @@ class Vouchers extends \AdminController
      */
     public static function announce()
     {
-        if (userHasPermission('admin.shop{0.vouchers_manage')) {
+        if (userHasPermission('admin.shop:0.vouchers_manage')) {
 
             $navGroup = new \Nails\Admin\Nav('Shop');
             $navGroup->addMethod('Manage Vouchers');
@@ -58,7 +58,7 @@ class Vouchers extends \AdminController
      */
     public function index()
     {
-        if (!userHasPermission('admin.shop{0.vouchers_manage')) {
+        if (!userHasPermission('admin.shop:0.vouchers_manage')) {
 
             unauthorised();
         }
@@ -110,9 +110,8 @@ class Vouchers extends \AdminController
         //  Define the $data variable for the queries
         $data = array(
             'sort' => array(
-                'column' => $sortOn,
-                'order'  => $sortOrder
-           ),
+                array($sortOn, $sortOrder)
+            ),
             'keywords' => $keywords,
             'filters'  => $filters
        );
@@ -147,7 +146,7 @@ class Vouchers extends \AdminController
      */
     public function create()
     {
-        if (!userHasPermission('admin.shop{0.vouchers_create')) {
+        if (!userHasPermission('admin.shop:0.vouchers_create')) {
 
             $this->session->set_flashdata('error', 'You do not have permission to create vouchers.');
             redirect('admin/shop/vouchers');
@@ -327,7 +326,7 @@ class Vouchers extends \AdminController
      */
     public function activate()
     {
-        if (!userHasPermission('admin.shop{0.vouchers_activate')) {
+        if (!userHasPermission('admin.shop:0.vouchers_activate')) {
 
             $status  = 'error';
             $message = 'You do not have permission to activate vouchers.';
@@ -362,7 +361,7 @@ class Vouchers extends \AdminController
      */
     public function deactivate()
     {
-        if (!userHasPermission('admin.shop{0.vouchers_deactivate')) {
+        if (!userHasPermission('admin.shop:0.vouchers_deactivate')) {
 
             $status  = 'error';
             $message = 'You do not have permission to suspend vouchers.';
