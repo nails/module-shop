@@ -14,6 +14,10 @@ namespace Nails\Admin\Shop;
 
 class Manage extends \AdminController
 {
+    protected $isModal;
+
+    // --------------------------------------------------------------------------
+
     /**
      * Announces this controller's navGroups
      * @return stdClass
@@ -39,6 +43,7 @@ class Manage extends \AdminController
 
         //  Used by redirects and some views to keep the user in the modal
         $this->data['isModal'] = $this->input->get('isModal') ? '?isModal=1' : false;
+        $this->isModal         = $this->data['isModal'];
 
         // --------------------------------------------------------------------------
 
@@ -150,7 +155,10 @@ class Manage extends \AdminController
         //  Add header button
         if (userHasPermission('admin.shop:0.attribute_create')) {
 
-            \Nails\Admin\Helper::addHeaderButton('admin/shop/manage/attribute/create', 'Create Attribute');
+            \Nails\Admin\Helper::addHeaderButton(
+                'admin/shop/manage/attribute/create' . $this->isModal,
+                'Create Attribute'
+            );
         }
 
         // --------------------------------------------------------------------------
@@ -192,7 +200,7 @@ class Manage extends \AdminController
                 if ($this->shop_attribute_model->create($data)) {
 
                     $this->session->set_flashdata('success', 'Attribute created successfully.');
-                    redirect('admin/shop/manage/attribute' . $this->data['isModal']);
+                    redirect('admin/shop/manage/attribute' . $this->isModal);
 
                 } else {
 
@@ -264,7 +272,7 @@ class Manage extends \AdminController
                 if ($this->shop_attribute_model->update($this->data['attribute']->id, $data)) {
 
                     $this->session->set_flashdata('success', 'Attribute saved successfully.');
-                    redirect('admin/shop/manage/attribute' . $this->data['isModal']);
+                    redirect('admin/shop/manage/attribute' . $this->isModal);
 
                 } else {
 
@@ -323,7 +331,7 @@ class Manage extends \AdminController
         }
 
         $this->session->set_flashdata($status, $message);
-        redirect('admin/shop/manage/attribute' . $this->data['isModal']);
+        redirect('admin/shop/manage/attribute' . $this->isModal);
     }
 
     // --------------------------------------------------------------------------
@@ -405,7 +413,10 @@ class Manage extends \AdminController
         //  Add header button
         if (userHasPermission('admin.shop:0.brand_create')) {
 
-            \Nails\Admin\Helper::addHeaderButton('admin/shop/manage/brand/create', 'Create Brand');
+            \Nails\Admin\Helper::addHeaderButton(
+                'admin/shop/manage/brand/create' . $this->isModal,
+                'Create Brand'
+            );
         }
 
         // --------------------------------------------------------------------------
@@ -461,7 +472,7 @@ class Manage extends \AdminController
 
                     //  Redirect to clear form
                     $this->session->set_flashdata('success', 'Brand created successfully.');
-                    redirect('admin/shop/manage/brand' . $this->data['isModal']);
+                    redirect('admin/shop/manage/brand' . $this->isModal);
 
                 } else {
 
@@ -546,7 +557,7 @@ class Manage extends \AdminController
                 if ($this->shop_brand_model->update($this->data['brand']->id, $data)) {
 
                     $this->session->set_flashdata('success', 'Brand saved successfully.');
-                    redirect('admin/shop/manage/brand' . $this->data['isModal']);
+                    redirect('admin/shop/manage/brand' . $this->isModal);
 
                 } else {
 
@@ -605,7 +616,7 @@ class Manage extends \AdminController
         }
 
         $this->session->set_flashdata($status, $message);
-        redirect('admin/shop/manage/brand' . $this->data['isModal']);
+        redirect('admin/shop/manage/brand' . $this->isModal);
     }
 
     // --------------------------------------------------------------------------
@@ -688,7 +699,10 @@ class Manage extends \AdminController
         //  Add header button
         if (userHasPermission('admin.shop:0.category_create')) {
 
-            \Nails\Admin\Helper::addHeaderButton('admin/shop/manage/category/create', 'Create Category');
+            \Nails\Admin\Helper::addHeaderButton(
+                'admin/shop/manage/category/create' . $this->isModal,
+                'Create Category'
+            );
         }
 
         // --------------------------------------------------------------------------
@@ -741,7 +755,7 @@ class Manage extends \AdminController
                 if ($this->shop_category_model->create($data)) {
 
                     $this->session->set_flashdata('success', 'Category created successfully.');
-                    redirect('admin/shop/manage/category' . $this->data['isModal']);
+                    redirect('admin/shop/manage/category' . $this->isModal);
 
                 } else {
 
@@ -824,7 +838,7 @@ class Manage extends \AdminController
                 if ($this->shop_category_model->update($this->data['category']->id, $data)) {
 
                     $this->session->set_flashdata('success', 'Category saved successfully.');
-                    redirect('admin/shop/manage/category' . $this->data['isModal']);
+                    redirect('admin/shop/manage/category' . $this->isModal);
 
                 } else {
 
@@ -883,7 +897,7 @@ class Manage extends \AdminController
         }
 
         $this->session->set_flashdata($status, $message);
-        redirect('admin/shop/manage/category' . $this->data['isModal']);
+        redirect('admin/shop/manage/category' . $this->isModal);
     }
 
     // --------------------------------------------------------------------------
@@ -966,7 +980,10 @@ class Manage extends \AdminController
         //  Add header button
         if (userHasPermission('admin.shop:0.collection_create')) {
 
-            \Nails\Admin\Helper::addHeaderButton('admin/shop/manage/collection/create', 'Create Collection');
+            \Nails\Admin\Helper::addHeaderButton(
+                'admin/shop/manage/collection/create' . $this->isModal,
+                'Create Collection'
+            );
         }
 
         // --------------------------------------------------------------------------
@@ -1019,7 +1036,7 @@ class Manage extends \AdminController
                 if ($this->shop_collection_model->create($data)) {
 
                     $this->session->set_flashdata('success', 'Collection created successfully.');
-                    redirect('admin/shop/manage/collection' . $this->data['isModal']);
+                    redirect('admin/shop/manage/collection' . $this->isModal);
 
                 } else {
 
@@ -1102,7 +1119,7 @@ class Manage extends \AdminController
                 if ($this->shop_collection_model->update($this->data['collection']->id, $data)) {
 
                     $this->session->set_flashdata('success', 'Collection saved successfully.');
-                    redirect('admin/shop/manage/collection' . $this->data['isModal']);
+                    redirect('admin/shop/manage/collection' . $this->isModal);
 
                 } else {
 
@@ -1161,7 +1178,7 @@ class Manage extends \AdminController
         }
 
         $this->session->set_flashdata($status, $message);
-        redirect('admin/shop/manage/collection' . $this->data['isModal']);
+        redirect('admin/shop/manage/collection' . $this->isModal);
     }
 
     // --------------------------------------------------------------------------
@@ -1243,7 +1260,10 @@ class Manage extends \AdminController
         //  Add header button
         if (userHasPermission('admin.shop:0.range_create')) {
 
-            \Nails\Admin\Helper::addHeaderButton('admin/shop/manage/range/create', 'Create Range');
+            \Nails\Admin\Helper::addHeaderButton(
+                'admin/shop/manage/range/create' . $this->isModal,
+                'Create Range'
+            );
         }
 
         // --------------------------------------------------------------------------
@@ -1296,7 +1316,7 @@ class Manage extends \AdminController
                 if ($this->shop_range_model->create($data)) {
 
                     $this->session->set_flashdata('success', 'Range created successfully.');
-                    redirect('admin/shop/manage/range' . $this->data['isModal']);
+                    redirect('admin/shop/manage/range' . $this->isModal);
 
                 } else {
 
@@ -1379,7 +1399,7 @@ class Manage extends \AdminController
                 if ($this->shop_range_model->update($this->data['range']->id, $data)) {
 
                     $this->session->set_flashdata('success', 'Range saved successfully.');
-                    redirect('admin/shop/manage/range' . $this->data['isModal']);
+                    redirect('admin/shop/manage/range' . $this->isModal);
 
                 } else {
 
@@ -1438,7 +1458,7 @@ class Manage extends \AdminController
         }
 
         $this->session->set_flashdata($status, $message);
-        redirect('admin/shop/manage/range' . $this->data['isModal']);
+        redirect('admin/shop/manage/range' . $this->isModal);
     }
 
     // --------------------------------------------------------------------------
@@ -1520,7 +1540,10 @@ class Manage extends \AdminController
         //  Add header button
         if (userHasPermission('admin.shop:0.tag_create')) {
 
-            \Nails\Admin\Helper::addHeaderButton('admin/shop/manage/tag/create', 'Create Tag');
+            \Nails\Admin\Helper::addHeaderButton(
+                'admin/shop/manage/tag/create' . $this->isModal,
+                'Create Tag'
+            );
         }
 
         // --------------------------------------------------------------------------
@@ -1571,7 +1594,7 @@ class Manage extends \AdminController
                 if ($this->shop_tag_model->create($data)) {
 
                     $this->session->set_flashdata('success', 'Tag created successfully.');
-                    redirect('admin/shop/manage/tag' . $this->data['isModal']);
+                    redirect('admin/shop/manage/tag' . $this->isModal);
 
                 } else {
 
@@ -1652,7 +1675,7 @@ class Manage extends \AdminController
                 if ($this->shop_tag_model->update($this->data['tag']->id, $data)) {
 
                     $this->session->set_flashdata('success', 'Tag saved successfully.');
-                    redirect('admin/shop/manage/tag' . $this->data['isModal']);
+                    redirect('admin/shop/manage/tag' . $this->isModal);
 
                 } else {
 
@@ -1711,7 +1734,7 @@ class Manage extends \AdminController
         }
 
         $this->session->set_flashdata($status, $message);
-        redirect('admin/shop/manage/tag' . $this->data['isModal']);
+        redirect('admin/shop/manage/tag' . $this->isModal);
     }
 
     // --------------------------------------------------------------------------
@@ -1793,7 +1816,10 @@ class Manage extends \AdminController
         //  Add header button
         if (userHasPermission('admin.shop:0.tax_rate_create')) {
 
-            \Nails\Admin\Helper::addHeaderButton('admin/shop/manage/taxRate/create', 'Create Tax Rate');
+            \Nails\Admin\Helper::addHeaderButton(
+                'admin/shop/manage/taxRate/create' . $this->isModal,
+                'Create Tax Rate'
+            );
         }
 
         // --------------------------------------------------------------------------
@@ -1836,7 +1862,7 @@ class Manage extends \AdminController
                 if ($this->shop_tax_rate_model->create($data)) {
 
                     $this->session->set_flashdata('success', 'Tax Rate created successfully.');
-                    redirect('admin/shop/manage/taxRate' . $this->data['isModal']);
+                    redirect('admin/shop/manage/taxRate' . $this->isModal);
 
                 } else {
 
@@ -1909,7 +1935,7 @@ class Manage extends \AdminController
                 if ($this->shop_tax_rate_model->update($this->data['tax_rate']->id, $data)) {
 
                     $this->session->set_flashdata('success', 'Tax Rate saved successfully.');
-                    redirect('admin/shop/manage/taxRate' . $this->data['isModal']);
+                    redirect('admin/shop/manage/taxRate' . $this->isModal);
 
                 } else {
 
@@ -1968,7 +1994,7 @@ class Manage extends \AdminController
         }
 
         $this->session->set_flashdata($status, $message);
-        redirect('admin/shop/manage/taxRate' . $this->data['isModal']);
+        redirect('admin/shop/manage/taxRate' . $this->isModal);
     }
 
     // --------------------------------------------------------------------------
@@ -2050,7 +2076,10 @@ class Manage extends \AdminController
         //  Add header button
         if (userHasPermission('admin.shop:0.product_type_create')) {
 
-            \Nails\Admin\Helper::addHeaderButton('admin/shop/manage/productType/create', 'Create Product Type');
+            \Nails\Admin\Helper::addHeaderButton(
+                'admin/shop/manage/productType/create' . $this->isModal,
+                'Create Product Type'
+            );
         }
 
         // --------------------------------------------------------------------------
@@ -2102,7 +2131,7 @@ class Manage extends \AdminController
 
                     //  Redirect to clear form
                     $this->session->set_flashdata('success', 'Product Type created successfully.');
-                    redirect('admin/shop/manage/productType' . $this->data['isModal']);
+                    redirect('admin/shop/manage/productType' . $this->isModal);
 
                 } else {
 
@@ -2182,7 +2211,7 @@ class Manage extends \AdminController
                 if ($this->shop_product_type_model->update($this->data['product_type']->id, $data)) {
 
                     $this->session->set_flashdata('success', 'Product Type saved successfully.');
-                    redirect('admin/shop/product_type' . $this->data['isModal']);
+                    redirect('admin/shop/product_type' . $this->isModal);
 
                 } else {
 
@@ -2225,7 +2254,7 @@ class Manage extends \AdminController
         $message .= 'the admin interface is on the roadmap and will be available soon.';
         $this->session->set_flashdata($status, $message);
 
-        redirect('admin/shop/manage/productType' . $this->data['isModal']);
+        redirect('admin/shop/manage/productType' . $this->isModal);
     }
 
     // --------------------------------------------------------------------------
@@ -2308,7 +2337,10 @@ class Manage extends \AdminController
         //  Add header button
         if (userHasPermission('admin.shop:0.product_type_meta_create')) {
 
-            \Nails\Admin\Helper::addHeaderButton('admin/shop/manage/productTypeMeta/create', 'Create Product Type Meta Field');
+            \Nails\Admin\Helper::addHeaderButton(
+                'admin/shop/manage/productTypeMeta/create' . $this->isModal,
+                'Create Product Type Meta Field'
+            );
         }
 
         // --------------------------------------------------------------------------
@@ -2360,7 +2392,7 @@ class Manage extends \AdminController
                 if ($this->shop_product_type_meta_model->create($data)) {
 
                     $this->session->set_flashdata('success', 'Product Type Meta Field created successfully.');
-                    redirect('admin/shop/manage/productTypeMeta' . $this->data['isModal']);
+                    redirect('admin/shop/manage/productTypeMeta' . $this->isModal);
 
                 } else {
 
@@ -2443,7 +2475,7 @@ class Manage extends \AdminController
                 if ($this->shop_product_type_meta_model->update($this->data['meta_field']->id, $data)) {
 
                     $this->session->set_flashdata('success', 'Product Type Meta Field saved successfully.');
-                    redirect('admin/shop/manage/productTypeMeta' . $this->data['isModal']);
+                    redirect('admin/shop/manage/productTypeMeta' . $this->isModal);
 
                 } else {
 
@@ -2502,7 +2534,7 @@ class Manage extends \AdminController
         }
 
         $this->session->set_flashdata($status, $message);
-        redirect('admin/shop/manage/productTypeMeta' . $this->data['isModal']);
+        redirect('admin/shop/manage/productTypeMeta' . $this->isModal);
     }
 
     // --------------------------------------------------------------------------

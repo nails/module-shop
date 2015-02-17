@@ -144,14 +144,14 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
         $this->db->select($this->_table_prefix . '.*');
         $this->db->join($this->_table  . ' ' . $this->_table_prefix, $this->_table_prefix . '.id = ' . $this->_table_taxonomy_prefix . '.meta_field_id');
         $this->db->group_by($this->_table_prefix . '.id');
-        $result = $this->db->get($this->_table_taxonomy . ' ' . $this->_table_taxonomy_prefix)->result();
+        $results = $this->db->get($this->_table_taxonomy . ' ' . $this->_table_taxonomy_prefix)->result();
 
-        foreach ($result as $result) {
+        foreach ($results as $result) {
 
             $this->_format_object($result);
         }
 
-        return $result;
+        return $results;
     }
 
     // --------------------------------------------------------------------------

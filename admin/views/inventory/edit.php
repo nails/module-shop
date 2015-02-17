@@ -188,7 +188,7 @@
 
                 if (!empty($item->published) && $item->published != '0000-00-00 00:00{00') {
 
-                    $publishedTime = userMysqlDatetime($item->published);
+                    $publishedTime = toUserDatetime($item->published, 'Y-m-d H:i:s');
 
                 } else {
 

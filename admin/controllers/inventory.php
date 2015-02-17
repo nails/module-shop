@@ -269,20 +269,12 @@ class Inventory extends \AdminController
         //  Assets
         $this->asset->library('uploadify');
         $this->asset->load('mustache.js/mustache.js', 'NAILS-BOWER');
-        $this->asset->load('nails.admin.shop.inventory.createEdit.min.js', true);
-
-        /*
-        var productTypes = <?=json_encode($product_types)?>;
-        var uploadToken  = '<?=$this->cdn->generate_api_upload_token(active_user('id')) ?>';
-        _CREATE_EDIT     = new NAILS_Admin_Shop_Inventory_Create_Edit();
-        _CREATE_EDIT.init(productTypes, uploadToken);
-        */
+        $this->asset->load('nails.admin.shop.inventory.createEdit.min.js', 'NAILS');
 
         $uploadtoken = $this->cdn->generate_api_upload_token(active_user('id'));
 
         $this->asset->inline('var _edit = new NAILS_Admin_Shop_Inventory_Create_Edit();', 'JS');
         $this->asset->inline('_edit.init(' . json_encode($product_types) . ', "' . $uploadToken . '");', 'JS');
-
 
         // --------------------------------------------------------------------------
 
@@ -563,6 +555,7 @@ class Inventory extends \AdminController
         $this->load->model('shop/shop_collection_model');
         $this->load->model('shop/shop_range_model');
         $this->load->model('shop/shop_tag_model');
+        $this->load->model('shop/shop_tax_rate_model');
 
         // --------------------------------------------------------------------------
 
@@ -584,6 +577,11 @@ class Inventory extends \AdminController
         $this->asset->library('uploadify');
         $this->asset->load('mustache.js/mustache.js', 'NAILS-BOWER');
         $this->asset->load('nails.admin.shop.inventory.createEdit.min.js', 'NAILS');
+
+        $uploadtoken = $this->cdn->generate_api_upload_token(active_user('id'));
+
+        $this->asset->inline('var _edit = new NAILS_Admin_Shop_Inventory_Create_Edit();', 'JS');
+        $this->asset->inline('_edit.init(' . json_encode($product_types) . ', "' . $uploadToken . '");', 'JS');
 
         // --------------------------------------------------------------------------
 

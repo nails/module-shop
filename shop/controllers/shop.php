@@ -127,6 +127,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         //  Pass to views
         $this->data['product_pagination'] = $this->_product_pagination;
+
     }
 
     // --------------------------------------------------------------------------
@@ -760,8 +761,8 @@ class NAILS_Shop extends NAILS_Shop_Controller
          * the product page takes them somewhere meaningful.
          */
 
-        $this->data['goBackUrl'] = $this->session->get_userdata('shopLastBrowsePage');
-        $this->data['goBackUrl'] = $this->data['goBackUrl'] ? site_url($this->data['goBackUrl']) : $this->shopUrl;
+        $this->data['goBackUrl'] = $this->session->userdata('shopLastBrowsePage');
+        $this->data['goBackUrl'] = $this->data['goBackUrl'] ? site_url($this->data['goBackUrl']) : site_url($this->shopUrl);
 
         // --------------------------------------------------------------------------
 

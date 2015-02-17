@@ -78,6 +78,8 @@
                                         //  Render buttons
                                         $_buttons = array();
 
+                                        $_buttons[] = anchor($item->url, lang('action_view'), 'class="awesome small orange" target="_blank"');
+
                                         if (userHasPermission('admin.shop:0.inventory_edit')) {
 
                                             $_buttons[] = anchor('admin/shop/inventory/edit/' . $item->id, lang('action_edit'), 'class="awesome small"');

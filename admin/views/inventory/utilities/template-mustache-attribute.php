@@ -26,6 +26,8 @@
         ?>
     </td>
     <td class="delete">
-        <a href="#" class="delete">Delete</a>
+        <a href="#" class="delete">
+            <b class="fa fa-times-circle fa-lg"></b>
+        </a>
     </td>
 </tr>
