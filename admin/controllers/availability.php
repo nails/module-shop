@@ -28,6 +28,24 @@ class Availability extends \AdminController
     // --------------------------------------------------------------------------
 
     /**
+     * Returns an array of extra permissions for this controller
+     * @return array
+     */
+    static function permissions()
+    {
+        $permissions = parent::permissions();
+
+        $permissions['manage'] = 'Can manage Product notifications';
+        $permissions['create'] = 'Can create Product notifications';
+        $permissions['edit']   = 'Can edit Product notifications';
+        $permissions['delete'] = 'Can delete Product notifications';
+
+        return $permissions;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Construct the controller
      */
     public function __construct()

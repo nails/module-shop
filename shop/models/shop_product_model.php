@@ -1858,6 +1858,27 @@ class NAILS_Shop_product_model extends NAILS_Model
             $this->db->where($where);
         }
 
+
+        //  Stock Status
+        //  ============
+
+        if (!empty($data['stockStatus'])) {
+
+            $where = 'SELECT count(*) FROM ' . $this->_table_variation . ' WHERE product_id = p.id AND stock_status ';
+
+            if (is_array($data['stockStatus'])) {
+
+                $statuses = array_map(array($this->db, 'escape'), $data['stockStatus']);
+                $where .= 'IN (' . implode(',', $statuses) . ')';
+
+            } else {
+
+                $where .= '= ' . $this->db->escape($data['stockStatus']);
+            }
+
+            $this->db->where('(' . $where . ') > 0');
+        }
+
         // --------------------------------------------------------------------------
 
         /**

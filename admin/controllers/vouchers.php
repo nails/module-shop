@@ -31,6 +31,24 @@ class Vouchers extends \AdminController
     // --------------------------------------------------------------------------
 
     /**
+     * Returns an array of extra permissions for this controller
+     * @return array
+     */
+    static function permissions()
+    {
+        $permissions = parent::permissions();
+
+        $permissions['manage']     = 'Vouchers: Manage';
+        $permissions['create']     = 'Vouchers: Create';
+        $permissions['activate']   = 'Vouchers: Activate';
+        $permissions['deactivate'] = 'Vouchers: Deactivate';
+
+        return $permissions;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Construct the controller
      */
     public function __construct()

@@ -31,6 +31,25 @@ class Orders extends \AdminController
     // --------------------------------------------------------------------------
 
     /**
+     * Returns an array of extra permissions for this controller
+     * @return array
+     */
+    static function permissions()
+    {
+        $permissions = parent::permissions();
+
+        $permissions['manage']    = 'Orders: Manage';
+        $permissions['view']      = 'Orders: View';
+        $permissions['edit']      = 'Orders: Edit';
+        $permissions['reprocess'] = 'Orders: Reprocess';
+        $permissions['process']   = 'Orders: Process';
+
+        return $permissions;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Construct the controller
      */
     public function __construct()
@@ -93,9 +112,9 @@ class Orders extends \AdminController
 
         // --------------------------------------------------------------------------
 
-        //  Filter columns
-        $filters   = array();
-        $filters[] = \Nails\Admin\Helper::searchFilterObject(
+        //  Filter Checkboxes
+        $cbFilters   = array();
+        $cbFilters[] = \Nails\Admin\Helper::searchFilterObject(
             $tablePrefix . '.status',
             'Status',
             array(
@@ -107,7 +126,7 @@ class Orders extends \AdminController
                 array('Pending', 'PENDING')
            )
         );
-        $filters[] = \Nails\Admin\Helper::searchFilterObject(
+        $cbFilters[] = \Nails\Admin\Helper::searchFilterObject(
             $tablePrefix . '.fulfilment_status',
             'Fulfilled',
             array(
@@ -115,7 +134,7 @@ class Orders extends \AdminController
                 array('No', 'UNFULFILLED')
            )
         );
-        $filters[] = \Nails\Admin\Helper::searchFilterObject(
+        $cbFilters[] = \Nails\Admin\Helper::searchFilterObject(
             $tablePrefix . '.delivery_type',
             'Delivery Type',
             array(
@@ -131,8 +150,8 @@ class Orders extends \AdminController
             'sort' => array(
                 array($sortOn, $sortOrder)
             ),
-            'keywords' => $keywords,
-            'filters'  => $filters
+            'keywords'  => $keywords,
+            'cbFilters' => $cbFilters
         );
 
         // --------------------------------------------------------------------------
@@ -142,7 +161,7 @@ class Orders extends \AdminController
         $this->data['orders'] = $this->shop_order_model->get_all($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
-        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords, $filters);
+        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords, $cbFilters);
         $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
 
         // --------------------------------------------------------------------------

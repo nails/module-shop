@@ -31,6 +31,24 @@ class Sales extends \AdminController
     // --------------------------------------------------------------------------
 
     /**
+     * Returns an array of extra permissions for this controller
+     * @return array
+     */
+    static function permissions()
+    {
+        $permissions = parent::permissions();
+
+        $permissions['manage'] = 'Sale: Manage';
+        $permissions['create'] = 'Sale: Create';
+        $permissions['edit']   = 'Sale: Edit';
+        $permissions['delete'] = 'Sale: Delete';
+
+        return $permissions;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Construct the controller
      */
     public function __construct()

@@ -32,6 +32,73 @@ class Manage extends \AdminController
     // --------------------------------------------------------------------------
 
     /**
+     * Returns an array of extra permissions for this controller
+     * @return array
+     */
+    static function permissions()
+    {
+        $permissions = parent::permissions();
+
+        //  Attributes
+        $permissions['attribute:create'] = 'Attribute: Create';
+        $permissions['attribute:create'] = 'Attribute: Create';
+        $permissions['attribute:edit']   = 'Attribute: Edit';
+        $permissions['attribute:delete'] = 'Attribute: Delete';
+
+        //  Brands
+        $permissions['brand:manage'] = 'Brand: Manage';
+        $permissions['brand:create'] = 'Brand: Create';
+        $permissions['brand:edit']   = 'Brand: Edit';
+        $permissions['brand:delete'] = 'Brand: Delete';
+
+        //  Categories
+        $permissions['category:manage'] = 'Category: Manage';
+        $permissions['category:create'] = 'Category: Create';
+        $permissions['category:edit']   = 'Category: Edit';
+        $permissions['category:delete'] = 'Category: Delete';
+
+        //  Collections
+        $permissions['collection:manage'] = 'Collection: Manage';
+        $permissions['collection:create'] = 'Collection: Create';
+        $permissions['collection:edit']   = 'Collection: Edit';
+        $permissions['collection:delete'] = 'Collection: Delete';
+
+        //  Ranges
+        $permissions['range:manage'] = 'Range: Manage';
+        $permissions['range:create'] = 'Range: Create';
+        $permissions['range:edit']   = 'Range: Edit';
+        $permissions['range:delete'] = 'Range: Delete';
+
+        //  Tags
+        $permissions['tag:manage'] = 'Tag: Manage';
+        $permissions['tag:create'] = 'Tag: Create';
+        $permissions['tag:edit']   = 'Tag: Edit';
+        $permissions['tag:delete'] = 'Tag: Delete';
+
+        //  Tax Rates
+        $permissions['taxRate:manage'] = 'Tax Rate: Manage';
+        $permissions['taxRate:create'] = 'Tax Rate: Create';
+        $permissions['taxRate:edit']   = 'Tax Rate: Edit';
+        $permissions['taxRate:delete'] = 'Tax Rate: Delete';
+
+        //  Product Types
+        $permissions['productType:manage'] = 'Product Type: Manage';
+        $permissions['productType:create'] = 'Product Type: Create';
+        $permissions['productType:edit']   = 'Product Type: Edit';
+        $permissions['productType:delete'] = 'Product Type: Delete';
+
+        //  Product Type Meta Fields
+        $permissions['productTypeMeta:manage'] = 'Product Type Meta: Manage';
+        $permissions['productTypeMeta:create'] = 'Product Type Meta: Create';
+        $permissions['productTypeMeta:edit']   = 'Product Type Meta: Edit';
+        $permissions['productTypeMeta:delete'] = 'Product Type Meta: Delete';
+
+        return $permissions;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Construct the controller
      */
     public function __construct()

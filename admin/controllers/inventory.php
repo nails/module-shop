@@ -30,6 +30,25 @@ class Inventory extends \AdminController
 
     // --------------------------------------------------------------------------
 
+/**
+     * Returns an array of extra permissions for this controller
+     * @return array
+     */
+    static function permissions()
+    {
+        $permissions = parent::permissions();
+
+        $permissions['manage']  = 'Inventory: Manage';
+        $permissions['create']  = 'Inventory: Create';
+        $permissions['edit']    = 'Inventory: Edit';
+        $permissions['delete']  = 'Inventory: Delete';
+        $permissions['restore'] = 'Inventory: Restore';
+
+        return $permissions;
+    }
+
+    // --------------------------------------------------------------------------
+
     /**
      * Construct the controller
      */
@@ -38,6 +57,8 @@ class Inventory extends \AdminController
         parent::__construct();
         $this->load->model('shop/shop_model');
         $this->load->model('shop/shop_category_model');
+        $this->load->model('shop/shop_brand_model');
+        $this->load->model('shop/shop_collection_model');
         $this->load->model('shop/shop_product_model');
         $this->load->model('shop/shop_product_type_model');
 
@@ -96,40 +117,131 @@ class Inventory extends \AdminController
 
         // --------------------------------------------------------------------------
 
-        //  Define the $data variable for the queries
-        $data = array(
-            'include_inactive' => true,
-            'where' => array(),
-            'sort' => array(
-                array($sortOn, $sortOrder)
-            ),
-            'keywords' => $keywords
+        //  Checkbox Filters
+        $cbFilters = array();
+        $cbFilters['isActive'] = \Nails\Admin\Helper::searchFilterObject(
+            $tablePrefix . '.is_active',
+            'Active',
+            array(
+                array('Yes', 1, true),
+                array('No', 0, true)
+           )
+        );
+        $cbFilters['stockStatus'] = \Nails\Admin\Helper::searchFilterObject(
+            '',
+            'Status',
+            array(
+                array('In Stock', 'INSTOCK', true),
+                array('Out of Stock', 'OUT_OF_STOCK', true)
+           )
+        );
+
+        /**
+         * Dropdown Filters
+         * Leaving columns blank so that _getcount_common() doesn't try and do
+         * anything with these values, they will be handled below.
+         */
+
+        $ddFilters = array();
+        $ddFilters['categoryId'] = \Nails\Admin\Helper::searchFilterObject(
+            '',
+            'Category',
+            array('Choose Category') + $this->shop_category_model->get_all_nested_flat()
+        );
+        $ddFilters['brandId'] = \Nails\Admin\Helper::searchFilterObject(
+            '',
+            'Brand',
+            array('Choose Brand') + $this->shop_brand_model->get_all_flat()
+        );
+        $ddFilters['collectionId'] = \Nails\Admin\Helper::searchFilterObject(
+            '',
+            'Collection',
+            array('Choose Collection') + $this->shop_collection_model->get_all_flat()
         );
 
         // --------------------------------------------------------------------------
 
-        //  If we're restricting to a certain category...
-        if ($this->input->get('categoryId')) {
+        //  Define the $data variable for the queries
+        $data = array(
+            'include_inactive' => true,
+            'where' => array(),
+            'sort'  => array(
+                array($sortOn, $sortOrder)
+            ),
+            'keywords'  => $keywords,
+            'ddFilters' => $ddFilters,
+            'cbFilters' => $cbFilters
+        );
 
-            $categoryId          = $this->input->get('categoryId');
+        // --------------------------------------------------------------------------
+
+        /**
+         * Determine if we're restricting to a certain category, brand or collection.
+         *
+         * Due to the way the search component works, we need to "listen" to the $_GET
+         * array by hand. Each filter above will be  indexed in either DDF (DropDownFilter)
+         * or cbF (CheckBoxFilter). For ddF values the value at the index is the
+         * selected option.
+         */
+
+        if (!empty($_GET['ddF']['categoryId'])) {
+
+            $categoryId = \Nails\Admin\Helper::searchFilterGetValueAtKey(
+                $ddFilters['categoryId'],
+                $_GET['ddF']['categoryId']
+            );
+
             $childCategories     = $this->shop_category_model->get_ids_of_children($categoryId);
-            $data['category_id'] = array($categoryId) + $childCategories;
-
+            $data['category_id'] = array_merge(array($categoryId), $childCategories);
         }
+
+        if (!empty($_GET['ddF']['brandId'])) {
+
+            $data['brand_id'] = \Nails\Admin\Helper::searchFilterGetValueAtKey(
+                $ddFilters['brandId'],
+                $_GET['ddF']['brandId']
+            );
+        }
+
+        if (!empty($_GET['ddF']['collectionId'])) {
+
+            $data['collection_id'] = \Nails\Admin\Helper::searchFilterGetValueAtKey(
+                $ddFilters['collectionId'],
+                $_GET['ddF']['collectionId']
+            );
+        }
+
+        if (!empty($_GET['cbF']['stockStatus'])) {
+
+            $data['stockStatus'] = array();
+
+            foreach ($_GET['cbF']['stockStatus'] as $filterKey => $checked)
+            {
+                $data['stockStatus'][] = \Nails\Admin\Helper::searchFilterGetValueAtKey(
+                    $cbFilters['stockStatus'],
+                    $filterKey
+                );
+            }
+        }
+
+        // --------------------------------------------------------------------------
 
         //  Get the items for the page
         $totalRows              = $this->shop_product_model->count_all($data);
         $this->data['products'] = $this->shop_product_model->get_all($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
-        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['search'] = \Nails\Admin\Helper::searchObject(
+            true,
+            $sortColumns,
+            $sortOn,
+            $sortOrder,
+            $perPage,
+            $keywords,
+            $cbFilters,
+            $ddFilters
+        );
         $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
-
-        // --------------------------------------------------------------------------
-
-        //  Fetch other required bits of data
-        $this->data['productTypes']   = $this->shop_product_type_model->get_all();
-        $this->data['categoriesFlat'] = $this->shop_category_model->get_all_nested_flat();
 
         // --------------------------------------------------------------------------
 
@@ -138,6 +250,11 @@ class Inventory extends \AdminController
             \Nails\Admin\Helper::addHeaderButton('admin/shop/inventory/import', 'Import Items', 'orange');
             \Nails\Admin\Helper::addHeaderButton('admin/shop/inventory/create', 'Add New Item');
         }
+
+        // --------------------------------------------------------------------------
+
+        //  Fetch other required bits of data
+        $this->data['productTypes']   = $this->shop_product_type_model->get_all();
 
         // --------------------------------------------------------------------------
 
@@ -617,7 +734,7 @@ class Inventory extends \AdminController
         if ($this->shop_product_model->delete($product->id)) {
 
             $status = 'success';
-            $msg    = 'Product successfully deleted!You can restore this product by ';
+            $msg    = 'Product successfully deleted! You can restore this product by ';
             $msg   .= anchor('/admin/shop/inventory/restore/' . $product->id, 'clicking here') . '.';
 
         } else {

@@ -712,7 +712,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         } else {
 
-            show_404();
+            show_404('', true);
         }
     }
 
@@ -726,9 +726,19 @@ class NAILS_Shop extends NAILS_Shop_Controller
     {
         $this->data['product'] = $this->shop_product_model->get_by_slug($slug);
 
-        if (!$this->data['product' ]) {
+        if (!$this->data['product']) {
+
+            show_404('', true);
+
+        } elseif (!$this->data['product']->is_active && !userHasPermission('admin.shop:0.inventory_manage')) {
 
             show_404();
+
+        } elseif (!$this->data['product']->is_active) {
+
+            $this->data['message']  = '<strong>This product is not public</strong><br />';
+            $this->data['message'] .= 'This product is not active; you can see this page because your ';
+            $this->data['message'] .= 'account has permission to manage inventory items.';
         }
 
         // --------------------------------------------------------------------------
