@@ -25,7 +25,11 @@ class Manage extends \AdminController
     public static function announce()
     {
         $navGroup = new \Nails\Admin\Nav('Shop');
-        $navGroup->addMethod('Other Managers');
+
+        if (userHasPermission('admin:shop:manage:.*')) {
+
+            $navGroup->addMethod('Other Managers');
+        }
         return $navGroup;
     }
 
@@ -40,7 +44,7 @@ class Manage extends \AdminController
         $permissions = parent::permissions();
 
         //  Attributes
-        $permissions['attribute:create'] = 'Attribute: Create';
+        $permissions['attribute:manage'] = 'Attribute: Manage';
         $permissions['attribute:create'] = 'Attribute: Create';
         $permissions['attribute:edit']   = 'Attribute: Edit';
         $permissions['attribute:delete'] = 'Attribute: Delete';
@@ -121,15 +125,6 @@ class Manage extends \AdminController
         //  Pass data to the views
         $this->data['shopName'] = $this->shopName;
         $this->data['shopUrl']  = $this->shopUrl;
-
-        // --------------------------------------------------------------------------
-
-        //  Header/Footer overrides for when shown in a modal
-        if ($this->input->get('isModal')) {
-
-            $this->data['headerOverride'] = 'structure/headerBlank';
-            $this->data['footerOverride'] = 'structure/footerBlank';
-        }
     }
 
     // --------------------------------------------------------------------------
@@ -151,7 +146,7 @@ class Manage extends \AdminController
      */
     public function attribute()
     {
-        if (!userHasPermission('admin.shop:0.attribute_manage')) {
+        if (!userHasPermission('admin:shop:manage:attribute:manage')) {
 
             unauthorised();
         }
@@ -220,7 +215,7 @@ class Manage extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Add header button
-        if (userHasPermission('admin.shop:0.attribute_create')) {
+        if (userHasPermission('admin:shop:manage:attribute:create')) {
 
             \Nails\Admin\Helper::addHeaderButton(
                 'admin/shop/manage/attribute/create' . $this->isModal,
@@ -242,7 +237,7 @@ class Manage extends \AdminController
      */
     protected function attributeCreate()
     {
-        if (!userHasPermission('admin.shop:0.attribute_create')) {
+        if (!userHasPermission('admin:shop:manage:attribute:create')) {
 
             unauthorised();
         }
@@ -305,7 +300,7 @@ class Manage extends \AdminController
      */
     protected function attributeEdit()
     {
-        if (!userHasPermission('admin.shop:0.attribute_edit')) {
+        if (!userHasPermission('admin:shop:manage:attribute:edit')) {
 
             unauthorised();
         }
@@ -377,7 +372,7 @@ class Manage extends \AdminController
      */
     protected function attributeDelete()
     {
-        if (!userHasPermission('admin.shop:0.attribute_delete')) {
+        if (!userHasPermission('admin:shop:manage:attribute:delete')) {
 
             unauthorised();
         }

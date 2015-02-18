@@ -214,14 +214,6 @@ class Orders extends \AdminController
 
         // --------------------------------------------------------------------------
 
-        if ($this->input->get('isModal')) {
-
-            $this->data['headerOverride'] = 'structure/headerBlank';
-            $this->data['footerOverride'] = 'structure/footerBlank';
-        }
-
-        // --------------------------------------------------------------------------
-
         $this->asset->load('nails.admin.shop.order.view.min.js', true);
         $this->asset->inline('var _SHOP_ORDER_VIEW = new NAILS_Admin_Shop_Order_View()', 'JS');
 

@@ -21,7 +21,12 @@ class Availability extends \AdminController
     public static function announce()
     {
         $navGroup = new \Nails\Admin\Nav('Shop');
-        $navGroup->addMethod('Product Availability Notifications');
+
+        if (userHasPermission('admin:shop:availability:manage')) {
+
+            $navGroup->addMethod('Product Availability Notifications');
+        }
+
         return $navGroup;
     }
 

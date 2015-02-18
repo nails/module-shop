@@ -8,47 +8,47 @@
         //    Gather manager options available to this user
         $option = array();
 
-        if (userHasPermission('admin.shop:0.attribute_manage')) {
+        if (userHasPermission('admin:shop:manage:attribute:manage')) {
 
             $options[] = anchor('admin/shop/manage/attribute' . $isModal, 'Attributes');
         }
 
-        if (userHasPermission('admin.shop:0.brand_manage')) {
+        if (userHasPermission('admin:shop:manage:brand:manage')) {
 
             $options[] = anchor('admin/shop/manage/brand' . $isModal, 'Brands');
         }
 
-        if (userHasPermission('admin.shop:0.category_manage')) {
+        if (userHasPermission('admin:shop:manage:category:manage')) {
 
             $options[] = anchor('admin/shop/manage/category' . $isModal, 'Categories');
         }
 
-        if (userHasPermission('admin.shop:0.collection_manage')) {
+        if (userHasPermission('admin:shop:manage:collection:manage')) {
 
             $options[] = anchor('admin/shop/manage/collection' . $isModal, 'Collections');
         }
 
-        if (userHasPermission('admin.shop:0.range_manage')) {
+        if (userHasPermission('admin:shop:manage:range:manage')) {
 
             $options[] = anchor('admin/shop/manage/range' . $isModal, 'Ranges');
         }
 
-        if (userHasPermission('admin.shop:0.tag_manage')) {
+        if (userHasPermission('admin:shop:manage:tag:manage')) {
 
             $options[] = anchor('admin/shop/manage/tag' . $isModal, 'Tags');
         }
 
-        if (userHasPermission('admin.shop:0.tax_rate_manage')) {
+        if (userHasPermission('admin:shop:manage:taxRate:manage')) {
 
             $options[] = anchor('admin/shop/manage/taxRate' . $isModal, 'Tax Rates');
         }
 
-        if (userHasPermission('admin.shop:0.product_type_manage')) {
+        if (userHasPermission('admin:shop:manage:productType:manage')) {
 
             $options[] = anchor('admin/shop/manage/productType' . $isModal, 'Product Types');
         }
 
-        if (userHasPermission('admin.shop:0.product_type_meta_manage')) {
+        if (userHasPermission('admin:shop:manage:productTypeMeta:manage')) {
 
             $options[] = anchor('admin/shop/manage/productTypeMeta' . $isModal, 'Product Type Meta');
         }

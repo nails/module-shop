@@ -21,7 +21,11 @@ class Settings extends \AdminController
     public static function announce()
     {
         $navGroup = new \Nails\Admin\Nav('Settings');
-        $navGroup->addMethod('Shop');
+
+        if (userHasPermission('admin:shop:settings:update')) {
+
+            $navGroup->addMethod('Shop');
+        }
 
         return $navGroup;
     }
@@ -50,20 +54,30 @@ class Settings extends \AdminController
     // --------------------------------------------------------------------------
 
     /**
+     * Returns an array of permissions which can be configured for the user
+     * @return array
+     */
+    public static function permissions()
+    {
+        $permissions = parent::permissions();
+
+        $permissions['update'] = 'Can update settings';
+
+        return $permissions;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Manage Shop settings
      * @return void
      */
-    public function shop()
+    public function index()
     {
-        if (!isModuleEnabled('nailsapp/module-shop')) {
+        if (!userHasPermission('admin:shop:settings:update')) {
 
-            show_404();
+            unauthorised();
         }
-
-        // --------------------------------------------------------------------------
-
-        //  Set method info
-        $this->data['page']->title = 'Shop';
 
         // --------------------------------------------------------------------------
 
@@ -123,6 +137,11 @@ class Settings extends \AdminController
         $this->asset->load('nails.admin.shop.settings.min.js', true);
         $this->asset->load('mustache.js/mustache.js', 'NAILS-BOWER');
         $this->asset->inline('<script>_nails_settings = new NAILS_Admin_Shop_Settings();</script>');
+
+        // --------------------------------------------------------------------------
+
+        //  Set page title
+        $this->data['page']->title = 'Settings &rsaquo; Shop';
 
         // --------------------------------------------------------------------------
 
@@ -504,13 +523,6 @@ class Settings extends \AdminController
                 }
             }
 
-            //  Handle modal viewing
-            if ($this->input->get('isModal')) {
-
-                $this->data['headerOverride'] = 'structure/headerBlank';
-                $this->data['footerOverride'] = 'structure/footerBlank';
-            }
-
             //  Render the interface
             $this->data['page']->title = 'Shop Payment Gateway Configuration &rsaquo; ' . $this->data['gateway_name'];
 
@@ -603,15 +615,6 @@ class Settings extends \AdminController
         // --------------------------------------------------------------------------
 
         $this->data['page']->title = 'Shop Shipping Driver Configuration &rsaquo; ';
-
-        // --------------------------------------------------------------------------
-
-        if ($this->input->get('isModal')) {
-
-            $this->data['headerOverride'] = 'structure/headerBlank';
-            $this->data['footerOverride'] = 'structure/footerBlank';
-
-        }
 
         // --------------------------------------------------------------------------
 
