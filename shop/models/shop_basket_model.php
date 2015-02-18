@@ -41,10 +41,10 @@ class NAILS_Shop_basket_model extends NAILS_Model
         //    Populate basket from session data?
         $_saved_basket = @unserialize($this->session->userdata($this->_sess_var));
 
-        if (empty($_saved_basket) && $this->user_model->is_logged_in()) {
+        if (empty($_saved_basket) && $this->user_model->isLoggedIn()) {
 
-            //    Check the active_user data in case it exists there
-            $_saved_basket = @unserialize(active_user('shop_basket'));
+            //    Check the activeUser data in case it exists there
+            $_saved_basket = @unserialize(activeUser('shop_basket'));
         }
 
         if (!empty($_saved_basket)) {
@@ -1111,10 +1111,10 @@ class NAILS_Shop_basket_model extends NAILS_Model
     protected function saveUser()
     {
         //    If logged in, save the basket to the user's meta data for safe keeping.
-        if ($this->user_model->is_logged_in()) {
+        if ($this->user_model->isLoggedIn()) {
 
             $_data = array('shop_basket' => $this->saveObject());
-            $this->user_model->update(active_user('id'), $_data);
+            $this->user_model->update(activeUser('id'), $_data);
 
         }
     }

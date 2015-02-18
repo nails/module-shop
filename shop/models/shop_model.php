@@ -73,10 +73,10 @@ class NAILS_Shop_model extends NAILS_Model
             //  Use the currency defined in the session
             $currencyCode = $this->session->userdata('shop_currency');
 
-        } elseif (active_user('shop_currency')) {
+        } elseif (activeUser('shop_currency')) {
 
             //  Use the currency defined in the user object
-            $currencyCode = active_user('shop_currency');
+            $currencyCode = activeUser('shop_currency');
 
             if (!headers_sent()) {
 
@@ -134,9 +134,9 @@ class NAILS_Shop_model extends NAILS_Model
                 $this->session->unset_userdata('shop_currency', $currencyCode);
             }
 
-            if ($this->user_model->is_logged_in()) {
+            if ($this->user_model->isLoggedIn()) {
 
-                $this->user_model->update(active_user('id'), array('shop_currency' => null));
+                $this->user_model->update(activeUser('id'), array('shop_currency' => null));
             }
         }
 

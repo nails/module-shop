@@ -512,17 +512,17 @@ class NAILS_Shop_product_model extends NAILS_Model
 
             $this->db->set('created', 'NOW()', false);
 
-            if ($this->user_model->is_logged_in()) {
+            if ($this->user_model->isLoggedIn()) {
 
-                $this->db->set('created_by', active_user('id'));
+                $this->db->set('created_by', activeUser('id'));
             }
         }
 
         $this->db->set('modified', 'NOW()', false);
 
-        if ($this->user_model->is_logged_in()) {
+        if ($this->user_model->isLoggedIn()) {
 
-            $this->db->set('modified_by', active_user('id'));
+            $this->db->set('modified_by', activeUser('id'));
         }
 
         if (!empty($data->id)) {
@@ -2269,10 +2269,10 @@ class NAILS_Shop_product_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Logged in?
-        if ($this->user_model->is_logged_in()) {
+        if ($this->user_model->isLoggedIn()) {
 
             $data = array('shop_recently_viewed' => json_encode($recentlyViewed));
-            $this->user_model->update(active_user('id'), $data);
+            $this->user_model->update(activeUser('id'), $data);
         }
     }
 
@@ -2290,9 +2290,9 @@ class NAILS_Shop_product_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Logged in?
-        if (empty($recentlyViewed) && $this->user->is_logged_in()) {
+        if (empty($recentlyViewed) && $this->user->isLoggedIn()) {
 
-            $recentlyViewed = active_user('shop_recently_viewed');
+            $recentlyViewed = activeUser('shop_recently_viewed');
         }
 
         // --------------------------------------------------------------------------

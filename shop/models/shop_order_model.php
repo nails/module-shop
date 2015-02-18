@@ -86,9 +86,9 @@ class NAILS_Shop_order_model extends NAILS_Model
 
             $order->user_email = $data->contact->email;
 
-        } elseif ($this->user_model->is_logged_in()) {
+        } elseif ($this->user_model->isLoggedIn()) {
 
-            $order->user_email = active_user('email');
+            $order->user_email = activeUser('email');
 
         } else {
 
@@ -102,9 +102,9 @@ class NAILS_Shop_order_model extends NAILS_Model
 
             $order->user_id = $user->id;
 
-        } elseif ($this->user_model->is_logged_in()) {
+        } elseif ($this->user_model->isLoggedIn()) {
 
-            $order->user_id = active_user('id');
+            $order->user_id = activeUser('id');
 
         } else {
 
@@ -117,9 +117,9 @@ class NAILS_Shop_order_model extends NAILS_Model
 
             $order->user_first_name = $data->contact->first_name;
 
-        } elseif ($this->user_model->is_logged_in()) {
+        } elseif ($this->user_model->isLoggedIn()) {
 
-            $order->user_first_name = active_user('first_name');
+            $order->user_first_name = activeUser('first_name');
 
         } else {
 
@@ -131,9 +131,9 @@ class NAILS_Shop_order_model extends NAILS_Model
 
             $order->user_last_name = $data->contact->last_name;
 
-        } elseif ($this->user_model->is_logged_in()) {
+        } elseif ($this->user_model->isLoggedIn()) {
 
-            $order->user_last_name = active_user('last_name');
+            $order->user_last_name = activeUser('last_name');
 
         } else {
 
@@ -145,9 +145,9 @@ class NAILS_Shop_order_model extends NAILS_Model
 
             $order->user_telephone = $data->contact->telephone;
 
-        } elseif ($this->user_model->is_logged_in()) {
+        } elseif ($this->user_model->isLoggedIn()) {
 
-            $order->user_telephone = active_user('telephone');
+            $order->user_telephone = activeUser('telephone');
 
         } else {
 
@@ -1180,10 +1180,10 @@ class NAILS_Shop_order_model extends NAILS_Model
         $this->db->set('created', 'NOW()', false);
         $this->db->set('modified', 'NOW()', false);
 
-        if ($this->user_model->is_logged_in()) {
+        if ($this->user_model->isLoggedIn()) {
 
-            $this->db->set('created_by', active_user('id'));
-            $this->db->set('modified_by', active_user('id'));
+            $this->db->set('created_by', activeUser('id'));
+            $this->db->set('modified_by', activeUser('id'));
 
         } else {
 
