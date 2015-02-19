@@ -66,7 +66,7 @@
                                         //    Render buttons
                                         $_buttons = array();
 
-                                        if (userHasPermission('admin.shop:0.notifications_edit')) {
+                                        if (userHasPermission('admin:shop:availability:edit')) {
 
                                             $_buttons[] = anchor('admin/shop/availability/edit/' . $item->id, lang('action_edit'), 'class="awesome small"');
 
@@ -74,7 +74,7 @@
 
                                         // --------------------------------------------------------------------------
 
-                                        if (userHasPermission('admin.shop:0.notifications_delete')) {
+                                        if (userHasPermission('admin:shop:availability:delete')) {
 
                                             $_buttons[] = anchor('admin/shop/availability/delete/' . $item->id, lang('action_delete'), 'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."');
 

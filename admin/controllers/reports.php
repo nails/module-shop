@@ -25,10 +25,10 @@ class Reports extends \AdminController
      */
     public static function announce()
     {
-        if (userHasPermission('admin.shop:0.can_generate_reports')) {
+        if (userHasPermission('admin:shop:reports:generate')) {
 
-            $navGroup = new \Nails\Admin\Nav('Shop');
-            $navGroup->addMethod('Generate Reports');
+            $navGroup = new \Nails\Admin\Nav('Shop', 'fa-shopping-cart');
+            $navGroup->addAction('Generate Reports');
             return $navGroup;
         }
     }
@@ -84,7 +84,7 @@ class Reports extends \AdminController
 
         $this->sources = array();
 
-        if (userHasPermission('admin.shop:0.inventory_manage')) {
+        if (userHasPermission('admin:shop:inventory:manage')) {
 
             $this->sources[] = array(
                 'Inventory',
@@ -93,7 +93,7 @@ class Reports extends \AdminController
            );
         }
 
-        if (userHasPermission('admin.shop:0.order_manage')) {
+        if (userHasPermission('admin:shop:orders:manage')) {
 
             $this->sources[] = array(
                 'Sales',
@@ -193,7 +193,7 @@ class Reports extends \AdminController
 
         // --------------------------------------------------------------------------
 
-        if (!userHasPermission('admin.shop:0.can_generate_reports')) {
+        if (!userHasPermission('admin:shop:reports:generate')) {
 
             unauthorised();
         }
@@ -313,7 +313,7 @@ class Reports extends \AdminController
      */
     protected function sourceOutOfStockVariants()
     {
-        if (!userHasPermission('admin.shop:0.inventory_manage')) {
+        if (!userHasPermission('admin:shop:inventory:manage')) {
 
             return false;
         }
@@ -356,7 +356,7 @@ class Reports extends \AdminController
      */
     protected function sourceProductSalesAll()
     {
-        if (!userHasPermission('admin.shop:0.order_manage')) {
+        if (!userHasPermission('admin:shop:orders:manage')) {
 
             return false;
         }

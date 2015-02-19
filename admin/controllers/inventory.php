@@ -20,10 +20,10 @@ class Inventory extends \AdminController
      */
     public static function announce()
     {
-        if (userHasPermission('admin.shop:0.inventory_manage')) {
+        if (userHasPermission('admin:shop:inventory:manage')) {
 
-            $navGroup = new \Nails\Admin\Nav('Shop');
-            $navGroup->addMethod('Manage Inventory');
+            $navGroup = new \Nails\Admin\Nav('Shop', 'fa-shopping-cart');
+            $navGroup->addAction('Manage Inventory');
             return $navGroup;
         }
     }
@@ -38,11 +38,12 @@ class Inventory extends \AdminController
     {
         $permissions = parent::permissions();
 
-        $permissions['manage']  = 'Inventory: Manage';
-        $permissions['create']  = 'Inventory: Create';
-        $permissions['edit']    = 'Inventory: Edit';
-        $permissions['delete']  = 'Inventory: Delete';
-        $permissions['restore'] = 'Inventory: Restore';
+        $permissions['manage']  = 'Manage inventory items';
+        $permissions['create']  = 'Create inventory items';
+        $permissions['edit']    = 'Edit inventory items';
+        $permissions['delete']  = 'Delete inventory items';
+        $permissions['restore'] = 'Restore inventory items';
+        $permissions['import'] = 'Import inventory items';
 
         return $permissions;
     }
@@ -81,7 +82,7 @@ class Inventory extends \AdminController
      */
     public function index()
     {
-        if (!userHasPermission('admin.shop:0.orders_manage')) {
+        if (!userHasPermission('admin:shop:inventory:manage')) {
 
             unauthorised();
         }
@@ -245,7 +246,7 @@ class Inventory extends \AdminController
 
         // --------------------------------------------------------------------------
 
-        if (userHasPermission('admin.shop:0.inventory_create')) {
+        if (userHasPermission('admin:shop:inventory:create')) {
 
             \Nails\Admin\Helper::addHeaderButton('admin/shop/inventory/import', 'Import Items', 'orange');
             \Nails\Admin\Helper::addHeaderButton('admin/shop/inventory/create', 'Add New Item');
@@ -269,6 +270,13 @@ class Inventory extends \AdminController
      */
     public function create()
     {
+        if (!userHasPermission('admin:shop:inventory:create')) {
+
+            unauthorised();
+        }
+
+        // --------------------------------------------------------------------------
+
         $this->data['page']->title = 'Add new Inventory Item';
 
         // --------------------------------------------------------------------------
@@ -586,6 +594,13 @@ class Inventory extends \AdminController
      */
     public function edit()
     {
+        if (!userHasPermission('admin:shop:inventory:edit')) {
+
+            unauthorised();
+        }
+
+        // --------------------------------------------------------------------------
+
         //  Fetch item
         $this->data['item'] = $this->shop_product_model->get_by_id($this->uri->segment(5));
 
@@ -719,6 +734,13 @@ class Inventory extends \AdminController
      */
     public function delete()
     {
+        if (!userHasPermission('admin:shop:inventory:delete')) {
+
+            unauthorised();
+        }
+
+        // --------------------------------------------------------------------------
+
         $product = $this->shop_product_model->get_by_id($this->uri->segment(5));
 
         if (!$product) {
@@ -759,6 +781,13 @@ class Inventory extends \AdminController
      */
     public function restore()
     {
+        if (!userHasPermission('admin:shop:inventory:restore')) {
+
+            unauthorised();
+        }
+
+        // --------------------------------------------------------------------------
+
         if ($this->shop_product_model->restore($this->uri->segment(5))) {
 
             $this->session->set_flashdata('success', 'Product successfully restored.');
@@ -781,6 +810,13 @@ class Inventory extends \AdminController
      */
     public function import()
     {
+        if (!userHasPermission('admin:shop:inventory:import')) {
+
+            unauthorised();
+        }
+
+        // --------------------------------------------------------------------------
+
         $this->load->helper('string');
         $method = $this->uri->segment(5) ? $this->uri->segment(5) : 'index';
         $method = 'import' . underscore_to_camelcase(strtolower($method), false);

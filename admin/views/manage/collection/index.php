@@ -43,12 +43,12 @@
 
                             echo '<td class="actions">';
 
-                                if (userHasPermission('admin.shop:0.collection_edit')) {
+                                if (userHasPermission('admin:shop:manage:collection:edit')) {
 
                                     echo anchor('admin/shop/manage/collection/edit/' . $collection->id . $isModal, lang('action_edit'), 'class="awesome small"');
                                 }
 
-                                if (userHasPermission('admin.shop:0.collection_delete')) {
+                                if (userHasPermission('admin:shop:manage:collection:delete')) {
 
                                     echo anchor('admin/shop/manage/collection/delete/' . $collection->id . $isModal, lang('action_delete'), 'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."');
                                 }

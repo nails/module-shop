@@ -36,7 +36,7 @@
                             echo \Nails\Admin\Helper::loadDatetimeCell($attribute->modified);
                             echo '<td class="actions">';
 
-                                if (userHasPermission('admin.shop:0.attribute_edit')) {
+                                if (userHasPermission('admin:shop:manage:attribute:edit')) {
 
                                     echo anchor(
                                         'admin/shop/manage/attribute/edit/' . $attribute->id . $isModal,
@@ -45,7 +45,7 @@
                                     );
                                 }
 
-                                if (userHasPermission('admin.shop:0.attribute_delete')) {
+                                if (userHasPermission('admin:shop:manage:attribute:delete')) {
 
                                     echo anchor(
                                         'admin/shop/manage/attribute/delete/' . $attribute->id . $isModal,

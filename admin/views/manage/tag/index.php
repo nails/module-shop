@@ -38,7 +38,7 @@
                             echo \Nails\Admin\Helper::loadDatetimeCell($tag->modified);
                             echo '<td class="actions">';
 
-                                if (userHasPermission('admin.shop:0.tag_edit')) {
+                                if (userHasPermission('admin:shop:manage:tag:edit')) {
 
                                     echo anchor(
                                         'admin/shop/manage/tag/edit/' . $tag->id . $isModal,
@@ -47,7 +47,7 @@
                                     );
                                 }
 
-                                if (userHasPermission('admin.shop:0.tag_delete')) {
+                                if (userHasPermission('admin:shop:manage:tag:delete')) {
 
                                     echo anchor(
                                         'admin/shop/manage/tag/delete/' . $tag->id . $isModal,

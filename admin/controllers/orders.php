@@ -20,10 +20,20 @@ class Orders extends \AdminController
      */
     public static function announce()
     {
-        if (userHasPermission('admin.shop:0.orders_manage')) {
+        if (userHasPermission('admin:shop:orders:manage')) {
 
-            $navGroup = new \Nails\Admin\Nav('Shop');
-            $navGroup->addMethod('Manage Orders');
+            //  Alerts
+            $alerts = array();
+            $ci     =& get_instance();
+
+            //  Draft pages
+            $ci->db->where('fulfilment_status', 'UNFULFILLED');
+            $ci->db->where('status', 'PAID');
+            $numDrafts = $ci->db->count_all_results(NAILS_DB_PREFIX . 'shop_order');
+            $alerts[]  = \Nails\Admin\Nav::alertObject($numDrafts, 'alert', 'Unfulfilled Orders');
+
+            $navGroup = new \Nails\Admin\Nav('Shop', 'fa-shopping-cart');
+            $navGroup->addAction('Manage Orders', 'index', $alerts);
             return $navGroup;
         }
     }
@@ -38,11 +48,11 @@ class Orders extends \AdminController
     {
         $permissions = parent::permissions();
 
-        $permissions['manage']    = 'Orders: Manage';
-        $permissions['view']      = 'Orders: View';
-        $permissions['edit']      = 'Orders: Edit';
-        $permissions['reprocess'] = 'Orders: Reprocess';
-        $permissions['process']   = 'Orders: Process';
+        $permissions['manage']    = 'Manage Orders';
+        $permissions['view']      = 'View Orders';
+        $permissions['edit']      = 'Edit Orders';
+        $permissions['reprocess'] = 'Reprocess Orders';
+        $permissions['process']   = 'Process Orders';
 
         return $permissions;
     }
@@ -77,7 +87,7 @@ class Orders extends \AdminController
      */
     public function index()
     {
-        if (!userHasPermission('admin.shop:0.orders_manage')) {
+        if (!userHasPermission('admin:shop:orders:manage')) {
 
             unauthorised();
         }
@@ -182,7 +192,7 @@ class Orders extends \AdminController
      */
     public function view()
     {
-        if (!userHasPermission('admin.shop:0.orders_view')) {
+        if (!userHasPermission('admin:shop:orders:view')) {
 
             $this->session->set_flashdata('error', 'You do not have permission to view order details.');
             redirect('admin/shop/orders');
@@ -246,7 +256,7 @@ class Orders extends \AdminController
      */
     public function reprocess()
     {
-        if (!userHasPermission('admin.shop:0.orders_reprocess')) {
+        if (!userHasPermission('admin:shop:orders:reprocess')) {
 
             $this->session->set_flashdata('error', 'You do not have permission to reprocess orders.');
             redirect('admin/shop/orders');
@@ -302,7 +312,7 @@ class Orders extends \AdminController
      */
     public function process()
     {
-        if (!userHasPermission('admin.shop:0.orders_process')) {
+        if (!userHasPermission('admin:shop:orders:process')) {
 
             $this->session->set_flashdata('error', 'You do not have permission to process order items.');
             redirect('admin/shop/orders');
@@ -370,7 +380,7 @@ class Orders extends \AdminController
      */
     public function download_invoice()
     {
-        if (!userHasPermission('admin.shop:0.orders_view')) {
+        if (!userHasPermission('admin:shop:orders:view')) {
 
             $this->session->set_flashdata('error', 'You do not have permission to download orders.');
             redirect('admin/shop/orders');
@@ -420,7 +430,7 @@ class Orders extends \AdminController
      */
     public function fulfil()
     {
-        if (!userHasPermission('admin.shop:0.orders_edit')) {
+        if (!userHasPermission('admin:shop:orders:edit')) {
 
             $msg    = 'You do not have permission to edit orders.';
             $status = 'error';
@@ -468,7 +478,7 @@ class Orders extends \AdminController
      */
     public function fulfil_batch()
     {
-        if (!userHasPermission('admin.shop:0.orders_edit')) {
+        if (!userHasPermission('admin:shop:orders:edit')) {
 
             $msg    = 'You do not have permission to edit orders.';
             $status = 'error';
@@ -505,7 +515,7 @@ class Orders extends \AdminController
      */
     public function unfulfil()
     {
-        if (!userHasPermission('admin.shop:0.orders_edit')) {
+        if (!userHasPermission('admin:shop:orders:edit')) {
 
             $msg    = 'You do not have permission to edit orders.';
             $status = 'error';
@@ -553,7 +563,7 @@ class Orders extends \AdminController
      */
     public function unfulfil_batch()
     {
-        if (!userHasPermission('admin.shop:0.orders_edit')) {
+        if (!userHasPermission('admin:shop:orders:edit')) {
 
             $msg    = 'You do not have permission to edit orders.';
             $status = 'error';
@@ -590,7 +600,7 @@ class Orders extends \AdminController
      */
     public function cancel()
     {
-        if (!userHasPermission('admin.shop:0.orders_edit')) {
+        if (!userHasPermission('admin:shop:orders:edit')) {
 
             $msg    = 'You do not have permission to edit orders.';
             $status = 'error';
@@ -638,7 +648,7 @@ class Orders extends \AdminController
      */
     public function cancel_batch()
     {
-        if (!userHasPermission('admin.shop:0.orders_edit')) {
+        if (!userHasPermission('admin:shop:orders:edit')) {
 
             $msg    = 'You do not have permission to edit orders.';
             $status = 'error';

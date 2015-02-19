@@ -56,12 +56,12 @@
                             echo \Nails\Admin\Helper::loadDatetimeCell($category->modified);
                             echo '<td class="actions">';
 
-                                if (userHasPermission('admin.shop:0.category_edit')) {
+                                if (userHasPermission('admin:shop:manage:category:edit')) {
 
                                     echo anchor('admin/shop/manage/category/edit/' . $category->id . $isModal, lang('action_edit'), 'class="awesome small"');
                                 }
 
-                                if (userHasPermission('admin.shop:0.category_delete')) {
+                                if (userHasPermission('admin:shop:manage:category:delete')) {
 
                                     echo anchor('admin/shop/manage/category/delete/' . $category->id . $isModal, lang('action_delete'), 'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone, any child categories will also be deleted."');
                                 }

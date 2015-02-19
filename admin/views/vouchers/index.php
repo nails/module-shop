@@ -143,14 +143,14 @@
 
                                     if ($voucher->is_active) {
 
-                                        if (userHasPermission('admin.shop:0.vouchers_deactivate')) {
+                                        if (userHasPermission('admin:shop:vouchers:deactivate')) {
 
                                             $buttons[] = anchor('admin/shop/vouchers/deactivate/' . $voucher->id, 'Suspend', 'class="awesome small red confirm"');
                                         }
 
                                     } else {
 
-                                        if (userHasPermission('admin.shop:0.vouchers_activate')) {
+                                        if (userHasPermission('admin:shop:vouchers:activate')) {
 
                                             $buttons[] = anchor('admin/shop/vouchers/activate/' . $voucher->id, 'Activate', 'class="awesome small green"');
                                         }

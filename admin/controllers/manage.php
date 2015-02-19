@@ -24,13 +24,12 @@ class Manage extends \AdminController
      */
     public static function announce()
     {
-        $navGroup = new \Nails\Admin\Nav('Shop');
-
         if (userHasPermission('admin:shop:manage:.*')) {
 
-            $navGroup->addMethod('Other Managers');
+            $navGroup = new \Nails\Admin\Nav('Shop', 'fa-shopping-cart');
+            $navGroup->addAction('Other Managers');
+            return $navGroup;
         }
-        return $navGroup;
     }
 
     // --------------------------------------------------------------------------
@@ -404,7 +403,7 @@ class Manage extends \AdminController
      */
     public function brand()
     {
-        if (!userHasPermission('admin.shop:0.brand_manage')) {
+        if (!userHasPermission('admin:shop:manage:brand:manage')) {
 
             unauthorised();
         }
@@ -473,7 +472,7 @@ class Manage extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Add header button
-        if (userHasPermission('admin.shop:0.brand_create')) {
+        if (userHasPermission('admin:shop:manage:brand:create')) {
 
             \Nails\Admin\Helper::addHeaderButton(
                 'admin/shop/manage/brand/create' . $this->isModal,
@@ -495,7 +494,7 @@ class Manage extends \AdminController
      */
     protected function brandCreate()
     {
-        if (!userHasPermission('admin.shop:0.brand_create')) {
+        if (!userHasPermission('admin:shop:manage:brand:create')) {
 
             unauthorised();
         }
@@ -572,7 +571,7 @@ class Manage extends \AdminController
      */
     protected function brandEdit()
     {
-        if (!userHasPermission('admin.shop:0.brand_edit')) {
+        if (!userHasPermission('admin:shop:manage:brand:edit')) {
 
             unauthorised();
         }
@@ -657,7 +656,7 @@ class Manage extends \AdminController
      */
     protected function brandDelete()
     {
-        if (!userHasPermission('admin.shop:0.brand_delete')) {
+        if (!userHasPermission('admin:shop:manage:brand:delete')) {
 
             unauthorised();
         }
@@ -689,7 +688,7 @@ class Manage extends \AdminController
      */
     public function category()
     {
-        if (!userHasPermission('admin.shop:0.category_manage')) {
+        if (!userHasPermission('admin:shop:manage:category:manage')) {
 
             unauthorised();
         }
@@ -759,7 +758,7 @@ class Manage extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Add header button
-        if (userHasPermission('admin.shop:0.category_create')) {
+        if (userHasPermission('admin:shop:manage:category:create')) {
 
             \Nails\Admin\Helper::addHeaderButton(
                 'admin/shop/manage/category/create' . $this->isModal,
@@ -781,7 +780,7 @@ class Manage extends \AdminController
      */
     protected function categoryCreate()
     {
-        if (!userHasPermission('admin.shop:0.category_create')) {
+        if (!userHasPermission('admin:shop:manage:category:create')) {
 
             unauthorised();
         }
@@ -855,7 +854,7 @@ class Manage extends \AdminController
      */
     protected function categoryEdit()
     {
-        if (!userHasPermission('admin.shop:0.category_edit')) {
+        if (!userHasPermission('admin:shop:manage:category:edit')) {
 
             unauthorised();
         }
@@ -938,7 +937,7 @@ class Manage extends \AdminController
      */
     protected function categoryDelete()
     {
-        if (!userHasPermission('admin.shop:0.category_delete')) {
+        if (!userHasPermission('admin:shop:manage:category:delete')) {
 
             unauthorised();
         }
@@ -970,7 +969,7 @@ class Manage extends \AdminController
      */
     public function collection()
     {
-        if (!userHasPermission('admin.shop:0.collection_manage')) {
+        if (!userHasPermission('admin:shop:manage:collection:manage')) {
 
             unauthorised();
         }
@@ -1040,7 +1039,7 @@ class Manage extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Add header button
-        if (userHasPermission('admin.shop:0.collection_create')) {
+        if (userHasPermission('admin:shop:manage:collection:create')) {
 
             \Nails\Admin\Helper::addHeaderButton(
                 'admin/shop/manage/collection/create' . $this->isModal,
@@ -1062,7 +1061,7 @@ class Manage extends \AdminController
      */
     protected function collectionCreate()
     {
-        if (!userHasPermission('admin.shop:0.collection_create')) {
+        if (!userHasPermission('admin:shop:manage:collection:create')) {
 
             unauthorised();
         }
@@ -1136,7 +1135,7 @@ class Manage extends \AdminController
      */
     protected function collectionEdit()
     {
-        if (!userHasPermission('admin.shop:0.collection_edit')) {
+        if (!userHasPermission('admin:shop:manage:collection:edit')) {
 
             unauthorised();
         }
@@ -1219,7 +1218,7 @@ class Manage extends \AdminController
      */
     protected function collectionDelete()
     {
-        if (!userHasPermission('admin.shop:0.collection_delete')) {
+        if (!userHasPermission('admin:shop:manage:collection:delete')) {
 
             unauthorised();
         }
@@ -1251,7 +1250,7 @@ class Manage extends \AdminController
      */
     public function range()
     {
-        if (!userHasPermission('admin.shop:0.range_manage')) {
+        if (!userHasPermission('admin:shop:manage:range:manage')) {
 
             unauthorised();
         }
@@ -1320,7 +1319,7 @@ class Manage extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Add header button
-        if (userHasPermission('admin.shop:0.range_create')) {
+        if (userHasPermission('admin:shop:manage:range:create')) {
 
             \Nails\Admin\Helper::addHeaderButton(
                 'admin/shop/manage/range/create' . $this->isModal,
@@ -1342,7 +1341,7 @@ class Manage extends \AdminController
      */
     protected function rangeCreate()
     {
-        if (!userHasPermission('admin.shop:0.range_create')) {
+        if (!userHasPermission('admin:shop:manage:range:create')) {
 
             unauthorised();
         }
@@ -1416,7 +1415,7 @@ class Manage extends \AdminController
      */
     protected function rangeEdit()
     {
-        if (!userHasPermission('admin.shop:0.range_edit')) {
+        if (!userHasPermission('admin:shop:manage:range:edit')) {
 
             unauthorised();
         }
@@ -1499,7 +1498,7 @@ class Manage extends \AdminController
      */
     protected function rangeDelete()
     {
-        if (!userHasPermission('admin.shop:0.range_delete')) {
+        if (!userHasPermission('admin:shop:manage:range:delete')) {
 
             unauthorised();
         }
@@ -1531,7 +1530,7 @@ class Manage extends \AdminController
      */
     public function tag()
     {
-        if (!userHasPermission('admin.shop:0.tag_manage')) {
+        if (!userHasPermission('admin:shop:manage:tag:manage')) {
 
             unauthorised();
         }
@@ -1600,7 +1599,7 @@ class Manage extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Add header button
-        if (userHasPermission('admin.shop:0.tag_create')) {
+        if (userHasPermission('admin:shop:manage:tag:create')) {
 
             \Nails\Admin\Helper::addHeaderButton(
                 'admin/shop/manage/tag/create' . $this->isModal,
@@ -1622,7 +1621,7 @@ class Manage extends \AdminController
      */
     protected function tagCreate()
     {
-        if (!userHasPermission('admin.shop:0.tag_create')) {
+        if (!userHasPermission('admin:shop:manage:tag:create')) {
 
             unauthorised();
         }
@@ -1694,7 +1693,7 @@ class Manage extends \AdminController
      */
     protected function tagEdit()
     {
-        if (!userHasPermission('admin.shop:0.tag_edit')) {
+        if (!userHasPermission('admin:shop:manage:tag:edit')) {
 
             unauthorised();
         }
@@ -1775,7 +1774,7 @@ class Manage extends \AdminController
      */
     protected function tagDelete()
     {
-        if (!userHasPermission('admin.shop:0.tag_delete')) {
+        if (!userHasPermission('admin:shop:manage:tag:delete')) {
 
             unauthorised();
         }
@@ -1807,7 +1806,7 @@ class Manage extends \AdminController
      */
     public function taxRate()
     {
-        if (!userHasPermission('admin.shop:0.tax_rate_manage')) {
+        if (!userHasPermission('admin:shop:manage:tax:rate_manage')) {
 
             unauthorised();
         }
@@ -1876,7 +1875,7 @@ class Manage extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Add header button
-        if (userHasPermission('admin.shop:0.tax_rate_create')) {
+        if (userHasPermission('admin:shop:manage:tax:rate_create')) {
 
             \Nails\Admin\Helper::addHeaderButton(
                 'admin/shop/manage/taxRate/create' . $this->isModal,
@@ -1898,7 +1897,7 @@ class Manage extends \AdminController
      */
     protected function taxRateCreate()
     {
-        if (!userHasPermission('admin.shop:0.tax_rate_create')) {
+        if (!userHasPermission('admin:shop:manage:tax:rate_create')) {
 
             unauthorised();
         }
@@ -1962,7 +1961,7 @@ class Manage extends \AdminController
      */
     protected function taxRateEdit()
     {
-        if (!userHasPermission('admin.shop:0.tax_rate_edit')) {
+        if (!userHasPermission('admin:shop:manage:tax:rate_edit')) {
 
             unauthorised();
         }
@@ -2035,7 +2034,7 @@ class Manage extends \AdminController
      */
     protected function taxRateDelete()
     {
-        if (!userHasPermission('admin.shop:0.tax_rate_delete')) {
+        if (!userHasPermission('admin:shop:manage:tax:rate_delete')) {
 
             unauthorised();
         }
@@ -2067,7 +2066,7 @@ class Manage extends \AdminController
      */
     public function productType()
     {
-        if (!userHasPermission('admin.shop:0.product_type_manage')) {
+        if (!userHasPermission('admin:shop:manage:product:type_manage')) {
 
             unauthorised();
         }
@@ -2136,7 +2135,7 @@ class Manage extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Add header button
-        if (userHasPermission('admin.shop:0.product_type_create')) {
+        if (userHasPermission('admin:shop:manage:product:type_create')) {
 
             \Nails\Admin\Helper::addHeaderButton(
                 'admin/shop/manage/productType/create' . $this->isModal,
@@ -2158,7 +2157,7 @@ class Manage extends \AdminController
      */
     protected function productTypeCreate()
     {
-        if (!userHasPermission('admin.shop:0.product_type_create')) {
+        if (!userHasPermission('admin:shop:manage:product:type_create')) {
 
             unauthorised();
         }
@@ -2231,7 +2230,7 @@ class Manage extends \AdminController
      */
     protected function productTypeEdit()
     {
-        if (!userHasPermission('admin.shop:0.product_type_edit')) {
+        if (!userHasPermission('admin:shop:manage:product:type_edit')) {
 
             unauthorised();
         }
@@ -2327,7 +2326,7 @@ class Manage extends \AdminController
      */
     public function productTypeMeta()
     {
-        if (!userHasPermission('admin.shop:0.product_type_meta__manage')) {
+        if (!userHasPermission('admin:shop:manage:product:type_meta__manage')) {
 
             unauthorised();
         }
@@ -2397,7 +2396,7 @@ class Manage extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Add header button
-        if (userHasPermission('admin.shop:0.product_type_meta_create')) {
+        if (userHasPermission('admin:shop:manage:product:type_meta_create')) {
 
             \Nails\Admin\Helper::addHeaderButton(
                 'admin/shop/manage/productTypeMeta/create' . $this->isModal,
@@ -2419,7 +2418,7 @@ class Manage extends \AdminController
      */
     protected function productTypeMetaCreate()
     {
-        if (!userHasPermission('admin.shop:0.product_type_meta_create')) {
+        if (!userHasPermission('admin:shop:manage:product:type_meta_create')) {
 
             unauthorised();
         }
@@ -2492,7 +2491,7 @@ class Manage extends \AdminController
      */
     protected function productTypeMetaEdit()
     {
-        if (!userHasPermission('admin.shop:0.product_type_meta_edit')) {
+        if (!userHasPermission('admin:shop:manage:product:type_meta_edit')) {
 
             unauthorised();
         }
@@ -2575,7 +2574,7 @@ class Manage extends \AdminController
      */
     protected function productTypeMetaDelete()
     {
-        if (!userHasPermission('admin.shop:0.product_type_meta_delete')) {
+        if (!userHasPermission('admin:shop:manage:product:type_meta_delete')) {
 
             unauthorised();
         }

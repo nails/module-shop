@@ -45,7 +45,7 @@
                             echo \Nails\Admin\Helper::loadDatetimeCell($field->modified);
                             echo '<td class="actions">';
 
-                                if (userHasPermission('admin.shop:0.product_type_meta_edit')) {
+                                if (userHasPermission('admin:shop:manage:productTypeMeta:edit')) {
 
                                     echo anchor(
                                         'admin/shop/manage/productTypeMeta/edit/' . $field->id . $isModal,
@@ -54,7 +54,7 @@
                                     );
                                 }
 
-                                if (userHasPermission('admin.shop:0.product_type_meta_delete')) {
+                                if (userHasPermission('admin:shop:manage:productTypeMeta:delete')) {
 
                                     echo anchor(
                                         'admin/shop/manage/productTypeMeta/delete/' . $field->id . $isModal,

@@ -20,14 +20,12 @@ class Availability extends \AdminController
      */
     public static function announce()
     {
-        $navGroup = new \Nails\Admin\Nav('Shop');
-
         if (userHasPermission('admin:shop:availability:manage')) {
 
-            $navGroup->addMethod('Product Availability Notifications');
+            $navGroup = new \Nails\Admin\Nav('Shop', 'fa-shopping-cart');
+            $navGroup->addAction('Product Availability Notifications');
+            return $navGroup;
         }
-
-        return $navGroup;
     }
 
     // --------------------------------------------------------------------------
@@ -93,7 +91,7 @@ class Availability extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Add a header button
-        if (userHasPermission('admin.shop:0.manage_create')) {
+        if (userHasPermission('admin:shop:availability:create')) {
 
             \Nails\Admin\Helper::addHeaderButton('admin/shop/availability/create', 'Add New Notification');
         }
@@ -111,7 +109,7 @@ class Availability extends \AdminController
      */
     public function create()
     {
-        if (!userHasPermission('admin.shop:0.notification_create')) {
+        if (!userHasPermission('admin:shop:availability:create')) {
 
             unauthorised();
         }
@@ -176,7 +174,7 @@ class Availability extends \AdminController
      */
     public function edit()
     {
-        if (!userHasPermission('admin.shop:0.notification_edit')) {
+        if (!userHasPermission('admin:shop:availability:edit')) {
 
             unauthorised();
         }
@@ -251,7 +249,7 @@ class Availability extends \AdminController
      */
     public function delete()
     {
-        if (!userHasPermission('admin.shop:0.notifications_delete')) {
+        if (!userHasPermission('admin:shop:availability:delete')) {
 
             unauthorised();
         }

@@ -155,7 +155,7 @@
 
                                         // --------------------------------------------------------------------------
 
-                                        if (userHasPermission('admin.shop:0.orders_view')) {
+                                        if (userHasPermission('admin:shop:orders:view')) {
 
                                             $_buttons[] = anchor(
                                                 'admin/shop/orders/view/' . $order->id,
@@ -171,7 +171,7 @@
 
                                         // --------------------------------------------------------------------------
 
-                                        // if (userHasPermission('admin.shop:0.orders_reprocess')) {
+                                        // if (userHasPermission('admin:shop:orders:reprocess')) {
 
                                         //      $_buttons[] = anchor(
                                         //         'admin/shop/orders/reprocess/' . $order->id,

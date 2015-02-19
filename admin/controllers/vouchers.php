@@ -20,10 +20,10 @@ class Vouchers extends \AdminController
      */
     public static function announce()
     {
-        if (userHasPermission('admin.shop:0.vouchers_manage')) {
+        if (userHasPermission('admin:shop:vouchers:manage')) {
 
-            $navGroup = new \Nails\Admin\Nav('Shop');
-            $navGroup->addMethod('Manage Vouchers');
+            $navGroup = new \Nails\Admin\Nav('Shop', 'fa-shopping-cart');
+            $navGroup->addAction('Manage Vouchers');
             return $navGroup;
         }
     }
@@ -38,10 +38,10 @@ class Vouchers extends \AdminController
     {
         $permissions = parent::permissions();
 
-        $permissions['manage']     = 'Vouchers: Manage';
-        $permissions['create']     = 'Vouchers: Create';
-        $permissions['activate']   = 'Vouchers: Activate';
-        $permissions['deactivate'] = 'Vouchers: Deactivate';
+        $permissions['manage']     = 'Manage Vouchers';
+        $permissions['create']     = 'Create Vouchers';
+        $permissions['activate']   = 'Activate Vouchers';
+        $permissions['deactivate'] = 'Deactivate Vouchers';
 
         return $permissions;
     }
@@ -76,7 +76,7 @@ class Vouchers extends \AdminController
      */
     public function index()
     {
-        if (!userHasPermission('admin.shop:0.vouchers_manage')) {
+        if (!userHasPermission('admin:shop:vouchers:manage')) {
 
             unauthorised();
         }
@@ -146,7 +146,7 @@ class Vouchers extends \AdminController
 
         // --------------------------------------------------------------------------
 
-        if (userHasPermission('admin.shop:0.voucher_create')) {
+        if (userHasPermission('admin:shop:voucher:create')) {
 
             \Nails\Admin\Helper::addHeaderButton('admin/shop/voucher/create', 'Create Voucher');
         }
@@ -164,7 +164,7 @@ class Vouchers extends \AdminController
      */
     public function create()
     {
-        if (!userHasPermission('admin.shop:0.vouchers_create')) {
+        if (!userHasPermission('admin:shop:vouchers:create')) {
 
             $this->session->set_flashdata('error', 'You do not have permission to create vouchers.');
             redirect('admin/shop/vouchers');
@@ -344,7 +344,7 @@ class Vouchers extends \AdminController
      */
     public function activate()
     {
-        if (!userHasPermission('admin.shop:0.vouchers_activate')) {
+        if (!userHasPermission('admin:shop:vouchers:activate')) {
 
             $status  = 'error';
             $message = 'You do not have permission to activate vouchers.';
@@ -379,7 +379,7 @@ class Vouchers extends \AdminController
      */
     public function deactivate()
     {
-        if (!userHasPermission('admin.shop:0.vouchers_deactivate')) {
+        if (!userHasPermission('admin:shop:vouchers:deactivate')) {
 
             $status  = 'error';
             $message = 'You do not have permission to suspend vouchers.';

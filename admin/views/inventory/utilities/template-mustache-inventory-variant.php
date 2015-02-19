@@ -481,7 +481,7 @@
                         $field['label']    = 'Collection Only';
                         $field['readonly'] = !app_setting('warehouse_collection_enabled', 'shop');
                         $field['info']     = !app_setting('warehouse_collection_enabled', 'shop') ? '<strong>Warehouse Collection is disabled</strong>' : '';
-                        $field['info']    .= !app_setting('warehouse_collection_enabled', 'shop') && userHasPermission('admin.settings:0') ? '<br />if you wish to allow customers to collect from your warehouse you must enable it in ' . anchor('admin/settings/shop', 'settings', 'class="confirm" data-title="Stop Editing?" data-body="Any unsaved changes will be lost."') . '.' : '';
+                        $field['info']    .= !app_setting('warehouse_collection_enabled', 'shop') && userHasPermission('admin:shop:settings:update') ? '<br />if you wish to allow customers to collect from your warehouse you must enable it in ' . anchor('admin/settings/shop', 'settings', 'class="confirm" data-title="Stop Editing?" data-body="Any unsaved changes will be lost."') . '.' : '';
                         $field['default']  = isset($variation->shipping->collection_only) ? (bool) $variation->shipping->collection_only : false;
                         $tip               = 'Items marked as collection only will be handled differently in checkout and reporting.';
 
@@ -543,7 +543,7 @@
 
                     echo '<p class="system-alert message">';
                         echo '<strong>No Shipping Drivers Enabled.</strong>';
-                        echo userHasPermission('admin.settings:0') ? '<br />You can enable and configure shipping drivers in ' . anchor('admin/settings/shop', 'settings', 'class="confirm" data-title="Stop Editing?" data-body="Any unsaved changes will be lost."') . '.' : '';
+                        echo userHasPermission('admin:shop:settings:update') ? '<br />You can enable and configure shipping drivers in ' . anchor('admin/settings/shop', 'settings', 'class="confirm" data-title="Stop Editing?" data-body="Any unsaved changes will be lost."') . '.' : '';
                     echo '</p>';
                 }
 

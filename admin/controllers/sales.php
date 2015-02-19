@@ -20,10 +20,10 @@ class Sales extends \AdminController
      */
     public static function announce()
     {
-        if (userHasPermission('admin.shop:0.sale_manage')) {
+        if (userHasPermission('admin:shop:sales:manage')) {
 
-            $navGroup = new \Nails\Admin\Nav('Shop');
-            $navGroup->addMethod('Manage Sales');
+            $navGroup = new \Nails\Admin\Nav('Shop', 'fa-shopping-cart');
+            $navGroup->addAction('Manage Sales');
             return $navGroup;
         }
     }
@@ -38,10 +38,10 @@ class Sales extends \AdminController
     {
         $permissions = parent::permissions();
 
-        $permissions['manage'] = 'Sale: Manage';
-        $permissions['create'] = 'Sale: Create';
-        $permissions['edit']   = 'Sale: Edit';
-        $permissions['delete'] = 'Sale: Delete';
+        $permissions['manage'] = 'Manage sales';
+        $permissions['create'] = 'Create sales';
+        $permissions['edit']   = 'Edit sales';
+        $permissions['delete'] = 'Delete sales';
 
         return $permissions;
     }
@@ -75,6 +75,13 @@ class Sales extends \AdminController
      */
     public function index()
     {
+        if (!userHasPermission('admin:shop:sales:manage')) {
+
+            unauthorised();
+        }
+
+        // --------------------------------------------------------------------------
+
         $this->data['page']->title = 'Manage Sales';
 
         // --------------------------------------------------------------------------
@@ -90,6 +97,13 @@ class Sales extends \AdminController
      */
     public function create()
     {
+        if (!userHasPermission('admin:shop:sales:create')) {
+
+            unauthorised();
+        }
+
+        // --------------------------------------------------------------------------
+
         $this->data['page']->title = 'Create Sale';
 
         // --------------------------------------------------------------------------
@@ -105,6 +119,13 @@ class Sales extends \AdminController
      */
     public function edit()
     {
+        if (!userHasPermission('admin:shop:sales:edit')) {
+
+            unauthorised();
+        }
+
+        // --------------------------------------------------------------------------
+
         $this->data['page']->title = 'Edit Sale "xxx"';
 
         // --------------------------------------------------------------------------
@@ -120,6 +141,13 @@ class Sales extends \AdminController
      */
     public function delete()
     {
+        if (!userHasPermission('admin:shop:sales:delete')) {
+
+            unauthorised();
+        }
+
+        // --------------------------------------------------------------------------
+
         $this->session->set_flashdata('message', '<strong>TODO:</strong> Delete a sale.');
         redirect('admin/shop/sales/index');
     }

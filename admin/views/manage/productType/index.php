@@ -56,7 +56,7 @@
                             echo \Nails\Admin\Helper::loadDatetimeCell($productType->modified);
                             echo '<td class="actions">';
 
-                                if (userHasPermission('admin.shop:0.product_type_edit')) {
+                                if (userHasPermission('admin:shop:manage:productType:edit')) {
 
                                     echo anchor(
                                         'admin/shop/manage/productType/edit/' . $productType->id . $isModal,
@@ -65,7 +65,7 @@
                                     );
                                 }
 
-                                if (userHasPermission('admin.shop:0.product_type_delete')) {
+                                if (userHasPermission('admin:shop:manage:productType:delete')) {
 
                                     echo anchor(
                                         'admin/shop/manage/productType/delete/' . $productType->id . $isModal,

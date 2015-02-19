@@ -44,7 +44,7 @@
 
                             echo '<td class="actions">';
 
-                                if (userHasPermission('admin.shop:0.range_edit')) {
+                                if (userHasPermission('admin:shop:manage:range:edit')) {
 
                                     echo anchor(
                                         'admin/shop/manage/range/edit/' . $range->id . $isModal,
@@ -53,7 +53,7 @@
                                     );
                                 }
 
-                                if (userHasPermission('admin.shop:0.range_delete')) {
+                                if (userHasPermission('admin:shop:manage:range:delete')) {
 
                                     echo anchor(
                                         'admin/shop/manage/range/delete/' . $range->id . $isModal,

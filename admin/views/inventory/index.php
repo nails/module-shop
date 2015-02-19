@@ -80,14 +80,14 @@
 
                                         $_buttons[] = anchor($item->url, lang('action_view'), 'class="awesome small orange" target="_blank"');
 
-                                        if (userHasPermission('admin.shop:0.inventory_edit')) {
+                                        if (userHasPermission('admin:shop:inventory:edit')) {
 
                                             $_buttons[] = anchor('admin/shop/inventory/edit/' . $item->id, lang('action_edit'), 'class="awesome small"');
                                         }
 
                                         // --------------------------------------------------------------------------
 
-                                        if (userHasPermission('admin.shop:0.inventory_delete')) {
+                                        if (userHasPermission('admin:shop:inventory:delete')) {
 
                                             $_buttons[] = anchor('admin/shop/inventory/delete/' . $item->id, lang('action_delete'), 'class="awesome small red confirm" data-title="Are you sure?" data-body="You can undo this action."');
                                         }

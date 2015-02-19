@@ -20,14 +20,12 @@ class Settings extends \AdminController
      */
     public static function announce()
     {
-        $navGroup = new \Nails\Admin\Nav('Settings');
-
         if (userHasPermission('admin:shop:settings:update')) {
 
-            $navGroup->addMethod('Shop');
+            $navGroup = new \Nails\Admin\Nav('Settings', 'fa-wrench');
+            $navGroup->addAction('Shop');
+            return $navGroup;
         }
-
-        return $navGroup;
     }
 
     // --------------------------------------------------------------------------

@@ -56,13 +56,13 @@
 
                             echo '<td class="actions">';
 
-                                if (userHasPermission('admin.shop:0.brand_edit')) {
+                                if (userHasPermission('admin:shop:manage:brand:edit')) {
 
                                     echo anchor('admin/shop/manage/brand/edit/' . $brand->id . $isModal, lang('action_edit'), 'class="awesome small"');
 
                                 }
 
-                                if (userHasPermission('admin.shop:0.brand_delete')) {
+                                if (userHasPermission('admin:shop:manage:brand:delete')) {
 
                                     echo anchor('admin/shop/manage/brand/delete/' . $brand->id . $isModal, lang('action_delete'), 'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."');
 

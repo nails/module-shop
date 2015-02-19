@@ -730,7 +730,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
             show_404('', true);
 
-        } elseif (!$this->data['product']->is_active && !userHasPermission('admin.shop:0.inventory_manage')) {
+        } elseif (!$this->data['product']->is_active && !userHasPermission('admin:shop:inventory:manage')) {
 
             show_404();
 

@@ -39,7 +39,7 @@
                             echo \Nails\Admin\Helper::loadDatetimeCell($taxRate->modified);
                             echo '<td class="actions">';
 
-                                if (userHasPermission('admin.shop:0.tax_rate_edit')) {
+                                if (userHasPermission('admin:shop:manage:taxRate:edit')) {
 
                                     echo anchor(
                                         'admin/shop/manage/taxRate/edit/' . $taxRate->id . $isModal,
@@ -48,7 +48,7 @@
                                     );
                                 }
 
-                                if (userHasPermission('admin.shop:0.tax_rate_delete')) {
+                                if (userHasPermission('admin:shop:manage:taxRate:delete')) {
 
                                     echo anchor(
                                         'admin/shop/manage/taxRate/delete/' . $taxRate->id . $isModal,
