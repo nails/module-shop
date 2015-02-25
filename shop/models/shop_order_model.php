@@ -20,8 +20,8 @@ class NAILS_Shop_order_model extends NAILS_Model
         parent::__construct();
         $this->load->model('shop/shop_currency_model');
 
-        $this->_table        = NAILS_DB_PREFIX . 'shop_order';
-        $this->_table_prefix = 'o';
+        $this->table        = NAILS_DB_PREFIX . 'shop_order';
+        $this->tablePrefix = 'o';
     }
 
     // --------------------------------------------------------------------------
@@ -412,7 +412,7 @@ class NAILS_Shop_order_model extends NAILS_Model
      **/
     public function get_all($page = null, $perPage = null, $data = array(), $_caller = 'GET_ALL')
     {
-        $this->db->select($this->_table_prefix . '.*');
+        $this->db->select($this->tablePrefix . '.*');
         $this->db->select('ue.email, u.first_name, u.last_name, u.gender, u.profile_img,ug.id user_group_id,ug.label user_group_label');
         $this->db->select('v.code v_code,v.label v_label, v.type v_type, v.discount_type v_discount_type, v.discount_value v_discount_value, v.discount_application v_discount_application');
         $this->db->select('v.product_type_id v_product_type_id, v.is_active v_is_active, v.is_deleted v_is_deleted, v.valid_from v_valid_from, v.valid_to v_valid_to');
@@ -482,23 +482,23 @@ class NAILS_Shop_order_model extends NAILS_Model
             }
 
             $data['or_like'][] = array(
-                'column' => $this->_table_prefix . '.code',
+                'column' => $this->tablePrefix . '.code',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
-                'column' => $this->_table_prefix . '.user_email',
+                'column' => $this->tablePrefix . '.user_email',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
-                'column' => $this->_table_prefix . '.user_first_name',
+                'column' => $this->tablePrefix . '.user_first_name',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
-                'column' => $this->_table_prefix . '.user_last_name',
+                'column' => $this->tablePrefix . '.user_last_name',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
-                'column' => $this->_table_prefix . '.user_telephone',
+                'column' => $this->tablePrefix . '.user_telephone',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
@@ -537,7 +537,7 @@ class NAILS_Shop_order_model extends NAILS_Model
             $data['where'] = array();
         }
 
-        $data['where'][] = array($this->_table_prefix . '.ref', $ref);
+        $data['where'][] = array($this->tablePrefix . '.ref', $ref);
 
         $result = $this->get_all(null, null, $data, false, 'GET_BY_REF');
 
@@ -567,7 +567,7 @@ class NAILS_Shop_order_model extends NAILS_Model
             $data['where_in'] = array();
         }
 
-        $data['where_in'][] = array($this->_table_prefix . '.ref', $refs);
+        $data['where_in'][] = array($this->tablePrefix . '.ref', $refs);
 
         return $this->get_all(null, null, $data, 'GET_BY_REFS');
     }
@@ -614,8 +614,8 @@ class NAILS_Shop_order_model extends NAILS_Model
      */
     public function get_for_user_id($userId)
     {
-        $this->db->where_in($this->_table_prefix . '.status', array('PAID', 'UNPAID'));
-        $this->db->where($this->_table_prefix . '.user_id', $userId);
+        $this->db->where_in($this->tablePrefix . '.status', array('PAID', 'UNPAID'));
+        $this->db->where($this->tablePrefix . '.user_id', $userId);
         return $this->get_all();
     }
 
@@ -628,8 +628,8 @@ class NAILS_Shop_order_model extends NAILS_Model
      */
     public function get_for_user_email($email)
     {
-        $this->db->where_in($this->_table_prefix . '.status', array('PAID', 'UNPAID'));
-        $this->db->where($this->_table_prefix . '.user_email', $email);
+        $this->db->where_in($this->tablePrefix . '.status', array('PAID', 'UNPAID'));
+        $this->db->where($this->tablePrefix . '.user_email', $email);
         return $this->get_all();
     }
 

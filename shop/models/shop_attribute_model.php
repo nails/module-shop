@@ -19,8 +19,8 @@ class NAILS_Shop_attribute_model extends NAILS_Model
     {
         parent::__construct();
 
-        $this->_table        = NAILS_DB_PREFIX . 'shop_attribute';
-        $this->_table_prefix = 'sa';
+        $this->table        = NAILS_DB_PREFIX . 'shop_attribute';
+        $this->tablePrefix = 'sa';
     }
 
     // --------------------------------------------------------------------------
@@ -42,7 +42,7 @@ class NAILS_Shop_attribute_model extends NAILS_Model
                 $data['sort'] = array();
             }
 
-            $data['sort'][] = array($this->_table_prefix . '.label', 'ASC');
+            $data['sort'][] = array($this->tablePrefix . '.label', 'ASC');
         }
 
         // --------------------------------------------------------------------------
@@ -52,11 +52,11 @@ class NAILS_Shop_attribute_model extends NAILS_Model
             if (empty($this->db->ar_select)) {
 
                 //  No selects have been called, call this so that we don't *just* get the product count
-                $this->db->select($this->_table_prefix . '.*');
+                $this->db->select($this->tablePrefix . '.*');
             }
 
             $sql  = 'SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product_attribute ';
-            $sql .= 'WHERE `attribute_id` = `' . $this->_table_prefix . '`.`id`';
+            $sql .= 'WHERE `attribute_id` = `' . $this->tablePrefix . '`.`id`';
 
             $this->db->select('(' . $sql . ') product_count');
         }
@@ -72,11 +72,11 @@ class NAILS_Shop_attribute_model extends NAILS_Model
             }
 
             $data['or_like'][] = array(
-                'column' => $this->_table_prefix . '.label',
+                'column' => $this->tablePrefix . '.label',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
-                'column' => $this->_table_prefix . '.description',
+                'column' => $this->tablePrefix . '.description',
                 'value'  => $data['keywords']
             );
         }

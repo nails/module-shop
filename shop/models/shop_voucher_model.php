@@ -15,9 +15,9 @@ class NAILS_Shop_voucher_model extends NAILS_Model
     public function __construct()
     {
         parent::__construct();
-        $this->_table = NAILS_DB_PREFIX . 'shop_voucher';
-        $this->_table_prefix = 'sv';
-        $this->_destructive_delete = false;
+        $this->table = NAILS_DB_PREFIX . 'shop_voucher';
+        $this->tablePrefix = 'sv';
+        $this->destructiveDelete = false;
     }
 
     // --------------------------------------------------------------------------
@@ -90,7 +90,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
         $this->db->set('use_count', 'use_count+1', false);
 
         $this->db->where('id', $voucher->id);
-        return $this->db->update($this->_table);
+        return $this->db->update($this->table);
     }
 
     // --------------------------------------------------------------------------
@@ -155,7 +155,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
         $this->db->set('gift_card_balance', 'gift_card_balance-' . $spend , false);
 
         $this->db->where('id', $voucher->id);
-        return $this->db->update($this->_table);
+        return $this->db->update($this->table);
     }
 
     // --------------------------------------------------------------------------
@@ -229,15 +229,15 @@ class NAILS_Shop_voucher_model extends NAILS_Model
             }
 
             $data['or_like'][] = array(
-                'column' => $this->_table_prefix . '.code',
+                'column' => $this->tablePrefix . '.code',
                 'value'  => $data['keywords']
            );
         }
 
         parent::_getcount_common($data, $_caller);
 
-        $this->db->select($this->_table_prefix . '.*,u.first_name, u.last_name, u.gender, u.profile_img, ue.email');
-        $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = ' . $this->_table_prefix . '.created_by', 'LEFT');
+        $this->db->select($this->tablePrefix . '.*,u.first_name, u.last_name, u.gender, u.profile_img, ue.email');
+        $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = ' . $this->tablePrefix . '.created_by', 'LEFT');
         $this->db->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.user_id = u.id AND ue.is_primary = 1', 'LEFT');
     }
 
@@ -257,7 +257,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
             $data['where'] = array();
         }
 
-        $data['where'][] = array($this->_table_prefix . '.code', $id);
+        $data['where'][] = array($this->tablePrefix . '.code', $id);
 
         $result = $this->get_all(null, null, $data, 'GET_BY_CODE');
 
@@ -522,7 +522,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 
             $code = strtoupper(random_string('alnum'));
             $this->db->where('code', $code);
-            $codeExists = (bool) $this->db->count_all_results($this->_table);
+            $codeExists = (bool) $this->db->count_all_results($this->table);
 
         } while($codeExists);
 

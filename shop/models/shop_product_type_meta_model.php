@@ -19,10 +19,10 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
     {
         parent::__construct();
 
-        $this->_table                 = NAILS_DB_PREFIX . 'shop_product_type_meta_field';
-        $this->_table_prefix          = 'ptmf';
-        $this->_table_taxonomy        = NAILS_DB_PREFIX . 'shop_product_type_meta_taxonomy';
-        $this->_table_taxonomy_prefix = 'ptmt';
+        $this->table                 = NAILS_DB_PREFIX . 'shop_product_type_meta_field';
+        $this->tablePrefix          = 'ptmf';
+        $this->table_taxonomy        = NAILS_DB_PREFIX . 'shop_product_type_meta_taxonomy';
+        $this->table_taxonomy_prefix = 'ptmt';
     }
 
     // --------------------------------------------------------------------------
@@ -52,11 +52,11 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
             if (isset($data['includeAssociatedProductTypes'])) {
 
                 $this->db->select('pt.id,pt.label');
-                $this->db->join(NAILS_DB_PREFIX . 'shop_product_type pt', 'pt.id = ' . $this->_table_taxonomy_prefix . '.product_type_id');
+                $this->db->join(NAILS_DB_PREFIX . 'shop_product_type pt', 'pt.id = ' . $this->table_taxonomy_prefix . '.product_type_id');
                 $this->db->group_by('pt.id');
                 $this->db->order_by('pt.label');
-                $this->db->where($this->_table_taxonomy_prefix . '.meta_field_id', $field->id);
-                $field->associated_product_types = $this->db->get($this->_table_taxonomy . ' ' . $this->_table_taxonomy_prefix)->result();
+                $this->db->where($this->table_taxonomy_prefix . '.meta_field_id', $field->id);
+                $field->associated_product_types = $this->db->get($this->table_taxonomy . ' ' . $this->table_taxonomy_prefix)->result();
             }
         }
 
@@ -82,7 +82,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
                 $data['sort'] = array();
             }
 
-            $data['sort'][] = array($this->_table_prefix . '.label', 'ASC');
+            $data['sort'][] = array($this->tablePrefix . '.label', 'ASC');
         }
 
         // --------------------------------------------------------------------------
@@ -96,7 +96,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
             }
 
             $data['or_like'][] = array(
-                'column' => $this->_table_prefix . '.label',
+                'column' => $this->tablePrefix . '.label',
                 'value'  => $data['keywords']
             );
         }
@@ -115,7 +115,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
      */
     public function getByProductTypeId($typeId)
     {
-        $this->db->where($this->_table_taxonomy_prefix . '.product_type_id', $typeId);
+        $this->db->where($this->table_taxonomy_prefix . '.product_type_id', $typeId);
         return $this->getByProductType();
     }
 
@@ -128,7 +128,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
      */
     public function getByProductTypeIds($typeIds)
     {
-        $this->db->where_in($this->_table_taxonomy_prefix . '.product_type_id', $typeIds);
+        $this->db->where_in($this->table_taxonomy_prefix . '.product_type_id', $typeIds);
         return $this->getByProductType();
     }
 
@@ -141,10 +141,10 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
      */
     protected function getByProductType()
     {
-        $this->db->select($this->_table_prefix . '.*');
-        $this->db->join($this->_table  . ' ' . $this->_table_prefix, $this->_table_prefix . '.id = ' . $this->_table_taxonomy_prefix . '.meta_field_id');
-        $this->db->group_by($this->_table_prefix . '.id');
-        $results = $this->db->get($this->_table_taxonomy . ' ' . $this->_table_taxonomy_prefix)->result();
+        $this->db->select($this->tablePrefix . '.*');
+        $this->db->join($this->table  . ' ' . $this->tablePrefix, $this->tablePrefix . '.id = ' . $this->table_taxonomy_prefix . '.meta_field_id');
+        $this->db->group_by($this->tablePrefix . '.id');
+        $results = $this->db->get($this->table_taxonomy . ' ' . $this->table_taxonomy_prefix)->result();
 
         foreach ($results as $result) {
 
@@ -192,7 +192,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
                 );
             }
 
-            if (!$this->db->insert_batch($this->_table_taxonomy, $data)) {
+            if (!$this->db->insert_batch($this->table_taxonomy, $data)) {
 
                 $this->_set_error('Failed to add new product type/meta field relationships.');
                 $this->db->trans_rollback();
@@ -229,7 +229,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
         }
 
         $this->db->where('meta_field_id', $id);
-        if (!$this->db->delete($this->_table_taxonomy)) {
+        if (!$this->db->delete($this->table_taxonomy)) {
 
             $this->_set_error('Failed to remove existing product type/meta field relationships.');
             $this->db->trans_rollback();
@@ -248,7 +248,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
                 );
             }
 
-            if (!$this->db->insert_batch($this->_table_taxonomy, $data)) {
+            if (!$this->db->insert_batch($this->table_taxonomy, $data)) {
 
                 $this->_set_error('Failed to add new product type/meta field relationships.');
                 $this->db->trans_rollback();

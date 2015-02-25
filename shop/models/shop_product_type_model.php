@@ -19,9 +19,9 @@ class NAILS_Shop_product_type_model extends NAILS_Model
     {
         parent::__construct();
 
-        $this->_table              = NAILS_DB_PREFIX . 'shop_product_type';
-        $this->_table_prefix       = 'spt';
-        $this->_destructive_delete = false;
+        $this->table              = NAILS_DB_PREFIX . 'shop_product_type';
+        $this->tablePrefix       = 'spt';
+        $this->destructiveDelete = false;
     }
 
     // --------------------------------------------------------------------------
@@ -43,7 +43,7 @@ class NAILS_Shop_product_type_model extends NAILS_Model
                 $data['sort'] = array();
             }
 
-            $data['sort'][] = array($this->_table_prefix . '.label', 'ASC');
+            $data['sort'][] = array($this->tablePrefix . '.label', 'ASC');
         }
 
         // --------------------------------------------------------------------------
@@ -53,10 +53,10 @@ class NAILS_Shop_product_type_model extends NAILS_Model
             if (empty($this->db->ar_select)) {
 
                 //  No selects have been called, call this so that we don't *just* get the product count
-                $this->db->select($this->_table_prefix . '.*');
+                $this->db->select($this->tablePrefix . '.*');
             }
 
-            $this->db->select('(SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product WHERE type_id = ' . $this->_table_prefix . '.id) product_count');
+            $this->db->select('(SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product WHERE type_id = ' . $this->tablePrefix . '.id) product_count');
         }
 
         // --------------------------------------------------------------------------
@@ -70,11 +70,11 @@ class NAILS_Shop_product_type_model extends NAILS_Model
             }
 
             $data['or_like'][] = array(
-                'column' => $this->_table_prefix . '.label',
+                'column' => $this->tablePrefix . '.label',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
-                'column' => $this->_table_prefix . '.description',
+                'column' => $this->tablePrefix . '.description',
                 'value'  => $data['keywords']
             );
         }

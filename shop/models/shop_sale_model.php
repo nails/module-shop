@@ -19,8 +19,8 @@ class NAILS_Shop_sale_model extends NAILS_Model
     {
         parent::__construct();
 
-        $this->_table        = NAILS_DB_PREFIX . 'shop_sale';
-        $this->_table_prefix = 'ss';
+        $this->table        = NAILS_DB_PREFIX . 'shop_sale';
+        $this->tablePrefix = 'ss';
     }
 
     // --------------------------------------------------------------------------
@@ -50,7 +50,7 @@ class NAILS_Shop_sale_model extends NAILS_Model
             if (empty($this->db->ar_select)) {
 
                 //  No selects have been called, call this so that we don't *just* get the product count
-                $_prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
+                $_prefix = $this->tablePrefix ? $this->tablePrefix . '.' : '';
                 $this->db->select($_prefix . '*');
             }
 

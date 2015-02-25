@@ -19,9 +19,9 @@ class NAILS_Shop_tax_rate_model extends NAILS_Model
     {
         parent::__construct();
 
-        $this->_table              = NAILS_DB_PREFIX . 'shop_tax_rate';
-        $this->_table_prefix       = 'str';
-        $this->_destructive_delete = false;
+        $this->table              = NAILS_DB_PREFIX . 'shop_tax_rate';
+        $this->tablePrefix       = 'str';
+        $this->destructiveDelete = false;
     }
 
     // --------------------------------------------------------------------------
@@ -43,7 +43,7 @@ class NAILS_Shop_tax_rate_model extends NAILS_Model
                 $data['sort'] = array();
             }
 
-            $data['sort'][] = array($this->_table_prefix . '.label', 'ASC');
+            $data['sort'][] = array($this->tablePrefix . '.label', 'ASC');
         }
 
         // --------------------------------------------------------------------------
@@ -53,10 +53,10 @@ class NAILS_Shop_tax_rate_model extends NAILS_Model
             if (empty($this->db->ar_select)) {
 
                 //  No selects have been called, call this so that we don't *just* get the product count
-                $this->db->select($this->_table_prefix . '.*');
+                $this->db->select($this->tablePrefix . '.*');
             }
 
-            $this->db->select('(SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product WHERE tax_rate_id = ' . $this->_table_prefix . '.id) product_count');
+            $this->db->select('(SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product WHERE tax_rate_id = ' . $this->tablePrefix . '.id) product_count');
         }
 
         // --------------------------------------------------------------------------
@@ -70,7 +70,7 @@ class NAILS_Shop_tax_rate_model extends NAILS_Model
             }
 
             $data['or_like'][] = array(
-                'column' => $this->_table_prefix . '.label',
+                'column' => $this->tablePrefix . '.label',
                 'value'  => $data['keywords']
             );
         }

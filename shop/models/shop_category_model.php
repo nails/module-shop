@@ -19,8 +19,8 @@ class NAILS_Shop_category_model extends NAILS_Model
     {
         parent::__construct();
 
-        $this->_table        = NAILS_DB_PREFIX . 'shop_category';
-        $this->_table_prefix = 'sc';
+        $this->table        = NAILS_DB_PREFIX . 'shop_category';
+        $this->tablePrefix = 'sc';
 
         // --------------------------------------------------------------------------
 
@@ -154,7 +154,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 
             $this->db->select('slug');
             $this->db->where('id', $_data['parent_id']);
-            $_parent = $this->db->get($this->_table)->row();
+            $_parent = $this->db->get($this->table)->row();
 
             if (empty($_parent)) {
 
@@ -225,13 +225,13 @@ class NAILS_Shop_category_model extends NAILS_Model
                     //  Slugs are slightly harder, we need to get the child's parent's slug and use it as a prefix
                     $this->db->select('parent_id, label');
                     $this->db->where('id', $child_id);
-                    $_child = $this->db->get($this->_table)->row();
+                    $_child = $this->db->get($this->table)->row();
 
                     if (!empty($_child)) {
 
                         $this->db->select('slug');
                         $this->db->where('id', $_child->parent_id);
-                        $_parent = $this->db->get($this->_table)->row();
+                        $_parent = $this->db->get($this->table)->row();
                         $_prefix = empty($_parent) ? '' : $_parent->slug . '/';
 
                         $_child_data->slug     = $this->_generate_slug($_child->label, $_prefix, '', null, null, $child_id);
@@ -350,7 +350,7 @@ class NAILS_Shop_category_model extends NAILS_Model
         //  Fetch current
         $this->db->select('id,slug,label');
         $this->db->where('id', $id);
-        $current = $this->db->get($this->_table)->result();
+        $current = $this->db->get($this->table)->result();
 
         if (empty($current)) {
 
@@ -364,7 +364,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 
             $this->db->select('id,slug,label');
             $this->db->where_in('id', $parents);
-            $parents = $this->db->get($this->_table)->result();
+            $parents = $this->db->get($this->table)->result();
         }
 
         //  Finally, build breadcrumbs
@@ -384,7 +384,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 
         $this->db->select('parent_id');
         $this->db->where('id', $id);
-        $parent = $this->db->get($this->_table)->row();
+        $parent = $this->db->get($this->table)->row();
 
         if (!empty($parent->parent_id)) {
 
@@ -409,7 +409,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 
         $this->db->select('id');
         $this->db->where('parent_id', $id);
-        $children = $this->db->get($this->_table)->result();
+        $children = $this->db->get($this->table)->result();
 
         if ($onlyImmediate) {
 
@@ -465,7 +465,7 @@ class NAILS_Shop_category_model extends NAILS_Model
     {
         $this->db->select('parent_id');
         $this->db->where('id', $categoryId);
-        $parent = $this->db->get($this->_table)->row();
+        $parent = $this->db->get($this->table)->row();
 
         if (!empty($parent->parent_id)) {
 
@@ -603,7 +603,7 @@ class NAILS_Shop_category_model extends NAILS_Model
                 $data['sort'] = array();
             }
 
-            $data['sort'][] = array($this->_table_prefix . '.slug', 'ASC');
+            $data['sort'][] = array($this->tablePrefix . '.slug', 'ASC');
         }
 
         // --------------------------------------------------------------------------
@@ -613,7 +613,7 @@ class NAILS_Shop_category_model extends NAILS_Model
             if (empty($this->db->ar_select)) {
 
                 //   No selects have been called, call this so that we don't *just* get the product count
-                $prefix = $this->_table_prefix ? $this->_table_prefix . '.' : '';
+                $prefix = $this->tablePrefix ? $this->tablePrefix . '.' : '';
                 $this->db->select($prefix . '*');
             }
 
@@ -622,8 +622,8 @@ class NAILS_Shop_category_model extends NAILS_Model
             $query .= 'JOIN ' . NAILS_DB_PREFIX . 'shop_product nsp ON `nspc`.`product_id` = `nsp`.`id` ';
             $query .= 'WHERE ';
             $query .= '(';
-            $query .= '`nspc`.`category_id` = `' . $this->_table_prefix . '`.`id` ';
-            $query .= 'OR FIND_IN_SET (`nspc`.`category_id`, `' . $this->_table_prefix . '`.`children_ids`)';
+            $query .= '`nspc`.`category_id` = `' . $this->tablePrefix . '`.`id` ';
+            $query .= 'OR FIND_IN_SET (`nspc`.`category_id`, `' . $this->tablePrefix . '`.`children_ids`)';
             $query .= ') ';
             $query .= 'AND `nsp`.`is_active` = 1 ';
             $query .= 'AND `nsp`.`is_deleted` = 0';
@@ -643,11 +643,11 @@ class NAILS_Shop_category_model extends NAILS_Model
             }
 
             $data['or_like'][] = array(
-                'column' => $this->_table_prefix . '.label',
+                'column' => $this->tablePrefix . '.label',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
-                'column' => $this->_table_prefix . '.description',
+                'column' => $this->tablePrefix . '.description',
                 'value'  => $data['keywords']
             );
         }

@@ -16,8 +16,8 @@ class NAILS_Shop_range_model extends NAILS_Model
     {
         parent::__construct();
 
-        $this->_table        = NAILS_DB_PREFIX . 'shop_range';
-        $this->_table_prefix = 'sr';
+        $this->table        = NAILS_DB_PREFIX . 'shop_range';
+        $this->tablePrefix = 'sr';
 
         // --------------------------------------------------------------------------
 
@@ -44,7 +44,7 @@ class NAILS_Shop_range_model extends NAILS_Model
                 $data['sort'] = array();
             }
 
-            $data['sort'][] = array($this->_table_prefix . '.label', 'ASC');
+            $data['sort'][] = array($this->tablePrefix . '.label', 'ASC');
         }
 
         // --------------------------------------------------------------------------
@@ -76,14 +76,14 @@ class NAILS_Shop_range_model extends NAILS_Model
             if (empty($this->db->ar_select)) {
 
                 //  No selects have been called, call this so that we don't *just* get the product count
-                $this->db->select($this->_table_prefix . '.*');
+                $this->db->select($this->tablePrefix . '.*');
             }
 
             $sql  = 'SELECT COUNT(DISTINCT(`nspr`.`product_id`)) ';
             $sql .= 'FROM ' . NAILS_DB_PREFIX . 'shop_product_range nspr ';
             $sql .= 'JOIN ' . NAILS_DB_PREFIX . 'shop_product nsp ON `nspr`.`product_id` = `nsp`.`id` ';
             $sql .= 'WHERE ';
-            $sql .= '`nspr`.`range_id` = `' . $this->_table_prefix . '`.`id` ';
+            $sql .= '`nspr`.`range_id` = `' . $this->tablePrefix . '`.`id` ';
             $sql .= 'AND `nsp`.`is_active` = 1 ';
             $sql .= 'AND `nsp`.`is_deleted` = 0';
 
@@ -101,11 +101,11 @@ class NAILS_Shop_range_model extends NAILS_Model
             }
 
             $data['or_like'][] = array(
-                'column' => $this->_table_prefix . '.label',
+                'column' => $this->tablePrefix . '.label',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
-                'column' => $this->_table_prefix . '.description',
+                'column' => $this->tablePrefix . '.description',
                 'value'  => $data['keywords']
             );
         }

@@ -15,8 +15,8 @@ class NAILS_Shop_order_payment_model extends NAILS_Model
     public function __construct()
     {
         parent::__construct();
-        $this->_table            = NAILS_DB_PREFIX . 'shop_order_payment';
-        $this->_table_prefix    = 'sop';
+        $this->table            = NAILS_DB_PREFIX . 'shop_order_payment';
+        $this->tablePrefix    = 'sop';
     }
 
     // --------------------------------------------------------------------------
@@ -37,8 +37,8 @@ class NAILS_Shop_order_payment_model extends NAILS_Model
     public function get_by_transaction_id($transaction_id, $gateway)
     {
         $_data['where']        = array();
-        $_data['where'][]    = array('column' => $this->_table_prefix . '.transaction_id', 'value' => $transaction_id);
-        $_data['where'][]    = array('column' => $this->_table_prefix . '.payment_gateway', 'value' => $gateway);
+        $_data['where'][]    = array('column' => $this->tablePrefix . '.transaction_id', 'value' => $transaction_id);
+        $_data['where'][]    = array('column' => $this->tablePrefix . '.payment_gateway', 'value' => $gateway);
 
         $_result = $this->get_all(null, null, $_data);
 
@@ -58,7 +58,7 @@ class NAILS_Shop_order_payment_model extends NAILS_Model
     public function get_for_order($order_id)
     {
         $_data['where']        = array();
-        $_data['where'][]    = array('column' => $this->_table_prefix . '.order_id', 'value' => $order_id);
+        $_data['where'][]    = array('column' => $this->tablePrefix . '.order_id', 'value' => $order_id);
 
         return $this->get_all(null, null, $_data);
     }
@@ -81,7 +81,7 @@ class NAILS_Shop_order_payment_model extends NAILS_Model
 
         $this->db->select('SUM(amount_base) as total_paid');
         $this->db->where('order_id', $_order->id);
-        $_result = $this->db->get($this->_table)->row();
+        $_result = $this->db->get($this->table)->row();
 
         return (float) $_result->total_paid >= $_order->totals->base->grand;
     }

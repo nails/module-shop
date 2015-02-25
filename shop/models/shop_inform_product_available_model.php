@@ -18,8 +18,8 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        $this->_table            = NAILS_DB_PREFIX . 'shop_inform_product_available';
-        $this->_table_prefix    = 'sipa';
+        $this->table            = NAILS_DB_PREFIX . 'shop_inform_product_available';
+        $this->tablePrefix    = 'sipa';
 
         // --------------------------------------------------------------------------
 
@@ -36,20 +36,20 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 
         if (empty($data['sort'])) {
 
-            $this->db->order_by($this->_table_prefix . '.created', 'DESC');
+            $this->db->order_by($this->tablePrefix . '.created', 'DESC');
 
         }
 
-        $this->db->select($this->_table_prefix . '.*, ue.user_id, u.first_name, u.last_name, u.profile_img, u.gender');
+        $this->db->select($this->tablePrefix . '.*, ue.user_id, u.first_name, u.last_name, u.profile_img, u.gender');
         $this->db->select('sp.label product_label, spv.label variation_label');
 
         //    Join the User tables
-        $this->db->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ' . $this->_table_prefix . '.email', 'LEFT');
+        $this->db->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ' . $this->tablePrefix . '.email', 'LEFT');
         $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = ue.user_id', 'LEFT');
 
         //    Join the product & variartion tables
-        $this->db->join(NAILS_DB_PREFIX . 'shop_product sp', 'sp.id = ' . $this->_table_prefix . '.product_id');
-        $this->db->join(NAILS_DB_PREFIX . 'shop_product_variation spv', 'spv.id = ' . $this->_table_prefix . '.variation_id');
+        $this->db->join(NAILS_DB_PREFIX . 'shop_product sp', 'sp.id = ' . $this->tablePrefix . '.product_id');
+        $this->db->join(NAILS_DB_PREFIX . 'shop_product_variation spv', 'spv.id = ' . $this->tablePrefix . '.variation_id');
     }
 
 
@@ -106,10 +106,10 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 
                 foreach ($variation_ids as $variation_id) {
 
-                    $this->db->select($this->_table_prefix . '.*');
-                    $this->db->where($this->_table_prefix . '.product_id', $product_id);
-                    $this->db->where($this->_table_prefix . '.variation_id', $variation_id);
-                    $_result = $this->db->get($this->_table . ' ' . $this->_table_prefix)->result();
+                    $this->db->select($this->tablePrefix . '.*');
+                    $this->db->where($this->tablePrefix . '.product_id', $product_id);
+                    $this->db->where($this->tablePrefix . '.variation_id', $variation_id);
+                    $_result = $this->db->get($this->table . ' ' . $this->tablePrefix)->result();
 
                     foreach ($_result as $result) {
 
@@ -145,7 +145,7 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
         //    Delete requests
         $this->db->where('product_id', $product_id);
         $this->db->where_in('variation_id', $variation_ids);
-        $this->db->delete($this->_table);
+        $this->db->delete($this->table);
     }
 
 

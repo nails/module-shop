@@ -21,26 +21,26 @@ class NAILS_Shop_product_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        $this->_table                             = NAILS_DB_PREFIX . 'shop_product';
-        $this->_table_prefix                      = 'p';
-        $this->_table_attribute                   = NAILS_DB_PREFIX . 'shop_product_attribute';
-        $this->_table_brand                       = NAILS_DB_PREFIX . 'shop_product_brand';
-        $this->_table_category                    = NAILS_DB_PREFIX . 'shop_product_category';
-        $this->_table_collection                  = NAILS_DB_PREFIX . 'shop_product_collection';
-        $this->_table_gallery                     = NAILS_DB_PREFIX . 'shop_product_gallery';
-        $this->_table_range                       = NAILS_DB_PREFIX . 'shop_product_range';
-        $this->_table_sale                        = NAILS_DB_PREFIX . 'shop_sale_product';
-        $this->_table_tag                         = NAILS_DB_PREFIX . 'shop_product_tag';
-        $this->_table_variation                   = NAILS_DB_PREFIX . 'shop_product_variation';
-        $this->_table_variation_gallery           = NAILS_DB_PREFIX . 'shop_product_variation_gallery';
-        $this->_table_variation_product_type_meta = NAILS_DB_PREFIX . 'shop_product_variation_product_type_meta';
-        $this->_table_variation_price             = NAILS_DB_PREFIX . 'shop_product_variation_price';
-        $this->_table_type                        = NAILS_DB_PREFIX . 'shop_product_type';
-        $this->_table_tax_rate                    = NAILS_DB_PREFIX . 'shop_tax_rate';
+        $this->table                             = NAILS_DB_PREFIX . 'shop_product';
+        $this->tablePrefix                      = 'p';
+        $this->table_attribute                   = NAILS_DB_PREFIX . 'shop_product_attribute';
+        $this->table_brand                       = NAILS_DB_PREFIX . 'shop_product_brand';
+        $this->table_category                    = NAILS_DB_PREFIX . 'shop_product_category';
+        $this->table_collection                  = NAILS_DB_PREFIX . 'shop_product_collection';
+        $this->table_gallery                     = NAILS_DB_PREFIX . 'shop_product_gallery';
+        $this->table_range                       = NAILS_DB_PREFIX . 'shop_product_range';
+        $this->table_sale                        = NAILS_DB_PREFIX . 'shop_sale_product';
+        $this->table_tag                         = NAILS_DB_PREFIX . 'shop_product_tag';
+        $this->table_variation                   = NAILS_DB_PREFIX . 'shop_product_variation';
+        $this->table_variation_gallery           = NAILS_DB_PREFIX . 'shop_product_variation_gallery';
+        $this->table_variation_product_type_meta = NAILS_DB_PREFIX . 'shop_product_variation_product_type_meta';
+        $this->table_variation_price             = NAILS_DB_PREFIX . 'shop_product_variation_price';
+        $this->table_type                        = NAILS_DB_PREFIX . 'shop_product_type';
+        $this->table_tax_rate                    = NAILS_DB_PREFIX . 'shop_tax_rate';
 
         // --------------------------------------------------------------------------
 
-        $this->_destructive_delete = false;
+        $this->destructiveDelete = false;
 
         // --------------------------------------------------------------------------
 
@@ -155,7 +155,7 @@ class NAILS_Shop_product_model extends NAILS_Model
         //  Slug
         //  ====
 
-        $_data->slug = $this->_generate_slug($data['label'], '', '', $this->_table, null, $id);
+        $_data->slug = $this->_generate_slug($data['label'], '', '', $this->table, null, $id);
 
         //  Product Info
         //  ============
@@ -528,12 +528,12 @@ class NAILS_Shop_product_model extends NAILS_Model
         if (!empty($data->id)) {
 
             $this->db->where('id', $data->id);
-            $result = $this->db->update($this->_table);
+            $result = $this->db->update($this->table);
             $action = 'update';
 
         } else {
 
-            $result = $this->db->insert($this->_table);
+            $result = $this->db->insert($this->table);
             $action = 'create';
             $data->id = $this->db->insert_id();
         }
@@ -548,13 +548,13 @@ class NAILS_Shop_product_model extends NAILS_Model
             $types = array();
 
             //                 //Items to loop     //Field name     //Plural human   //Table name
-            $types[]   = array($data->attributes,  'attribute_id',  'attributes',    $this->_table_attribute);
-            $types[]   = array($data->brands,      'brand_id',      'brands',        $this->_table_brand);
-            $types[]   = array($data->categories,  'category_id',   'categories',    $this->_table_category);
-            $types[]   = array($data->collections, 'collection_id', 'collections',   $this->_table_collection);
-            $types[]   = array($data->gallery,     'object_id',     'gallery items', $this->_table_gallery);
-            $types[]   = array($data->ranges,      'range_id',      'ranges',        $this->_table_range);
-            $types[]   = array($data->tags,        'tag_id',        'tags',          $this->_table_tag);
+            $types[]   = array($data->attributes,  'attribute_id',  'attributes',    $this->table_attribute);
+            $types[]   = array($data->brands,      'brand_id',      'brands',        $this->table_brand);
+            $types[]   = array($data->categories,  'category_id',   'categories',    $this->table_category);
+            $types[]   = array($data->collections, 'collection_id', 'collections',   $this->table_collection);
+            $types[]   = array($data->gallery,     'object_id',     'gallery items', $this->table_gallery);
+            $types[]   = array($data->ranges,      'range_id',      'ranges',        $this->table_range);
+            $types[]   = array($data->tags,        'tag_id',        'tags',          $this->table_tag);
 
             foreach ($types as $type) {
 
@@ -704,7 +704,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
                         //  Existing variation, update what's there
                         $this->db->where('id', $v->id);
-                        $result = $this->db->update($this->_table_variation);
+                        $result = $this->db->update($this->table_variation);
                         $action = 'update';
 
                         $variantIdTracker[] = $v->id;
@@ -713,7 +713,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
                         //  New variation, add it.
                         $this->db->set('product_id', $data->id);
-                        $result = $this->db->insert($this->_table_variation);
+                        $result = $this->db->insert($this->table_variation);
                         $action = 'create';
 
                         $variantIdTracker[] = $this->db->insert_id();
@@ -727,7 +727,7 @@ class NAILS_Shop_product_model extends NAILS_Model
                         //  ==========================
 
                         $this->db->where('variation_id', $v->id);
-                        if (!$this->db->delete($this->_table_variation_gallery)) {
+                        if (!$this->db->delete($this->table_variation_gallery)) {
 
                             $this->_set_error('Failed to clear gallery items for variant with label "' . $v->label . '"');
                             $rollback = true;
@@ -746,7 +746,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
                             if ($temp) {
 
-                                if (!$this->db->insert_batch($this->_table_variation_gallery, $temp)) {
+                                if (!$this->db->insert_batch($this->table_variation_gallery, $temp)) {
 
                                     $this->_set_error('Failed to update gallery items variant with label "' . $v->label . '"');
                                     $rollback = true;
@@ -767,7 +767,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
                             $this->db->where('variation_id', $v->id);
 
-                            if (!$this->db->delete($this->_table_variation_product_type_meta)) {
+                            if (!$this->db->delete($this->table_variation_product_type_meta)) {
 
                                 $this->_set_error('Failed to clear meta data for variant with label "' . $v->label . '"');
                                 $rollback = true;
@@ -775,7 +775,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
                             if (!$rollback && !empty($v->meta)) {
 
-                                if (!$this->db->insert_batch($this->_table_variation_product_type_meta, $v->meta)) {
+                                if (!$this->db->insert_batch($this->table_variation_product_type_meta, $v->meta)) {
 
                                     $this->_set_error('Failed to update meta data for variant with label "' . $v->label . '"');
                                     $rollback = true;
@@ -790,7 +790,7 @@ class NAILS_Shop_product_model extends NAILS_Model
                         if (!$rollback) {
 
                             $this->db->where('variation_id', $v->id);
-                            if (!$this->db->delete($this->_table_variation_price)) {
+                            if (!$this->db->delete($this->table_variation_price)) {
 
                                 $this->_set_error('Failed to clear price data for variant with label "' . $v->label . '"');
                                 $rollback = true;
@@ -808,7 +808,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
                                 if ($v->pricing) {
 
-                                    if (!$this->db->insert_batch($this->_table_variation_price, $v->pricing)) {
+                                    if (!$this->db->insert_batch($this->table_variation_price, $v->pricing)) {
 
                                         $this->_set_error('Failed to update price data for variant with label "' . $v->label . '"');
                                         $rollback = true;
@@ -834,7 +834,7 @@ class NAILS_Shop_product_model extends NAILS_Model
                     $this->db->where('product_id', $data->id);
                     $this->db->where_not_in('id', $variantIdTracker);
 
-                    if (!$this->db->update($this->_table_variation)) {
+                    if (!$this->db->update($this->table_variation)) {
 
                         $this->_set_error('Unable to delete old variations.');
                         $rollback = true;
@@ -871,7 +871,7 @@ class NAILS_Shop_product_model extends NAILS_Model
             $this->db->where('is_deleted', false);
             $this->db->where('stock_status', 'IN_STOCK');
             $this->db->where('(quantity_available IS null OR quantity_available > 0)');
-            $variantsAvailable_raw = $this->db->get($this->_table_variation   )->result();
+            $variantsAvailable_raw = $this->db->get($this->table_variation   )->result();
             $variantsAvailable = array();
 
             foreach ($variantsAvailable_raw as $v) {
@@ -956,21 +956,21 @@ class NAILS_Shop_product_model extends NAILS_Model
             $this->db->select('pa.attribute_id id, a.label, pa.value');
             $this->db->where('pa.product_id', $product->id);
             $this->db->join(NAILS_DB_PREFIX . 'shop_attribute a', 'a.id = pa.attribute_id');
-            $product->attributes = $this->db->get($this->_table_attribute . ' pa')->result();
+            $product->attributes = $this->db->get($this->table_attribute . ' pa')->result();
 
             //  Brands
             //  ======
             $this->db->select('b.id, b.slug, b.label, b.logo_id, b.is_active');
             $this->db->where('pb.product_id', $product->id);
             $this->db->join(NAILS_DB_PREFIX . 'shop_brand b', 'b.id = pb.brand_id');
-            $product->brands = $this->db->get($this->_table_brand . ' pb')->result();
+            $product->brands = $this->db->get($this->table_brand . ' pb')->result();
 
             //  Categories
             //  ==========
             $this->db->select('c.id, c.slug, c.label, c.breadcrumbs');
             $this->db->where('pc.product_id', $product->id);
             $this->db->join(NAILS_DB_PREFIX . 'shop_category c', 'c.id = pc.category_id');
-            $product->categories = $this->db->get($this->_table_category . ' pc')->result();
+            $product->categories = $this->db->get($this->table_category . ' pc')->result();
             foreach ($product->categories as $category) {
 
                 $category->url = $this->shop_category_model->format_url($category->slug);
@@ -981,14 +981,14 @@ class NAILS_Shop_product_model extends NAILS_Model
             $this->db->select('c.id, c.slug, c.label');
             $this->db->where('pc.product_id', $product->id);
             $this->db->join(NAILS_DB_PREFIX . 'shop_collection c', 'c.id = pc.collection_id');
-            $product->collections = $this->db->get($this->_table_collection . ' pc')->result();
+            $product->collections = $this->db->get($this->table_collection . ' pc')->result();
 
             //  Gallery
             //  =======
             $this->db->select('object_id');
             $this->db->where('product_id', $product->id);
             $this->db->order_by('order');
-            $temp = $this->db->get($this->_table_gallery)->result();
+            $temp = $this->db->get($this->table_gallery)->result();
 
             $product->gallery = array();
             foreach ($temp as $image) {
@@ -1012,14 +1012,14 @@ class NAILS_Shop_product_model extends NAILS_Model
             $this->db->select('r.id, r.slug, r.label');
             $this->db->where('pr.product_id', $product->id);
             $this->db->join(NAILS_DB_PREFIX . 'shop_range r', 'r.id = pr.range_id');
-            $product->ranges = $this->db->get($this->_table_range . ' pr')->result();
+            $product->ranges = $this->db->get($this->table_range . ' pr')->result();
 
             //  Tags
             //  ====
             $this->db->select('t.id, t.slug, t.label');
             $this->db->where('pt.product_id', $product->id);
             $this->db->join(NAILS_DB_PREFIX . 'shop_tag t', 't.id = pt.tag_id');
-            $product->tags = $this->db->get($this->_table_tag . ' pt')->result();
+            $product->tags = $this->db->get($this->table_tag . ' pt')->result();
 
             //  Variations
             //  ==========
@@ -1030,7 +1030,7 @@ class NAILS_Shop_product_model extends NAILS_Model
                 $this->db->where('pv.is_deleted', false);
             }
             $this->db->order_by('pv.order');
-            $product->variations = $this->db->get($this->_table_variation . ' pv')->result();
+            $product->variations = $this->db->get($this->table_variation . ' pv')->result();
 
             foreach ($product->variations as &$v) {
 
@@ -1040,7 +1040,7 @@ class NAILS_Shop_product_model extends NAILS_Model
                 $this->db->select('a.id,a.meta_field_id,b.label,a.value,b.allow_multiple');
                 $this->db->join(NAILS_DB_PREFIX . 'shop_product_type_meta_field b', 'a.meta_field_id = b.id');
                 $this->db->where('variation_id', $v->id);
-                $metaRaw = $this->db->get($this->_table_variation_product_type_meta . ' a')->result();
+                $metaRaw = $this->db->get($this->table_variation_product_type_meta . ' a')->result();
 
                 //  Merge `allow_multiple` fields into one
                 $v->meta = array();
@@ -1076,7 +1076,7 @@ class NAILS_Shop_product_model extends NAILS_Model
                 //  =======
 
                 $this->db->where('variation_id', $v->id);
-                $temp = $this->db->get($this->_table_variation_gallery)->result();
+                $temp = $this->db->get($this->table_variation_gallery)->result();
                 $v->gallery = array();
 
                 foreach ($temp as $image) {
@@ -1098,7 +1098,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
                 $this->db->select('pvp.price, pvp.sale_price, pvp.currency');
                 $this->db->where('pvp.variation_id', $v->id);
-                $_price = $this->db->get($this->_table_variation_price . ' pvp')->result();
+                $_price = $this->db->get($this->table_variation_price . ' pvp')->result();
 
                 $v->price_raw = new \stdClass();
                 $v->price     = new \stdClass();
@@ -1473,11 +1473,11 @@ class NAILS_Shop_product_model extends NAILS_Model
     public function getAllProductVariationFlat()
     {
         $this->db->select('p.id p_id, v.id v_id, p.label p_label, v.label v_label, v.sku');
-        $this->db->join($this->_table . ' p', 'v.product_id = p.id');
+        $this->db->join($this->table . ' p', 'v.product_id = p.id');
         $this->db->order_by('p.label');
         $this->db->where('v.is_deleted', false);
         $this->db->where('p.is_deleted', false);
-        $items = $this->db->get($this->_table_variation . ' v')->result();
+        $items = $this->db->get($this->table_variation . ' v')->result();
 
         $out = array();
 
@@ -1577,7 +1577,7 @@ class NAILS_Shop_product_model extends NAILS_Model
         $this->db->select('product_id');
         $this->db->where('id', $variantId);
         $this->db->where('is_deleted', false);
-        $variant = $this->db->get($this->_table_variation)->row();
+        $variant = $this->db->get($this->table_variation)->row();
 
         if ($variant) {
 
@@ -1637,23 +1637,23 @@ class NAILS_Shop_product_model extends NAILS_Model
         //  Selects
         if (empty($data['_do_not_select'])) {
 
-            $this->db->select($this->_table_prefix . '.*');
+            $this->db->select($this->tablePrefix . '.*');
             $this->db->select('pt.label type_label, pt.max_per_order type_max_per_order, pt.is_physical type_is_physical');
             $this->db->select('tr.label tax_rate_label, tr.rate tax_rate_rate');
         }
 
         //  Joins
-        $this->db->join($this->_table_type . ' pt', 'p.type_id = pt.id');
-        $this->db->join($this->_table_tax_rate . ' tr', 'p.tax_rate_id = tr.id', 'LEFT');
+        $this->db->join($this->table_type . ' pt', 'p.type_id = pt.id');
+        $this->db->join($this->table_tax_rate . ' tr', 'p.tax_rate_id = tr.id', 'LEFT');
 
         //  Default sort
         if (empty($customSort) && empty($data['sort'])) {
 
-            $this->db->order_by($this->_table_prefix . '.label');
+            $this->db->order_by($this->tablePrefix . '.label');
 
         } elseif (!empty($customSort) && $customSort[0] === 'PRICE') {
 
-            $this->db->order_by('(SELECT MIN(`price`) FROM `' . $this->_table_variation_price . '` vp WHERE vp.product_id = p.id)', $customSort[1]);
+            $this->db->order_by('(SELECT MIN(`price`) FROM `' . $this->table_variation_price . '` vp WHERE vp.product_id = p.id)', $customSort[1]);
 
         } elseif (!empty($customSort) && $customSort[0] === 'CREATED') {
 
@@ -1671,12 +1671,12 @@ class NAILS_Shop_product_model extends NAILS_Model
             $search = $this->db->escape_like_str($data['keywords']);
 
             $where   = array();
-            $where[] = $this->_table_prefix . '.id IN (SELECT product_id FROM ' . NAILS_DB_PREFIX . 'shop_product_variation WHERE label LIKE \'%' . $search . '%\' OR sku LIKE \'%' . $search . '%\')' ;
-            $where[] = $this->_table_prefix . '.id LIKE \'%' . $search  . '%\'';
-            $where[] = $this->_table_prefix . '.label LIKE \'%' . $search  . '%\'';
-            $where[] = $this->_table_prefix . '.description LIKE \'%' . $search  . '%\'';
-            $where[] = $this->_table_prefix . '.seo_description LIKE \'%' . $search  . '%\'';
-            $where[] = $this->_table_prefix . '.seo_keywords LIKE \'%' . $search  . '%\'';
+            $where[] = $this->tablePrefix . '.id IN (SELECT product_id FROM ' . NAILS_DB_PREFIX . 'shop_product_variation WHERE label LIKE \'%' . $search . '%\' OR sku LIKE \'%' . $search . '%\')' ;
+            $where[] = $this->tablePrefix . '.id LIKE \'%' . $search  . '%\'';
+            $where[] = $this->tablePrefix . '.label LIKE \'%' . $search  . '%\'';
+            $where[] = $this->tablePrefix . '.description LIKE \'%' . $search  . '%\'';
+            $where[] = $this->tablePrefix . '.seo_description LIKE \'%' . $search  . '%\'';
+            $where[] = $this->tablePrefix . '.seo_keywords LIKE \'%' . $search  . '%\'';
             $where   = '(' . implode(' OR ', $where) . ')';
 
             $this->db->where($where);
@@ -1687,7 +1687,7 @@ class NAILS_Shop_product_model extends NAILS_Model
         //  Unless told otherwise, only return active items
         if (empty($data['include_inactive'])) {
 
-            $this->db->where($this->_table_prefix . '.is_active', true);
+            $this->db->where($this->tablePrefix . '.is_active', true);
         }
 
         // --------------------------------------------------------------------------
@@ -1721,7 +1721,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
         if (!empty($data['brand_id'])) {
 
-            $where = $this->_table_prefix . '.id IN (SELECT product_id FROM ' . $this->_table_brand . ' WHERE brand_id ';
+            $where = $this->tablePrefix . '.id IN (SELECT product_id FROM ' . $this->table_brand . ' WHERE brand_id ';
 
             if (is_array($data['brand_id'])) {
 
@@ -1744,7 +1744,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
         if (!empty($data['category_id'])) {
 
-            $where = $this->_table_prefix . '.id IN (SELECT product_id FROM ' . $this->_table_category . ' WHERE category_id ';
+            $where = $this->tablePrefix . '.id IN (SELECT product_id FROM ' . $this->table_category . ' WHERE category_id ';
 
             if (is_array($data['category_id'])) {
 
@@ -1768,7 +1768,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
         if (!empty($data['collection_id'])) {
 
-            $where = $this->_table_prefix . '.id IN (SELECT product_id FROM ' . $this->_table_collection . ' WHERE collection_id ';
+            $where = $this->tablePrefix . '.id IN (SELECT product_id FROM ' . $this->table_collection . ' WHERE collection_id ';
 
             if (is_array($data['collection_id'])) {
 
@@ -1792,7 +1792,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
         if (!empty($data['range_id'])) {
 
-            $where = $this->_table_prefix . '.id IN (SELECT product_id FROM ' . $this->_table_range . ' WHERE range_id ';
+            $where = $this->tablePrefix . '.id IN (SELECT product_id FROM ' . $this->table_range . ' WHERE range_id ';
 
             if (is_array($data['range_id'])) {
 
@@ -1816,7 +1816,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
         if (!empty($data['sale_id'])) {
 
-            $where = $this->_table_prefix . '.id IN (SELECT product_id FROM ' . $this->_table_sale . ' WHERE sale_id ';
+            $where = $this->tablePrefix . '.id IN (SELECT product_id FROM ' . $this->table_sale . ' WHERE sale_id ';
 
             if (is_array($data['sale_id'])) {
 
@@ -1840,7 +1840,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
         if (!empty($data['tag_id'])) {
 
-            $where = $this->_table_prefix . '.id IN (SELECT product_id FROM ' . $this->_table_tag . ' WHERE tag_id ';
+            $where = $this->tablePrefix . '.id IN (SELECT product_id FROM ' . $this->table_tag . ' WHERE tag_id ';
 
             if (is_array($data['tag_id'])) {
 
@@ -1864,7 +1864,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
         if (!empty($data['stockStatus'])) {
 
-            $where = 'SELECT count(*) FROM ' . $this->_table_variation . ' WHERE product_id = p.id AND stock_status ';
+            $where = 'SELECT count(*) FROM ' . $this->table_variation . ' WHERE product_id = p.id AND stock_status ';
 
             if (is_array($data['stockStatus'])) {
 
@@ -1889,7 +1889,7 @@ class NAILS_Shop_product_model extends NAILS_Model
         if (empty($data['_ignore_filters']) && !empty($data['filter'])) {
 
             //  Join the avriation table
-            $this->db->join($this->_table_variation . ' spv', $this->_table_prefix . '.id = spv.product_id');
+            $this->db->join($this->table_variation . ' spv', $this->tablePrefix . '.id = spv.product_id');
 
             foreach ($data['filter'] as $meta_field_id => $values) {
 
@@ -1905,10 +1905,10 @@ class NAILS_Shop_product_model extends NAILS_Model
                 $valuesClean = array_map(array($this->db, 'escape'), $valuesClean);
                 $valuesClean = implode(',', $valuesClean);
 
-                $this->db->join($this->_table_variation_product_type_meta . ' spvptm' . $meta_field_id , 'spvptm' . $meta_field_id . '.variation_id = spv.id AND spvptm' . $meta_field_id . '.meta_field_id = \'' . $meta_field_id . '\' AND spvptm' . $meta_field_id . '.value IN (' . $valuesClean . ')');
+                $this->db->join($this->table_variation_product_type_meta . ' spvptm' . $meta_field_id , 'spvptm' . $meta_field_id . '.variation_id = spv.id AND spvptm' . $meta_field_id . '.meta_field_id = \'' . $meta_field_id . '\' AND spvptm' . $meta_field_id . '.value IN (' . $valuesClean . ')');
             }
 
-            $this->db->group_by($this->_table_prefix . '.id');
+            $this->db->group_by($this->tablePrefix . '.id');
         }
     }
 
@@ -2290,7 +2290,7 @@ class NAILS_Shop_product_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Logged in?
-        if (empty($recentlyViewed) && $this->user->isLoggedIn()) {
+        if (empty($recentlyViewed) && $this->user_model->isLoggedIn()) {
 
             $recentlyViewed = activeUser('shop_recently_viewed');
         }
@@ -2309,13 +2309,13 @@ class NAILS_Shop_product_model extends NAILS_Model
      */
     public function getFiltersForProducts($data)
     {
-        if (!$this->_table) {
+        if (!$this->table) {
 
             show_error(get_called_class() . '::count_all() Table variable not set');
 
         } else {
 
-            $table  = $this->_table_prefix ? $this->_table . ' ' . $this->_table_prefix : $this->_table;
+            $table  = $this->tablePrefix ? $this->table . ' ' . $this->tablePrefix : $this->table;
         }
 
         // --------------------------------------------------------------------------
@@ -2367,7 +2367,7 @@ class NAILS_Shop_product_model extends NAILS_Model
                 $this->db->where_in('spb.product_id', $productIds);
                 $this->db->group_by('sb.id');
                 $this->db->order_by('sb.label');
-                $result = $this->db->get($this->_table_brand . ' spb')->result();
+                $result = $this->db->get($this->table_brand . ' spb')->result();
 
                 if ($result) {
 
@@ -2387,7 +2387,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
             $this->db->select('id');
             $this->db->where_in('product_id', $productIds);
-            $variantIdsRaw = $this->db->get($this->_table_variation)->result();
+            $variantIdsRaw = $this->db->get($this->table_variation)->result();
             $variantIds    = array();
 
             foreach ($variantIdsRaw as $vid) {
@@ -2430,7 +2430,7 @@ class NAILS_Shop_product_model extends NAILS_Model
                 $this->db->where('value !=', '');
                 $this->db->where_in('variation_id', $variantIds);
                 $this->db->group_by('value');
-                $temp->values = $this->db->get($this->_table_variation_product_type_meta)->result();
+                $temp->values = $this->db->get($this->table_variation_product_type_meta)->result();
 
                 if (!empty($temp->values)) {
 
