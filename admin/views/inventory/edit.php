@@ -81,6 +81,7 @@
                 $field['text_on']  = strtoupper(lang('yes'));
                 $field['text_off'] = strtoupper(lang('no'));
                 $field['default']  = isset($item->is_active) ? $item->is_active : true;
+                $field['tip']      = 'If not active then validation rules will be relaxed and the product can be saved as a draft.';
 
                 echo form_field_boolean($field);
 

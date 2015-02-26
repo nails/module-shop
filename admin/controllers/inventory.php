@@ -132,7 +132,7 @@ class Inventory extends \AdminController
             '',
             'Status',
             array(
-                array('In Stock', 'INSTOCK', true),
+                array('In Stock', 'IN_STOCK', true),
                 array('Out of Stock', 'OUT_OF_STOCK', true)
            )
         );
@@ -337,7 +337,7 @@ class Inventory extends \AdminController
                 $this->load->library('form_validation');
 
                 //  Define all the rules
-                $this->__inventory_create_edit_validation_rules($this->input->post());
+                $this->_inventory_create_edit_validation_rules($this->input->post());
 
                 // --------------------------------------------------------------------------
 
@@ -415,11 +415,151 @@ class Inventory extends \AdminController
     // --------------------------------------------------------------------------
 
     /**
+     * Edit a shop inventory item
+     * @return void
+     */
+    public function edit()
+    {
+        if (!userHasPermission('admin:shop:inventory:edit')) {
+
+            unauthorised();
+        }
+
+        // --------------------------------------------------------------------------
+
+        //  Fetch item
+        $this->data['item'] = $this->shop_product_model->get_by_id($this->uri->segment(5));
+
+        if (!$this->data['item']) {
+
+            $this->session->set_flashdata('error', 'I could not find a product by that ID.');
+            redirect('admin/shop/inventory');
+        }
+
+        // --------------------------------------------------------------------------
+
+        $this->data['page']->title = 'Edit Inventory Item "' . $this->data['item']->label . '"';
+
+        // --------------------------------------------------------------------------
+
+        //  Fetch data, this data is used in both the view and the form submission
+        $this->data['product_types'] = $this->shop_product_type_model->get_all();
+
+        if (!$this->data['product_types']) {
+
+            //  No Product types, some need added, yo!
+            $this->session->set_flashdata('message', '<strong>Hey!</strong> No product types have been defined. You must set some before you can add inventory items.');
+            redirect('admin/shop/manage/productType/create');
+        }
+
+        $this->data['currencies'] = $this->shop_currency_model->get_all_supported();
+
+        //  Fetch product type meta fields
+        $this->data['product_types_meta'] = array();
+        $this->load->model('shop/shop_product_type_meta_model');
+
+        foreach ($this->data['product_types'] as $type) {
+
+            $this->data['product_types_meta'][$type->id] = $this->shop_product_type_meta_model->getByProductTypeId($type->id);
+        }
+
+        // --------------------------------------------------------------------------
+
+        //  Fetch shipping data, used in form validation
+        $this->load->model('shop/shop_shipping_driver_model');
+        $this->data['shipping_driver']          = $this->shop_shipping_driver_model->getEnabled();
+        $this->data['shipping_options_variant'] = $this->shop_shipping_driver_model->optionsVariant();
+
+        // --------------------------------------------------------------------------
+
+        //  Process POST
+        if ($this->input->post()) {
+
+            //  Form validation, this'll be fun...
+            $this->load->library('form_validation');
+
+            //  Define all the rules
+            $this->_inventory_create_edit_validation_rules($this->input->post());
+
+            // --------------------------------------------------------------------------
+
+            if ($this->form_validation->run($this)) {
+
+                //  Validated!Create the product
+                $product = $this->shop_product_model->update($this->data['item']->id, $this->input->post());
+
+                if ($product) {
+
+                    $this->session->set_flashdata('success', 'Product was updated successfully.');
+                    redirect('admin/shop/inventory');
+
+                } else {
+
+                    $this->data['error'] = 'There was a problem updating the Product. ' . $this->shop_product_model->last_error();
+                }
+
+            } else {
+
+                $this->data['error'] = lang('fv_there_were_errors');
+            }
+        }
+
+        // --------------------------------------------------------------------------
+
+        //  Load additional models
+        $this->load->model('shop/shop_attribute_model');
+        $this->load->model('shop/shop_brand_model');
+        $this->load->model('shop/shop_category_model');
+        $this->load->model('shop/shop_collection_model');
+        $this->load->model('shop/shop_range_model');
+        $this->load->model('shop/shop_tag_model');
+        $this->load->model('shop/shop_tax_rate_model');
+
+        // --------------------------------------------------------------------------
+
+        //  Fetch additional data
+        $this->data['product_types_flat'] = $this->shop_product_type_model->get_all_flat();
+        $this->data['tax_rates']          = $this->shop_tax_rate_model->get_all_flat();
+        $this->data['attributes']         = $this->shop_attribute_model->get_all_flat();
+        $this->data['brands']             = $this->shop_brand_model->get_all_flat();
+        $this->data['categories']         = $this->shop_category_model->get_all_nested_flat();
+        $this->data['collections']        = $this->shop_collection_model->get_all();
+        $this->data['ranges']             = $this->shop_range_model->get_all();
+        $this->data['tags']               = $this->shop_tag_model->get_all_flat();
+
+        $this->data['tax_rates'] = array('No Tax') + $this->data['tax_rates'];
+
+        // --------------------------------------------------------------------------
+
+        //  Assets
+        $this->asset->library('uploadify');
+        $this->asset->load('mustache.js/mustache.js', 'NAILS-BOWER');
+        $this->asset->load('nails.admin.shop.inventory.createEdit.min.js', 'NAILS');
+
+        $uploadtoken = $this->cdn->generate_api_upload_token(activeUser('id'));
+
+        $this->asset->inline('var _edit = new NAILS_Admin_Shop_Inventory_Create_Edit();', 'JS');
+        $this->asset->inline('_edit.init(' . json_encode($product_types) . ', "' . $uploadToken . '");', 'JS');
+
+        // --------------------------------------------------------------------------
+
+        //  Libraries
+        $this->load->library('mustache');
+
+        // --------------------------------------------------------------------------
+
+        //  Load views
+        \Nails\Admin\Helper::loadView('edit');
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Form Validation: Set the validation rules for creating/editing inventory items
      * @param  array $post The $_POST array
      * @return void
      */
-    protected function __inventory_create_edit_validation_rules($post)
+    protected function _inventory_create_edit_validation_rules($post)
     {
         //  Product Info
         //  ============
@@ -584,146 +724,6 @@ class Inventory extends \AdminController
         $this->form_validation->set_message('numeric', lang('fv_numeric'));
         $this->form_validation->set_message('is_natural', lang('fv_is_natural'));
         $this->form_validation->set_message('max_length', lang('fv_max_length'));
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Edit a shop inventory item
-     * @return void
-     */
-    public function edit()
-    {
-        if (!userHasPermission('admin:shop:inventory:edit')) {
-
-            unauthorised();
-        }
-
-        // --------------------------------------------------------------------------
-
-        //  Fetch item
-        $this->data['item'] = $this->shop_product_model->get_by_id($this->uri->segment(5));
-
-        if (!$this->data['item']) {
-
-            $this->session->set_flashdata('error', 'I could not find a product by that ID.');
-            redirect('admin/shop/inventory');
-        }
-
-        // --------------------------------------------------------------------------
-
-        $this->data['page']->title = 'Edit Inventory Item "' . $this->data['item']->label . '"';
-
-        // --------------------------------------------------------------------------
-
-        //  Fetch data, this data is used in both the view and the form submission
-        $this->data['product_types'] = $this->shop_product_type_model->get_all();
-
-        if (!$this->data['product_types']) {
-
-            //  No Product types, some need added, yo!
-            $this->session->set_flashdata('message', '<strong>Hey!</strong> No product types have been defined. You must set some before you can add inventory items.');
-            redirect('admin/shop/manage/productType/create');
-        }
-
-        $this->data['currencies'] = $this->shop_currency_model->get_all_supported();
-
-        //  Fetch product type meta fields
-        $this->data['product_types_meta'] = array();
-        $this->load->model('shop/shop_product_type_meta_model');
-
-        foreach ($this->data['product_types'] as $type) {
-
-            $this->data['product_types_meta'][$type->id] = $this->shop_product_type_meta_model->getByProductTypeId($type->id);
-        }
-
-        // --------------------------------------------------------------------------
-
-        //  Fetch shipping data, used in form validation
-        $this->load->model('shop/shop_shipping_driver_model');
-        $this->data['shipping_driver']          = $this->shop_shipping_driver_model->getEnabled();
-        $this->data['shipping_options_variant'] = $this->shop_shipping_driver_model->optionsVariant();
-
-        // --------------------------------------------------------------------------
-
-        //  Process POST
-        if ($this->input->post()) {
-
-            //  Form validation, this'll be fun...
-            $this->load->library('form_validation');
-
-            //  Define all the rules
-            $this->__inventory_create_edit_validation_rules($this->input->post());
-
-            // --------------------------------------------------------------------------
-
-            if ($this->form_validation->run($this)) {
-
-                //  Validated!Create the product
-                $product = $this->shop_product_model->update($this->data['item']->id, $this->input->post());
-
-                if ($product) {
-
-                    $this->session->set_flashdata('success', 'Product was updated successfully.');
-                    redirect('admin/shop/inventory');
-
-                } else {
-
-                    $this->data['error'] = 'There was a problem updating the Product. ' . $this->shop_product_model->last_error();
-                }
-
-            } else {
-
-                $this->data['error'] = lang('fv_there_were_errors');
-            }
-        }
-
-        // --------------------------------------------------------------------------
-
-        //  Load additional models
-        $this->load->model('shop/shop_attribute_model');
-        $this->load->model('shop/shop_brand_model');
-        $this->load->model('shop/shop_category_model');
-        $this->load->model('shop/shop_collection_model');
-        $this->load->model('shop/shop_range_model');
-        $this->load->model('shop/shop_tag_model');
-        $this->load->model('shop/shop_tax_rate_model');
-
-        // --------------------------------------------------------------------------
-
-        //  Fetch additional data
-        $this->data['product_types_flat'] = $this->shop_product_type_model->get_all_flat();
-        $this->data['tax_rates']          = $this->shop_tax_rate_model->get_all_flat();
-        $this->data['attributes']         = $this->shop_attribute_model->get_all_flat();
-        $this->data['brands']             = $this->shop_brand_model->get_all_flat();
-        $this->data['categories']         = $this->shop_category_model->get_all_nested_flat();
-        $this->data['collections']        = $this->shop_collection_model->get_all();
-        $this->data['ranges']             = $this->shop_range_model->get_all();
-        $this->data['tags']               = $this->shop_tag_model->get_all_flat();
-
-        $this->data['tax_rates'] = array('No Tax') + $this->data['tax_rates'];
-
-        // --------------------------------------------------------------------------
-
-        //  Assets
-        $this->asset->library('uploadify');
-        $this->asset->load('mustache.js/mustache.js', 'NAILS-BOWER');
-        $this->asset->load('nails.admin.shop.inventory.createEdit.min.js', 'NAILS');
-
-        $uploadtoken = $this->cdn->generate_api_upload_token(activeUser('id'));
-
-        $this->asset->inline('var _edit = new NAILS_Admin_Shop_Inventory_Create_Edit();', 'JS');
-        $this->asset->inline('_edit.init(' . json_encode($product_types) . ', "' . $uploadToken . '");', 'JS');
-
-        // --------------------------------------------------------------------------
-
-        //  Libraries
-        $this->load->library('mustache');
-
-        // --------------------------------------------------------------------------
-
-        //  Load views
-        \Nails\Admin\Helper::loadView('edit');
     }
 
     // --------------------------------------------------------------------------
