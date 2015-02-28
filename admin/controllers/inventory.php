@@ -30,7 +30,7 @@ class Inventory extends \AdminController
 
     // --------------------------------------------------------------------------
 
-/**
+    /**
      * Returns an array of extra permissions for this controller
      * @return array
      */
@@ -43,7 +43,7 @@ class Inventory extends \AdminController
         $permissions['edit']    = 'Edit inventory items';
         $permissions['delete']  = 'Delete inventory items';
         $permissions['restore'] = 'Restore inventory items';
-        $permissions['import'] = 'Import inventory items';
+        $permissions['import']  = 'Import inventory items';
 
         return $permissions;
     }
