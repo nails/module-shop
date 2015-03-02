@@ -248,14 +248,14 @@ class NAILS_Shop_product_model extends NAILS_Model
 
                     $_data->variation[$index]->quantity_available = is_numeric($v['quantity_available']) ? (int) $v['quantity_available'] : null;
                     $_data->variation[$index]->lead_time          = null;
-	                break;
+                    break;
 
                 case 'OUT_OF_STOCK' :
 
                     //  Shhh, be vewy qwiet, we're huntin' wabbits.
                     $_data->variation[$index]->quantity_available = null;
                     $_data->variation[$index]->lead_time          = null;
-	                break;
+                    break;
             }
 
             /**
@@ -281,13 +281,13 @@ class NAILS_Shop_product_model extends NAILS_Model
                 case 'TO_ORDER' :
 
                     $_data->variation[$index]->out_of_stock_to_order_lead_time = isset($v['out_of_stock_to_order_lead_time']) ? $v['out_of_stock_to_order_lead_time'] : null;
-	                break;
+                    break;
 
                 case 'OUT_OF_STOCK' :
 
                     //  Shhh, be vewy qwiet, we're huntin' wabbits.
                     $_data->variation[$index]->out_of_stock_to_order_lead_time = null;
-	                break;
+                    break;
             }
 
             //  Meta
@@ -577,12 +577,12 @@ class NAILS_Shop_product_model extends NAILS_Model
                         foreach ($items as $item) {
 
                             $temp[] = array(
-                            	'product_id' => $data->id,
-                            	'attribute_id' => $item['attribute_id'],
-                            	'value' => $item['value']
+                                'product_id' => $data->id,
+                                'attribute_id' => $item['attribute_id'],
+                                'value' => $item['value']
                             );
                         }
-	                    break;
+                        break;
 
                     case 'object_id':
 
@@ -590,24 +590,24 @@ class NAILS_Shop_product_model extends NAILS_Model
                         foreach ($items as $item_id) {
 
                             $temp[] = array(
-                            	'product_id' => $data->id,
-                            	$field => $item_id,
-                            	'order' => $counter
+                                'product_id' => $data->id,
+                                $field => $item_id,
+                                'order' => $counter
                             );
                             $counter++;
                         }
-	                    break;
+                        break;
 
                     default:
 
                         foreach ($items as $item_id) {
 
                             $temp[] = array(
-                            	'product_id' => $data->id,
-                            	$field => $item_id
+                                'product_id' => $data->id,
+                                $field => $item_id
                             );
                         }
-	                    break;
+                        break;
 
                 }
 
@@ -2206,30 +2206,42 @@ class NAILS_Shop_product_model extends NAILS_Model
             $product->seo_description .= ' - ' . substr($description, 0, strpos($description, '.') + 1);
 
             //  Encode entities
-            $product->seo_description = htmlentities($product->seo_description);
+            $product->seo_description = htmlentities(html_entity_decode($product->seo_description));
+            $product->seo_description = str_replace('&amp;', 'and', $product->seo_description);
         }
 
         if (empty($product->seo_keywords)) {
 
-            //  Extract common keywords
-            $this->lang->load('shop/shop');
-            $common = explode(',', lang('shop_common_words'));
-            $common = array_unique($common);
-            $common = array_filter($common);
+            //  Sanitise the description, removing stop words
+            $description = strip_tags($product->description);
+            $description = html_entity_decode($description);
+            $description = trim($description);
+            $description = removeStopWords($description);
 
-            //  Remove them and return the most popular words
-            $description = strtolower($product->description);
+            //  Break it up and get the most frequently occurring words
+            $description = strtolower($description);
             $description = str_replace("\n", ' ', strip_tags($description));
             $description = str_word_count($description, 1);
-            $description = array_count_values($description    );
+            $description = array_count_values($description);
             arsort($description);
             $description = array_keys($description);
-            $description = array_diff($description, $common);
             $description = array_slice($description, 0, 10);
+            $product->seo_keywords = $description;
 
-            $product->seo_keywords = implode(',', $description);
+            //  Append the parent category/categories names onto the string
+            foreach ($product->categories as $category) {
 
-            //  Encode entities
+                $breadcrumbs = json_decode($category->breadcrumbs);
+
+                foreach ($breadcrumbs as $crumb) {
+
+                    $product->seo_keywords[] = strtolower($crumb->label);
+                }
+            }
+
+            //  Implode and encode entities
+            $product->seo_keywords = array_unique($product->seo_keywords);
+            $product->seo_keywords = implode(',', $product->seo_keywords);
             $product->seo_keywords = htmlentities($product->seo_keywords);
         }
     }
@@ -2617,13 +2629,13 @@ class NAILS_Shop_product_model extends NAILS_Model
                     //  And... override!
                     $variation->stock_status = 'TO_ORDER';
                     $variation->lead_time    = $variation->out_of_stock_to_order_lead_time ? $variation->out_of_stock_to_order_lead_time : $variation->lead_time;
-	                break;
+                    break;
 
                 case 'OUT_OF_STOCK':
                 default:
 
                     //  Nothing to do.
-	                break;
+                    break;
             }
 
             unset($variation->out_of_stock_behaviour);

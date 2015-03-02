@@ -33,11 +33,6 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
         // --------------------------------------------------------------------------
 
-        //  Load language file
-        $this->lang->load('shop');
-
-        // --------------------------------------------------------------------------
-
         //  Load the models
         $this->load->model('shop/shop_model');
         $this->load->model('shop/shop_basket_model');
