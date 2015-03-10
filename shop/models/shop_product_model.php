@@ -2212,9 +2212,22 @@ class NAILS_Shop_product_model extends NAILS_Model
 
         if (empty($product->seo_keywords)) {
 
-            //  Sanitise the description, removing stop words
+            //  Sanitise the description
             $description = strip_tags($product->description);
             $description = html_entity_decode($description);
+
+            //  Append the parent category/categories names onto the string
+            foreach ($product->categories as $category) {
+
+                $breadcrumbs = json_decode($category->breadcrumbs);
+
+                foreach ($breadcrumbs as $crumb) {
+
+                    $description .= strtolower($crumb->label);
+                }
+            }
+
+            //  Trim and rmeove stop words
             $description = trim($description);
             $description = removeStopWords($description);
 
@@ -2227,17 +2240,6 @@ class NAILS_Shop_product_model extends NAILS_Model
             $description = array_keys($description);
             $description = array_slice($description, 0, 10);
             $product->seo_keywords = $description;
-
-            //  Append the parent category/categories names onto the string
-            foreach ($product->categories as $category) {
-
-                $breadcrumbs = json_decode($category->breadcrumbs);
-
-                foreach ($breadcrumbs as $crumb) {
-
-                    $product->seo_keywords[] = strtolower($crumb->label);
-                }
-            }
 
             //  Implode and encode entities
             $product->seo_keywords = array_unique($product->seo_keywords);

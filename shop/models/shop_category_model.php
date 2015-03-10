@@ -519,13 +519,14 @@ class NAILS_Shop_category_model extends NAILS_Model
     {
         if (empty($data['where'])) {
 
-            $data['where'][] = array('column' => 'parent_id', 'value' => null);
+            $data['where'][] = array('parent_id', null);
         }
 
         if (!isset($data['include_count'])) {
 
             $data['include_count'] = true;
         }
+        $this->get_all(null, null, $data);
 
         // --------------------------------------------------------------------------
 
@@ -642,14 +643,8 @@ class NAILS_Shop_category_model extends NAILS_Model
                 $data['or_like'] = array();
             }
 
-            $data['or_like'][] = array(
-                'column' => $this->tablePrefix . '.label',
-                'value'  => $data['keywords']
-            );
-            $data['or_like'][] = array(
-                'column' => $this->tablePrefix . '.description',
-                'value'  => $data['keywords']
-            );
+            $data['or_like'][] = array($this->tablePrefix . '.label', $data['keywords']);
+            $data['or_like'][] = array($this->tablePrefix . '.description', $data['keywords']);
         }
 
         // --------------------------------------------------------------------------
@@ -693,25 +688,32 @@ class NAILS_Shop_category_model extends NAILS_Model
 
         if (empty($category->seo_keywords)) {
 
-            //  Extract common keywords
-            $this->lang->load('shop/shop');
-            $common = explode(',', lang('shop_common_words'));
-            $common = array_unique($common);
-            $common = array_filter($common);
+            //  Sanitise the description
+            $description = strip_tags($category->description);
+            $description = html_entity_decode($description);
 
-            //  Remove them and return the most popular words
-            $description = strtolower($category->description);
+            //  Append the category names, including parents
+            foreach ($category->breadcrumbs as $crumb) {
+
+                $description .=  ' ' . strtolower($crumb->label);
+            }
+            //  Trim and remove stop words
+            $description = trim($description);
+            $description = removeStopWords($description);
+
+            //  Break it up and get the most frequently occurring words
+            $description = strtolower($description);
             $description = str_replace("\n", ' ', strip_tags($description));
             $description = str_word_count($description, 1);
-            $description = array_count_values($description    );
+            $description = array_count_values($description);
             arsort($description);
             $description = array_keys($description);
-            $description = array_diff($description, $common);
             $description = array_slice($description, 0, 10);
+            $category->seo_keywords = $description;
 
-            $category->seo_keywords = implode(',', $description);
-
-            //  Encode entities
+            //  Implode and encode entities
+            $category->seo_keywords = array_unique($category->seo_keywords);
+            $category->seo_keywords = implode(',', $category->seo_keywords);
             $category->seo_keywords = htmlentities($category->seo_keywords);
         }
     }
