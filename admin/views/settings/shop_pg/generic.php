@@ -1,5 +1,5 @@
 <div class="group-settings shop-pg">
-    <p <?=$this->input->get('isModal') ? 'class="system-alert"' : ''?>>
+    <p <?=!empty($isModal) ? 'class="system-alert"' : ''?>>
         Configure the <?=$gateway_name?> payment gateway.
     </p>
     <hr />
@@ -21,25 +21,25 @@
                 <hr />
                 <?php
 
-                    $_field                    = array();
-                    $_field['key']            = 'omnipay_' . $gateway_slug . '_customise_label';
-                    $_field['label']        = 'Label';
-                    $_field['placeholder']    = 'Give this Payment Gateway a custom customer facing label';
-                    $_field['default']        = app_setting($_field['key'], 'shop');
-                    $_field['tip']            = 'Set this to override the default payment gateway name.';
+                    $field                = array();
+                    $field['key']         = 'omnipay_' . $gateway_slug . '_customise_label';
+                    $field['label']       = 'Label';
+                    $field['placeholder'] = 'Give this Payment Gateway a custom customer facing label';
+                    $field['default']     = app_setting($field['key'], 'shop');
+                    $field['tip']         = 'Set this to override the default payment gateway name.';
 
-                    echo form_field($_field);
+                    echo form_field($field);
 
                     // --------------------------------------------------------------------------
 
-                    $_field                = array();
-                    $_field['key']        = 'omnipay_' . $gateway_slug . '_customise_img';
-                    $_field['label']    = 'Image';
-                    $_field['bucket']    = 'shop-pg-img-' . $gateway_slug;
-                    $_field['default']    = app_setting($_field['key'], 'shop');
-                    $_field['tip']        = 'No image is shown by default, but you can choose to show one, perhaps a logo, or an image showing which cards are accepted.';
+                    $field            = array();
+                    $field['key']     = 'omnipay_' . $gateway_slug . '_customise_img';
+                    $field['label']   = 'Image';
+                    $field['bucket']  = 'shop-pg-img-' . $gateway_slug;
+                    $field['default'] = app_setting($field['key'], 'shop');
+                    $field['tip']     = 'No image is shown by default, but you can choose to show one, perhaps a logo, or an image showing which cards are accepted.';
 
-                    echo form_field_mm_image($_field);
+                    echo form_field_mm_image($field);
 
                 ?>
             </div>
@@ -53,20 +53,20 @@
 
                     foreach ($params as $key => $value) {
 
-                        //    Prep the visible label
-                        $_label        = $key;
-                        $_label        = preg_replace('/([a-z])([A-Z])/', '$1 $2', $_label);
-                        $_label        = ucwords($_label);
-                        $_replace    = array('API', 'ID', 'URL');
-                        $_label        = str_ireplace($_replace, $_replace, $_label);
+                        //  Prep the visible label
+                        $label   = $key;
+                        $label   = preg_replace('/([a-z])([A-Z])/', '$1 $2', $label);
+                        $label   = ucwords($label);
+                        $replace = array('API', 'ID', 'URL');
+                        $label   = str_ireplace($replace, $replace, $label);
 
-                        $_field                = array();
-                        $_field['key']        = 'omnipay_' . $gateway_slug . '_' . $key;
-                        $_field['label']    = $_label;
-                        $_field['default']    = app_setting($_field['key'], 'shop');
-                        $_field['required']    = true;
+                        $field             = array();
+                        $field['key']      = 'omnipay_' . $gateway_slug . '_' . $key;
+                        $field['label']    = $label;
+                        $field['default']  = app_setting($field['key'], 'shop');
+                        $field['required'] = true;
 
-                        echo form_field($_field);
+                        echo form_field($field);
 
                     }
 

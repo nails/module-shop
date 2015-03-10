@@ -1,5 +1,5 @@
 <div class="group-settings shop-pg">
-    <p <?=$this->input->get('isModal') ? 'class="system-alert"' : ''?>>
+    <p <?=!empty($isModal) ? 'class="system-alert"' : ''?>>
         Configure the <?=$gateway_name?> payment gateway. The following fields can be either found or
         set within the "Installation Administration" area of <?=$gateway_name?>'s Merchant interface.
     </p>
@@ -28,23 +28,23 @@
                 <fieldset>
                     <?php
 
-                        $_field                    = array();
-                        $_field['key']            = 'omnipay_' . $gateway_slug . '_customise_label';
-                        $_field['label']        = 'Label';
-                        $_field['placeholder']    = 'Give this Payment Gateway a custom customer facing label';
-                        $_field['default']        = app_setting($_field['key'], 'shop');
+                        $field                = array();
+                        $field['key']         = 'omnipay_' . $gateway_slug . '_customise_label';
+                        $field['label']       = 'Label';
+                        $field['placeholder'] = 'Give this Payment Gateway a custom customer facing label';
+                        $field['default']     = app_setting($field['key'], 'shop');
 
-                        echo form_field($_field);
+                        echo form_field($field);
 
                         // --------------------------------------------------------------------------
 
-                        $_field                = array();
-                        $_field['key']        = 'omnipay_' . $gateway_slug . '_customise_image';
-                        $_field['label']    = 'Label';
-                        $_field['bucket']    = 'shop-pg-img-' . $gateway_slug;
-                        $_field['default']    = app_setting($_field['key'], 'shop');
+                        $field            = array();
+                        $field['key']     = 'omnipay_' . $gateway_slug . '_customise_image';
+                        $field['label']   = 'Label';
+                        $field['bucket']  = 'shop-pg-img-' . $gateway_slug;
+                        $field['default'] = app_setting($field['key'], 'shop');
 
-                        echo form_field_mm_image($_field);
+                        echo form_field_mm_image($field);
 
                     ?>
                 </fieldset>
@@ -57,25 +57,25 @@
                 <fieldset>
                 <?php
 
-                    $_field                    = array();
-                    $_field['key']            = 'omnipay_' . $gateway_slug . '_installationId';
-                    $_field['label']        = 'Installation ID';
-                    $_field['default']        = app_setting($_field['key'], 'shop');
-                    $_field['placeholder']    = 'The Installation ID for this shop.';
-                    $_field['required']        = true;
+                    $field                = array();
+                    $field['key']         = 'omnipay_' . $gateway_slug . '_installationId';
+                    $field['label']       = 'Installation ID';
+                    $field['default']     = app_setting($field['key'], 'shop');
+                    $field['placeholder'] = 'The Installation ID for this shop.';
+                    $field['required']    = true;
 
-                    echo form_field($_field);
+                    echo form_field($field);
 
                     // --------------------------------------------------------------------------
 
-                    $_field                    = array();
-                    $_field['key']            = 'omnipay_' . $gateway_slug . '_accountId';
-                    $_field['label']        = 'Administratrion Code';
-                    $_field['default']        = app_setting($_field['key'], 'shop');
-                    $_field['placeholder']    = 'The Account ID for this shop.';
-                    $_field['required']        = true;
+                    $field                = array();
+                    $field['key']         = 'omnipay_' . $gateway_slug . '_accountId';
+                    $field['label']       = 'Administratrion Code';
+                    $field['default']     = app_setting($field['key'], 'shop');
+                    $field['placeholder'] = 'The Account ID for this shop.';
+                    $field['required']    = true;
 
-                    echo form_field($_field);
+                    echo form_field($field);
 
                 ?>
                 </fieldset>
@@ -86,33 +86,33 @@
                 <fieldset>
                 <?php
 
-                    $_field                    = array();
-                    $_field['key']            = 'omnipay_' . $gateway_slug . '_callbackPassword';
-                    $_field['label']        = 'Payment Response Password';
-                    $_field['info']            = '<a href="#" id="generate-password" class="awesome small">Generate</a>';
-                    $_field['default']        = app_setting($_field['key'], 'shop');
-                    $_field['placeholder']    = 'The Payment Response Password for this installation.';
-                    $_field['type']            = 'password';
-                    $_field['required']        = true;
-                    $_field['id']            = 'the-password';
-                    $_field['tip']            = 'This should be sufficiently hard to guess and definitely never revealed to anyone.';
+                    $field                = array();
+                    $field['key']         = 'omnipay_' . $gateway_slug . '_callbackPassword';
+                    $field['label']       = 'Payment Response Password';
+                    $field['info']        = '<a href="#" id="generate-password" class="awesome small">Generate</a>';
+                    $field['default']     = app_setting($field['key'], 'shop');
+                    $field['placeholder'] = 'The Payment Response Password for this installation.';
+                    $field['type']        = 'password';
+                    $field['required']    = true;
+                    $field['id']          = 'the-password';
+                    $field['tip']         = 'This should be sufficiently hard to guess and definitely never revealed to anyone.';
 
-                    echo form_field($_field);
+                    echo form_field($field);
 
                     // --------------------------------------------------------------------------
 
-                    $_field                    = array();
-                    $_field['key']            = 'omnipay_' . $gateway_slug . '_secretWord';
-                    $_field['label']        = 'MD5 Secret for Transactions';
-                    $_field['info']            = '<a href="#" id="generate-secret" class="awesome small">Generate</a>';
-                    $_field['default']        = app_setting($_field['key'], 'shop');
-                    $_field['placeholder']    = 'The MD5 Secret for this installation\'s transactions.';
-                    $_field['type']            = 'password';
-                    $_field['required']        = true;
-                    $_field['id']            = 'the-secret';
-                    $_field['tip']            = 'This should be sufficiently hard to guess and definitely never revealed to anyone.';
+                    $field                = array();
+                    $field['key']         = 'omnipay_' . $gateway_slug . '_secretWord';
+                    $field['label']       = 'MD5 Secret for Transactions';
+                    $field['info']        = '<a href="#" id="generate-secret" class="awesome small">Generate</a>';
+                    $field['default']     = app_setting($field['key'], 'shop');
+                    $field['placeholder'] = 'The MD5 Secret for this installation\'s transactions.';
+                    $field['type']        = 'password';
+                    $field['required']    = true;
+                    $field['id']          = 'the-secret';
+                    $field['tip']         = 'This should be sufficiently hard to guess and definitely never revealed to anyone.';
 
-                    echo form_field($_field);
+                    echo form_field($field);
 
                 ?>
                 </fieldset>
@@ -126,149 +126,149 @@
                 <fieldset>
                     <?php
 
-                        $_field                    = array();
-                        $_field['key']            = '';
-                        $_field['label']        = 'Description';
-                        $_field['placeholder']    = 'Anything you like, something descriptive!';
-                        $_field['readonly']        = true;
+                        $field                = array();
+                        $field['key']         = '';
+                        $field['label']       = 'Description';
+                        $field['placeholder'] = 'Anything you like, something descriptive!';
+                        $field['readonly']    = true;
 
-                        echo form_field($_field);
-
-                        // --------------------------------------------------------------------------
-
-                        $_field                    = array();
-                        $_field['key']            = '';
-                        $_field['label']        = 'Customer Description';
-                        $_field['placeholder']    = 'Anything you like, something descriptive!';
-                        $_field['readonly']        = true;
-
-                        echo form_field($_field);
+                        echo form_field($field);
 
                         // --------------------------------------------------------------------------
 
-                        $_field                = array();
-                        $_field['key']        = '';
-                        $_field['label']    = 'Store-Builder used:';
-                        $_field['default']    = 'Other - Please specify below';
-                        $_field['readonly']    = true;
+                        $field                = array();
+                        $field['key']         = '';
+                        $field['label']       = 'Customer Description';
+                        $field['placeholder'] = 'Anything you like, something descriptive!';
+                        $field['readonly']    = true;
 
-                        echo form_field($_field);
-
-                        // --------------------------------------------------------------------------
-
-                        $_field                = array();
-                        $_field['key']        = '';
-                        $_field['label']    = 'Store-builder: if other - please specify';
-                        $_field['default']    = 'Nails Shop';
-                        $_field['readonly']    = true;
-
-                        echo form_field($_field);
+                        echo form_field($field);
 
                         // --------------------------------------------------------------------------
 
-                        $_shop_url = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
+                        $field             = array();
+                        $field['key']      = '';
+                        $field['label']    = 'Store-Builder used:';
+                        $field['default']  = 'Other - Please specify below';
+                        $field['readonly'] = true;
 
-                        $_field                = array();
-                        $_field['key']        = '';
-                        $_field['label']    = 'Payment Response URL';
-                        $_field['default']    = site_url('api/shop/webhook/worldpay');
-                        $_field['readonly']    = true;
-                        $_field['info']         = 'Please note that this URL will vary between installations. The URL shown ';
-                        $_field['info']        .= 'above is correct for the <strong>' . ENVIRONMENT . '</strong> (or equivilent) ';
-                        $_field['info']        .= 'installation. If ' . $gateway_name . ' is having problems confirming payments ensure this URL ';
-                        $_field['info']        .= 'is worldwide accessible.';
-
-                        echo form_field($_field);
+                        echo form_field($field);
 
                         // --------------------------------------------------------------------------
 
-                        $_field                = array();
-                        $_field['key']        = '';
-                        $_field['label']    = 'Payment Response enabled?';
-                        $_field['default']    = true;
-                        $_field['readonly']    = true;
+                        $field             = array();
+                        $field['key']      = '';
+                        $field['label']    = 'Store-builder: if other - please specify';
+                        $field['default']  = 'Nails Shop';
+                        $field['readonly'] = true;
 
-                        echo form_field_boolean($_field);
-
-                        // --------------------------------------------------------------------------
-
-                        $_field                = array();
-                        $_field['key']        = '';
-                        $_field['label']    = 'Enable Recurring Payment Response';
-                        $_field['default']    = true;
-                        $_field['readonly']    = true;
-
-                        echo form_field_boolean($_field);
+                        echo form_field($field);
 
                         // --------------------------------------------------------------------------
 
-                        $_field                = array();
-                        $_field['key']        = '';
-                        $_field['label']    = 'Enable the Shopper Response';
-                        $_field['default']    = false;
-                        $_field['readonly']    = true;
+                        $shop_url = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
 
-                        echo form_field_boolean($_field);
+                        $field              = array();
+                        $field['key']       = '';
+                        $field['label']     = 'Payment Response URL';
+                        $field['default']   = site_url('api/shop/webhook/worldpay');
+                        $field['readonly']  = true;
+                        $field['info']      = 'Please note that this URL will vary between installations. The URL shown ';
+                        $field['info']     .= 'above is correct for the <strong>' . ENVIRONMENT . '</strong> (or equivilent) ';
+                        $field['info']     .= 'installation. If ' . $gateway_name . ' is having problems confirming payments ensure this URL ';
+                        $field['info']     .= 'is worldwide accessible.';
 
-                        // --------------------------------------------------------------------------
-
-                        $_field                = array();
-                        $_field['key']        = '';
-                        $_field['label']    = 'Suspension of Payment Response';
-                        $_field['default']    = false;
-                        $_field['readonly']    = true;
-
-                        echo form_field_boolean($_field);
+                        echo form_field($field);
 
                         // --------------------------------------------------------------------------
 
-                        $_field                    = array();
-                        $_field['key']            = '';
-                        $_field['label']        = 'Payment Response failure email address';
-                        $_field['placeholder']    = 'Email address where you\'d like to receive failure notifications';
-                        $_field['readonly']        = true;
+                        $field             = array();
+                        $field['key']      = '';
+                        $field['label']    = 'Payment Response enabled?';
+                        $field['default']  = true;
+                        $field['readonly'] = true;
 
-                        echo form_field($_field);
-
-                        // --------------------------------------------------------------------------
-
-                        $_field                = array();
-                        $_field['key']        = '';
-                        $_field['label']    = 'Attach HTTP(s) Payment Message to the failure email?';
-                        $_field['default']    = true;
-                        $_field['readonly']    = true;
-
-                        echo form_field_boolean($_field);
+                        echo form_field_boolean($field);
 
                         // --------------------------------------------------------------------------
 
-                        $_field                    = array();
-                        $_field['key']            = '';
-                        $_field['label']        = 'Merchant receipt email address';
-                        $_field['placeholder']    = 'Email address where you\'d like to receive receipts';
-                        $_field['readonly']        = true;
+                        $field             = array();
+                        $field['key']      = '';
+                        $field['label']    = 'Enable Recurring Payment Response';
+                        $field['default']  = true;
+                        $field['readonly'] = true;
 
-                        echo form_field($_field);
-
-                        // --------------------------------------------------------------------------
-
-                        $_field                    = array();
-                        $_field['key']            = '';
-                        $_field['label']        = 'Info servlet password';
-                        $_field['placeholder']    = 'Leave blank';
-                        $_field['readonly']        = true;
-
-                        echo form_field($_field);
+                        echo form_field_boolean($field);
 
                         // --------------------------------------------------------------------------
 
-                        $_field                = array();
-                        $_field['key']        = '';
-                        $_field['label']    = 'Signature Fields';
-                        $_field['default']    = 'instId:amount:currency:cartId';
-                        $_field['readonly']    = true;
+                        $field             = array();
+                        $field['key']      = '';
+                        $field['label']    = 'Enable the Shopper Response';
+                        $field['default']  = false;
+                        $field['readonly'] = true;
 
-                        echo form_field($_field);
+                        echo form_field_boolean($field);
+
+                        // --------------------------------------------------------------------------
+
+                        $field             = array();
+                        $field['key']      = '';
+                        $field['label']    = 'Suspension of Payment Response';
+                        $field['default']  = false;
+                        $field['readonly'] = true;
+
+                        echo form_field_boolean($field);
+
+                        // --------------------------------------------------------------------------
+
+                        $field                = array();
+                        $field['key']         = '';
+                        $field['label']       = 'Payment Response failure email address';
+                        $field['placeholder'] = 'Email address where you\'d like to receive failure notifications';
+                        $field['readonly']    = true;
+
+                        echo form_field($field);
+
+                        // --------------------------------------------------------------------------
+
+                        $field             = array();
+                        $field['key']      = '';
+                        $field['label']    = 'Attach HTTP(s) Payment Message to the failure email?';
+                        $field['default']  = true;
+                        $field['readonly'] = true;
+
+                        echo form_field_boolean($field);
+
+                        // --------------------------------------------------------------------------
+
+                        $field                = array();
+                        $field['key']         = '';
+                        $field['label']       = 'Merchant receipt email address';
+                        $field['placeholder'] = 'Email address where you\'d like to receive receipts';
+                        $field['readonly']    = true;
+
+                        echo form_field($field);
+
+                        // --------------------------------------------------------------------------
+
+                        $field                = array();
+                        $field['key']         = '';
+                        $field['label']       = 'Info servlet password';
+                        $field['placeholder'] = 'Leave blank';
+                        $field['readonly']    = true;
+
+                        echo form_field($field);
+
+                        // --------------------------------------------------------------------------
+
+                        $field             = array();
+                        $field['key']      = '';
+                        $field['label']    = 'Signature Fields';
+                        $field['default']  = 'instId:amount:currency:cartId';
+                        $field['readonly'] = true;
+
+                        echo form_field($field);
 
                     ?>
                 </fieldset>
@@ -309,15 +309,15 @@
 </p>
 <textarea readonly="readonly" onClick="this.select();" style="width:100%;box-sizing:border-box;height:400px;margin:0;">
 <?php
-$_app_name            = APP_NAME;
-$_shop_url            = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
-$_processing_url    = site_url($_shop_url . 'checkout/processing');
-$_html = <<<EOT
+$app_name          = APP_NAME;
+$shop_url          = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
+$processing_url    = site_url($shop_url . 'checkout/processing');
+$html = <<<EOT
 <html>
     <head>
         <title>Please Wait...</title>
         <meta http-equiv="content-type" content="text/html;charset=utf-8" />
-        <meta http-equiv="refresh" content="3;URL='$_processing_url'" />
+        <meta http-equiv="refresh" content="3;URL='$processing_url'" />
         <style type="text/css">
 
             body
@@ -350,7 +350,7 @@ $_html = <<<EOT
     <body>
         <h1>
             Please wait while we redirect
-            <br />you back to $_app_name
+            <br />you back to $app_name
         </h1>
         <p>
             Your payment was accepted.
@@ -359,7 +359,7 @@ $_html = <<<EOT
 </html>
 EOT;
 
-    echo htmlspecialchars($_html);
+    echo htmlspecialchars($html);
 ?>
 </textarea>
 </div>
@@ -372,15 +372,15 @@ EOT;
 </p>
 <textarea readonly="readonly" onClick="this.select();" style="width:100%;box-sizing:border-box;height:400px;margin:0;">
 <?php
-$_app_name            = APP_NAME;
-$_shop_url            = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
-$_processing_url    = site_url($_shop_url . 'checkout/cancel');
-$_html = <<<EOT
+$app_name          = APP_NAME;
+$shop_url          = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
+$processing_url    = site_url($shop_url . 'checkout/cancel');
+$html = <<<EOT
 <html>
     <head>
         <title>Please Wait...</title>
         <meta http-equiv="content-type" content="text/html;charset=utf-8" />
-        <meta http-equiv="refresh" content="3;URL='$_processing_url'" />
+        <meta http-equiv="refresh" content="3;URL='$processing_url'" />
         <style type="text/css">
 
             body
@@ -413,7 +413,7 @@ $_html = <<<EOT
     <body>
         <h1>
             Please wait while we redirect
-            <br />you back to $_app_name
+            <br />you back to $app_name
         </h1>
         <p>
             Your payment was cancelled.
@@ -422,7 +422,7 @@ $_html = <<<EOT
 </html>
 EOT;
 
-    echo htmlspecialchars($_html);
+    echo htmlspecialchars($html);
 ?>
 </textarea>
 </div>
