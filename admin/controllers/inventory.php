@@ -23,7 +23,7 @@ class Inventory extends \AdminController
         if (userHasPermission('admin:shop:inventory:manage')) {
 
             $navGroup = new \Nails\Admin\Nav('Shop', 'fa-shopping-cart');
-            $navGroup->addAction('Manage Inventory');
+            $navGroup->addAction('Manage Inventory', 'index', array(), 0);
             return $navGroup;
         }
     }

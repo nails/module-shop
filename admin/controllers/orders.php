@@ -26,14 +26,14 @@ class Orders extends \AdminController
             $alerts = array();
             $ci     =& get_instance();
 
-            //  Draft pages
+            //  Unfulfilled orders
             $ci->db->where('fulfilment_status', 'UNFULFILLED');
             $ci->db->where('status', 'PAID');
-            $numDrafts = $ci->db->count_all_results(NAILS_DB_PREFIX . 'shop_order');
-            $alerts[]  = \Nails\Admin\Nav::alertObject($numDrafts, 'alert', 'Unfulfilled Orders');
+            $numUnfulfilled = $ci->db->count_all_results(NAILS_DB_PREFIX . 'shop_order');
+            $alerts[]  = \Nails\Admin\Nav::alertObject($numUnfulfilled, 'alert', 'Unfulfilled Orders');
 
             $navGroup = new \Nails\Admin\Nav('Shop', 'fa-shopping-cart');
-            $navGroup->addAction('Manage Orders', 'index', $alerts);
+            $navGroup->addAction('Manage Orders', 'index', $alerts, 0);
             return $navGroup;
         }
     }
