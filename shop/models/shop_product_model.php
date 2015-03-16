@@ -1671,12 +1671,10 @@ class NAILS_Shop_product_model extends NAILS_Model
             $search = $this->db->escape_like_str($data['keywords']);
 
             $where   = array();
-            $where[] = $this->tablePrefix . '.id IN (SELECT product_id FROM ' . NAILS_DB_PREFIX . 'shop_product_variation WHERE label LIKE \'%' . $search . '%\' OR sku LIKE \'%' . $search . '%\')' ;
+            $where[] = $this->tablePrefix . '.id IN (SELECT product_id FROM ' . NAILS_DB_PREFIX . 'shop_product_variation WHERE label REGEXP \'[[:<:]]' . $search . '[[:>:]]\' OR sku LIKE \'%' . $search . '%\')' ;
             $where[] = $this->tablePrefix . '.id LIKE \'%' . $search  . '%\'';
-            $where[] = $this->tablePrefix . '.label LIKE \'%' . $search  . '%\'';
-            $where[] = $this->tablePrefix . '.description LIKE \'%' . $search  . '%\'';
-            $where[] = $this->tablePrefix . '.seo_description LIKE \'%' . $search  . '%\'';
-            $where[] = $this->tablePrefix . '.seo_keywords LIKE \'%' . $search  . '%\'';
+            $where[] = $this->tablePrefix . '.label REGEXP \'[[:<:]]' . $search . '[[:>:]]\'';
+            $where[] = $this->tablePrefix . '.description REGEXP \'[[:<:]]' . $search . '[[:>:]]\'';
             $where   = '(' . implode(' OR ', $where) . ')';
 
             $this->db->where($where);

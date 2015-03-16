@@ -1249,7 +1249,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $data['where'][] = array('column' => 'p.published <=', 'value' => 'NOW()', 'escape' => false);
         $data['sort']    = $this->_product_sort->sort_on;
         $data['filter']  = $this->input->get('f');
-        $data['search']  = $this->input->get('s');
+        $data['keywords']  = $this->input->get('s');
 
         // --------------------------------------------------------------------------
 
@@ -1283,7 +1283,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  ===============
 
         $this->data['sidebar_filters'] = $this->shop_product_model->getFiltersForProductsInSearch(
-            $data['search'],
+            $data['keywords'],
             $data
        );
 
