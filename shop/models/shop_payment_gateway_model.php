@@ -686,7 +686,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
         } else {
 
-            _LOG('Payment Transaction ID: #' . $_payment_data['transaction_id']);
+            _LOG('Payment Transaction ID: #' . $payment_data['transaction_id']);
 
         }
 

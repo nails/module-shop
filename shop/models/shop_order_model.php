@@ -1109,8 +1109,8 @@ class NAILS_Shop_order_model extends NAILS_Model
 
     public function send_order_notification($orderId, $payment_data = array(), $partial = false)
     {
-        _LOG('Looking up order #' . $order);
-        $order = $this->get_by_id($order);
+        _LOG('Looking up order #' . $orderId);
+        $order = $this->get_by_id($orderId);
 
         if (!$order) {
 
