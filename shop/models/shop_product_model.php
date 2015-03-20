@@ -380,8 +380,6 @@ class NAILS_Shop_product_model extends NAILS_Model
 
                 foreach ($v['gallery'] as $gallery_index => $image) {
 
-                    $this->form_validation->set_rules('variation[' . $index . '][gallery][' . $gallery_index . ']', '', 'xss_clean');
-
                     if ($image) {
 
                         $_data->variation[$index]->gallery[] = $image;
