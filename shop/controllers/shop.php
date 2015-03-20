@@ -1244,12 +1244,12 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Configure Conditionals and Sorting
         //  ==================================
 
-        $data            = array();
-        $data['where']   = array();
-        $data['where'][] = array('column' => 'p.published <=', 'value' => 'NOW()', 'escape' => false);
-        $data['sort']    = $this->_product_sort->sort_on;
-        $data['filter']  = $this->input->get('f');
-        $data['keywords']  = $this->input->get('s');
+        $data             = array();
+        $data['where']    = array();
+        $data['where'][]  = array('column' => 'p.published <=', 'value' => 'NOW()', 'escape' => false);
+        $data['sort']     = $this->_product_sort->sort_on;
+        $data['filter']   = $this->input->get('f');
+        $data['keywords'] = $this->input->get('s');
 
         // --------------------------------------------------------------------------
 
@@ -1261,10 +1261,10 @@ class NAILS_Shop extends NAILS_Shop_Controller
          * like a ninja.
          */
 
-        $this->_product_pagination->rsegment = 2;
+        $this->_product_pagination->rsegment = 3;
         $this->_product_pagination->page     = (int) $this->uri->rsegment($this->_product_pagination->rsegment);
 
-        $this->configurePagination($this->shop_product_model->count_all($data));
+        $this->configurePagination($this->shop_product_model->count_all($data), 'search', '?s=' . $this->input->get('s'));
 
         // --------------------------------------------------------------------------
 
@@ -1301,9 +1301,10 @@ class NAILS_Shop extends NAILS_Shop_Controller
      * Common pagination configurations
      * @param  integer $total_rows The total number of rows to paginate for
      * @param  string  $baseUrl    Any additional part of the URL to add
+     * @param  string  $firstUrl   An alternative URl for the first link
      * @return void
      */
-    protected function configurePagination($total_rows = 0, $baseUrl = '')
+    protected function configurePagination($total_rows = 0, $baseUrl = '', $firstUrl = '')
     {
         $this->load->library('pagination');
 
@@ -1319,6 +1320,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         }
 
         $config['base_url']         = site_url($config['base_url']);
+        $config['first_url']        = site_url($config['base_url'] . $firstUrl);
         $config['total_rows']       = $total_rows;
         $config['per_page']         = $this->_product_pagination->per_page;
         $config['use_page_numbers'] = true;
