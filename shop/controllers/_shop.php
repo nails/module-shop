@@ -24,15 +24,6 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
         // --------------------------------------------------------------------------
 
-        //  Check this module is enabled in settings
-        if (!isModuleEnabled('nailsapp/module-shop')) {
-
-            //  Cancel execution, module isn't enabled
-            show_404();
-        }
-
-        // --------------------------------------------------------------------------
-
         //  Load the models
         $this->load->model('shop/shop_model');
         $this->load->model('shop/shop_basket_model');

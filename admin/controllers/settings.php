@@ -198,7 +198,7 @@ class Settings extends \AdminController
 
             //  Rewrite routes
             $this->load->model('routes_model');
-            if (!$this->routes_model->update('shop')) {
+            if (!$this->routes_model->update()) {
 
                 $this->data['warning'] = '<strong>Warning:</strong> while the shop settings were updated, the routes file could not be updated. The shop may not behave as expected,';
             }

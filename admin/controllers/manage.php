@@ -2608,7 +2608,7 @@ class Manage extends \AdminController
     protected function routeRequest($prefix)
     {
         $methodRaw = $this->uri->segment(5) ? $this->uri->segment(5) : 'index';
-        $method    = $prefix . underscore_to_camelcase($methodRaw, false);
+        $method    = $prefix . underscoreToCamelcase($methodRaw, false);
 
         if (method_exists($this, $method)) {
 

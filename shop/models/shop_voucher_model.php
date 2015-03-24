@@ -387,7 +387,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 
         //  Check custom voucher type conditions
         $this->load->helper('string');
-        $method = 'validate' . underscore_to_camelcase(strtolower($voucher->type));
+        $method = 'validate' . underscoreToCamelcase(strtolower($voucher->type));
 
         if (method_exists($this, $method)) {
 

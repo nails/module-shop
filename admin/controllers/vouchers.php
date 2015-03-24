@@ -148,7 +148,7 @@ class Vouchers extends \AdminController
 
         if (userHasPermission('admin:shop:voucher:create')) {
 
-            \Nails\Admin\Helper::addHeaderButton('admin/shop/voucher/create', 'Create Voucher');
+            \Nails\Admin\Helper::addHeaderButton('admin/shop/vouchers/create', 'Create Voucher');
         }
 
         // --------------------------------------------------------------------------
