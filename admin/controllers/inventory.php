@@ -539,7 +539,7 @@ class Inventory extends \AdminController
         $uploadtoken = $this->cdn->generate_api_upload_token(activeUser('id'));
 
         $this->asset->inline('var _edit = new NAILS_Admin_Shop_Inventory_Create_Edit();', 'JS');
-        $this->asset->inline('_edit.init(' . json_encode($product_types) . ', "' . $uploadToken . '");', 'JS');
+        $this->asset->inline('_edit.init(' . json_encode($this->data['product_types']) . ', "' . $uploadToken . '");', 'JS');
 
         // --------------------------------------------------------------------------
 
