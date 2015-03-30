@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Api\Shop;
+namespace Nails\Api\Shop;
 
 /**
  * Admin API end points: Shop Vouchers
