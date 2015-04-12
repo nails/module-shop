@@ -315,8 +315,11 @@ class Inventory extends \AdminController
         //  Process POST
         if ($this->input->post()) {
 
+            //  Prep the POST fields
+            $this->inventoryCreateEditPrepFields();
+
             //  If the product is a draft i.e. not active, go ahead and save it without any
-            if (empty($this->input->post('is_active'))) {
+            if (!$this->input->post('is_active')) {
 
                 //  Create draft product
                 $product = $this->shop_product_model->create($this->input->post());
@@ -337,7 +340,7 @@ class Inventory extends \AdminController
                 $this->load->library('form_validation');
 
                 //  Define all the rules
-                $this->_inventory_create_edit_validation_rules($this->input->post());
+                $this->inventoryCreateEditValidationRules();
 
                 // --------------------------------------------------------------------------
 
@@ -478,12 +481,21 @@ class Inventory extends \AdminController
             //  Form validation, this'll be fun...
             $this->load->library('form_validation');
 
-            //  Define all the rules
-            $this->_inventory_create_edit_validation_rules($this->input->post());
+            //  Define all the rules if the product is active
+            if ($this->input->post('is_active')) {
+
+                $this->inventoryCreateEditValidationRules();
+            }
+
+            $this->inventoryCreateEditPrepFields();
 
             // --------------------------------------------------------------------------
 
-            if ($this->form_validation->run($this)) {
+            /**
+             * If not active then allow the request through, otherwise, run the
+             * validation rules.
+             */
+            if (!$this->input->post('is_active') || $this->form_validation->run($this)) {
 
                 //  Validated!Create the product
                 $product = $this->shop_product_model->update($this->data['item']->id, $this->input->post());
@@ -556,10 +568,9 @@ class Inventory extends \AdminController
 
     /**
      * Form Validation: Set the validation rules for creating/editing inventory items
-     * @param  array $post The $_POST array
      * @return void
      */
-    protected function _inventory_create_edit_validation_rules($post)
+    protected function inventoryCreateEditValidationRules()
     {
         //  Product Info
         //  ============
@@ -579,7 +590,7 @@ class Inventory extends \AdminController
 
             $this->form_validation->set_rules('is_external', '', 'xss_clean');
 
-            if (!empty($post['is_external'])) {
+            if ($this->input->post('is_external')) {
 
                 $this->form_validation->set_rules('external_vendor_label', '', 'xss_clean|required');
                 $this->form_validation->set_rules('external_vendor_url', '', 'xss_clean|required');
@@ -601,9 +612,9 @@ class Inventory extends \AdminController
 
         //  Variants - Loop variants
         //  ========================
-        if (!empty($post['variation']) && is_array($post['variation'])) {
+        if ($this->input->post('variation') && is_array($this->input->post('variation'))) {
 
-            foreach ($post['variation'] as $index => $v) {
+            foreach ($this->input->post('variation') as $index => $v) {
 
                 //  Details
                 //  -------
@@ -671,7 +682,7 @@ class Inventory extends \AdminController
                     $rules      = array();
                     $rules[]    = 'xss_clean';
 
-                    if (empty($post['variation'][$index]['shipping']['collection_only'])) {
+                    if (empty($_POST['variation'][$index]['shipping']['collection_only'])) {
 
                         if (!empty($option['validation'])) {
 
@@ -724,6 +735,28 @@ class Inventory extends \AdminController
         $this->form_validation->set_message('numeric', lang('fv_numeric'));
         $this->form_validation->set_message('is_natural', lang('fv_is_natural'));
         $this->form_validation->set_message('max_length', lang('fv_max_length'));
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Performs any alterations to fields prior to being passed to the shop_product_model.
+     * @return Void
+     */
+    protected function inventoryCreateEditPrepFields()
+    {
+        /**
+         * If the published date is set then it should be converted from the user's
+         * timezone to the Nails timezone, otherwise it should be NULL.
+         */
+        if (empty($_POST['published']) || $_POST['published'] === '0000-00-00 00:00:00') {
+
+            $_POST['published'] = null;
+
+        } else {
+
+            $_POST['published'] = toNailsDatetime($_POST['published']);
+        }
     }
 
     // --------------------------------------------------------------------------

@@ -193,7 +193,7 @@
 
                 } else {
 
-                    $publishedTime = date('Y-m-d H:i:00');
+                    $publishedTime = toUserDatetime(date('Y-m-d H:i:00'), 'Y-m-d H:i:s');
                 }
 
                 $field                = array();
