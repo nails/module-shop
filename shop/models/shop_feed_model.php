@@ -177,31 +177,29 @@ class NAILS_Shop_feed_model extends NAILS_Model
     protected function googleWriteXml($data)
     {
 
-        $xml = '<?xml version="1.0" encoding="utf-16"?>';
-        $xml .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/2.0">';
+        $xml = '<?xml version="1.0" encoding="utf-8"?>';
+        $xml .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">';
         $xml .= '<channel>';
         $xml .= '<title><![CDATA[' . app_setting('invoice_company', 'shop') . ']]></title>';
         $xml .= '<description><![CDATA[' . app_setting('invoice_address', 'shop') . ']]></description>';
         $xml .= '<link><![CDATA[' . BASE_URL . ']]></link>';
-        $xml .= '';
-        $xml .= '';
 
         foreach ($data as $item) {
 
             $xml .= '<item>';
                 $xml .= '<g:id>' . $item->productId . '.' . $item->variantId . '</g:id>';
-                $xml .= '<title><![CDATA[' . $item->title . ']]></title>';
-                $xml .= '<description><![CDATA[' . $item->description . ']]></description>';
-                $xml .= '<g:product_type><![CDATA[' . $item->category . ']]></g:product_type>';
+                $xml .= '<title><![CDATA[' . htmlentities($item->title) . ']]></title>';
+                $xml .= '<description><![CDATA[' . htmlentities($item->description) . ']]></description>';
+                $xml .= '<g:product_type><![CDATA[' . htmlentities($item->category) . ']]></g:product_type>';
                 $xml .= '<link>' . $item->url . '</link>';
                 $xml .= '<g:image_link>' . $item->image . '</g:image_link>';
                 $xml .= '<g:condition>' . $item->condition . '</g:condition>';
                 $xml .= '<g:availability>' . $item->availability . '</g:availability>';
                 $xml .= '<g:price>' . $item->price . '</g:price>';
-                $xml .= '<g:brand><![CDATA[' . $item->brand . ']]></g:brand>';
+                $xml .= '<g:brand><![CDATA[' . htmlentities($item->brand) . ']]></g:brand>';
                 $xml .= '<g:gtin>' . $item->sku . '</g:gtin>';
                 $xml .= '<g:shipping>';
-                    $xml .= '<g:country>' . $item->shipping_country . '</g:country>';
+                    $xml .= '<g:country>' . htmlentities($item->shipping_country) . '</g:country>';
                     $xml .= '<g:service>' . $item->shipping_service . '</g:service>';
                     $xml .= '<g:price>' . $item->shipping_price . '</g:price>';
                 $xml .= '</g:shipping>';
