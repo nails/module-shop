@@ -26,7 +26,7 @@ class NAILS_Shop_feed_model extends NAILS_Model
             if ($xml) {
 
                 $this->load->helper('file');
-                $cacheFile = DEPLOY_CACHE_DIR . 'shop-feed-' . $provider . '.' . $format;
+                $cacheFile = DEPLOY_CACHE_DIR . 'shop-feed-' . $provider . '-' . date("Y-m-d") . '.' . $format;
 
                 if (!write_file($cacheFile, $xml)) {
 
@@ -55,7 +55,7 @@ class NAILS_Shop_feed_model extends NAILS_Model
     public function serve($provider, $format)
     {
         //  Check cache for file, if it exists, server it up with the appropriate cache headers, if not, generate and thens erve
-        $cacheFile = DEPLOY_CACHE_DIR . 'shop-feed-' . $provider . '.' . $format;
+        $cacheFile = DEPLOY_CACHE_DIR . 'shop-feed-' . $provider  . '-' . date("Y-m-d") . '.' . $format;
 
         if (is_file($cacheFile)) {
 
