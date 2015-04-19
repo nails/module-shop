@@ -32,7 +32,7 @@ class Order extends \ApiController
 
         if ($order) {
 
-            $out['order']            = new stdClass();
+            $out['order']            = new \stdClass();
             $out['order']->status    = $order->status;
             $out['order']->is_recent = (time() - strtotime($order->created)) < 300;
 
