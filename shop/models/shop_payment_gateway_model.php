@@ -908,7 +908,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
      * Fetches the order ID from the session, verifying it along the way
      * @return mixed INT on success false on failure.
      */
-    public function checkout_session_get()
+    public function checkoutSessionGet()
     {
         $hash = $this->session->userdata($this->checkoutSessionKey);
 

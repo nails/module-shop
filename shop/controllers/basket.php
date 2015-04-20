@@ -98,7 +98,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         //  Abandon any previous orders
         $this->load->model('shop/shop_payment_gateway_model');
-        $previousOrder = $this->shop_payment_gateway_model->checkout_session_get();
+        $previousOrder = $this->shop_payment_gateway_model->checkoutSessionGet();
 
         if ($previousOrder) {
 

@@ -66,7 +66,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Abandon any previous orders
-        $previousOrder = $this->shop_payment_gateway_model->checkout_session_get();
+        $previousOrder = $this->shop_payment_gateway_model->checkoutSessionGet();
 
         if ($previousOrder) {
 
@@ -630,25 +630,26 @@ class NAILS_Checkout extends NAILS_Shop_Controller
      */
     protected function getOrder($redirect = true)
     {
-        $order_ref = $this->input->get('ref');
+        $orderRef = $this->input->get('ref');
 
-        if ($order_ref) {
+        if ($orderRef) {
 
             $this->shop_payment_gateway_model->checkoutSessionClear();
-            return $this->shop_order_model->get_by_ref($order_ref);
+            return $this->shop_order_model->get_by_ref($orderRef);
 
         } else {
 
             //  No ref, try the session
-            $order_id = $this->shop_payment_gateway_model->checkout_session_get();
+            $orderId = $this->shop_payment_gateway_model->checkoutSessionGet();
 
-            if ($order_id) {
+            if ($orderId) {
 
-                $order = $this->shop_order_model->get_by_id($order_id);
+                $order = $this->shop_order_model->get_by_id($orderId);
 
                 if ($order) {
 
                     $this->shop_payment_gateway_model->checkoutSessionClear();
+
                     if ($redirect) {
 
                         redirect($this->shopUrl . 'checkout/processing?ref=' . $order->ref);
