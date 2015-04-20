@@ -12,6 +12,16 @@
 
 class NAILS_Shop_feed_model extends NAILS_Model
 {
+    protected $cacheFile;
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Generates the feed
+     * @param  string  $provider The provider to generate for
+     * @param  string  $format   The format to generate
+     * @return boolean
+     */
     public function generate($provider, $format)
     {
         $methodProvider = strtolower($provider);
@@ -20,55 +30,36 @@ class NAILS_Shop_feed_model extends NAILS_Model
 
         if (method_exists($this, $method)) {
 
-            $data = $this->getShopData();
+            $data     = $this->getShopData();
+            $fileData = $this->{$method}($data);
 
-            $xml = $this->{$method}($data);
-            if ($xml) {
+            if ($fileData) {
 
                 $this->load->helper('file');
-                $cacheFile = DEPLOY_CACHE_DIR . 'shop-feed-' . $provider . '-' . date("Y-m-d") . '.' . $format;
+                $cacheFile = $this->getCacheFile($provider, $format);
 
-                if (!write_file($cacheFile, $xml)) {
+                if (write_file($cacheFile, $fileData)) {
 
-                    $this->_set_error('Failed to write shop feed to disk "' . $provider . '" in format "' . $xml . '"');
+                    return true;
 
                 } else {
 
-                    return true;
+                    $error = 'Failed to write shop feed to disk "' . $provider . '" in format "' . $format . '"';
+                    $this->_set_error($error);
+                    return false;
                 }
 
             } else {
 
-                $this->_set_error('Failed to generate data for "' . $provider . '" in format "' . $xml . '"');
+                $error = 'Failed to generate data for "' . $provider . '" in format "' . $format . '"';
+                $this->_set_error($error);
                 return false;
             }
 
         } else {
 
-            $this->_set_error('Invalid feed parameters.');
-            return false;
-        }
-    }
-
-    // --------------------------------------------------------------------------
-
-    public function serve($provider, $format)
-    {
-        //  Check cache for file, if it exists, server it up with the appropriate cache headers, if not, generate and thens erve
-        $cacheFile = DEPLOY_CACHE_DIR . 'shop-feed-' . $provider  . '-' . date("Y-m-d") . '.' . $format;
-
-        if (is_file($cacheFile)) {
-
-            return @file_get_contents($cacheFile);
-        }
-
-        //  File doesn't exist, attempt to generate
-        if ($this->generate($provider, $format)) {
-
-            return @file_get_contents($cacheFile);
-
-        } else {
-
+            $error = 'Invalid feed parameters.';
+            $this->_set_error($error);
             return false;
         }
     }
@@ -76,7 +67,35 @@ class NAILS_Shop_feed_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
-     * Render the feed
+     * Returns the contents of the appropriate feed file.
+     * @param  string $provider The provider to serve
+     * @param  string $format   The format to serve
+     * @return string
+     */
+    public function serve($provider, $format)
+    {
+        $cacheFile = $this->getCacheFile($provider, $format);
+
+        if (is_file($cacheFile)) {
+
+            return file_get_contents($cacheFile);
+        }
+
+        //  File doesn't exist, attempt to generate
+        if ($this->generate($provider, $format)) {
+
+            return file_get_contents($cacheFile);
+
+        } else {
+
+            return '';
+        }
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns an array of the shop items for the feed generators
      * @return array
      */
     protected function getShopData()
@@ -84,19 +103,19 @@ class NAILS_Shop_feed_model extends NAILS_Model
         $products = $this->shop_product_model->get_all();
         $out      = array();
 
-        foreach($products as $p) {
-            foreach($p->variations as $v) {
+        foreach ($products as $p) {
+            foreach ($p->variations as $v) {
 
                 $temp = new \stdClass();
 
                 //  General product fields
                 if ($p->label != $v->label) {
 
-                    $temp->title   = $p->label . ' - ' . $v->label;
+                    $temp->title = $p->label . ' - ' . $v->label;
 
-                }else{
+                } else {
 
-                    $temp->title   = $p->label;
+                    $temp->title = $p->label;
                 }
 
                 $temp->url         = $p->url;
@@ -115,7 +134,7 @@ class NAILS_Shop_feed_model extends NAILS_Model
 
                 } else {
 
-                    $temp->brand = app_setting('invoice_company','shop');
+                    $temp->brand = app_setting('invoice_company', 'shop');
                 }
 
                 // --------------------------------------------------------------------------
@@ -129,7 +148,7 @@ class NAILS_Shop_feed_model extends NAILS_Model
                         $category[] = $c->label;
                     }
 
-                    $temp->category = implode (", ", $category);
+                    $temp->category = implode(', ', $category);
 
                 } else {
 
@@ -165,15 +184,15 @@ class NAILS_Shop_feed_model extends NAILS_Model
                 $shippingData = $this->shop_shipping_driver_model->calculateVariant($v->id);
 
                 //   Calculate price and price of shipping
-                $temp->price = $p->price->user->min_price . ' ' . app_setting('base_currency','shop');
+                $temp->price = $p->price->user->min_price . ' ' . app_setting('base_currency', 'shop');
+
                 $temp->shipping_country = app_setting('warehouse_addr_country', 'shop');
                 $temp->shipping_service = 'Standard';
-                $temp->shipping_price = $shippingData->base . ' ' . app_setting('base_currency','shop');
+                $temp->shipping_price   = $shippingData->base . ' ' . app_setting('base_currency', 'shop');
 
                 // --------------------------------------------------------------------------
 
                 $out[] = $temp;
-
             }
         }
 
@@ -182,9 +201,13 @@ class NAILS_Shop_feed_model extends NAILS_Model
 
     // --------------------------------------------------------------------------
 
-    protected function googleWriteXml($data)
+    /**
+     * Returns XML data as expected by Google
+     * @param  array $items The item array as generated by getShopData()
+     * @return string
+     */
+    protected function googleWriteXml($items)
     {
-
         $xml = '<?xml version="1.0" encoding="utf-8"?>';
         $xml .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">';
         $xml .= '<channel>';
@@ -192,7 +215,7 @@ class NAILS_Shop_feed_model extends NAILS_Model
         $xml .= '<description><![CDATA[' . app_setting('invoice_address', 'shop') . ']]></description>';
         $xml .= '<link><![CDATA[' . BASE_URL . ']]></link>';
 
-        foreach ($data as $item) {
+        foreach ($items as $item) {
 
             $xml .= '<item>';
                 $xml .= '<g:id>' . $item->productId . '.' . $item->variantId . '</g:id>';
@@ -219,11 +242,27 @@ class NAILS_Shop_feed_model extends NAILS_Model
 
         return $xml;
     }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns the path of the cachefile
+     * @param  string $provider The provider to supply for
+     * @param  string $format   The format to return in
+     * @return string
+     */
+    protected function getCacheFile($provider, $format)
+    {
+        if (empty($this->cacheFile)) {
+
+            $this->cacheFile = DEPLOY_CACHE_DIR . 'shop-feed-' . $provider . '-' . date('Y-m-d') . '.' . $format;
+        }
+
+        return $this->cacheFile;
+    }
 }
 
-
 // --------------------------------------------------------------------------
-
 
 /**
  * OVERLOADING NAILS' MODELS

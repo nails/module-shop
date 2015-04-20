@@ -395,7 +395,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        if (!empty($item->type->is_physical)) {
+        if (empty($item->type->is_physical)) {
 
             //  Item is not physical, assume no charge for delivery
             return $free;
@@ -421,7 +421,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
          * which is in the base currency. Similar to the calculate() method
          */
 
-        $cost = $this->driver->calculateVariant($variant);
+        $cost = $this->driver->calculateVariant($item);
 
         if (is_int($cost) || is_numeric($cost)) {
 
