@@ -103,7 +103,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         if ($previousOrder) {
 
             $this->shop_order_model->abandon($previousOrder);
-            $this->shop_payment_gateway_model->checkout_session_clear();
+            $this->shop_payment_gateway_model->checkoutSessionClear();
         }
 
         // --------------------------------------------------------------------------

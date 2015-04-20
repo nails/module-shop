@@ -25,6 +25,10 @@ class Order extends \ApiController
 
     // --------------------------------------------------------------------------
 
+    /**
+     * Returns the status of an order
+     * @return array
+     */
     public function getStatus()
     {
         $out   = array();
@@ -42,8 +46,6 @@ class Order extends \ApiController
             $out['error']   = '"' . $this->input->get('ref') . '" is not a valid order ref';
         }
 
-        // --------------------------------------------------------------------------
-
-        $this->_out($out);
+        return $out;
     }
 }

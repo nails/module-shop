@@ -38,7 +38,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         $this->load->model('country_model');
 
         $this->data['countries_flat']   = $this->country_model->getAllFlat();
-        $this->data['payment_gateways'] = $this->shop_payment_gateway_model->get_enabled_formatted();
+        $this->data['payment_gateways'] = $this->shop_payment_gateway_model->getEnabledFormatted();
 
         if (!count($this->data['payment_gateways'])) {
 
@@ -71,14 +71,14 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         if ($previousOrder) {
 
             $this->shop_order_model->abandon($previousOrder);
-            $this->shop_payment_gateway_model->checkout_session_clear();
+            $this->shop_payment_gateway_model->checkoutSessionClear();
         }
 
         // --------------------------------------------------------------------------
 
         if ($this->input->post()) {
 
-            if (!$this->shop_payment_gateway_model->is_enabled($this->input->post('payment_gateway'))) {
+            if (!$this->shop_payment_gateway_model->isEnabled($this->input->post('payment_gateway'))) {
 
                 $this->data['error']  = '"' . $this->input->post('payment_gateway') . '" ';
                 $this->data['error'] .= 'is not a valid payment gateway.';
@@ -178,18 +178,17 @@ class NAILS_Checkout extends NAILS_Shop_Controller
                          * so that when we redirect the processing/cancel pages can pick up where we left off.
                          */
 
-                        $this->shop_payment_gateway_model->checkout_session_save($order->id, $order->ref, $order->code);
+                        $this->shop_payment_gateway_model->checkoutSessionSave($order->id, $order->ref, $order->code);
 
-                        $result = $this->shop_payment_gateway_model->do_payment(
+                        $result = $this->shop_payment_gateway_model->doPayment(
                             $order->id,
-                            $this->input->post('payment_gateway'),
-                            $this->input->post()
-                       );
+                            $this->input->post('payment_gateway')
+                        );
 
                         if ($result) {
 
                             /**
-                             * Payment complete!Mark order as paid and then process it, finally send user to
+                             * Payment complete! Mark order as paid and then process it, finally send user to
                              * processing page for receipt
                              */
 
@@ -208,7 +207,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
                             $this->data['error'] .= $this->shop_payment_gateway_model->last_error();
                             $this->data['payment_error'] = $this->shop_payment_gateway_model->last_error();
 
-                            $this->shop_payment_gateway_model->checkout_session_clear();
+                            $this->shop_payment_gateway_model->checkoutSessionClear();
                         }
 
                     } else {
@@ -229,7 +228,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         //  Load assets required by the payment gateways
         foreach ($this->data['payment_gateways'] as $pg) {
 
-            $assets = $this->shop_payment_gateway_model->get_checkout_assets($pg->slug);
+            $assets = $this->shop_payment_gateway_model->getCheckoutAssets($pg->slug);
 
             foreach ($assets as $asset) {
 
@@ -378,7 +377,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
     protected function processingPending()
     {
         //  Now we know what the state of play is, clear the session.
-        $this->shop_payment_gateway_model->checkout_session_clear();
+        $this->shop_payment_gateway_model->checkoutSessionClear();
 
         //  And load the view
         $this->load->view($this->skin->path . 'views/checkout/processing/pending', $this->data);
@@ -398,7 +397,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Now we know what the state of play is, clear the session.
-        $this->shop_payment_gateway_model->checkout_session_clear();
+        $this->shop_payment_gateway_model->checkoutSessionClear();
 
         //  And load the view
         $this->load->view($this->skin->path . 'views/checkout/processing/paid', $this->data);
@@ -425,7 +424,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Now we know what the state of play is, clear the session.
-        $this->shop_payment_gateway_model->checkout_session_clear();
+        $this->shop_payment_gateway_model->checkoutSessionClear();
 
         //  And load the view
         $this->load->view($this->skin->path . 'views/checkout/processing/failed', $this->data);
@@ -452,7 +451,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Now we know what the state of play is, clear the session.
-        $this->shop_payment_gateway_model->checkout_session_clear();
+        $this->shop_payment_gateway_model->checkoutSessionClear();
 
         //  And load the view
         $this->load->view($this->skin->path . 'views/checkout/processing/abandoned', $this->data);
@@ -479,7 +478,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Now we know what the state of play is, clear the session.
-        $this->shop_payment_gateway_model->checkout_session_clear();
+        $this->shop_payment_gateway_model->checkoutSessionClear();
 
         //  And load the view
         $this->load->view($this->skin->path . 'views/checkout/processing/cancelled', $this->data);
@@ -508,7 +507,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Now we know what the state of play is, clear the session.
-        $this->shop_payment_gateway_model->checkout_session_clear();
+        $this->shop_payment_gateway_model->checkoutSessionClear();
 
         //  And load the view
         $this->load->view($this->skin->path . 'views/checkout/processing/error', $this->data);
@@ -560,7 +559,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
             show_404();
         }
 
-        $result = $this->shop_payment_gateway_model->confirm_complete_payment($this->uri->rsegment(3), $order);
+        $result = $this->shop_payment_gateway_model->confirmCompletePayment($this->uri->rsegment(3), $order);
 
         if ($result) {
 
@@ -635,7 +634,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
         if ($order_ref) {
 
-            $this->shop_payment_gateway_model->checkout_session_clear();
+            $this->shop_payment_gateway_model->checkoutSessionClear();
             return $this->shop_order_model->get_by_ref($order_ref);
 
         } else {
@@ -649,7 +648,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
                 if ($order) {
 
-                    $this->shop_payment_gateway_model->checkout_session_clear();
+                    $this->shop_payment_gateway_model->checkoutSessionClear();
                     if ($redirect) {
 
                         redirect($this->shopUrl . 'checkout/processing?ref=' . $order->ref);

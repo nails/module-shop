@@ -110,7 +110,7 @@ class Settings extends \AdminController
 
         //  Get data
         $this->data['settings']         = app_setting(null, 'shop', true);
-        $this->data['payment_gateways'] = $this->shop_payment_gateway_model->get_available();
+        $this->data['payment_gateways'] = $this->shop_payment_gateway_model->getAvailable();
         $this->data['shipping_drivers'] = $this->shop_shipping_driver_model->getAvailable();
         $this->data['currencies']       = $this->shop_currency_model->get_all();
         $this->data['tax_rates']        = $this->shop_tax_rate_model->get_all();
@@ -434,15 +434,15 @@ class Settings extends \AdminController
         $this->load->model('shop/shop_payment_gateway_model');
 
         $gateway    = $this->uri->segment(4) ? strtolower($this->uri->segment(4)) : '';
-        $available = $this->shop_payment_gateway_model->is_available($gateway);
+        $available = $this->shop_payment_gateway_model->isAvailable($gateway);
 
         if ($available) {
 
-            $params = $this->shop_payment_gateway_model->get_default_params($gateway);
+            $params = $this->shop_payment_gateway_model->getDefaultParameters($gateway);
 
             $this->data['params']       = $params;
             $this->data['gateway_name'] = ucwords(str_replace('_', ' ', $gateway));
-            $this->data['gateway_slug'] = $this->shop_payment_gateway_model->get_correct_casing($gateway);
+            $this->data['gateway_slug'] = $this->shop_payment_gateway_model->getCorrectCasing($gateway);
 
             //  Handle POST
             if ($this->input->post()) {

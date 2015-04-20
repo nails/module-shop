@@ -35,7 +35,7 @@ class Webhook extends \ApiController
         // --------------------------------------------------------------------------
 
         $this->load->model('shop/shop_payment_gateway_model');
-        $result = $this->shop_payment_gateway_model->webhook_complete_payment($this->uri->segment(4), true);
+        $result = $this->shop_payment_gateway_model->webhookCompletePayment($this->uri->segment(4), true);
 
         if (!$result) {
 
