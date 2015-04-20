@@ -403,6 +403,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
+        $variant = null;
         foreach ($item->variations as $v) {
 
             if ($v->id = $variantId) {
@@ -410,6 +411,9 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
                     //  Item is collect only, assume no charge for delivery
                     return $free;
+                } else {
+
+                    $variant = $v;
                 }
             }
         }
@@ -421,7 +425,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
          * which is in the base currency. Similar to the calculate() method
          */
 
-        $cost = $this->driver->calculateVariant($item);
+        $cost = $this->driver->calculateVariant($variant);
 
         if (is_int($cost) || is_numeric($cost)) {
 
