@@ -16,9 +16,10 @@ class Webhook extends \ApiController
 {
     /**
      * Handles responses from the payment gateways
-     * @return mixed
+     * @param  string $gatewayName The name of the gateway to handle
+     * @return array
      */
-    public function anyRemap()
+    public function anyRemap($gatewayName)
     {
         /**
          * We'll do logging for this method as it's reasonably important that
@@ -35,7 +36,7 @@ class Webhook extends \ApiController
         // --------------------------------------------------------------------------
 
         $this->load->model('shop/shop_payment_gateway_model');
-        $result = $this->shop_payment_gateway_model->webhookCompletePayment($this->uri->segment(4), true);
+        $result = $this->shop_payment_gateway_model->webhookCompletePayment($gatewayName, true);
 
         if (!$result) {
 
@@ -48,23 +49,9 @@ class Webhook extends \ApiController
         _LOG('Webhook terminating');
 
         /**
-         * Return in the format expected by the gateway, and don't set a header. Most
-         * gateways will keep trying, or send false positive failures if this comes
-         * back as non-200.
+         * Don't set a header. Most gateways will keep trying, or send false positive
+         * failures if this comes back as non-200.
          */
-
-        switch (strtolower($this->uri->segment(4))) {
-
-            case 'worldpay':
-
-                $format = 'TXT';
-                break;
-        }
-
-        if (!empty($format)) {
-
-            $this->data['apiRouter']->outputSetFormat($format);
-        }
 
         $this->data['apiRouter']->outputSendHeader(false);
 

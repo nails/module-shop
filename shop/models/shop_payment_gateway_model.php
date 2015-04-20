@@ -142,8 +142,8 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
     /**
      * Returns the correct casing for a payment gateway
-     * @param  string $name The payment gateway to retrieve
-     * @return mixed        String on success, null on failure
+     * @param  string $gatewayName The payment gateway to retrieve
+     * @return mixed               String on success, null on failure
      */
     public function getCorrectCasing($gatewayName)
     {
