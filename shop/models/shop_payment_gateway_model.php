@@ -145,14 +145,14 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
      * @param  string $name The payment gateway to retrieve
      * @return mixed        String on success, null on failure
      */
-    public function getCorrectCasing($name)
+    public function getCorrectCasing($gatewayName)
     {
         $gateways = $this->getAvailable();
         $name     = null;
 
         foreach ($gateways as $gateway) {
 
-            if (trim(strtolower($name)) == strtolower($gateway)) {
+            if (trim(strtolower($gatewayName)) == strtolower($gateway)) {
 
                 $name = $gateway;
                 break;
