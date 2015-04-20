@@ -90,7 +90,15 @@ class NAILS_Shop_feed_model extends NAILS_Model
                 $temp = new \stdClass();
 
                 //  General product fields
-                $temp->title       = $v->label;
+                if ($p->label != $v->label) {
+
+                    $temp->title   = $p->label . ' - ' . $v->label;
+
+                }else{
+
+                    $temp->title   = $p->label;
+                }
+
                 $temp->url         = $p->url;
                 $temp->description = trim(strip_tags($p->description));
                 $temp->productId   = $p->id;
