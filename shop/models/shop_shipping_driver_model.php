@@ -316,14 +316,6 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        if (!is_callable(array($this->driver, 'calculate'))) {
-
-            //  Driver isn't configured properly, free shipping.
-            return $free;
-        }
-
-        // --------------------------------------------------------------------------
-
         /**
          * Have the driver calculate the cost of shipping, this should return a float
          * which is in the base currency. It is passed an array of all shippable items
@@ -403,14 +395,6 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        if (!is_callable(array($this->driver, 'calculateVariant'))) {
-
-            //  No method exists to calculate this charge, assume no charge
-            return $free;
-        }
-
-        // --------------------------------------------------------------------------
-
         if (!empty($item->type->is_physical)) {
 
             //  Item is not physical, assume no charge for delivery
@@ -475,16 +459,6 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
             }
         }
 
-        // --------------------------------------------------------------------------
-
-        if (!is_callable(array($this->driver, 'optionsBasket'))) {
-
-            //  Driver isn't configured properly
-            return array();
-        }
-
-        // --------------------------------------------------------------------------
-
         return $this->driver->optionsBasket();
     }
 
@@ -504,16 +478,6 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
             }
         }
 
-        // --------------------------------------------------------------------------
-
-        if (!is_callable(array($this->driver, 'optionsVariant'))) {
-
-            //  Driver isn't configured properly
-            return array();
-        }
-
-        // --------------------------------------------------------------------------
-
         return $this->driver->optionsVariant();
     }
 
@@ -532,16 +496,6 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
                 return array();
             }
         }
-
-        // --------------------------------------------------------------------------
-
-        if (!is_callable(array($this->driver, 'optionsProduct'))) {
-
-            //  Driver isn't configured properly
-            return array();
-        }
-
-        // --------------------------------------------------------------------------
 
         return $this->driver->optionsProduct();
     }
@@ -576,17 +530,6 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
         $class = ucfirst(strtolower(str_replace('-', '_', $driver->slug)));
         $this->driverconfig = new $class();
-
-        // --------------------------------------------------------------------------
-
-        //  Call the config method
-        if (!is_callable(array($this->driverconfig, 'configure'))) {
-
-            //  Driver isn't configured properly
-            return false;
-        }
-
-        // --------------------------------------------------------------------------
 
         //  Spit back whatever the driver desires
         return $this->driverconfig->configure();

@@ -13,12 +13,22 @@
 interface Shop_shipping_driver
 {
     /**
-     * Caldulcates the cost of shipping, in the shop's base currency. It is important that this return a float.
+     * Calculates the cost of shipping, in the shop's base currency.
+     * It is important that this return a float.
      * @param  array    $shippableItems An array of all shippable items
      * @param  stdClass $basket         The entire basket object
      * @return float
      */
     public function calculate($shippableItems, $basket);
+
+    /**
+     * Calculates the cost of shipping an individual variant, in the shop's
+     * base currency. It is important that this return a float.
+     * @param  array    $shippableItems An array of all shippable items
+     * @param  stdClass $basket         The entire basket object
+     * @return float
+     */
+    public function calculateVariant($variant, $basket = null);
 
     /**
      * Specifies any configurable fields
