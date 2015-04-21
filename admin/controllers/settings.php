@@ -132,7 +132,7 @@ class Settings extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Load assets
-        $this->asset->load('nails.admin.shop.settings.min.js', true);
+        $this->asset->load('nails.admin.shop.settings.min.js', 'NAILS');
         $this->asset->load('mustache.js/mustache.js', 'NAILS-BOWER');
         $this->asset->inline('<script>_nails_settings = new NAILS_Admin_Shop_Settings();</script>');
 
@@ -161,6 +161,7 @@ class Settings extends \AdminController
         $settings['url']                                   = $this->input->post('url');
         $settings['price_exclude_tax']                     = $this->input->post('price_exclude_tax');
         $settings['enable_external_products']              = (bool) $this->input->post('enable_external_products');
+        $settings['firstFinancialYearEndDate']             = $this->input->post('firstFinancialYearEndDate');
         $settings['invoice_company']                       = $this->input->post('invoice_company');
         $settings['invoice_company']                       = $this->input->post('invoice_company');
         $settings['invoice_address']                       = $this->input->post('invoice_address');
@@ -190,22 +191,36 @@ class Settings extends \AdminController
 
         // --------------------------------------------------------------------------
 
-        if ($this->app_setting_model->set($settings, 'shop')) {
+        //  Validation
+        $this->load->library('form_validation');
 
-            $this->data['success'] = 'Store settings have been saved.';
+        $this->form_validation->set_rules('firstFinancialYearEndDate', '', 'valid_date');
 
-            // --------------------------------------------------------------------------
+        $this->form_validation->set_message('valid_date', lang('fv_valid_date'));
 
-            //  Rewrite routes
-            $this->load->model('routes_model');
-            if (!$this->routes_model->update()) {
+        if ($this->form_validation->run()) {
 
-                $this->data['warning'] = '<strong>Warning:</strong> while the shop settings were updated, the routes file could not be updated. The shop may not behave as expected,';
+            if ($this->app_setting_model->set($settings, 'shop')) {
+
+                $this->data['success'] = 'Store settings have been saved.';
+
+                // --------------------------------------------------------------------------
+
+                //  Rewrite routes
+                $this->load->model('routes_model');
+                if (!$this->routes_model->update()) {
+
+                    $this->data['warning'] = '<strong>Warning:</strong> while the shop settings were updated, the routes file could not be updated. The shop may not behave as expected,';
+                }
+
+            } else {
+
+                $this->data['error'] = 'There was a problem saving settings.';
             }
 
         } else {
 
-            $this->data['error'] = 'There was a problem saving settings.';
+            $this->data['error'] = lang('fv_there_were_errors');
         }
     }
 

@@ -15,7 +15,10 @@ namespace Nails\Admin\Shop;
 class Reports extends \AdminController
 {
     protected $sources;
+    protected $periods;
     protected $formats;
+    protected $currentFY;
+    protected $previousFY;
 
     // --------------------------------------------------------------------------
 
@@ -61,6 +64,42 @@ class Reports extends \AdminController
         // --------------------------------------------------------------------------
 
         /**
+         * If a financial year start date has been specified then work out the start
+         * and end dates.
+         */
+
+        $firstFinancialYearEndDate = app_setting('firstFinancialYearEndDate', 'shop');
+
+        if (!empty($firstFinancialYearEndDate)) {
+
+            try {
+
+                $yearInvterval = new \DateInterval('P1Y');
+                $yearEnd       = explode('-', $firstFinancialYearEndDate);
+
+                $yearEnd[0] = date('Y');
+                $this->currentFY        = new \stdClass();
+                $this->currentFY->start = new \DateTime(implode('-', $yearEnd));
+                $this->currentFY->end   = new \DateTime(implode('-', $yearEnd));
+                $this->currentFY->end->add($yearInvterval);
+
+                $yearEnd[0] = date('Y') - 1;
+                $this->previousFY        = new \stdClass();
+                $this->previousFY->start = new \DateTime(implode('-', $yearEnd));
+                $this->previousFY->end   = new \DateTime(implode('-', $yearEnd));
+                $this->previousFY->end->add($yearInvterval);
+
+            } catch (\Exception $e) {
+
+                //  Failed, simply do not show options
+                $this->currentFY  = null;
+                $this->previousFY = null;
+            }
+        }
+
+        // --------------------------------------------------------------------------
+
+        /**
          * Define the report sources
          *
          * Each item in this array is an array which defines the source, in the
@@ -69,7 +108,8 @@ class Reports extends \AdminController
          * array(
          *    0 => 'Source Title',
          *    1 => 'Source Description',
-         *    2 => 'sourceMethod'
+         *    2 => 'sourceMethod',
+         *    4 => 'respectsPeriods'
          *)
          *
          * The source method should be a callable method which is prefixed with
@@ -89,32 +129,50 @@ class Reports extends \AdminController
             $this->sources[] = array(
                 'Inventory',
                 'Out of Stock variants',
-                'OutOfStockVariants'
-           );
+                'OutOfStockVariants',
+                false
+            );
         }
 
         if (userHasPermission('admin:shop:orders:manage')) {
 
             $this->sources[] = array(
                 'Sales',
-                'Product Sales - All time',
-                'ProductSalesAll'
-           );
-            $this->sources[] = array(
-                'Sales',
-                'Product Sales - The Month',
-                'ProductSalesThisMonth'
-           );
-            $this->sources[] = array(
-                'Sales',
-                'Product Sales - Last Month',
-                'ProductSalesLastMonth'
-           );
+                'Orders',
+                'Orders',
+                true
+            );
 
-            /**
-             * @todo Have a reporting section in settings which allows the financial
-             * year data to be specified and build a source which respects these dates
-             */
+            $this->sources[] = array(
+                'Sales',
+                'Products',
+                'Products',
+                true
+            );
+        }
+
+        // --------------------------------------------------------------------------
+
+        /**
+         * Define the available periods for reports
+         *
+         * All reports should allow the suer to restrict to a certain time frame
+         */
+
+        $this->periods = array(
+            'ALL_TIME'   => 'All time',
+            'THIS_MONTH' => 'This Month',
+            'LAST_MONTH' => 'Last Month',
+        );
+
+        if (!empty($this->currentFY)) {
+
+            $this->periods['CURRENT_FY'] = $this->currentFY->start->format('Y') . '/' . $this->currentFY->end->format('Y');
+        }
+
+        if (!empty($this->previousFY)) {
+
+            $this->periods['PREVIOUS_FY'] = $this->previousFY->start->format('Y') . '/' . $this->previousFY->end->format('Y');
         }
 
         // --------------------------------------------------------------------------
@@ -145,27 +203,28 @@ class Reports extends \AdminController
         $this->formats[] = array(
             'CSV',
             'Easily imports to many software packages, including Microsoft Excel.',
-            'Csv');
-
+            'Csv'
+        );
         $this->formats[] = array(
             'HTML',
             'Produces an HTML table containing the data',
-            'Html');
-
+            'Html'
+        );
         $this->formats[] = array(
             'PDF',
             'Saves a PDF using the data from the HTML export option',
-            'Pdf');
-
+            'Pdf'
+        );
         $this->formats[] = array(
             'PHP Serialize',
             'Export as an object serialized using PHP\'s serialize() function',
-            'Serialize');
-
+            'Serialize'
+        );
         $this->formats[] = array(
             'JSON',
             'Export as a JSON array',
-            'Json');
+            'Json'
+        );
 
         // --------------------------------------------------------------------------
 
@@ -212,6 +271,7 @@ class Reports extends \AdminController
 
             //  Define rules
             $this->form_validation->set_rules('report', '', 'xss_clean|required');
+            $this->form_validation->set_rules('period', '', 'xss_clean');
             $this->form_validation->set_rules('format', '', 'xss_clean|required');
 
             //  Set Messages
@@ -219,12 +279,17 @@ class Reports extends \AdminController
 
             //  Execute
             $source = $this->input->post('report');
+            $source = explode(':', $source);
+            $source = $source[0];
             $sourceExists = isset($this->sources[$source]);
+
+            $period = $this->input->post('period');
+            $periodExists = isset($this->periods[$period]);
 
             $format = $this->input->post('format');
             $formatExists = isset($this->formats[$format]);
 
-            if ($this->form_validation->run() && $sourceExists && $formatExists) {
+            if ($this->form_validation->run() && $sourceExists && $periodExists && $formatExists) {
 
                 $source = $this->sources[$source];
                 $format = $this->formats[$format];
@@ -233,14 +298,14 @@ class Reports extends \AdminController
 
                     $this->data['error'] = 'That data source is not available.';
 
-                } elseif ((!method_exists($this, 'format' . $format[2]))) {
+                } elseif (!method_exists($this, 'format' . $format[2])) {
 
                     $this->data['error'] = 'That format type is not available.';
 
                 } else {
 
                     //  All seems well, generate the report!
-                    $data = $this->{'source' . $source[2]}();
+                    $data = $this->{'source' . $source[2]}($period);
 
                     //  Anything to report?
                     if (!empty($data)) {
@@ -285,7 +350,13 @@ class Reports extends \AdminController
         }
 
         $this->data['sources'] = $this->sources;
+        $this->data['periods'] = $this->periods;
         $this->data['formats'] = $this->formats;
+
+        // --------------------------------------------------------------------------
+
+        $this->asset->load('nails.admin.shop.reports.min.js', 'NAILS');
+        $this->asset->inline('<script>_nails_shop_reports = new NAILS_Admin_Shop_Reports();</script>');
 
         // --------------------------------------------------------------------------
 
@@ -300,7 +371,7 @@ class Reports extends \AdminController
      */
     protected function indexCli()
     {
-        //  @TODO: Complete CLI functionality for report generating
+        //  @todo Complete CLI functionality for report generating
         echo 'Sorry, this functionality is not complete yet. If you are experiencing ';
         echo 'timeouts please increase the timeout limit for PHP.';
     }
@@ -351,10 +422,11 @@ class Reports extends \AdminController
     // --------------------------------------------------------------------------
 
     /**
-     * Report soure: All recorded
+     * Report source: Orders
+     * @param  string $period The period to restrict to
      * @return stdClass
      */
-    protected function sourceProductSalesAll()
+    protected function sourceOrders($period)
     {
         if (!userHasPermission('admin:shop:orders:manage')) {
 
@@ -364,22 +436,88 @@ class Reports extends \AdminController
         // --------------------------------------------------------------------------
 
         $out           = new \stdClass();
-        $out->label    = 'Product Sales';
-        $out->filename = NAILS_DB_PREFIX . 'product_sales';
+        $out->label    = 'Orders';
+        $out->filename = NAILS_DB_PREFIX . 'orders';
         $out->fields   = array();
         $out->data     = array();
 
         // --------------------------------------------------------------------------
 
         //  Fetch all products from the order products table
-        $this->db->select('o.id, o.created, op.quantity as quantity_sold, p.id product_id, p.label product_label, v.id variation_id, v.label variation_label, v.sku, v.quantity_available');
-        $this->db->select('(SELECT GROUP_CONCAT(DISTINCT `b`.`label` ORDER BY `b`.`label` SEPARATOR \', \') FROM `' . NAILS_DB_PREFIX . 'shop_product_brand` pb JOIN `' . NAILS_DB_PREFIX . 'shop_brand` b ON `b`.`id` = `pb`.`brand_id` WHERE `pb`.`product_id` = `p`.`id` GROUP BY `pb`.`product_id`) brands', false);
-        $this->db->join(NAILS_DB_PREFIX . 'shop_order o', 'o.id = op.order_id', 'LEFT');
-        $this->db->join(NAILS_DB_PREFIX . 'shop_product p', 'p.id = op.variant_id', 'LEFT');
-        $this->db->join(NAILS_DB_PREFIX . 'shop_product_variation v', 'v.product_id = p.id', 'LEFT');
+        $select = array(
+            'o.id',
+            'o.ref',
+            'o.user_id',
+            'o.user_email',
+            'o.user_first_name',
+            'o.user_last_name',
+            'o.user_telephone',
+            'o.ip_address',
+            'o.status',
+            'o.requires_shipping',
+            'o.delivery_type',
+            'o.fulfilment_status',
+            'o.note',
+            'o.created',
+            'o.modified',
+            'o.fulfilled',
+            'o.base_currency',
+            'o.total_base_item',
+            'o.total_base_shipping',
+            'o.total_base_tax',
+            'o.total_base_grand',
+            'o.currency user_currency',
+            'o.total_user_item',
+            'o.total_user_shipping',
+            'o.total_user_tax',
+            'o.total_user_grand',
+            'o.shipping_line_1',
+            'o.shipping_line_2',
+            'o.shipping_town',
+            'o.shipping_state',
+            'o.shipping_postcode',
+            'o.shipping_country',
+            'o.billing_line_1',
+            'o.billing_line_2',
+            'o.billing_town',
+            'o.billing_state',
+            'o.billing_postcode',
+            'o.billing_country'
+        );
+        $this->db->select($select);
         $this->db->where('o.status', 'PAID');
-        $out->data = $this->db->get(NAILS_DB_PREFIX . 'shop_order_product op')->result_array();
+        $this->db->order_by('o.created');
 
+        //  Restrict to period
+        switch ($period) {
+
+            case 'THIS_MONTH':
+
+                $this->db->where('MONTH(o.created) = MONTH(CURDATE())');
+                $this->db->where('YEAR(o.created) = YEAR(CURDATE())');
+                break;
+
+            case 'LAST_MONTH':
+
+                $this->db->where('MONTH(o.created) = MONTH(CURDATE() - INTERVAL 1 MONTH)');
+                $this->db->where('YEAR(o.created) = YEAR(CURDATE() - INTERVAL 1 MONTH)');
+                break;
+
+            case 'CURRENT_FY':
+
+                $this->db->where('o.created >=', $this->currentFY->start->format('Y-m-d H:i:s'));
+                $this->db->where('o.created <', $this->currentFY->end->format('Y-m-d H:i:s'));
+                break;
+
+            case 'PREVIOUS_FY':
+
+                $this->db->where('o.created >=', $this->previousFY->start->format('Y-m-d H:i:s'));
+                $this->db->where('o.created <', $this->previousFY->end->format('Y-m-d H:i:s'));
+                break;
+        }
+
+        $out->data = $this->db->get(NAILS_DB_PREFIX . 'shop_order o')->result_array();
+last_query();
         if ($out->data) {
 
             $out->fields = array_keys($out->data[0]);
@@ -393,27 +531,75 @@ class Reports extends \AdminController
     // --------------------------------------------------------------------------
 
     /**
-     * Same as sourceProductSalesAll but restricted to the current month
+     * Report source: Products
+     * @param  string $period The period to restrict to
      * @return stdClass
      */
-    protected function sourceProductSalesThisMonth()
+    protected function sourceProducts($period)
     {
-        $this->db->where('MONTH(o.created) = MONTH(CURDATE())');
-        $this->db->where('YEAR(o.created) = YEAR(CURDATE())');
-        return $this->sourceProductSalesAll();
-    }
+        if (!userHasPermission('admin:shop:orders:manage')) {
 
-    // --------------------------------------------------------------------------
+            return false;
+        }
 
-    /**
-     * Same as sourceProductSalesAll but restricted to the previous month
-     * @return stdClass
-     */
-    protected function sourceProductSalesLastMonth()
-    {
-        $this->db->where('MONTH(o.created) = MONTH(CURDATE() - INTERVAL 1 MONTH)');
-        $this->db->where('YEAR(o.created) = YEAR(CURDATE() - INTERVAL 1 MONTH)');
-        return $this->sourceProductSalesAll();
+        // --------------------------------------------------------------------------
+
+        $out           = new \stdClass();
+        $out->label    = 'Products';
+        $out->filename = NAILS_DB_PREFIX . 'products';
+        $out->fields   = array();
+        $out->data     = array();
+
+        // --------------------------------------------------------------------------
+
+        //  Fetch all products from the order products table
+        $this->db->select('o.id order_id, o.ref order_ref, o.created, op.quantity as quantity_sold, p.id product_id, p.label product_label, v.id variation_id, v.label variation_label, v.sku');
+        $this->db->select('(SELECT GROUP_CONCAT(DISTINCT `b`.`label` ORDER BY `b`.`label` SEPARATOR \', \') FROM `' . NAILS_DB_PREFIX . 'shop_product_brand` pb JOIN `' . NAILS_DB_PREFIX . 'shop_brand` b ON `b`.`id` = `pb`.`brand_id` WHERE `pb`.`product_id` = `p`.`id` GROUP BY `pb`.`product_id`) brands', false);
+        $this->db->join(NAILS_DB_PREFIX . 'shop_order o', 'o.id = op.order_id', 'LEFT');
+        $this->db->join(NAILS_DB_PREFIX . 'shop_product p', 'p.id = op.variant_id', 'LEFT');
+        $this->db->join(NAILS_DB_PREFIX . 'shop_product_variation v', 'v.product_id = p.id', 'LEFT');
+        $this->db->where('o.status', 'PAID');
+        $this->db->order_by('o.created');
+
+        //  Restrict to period
+        switch ($period) {
+
+            case 'THIS_MONTH':
+
+                $this->db->where('MONTH(o.created) = MONTH(CURDATE())');
+                $this->db->where('YEAR(o.created) = YEAR(CURDATE())');
+                break;
+
+            case 'LAST_MONTH':
+
+                $this->db->where('MONTH(o.created) = MONTH(CURDATE() - INTERVAL 1 MONTH)');
+                $this->db->where('YEAR(o.created) = YEAR(CURDATE() - INTERVAL 1 MONTH)');
+                break;
+
+            case 'CURRENT_FY':
+
+                $this->db->where('o.created >=', $this->currentFY->start->format('Y-m-d H:i:s'));
+                $this->db->where('o.created <', $this->currentFY->end->format('Y-m-d H:i:s'));
+                break;
+
+            case 'PREVIOUS_FY':
+
+                $this->db->where('o.created >=', $this->previousFY->start->format('Y-m-d H:i:s'));
+                $this->db->where('o.created <', $this->previousFY->end->format('Y-m-d H:i:s'));
+                break;
+        }
+
+        $out->data = $this->db->get(NAILS_DB_PREFIX . 'shop_order_product op')->result_array();
+
+        if ($out->data) {
+
+            $out->fields = array_keys($out->data[0]);
+        }
+
+
+        // --------------------------------------------------------------------------
+
+        return $out;
     }
 
     // --------------------------------------------------------------------------
