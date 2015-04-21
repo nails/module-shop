@@ -517,7 +517,7 @@ class Reports extends \AdminController
         }
 
         $out->data = $this->db->get(NAILS_DB_PREFIX . 'shop_order o')->result_array();
-last_query();
+
         if ($out->data) {
 
             $out->fields = array_keys($out->data[0]);
