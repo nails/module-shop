@@ -1285,10 +1285,10 @@ class NAILS_Shop_order_model extends NAILS_Model
         $order->totals                  = new \stdClass();
 
         $order->totals->base            = new \stdClass();
-        $order->totals->base->item      = (float) $order->total_base_item;
-        $order->totals->base->shipping  = (float) $order->total_base_shipping;
-        $order->totals->base->tax       = (float) $order->total_base_tax;
-        $order->totals->base->grand     = (float) $order->total_base_grand;
+        $order->totals->base->item      = (int) $order->total_base_item;
+        $order->totals->base->shipping  = (int) $order->total_base_shipping;
+        $order->totals->base->tax       = (int) $order->total_base_tax;
+        $order->totals->base->grand     = (int) $order->total_base_grand;
 
         $order->totals->base_formatted           = new \stdClass();
         $order->totals->base_formatted->item     = $this->shop_currency_model->format_base($order->totals->base->item);
@@ -1297,10 +1297,10 @@ class NAILS_Shop_order_model extends NAILS_Model
         $order->totals->base_formatted->grand    = $this->shop_currency_model->format_base($order->totals->base->grand);
 
         $order->totals->user           = new \stdClass();
-        $order->totals->user->item     = (float) $order->total_user_item;
-        $order->totals->user->shipping = (float) $order->total_user_shipping;
-        $order->totals->user->tax      = (float) $order->total_user_tax;
-        $order->totals->user->grand    = (float) $order->total_user_grand;
+        $order->totals->user->item     = (int) $order->total_user_item;
+        $order->totals->user->shipping = (int) $order->total_user_shipping;
+        $order->totals->user->tax      = (int) $order->total_user_tax;
+        $order->totals->user->grand    = (int) $order->total_user_grand;
 
         $order->totals->user_formatted           = new \stdClass();
         $order->totals->user_formatted->item     = $this->shop_currency_model->format_user($order->totals->user->item);
@@ -1410,10 +1410,10 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         $item->price                      = new \stdClass();
         $item->price->base                = new \stdClass();
-        $item->price->base->value         = (float) $item->price_base_value;
-        $item->price->base->value_inc_tax = (float) $item->price_base_value_inc_tax;
-        $item->price->base->value_ex_tax  = (float) $item->price_base_value_ex_tax;
-        $item->price->base->value_tax     = (float) $item->price_base_value_tax;
+        $item->price->base->value         = $this->shop_currency_model->intToDecimal($item->price_base_value);
+        $item->price->base->value_inc_tax = $this->shop_currency_model->intToDecimal($item->price_base_value_inc_tax);
+        $item->price->base->value_ex_tax  = $this->shop_currency_model->intToDecimal($item->price_base_value_ex_tax);
+        $item->price->base->value_tax     = $this->shop_currency_model->intToDecimal($item->price_base_value_tax);
 
         $item->price->base_formatted                = new \stdClass();
         $item->price->base_formatted->value         = $this->shop_currency_model->format_base($item->price->base->value);
@@ -1422,10 +1422,10 @@ class NAILS_Shop_order_model extends NAILS_Model
         $item->price->base_formatted->value_tax     = $this->shop_currency_model->format_base($item->price->base->value_tax);
 
         $item->price->user                = new \stdClass();
-        $item->price->user->value         = (float) $item->price_user_value;
-        $item->price->user->value_inc_tax = (float) $item->price_user_value_inc_tax;
-        $item->price->user->value_ex_tax  = (float) $item->price_user_value_ex_tax;
-        $item->price->user->value_tax     = (float) $item->price_user_value_tax;
+        $item->price->user->value         = $this->shop_currency_model->intToDecimal($item->price_user_value);
+        $item->price->user->value_inc_tax = $this->shop_currency_model->intToDecimal($item->price_user_value_inc_tax);
+        $item->price->user->value_ex_tax  = $this->shop_currency_model->intToDecimal($item->price_user_value_ex_tax);
+        $item->price->user->value_tax     = $this->shop_currency_model->intToDecimal($item->price_user_value_tax);
 
         $item->price->user_formatted                = new \stdClass();
         $item->price->user_formatted->value         = $this->shop_currency_model->format_user($item->price->user->value);
@@ -1435,10 +1435,10 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         $item->sale_price                      = new \stdClass();
         $item->sale_price->base                = new \stdClass();
-        $item->sale_price->base->value         = (float) $item->sale_price_base_value;
-        $item->sale_price->base->value_inc_tax = (float) $item->sale_price_base_value_inc_tax;
-        $item->sale_price->base->value_ex_tax  = (float) $item->sale_price_base_value_ex_tax;
-        $item->sale_price->base->value_tax     = (float) $item->sale_price_base_value_tax;
+        $item->sale_price->base->value         = $this->shop_currency_model->intToDecimal($item->sale_price_base_value);
+        $item->sale_price->base->value_inc_tax = $this->shop_currency_model->intToDecimal($item->sale_price_base_value_inc_tax);
+        $item->sale_price->base->value_ex_tax  = $this->shop_currency_model->intToDecimal($item->sale_price_base_value_ex_tax);
+        $item->sale_price->base->value_tax     = $this->shop_currency_model->intToDecimal($item->sale_price_base_value_tax);
 
         $item->sale_price->base_formatted                = new \stdClass();
         $item->sale_price->base_formatted->value         = $this->shop_currency_model->format_base($item->sale_price->base->value);
@@ -1447,10 +1447,10 @@ class NAILS_Shop_order_model extends NAILS_Model
         $item->sale_price->base_formatted->value_tax     = $this->shop_currency_model->format_base($item->sale_price->base->value_tax);
 
         $item->sale_price->user                = new \stdClass();
-        $item->sale_price->user->value         = (float) $item->sale_price_user_value;
-        $item->sale_price->user->value_inc_tax = (float) $item->sale_price_user_value_inc_tax;
-        $item->sale_price->user->value_ex_tax  = (float) $item->sale_price_user_value_ex_tax;
-        $item->sale_price->user->value_tax     = (float) $item->sale_price_user_value_tax;
+        $item->sale_price->user->value         = $this->shop_currency_model->intToDecimal($item->sale_price_user_value);
+        $item->sale_price->user->value_inc_tax = $this->shop_currency_model->intToDecimal($item->sale_price_user_value_inc_tax);
+        $item->sale_price->user->value_ex_tax  = $this->shop_currency_model->intToDecimal($item->sale_price_user_value_ex_tax);
+        $item->sale_price->user->value_tax     = $this->shop_currency_model->intToDecimal($item->sale_price_user_value_tax);
 
         $item->sale_price->user_formatted                = new \stdClass();
         $item->sale_price->user_formatted->value         = $this->shop_currency_model->format_user($item->sale_price->user->value);

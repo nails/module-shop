@@ -432,7 +432,7 @@ class Inventory extends \AdminController
 
         //  Fetch item
         $this->data['item'] = $this->shop_product_model->get_by_id($this->uri->segment(5));
-
+dumpanddie($this->data['item']);
         if (!$this->data['item']) {
 
             $this->session->set_flashdata('error', 'I could not find a product by that ID.');

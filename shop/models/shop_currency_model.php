@@ -605,7 +605,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
     /**
      * Formats a value using the settings for a given currency.
-     * @param  mixed   $value      The value to format, string, int or float
+     * @param  integer $value      The value to format, as an integer
      * @param  string  $code       The currency to format as
      * @param  boolean $inc_symbol Whether or not to include the currency's symbol
      * @return mixed               String on success, false on failure
@@ -621,6 +621,12 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
         }
 
+        /**
+         * The input comes in as an integer, convert into a decimal with the
+         * correct number of decimal places.
+         */
+
+        $value = $this->intToDecimal($value, $code);
         $value = number_format($value, $_currency->decimal_precision, $_currency->decimal_symbol, $_currency->thousands_seperator);
 
         if ($inc_symbol) {
@@ -668,6 +674,21 @@ class NAILS_Shop_currency_model extends NAILS_Model
     public function format_user($value, $inc_symbol = true)
     {
         return $this->format($value, SHOP_USER_CURRENCY_CODE, $inc_symbol);
+    }
+
+    // --------------------------------------------------------------------------
+
+    public function intToDecimal($value, $code)
+    {
+        $currency = $this->get_by_code($code);
+
+        if (!$currency) {
+
+            $this->_set_error('Invalid currency code.');
+            return false;
+        }
+
+        return $value / pow(10, $currency->decimal_precision);
     }
 
 
@@ -725,8 +746,4 @@ if (!defined('NAILS_ALLOW_EXTENSION_SHOP_CURRENCY_MODEL')) {
     class Shop_currency_model extends NAILS_Shop_currency_model
     {
     }
-
 }
-
-/* End of file shop_currency_model.php */
-/* Location: ./modules/shop/models/shop_currency_model.php */

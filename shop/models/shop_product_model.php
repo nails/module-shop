@@ -356,8 +356,8 @@ class NAILS_Shop_product_model extends NAILS_Model
 
                     $_data->variation[$index]->pricing[$price_index]             = new \stdClass();
                     $_data->variation[$index]->pricing[$price_index]->currency   = $price['currency'];
-                    $_data->variation[$index]->pricing[$price_index]->price      = !empty($price['price']) ? (float) $price['price'] : null;
-                    $_data->variation[$index]->pricing[$price_index]->sale_price = !empty($price['sale_price']) ? (float) $price['sale_price'] : null;
+                    $_data->variation[$index]->pricing[$price_index]->price      = !empty($price['price']) ? (int) $price['price'] : null;
+                    $_data->variation[$index]->pricing[$price_index]->sale_price = !empty($price['sale_price']) ? (int) $price['sale_price'] : null;
 
                     if ($price['currency'] == SHOP_BASE_CURRENCY_CODE) {
 
@@ -2593,8 +2593,8 @@ class NAILS_Shop_product_model extends NAILS_Model
 
             foreach ($variation->price_raw as $price) {
 
-                $price->price      = (float) $price->price;
-                $price->sale_price = (float) $price->sale_price;
+                $price->price      = (int) $price->price;
+                $price->sale_price = (int) $price->sale_price;
             }
         }
 
