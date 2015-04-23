@@ -350,7 +350,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
         //  Convert the base price to the user's currency
         $this->load->model('shop/shop_currency_model');
-        $out->user = $this->shop_currency_model->convert_base_to_user($cost);
+        $out->user = $this->shop_currency_model->convertBaseToUser($cost);
 
         return $out;
     }
@@ -441,7 +441,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
         //  Convert the base price to the user's currency
         $this->load->model('shop/shop_currency_model');
-        $out->user = $this->shop_currency_model->convert_base_to_user($cost);
+        $out->user = $this->shop_currency_model->convertBaseToUser($cost);
 
         return $out;
     }

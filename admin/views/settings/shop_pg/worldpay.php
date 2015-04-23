@@ -4,7 +4,7 @@
         set within the "Installation Administration" area of <?=$gateway_name?>'s Merchant interface.
     </p>
     <hr />
-    <?=form_open('admin/settings/shop_pg/' . $gateway_slug . '?isModal=' . $this->input->get('isModal'))?>
+    <?=form_open('admin/shop/settings/shop_pg/' . $gateway_slug . '?isModal=' . $this->input->get('isModal'))?>
         <ul class="tabs">
             <li class="tab active">
                 <a href="#" data-tab="tab-customise">Customise</a>

@@ -67,7 +67,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
             case 'recent':
             default:
 
-                $this->_product_sort->sort_on =  'CREATED.DESC';
+                $this->_product_sort->sort_on =  'PUBLISHED.DESC';
                 break;
         }
 

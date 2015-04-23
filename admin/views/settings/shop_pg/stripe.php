@@ -3,7 +3,7 @@
         Configure the <?=$gateway_name?> payment gateway.
     </p>
     <hr />
-    <?=form_open('admin/settings/shop_pg/' . $this->uri->segment(4) . '?isModal=' . $this->input->get('isModal'))?>
+    <?=form_open('admin/shop/settings/shop_pg/' . $this->uri->segment(4) . '?isModal=' . $this->input->get('isModal'))?>
         <ul class="tabs">
             <li class="tab active">
                 <a href="#" data-tab="tab-customise">Customise</a>

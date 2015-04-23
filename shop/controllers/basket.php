@@ -334,7 +334,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
      **/
     public function set_currency()
     {
-        $currency = $this->shop_currency_model->get_by_code($this->input->get_post('currency'));
+        $currency = $this->shop_currency_model->getByCode($this->input->get_post('currency'));
 
         if ($currency) {
 

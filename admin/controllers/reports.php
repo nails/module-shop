@@ -17,6 +17,7 @@ class Reports extends \AdminController
     protected $sources;
     protected $periods;
     protected $formats;
+    protected $firstFY;
     protected $currentFY;
     protected $previousFY;
 
@@ -74,24 +75,51 @@ class Reports extends \AdminController
 
             try {
 
-                $yearInvterval = new \DateInterval('P1Y');
-                $yearEnd       = explode('-', $firstFinancialYearEndDate);
+                $yearInvterval   = new \DateInterval('P1Y');
+                $secondInvterval = new \DateInterval('PT1S');
+                $yearEnd         = explode('-', $firstFinancialYearEndDate);
 
+                /**
+                 * If we're sitting BEFORE
+                 */
+
+                $this->firstFY        = new \stdClass();
+                $this->firstFY->start = null;
+                $this->firstFY->end   = new \DateTime(implode('-', $yearEnd) . ' 23:59:59');
+                $this->firstFY->start = new \DateTime(implode('-', $yearEnd) . ' 23:59:59');
+                $this->firstFY->start->sub($yearInvterval)->add($secondInvterval);
+
+
+                //  If we're before the
                 $yearEnd[0] = date('Y');
                 $this->currentFY        = new \stdClass();
-                $this->currentFY->start = new \DateTime(implode('-', $yearEnd));
-                $this->currentFY->end   = new \DateTime(implode('-', $yearEnd));
-                $this->currentFY->end->add($yearInvterval);
+                $this->currentFY->start = null;
+                $this->currentFY->end   = new \DateTime(implode('-', $yearEnd) . ' 23:59:59');
+                $this->currentFY->start = new \DateTime(implode('-', $yearEnd) . ' 23:59:59');
+                $this->currentFY->start->sub($yearInvterval)->add($secondInvterval);
 
                 $yearEnd[0] = date('Y') - 1;
                 $this->previousFY        = new \stdClass();
-                $this->previousFY->start = new \DateTime(implode('-', $yearEnd));
-                $this->previousFY->end   = new \DateTime(implode('-', $yearEnd));
-                $this->previousFY->end->add($yearInvterval);
+                $this->previousFY->start = null;
+                $this->previousFY->end   = new \DateTime(implode('-', $yearEnd) . ' 23:59:59');
+                $this->previousFY->start = new \DateTime(implode('-', $yearEnd) . ' 23:59:59');
+                $this->previousFY->start->sub($yearInvterval)->add($secondInvterval);
+
+                /**
+                 * If the end of the previous financial year falls before the
+                 * start of the first financial year start date then don't offer
+                 * it as an option.
+                 */
+
+                if ($this->previousFY->end < $this->firstFY->start) {
+
+                    $this->previousFY = null;
+                }
 
             } catch (\Exception $e) {
 
                 //  Failed, simply do not show options
+                $this->firstFY    = null;
                 $this->currentFY  = null;
                 $this->previousFY = null;
             }

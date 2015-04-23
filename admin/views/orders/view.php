@@ -359,7 +359,7 @@
                                     echo $payment->transaction_id;
                                 echo '</td>';
                                 echo '<td>';
-                                    echo $this->shop_currency_model->format_base($payment->amount_base);
+                                    echo $this->shop_currency_model->formatBase($payment->amount_base);
                                 echo '</td>';
 
                                 echo \Nails\Admin\Helper::loadDatetimeCell($payment->created);

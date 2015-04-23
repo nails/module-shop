@@ -20,6 +20,7 @@ class Order extends \ApiController
     public function __construct()
     {
         parent::__construct();
+        $this->load->model('shop/shop_model');
         $this->load->model('shop/shop_order_model');
     }
 

@@ -315,7 +315,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
         //  And now the purchase request
         $data                  = array();
-        $data['amount']        = $order->totals->user->grand;
+        $data['amount']        = $this->shop_currency_model->intToFloat($order->totals->user->grand, $order->currency);
         $data['currency']      = $order->currency;
         $data['card']          = $creditCard;
         $data['transactionId'] = $order->id;
@@ -365,7 +365,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
                 $paymentData                   = array();
                 $paymentData['order_id']       = $order->id;
                 $paymentData['transaction_id'] = $transactionId;
-                $paymentData['amount']         = $order->totals->user->grand;
+                $paymentData['amount']         = $this->shop_currency_model->intToFloat($order->totals->user->grand, $order->currency);
                 $paymentData['currency']       = $order->currency;
 
                 // --------------------------------------------------------------------------

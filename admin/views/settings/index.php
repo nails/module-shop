@@ -856,7 +856,7 @@
                                     echo str_replace('_', ' ', $slug);
                                 echo '</td>';
                                 echo '<td class="configure">';
-                                    echo anchor('admin/settings/shop_pg/' . $slug, 'Configure', 'data-fancybox-type="iframe" class="fancybox awesome small"');
+                                    echo anchor('admin/shop/settings/shop_pg/' . $slug, 'Configure', 'data-fancybox-type="iframe" class="fancybox awesome small"');
                                 echo '</td>';
                             echo '</tr>';
                         }
@@ -894,18 +894,27 @@
             <fieldset id="shop-currencies-base">
                 <legend>Base Currency</legend>
                 <p>
-                    The base currency is the default currency of the shop. When you create a new product and define it's
-                    price, you are doing so in the base currency. You are free to change this but it will be reflected
-                    across the entire store, <em>change with <strong>extreme</strong> caution</em>.
+                    Define the default currency of the shop. Reporting will be generated in this currency.
                 </p>
+                <?php
+
+                    if ($productCount) {
+
+                        echo '<p class="system-alert message">';
+                            echo '<strong>Important:</strong> The base currency cannot be changed once a product has been created.';
+                        echo '</p>';
+                    }
+
+                ?>
                 <p>
                 <?php
 
                     //  Base Currency
-                    $field            = array();
-                    $field['key']     = 'base_currency';
-                    $field['label']   = 'Base Currency';
-                    $field['default'] = app_setting($field['key'], 'shop');
+                    $field             = array();
+                    $field['key']      = 'base_currency';
+                    $field['label']    = 'Base Currency';
+                    $field['default']  = app_setting($field['key'], 'shop');
+                    $field['readonly'] = $productCount ? 'disabled="disabled"' : '';
 
                     $_currencies = array();
 
@@ -914,7 +923,7 @@
                         $_currencies[$c->code] = $c->code . ' - ' . $c->label;
                     }
 
-                    echo form_dropdown($field['key'], $_currencies, set_value($field['key'], $field['default']), 'class="select2"');
+                    echo form_dropdown($field['key'], $_currencies, set_value($field['key'], $field['default']), 'class="select2" ' . $field['readonly']);
 
                 ?>
                 </p>
@@ -973,98 +982,10 @@
         </div>
         <?php $display = $this->input->post('update') == 'shipping' ? 'active' : ''?>
         <div id="tab-shipping" class="tab page <?=$display?> shipping">
-            <?=form_open(null, 'style="margin-bottom:0;"')?>
-            <?=form_hidden('update', 'shipping')?>
             <?php
 
-            /*
-            <fieldset id="shop-settings-shipping-domicile">
-                <legend>Domicile</legend>
-                <p>
-                    Where is your shop based? The domicile will be used to determine when to
-                    use international postage rates.
-                </p>
-                <?php
-
-                    $field            = array();
-                    $field['key']     = 'domicile';
-                    $field['default'] = app_setting($field['key'], 'shop') ? app_setting($field['key'], 'shop') : 'GB';
-
-                    echo form_dropdown($field['key'], $countries_flat, set_value($field['key'], $field['default']), 'class="select2"');
-
-                ?>
-            </fieldset>
-            <fieldset id="shop-settings-shipping-countries">
-                <legend>Ship To</legend>
-                <p>
-                    Where you're willing to ship to. You can be as granular as individual countries,
-                    or you can choose entire continents. Your domicile will always be a shippable location.
-                </p>
-                <p>
-                    <strong>Continents</strong>
-                </p>
-                <p>
-                <?php
-
-                    $_default = set_value('ship_to_continents', app_setting('ship_to_continents', 'shop'));
-                    $_default = array_filter((array) $_default);
-
-                    echo '<select name="ship_to_continents[]" multiple="multiple" class="select2">';
-                        foreach ($continents_flat as $key => $label) {
-
-                            $_selected = array_search($key, $_default) !== false ? ' selected="selected"' : '';
-
-                            echo '<option value="'. $key . '"' . $_selected . '>' . $label . '</option>';
-                        }
-                    echo '</select>';
-
-                ?>
-                </p>
-                <p>
-                    <strong>Countries</strong>
-                </p>
-                <p>
-                <?php
-
-                    $_default = set_value('ship_to_countries', app_setting('ship_to_countries', 'shop'));
-                    $_default = array_filter((array) $_default);
-
-                    echo '<select name="ship_to_countries[]" multiple="multiple" class="select2">';
-                        foreach ($countries_flat as $key => $label) {
-
-                            $_selected = array_search($key, $_default) !== false ? ' selected="selected"' : '';
-
-                            echo '<option value="'. $key . '"' . $_selected . '>' . $label . '</option>';
-                        }
-                    echo '</select>';
-
-                ?>
-                </p>
-                <p>
-                    <strong>Exclude</strong> - Exclude certain countries, regardless if they fall under any of the options above.
-                </p>
-                <p>
-                <?php
-
-                    $_default = set_value('ship_to_exclude', app_setting('ship_to_exclude', 'shop'));
-                    $_default = array_filter((array) $_default);
-
-                    echo '<select name="ship_to_exclude[]" multiple="multiple" class="select2">';
-                        foreach ($countries_flat as $key => $label) {
-
-                            $_selected = array_search($key, $_default) !== false ? ' selected="selected"' : '';
-
-                            echo '<option value="'. $key . '"' . $_selected . '>' . $label . '</option>';
-                        }
-                    echo '</select>';
-
-                ?>
-                </p>
-            </fieldset>
-
-            <hr />
-
-            */
+                echo form_open(null, 'style="margin-bottom:0;"');
+                echo form_hidden('update', 'shipping');
 
                 if (!empty($shipping_drivers)) {
 
@@ -1095,7 +1016,7 @@
                                     echo $_description ? '<small>' . $_description . '</small>' : '';
                                 echo '</td>';
                                 echo '<td class="configure">';
-                                    echo !empty($driver->configurable) ? anchor('admin/settings/shop_sd?driver=' . $driver->slug, 'Configure', 'data-fancybox-type="iframe" class="fancybox awesome small"') : '';
+                                    echo !empty($driver->configurable) ? anchor('admin/shop/settings/shop_sd?driver=' . $driver->slug, 'Configure', 'data-fancybox-type="iframe" class="fancybox awesome small"') : '';
                                 echo '</td>';
                             echo '</tr>';
                         }

@@ -87,6 +87,7 @@ class Settings extends \AdminController
         $this->load->model('shop/shop_tax_rate_model');
         $this->load->model('shop/shop_skin_front_model');
         $this->load->model('shop/shop_skin_checkout_model');
+        $this->load->model('shop/shop_product_model');
         $this->load->model('country_model');
 
         // --------------------------------------------------------------------------
@@ -112,7 +113,7 @@ class Settings extends \AdminController
         $this->data['settings']         = app_setting(null, 'shop', true);
         $this->data['payment_gateways'] = $this->shop_payment_gateway_model->getAvailable();
         $this->data['shipping_drivers'] = $this->shop_shipping_driver_model->getAvailable();
-        $this->data['currencies']       = $this->shop_currency_model->get_all();
+        $this->data['currencies']       = $this->shop_currency_model->getAll();
         $this->data['tax_rates']        = $this->shop_tax_rate_model->get_all();
         $this->data['tax_rates_flat']   = $this->shop_tax_rate_model->get_all_flat();
         $this->data['countries_flat']   = $this->country_model->getAllFlat();
@@ -128,6 +129,11 @@ class Settings extends \AdminController
         $this->data['skins_checkout']         = $this->shop_skin_checkout_model->get_available();
         $this->data['skin_checkout_selected'] = app_setting('skin_checkout', 'shop') ? app_setting('skin_checkout', 'shop') : 'shop-skin-checkout-classic';
         $this->data['skin_checkout_current']  = $this->shop_skin_checkout_model->get($this->data['skin_checkout_selected']);
+
+        /**
+         * Count the number of products (including deleted) - base currency is locked if > 1
+         */
+        $this->data['productCount'] = $this->shop_product_model->count_all(null, true);
 
         // --------------------------------------------------------------------------
 
@@ -356,8 +362,12 @@ class Settings extends \AdminController
     protected function _shop_update_currencies()
     {
         //  Prepare update
-        $settings                          = array();
-        $settings['base_currency']         = $this->input->post('base_currency');
+        $settings = array();
+
+        if ($this->input->post('base_currency')) {
+
+            $settings['base_currency'] = $this->input->post('base_currency');
+        }
         $settings['additional_currencies'] = $this->input->post('additional_currencies');
 
         $settings_encrypted                             = array();
@@ -400,6 +410,9 @@ class Settings extends \AdminController
             if (!empty($settings['additional_currencies']) && !empty($settings_encrypted['openexchangerates_app_id'])) {
 
                 $this->load->model('shop/shop_currency_model');
+
+                //  Force a refresh of the settings
+                app_setting(null, 'shop', true);
 
                 if (!$this->shop_currency_model->sync()) {
 
@@ -448,7 +461,7 @@ class Settings extends \AdminController
         //  Check if valid gateway
         $this->load->model('shop/shop_payment_gateway_model');
 
-        $gateway    = $this->uri->segment(4) ? strtolower($this->uri->segment(4)) : '';
+        $gateway    = $this->uri->segment(5) ? strtolower($this->uri->segment(5)) : '';
         $available = $this->shop_payment_gateway_model->isAvailable($gateway);
 
         if ($available) {

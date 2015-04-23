@@ -178,7 +178,7 @@ class Basket extends \ApiController
     public function postSetCurrency()
     {
         $out      = array();
-        $currency = $this->shop_currency_model->get_by_code($this->input->post('currency'));
+        $currency = $this->shop_currency_model->getByCode($this->input->post('currency'));
 
         if ($currency) {
 

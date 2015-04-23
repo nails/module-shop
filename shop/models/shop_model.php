@@ -122,7 +122,7 @@ class NAILS_Shop_model extends NAILS_Model
         }
 
         //  Fetch the user's render currency
-        $userCurrency = $this->shop_currency_model->get_by_code($currencyCode);
+        $userCurrency = $this->shop_currency_model->getByCode($currencyCode);
 
         if (!$userCurrency) {
 
@@ -196,12 +196,12 @@ class NAILS_Shop_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Fetch base currency
-        $base = $this->shop_currency_model->get_by_code(app_setting('base_currency', 'shop'));
+        $base = $this->shop_currency_model->getByCode(app_setting('base_currency', 'shop'));
 
         //  If no base currency is found, default to GBP
         if (!$base) {
 
-            $base = $this->shop_currency_model->get_by_code('GBP');
+            $base = $this->shop_currency_model->getByCode('GBP');
 
             if (!$base) {
 
@@ -294,7 +294,7 @@ class NAILS_Shop_model extends NAILS_Model
 
                 } else {
 
-                    $currency = $this->shop_currency_model->get_by_code($forCurrency);
+                    $currency = $this->shop_currency_model->getByCode($forCurrency);
                 }
 
                 if ($currency) {

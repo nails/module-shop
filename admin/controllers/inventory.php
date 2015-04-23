@@ -282,7 +282,7 @@ class Inventory extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Fetch data, this data is used in both the view and the form submission
-        $this->data['currencies']    = $this->shop_currency_model->get_all_supported();
+        $this->data['currencies']    = $this->shop_currency_model->getAllSupported();
         $this->data['product_types'] = $this->shop_product_type_model->get_all();
 
         if (!$this->data['product_types']) {
@@ -432,7 +432,7 @@ class Inventory extends \AdminController
 
         //  Fetch item
         $this->data['item'] = $this->shop_product_model->get_by_id($this->uri->segment(5));
-dumpanddie($this->data['item']);
+// dumpanddie($this->data['item']);
         if (!$this->data['item']) {
 
             $this->session->set_flashdata('error', 'I could not find a product by that ID.');
@@ -455,7 +455,7 @@ dumpanddie($this->data['item']);
             redirect('admin/shop/manage/productType/create');
         }
 
-        $this->data['currencies'] = $this->shop_currency_model->get_all_supported();
+        $this->data['currencies'] = $this->shop_currency_model->getAllSupported();
 
         //  Fetch product type meta fields
         $this->data['product_types_meta'] = array();
@@ -548,7 +548,7 @@ dumpanddie($this->data['item']);
         $this->asset->load('mustache.js/mustache.js', 'NAILS-BOWER');
         $this->asset->load('nails.admin.shop.inventory.createEdit.min.js', 'NAILS');
 
-        $uploadtoken = $this->cdn->generate_api_upload_token(activeUser('id'));
+        $uploadToken = $this->cdn->generate_api_upload_token(activeUser('id'));
 
         $this->asset->inline('var _edit = new NAILS_Admin_Shop_Inventory_Create_Edit();', 'JS');
         $this->asset->inline('_edit.init(' . json_encode($this->data['product_types']) . ', "' . $uploadToken . '");', 'JS');

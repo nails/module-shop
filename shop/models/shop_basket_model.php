@@ -227,21 +227,21 @@ class NAILS_Shop_basket_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Format totals
-        $basket->totals->base_formatted->item     = $this->shop_currency_model->format_base($basket->totals->base->item);
-        $basket->totals->base_formatted->shipping = $this->shop_currency_model->format_base($basket->totals->base->shipping);
-        $basket->totals->base_formatted->tax      = $this->shop_currency_model->format_base($basket->totals->base->tax);
-        $basket->totals->base_formatted->grand    = $this->shop_currency_model->format_base($basket->totals->base->grand);
+        $basket->totals->base_formatted->item     = $this->shop_currency_model->formatBase($basket->totals->base->item);
+        $basket->totals->base_formatted->shipping = $this->shop_currency_model->formatBase($basket->totals->base->shipping);
+        $basket->totals->base_formatted->tax      = $this->shop_currency_model->formatBase($basket->totals->base->tax);
+        $basket->totals->base_formatted->grand    = $this->shop_currency_model->formatBase($basket->totals->base->grand);
 
-        $basket->totals->user_formatted->item     = $this->shop_currency_model->format_user($basket->totals->user->item);
-        $basket->totals->user_formatted->shipping = $this->shop_currency_model->format_user($basket->totals->user->shipping);
-        $basket->totals->user_formatted->tax      = $this->shop_currency_model->format_user($basket->totals->user->tax);
-        $basket->totals->user_formatted->grand    = $this->shop_currency_model->format_user($basket->totals->user->grand);
+        $basket->totals->user_formatted->item     = $this->shop_currency_model->formatUser($basket->totals->user->item);
+        $basket->totals->user_formatted->shipping = $this->shop_currency_model->formatUser($basket->totals->user->shipping);
+        $basket->totals->user_formatted->tax      = $this->shop_currency_model->formatUser($basket->totals->user->tax);
+        $basket->totals->user_formatted->grand    = $this->shop_currency_model->formatUser($basket->totals->user->grand);
 
         // --------------------------------------------------------------------------
 
         //  Save to cache and spit it back
         $this->_set_cache($this->cacheKey, $basket);
-
+// dumpanddie($basket);
         return $basket;
     }
 
@@ -281,13 +281,14 @@ class NAILS_Shop_basket_model extends NAILS_Model
      */
     public function get_total($formatted = true)
     {
+        $basket = $this->get();
         if ($formatted) {
 
-            return $_out->totals->user_formatted->grand;
+            return $basket->totals->user_formatted->grand;
 
         } else {
 
-            return $_out->totals->user->grand;
+            return $basket->totals->user->grand;
         }
     }
 
