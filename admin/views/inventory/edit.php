@@ -4,185 +4,177 @@
         <li class="tab active">
             <a href="#" data-tab="tab-basics">Product Info</a>
         </li>
-
         <li class="tab">
             <a href="#" id="tabber-meta" data-tab="tab-meta">Product Meta</a>
         </li>
-
         <li class="tab">
             <a href="#" id="tabber-description" data-tab="tab-description">Description</a>
         </li>
-
         <li class="tab">
             <a href="#" id="tabber-variations" data-tab="tab-variations">Variations</a>
         </li>
-
         <li class="tab">
             <a href="#" id="tabber-gallery" data-tab="tab-gallery">Gallery</a>
         </li>
-
         <li class="tab">
             <a href="#" id="tabber-attributes" data-tab="tab-attributes">Attributes</a>
         </li>
-
         <li class="tab">
             <a href="#" id="tabber-ranges-collections" data-tab="tab-ranges-collections">Ranges &amp; Collections</a>
         </li>
-
+        <li class="tab">
+            <a href="#" id="tabber-related" data-tab="tab-related">Releated Products</a>
+        </li>
         <li class="tab">
             <a href="#" id="tabber-seo" data-tab="tab-seo">SEO</a>
         </li>
     </ul>
-
     <section class="tabs pages main-product">
-
         <div class="tab page basics active fieldset" id="tab-basics">
             <?php
 
-                $field             = array();
-                $field['key']      = 'type_id';
-                $field['label']    = 'Type';
-                $field['required'] = true;
-                $field['class']    = 'type_id select2';
-                $field['id']       = 'type_id';
-                $field['info']     = '<a href="#" class="manage-types awesome orange small">Manage Product Types</a>';
-                $field['default']  = !empty($item->type->id) ? $item->type->id : null;
+            $field             = array();
+            $field['key']      = 'type_id';
+            $field['label']    = 'Type';
+            $field['required'] = true;
+            $field['class']    = 'type_id select2';
+            $field['id']       = 'type_id';
+            $field['info']     = '<a href="#" class="manage-types awesome orange small">Manage Product Types</a>';
+            $field['default']  = !empty($item->type->id) ? $item->type->id : null;
 
-                if (count($product_types_flat) == 1) {
+            if (count($product_types_flat) == 1) {
 
-                    reset($product_types_flat);
-                    $_id = key($product_types_flat);
+                reset($product_types_flat);
+                $_id = key($product_types_flat);
 
-                    //  Only one product type, no need to render a drop down
-                    echo '<input type="hidden" name="' . $field['key'] . '" value="' . $_id . '" class="' . $field['key'] . '">';
+                //  Only one product type, no need to render a drop down
+                echo '<input type="hidden" name="' . $field['key'] . '" value="' . $_id . '" class="' . $field['key'] . '">';
 
-                } else {
+            } else {
 
-                    echo form_field_dropdown($field, $product_types_flat);
+                echo form_field_dropdown($field, $product_types_flat);
+            }
+
+            // --------------------------------------------------------------------------
+
+            $field                = array();
+            $field['key']         = 'label';
+            $field['label']       = 'Label';
+            $field['required']    = true;
+            $field['placeholder'] = 'Give this product a label';
+            $field['default']     = !empty($item->label) ? $item->label : '';
+
+            echo form_field($field);
+
+            // --------------------------------------------------------------------------
+
+            $field             = array();
+            $field['key']      = 'is_active';
+            $field['label']    = 'Is Active';
+            $field['default']  = true;
+            $field['text_on']  = strtoupper(lang('yes'));
+            $field['text_off'] = strtoupper(lang('no'));
+            $field['default']  = isset($item->is_active) ? $item->is_active : true;
+            $field['tip']      = 'If not active then validation rules will be relaxed and the product can be saved as a draft.';
+
+            echo form_field_boolean($field);
+
+            // --------------------------------------------------------------------------
+
+            $field          = array();
+            $field['key']   = 'brands[]';
+            $field['label'] = 'Brands';
+            $field['class'] = 'brands select2';
+            $field['info']  = '<a href="#" class="manage-brands awesome orange small">Manage Brands</a>';
+            $tip            = 'If this product contains multiple brands (e.g a hamper) specify them all here.';
+
+            //  Defaults
+            if ($this->input->post('brands')) {
+
+                $field['default'] = $this->input->post('brands');
+
+            } elseif (!empty($item->brands)) {
+
+                $field['default'] = array();
+
+                //  Build an array which matches the potential $_POST array
+                foreach ($item->brands as $brand) {
+
+                    $field['default'][] = $brand->id;
                 }
+            }
 
-                // --------------------------------------------------------------------------
+            echo form_field_dropdown_multiple($field, $brands, $tip);
 
-                $field                = array();
-                $field['key']         = 'label';
-                $field['label']       = 'Label';
-                $field['required']    = true;
-                $field['placeholder'] = 'Give this product a label';
-                $field['default']     = !empty($item->label) ? $item->label : '';
+            // --------------------------------------------------------------------------
 
-                echo form_field($field);
+            $field          = array();
+            $field['key']   = 'categories[]';
+            $field['label'] = 'Categories';
+            $field['class'] = 'categories select2';
+            $field['info']  = '<a href="#" class="manage-categories awesome orange small">Manage Categories</a>';
+            $tip            = 'Specify which categories this product falls into.';
 
-                // --------------------------------------------------------------------------
+            //  Defaults
+            if ($this->input->post('categories')) {
 
-                $field             = array();
-                $field['key']      = 'is_active';
-                $field['label']    = 'Is Active';
-                $field['default']  = true;
-                $field['text_on']  = strtoupper(lang('yes'));
-                $field['text_off'] = strtoupper(lang('no'));
-                $field['default']  = isset($item->is_active) ? $item->is_active : true;
-                $field['tip']      = 'If not active then validation rules will be relaxed and the product can be saved as a draft.';
+                $field['default'] = $this->input->post('categories');
 
-                echo form_field_boolean($field);
+            } elseif (!empty($item->categories)) {
 
-                // --------------------------------------------------------------------------
+                $field['default'] = array();
 
-                $field          = array();
-                $field['key']   = 'brands[]';
-                $field['label'] = 'Brands';
-                $field['class'] = 'brands select2';
-                $field['info']  = '<a href="#" class="manage-brands awesome orange small">Manage Brands</a>';
-                $tip            = 'If this product contains multiple brands (e.g a hamper) specify them all here.';
+                //  Build an array which matches the potential $_POST array
+                foreach ($item->categories as $category) {
 
-                //  Defaults
-                if ($this->input->post('brands')) {
-
-                    $field['default'] = $this->input->post('brands');
-
-                } elseif (!empty($item->brands)) {
-
-                    $field['default'] = array();
-
-                    //  Build an array which matches the potential $_POST array
-                    foreach ($item->brands as $brand) {
-
-                        $field['default'][] = $brand->id;
-                    }
+                    $field['default'][] = $category->id;
                 }
+            }
 
-                echo form_field_dropdown_multiple($field, $brands, $tip);
+            echo form_field_dropdown_multiple($field, $categories, $tip);
 
-                // --------------------------------------------------------------------------
+            // --------------------------------------------------------------------------
 
-                $field          = array();
-                $field['key']   = 'categories[]';
-                $field['label'] = 'Categories';
-                $field['class'] = 'categories select2';
-                $field['info']  = '<a href="#" class="manage-categories awesome orange small">Manage Categories</a>';
-                $tip            = 'Specify which categories this product falls into.';
+            $field          = array();
+            $field['key']   = 'tags[]';
+            $field['label'] = 'Tags';
+            $field['class'] = 'tags select2';
+            $field['info']  = '<a href="#" class="manage-tags awesome orange small">Manage Tags</a>';
+            $tip            = 'Use tags to associate products together, e.g. events.';
 
-                //  Defaults
-                if ($this->input->post('categories')) {
+            //  Defaults
+            if ($this->input->post('tags')) {
 
-                    $field['default'] = $this->input->post('categories');
+                $field['default'] = $this->input->post('tags');
 
-                } elseif (!empty($item->categories)) {
+            } elseif (!empty($item->tags)) {
 
-                    $field['default'] = array();
+                $field['default'] = array();
 
-                    //  Build an array which matches the potential $_POST array
-                    foreach ($item->categories as $category) {
+                //  Build an array which matches the potential $_POST array
+                foreach ($item->tags as $tag) {
 
-                        $field['default'][] = $category->id;
-                    }
+                    $field['default'][] = $tag->id;
                 }
+            }
 
-                echo form_field_dropdown_multiple($field, $categories, $tip);
+            echo form_field_dropdown_multiple($field, $tags, $tip);
 
-                // --------------------------------------------------------------------------
+            // --------------------------------------------------------------------------
 
-                $field          = array();
-                $field['key']   = 'tags[]';
-                $field['label'] = 'Tags';
-                $field['class'] = 'tags select2';
-                $field['info']  = '<a href="#" class="manage-tags awesome orange small">Manage Tags</a>';
-                $tip            = 'Use tags to associate products together, e.g. events.';
+            $field             = array();
+            $field['key']      = 'tax_rate_id';
+            $field['label']    = 'Tax Rate';
+            $field['class']    = 'tax_rate_id select2';
+            $field['required'] = true;
+            $field['info']     = '<a href="#" class="manage-tax-rates awesome orange small">Manage Tax Rates</a>';
+            $field['default']  = !empty($item->tax_rate->id) ? $item->tax_rate->id : null;
 
-                //  Defaults
-                if ($this->input->post('tags')) {
-
-                    $field['default'] = $this->input->post('tags');
-
-                } elseif (!empty($item->tags)) {
-
-                    $field['default'] = array();
-
-                    //  Build an array which matches the potential $_POST array
-                    foreach ($item->tags as $tag) {
-
-                        $field['default'][] = $tag->id;
-                    }
-                }
-
-                echo form_field_dropdown_multiple($field, $tags, $tip);
-
-                // --------------------------------------------------------------------------
-
-                $field             = array();
-                $field['key']      = 'tax_rate_id';
-                $field['label']    = 'Tax Rate';
-                $field['class']    = 'tax_rate_id select2';
-                $field['required'] = true;
-                $field['info']     = '<a href="#" class="manage-tax-rates awesome orange small">Manage Tax Rates</a>';
-                $field['default']  = !empty($item->tax_rate->id) ? $item->tax_rate->id : null;
-
-                echo form_field_dropdown($field, $tax_rates);
+            echo form_field_dropdown($field, $tax_rates);
 
             ?>
         </div>
-
         <div class="tab page meta fieldset" id="tab-meta">
-
             <fieldset>
                 <legend>Dates &amp; Times</legend>
                 <?php
@@ -209,7 +201,6 @@
 
                 ?>
             </fieldset>
-
             <?php if (app_setting('enable_external_products', 'shop')) { ?>
             <fieldset>
                 <legend>External Product</legend>
@@ -260,11 +251,9 @@
                 ?>
             </fieldset>
             <?php }; ?>
-
         </div>
-
         <div class="tab page description" id="tab-description">
-        <?php
+            <?php
 
             $field            = array();
             $field['key']     = 'description';
@@ -274,9 +263,8 @@
             echo form_error($field['key'], '<p class="system-alert error">', '</p>');
             echo form_textarea($field['key'], set_value($field['key'], $field['default']), 'class="wysiwyg" id="productDescription"');
 
-        ?>
+            ?>
         </div>
-
         <div class="tab page variations" id="tab-variations">
             <p>
                 Variations allow you to offer the same product but with different attributes (e.g colours or sizes).
@@ -362,7 +350,6 @@
                 </p>
             </div>
         </div>
-
         <div class="tab page gallery" id="tab-gallery" >
             <p>
                 Upload images to the product gallery. Once uploaded you can specify which variations are featured
@@ -509,7 +496,6 @@
                 <a href="#" class="awesome small orange manage-attributes">Manage Attributes</a>
             </p>
         </div>
-
         <div class="tab page ranges-collections" id="tab-ranges-collections">
             <p>
                 Specify which ranges and/or collections this product should appear in.
@@ -619,6 +605,38 @@
                 <a href="#" class="awesome small orange manage-collections">Manage Collections</a>
             </p>
         </div>
+        <div class="tab page seo" id="tab-related">
+            <p>
+                One-way product relations can be specified here; related products appear on the product's page.
+            </p>
+            <p>
+                <strong>Related</strong>
+            </p>
+            <p>
+            <?php
+
+                if (isset($relatedProducts)) {
+
+                    $default = array();
+                    foreach ($relatedProducts as $relatedItem) {
+                        $default[] = $relatedItem->id;
+                    }
+                    $default = implode(',', $default);
+
+                } else {
+
+                    $default = null;
+                }
+
+                echo form_input(
+                    'related',
+                    set_value('related', $default),
+                    'class="related" id="related-products" style="width:100%"'
+                );
+
+            ?>
+            </p>
+        </div>
         <div class="tab page seo" id="tab-seo">
             <p>
                 Define some meta information here which will help search engines understand the product. Keep it
@@ -663,7 +681,6 @@
                 ?>
             </fieldset>
         </div>
-
     </section>
     <p>
     <?php

@@ -355,6 +355,13 @@ class NAILS_Shop_category_model extends NAILS_Model
         if (empty($current)) {
 
             return false;
+
+        } else {
+
+            foreach ($current as &$cat) {
+
+                $cat->id = (int) $cat->id;
+            }
         }
 
         //  Fetch parents
@@ -365,6 +372,14 @@ class NAILS_Shop_category_model extends NAILS_Model
             $this->db->select('id,slug,label');
             $this->db->where_in('id', $parents);
             $parents = $this->db->get($this->table)->result();
+
+            if (!empty($parents)) {
+
+                foreach ($parents as &$cat) {
+
+                    $cat->id = (int) $cat->id;
+                }
+            }
         }
 
         //  Finally, build breadcrumbs

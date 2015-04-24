@@ -776,6 +776,17 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
+        //  Product Reviews
+        //  @todo
+        $this->data['productReviews'] = array();
+
+        // --------------------------------------------------------------------------
+
+        //  Related Products
+        $this->data['relatedProducts'] = $this->shop_product_model->getRelatedProducts($this->data['product']->id);
+
+        // --------------------------------------------------------------------------
+
         //  Load views
         $this->load->view('structure/header', $this->data);
         $this->load->view($this->skin->path . 'views/front/product/single', $this->data);

@@ -294,24 +294,6 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
             // --------------------------------------------------------------------------
 
-            //  Map the country codes to names
-            $this->load->model('country_model');
-            $this->data['country'] = $this->country_model->getAllFlat();
-
-            if ($this->data['order']->shipping_address->country) {
-
-                $key = $this->data['order']->shipping_address->country;
-                $this->data['order']->shipping_address->country = $this->data['country'][$key];
-            }
-
-            if ($this->data['order']->billing_address->country) {
-
-                $key = $this->data['order']->billing_address->country;
-                $this->data['order']->billing_address->country = $this->data['country'][$key];
-            }
-
-            // --------------------------------------------------------------------------
-
             //  Empty the basket
             $this->shop_basket_model->destroy();
 
@@ -587,7 +569,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         //  Fetch and check order
         $this->load->model('shop/shop_order_model');
 
-        $this->data['order'] = $this->shop_order_model->get_by_ref($this->uri->rsegment(3));
+        $this->data['order'] = $this->shop_order_model->getByRef($this->uri->rsegment(3));
         if (!$this->data['order'] || $this->uri->rsegment(4) != md5($this->data['order']->code)) {
 
             show_404();
@@ -635,7 +617,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         if ($orderRef) {
 
             $this->shop_payment_gateway_model->checkoutSessionClear();
-            return $this->shop_order_model->get_by_ref($orderRef);
+            return $this->shop_order_model->getByRef($orderRef);
 
         } else {
 

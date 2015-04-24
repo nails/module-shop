@@ -31,6 +31,7 @@ class NAILS_Shop_product_model extends NAILS_Model
         $this->table_range                       = NAILS_DB_PREFIX . 'shop_product_range';
         $this->table_sale                        = NAILS_DB_PREFIX . 'shop_sale_product';
         $this->table_tag                         = NAILS_DB_PREFIX . 'shop_product_tag';
+        $this->table_related                     = NAILS_DB_PREFIX . 'shop_product_related';
         $this->table_variation                   = NAILS_DB_PREFIX . 'shop_product_variation';
         $this->table_variation_gallery           = NAILS_DB_PREFIX . 'shop_product_variation_gallery';
         $this->table_variation_product_type_meta = NAILS_DB_PREFIX . 'shop_product_variation_product_type_meta';
@@ -448,6 +449,16 @@ class NAILS_Shop_product_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
+        //  Related products
+        $_data->related = isset($data['related']) ? explode(',', $data['related']) : array();
+        $_data->related = array_filter($_data->related);
+        $_data->related = array_unique($_data->related);
+        $_data->related = array_map(function($val) {
+            return (int) $val;
+        }, $_data->related);
+
+        // --------------------------------------------------------------------------
+
         //  SEO
         $_data->seo_title       = isset($data['seo_title']) ? $data['seo_title'] : null;
         $_data->seo_description = isset($data['seo_description']) ? $data['seo_description'] : null;
@@ -550,20 +561,21 @@ class NAILS_Shop_product_model extends NAILS_Model
         if ($result) {
 
             /**
-             * The following items are all handled, and error, in the [mostly]
-             * same way loopy loop for clarity and consistency.
+             * The following items are all handled, and error, in [mostly]
+             * the same way; loopy loop for clarity and consistency.
              */
 
             $types = array();
 
-            //                 //Items to loop     //Field name     //Plural human   //Table name
-            $types[]   = array($data->attributes,  'attribute_id',  'attributes',    $this->table_attribute);
-            $types[]   = array($data->brands,      'brand_id',      'brands',        $this->table_brand);
-            $types[]   = array($data->categories,  'category_id',   'categories',    $this->table_category);
-            $types[]   = array($data->collections, 'collection_id', 'collections',   $this->table_collection);
-            $types[]   = array($data->gallery,     'object_id',     'gallery items', $this->table_gallery);
-            $types[]   = array($data->ranges,      'range_id',      'ranges',        $this->table_range);
-            $types[]   = array($data->tags,        'tag_id',        'tags',          $this->table_tag);
+            //                 //Items to loop     //Field name     //Plural human      //Table name
+            $types[]   = array($data->attributes,  'attribute_id',  'attributes',       $this->table_attribute);
+            $types[]   = array($data->brands,      'brand_id',      'brands',           $this->table_brand);
+            $types[]   = array($data->categories,  'category_id',   'categories',       $this->table_category);
+            $types[]   = array($data->collections, 'collection_id', 'collections',      $this->table_collection);
+            $types[]   = array($data->gallery,     'object_id',     'gallery items',    $this->table_gallery);
+            $types[]   = array($data->ranges,      'range_id',      'ranges',           $this->table_range);
+            $types[]   = array($data->tags,        'tag_id',        'tags',             $this->table_tag);
+            $types[]   = array($data->related,     'related_id',    'related products', $this->table_related);
 
             foreach ($types as $type) {
 
@@ -951,6 +963,29 @@ class NAILS_Shop_product_model extends NAILS_Model
             return $posts;
         }
 
+        // --------------------------------------------------------------------------
+
+        /**
+         * For consistency, we're going to create a 'base' price_raw object here,
+         * where everything is 0. the code below can fill in the gaps where appropriate
+         */
+
+        $supportedCurrency     = $this->shop_currency_model->getAllSupported();
+        $supportedCurrencyFlat = array();
+        $basePriceRaw          = new \stdClass();
+
+        foreach ($supportedCurrency as $currency) {
+
+            $supportedCurrencyFlat[] = $currency->code;
+
+            $basePriceRaw->{$currency->code}             = new \stdClass();
+            $basePriceRaw->{$currency->code}->price      = 0;
+            $basePriceRaw->{$currency->code}->sale_price = 0;
+            $basePriceRaw->{$currency->code}->currency   = $currency;
+        }
+
+        // --------------------------------------------------------------------------
+
         foreach ($products as $product) {
 
             //  Format
@@ -982,7 +1017,9 @@ class NAILS_Shop_product_model extends NAILS_Model
             $product->categories = $this->db->get($this->table_category . ' pc')->result();
             foreach ($product->categories as $category) {
 
-                $category->url = $this->shop_category_model->format_url($category->slug);
+                $category->id          = (int) $category->id;
+                $category->breadcrumbs = json_decode($category->breadcrumbs);
+                $category->url         = $this->shop_category_model->format_url($category->slug);
             }
 
             //  Collections
@@ -1107,22 +1144,21 @@ class NAILS_Shop_product_model extends NAILS_Model
 
                 $this->db->select('pvp.price, pvp.sale_price, pvp.currency');
                 $this->db->where('pvp.variation_id', $v->id);
+                $this->db->where_in('pvp.currency', $supportedCurrencyFlat);
                 $_price = $this->db->get($this->table_variation_price . ' pvp')->result();
 
-                $v->price_raw = new \stdClass();
+                $v->price_raw = $basePriceRaw;
                 $v->price     = new \stdClass();
+
+                //  Set up a base object first, for consistency
 
                 foreach ($_price as $price) {
 
                     $currencyCode = $price->currency;
 
-                    $v->price_raw->{$currencyCode}           = $price;
-                    $v->price_raw->{$currencyCode}->currency = $this->shop_currency_model->getByCode($currencyCode);
-
                     //  Cast as integer
-
-                    $v->price_raw->{$currencyCode}->price      = (int) $v->price_raw->{$currencyCode}->price;
-                    $v->price_raw->{$currencyCode}->sale_price = (int) $v->price_raw->{$currencyCode}->sale_price;
+                    $v->price_raw->{$currencyCode}->price      = (int) $price->price;
+                    $v->price_raw->{$currencyCode}->sale_price = (int) $price->sale_price;
                 }
 
                 $this->formatVariationObject($v);
@@ -1623,6 +1659,29 @@ class NAILS_Shop_product_model extends NAILS_Model
 
     // --------------------------------------------------------------------------
 
+    public function getRelatedProducts($productId)
+    {
+        $this->db->select('related_id');
+        $this->db->where('product_id', $productId);
+        $result = $this->db->get($this->table_related)->result();
+
+        if (empty($result)) {
+
+            return array();
+
+        } else {
+
+            $ids = array();
+            foreach ($result as $item) {
+                $ids[] = $item->related_id;
+            }
+
+            return $this->get_by_ids($ids);
+        }
+    }
+
+    // --------------------------------------------------------------------------
+
     /**
      * This method applies the conditionals which are common across the get_*()
      * methods and the count() method.
@@ -1701,6 +1760,8 @@ class NAILS_Shop_product_model extends NAILS_Model
              * 'cause Active Record is a big pile of $%!@
              */
 
+            $this->load->helper('string');
+            $data['keywords'] = removeStopWords($data['keywords']);
             $search = $this->db->escape_like_str($data['keywords']);
 
             $where   = array();
@@ -2249,10 +2310,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
             //  Append the parent category/categories names onto the string
             foreach ($product->categories as $category) {
-
-                $breadcrumbs = json_decode($category->breadcrumbs);
-
-                foreach ($breadcrumbs as $crumb) {
+                foreach ($category->breadcrumbs as $crumb) {
 
                     $description .= strtolower($crumb->label);
                 }

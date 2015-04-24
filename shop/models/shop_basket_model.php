@@ -94,16 +94,20 @@ class NAILS_Shop_basket_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
-     * Takes the internal _basket object and fills it out a little.
+     * Takes the internal $this->basket object and fills it out a little.
+     * @param  boolean $skipCache Whether to skip the cache or not
      * @return stdClass
      */
-    public function get()
+    public function get($skipCache = false)
     {
-        $cache = $this->_get_cache($this->cacheKey);
+        if (!empty($skipCache)) {
 
-        if (!empty($cache)) {
+            $cache = $this->_get_cache($this->cacheKey);
 
-            return $cache;
+            if (!empty($cache)) {
+
+                return $cache;
+            }
         }
 
         // --------------------------------------------------------------------------
@@ -189,8 +193,15 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
+        //  Determine the shipping Type
+        $basket->shipping->user          = $this->basket->shipping->user;
+        $basket->shipping->type          = $this->getShippingType();
+        $basket->shipping->isDeliverable = $this->isDeliverable();
+
+        // --------------------------------------------------------------------------
+
         //  Calculate shipping costs
-        if ($basket->shipping->type === 'DELIVER') {
+        if ($basket->shipping->type === 'DELIVER' || $basket->shipping->type === 'DELIVER_COLLECT') {
 
             $this->load->model('shop/shop_shipping_driver_model');
             $_shipping_costs = $this->shop_shipping_driver_model->calculate($basket);
@@ -241,7 +252,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
         //  Save to cache and spit it back
         $this->_set_cache($this->cacheKey, $basket);
-// dumpanddie($basket);
+
         return $basket;
     }
 
@@ -666,7 +677,38 @@ class NAILS_Shop_basket_model extends NAILS_Model
      */
     public function getShippingType()
     {
-        return $this->basket->shipping->type;
+        /**
+         * If the basket is a DELIVER basket then check if there are any collect only
+         * items. If we find a collect only item then mark as DELIVER_COLLECT, unless
+         * ALL the items are for colelct in which case it's a COLLECT order.
+         */
+
+        if ($this->basket->shipping->user === 'DELIVER') {
+
+            $numCollectOnlyItems = 0;
+            foreach ($this->basket->items as $item) {
+                if ($item->variant->ship_collection_only) {
+                    $numCollectOnlyItems++;
+                }
+            }
+
+            if ($numCollectOnlyItems > 0 && $numCollectOnlyItems < count($this->basket->items)) {
+
+                return 'DELIVER_COLLECT';
+
+            } elseif ($numCollectOnlyItems > 0 && $numCollectOnlyItems === count($this->basket->items)) {
+
+                return 'COLLECT';
+
+            } else {
+
+                return 'DELIVER';
+            }
+
+        } else {
+
+            return $this->basket->shipping->user;
+        }
     }
 
     // --------------------------------------------------------------------------
@@ -679,7 +721,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
     {
         if ($deliveryType == 'COLLECT' || $deliveryType == 'DELIVER') {
 
-            $this->basket->shipping->type = $deliveryType;
+            $this->basket->shipping->user = $deliveryType;
 
             //  Invalidate the basket cache
             $this->saveSession();
@@ -702,13 +744,31 @@ class NAILS_Shop_basket_model extends NAILS_Model
      */
     public function removeShippingType()
     {
-        $this->basket->shipping->type = $this->defaultShippingType();
+        $this->basket->shipping->user = $this->defaultShippingType();
 
         //  Invalidate the basket cache
         $this->saveSession();
         $this->_unset_cache($this->cacheKey);
 
         return true;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns whether the basket is deliverable or not
+     * @return boolean
+     */
+    public function isDeliverable()
+    {
+        $numCollectOnlyItems = 0;
+        foreach ($this->basket->items as $item) {
+            if ($item->variant->ship_collection_only) {
+                $numCollectOnlyItems++;
+            }
+        }
+
+        return $numCollectOnlyItems !== count($this->basket->items);
     }
 
     // --------------------------------------------------------------------------
@@ -973,7 +1033,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
         $_save->items            = $this->basket->items;
         $_save->order            = $this->basket->order;
         $_save->customer_details = $this->basket->customer->details;
-        $_save->shipping_type    = $this->basket->shipping->type;
+        $_save->shipping_type    = $this->basket->shipping->user;
         $_save->shipping_details = $this->basket->shipping->details;
         $_save->payment_gateway  = $this->basket->payment_gateway;
         $_save->voucher          = $this->basket->voucher->id;
@@ -1066,7 +1126,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
         $out->customer          = new \stdClass();
         $out->customer->details = $this->defaultCustomerDetails();
         $out->shipping          = new \stdClass();
-        $out->shipping->type    = $this->defaultShippingType();
+        $out->shipping->user    = $this->defaultShippingType();
         $out->shipping->details = $this->defaultShippingDetails();
         $out->payment_gateway   = $this->defaultPaymentGateway();
         $out->voucher           = $this->defaultVoucher();

@@ -1,4 +1,21 @@
-<div class="group-shop orders single">
+<?php
+
+    $numCollectItems = 0;
+
+    foreach ($order->items as $item) {
+        if ($item->ship_collection_only) {
+            $numCollectItems++;
+        }
+    }
+
+?>
+<div
+    id="order"
+    class="group-shop orders single"
+    data-fulfilment-status="<?=$order->fulfilment_status?>"
+    data-delivery-type="<?=$order->delivery_type?>"
+    data-num-collect-items="<?=$numCollectItems?>"
+>
     <div class="col-3-container">
         <div class="col-3">
             <fieldset>
@@ -35,6 +52,57 @@
 
                                         //  @todo: Show voucher details
                                         echo 'TODO: voucher display';
+                                    }
+
+                                ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">Sub Total</td>
+                                <td class="value">
+                                <?php
+
+                                    echo $order->totals->base_formatted->item;
+
+                                    if ($order->currency != $order->base_currency) {
+
+                                        echo '<small>';
+                                            echo 'User checked out in ' . $order->currency . ': ' . $order->totals->user_formatted->item;
+                                        echo '</small>';
+                                    }
+
+                                ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">Shipping</td>
+                                <td class="value">
+                                <?php
+
+                                    echo $order->totals->base_formatted->shipping;
+
+                                    if ($order->currency != $order->base_currency) {
+
+                                        echo '<small>';
+                                            echo 'User checked out in ' . $order->currency . ': ' . $order->totals->user_formatted->shipping;
+                                        echo '</small>';
+                                    }
+
+                                ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">Tax</td>
+                                <td class="value">
+                                <?php
+
+                                    echo $order->totals->base_formatted->tax;
+
+                                    if ($order->currency != $order->base_currency) {
+
+                                        echo '<small>';
+                                            echo 'User checked out in ' . $order->currency . ': ' . $order->totals->user_formatted->tax;
+                                        echo '</small>';
                                     }
 
                                 ?>
@@ -105,9 +173,15 @@
                                 <td class="value">
                                 <?php
 
-                                    $_address = array_filter((array) $order->billing_address);
-                                    echo implode('<br />', $_address);
-                                    echo '<small>' . anchor('https://www.google.com/maps/?q=' . urlencode(implode(', ', $_address)), '<b class="fa fa-map-marker"></b> Map', 'target="_blank"') . '</small>';
+                                    $address = array_filter((array) $order->billing_address);
+                                    echo implode('<br />', $address);
+                                    echo '<small>';
+                                        echo anchor(
+                                            'https://www.google.com/maps/?q=' . urlencode(implode(', ', $address)),
+                                            '<b class="fa fa-map-marker"></b> Map',
+                                            'target="_blank"'
+                                        );
+                                    echo '</small>';
 
                                 ?>
                                 </td>
@@ -117,9 +191,15 @@
                                 <td class="value">
                                 <?php
 
-                                    $_address = array_filter((array) $order->shipping_address);
-                                    echo implode('<br />', $_address);
-                                    echo '<small>' . anchor('https://www.google.com/maps/?q=' . urlencode(implode(', ', $_address)), '<b class="fa fa-map-marker"></b> Map', 'target="_blank"') . '</small>';
+                                    $address = array_filter((array) $order->shipping_address);
+                                    echo implode('<br />', $address);
+                                    echo '<small>';
+                                        echo anchor(
+                                            'https://www.google.com/maps/?q=' . urlencode(implode(', ', $address)),
+                                            '<b class="fa fa-map-marker"></b> Map',
+                                            'target="_blank"'
+                                        );
+                                    echo '</small>';
 
                                 ?>
                                 </td>
@@ -190,9 +270,9 @@
 
                             default:
 
-                                $_status = ucwords(strtolower($order->status));
-                                echo '<h1>' . $_status . '</h1>';
-                                echo '<p>"' . $_status . '" is not an order status I understand, there may be a problem.</p>';
+                                $status = ucwords(strtolower($order->status));
+                                echo '<h1>' . $status . '</h1>';
+                                echo '<p>"' . $status . '" is not an order status I understand, there may be a problem.</p>';
                                 break;
 
                         }
@@ -239,10 +319,10 @@
 
                             default:
 
-                                $_status = ucwords(strtolower($order->fulfilment_status));
-                                echo '<h1>' . $_status . '</h1>';
+                                $status = ucwords(strtolower($order->fulfilment_status));
+                                echo '<h1>' . $status . '</h1>';
                                 echo '<p>';
-                                echo '"' . $_status . '" is not a fulfilment status I understand, there may be a problem.';
+                                echo '"' . $status . '" is not a fulfilment status I understand, there may be a problem.';
                                 echo '</p>';
                                 break;
                         }
@@ -256,7 +336,7 @@
     <fieldset class="notcollapsable">
         <legend>Products</legend>
         <div class="table-responsive">
-            <table>
+            <table class="order-products">
                 <thead>
                     <tr>
                         <th>Item</th>
@@ -281,6 +361,13 @@
                                 echo '<td>';
                                     echo $item->product_label;
                                     echo $item->variant_label != $item->product_label ? '<br /><small>' . $item->variant_label . '</small>' : '';
+
+                                    if ($item->ship_collection_only) {
+
+                                        echo '<p class="system-alert message skinny">';
+                                            echo '<strong>Note:</strong> This item is for collection only.';
+                                        echo '</p>';
+                                    }
                                 echo '</td>';
                                 echo '<td>';
                                     echo $item->type->label;
@@ -316,7 +403,6 @@
                                     echo anchor('', 'Refund', 'class="awesome small todo"');
                                 echo '</td>';
                             echo '</tr>';
-
                         }
 
                     } else {
@@ -324,7 +410,6 @@
                         echo '<tr>';
                             echo '<td colspan="9" class="no-data">No Items</td>';
                         echo '</tr>';
-
                     }
 
                 ?>

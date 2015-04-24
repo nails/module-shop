@@ -64,6 +64,14 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
+        if (count($this->data['basket']->items) && !$this->data['basket']->shipping->isDeliverable) {
+
+            $this->data['message']  = '<strong>We won\'t deliver this order</strong>';
+            $this->data['message'] .= '<br />All items in your order must be collected.';
+        }
+
+        // --------------------------------------------------------------------------
+
         /**
          * Continue shopping URL. Skins can render a button which takes the user to a
          * sensible place to keep shopping
@@ -374,12 +382,12 @@ class NAILS_Basket extends NAILS_Shop_Controller
         if ($this->shop_basket_model->addShippingType('COLLECT')) {
 
             $status  = 'success';
-            $message = '<strong>Success!</strong> Your basket was set as a "collection" order.';
+            $message = '<strong>Success!</strong> Your basket was set as a "Collection" order.';
 
         } else {
 
             $status   = 'error';
-            $message  = '<strong>Sorry,</strong> failed to set your basket as a "collection" order. ';
+            $message  = '<strong>Sorry,</strong> failed to set your basket as a "Collection" order. ';
             $message .= $this->shop_basket_model->last_error();
         }
 
@@ -397,15 +405,41 @@ class NAILS_Basket extends NAILS_Shop_Controller
      */
     public function set_as_delivery()
     {
-        if ($this->shop_basket_model->addShippingType('DELIVER')) {
+        //  Check that the basket can in fact be set as delivery
+        $numCollectOnlyItems = 0;
+        $basket              = $this->shop_basket_model->get();
+
+        if (!$basket->shipping->isDeliverable) {
+
+            $status   = 'error';
+            $message  = '<strong>Sorry,</strong> failed to set your basket as a "delivery" order. ';
+            $message .= 'Your order does not contain any deliverable items.';
+
+        } elseif ($this->shop_basket_model->addShippingType('DELIVER')) {
 
             $status  = 'success';
-            $message = '<strong>Success!</strong> Your basket was set as a "delivery" order.';
+            $message = '<strong>Success!</strong> Your basket was set as a "Delivery" order.';
+
+            /**
+             * Refresh the basket, we need to check if this is a DELIVER_COLLECT order now,
+             * if it is, we should give the user a heads-up.
+             */
+
+            $basket = $this->shop_basket_model->get(true);
+
+            if ($basket->shipping->type) {
+
+                $this->session->set_flashdata(
+                    'message',
+                    '<strong>We will only partially deliver this order</strong>' .
+                    '<br />Your order contains items which are collect only.'
+                );
+            }
 
         } else {
 
             $status   = 'error';
-            $message  = '<strong>Sorry,</strong> failed to set your basket as a "delivery" order. ';
+            $message  = '<strong>Sorry,</strong> failed to set your basket as a "Delivery" order. ';
             $message .= $this->shop_basket_model->last_error();
         }
 

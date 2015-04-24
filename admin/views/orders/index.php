@@ -61,7 +61,6 @@
                                     if ($order->currency !== $order->base_currency) {
 
                                         echo '<small>' . $order->totals->user_formatted->item . '</small>';
-
                                     }
 
                                 ?>
@@ -74,7 +73,6 @@
                                     if ($order->currency !== $order->base_currency) {
 
                                         echo '<small>' . $order->totals->user_formatted->tax . '</small>';
-
                                     }
 
                                 ?>
@@ -87,7 +85,6 @@
                                     if ($order->currency !== $order->base_currency) {
 
                                         echo '<small>' . $order->totals->user_formatted->shipping . '</small>';
-
                                     }
 
                                 ?>
@@ -100,13 +97,11 @@
                                     if ($order->currency !== $order->base_currency) {
 
                                         echo '<small>' . $order->totals->user_formatted->grand . '</small>';
-
                                     }
 
                                 ?>
                                 </td>
                                 <?php
-
 
                                     switch ($order->status) {
 
@@ -241,15 +236,3 @@
 
     ?>
 </div>
-<script type="text/javascript">
-
-    function mark_fulfilled(order_id)
-    {
-        $('#order-' + order_id).find('td.fulfilment').removeClass('no').addClass('yes').text('<?=lang('yes')?>');
-    }
-
-    function mark_unfulfilled(order_id)
-    {
-        $('#order-' + order_id).find('td.fulfilment').removeClass('yes').addClass('no').text('<?=lang('no')?>');
-    }
-</script>

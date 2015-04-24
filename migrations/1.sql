@@ -84,3 +84,5 @@ SET
 
 ALTER TABLE `nails_shop_product_variation_price` CHANGE `price` `price` INT(11) NOT NULL;
 ALTER TABLE `nails_shop_product_variation_price` CHANGE `sale_price` `sale_price` INT(11) NOT NULL;
+ALTER TABLE `nails_shop_order_product` ADD `ship_collection_only` TINYINT(1)  UNSIGNED  NOT NULL  DEFAULT '0'  AFTER `tax_rate_id`;
+ALTER TABLE `nails_shop_order` CHANGE `delivery_type` `delivery_type` ENUM('DELIVER','COLLECT', 'DELIVER_COLLECT')  CHARACTER SET utf8  COLLATE utf8_general_ci  NOT NULL  DEFAULT 'DELIVER';

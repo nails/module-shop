@@ -33,7 +33,7 @@ class Order extends \ApiController
     public function getStatus()
     {
         $out   = array();
-        $order = $this->shop_order_model->get_by_ref($this->input->get('ref'));
+        $order = $this->shop_order_model->getByRef($this->input->get('ref'));
 
         if ($order) {
 

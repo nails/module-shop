@@ -416,16 +416,16 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
                     // --------------------------------------------------------------------------
 
                     //  Send notifications to manager(s) and customer
-                    $this->shop_order_model->send_order_notification($order->id, $paymentData, false);
-                    $this->shop_order_model->send_receipt($order->id, $paymentData, false);
+                    $this->shop_order_model->sendOrderNotification($order->id, $paymentData, false);
+                    $this->shop_order_model->sendReceipt($order->id, $paymentData, false);
 
                 } else {
 
                     _LOG('Order is partially paid.');
 
                     //  Send notifications to manager(s) and customer
-                    $this->shop_order_model->send_order_notification($order->id, $paymentData, true);
-                    $this->shop_order_model->send_receipt($order->id, $paymentData, true);
+                    $this->shop_order_model->sendOrderNotification($order->id, $paymentData, true);
+                    $this->shop_order_model->sendReceipt($order->id, $paymentData, true);
                 }
 
                 return true;
@@ -716,16 +716,16 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
             // --------------------------------------------------------------------------
 
             //  Send notifications to manager(s) and customer
-            $this->shop_order_model->send_order_notification($order->id, $paymentData, false);
-            $this->shop_order_model->send_receipt($order->id, $paymentData, false);
+            $this->shop_order_model->sendOrderNotification($order->id, $paymentData, false);
+            $this->shop_order_model->sendReceipt($order->id, $paymentData, false);
 
         } else {
 
             _LOG('Order is partially paid.');
 
             //  Send notifications to manager(s) and customer
-            $this->shop_order_model->send_order_notification($order->id, $paymentData, true);
-            $this->shop_order_model->send_receipt($order->id, $paymentData, true);
+            $this->shop_order_model->sendOrderNotification($order->id, $paymentData, true);
+            $this->shop_order_model->sendReceipt($order->id, $paymentData, true);
         }
 
         return true;

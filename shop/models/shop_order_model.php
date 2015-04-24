@@ -19,6 +19,8 @@ class NAILS_Shop_order_model extends NAILS_Model
     {
         parent::__construct();
         $this->load->model('shop/shop_currency_model');
+        $this->load->model('app_notification_model');
+        $this->load->model('country_model');
 
         $this->table        = NAILS_DB_PREFIX . 'shop_order';
         $this->tablePrefix = 'o';
@@ -388,83 +390,6 @@ class NAILS_Shop_order_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
-     * Deletes an existing object
-     * @param  int  $id The ID of the object to delete
-     * @return bool
-     **/
-    public function delete($id)
-    {
-        $this->db->where('id', $id);
-        $this->db->delete(NAILS_DB_PREFIX . 'shop_order');
-
-        return $this->db->affected_rows() ? true : false;
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Fetches all objects, optionally paginated.
-     * @param int    $page    The page number of the results, if null then no pagination
-     * @param int    $perPage How many items per page of paginated results
-     * @param mixed  $data    Any data to pass to _getcount_common()
-     * @param string $_caller Internal flag to pass to _getcount_common(), contains the calling method
-     * @return array
-     **/
-    public function get_all($page = null, $perPage = null, $data = array(), $_caller = 'GET_ALL')
-    {
-        $this->db->select($this->tablePrefix . '.*');
-        $this->db->select('ue.email, u.first_name, u.last_name, u.gender, u.profile_img,ug.id user_group_id,ug.label user_group_label');
-        $this->db->select('v.code v_code,v.label v_label, v.type v_type, v.discount_type v_discount_type, v.discount_value v_discount_value, v.discount_application v_discount_application');
-        $this->db->select('v.product_type_id v_product_type_id, v.is_active v_is_active, v.is_deleted v_is_deleted, v.valid_from v_valid_from, v.valid_to v_valid_to');
-
-        // --------------------------------------------------------------------------
-
-        $results = parent::get_all($page, $perPage, $data, false, $_caller);
-
-        // --------------------------------------------------------------------------
-
-        foreach ($results as $order) {
-
-            //  Format order object
-            $this->_format_order($order);
-
-            // --------------------------------------------------------------------------
-
-            //  Fetch items associated with this order
-            $order->items = $this->get_items_for_order($order->id);
-        }
-
-        return $results;
-    }
-
-
-    // --------------------------------------------------------------------------
-
-
-    /**
-     * Counts the total amount of orders for a partricular query/search key. Essentially performs
-     * the same query as $this->get_all() but without limiting.
-     *
-     * @access  public
-     * @param   string  $where  An array of where conditions
-     * @param   mixed   $search A string containing the search terms
-     * @return  int
-     *
-     **/
-    public function count_unfulfilled_orders($where = null, $search = null)
-    {
-        $this->db->where('fulfilment_status', 'UNFULFILLED');
-        $this->db->where('status', 'PAID');
-
-        // --------------------------------------------------------------------------
-
-        //  Execute Query
-        return $this->db->count_all_results(NAILS_DB_PREFIX . 'shop_order o');
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
      * This method applies the conditionals which are common across the get_*()
      * methods and the count() method.
      * @param array  $data    Data passed from the calling method
@@ -473,6 +398,20 @@ class NAILS_Shop_order_model extends NAILS_Model
      **/
     protected function _getcount_common($data = array(), $_caller = null)
     {
+        //  Selects
+        $this->db->select($this->tablePrefix . '.*');
+        $this->db->select('ue.email, u.first_name, u.last_name, u.gender, u.profile_img,ug.id user_group_id,ug.label user_group_label');
+        $this->db->select('v.code v_code,v.label v_label, v.type v_type, v.discount_type v_discount_type, v.discount_value v_discount_value, v.discount_application v_discount_application');
+        $this->db->select('v.product_type_id v_product_type_id, v.is_active v_is_active, v.is_deleted v_is_deleted, v.valid_from v_valid_from, v.valid_to v_valid_to');
+
+        //  Joins
+        $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = o.user_id', 'LEFT');
+        $this->db->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.user_id = u.id AND ue.is_primary = 1', 'LEFT');
+        $this->db->join(NAILS_DB_PREFIX . 'user_group ug', 'ug.id = u.group_id', 'LEFT');
+        $this->db->join(NAILS_DB_PREFIX . 'shop_voucher v', 'v.id = o.voucher_id', 'LEFT');
+
+        // --------------------------------------------------------------------------
+
         //  Search
         if (!empty($data['keywords'])) {
 
@@ -516,11 +455,6 @@ class NAILS_Shop_order_model extends NAILS_Model
         }
 
         parent::_getcount_common($data, $_caller);
-
-        $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = o.user_id', 'LEFT');
-        $this->db->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.user_id = u.id AND ue.is_primary = 1', 'LEFT');
-        $this->db->join(NAILS_DB_PREFIX . 'user_group ug', 'ug.id = u.group_id', 'LEFT');
-        $this->db->join(NAILS_DB_PREFIX . 'shop_voucher v', 'v.id = o.voucher_id', 'LEFT');
     }
 
     // --------------------------------------------------------------------------
@@ -530,8 +464,12 @@ class NAILS_Shop_order_model extends NAILS_Model
      * @param  int   $ref The ref of the object to fetch
      * @return mixed      stdClass on success, false on failure
      */
-    public function get_by_ref($ref)
+    public function getByRef($ref)
     {
+        if (empty($ref)) {
+            return false;
+        }
+
         if (!isset($data['where'])) {
 
             $data['where'] = array();
@@ -541,14 +479,10 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         $result = $this->get_all(null, null, $data, false, 'GET_BY_REF');
 
-        // --------------------------------------------------------------------------
-
         if (!$result) {
 
             return false;
         }
-
-        // --------------------------------------------------------------------------
 
         return $result[0];
     }
@@ -560,8 +494,12 @@ class NAILS_Shop_order_model extends NAILS_Model
      * @param  array $ref The array of refs to fetch
      * @return array
      */
-    public function get_by_refs($refs)
+    public function getByRefs($refs)
     {
+        if (empty($refs)) {
+            return array();
+        }
+
         if (!isset($data['where_in'])) {
 
             $data['where_in'] = array();
@@ -579,7 +517,7 @@ class NAILS_Shop_order_model extends NAILS_Model
      * @param  int   $order_id The order's ID
      * @return array
      */
-    public function get_items_for_order($order_id)
+    public function getItemsForOrder($order_id)
     {
         $this->db->select('op.*');
         $this->db->select('pt.id pt_id, pt.label pt_label, pt.ipn_method pt_ipn_method');
@@ -593,9 +531,6 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         $this->db->where('op.order_id', $order_id);
         $items = $this->db->get(NAILS_DB_PREFIX . 'shop_order_product op')->result();
-
-        //  Needed by the _format_*() methods
-        $this->load->model('shop/shop_currency_model');
 
         foreach ($items as $item) {
 
@@ -612,7 +547,7 @@ class NAILS_Shop_order_model extends NAILS_Model
      * @param  int   $userId the user's ID
      * @return array
      */
-    public function get_for_user_id($userId)
+    public function getForUserId($userId)
     {
         $this->db->where_in($this->tablePrefix . '.status', array('PAID', 'UNPAID'));
         $this->db->where($this->tablePrefix . '.user_id', $userId);
@@ -626,11 +561,30 @@ class NAILS_Shop_order_model extends NAILS_Model
      * @param  string $email The user's email address
      * @return array
      */
-    public function get_for_user_email($email)
+    public function getForUserEmail($email)
     {
         $this->db->where_in($this->tablePrefix . '.status', array('PAID', 'UNPAID'));
         $this->db->where($this->tablePrefix . '.user_email', $email);
         return $this->get_all();
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Counts the total amount of orders for a partricular query/search key. Essentially performs
+     * the same query as $this->get_all() but without limiting.
+     *
+     * @access  public
+     * @param   string  $where  An array of where conditions
+     * @param   mixed   $search A string containing the search terms
+     * @return  int
+     *
+     **/
+    public function countUnfulfilledOrders($where = null, $search = null)
+    {
+        $this->db->where('fulfilment_status', 'UNFULFILLED');
+        $this->db->where('status', 'PAID');
+        return $this->db->count_all_results(NAILS_DB_PREFIX . 'shop_order o');
     }
 
     // --------------------------------------------------------------------------
@@ -700,13 +654,20 @@ class NAILS_Shop_order_model extends NAILS_Model
 
     /**
      * Marks an order as cancelled
-     * @param  int     $orderId The order's ID
+     * @param  mixed   $orderId The order's ID, or an array of order IDs
      * @return boolean
      */
     public function cancel($orderId)
     {
-        $data = array('status' => 'CANCELLED');
-        return $this->update($orderId, $data);
+        if (is_array($orderId)) {
+
+            return $this->cancelBatch($orderId);
+
+        } else {
+
+            $data = array('status' => 'CANCELLED');
+            return $this->update($orderId, $data);
+        }
     }
 
     // --------------------------------------------------------------------------
@@ -756,44 +717,51 @@ class NAILS_Shop_order_model extends NAILS_Model
 
     /**
      * Marks an order as fulfilled and optionally informs the customer
-     * @param  in      $orderId        The order's ID
+     * @param  mixed   $orderId        The order's ID, or an array of order IDs
      * @param  boolean $informCustomer Whether to inform the customer or not
      * @return boolean
      */
     public function fulfil($orderId, $informCustomer = true)
     {
-        // Fetch order details
-        $order = $this->get_by_id($orderId);
+        if (is_array($orderId)) {
 
-        // --------------------------------------------------------------------------
-
-        //  Set fulfil data
-        $data = array(
-            'fulfilment_status' => 'FULFILLED',
-            'fulfilled'         => date('Y-m-d H:i:s')
-       );
-
-        // --------------------------------------------------------------------------
-
-        if ($this->update($orderId, $data)) {
-
-            if ($informCustomer) {
-
-                $email                = new \stdClass();
-                $email->type          = 'shop_order_fulfilled';
-                $email->to_email      = $order->user->email;
-                $email->data          = array();
-                $email->data['order'] = $order;
-
-                $this->emailer->send($email, true);
-            }
-
-            return true;
+            return $this->fulfilBatch($orderId, $informCustomer);
 
         } else {
 
-            $this->_set_error('Failed to update fulfilment status on this order.');
-            return false;
+            // Fetch order details
+            $order = $this->get_by_id($orderId);
+
+            // --------------------------------------------------------------------------
+
+            //  Set fulfil data
+            $data = array(
+                'fulfilment_status' => 'FULFILLED',
+                'fulfilled'         => date('Y-m-d H:i:s')
+           );
+
+            // --------------------------------------------------------------------------
+
+            if ($this->update($orderId, $data)) {
+
+                if ($informCustomer) {
+
+                    $email                = new \stdClass();
+                    $email->type          = 'shop_order_fulfilled';
+                    $email->to_email      = $order->user->email;
+                    $email->data          = array();
+                    $email->data['order'] = $order;
+
+                    $this->emailer->send($email, true);
+                }
+
+                return true;
+
+            } else {
+
+                $this->_set_error('Failed to update fulfilment status on this order.');
+                return false;
+            }
         }
     }
 
@@ -852,17 +820,24 @@ class NAILS_Shop_order_model extends NAILS_Model
 
     /**
      * Marks an order as unfulfilled
-     * @param  int     $orderId The order's ID
+     * @param  mixed   $orderId The order's ID, or an array of order IDs
      * @return boolean
      */
     public function unfulfil($orderId)
     {
-        $data = array(
-            'fulfilment_status' => 'UNFULFILLED',
-            'fulfilled'         => null
-       );
+        if (is_array($orderId)) {
 
-        return $this->update($orderId, $data);
+            return $this->unfulfilBatch($orderId);
+
+        } else {
+
+            $data = array(
+                'fulfilment_status' => 'UNFULFILLED',
+                'fulfilled'         => null
+           );
+
+            return $this->update($orderId, $data);
+        }
     }
 
     // --------------------------------------------------------------------------
@@ -931,14 +906,16 @@ class NAILS_Shop_order_model extends NAILS_Model
 
             _LOG('Processing item #' . $item->id . ': ' . $item->title . '(' . $item->type->label . ')');
 
-            if ($item->type->ipn_method && method_exists($this, '_process_' . $item->type->ipn_method)) {
+            $methodName = 'process' . $item->type->ipn_method;
 
-                if (!isset($_processors['_process_' . $item->type->ipn_method])) {
+            if ($item->type->ipn_method && method_exists($this, $methodName)) {
 
-                    $_processors['_process_' . $item->type->ipn_method] = array();
+                if (!isset($_processors[$methodName])) {
+
+                    $_processors[$methodName] = array();
                 }
 
-                $_processors['_process_' . $item->type->ipn_method][] = $item;
+                $_processors[$methodName][] = $item;
             }
         }
 
@@ -985,21 +962,21 @@ class NAILS_Shop_order_model extends NAILS_Model
      * @param  stdClass &$order The complete order object
      * @return void
      */
-    protected function _process_download(&$items, &$order)
+    protected function processDownload(&$items, &$order)
     {
         //  Generate links for all the items
-        $_urls    = array();
-        $_ids     = array();
-        $_expires = 172800; //    48 hours
+        $urls    = array();
+        $ids     = array();
+        $expires = 172800;  //  48 hours
 
         foreach ($items as $item) {
 
             $temp        = new \stdClass();
             $temp->title = $item->title;
-            $temp->url   = cdn_expiring_url($item->meta->download_id, $_expires, true);
+            $temp->url   = cdn_expiring_url($item->meta->download_id, $expires, true);
 
-            $_urls[] = $temp;
-            $_ids[]  = $item->id;
+            $urls[] = $temp;
+            $ids[]  = $item->id;
 
             unset($temp);
         }
@@ -1007,24 +984,24 @@ class NAILS_Shop_order_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Send the user an email with the links
-        _LOG('Sending download email to ' . $order->user->email  . '; email contains ' . count($_urls) . ' expiring URLs');
+        _LOG('Sending download email to ' . $order->user->email  . '; email contains ' . count($urls) . ' expiring URLs');
 
-        $_email                         = new \stdClass();
-        $_email->type                   = 'shop_product_type_download';
-        $_email->to_email               = $order->user->email;
-        $_email->data                   = array();
-        $_email->data['order']          = new \stdClass();
-        $_email->data['order']->id      = $order->id;
-        $_email->data['order']->ref     = $order->ref;
-        $_email->data['order']->created = $order->created;
-        $_email->data['expires']        = $_expires;
-        $_email->data['urls']           = $_urls;
+        $email                         = new \stdClass();
+        $email->type                   = 'shop_product_type_download';
+        $email->to_email               = $order->user->email;
+        $email->data                   = array();
+        $email->data['order']          = new \stdClass();
+        $email->data['order']->id      = $order->id;
+        $email->data['order']->ref     = $order->ref;
+        $email->data['order']->created = $order->created;
+        $email->data['expires']        = $expires;
+        $email->data['urls']           = $urls;
 
-        if ($this->emailer->send($_email, true)) {
+        if ($this->emailer->send($email, true)) {
 
             //  Mark items as processed
             $this->db->set('processed', true);
-            $this->db->where_in('id', $_ids);
+            $this->db->where_in('id', $ids);
             $this->db->update(NAILS_DB_PREFIX . 'shop_order_product');
 
         } else {
@@ -1034,7 +1011,7 @@ class NAILS_Shop_order_model extends NAILS_Model
             _LOG(implode("\n", $this->emailer->get_errors()));
 
             $subject  = 'Unable to send download email';
-            $message  = 'Unable to send the email with download links to ' . $_email->to_email . '; ';
+            $message  = 'Unable to send the email with download links to ' . $email->to_email . '; ';
             $message .= 'order #' . $order->id . "\n\nEmailer errors:\n\n";
             $message .= print_r($this->emailer->get_errors(), true);
 
@@ -1046,12 +1023,12 @@ class NAILS_Shop_order_model extends NAILS_Model
 
     /**
      * Send a receipt to the user
-     * @param  int     $orderId      The ordr's ID
-     * @param  array   $payment_data [description]
-     * @param  boolean $partial      [description]
+     * @param  int     $orderId     The ordr's ID
+     * @param  array   $paymentData Payment data pertaining to the order
+     * @param  boolean $partial     Whether the order is aprtially paid, or completely paid
      * @return boolean
      */
-    public function send_receipt($orderId, $payment_data = array(), $partial = false)
+    public function sendReceipt($orderId, $paymentData = array(), $partial = false)
     {
         _LOG('Looking up order #' . $orderId);
         $order = $this->get_by_id($orderId);
@@ -1061,40 +1038,39 @@ class NAILS_Shop_order_model extends NAILS_Model
             _LOG('Invalid order ID');
             $this->_set_error('Invalid order ID');
             return false;
-
         }
 
         // --------------------------------------------------------------------------
 
-        $_email                         = new \stdClass();
-        $_email->type                   = $partial ? 'shop_receipt_partial' : 'shop_receipt';
-        $_email->to_email               = $order->user->email;
-        $_email->data                   = array();
-        $_email->data['order']          = $order;
-        $_email->data['payment_data']   = $payment_data;
+        $email                       = new \stdClass();
+        $email->type                 = $partial ? 'shop_receipt_partial' : 'shop_receipt';
+        $email->to_email             = $order->user->email;
+        $email->data                 = array();
+        $email->data['order']        = $order;
+        $email->data['payment_data'] = $paymentData;
 
-        if (!$this->emailer->send($_email, true)) {
+        if (!$this->emailer->send($email, true)) {
 
             //  Email failed to send, alert developers
-            $_email_errors = $this->emailer->get_errors();
+            $emailErrors = $this->emailer->get_errors();
 
             if ($partial) {
 
                 _LOG('!!Failed to send receipt(partial payment) to customer, alerting developers');
-                $_subject  = 'Unable to send customer receipt email(partial payment)';
+                $subject  = 'Unable to send customer receipt email(partial payment)';
 
             } else {
 
                 _LOG('!!Failed to send receipt to customer, alerting developers');
-                $_subject  = 'Unable to send customer receipt email';
+                $subject  = 'Unable to send customer receipt email';
 
             }
-            _LOG(implode("\n", $_email_errors));
+            _LOG(implode("\n", $emailErrors));
 
-            $_message  = 'Unable to send the customer receipt to ' . $_email->to_email . '; order: #' . $order->id . "\n\n";
-            $_message .= 'Emailer errors:' . "\n\n" . print_r($_email_errors, true);
+            $message  = 'Unable to send the customer receipt to ' . $email->to_email . '; order: #' . $order->id . "\n\n";
+            $message .= 'Emailer errors:' . "\n\n" . print_r($emailErrors, true);
 
-            sendDeveloperMail($_subject, $_message);
+            sendDeveloperMail($subject, $message);
 
         }
 
@@ -1103,11 +1079,16 @@ class NAILS_Shop_order_model extends NAILS_Model
         return true;
     }
 
-
     // --------------------------------------------------------------------------
 
-
-    public function send_order_notification($orderId, $payment_data = array(), $partial = false)
+    /**
+     * Send the order notification to the shop manager(s)
+     * @param  int     $orderId     The ID of the order
+     * @param  array   $paymentData Payment data pertaining to the order
+     * @param  boolean $partial     Whether the order is aprtially paid, or completely paid
+     * @return boolean
+     */
+    public function sendOrderNotification($orderId, $paymentData = array(), $partial = false)
     {
         _LOG('Looking up order #' . $orderId);
         $order = $this->get_by_id($orderId);
@@ -1117,66 +1098,61 @@ class NAILS_Shop_order_model extends NAILS_Model
             _LOG('Invalid order ID');
             $this->_set_error('Invalid order ID.');
             return false;
-
         }
 
         // --------------------------------------------------------------------------
 
-        $_email                         = new \stdClass();
-        $_email->type                   = $partial ? 'shop_notification_partial_payment' : 'shop_notification_paid';
-        $_email->data                   = array();
-        $_email->data['order']          = $order;
-        $_email->data['payment_data']   = $payment_data;
+        $email                       = new \stdClass();
+        $email->type                 = $partial ? 'shop_notification_partial_payment' : 'shop_notification_paid';
+        $email->data                 = array();
+        $email->data['order']        = $order;
+        $email->data['payment_data'] = $paymentData;
 
-        $this->load->model('app_notification_model');
         $_notify = $this->app_notification_model->get('orders', 'shop');
 
         foreach ($_notify as $email) {
 
-            $_email->to_email = $email;
+            $email->to_email = $email;
 
-            if (!$this->emailer->send($_email, true)) {
+            if (!$this->emailer->send($email, true)) {
 
-                $_email_errors = $this->emailer->get_errors();
+                $emailErrors = $this->emailer->get_errors();
 
                 if ($partial) {
 
                     _LOG('!!Failed to send order notification(partially payment) to ' . $email . ', alerting developers.');
-                    $_subject  = 'Unable to send order notification email(partial payment)';
+                    $subject  = 'Unable to send order notification email(partial payment)';
 
                 } else {
 
                     _LOG('!!Failed to send order notification to ' . $email . ', alerting developers.');
-                    $_subject  = 'Unable to send order notification email';
+                    $subject  = 'Unable to send order notification email';
 
                 }
 
-                _LOG(implode("\n", $_email_errors));
+                _LOG(implode("\n", $emailErrors));
 
-                $_message  = 'Unable to send the order notification to ' . $email . '; order{ #' . $order->id . "\n\n";
-                $_message .= 'Emailer errors:' . "\n\n" . print_r($_email_errors, true);
+                $message  = 'Unable to send the order notification to ' . $email . '; order{ #' . $order->id . "\n\n";
+                $message .= 'Emailer errors:' . "\n\n" . print_r($emailErrors, true);
 
-                sendDeveloperMail($_subject, $_message);
-
+                sendDeveloperMail($subject, $message);
             }
-
         }
-    }
 
+        return true;
+    }
 
     // --------------------------------------------------------------------------
 
-
     /**
      * Adds a note against an order
-     * @param int $order_id The order IDto add the note against
+     * @param int     $orderId The order ID to add the note against
      * @param boolean
      */
-    public function note_add($order_id, $note)
+    public function note_add($orderId, $note)
     {
-        $this->db->set('order_id', $order_id);
+        $this->db->set('order_id', $orderId);
         $this->db->set('note', $note);
-
         $this->db->set('created', 'NOW()', false);
         $this->db->set('modified', 'NOW()', false);
 
@@ -1189,7 +1165,6 @@ class NAILS_Shop_order_model extends NAILS_Model
 
             $this->db->set('created_by', null);
             $this->db->set('modified_by', null);
-
         }
 
         $this->db->insert(NAILS_DB_PREFIX . 'shop_order_note');
@@ -1197,20 +1172,18 @@ class NAILS_Shop_order_model extends NAILS_Model
         return(bool) $this->db->affected_rows();
     }
 
-
     // --------------------------------------------------------------------------
-
 
     /**
      * Deletes an existing order note
-     * @param  int    $order_id The Order's ID
-     * @param  int    $note_id  The note's ID
+     * @param  int    $orderId The order's ID
+     * @param  int    $noteId  The note's ID
      * @return boolean
      */
-    public function note_delete($order_id, $note_id)
+    public function noteDelete($orderId, $noteId)
     {
-        $this->db->where('id', $note_id);
-        $this->db->where('order_iid', $order_id);
+        $this->db->where('id', $noteId);
+        $this->db->where('order_iid', $orderId);
         $this->db->delete(NAILS_DB_PREFIX . 'shop_order_note');
         return(bool) $this->db->affected_rows();
     }
@@ -1222,11 +1195,11 @@ class NAILS_Shop_order_model extends NAILS_Model
      * @param  stdClass &$order The object to format
      * @return void
      */
-    protected function _format_order(&$order)
+    protected function _format_object(&$order)
     {
         //  User
-        $order->user        = new \stdClass();
-        $order->user->id    = $order->user_id;
+        $order->user     = new \stdClass();
+        $order->user->id = $order->user_id;
 
         if ($order->user_email) {
 
@@ -1235,7 +1208,6 @@ class NAILS_Shop_order_model extends NAILS_Model
         } else {
 
             $order->user->email = $order->email;
-
         }
 
         if ($order->user_first_name) {
@@ -1255,12 +1227,11 @@ class NAILS_Shop_order_model extends NAILS_Model
         } else {
 
             $order->user->last_name = $order->last_name;
-
         }
 
-        $order->user->telephone    = $order->user_telephone;
-        $order->user->gender       = $order->gender;
-        $order->user->profile_img  = $order->profile_img;
+        $order->user->telephone   = $order->user_telephone;
+        $order->user->gender      = $order->gender;
+        $order->user->profile_img = $order->profile_img;
 
         $order->user->group        = new \stdClass();
         $order->user->group->id    = $order->user_group_id;
@@ -1282,13 +1253,13 @@ class NAILS_Shop_order_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Totals
-        $order->totals                  = new \stdClass();
+        $order->totals = new \stdClass();
 
-        $order->totals->base            = new \stdClass();
-        $order->totals->base->item      = (int) $order->total_base_item;
-        $order->totals->base->shipping  = (int) $order->total_base_shipping;
-        $order->totals->base->tax       = (int) $order->total_base_tax;
-        $order->totals->base->grand     = (int) $order->total_base_grand;
+        $order->totals->base           = new \stdClass();
+        $order->totals->base->item     = (int) $order->total_base_item;
+        $order->totals->base->shipping = (int) $order->total_base_shipping;
+        $order->totals->base->tax      = (int) $order->total_base_tax;
+        $order->totals->base->grand    = (int) $order->total_base_grand;
 
         $order->totals->base_formatted           = new \stdClass();
         $order->totals->base_formatted->item     = $this->shop_currency_model->formatBase($order->totals->base->item);
@@ -1326,7 +1297,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         $order->shipping_address->town     = $order->shipping_town;
         $order->shipping_address->state    = $order->shipping_state;
         $order->shipping_address->postcode = $order->shipping_postcode;
-        $order->shipping_address->country  = $order->shipping_country;
+        $order->shipping_address->country  = $this->country_model->getByCode($order->shipping_country);
 
         unset($order->shipping_line_1);
         unset($order->shipping_line_2);
@@ -1341,7 +1312,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         $order->billing_address->town     = $order->billing_town;
         $order->billing_address->state    = $order->billing_state;
         $order->billing_address->postcode = $order->billing_postcode;
-        $order->billing_address->country  = $order->billing_country;
+        $order->billing_address->country  = $this->country_model->getByCode($order->billing_country);
 
         unset($order->billing_line_1);
         unset($order->billing_line_2);
@@ -1386,6 +1357,11 @@ class NAILS_Shop_order_model extends NAILS_Model
         unset($order->v_valid_to);
         unset($order->v_is_active);
         unset($order->v_is_deleted);
+
+        // --------------------------------------------------------------------------
+
+        //  Items
+        $order->items = $this->getItemsForOrder($order->id);
     }
 
     // --------------------------------------------------------------------------
@@ -1401,8 +1377,9 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        $item->sku      = $item->v_sku;
-        $item->quantity = (int) $item->quantity;
+        $item->sku                  = $item->v_sku;
+        $item->quantity             = (int) $item->quantity;
+        $item->ship_collection_only = (bool) $item->ship_collection_only;
 
         unset($item->v_sku);
 
@@ -1416,10 +1393,10 @@ class NAILS_Shop_order_model extends NAILS_Model
         $item->price->base->value_tax     = $this->shop_currency_model->intToFloat($item->price_base_value_tax, SHOP_BASE_CURRENCY_CODE);
 
         $item->price->base_formatted                = new \stdClass();
-        $item->price->base_formatted->value         = $this->shop_currency_model->formatBase($item->price->base->value);
-        $item->price->base_formatted->value_inc_tax = $this->shop_currency_model->formatBase($item->price->base->value_inc_tax);
-        $item->price->base_formatted->value_ex_tax  = $this->shop_currency_model->formatBase($item->price->base->value_ex_tax);
-        $item->price->base_formatted->value_tax     = $this->shop_currency_model->formatBase($item->price->base->value_tax);
+        $item->price->base_formatted->value         = $this->shop_currency_model->formatBase($item->price_base_value);
+        $item->price->base_formatted->value_inc_tax = $this->shop_currency_model->formatBase($item->price_base_value_inc_tax);
+        $item->price->base_formatted->value_ex_tax  = $this->shop_currency_model->formatBase($item->price_base_value_ex_tax);
+        $item->price->base_formatted->value_tax     = $this->shop_currency_model->formatBase($item->price_base_value_tax);
 
         $item->price->user                = new \stdClass();
         $item->price->user->value         = $this->shop_currency_model->intToFloat($item->price_user_value, SHOP_USER_CURRENCY_CODE);
@@ -1428,10 +1405,10 @@ class NAILS_Shop_order_model extends NAILS_Model
         $item->price->user->value_tax     = $this->shop_currency_model->intToFloat($item->price_user_value_tax, SHOP_USER_CURRENCY_CODE);
 
         $item->price->user_formatted                = new \stdClass();
-        $item->price->user_formatted->value         = $this->shop_currency_model->formatUser($item->price->user->value);
-        $item->price->user_formatted->value_inc_tax = $this->shop_currency_model->formatUser($item->price->user->value_inc_tax);
-        $item->price->user_formatted->value_ex_tax  = $this->shop_currency_model->formatUser($item->price->user->value_ex_tax);
-        $item->price->user_formatted->value_tax     = $this->shop_currency_model->formatUser($item->price->user->value_tax);
+        $item->price->user_formatted->value         = $this->shop_currency_model->formatUser($item->price_user_value);
+        $item->price->user_formatted->value_inc_tax = $this->shop_currency_model->formatUser($item->price_user_value_inc_tax);
+        $item->price->user_formatted->value_ex_tax  = $this->shop_currency_model->formatUser($item->price_user_value_ex_tax);
+        $item->price->user_formatted->value_tax     = $this->shop_currency_model->formatUser($item->price_user_value_tax);
 
         $item->sale_price                      = new \stdClass();
         $item->sale_price->base                = new \stdClass();
@@ -1441,10 +1418,10 @@ class NAILS_Shop_order_model extends NAILS_Model
         $item->sale_price->base->value_tax     = $this->shop_currency_model->intToFloat($item->sale_price_base_value_tax, SHOP_BASE_CURRENCY_CODE);
 
         $item->sale_price->base_formatted                = new \stdClass();
-        $item->sale_price->base_formatted->value         = $this->shop_currency_model->formatBase($item->sale_price->base->value);
-        $item->sale_price->base_formatted->value_inc_tax = $this->shop_currency_model->formatBase($item->sale_price->base->value_inc_tax);
-        $item->sale_price->base_formatted->value_ex_tax  = $this->shop_currency_model->formatBase($item->sale_price->base->value_ex_tax);
-        $item->sale_price->base_formatted->value_tax     = $this->shop_currency_model->formatBase($item->sale_price->base->value_tax);
+        $item->sale_price->base_formatted->value         = $this->shop_currency_model->formatBase($item->sale_price_base_value);
+        $item->sale_price->base_formatted->value_inc_tax = $this->shop_currency_model->formatBase($item->sale_price_base_value_inc_tax);
+        $item->sale_price->base_formatted->value_ex_tax  = $this->shop_currency_model->formatBase($item->sale_price_base_value_ex_tax);
+        $item->sale_price->base_formatted->value_tax     = $this->shop_currency_model->formatBase($item->sale_price_base_value_tax);
 
         $item->sale_price->user                = new \stdClass();
         $item->sale_price->user->value         = $this->shop_currency_model->intToFloat($item->sale_price_user_value, SHOP_USER_CURRENCY_CODE);
@@ -1453,10 +1430,10 @@ class NAILS_Shop_order_model extends NAILS_Model
         $item->sale_price->user->value_tax     = $this->shop_currency_model->intToFloat($item->sale_price_user_value_tax, SHOP_USER_CURRENCY_CODE);
 
         $item->sale_price->user_formatted                = new \stdClass();
-        $item->sale_price->user_formatted->value         = $this->shop_currency_model->formatUser($item->sale_price->user->value);
-        $item->sale_price->user_formatted->value_inc_tax = $this->shop_currency_model->formatUser($item->sale_price->user->value_inc_tax);
-        $item->sale_price->user_formatted->value_ex_tax  = $this->shop_currency_model->formatUser($item->sale_price->user->value_ex_tax);
-        $item->sale_price->user_formatted->value_tax     = $this->shop_currency_model->formatUser($item->sale_price->user->value_tax);
+        $item->sale_price->user_formatted->value         = $this->shop_currency_model->formatUser($item->sale_price_user_value);
+        $item->sale_price->user_formatted->value_inc_tax = $this->shop_currency_model->formatUser($item->sale_price_user_value_inc_tax);
+        $item->sale_price->user_formatted->value_ex_tax  = $this->shop_currency_model->formatUser($item->sale_price_user_value_ex_tax);
+        $item->sale_price->user_formatted->value_tax     = $this->shop_currency_model->formatUser($item->sale_price_user_value_tax);
 
         $item->processed = (bool) $item->processed;
         $item->refunded  = (bool) $item->refunded;

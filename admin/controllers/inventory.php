@@ -432,7 +432,7 @@ class Inventory extends \AdminController
 
         //  Fetch item
         $this->data['item'] = $this->shop_product_model->get_by_id($this->uri->segment(5));
-// dumpanddie($this->data['item']);
+
         if (!$this->data['item']) {
 
             $this->session->set_flashdata('error', 'I could not find a product by that ID.');
@@ -538,6 +538,7 @@ class Inventory extends \AdminController
         $this->data['collections']        = $this->shop_collection_model->get_all();
         $this->data['ranges']             = $this->shop_range_model->get_all();
         $this->data['tags']               = $this->shop_tag_model->get_all_flat();
+        $this->data['relatedProducts']    = $this->shop_product_model->getRelatedProducts($this->data['item']->id);
 
         $this->data['tax_rates'] = array('No Tax') + $this->data['tax_rates'];
 
@@ -720,6 +721,11 @@ class Inventory extends \AdminController
         //  Ranges & Collections
         $this->form_validation->set_rules('ranges', '', 'xss_clean');
         $this->form_validation->set_rules('collections', '', 'xss_clean');
+
+        // --------------------------------------------------------------------------
+
+        //  Related products
+        $this->form_validation->set_rules('related', '', 'xss_clean');
 
         // --------------------------------------------------------------------------
 
