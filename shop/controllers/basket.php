@@ -427,7 +427,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
             $basket = $this->shop_basket_model->get(true);
 
-            if ($basket->shipping->type) {
+            if ($basket->shipping->type == 'DELIVER_COLLECT') {
 
                 $this->session->set_flashdata(
                     'message',

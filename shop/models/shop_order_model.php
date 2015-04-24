@@ -258,14 +258,15 @@ class NAILS_Shop_order_model extends NAILS_Model
 
             foreach ($data->basket->items as $item) {
 
-                $temp                  = array();
-                $temp['order_id']      = $order->id;
-                $temp['product_id']    = $item->product_id;
-                $temp['product_label'] = $item->product_label;
-                $temp['variant_id']    = $item->variant_id;
-                $temp['variant_label'] = $item->variant_label;
-                $temp['quantity']      = $item->quantity;
-                $temp['tax_rate_id']   = !empty($item->product->tax_rate->id) ? $item->product->tax_rate->id : null;
+                $temp                         = array();
+                $temp['order_id']             = $order->id;
+                $temp['product_id']           = $item->product_id;
+                $temp['product_label']        = $item->product_label;
+                $temp['variant_id']           = $item->variant_id;
+                $temp['variant_label']        = $item->variant_label;
+                $temp['quantity']             = $item->quantity;
+                $temp['tax_rate_id']          = !empty($item->product->tax_rate->id) ? $item->product->tax_rate->id : null;
+                $temp['ship_collection_only'] = $item->variant->ship_collection_only;
 
                 //  Price
                 $temp['price_base_value']         = $item->variant->price->price->base->value;
@@ -1047,7 +1048,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         $email                       = new \stdClass();
-        $email->type                 = $partial ? 'shop_receipt_partial' : 'shop_receipt';
+        $email->type                 = $partial ? 'shop_receipt_partial_payment' : 'shop_receipt';
         $email->to_email             = $order->user->email;
         $email->data                 = array();
         $email->data['order']        = $order;
@@ -1112,11 +1113,11 @@ class NAILS_Shop_order_model extends NAILS_Model
         $email->data['order']        = $order;
         $email->data['payment_data'] = $paymentData;
 
-        $_notify = $this->app_notification_model->get('orders', 'shop');
+        $notify = $this->app_notification_model->get('orders', 'shop');
 
-        foreach ($_notify as $email) {
+        foreach ($notify as $notifyEmail) {
 
-            $email->to_email = $email;
+            $email->to_email = $notifyEmail;
 
             if (!$this->emailer->send($email, true)) {
 

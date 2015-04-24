@@ -56,6 +56,10 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         $this->checkoutSessionKey = 'nailsshopcheckoutorder';
+
+        // --------------------------------------------------------------------------
+
+        $this->load->model('shop/shop_currency_model');
     }
 
     // --------------------------------------------------------------------------
@@ -839,8 +843,8 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         $out                   = array();
         $out['order_id']       = (int) $this->input->post('cartId');
         $out['transaction_id'] = $this->input->post('transId');
-        $out['amount']         = (float) $this->input->post('amount');
         $out['currency']       = $this->input->post('currency');
+        $out['amount']         = $this->shop_currency_model->floatToInt($this->input->post('amount'), $out['currency']);
 
         return $out;
     }
