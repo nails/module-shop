@@ -421,7 +421,11 @@ class NAILS_Shop_order_model extends NAILS_Model
             }
 
             $data['or_like'][] = array(
-                'column' => $this->tablePrefix . '.code',
+                'column' => $this->tablePrefix . '.id',
+                'value'  => $data['keywords']
+            );
+            $data['or_like'][] = array(
+                'column' => $this->tablePrefix . '.ref',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
@@ -444,11 +448,11 @@ class NAILS_Shop_order_model extends NAILS_Model
                 'column' => 'ue.email',
                 'value'  => $data['keywords']
             );
-            $data['like'][] = array(
+            $data['or_like'][] = array(
                 'column' => 'u.first_name',
                 'value'  => $data['keywords']
             );
-            $data['like'][] = array(
+            $data['or_like'][] = array(
                 'column' => 'u.last_name',
                 'value'  => $data['keywords']
             );
@@ -1387,53 +1391,61 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         $item->price                      = new \stdClass();
         $item->price->base                = new \stdClass();
-        $item->price->base->value         = $this->shop_currency_model->intToFloat($item->price_base_value, SHOP_BASE_CURRENCY_CODE);
-        $item->price->base->value_inc_tax = $this->shop_currency_model->intToFloat($item->price_base_value_inc_tax, SHOP_BASE_CURRENCY_CODE);
-        $item->price->base->value_ex_tax  = $this->shop_currency_model->intToFloat($item->price_base_value_ex_tax, SHOP_BASE_CURRENCY_CODE);
-        $item->price->base->value_tax     = $this->shop_currency_model->intToFloat($item->price_base_value_tax, SHOP_BASE_CURRENCY_CODE);
+        $item->price->base->value         = $item->price_base_value;
+        $item->price->base->value_inc_tax = $item->price_base_value_inc_tax;
+        $item->price->base->value_ex_tax  = $item->price_base_value_ex_tax;
+        $item->price->base->value_tax     = $item->price_base_value_tax;
+        $item->price->base->value_total   = $item->price_base_value * $item->quantity;
 
         $item->price->base_formatted                = new \stdClass();
         $item->price->base_formatted->value         = $this->shop_currency_model->formatBase($item->price_base_value);
         $item->price->base_formatted->value_inc_tax = $this->shop_currency_model->formatBase($item->price_base_value_inc_tax);
         $item->price->base_formatted->value_ex_tax  = $this->shop_currency_model->formatBase($item->price_base_value_ex_tax);
         $item->price->base_formatted->value_tax     = $this->shop_currency_model->formatBase($item->price_base_value_tax);
+        $item->price->base_formatted->value_total   = $this->shop_currency_model->formatBase($item->price_base_value * $item->quantity);
 
         $item->price->user                = new \stdClass();
-        $item->price->user->value         = $this->shop_currency_model->intToFloat($item->price_user_value, SHOP_USER_CURRENCY_CODE);
-        $item->price->user->value_inc_tax = $this->shop_currency_model->intToFloat($item->price_user_value_inc_tax, SHOP_USER_CURRENCY_CODE);
-        $item->price->user->value_ex_tax  = $this->shop_currency_model->intToFloat($item->price_user_value_ex_tax, SHOP_USER_CURRENCY_CODE);
-        $item->price->user->value_tax     = $this->shop_currency_model->intToFloat($item->price_user_value_tax, SHOP_USER_CURRENCY_CODE);
+        $item->price->user->value         = $item->price_user_value;
+        $item->price->user->value_inc_tax = $item->price_user_value_inc_tax;
+        $item->price->user->value_ex_tax  = $item->price_user_value_ex_tax;
+        $item->price->user->value_tax     = $item->price_user_value_tax;
+        $item->price->user->value_total   = $item->price_user_value * $item->quantity;
 
         $item->price->user_formatted                = new \stdClass();
         $item->price->user_formatted->value         = $this->shop_currency_model->formatUser($item->price_user_value);
         $item->price->user_formatted->value_inc_tax = $this->shop_currency_model->formatUser($item->price_user_value_inc_tax);
         $item->price->user_formatted->value_ex_tax  = $this->shop_currency_model->formatUser($item->price_user_value_ex_tax);
         $item->price->user_formatted->value_tax     = $this->shop_currency_model->formatUser($item->price_user_value_tax);
+        $item->price->user_formatted->value_total   = $this->shop_currency_model->formatUser($item->price_user_value * $item->quantity);
 
         $item->sale_price                      = new \stdClass();
         $item->sale_price->base                = new \stdClass();
-        $item->sale_price->base->value         = $this->shop_currency_model->intToFloat($item->sale_price_base_value, SHOP_BASE_CURRENCY_CODE);
-        $item->sale_price->base->value_inc_tax = $this->shop_currency_model->intToFloat($item->sale_price_base_value_inc_tax, SHOP_BASE_CURRENCY_CODE);
-        $item->sale_price->base->value_ex_tax  = $this->shop_currency_model->intToFloat($item->sale_price_base_value_ex_tax, SHOP_BASE_CURRENCY_CODE);
-        $item->sale_price->base->value_tax     = $this->shop_currency_model->intToFloat($item->sale_price_base_value_tax, SHOP_BASE_CURRENCY_CODE);
+        $item->sale_price->base->value         = $item->sale_price_base_value;
+        $item->sale_price->base->value_inc_tax = $item->sale_price_base_value_inc_tax;
+        $item->sale_price->base->value_ex_tax  = $item->sale_price_base_value_ex_tax;
+        $item->sale_price->base->value_tax     = $item->sale_price_base_value_tax;
+        $item->sale_price->base->value_total   = $item->sale_price_base_value * $item->quantity;
 
         $item->sale_price->base_formatted                = new \stdClass();
         $item->sale_price->base_formatted->value         = $this->shop_currency_model->formatBase($item->sale_price_base_value);
         $item->sale_price->base_formatted->value_inc_tax = $this->shop_currency_model->formatBase($item->sale_price_base_value_inc_tax);
         $item->sale_price->base_formatted->value_ex_tax  = $this->shop_currency_model->formatBase($item->sale_price_base_value_ex_tax);
         $item->sale_price->base_formatted->value_tax     = $this->shop_currency_model->formatBase($item->sale_price_base_value_tax);
+        $item->sale_price->base_formatted->value_total   = $this->shop_currency_model->formatBase($item->sale_price_base_value * $item->quantity);
 
         $item->sale_price->user                = new \stdClass();
-        $item->sale_price->user->value         = $this->shop_currency_model->intToFloat($item->sale_price_user_value, SHOP_USER_CURRENCY_CODE);
-        $item->sale_price->user->value_inc_tax = $this->shop_currency_model->intToFloat($item->sale_price_user_value_inc_tax, SHOP_USER_CURRENCY_CODE);
-        $item->sale_price->user->value_ex_tax  = $this->shop_currency_model->intToFloat($item->sale_price_user_value_ex_tax, SHOP_USER_CURRENCY_CODE);
-        $item->sale_price->user->value_tax     = $this->shop_currency_model->intToFloat($item->sale_price_user_value_tax, SHOP_USER_CURRENCY_CODE);
+        $item->sale_price->user->value         = $item->sale_price_user_value;
+        $item->sale_price->user->value_inc_tax = $item->sale_price_user_value_inc_tax;
+        $item->sale_price->user->value_ex_tax  = $item->sale_price_user_value_ex_tax;
+        $item->sale_price->user->value_tax     = $item->sale_price_user_value_tax;
+        $item->sale_price->user->value_total   = $item->sale_price_user_value * $item->quantity;
 
         $item->sale_price->user_formatted                = new \stdClass();
         $item->sale_price->user_formatted->value         = $this->shop_currency_model->formatUser($item->sale_price_user_value);
         $item->sale_price->user_formatted->value_inc_tax = $this->shop_currency_model->formatUser($item->sale_price_user_value_inc_tax);
         $item->sale_price->user_formatted->value_ex_tax  = $this->shop_currency_model->formatUser($item->sale_price_user_value_ex_tax);
         $item->sale_price->user_formatted->value_tax     = $this->shop_currency_model->formatUser($item->sale_price_user_value_tax);
+        $item->sale_price->user_formatted->value_total   = $this->shop_currency_model->formatUser($item->sale_price_user_value * $item->quantity);
 
         $item->processed = (bool) $item->processed;
         $item->refunded  = (bool) $item->refunded;

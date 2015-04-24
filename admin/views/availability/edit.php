@@ -7,29 +7,28 @@
         <legend>Basic Information</legend>
         <?php
 
-            $_field                    = array();
-            $_field['key']            = 'email';
-            $_field['label']        = 'Email';
-            $_field['type']            = 'email';
-            $_field['placeholder']    = 'The user\'s email address';
-            $_field['default']        = isset($notification->user->email) ? $notification->user->email : '';
-            $_field['required']        = true;
+            $field                = array();
+            $field['key']         = 'email';
+            $field['label']       = 'Email';
+            $field['type']        = 'email';
+            $field['placeholder'] = 'The user\'s email address';
+            $field['default']     = isset($notification->user->email) ? $notification->user->email : '';
+            $field['required']    = true;
 
-            echo form_field($_field);
+            echo form_field($field);
 
             // --------------------------------------------------------------------------
 
-            $_field                    = array();
-            $_field['key']            = 'item';
-            $_field['label']        = 'Item';
-            $_field['default']        = isset($notification->product->id) ? $notification->product->id : '';
-            $_field['default']        .= isset($notification->variation->id) ? ':' . $notification->variation->id : '';
-            $_field['required']        = true;
-            $_field['class']        = 'select2';
+            $field              = array();
+            $field['key']       = 'item';
+            $field['label']     = 'Item';
+            $field['default']   = isset($notification->product->id) ? $notification->product->id : '';
+            $field['default']  .= isset($notification->variation->id) ? ':' . $notification->variation->id : '';
+            $field['required']  = true;
+            $field['options']   = $productsVariationsFlat;
+            $field['class']     = 'select2';
 
-            $_field['options']        = $products_variations_flat;
-
-            echo form_field_dropdown($_field);
+            echo form_field_dropdown($field);
 
         ?>
     </fieldset>

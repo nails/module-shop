@@ -111,7 +111,7 @@ class Basket extends \ApiController
     public function postAddVoucher()
     {
         $out     = array();
-        $voucher = $this->shop_voucher_model->validate($this->input->post('voucher'), get_basket());
+        $voucher = $this->shop_voucher_model->validate($this->input->post('voucher'), getBasket());
 
         if ($voucher) {
 

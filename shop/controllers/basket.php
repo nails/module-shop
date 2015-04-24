@@ -253,7 +253,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
      **/
     public function add_voucher()
     {
-        $voucher = $this->shop_voucher_model->validate($this->input->get_post('voucher'), get_basket());
+        $voucher = $this->shop_voucher_model->validate($this->input->get_post('voucher'), getBasket());
 
         if ($voucher) {
 

@@ -159,7 +159,7 @@ class Availability extends \AdminController
 
         // --------------------------------------------------------------------------
 
-        $this->data['products_variations_flat'] = $this->shop_product_model->getAllProductVariationFlat();
+        $this->data['productsVariationsFlat'] = $this->shop_product_model->getAllProductVariationFlat();
 
         // --------------------------------------------------------------------------
 
@@ -234,7 +234,7 @@ class Availability extends \AdminController
 
         // --------------------------------------------------------------------------
 
-        $this->data['products_variations_flat'] = $this->shop_product_model->getAllProductVariationFlat();
+        $this->data['productsVariationsFlat'] = $this->shop_product_model->getAllProductVariationFlat();
 
         // --------------------------------------------------------------------------
 

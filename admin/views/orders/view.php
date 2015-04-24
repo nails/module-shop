@@ -173,7 +173,17 @@
                                 <td class="value">
                                 <?php
 
-                                    $address = array_filter((array) $order->billing_address);
+                                    $address = array(
+                                        $order->billing_address->line_1,
+                                        $order->billing_address->line_2,
+                                        $order->billing_address->town,
+                                        $order->billing_address->state,
+                                        $order->billing_address->postcode,
+                                        $order->billing_address->country->label
+                                    );
+
+                                    $address = array_filter($address);
+
                                     echo implode('<br />', $address);
                                     echo '<small>';
                                         echo anchor(
@@ -191,7 +201,17 @@
                                 <td class="value">
                                 <?php
 
-                                    $address = array_filter((array) $order->shipping_address);
+                                    $address = array(
+                                        $order->shipping_address->line_1,
+                                        $order->shipping_address->line_2,
+                                        $order->shipping_address->town,
+                                        $order->shipping_address->state,
+                                        $order->shipping_address->postcode,
+                                        $order->shipping_address->country->label
+                                    );
+
+                                    $address = array_filter($address);
+
                                     echo implode('<br />', $address);
                                     echo '<small>';
                                         echo anchor(
@@ -339,12 +359,12 @@
             <table class="order-products">
                 <thead>
                     <tr>
+                        <th>SKU</th>
                         <th>Item</th>
                         <th>Type</th>
                         <th class="text-center">Quantity</th>
-                        <th class="text-center">SKU</th>
                         <th class="text-center">Unit Cost</th>
-                        <th class="text-center">Tax</th>
+                        <th class="text-center">Tax per Unit</th>
                         <th class="text-center">Total</th>
                         <th class="text-center">Refunded</th>
                         <th class="text-center">Actions</th>
@@ -358,6 +378,9 @@
                         foreach ($order->items as $item) {
 
                             echo '<tr>';
+                                echo '<td>';
+                                    echo $item->sku;
+                                echo '</td>';
                                 echo '<td>';
                                     echo $item->product_label;
                                     echo $item->variant_label != $item->product_label ? '<br /><small>' . $item->variant_label . '</small>' : '';
@@ -376,16 +399,13 @@
                                     echo $item->quantity;
                                 echo '</td>';
                                 echo '<td class="text-center">';
-                                    echo $item->sku;
-                                echo '</td>';
-                                echo '<td class="text-center">';
                                     echo $item->price->base_formatted->value_ex_tax;
                                 echo '</td>';
                                 echo '<td class="text-center">';
                                     echo $item->price->base_formatted->value_tax;
                                 echo '</td>';
                                 echo '<td class="text-center">';
-                                    echo $item->price->base_formatted->value;
+                                    echo $item->price->base_formatted->value_total;
                                 echo '</td>';
                                 echo '<td class="text-center">';
 

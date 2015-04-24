@@ -263,7 +263,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
      * @param  boolean $respectQuantity If true then the number of items in the basket is counted rather than just the number of items
      * @return int
      */
-    public function get_count($respectQuantity = true)
+    public function getCount($respectQuantity = true)
     {
         if ($respectQuantity) {
 
@@ -290,7 +290,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
      * @param  boolean $formatted Whether to return the fromatted value or not
      * @return string
      */
-    public function get_total($formatted = true)
+    public function getTotal($formatted = true)
     {
         $basket = $this->get();
         if ($formatted) {
