@@ -180,7 +180,7 @@ class NAILS_Shop_category_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Find all childen
-        $_data['children_ids'] = implode(',', $this->get_ids_of_children($id));
+        $_data['children_ids'] = implode(',', $this->getIdsOfChildren($id));
 
         if (empty($_data['children_ids'])) {
 
@@ -211,7 +211,7 @@ class NAILS_Shop_category_model extends NAILS_Model
             // --------------------------------------------------------------------------
 
             //  Also regenerate breadcrumbs and slugs for all children
-            $_children = $this->get_ids_of_children($id);
+            $_children = $this->getIdsOfChildren($id);
 
             if ($_children) {
 
@@ -257,7 +257,7 @@ class NAILS_Shop_category_model extends NAILS_Model
             foreach ($_parents as $parent_id) {
 
                 $_data                 = array();
-                $_data['children_ids'] = implode(',', $this->get_ids_of_children($parent_id));
+                $_data['children_ids'] = implode(',', $this->getIdsOfChildren($parent_id));
 
                 if (empty($_data['children_ids'])) {
 
@@ -312,7 +312,7 @@ class NAILS_Shop_category_model extends NAILS_Model
             foreach ($parents as $parentId) {
 
                 $data                 = array();
-                $data['children_ids'] = implode(',', $this->get_ids_of_children($parentId));
+                $data['children_ids'] = implode(',', $this->getIdsOfChildren($parentId));
 
                 if (empty($data['children_ids'])) {
 
@@ -418,7 +418,7 @@ class NAILS_Shop_category_model extends NAILS_Model
      * @param  boolean $onlyImmediate Whether to recurscively fetch all descendants, or just the immediate descendants
      * @return array
      */
-    public function get_ids_of_children($id, $onlyImmediate = false)
+    public function getIdsOfChildren($id, $onlyImmediate = false)
     {
         $return = array();
 
@@ -440,7 +440,7 @@ class NAILS_Shop_category_model extends NAILS_Model
                 foreach ($children as $child) {
 
                     $_temp   = array($child->id);
-                    $return = array_merge($return, $_temp, $this->get_ids_of_children($child->id, false));
+                    $return = array_merge($return, $_temp, $this->getIdsOfChildren($child->id, false));
                 }
             }
         }
@@ -459,7 +459,7 @@ class NAILS_Shop_category_model extends NAILS_Model
      */
     public function get_children($categoryId, $onlyImmediate = false, $data = array())
     {
-        $children = $this->get_ids_of_children($categoryId, $onlyImmediate);
+        $children = $this->getIdsOfChildren($categoryId, $onlyImmediate);
 
         if (!empty($children)) {
 
@@ -488,7 +488,7 @@ class NAILS_Shop_category_model extends NAILS_Model
         }
 
         $this->db->where('id !=', $categoryId);
-        return $this->get_ids_of_children($parent->parent_id, true);
+        return $this->getIdsOfChildren($parent->parent_id, true);
     }
 
     // --------------------------------------------------------------------------
@@ -499,7 +499,7 @@ class NAILS_Shop_category_model extends NAILS_Model
      * @param  array   $data       An array of data to pass to get_by_ids()
      * @return array
      */
-    public function get_siblings($categoryId, $data = array())
+    public function getSiblings($categoryId, $data = array())
     {
         $children = $this->get_ids_of_siblings($categoryId);
 
@@ -518,7 +518,7 @@ class NAILS_Shop_category_model extends NAILS_Model
      * @param  array  $data An array of data to pass to get_all()
      * @return array
      */
-    public function get_all_nested($data = array())
+    public function getAllNested($data = array())
     {
         return $this->nestItems($this->get_all(null, null, $data), null);
     }
@@ -530,7 +530,7 @@ class NAILS_Shop_category_model extends NAILS_Model
      * @param  array  $data an aray of data to pass to get_all()
      * @return array
      */
-    public function get_top_level($data = array())
+    public function getTopLevel($data = array())
     {
         if (empty($data['where'])) {
 
@@ -580,7 +580,7 @@ class NAILS_Shop_category_model extends NAILS_Model
      * @param  string $separator The string ot use as the category separator
      * @return array
      */
-    public function get_all_nested_flat($separator = ' &rsaquo; ')
+    public function getAllNestedFlat($separator = ' &rsaquo; ')
     {
         $categories = $this->get_all(null, null);
         $out        = array();

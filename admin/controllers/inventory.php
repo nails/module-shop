@@ -147,7 +147,7 @@ class Inventory extends \AdminController
         $ddFilters['categoryId'] = \Nails\Admin\Helper::searchFilterObject(
             '',
             'Category',
-            array('Choose Category') + $this->shop_category_model->get_all_nested_flat()
+            array('Choose Category') + $this->shop_category_model->getAllNestedFlat()
         );
         $ddFilters['brandId'] = \Nails\Admin\Helper::searchFilterObject(
             '',
@@ -192,7 +192,7 @@ class Inventory extends \AdminController
                 $_GET['ddF']['categoryId']
             );
 
-            $childCategories     = $this->shop_category_model->get_ids_of_children($categoryId);
+            $childCategories     = $this->shop_category_model->getIdsOfChildren($categoryId);
             $data['category_id'] = array_merge(array($categoryId), $childCategories);
         }
 
@@ -385,7 +385,7 @@ class Inventory extends \AdminController
         $this->data['tax_rates']          = $this->shop_tax_rate_model->get_all_flat();
         $this->data['attributes']         = $this->shop_attribute_model->get_all_flat();
         $this->data['brands']             = $this->shop_brand_model->get_all_flat();
-        $this->data['categories']         = $this->shop_category_model->get_all_nested_flat();
+        $this->data['categories']         = $this->shop_category_model->getAllNestedFlat();
         $this->data['collections']        = $this->shop_collection_model->get_all();
         $this->data['ranges']             = $this->shop_range_model->get_all();
         $this->data['tags']               = $this->shop_tag_model->get_all_flat();
@@ -534,7 +534,7 @@ class Inventory extends \AdminController
         $this->data['tax_rates']          = $this->shop_tax_rate_model->get_all_flat();
         $this->data['attributes']         = $this->shop_attribute_model->get_all_flat();
         $this->data['brands']             = $this->shop_brand_model->get_all_flat();
-        $this->data['categories']         = $this->shop_category_model->get_all_nested_flat();
+        $this->data['categories']         = $this->shop_category_model->getAllNestedFlat();
         $this->data['collections']        = $this->shop_collection_model->get_all();
         $this->data['ranges']             = $this->shop_range_model->get_all();
         $this->data['tags']               = $this->shop_tag_model->get_all_flat();

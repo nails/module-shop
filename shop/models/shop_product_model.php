@@ -2051,7 +2051,7 @@ class NAILS_Shop_product_model extends NAILS_Model
     {
         //  Fetch this category's children also
         $this->load->model('shop/shop_category_model');
-        $data['category_id'] = array_merge(array($categoryId), $this->shop_category_model->get_ids_of_children($categoryId));
+        $data['category_id'] = array_merge(array($categoryId), $this->shop_category_model->getIdsOfChildren($categoryId));
         return $this->get_all($page, $perPage, $data, $includeDeleted, 'GET_FOR_CATEGORY');
     }
 
@@ -2068,7 +2068,7 @@ class NAILS_Shop_product_model extends NAILS_Model
     {
         //  Fetch this category's children also
         $this->load->model('shop/shop_category_model');
-        $data['category_id'] = array_merge(array($categoryId), $this->shop_category_model->get_ids_of_children($categoryId));
+        $data['category_id'] = array_merge(array($categoryId), $this->shop_category_model->getIdsOfChildren($categoryId));
         return $this->count_all($data, $includeDeleted, 'COUNT_FOR_CATEGORY');
     }
 
@@ -2582,7 +2582,7 @@ class NAILS_Shop_product_model extends NAILS_Model
     {
         //  Fetch this category's children also
         $this->load->model('shop/shop_category_model');
-        $data['category_id'] = array_merge(array($categoryId), $this->shop_category_model->get_ids_of_children($categoryId));
+        $data['category_id'] = array_merge(array($categoryId), $this->shop_category_model->getIdsOfChildren($categoryId));
         return $this->getFiltersForProducts($data);
     }
 

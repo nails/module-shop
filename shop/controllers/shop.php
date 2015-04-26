@@ -148,7 +148,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Sidebar Items
         //  =============
 
-        $this->data['categories'] = $this->shop_category_model->get_top_level();
+        $this->data['categories'] = $this->shop_category_model->getTopLevel();
 
         $data = array('include_count' => true);
         $this->data['brands']      = $this->shop_brand_model->get_all(null, null, $data);
@@ -414,7 +414,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         $data = array('include_count' => true);
         $this->data['categories']        = $this->shop_category_model->get_all(null, null, $data);
-        $this->data['categories_nested'] = $this->shop_category_model->get_all_nested($data);
+        $this->data['categories_nested'] = $this->shop_category_model->getAllNested($data);
 
         // --------------------------------------------------------------------------
 
@@ -469,7 +469,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Category's siblings
         //  =================================
 
-        $this->data['category_siblings'] = $this->shop_category_model->get_siblings(
+        $this->data['category_siblings'] = $this->shop_category_model->getSiblings(
             $this->data['category']->id,
             $data
        );
