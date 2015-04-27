@@ -33,40 +33,34 @@ echo "\n" . $order->user->telephone;
 SHIPPING ADDRESS
 <?php
 
-foreach ($order->shipping_address as $key => $line) {
+$address = array(
+    $order->shipping_address->line_1,
+    $order->shipping_address->line_2,
+    $order->shipping_address->town,
+    $order->shipping_address->state,
+    $order->shipping_address->postcode,
+    $order->shipping_address->country->label
+);
 
-    if (!empty($line)) {
-
-        if ($key == 'country' && isset($countriesFlat[$line])) {
-
-            echo $countriesFlat[$line] . "\n";
-
-        } else {
-
-            echo $line . "\n";
-        }
-    }
-}
+$address = array_filter($address);
+echo implode("\n", $address);
 
 ?>
 
 BILLING ADDRESS
 <?php
 
-foreach ($order->billing_address as $key => $line) {
+$address = array(
+    $order->billing_address->line_1,
+    $order->billing_address->line_2,
+    $order->billing_address->town,
+    $order->billing_address->state,
+    $order->billing_address->postcode,
+    $order->billing_address->country->label
+);
 
-    if (!empty($line)) {
-
-        if ($key == 'country' && isset($countriesFlat[$line])) {
-
-            echo $countriesFlat[$line] . "\n";
-
-        } else {
-
-            echo $line . "\n";
-        }
-    }
-}
+$address = array_filter($address);
+echo implode("\n", $address);
 
 
 if (!empty($order->note)) {

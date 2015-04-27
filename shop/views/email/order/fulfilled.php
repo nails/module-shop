@@ -49,20 +49,17 @@ $countriesFlat = $this->country_model->getAllFlat();
             <?php
 
             echo '<strong>Delivery</strong>';
-            foreach ($order->shipping_address as $key => $line) {
+            $address = array(
+                $order->shipping_address->line_1,
+                $order->shipping_address->line_2,
+                $order->shipping_address->town,
+                $order->shipping_address->state,
+                $order->shipping_address->postcode,
+                $order->shipping_address->country->label
+            );
 
-                if (!empty($line)) {
-
-                    if ($key == 'country' && isset($countriesFlat[$line])) {
-
-                        echo '<br />' . $countriesFlat[$line];
-
-                    } else {
-
-                        echo '<br />' . $line;
-                    }
-                }
-            }
+            $address = array_filter($address);
+            echo implode('<br />', $address);
 
             ?>
             </td>
@@ -70,20 +67,17 @@ $countriesFlat = $this->country_model->getAllFlat();
             <?php
 
             echo '<strong>Billing</strong>';
-            foreach ($order->billing_address as $key => $line) {
+            $address = array(
+                $order->billing_address->line_1,
+                $order->billing_address->line_2,
+                $order->billing_address->town,
+                $order->billing_address->state,
+                $order->billing_address->postcode,
+                $order->billing_address->country->label
+            );
 
-                if (!empty($line)) {
-
-                    if ($key == 'country' && isset($countriesFlat[$line])) {
-
-                        echo '<br />' . $countriesFlat[$line];
-
-                    } else {
-
-                        echo '<br />' . $line;
-                    }
-                }
-            }
+            $address = array_filter($address);
+            echo implode('<br />', $address);
 
             ?>
             </td>
