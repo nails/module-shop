@@ -566,7 +566,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
         } else {
 
-            _LOG('Payment Amount: #' . $paymentData['amount']);
+            _LOG('Payment Amount: ' . $paymentData['amount']);
         }
 
         //  Verify Currency
@@ -579,7 +579,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
         } else {
 
-            _LOG('Payment Currency: #' . $paymentData['currency']);
+            _LOG('Payment Currency: ' . $paymentData['currency']);
         }
 
         // --------------------------------------------------------------------------
@@ -624,7 +624,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         }
         catch (Exception $e)
         {
-            $error = 'Payment Failed with error: ' . $e->getMessage();
+            $error = 'Payment Failed with exception: ' . $e->getMessage();
             _LOG($error);
             $this->_set_error($error);
             return false;

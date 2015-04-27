@@ -282,12 +282,12 @@ class Orders extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Send a receipt to the customer
-        $this->shop_order_model->send_receipt($order->id);
+        $this->shop_order_model->sendReceipt($order->id);
 
         // --------------------------------------------------------------------------
 
         //  Send a notification to the store owner(s)
-        $this->shop_order_model->send_order_notification($order->id);
+        $this->shop_order_model->sendOrderNotification($order->id);
 
         // --------------------------------------------------------------------------
 
