@@ -120,21 +120,21 @@ $countriesFlat = $this->country_model->getAllFlat();
 </table>
 <?php
 
-$_invoice_company    = app_setting('invoice_company', 'shop');
-$_invoice_address    = app_setting('invoice_address', 'shop');
-$_invoice_vat_no     = app_setting('invoice_vat_no', 'shop');
-$_invoice_company_no = app_setting('invoice_company_no', 'shop');
-$_invoice_footer     = app_setting('invoice_footer', 'shop');
+$invoiceCompany   = app_setting('invoice_company', 'shop');
+$invoiceAddress   = app_setting('invoice_address', 'shop');
+$invoiceVatNo     = app_setting('invoice_vat_no', 'shop');
+$invoiceCompanyNo = app_setting('invoice_company_no', 'shop');
+$invoiceFooter    = app_setting('invoice_footer', 'shop');
 
-if (!empty($_invoice_company)||!empty($_invoice_address)||!empty($_invoice_vat_no)||!empty($_invoice_company_no)) {
+if (!empty($invoiceCompany)||!empty($invoiceAddress)||!empty($invoiceVatNo)||!empty($invoiceCompanyNo)) {
 
     ?>
     <h2>Other Details</h2>
     <table class="default-style">
         <tbody>
-            <?php
+        <?php
 
-            if (!empty($_invoice_company)||!empty($_invoice_address)) {
+            if (!empty($invoiceCompany)||!empty($invoiceAddress)) {
 
                 ?>
                 <tr>
@@ -142,16 +142,16 @@ if (!empty($_invoice_company)||!empty($_invoice_address)||!empty($_invoice_vat_n
                     <td>
                     <?php
 
-                        echo $_invoice_company  ? '<strong>' . $_invoice_company . '</strong>' : '<strong>' . APP_NAME . '</strong>';
-                        echo $_invoice_address  ? '<br />' . nl2br($_invoice_address) . '<br />' : '';
+                        echo $invoiceCompany  ? '<strong>' . $invoiceCompany . '</strong>' : '<strong>' . APP_NAME . '</strong>';
+                        echo $invoiceAddress  ? '<br />' . nl2br($invoiceAddress) . '<br />' : '';
                     ?>
                     </td>
                 </tr>
                 <?php
 
-            };
+            }
 
-            if (!empty($_invoice_vat_no)) {
+            if (!empty($invoiceVatNo)) {
 
                 ?>
                 <tr>
@@ -159,39 +159,39 @@ if (!empty($_invoice_company)||!empty($_invoice_address)||!empty($_invoice_vat_n
                     <td>
                     <?php
 
-                        echo $_invoice_vat_no ? $_invoice_vat_no : '';
+                        echo $invoiceVatNo ? $invoiceVatNo : '';
                     ?>
                     </td>
                 </tr>
                 <?php
 
-            };
+            }
 
-            if (!empty($_invoice_company_no)) {
+            if (!empty($invoiceCompanyNo)) {
 
                 ?>
                 <tr>
                     <td class="left-header-cell">Company Number</td>
                     <td>
                     <?php
-                        echo $_invoice_company_no ? $_invoice_company_no : '';
+                        echo $invoiceCompanyNo ? $invoiceCompanyNo : '';
                     ?>
                     </td>
                 </tr>
                 <?php
 
-            };
+            }
 
-            ?>
+        ?>
         </tbody>
     </table>
     <?php
 
 }
 
-if (!empty($_invoice_footer)) {
+if (!empty($invoiceFooter)) {
 
     echo '<p>';
-    echo '<small>' . $_invoice_footer . '</small>';
+    echo '<small>' . $invoiceFooter . '</small>';
     echo '</p>';
 }
