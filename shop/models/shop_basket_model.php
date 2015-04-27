@@ -164,7 +164,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
                 unset($this->basket->items[$key]);
             }
 
-            $basket->items          = array_values($basket->items);
+            $basket->items         = array_values($basket->items);
             $this->basket->items   = array_values($this->basket->items);
             $basket->items_removed = count($unset);
 
@@ -172,6 +172,23 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
             $this->save();
         }
+
+        // --------------------------------------------------------------------------
+
+        /**
+         * Reset totals - if this gets called multiple times we don't want values
+         * doubling up
+         */
+
+        $basket->totals->base->item     = 0;
+        $basket->totals->base->shipping = 0;
+        $basket->totals->base->tax      = 0;
+        $basket->totals->base->grand    = 0;
+
+        $basket->totals->user->item     = 0;
+        $basket->totals->user->shipping = 0;
+        $basket->totals->user->tax      = 0;
+        $basket->totals->user->grand    = 0;
 
         // --------------------------------------------------------------------------
 
