@@ -93,10 +93,10 @@
 
                 // --------------------------------------------------------------------------
 
-                $_status  = set_value('variation[' . $_counter . '][stock_status]', $field['default']);
-                $_display = $_status == 'IN_STOCK' ? 'block' : 'none';
+                $status  = set_value('variation[' . $_counter . '][stock_status]', $field['default']);
+                $display = $status == 'IN_STOCK' ? 'block' : 'none';
 
-                echo '<div class="stock-status-field IN_STOCK" style="display:' . $_display . '">';
+                echo '<div class="stock-status-field IN_STOCK" style="display:' . $display . '">';
 
                     $field                = array();
                     $field['key']         = 'variation[' . $_counter . '][quantity_available]';
@@ -126,10 +126,10 @@
 
                 // --------------------------------------------------------------------------
 
-                $_status  = set_value('variation[' . $_counter . '][out_of_stock_behaviour]', $field['default']);
-                $_display = $_status == 'TO_ORDER' ? 'block' : 'none';
+                $status  = set_value('variation[' . $_counter . '][out_of_stock_behaviour]', $field['default']);
+                $display = $status == 'TO_ORDER' ? 'block' : 'none';
 
-                echo '<div class="out-of-stock-behaviour-field TO_ORDER" style="display:' . $_display . '">';
+                echo '<div class="out-of-stock-behaviour-field TO_ORDER" style="display:' . $display . '">';
 
                     $field                = array();
                     $field['key']         = 'variation[' . $_counter . '][out_of_stock_to_order_lead_time]';
@@ -155,7 +155,7 @@
 
                     if ($metaFields) {
 
-                        $_defaults = array();
+                        $defaults = array();
 
                         //  Set any default values
                         if (isset($variation->meta)) {
@@ -163,11 +163,11 @@
                             //  DB Data
                             foreach ($variation->meta as $variationMeta) {
 
-                                $_defaults[$variationMeta->meta_field_id] = $variationMeta->value;
+                                $defaults[$variationMeta->meta_field_id] = $variationMeta->value;
 
                                 if ($variationMeta->allow_multiple) {
 
-                                    $_defaults[$variationMeta->meta_field_id] = implode(',', $_defaults[$variationMeta->meta_field_id]);
+                                    $defaults[$variationMeta->meta_field_id] = implode(',', $defaults[$variationMeta->meta_field_id]);
                                 }
                             }
 
@@ -176,7 +176,7 @@
                             //  POST Data
                             foreach ($variation['meta'][$productTypeId] as $meta_field_id => $meta_field_value) {
 
-                                $_defaults[$meta_field_id] = $meta_field_value;
+                                $defaults[$meta_field_id] = $meta_field_value;
                             }
                         }
 
@@ -189,7 +189,7 @@
                             $field['placeholder'] = !empty($metaField->admin_form_placeholder) ? $metaField->admin_form_placeholder : '';
                             $field['tip']         = !empty($metaField->admin_form_tip)         ? $metaField->admin_form_tip : '';
                             $field['class']       = !empty($metaField->allow_multiple)         ? 'allow-multiple' : '';
-                            $field['default']     = !empty($_defaults[$metaField->id])         ? $_defaults[$metaField->id] : '';
+                            $field['default']     = !empty($defaults[$metaField->id])          ? $defaults[$metaField->id] : '';
                             $field['info']        = !empty($metaField->allow_multiple)         ? '<strong>Tip:</strong> This field accepts multiple selections, seperate multiple values with a comma or hit enter.' : '';
 
                             echo form_field($field);
@@ -223,120 +223,92 @@
                     </tr>
                 </thead>
                 <tbody>
-
                     <!--    BASE CURRENCY   -->
                     <?php
 
-                        if ($is_first) {
-
-                            $_attr_price       = 'data-code="' . SHOP_BASE_CURRENCY_CODE . '"';
-                            $_attr_price_sale  = 'data-code="' . SHOP_BASE_CURRENCY_CODE . '"';
-
-                            $_class_price      = array('base-price');
-                            $_class_price_sale = array('base-price-sale');
-
-                        } else {
-
-                            $_attr_price       = '';
-                            $_attr_price_sale  = '';
-
-                            $_class_price      = array('variation-price', SHOP_BASE_CURRENCY_CODE);
-                            $_class_price_sale = array('variation-price-sale', SHOP_BASE_CURRENCY_CODE);
-                        }
-
-                        // --------------------------------------------------------------------------
-
                         //  Prep the prices into an easy to access array
-                        $_price         = array();
-                        $_sale_price    = array();
+                        $price     = array();
+                        $salePrice = array();
 
                         if (!empty($variation->price_raw)) {
 
-                            foreach ($variation->price_raw as $price) {
+                            foreach ($variation->price_raw as $priceRaw) {
 
-                                $_price[$price->currency->code]      = $this->shop_currency_model->intToFloat($price->price, $price->currency->code);
-                                $_sale_price[$price->currency->code] = $this->shop_currency_model->intToFloat($price->sale_price, $price->currency->code);
+                                $price[$priceRaw->currency->code]     = $this->shop_currency_model->intToFloat($priceRaw->price, $priceRaw->currency->code);
+                                $salePrice[$priceRaw->currency->code] = $this->shop_currency_model->intToFloat($priceRaw->sale_price, $priceRaw->currency->code);
                             }
                         }
 
                     ?>
                     <tr>
                         <td class="currency">
-                            <?php
+                        <?php
 
-                                echo SHOP_BASE_CURRENCY_CODE;
+                            echo SHOP_BASE_CURRENCY_CODE;
 
-                                $_key = 'variation[' . $_counter . '][pricing][0][currency]';
-                                echo form_hidden($_key, SHOP_BASE_CURRENCY_CODE);
+                            $key = 'variation[' . $_counter . '][pricing][0][currency]';
+                            echo form_hidden($key, SHOP_BASE_CURRENCY_CODE);
 
-                            ?>
+                        ?>
                         </td>
                         <td class="price">
-                            <?php
+                        <?php
 
-                                $_key     = 'variation[' . $_counter . '][pricing][0][price]';
-                                $_error   = form_error($_key, '<span class="error show-in-tabs">', '</span>');
-                                $_class   = $_class_price;
-                                $_default = !empty($_price[SHOP_BASE_CURRENCY_CODE]) ? $_price[SHOP_BASE_CURRENCY_CODE] : '';
+                            $key     = 'variation[' . $_counter . '][pricing][0][price]';
+                            $error   = form_error($key, '<span class="error show-in-tabs">', '</span>');
+                            $class   = array('variation-price', SHOP_BASE_CURRENCY_CODE);
+                            $default = !empty($price[SHOP_BASE_CURRENCY_CODE]) ? $price[SHOP_BASE_CURRENCY_CODE] : '';
 
-                                if ($_error) {
+                            if ($error) {
 
-                                    $_class[] = 'error';
-                                }
+                                $class[] = 'error';
+                            }
 
-                                $_class = $_class ? ' class="' . implode(' ', $_class) . '"' : '';
+                            echo form_input(
+                                $key,
+                                set_value($key, $default),
+                                'data-prefix="' . SHOP_BASE_CURRENCY_SYMBOL . '" ' .
+                                'data-code="' . SHOP_BASE_CURRENCY_CODE . '" ' .
+                                'class="' . implode(' ', $class) . '" ' .
+                                'placeholder="Price"'
+                            );
+                            echo $error;
 
-                                echo form_input($_key, set_value($_key, $_default), 'data-prefix="' . SHOP_BASE_CURRENCY_SYMBOL . '" ' . $_attr_price . $_class . ' placeholder="Price"');
-                                echo $_error;
-
-                            ?>
+                        ?>
                         </td>
                         <td class="price-sale">
-                            <?php
+                        <?php
 
-                                $_key     = 'variation[' . $_counter . '][pricing][0][sale_price]';
-                                $_error   = form_error($_key, '<span class="error show-in-tabs">', '</span>');
-                                $_class   = $_class_price_sale;
-                                $_default = !empty($_sale_price[SHOP_BASE_CURRENCY_CODE]) ? $_sale_price[SHOP_BASE_CURRENCY_CODE] : '';
+                            $key     = 'variation[' . $_counter . '][pricing][0][sale_price]';
+                            $error   = form_error($key, '<span class="error show-in-tabs">', '</span>');
+                            $class   = array('variation-price-sale', SHOP_BASE_CURRENCY_CODE);
+                            $default = !empty($salePrice[SHOP_BASE_CURRENCY_CODE]) ? $salePrice[SHOP_BASE_CURRENCY_CODE] : '';
 
-                                if ($_error) {
+                            if ($error) {
 
-                                    $_class[] = 'error';
-                                }
+                                $class[] = 'error';
+                            }
 
-                                $_class = $_class ? ' class="' . implode(' ', $_class) . '"' : '';
+                            echo form_input(
+                                $key,
+                                set_value($key, $default),
+                                'data-prefix="' . SHOP_BASE_CURRENCY_SYMBOL . '" ' .
+                                'data-code="' . SHOP_BASE_CURRENCY_CODE . '" ' .
+                                'class="' . implode(' ', $class) . '" ' .
+                                'placeholder="Sale Price"'
+                            );
+                            echo $error;
 
-                                echo form_input($_key, set_value($_key, $_default), 'data-prefix="' . SHOP_BASE_CURRENCY_SYMBOL . '" ' . $_attr_price_sale . $_class . ' placeholder="Sale Price"');
-                                echo $_error;
-
-                            ?>
+                        ?>
                         </td>
                     </tr>
-
                     <!--    OTHER CURRENCIES    -->
                     <?php
 
-                        $_counter_inside = 1;
+                        $counterInside = 1;
                         foreach ($currencies as $currency) {
 
                             if ($currency->code != SHOP_BASE_CURRENCY_CODE) {
-
-                                if ($is_first) {
-
-                                    $_attr_price      = 'data-code="' . $currency->code . '"';
-                                    $_attr_price_sale = 'data-code="' . $currency->code . '"';
-
-                                    $_class_price      = array('base-price');
-                                    $_class_price_sale = array('base-price-sale');
-
-                                } else {
-
-                                    $_attr_price      = '';
-                                    $_attr_price_sale = '';
-
-                                    $_class_price      = array('variation-price', $currency->code);
-                                    $_class_price_sale = array('variation-price-sale', $currency->code);
-                                }
 
                                 ?>
                                 <tr>
@@ -345,70 +317,77 @@
 
                                             echo $currency->code;
 
-                                            $_key = 'variation[' . $_counter . '][pricing][' . $_counter_inside . '][currency]';
-                                            echo form_hidden($_key, $currency->code);
+                                            $key = 'variation[' . $_counter . '][pricing][' . $counterInside . '][currency]';
+                                            echo form_hidden($key, $currency->code);
 
                                         ?>
                                     </td>
                                     <td class="price">
                                         <?php
 
-                                            $_key     = 'variation[' . $_counter . '][pricing][' . $_counter_inside . '][price]';
-                                            $_error   = form_error($_key, '<span class="error show-in-tabs">', '</span>');
-                                            $_class   = $_class_price;
-                                            $_default = !empty($_price[$currency->code]) ? $_price[$currency->code] : '';
+                                            $key     = 'variation[' . $_counter . '][pricing][' . $counterInside . '][price]';
+                                            $error   = form_error($key, '<span class="error show-in-tabs">', '</span>');
+                                            $class   = array('variation-price', $currency->code);
+                                            $default = !empty($price[$currency->code]) ? $price[$currency->code] : '';
 
-                                            if ($_error) {
+                                            if ($error) {
 
-                                                $_class[] = 'error';
+                                                $class[] = 'error';
                                             }
 
-                                            $_class = $_class ? ' class="' . implode(' ', $_class) . '"' : '';
-
-                                            echo form_input($_key, set_value($_key, $_default), 'data-prefix="' . $currency->symbol . '" ' . $_attr_price . $_class . ' placeholder="Calculate automatically from ' . SHOP_BASE_CURRENCY_CODE . '"');
-                                            echo $_error;
+                                            echo form_input(
+                                                $key,
+                                                set_value($key, $default),
+                                                'data-prefix="' . $currency->symbol . '" ' .
+                                                'data-code="' . $currency->code . '" ' .
+                                                'class="' . implode(' ', $class) . '" ' .
+                                                'placeholder="Calculate automatically from ' . SHOP_BASE_CURRENCY_CODE . '"'
+                                            );
+                                            echo $error;
 
                                         ?>
                                     </td>
                                     <td class="price-sale">
                                         <?php
 
-                                            $_key     = 'variation[' . $_counter . '][pricing][' . $_counter_inside . '][sale_price]';
-                                            $_error   = form_error($_key, '<span class="error show-in-tabs">', '</span>');
-                                            $_class   = $_class_price_sale;
-                                            $_default = !empty($_sale_price[$currency->code]) ? $_sale_price[$currency->code] : '';
+                                            $key     = 'variation[' . $_counter . '][pricing][' . $counterInside . '][sale_price]';
+                                            $error   = form_error($key, '<span class="error show-in-tabs">', '</span>');
+                                            $class   = array('variation-price-sale', $currency->code);
+                                            $default = !empty($salePrice[$currency->code]) ? $salePrice[$currency->code] : '';
 
-                                            if ($_error) {
+                                            if ($error) {
 
-                                                $_class[] = 'error';
+                                                $class[] = 'error';
                                             }
 
-                                            $_class = $_class ? ' class="' . implode(' ', $_class) . '"' : '';
-                                            echo form_input($_key, set_value($_key, $_default), 'data-prefix="' . $currency->symbol . '" ' . $_attr_price_sale . $_class . ' placeholder="Calculate automatically from ' . SHOP_BASE_CURRENCY_CODE . '"');
-                                            echo $_error;
+                                            echo form_input(
+                                                $key,
+                                                set_value($key, $default),
+                                                'data-prefix="' . $currency->symbol . '" ' .
+                                                'data-code="' . $currency->code . '" ' .
+                                                'class="' . implode(' ', $class) . '"' .
+                                                'placeholder="Calculate automatically from ' . SHOP_BASE_CURRENCY_CODE . '"'
+                                            );
+                                            echo $error;
 
                                         ?>
                                     </td>
                                 </tr>
                                 <?php
 
-                                $_counter_inside++;
+                                $counterInside++;
                             }
                         }
 
                     ?>
-
                 </tbody>
             </table>
             <?php
 
-                if ($is_first) {
-
-                    $_display = empty($num_variants) || $num_variants == 1 ? 'none' : 'block';
-                    echo '<p id="variation-sync-prices" style="display:' . $_display . '">';
+                $display = empty($isFirst) || empty($numVariants) || $numVariants == 1 ? 'none' : 'block';
+                echo '<p class="variation-sync-prices" style="display:' . $display . '">';
                     echo '<a href="#" class="awesome small orange">Sync Prices</a>';
-                    echo '</p>';
-                }
+                echo '</p>';
 
             ?>
         </div>
@@ -493,8 +472,8 @@
 
                     if (!empty($shipping_options_variant)) {
 
-                        $_display = $field['default'] ? 'none' : 'block';
-                        echo '<div class="shipping-driver-options" style="display:' . $_display . '">';
+                        $display = $field['default'] ? 'none' : 'block';
+                        echo '<div class="shipping-driver-options" style="display:' . $display . '">';
 
                             //  Any further options from the shipping driver?
                             foreach ($shipping_options_variant as $field) {
@@ -506,13 +485,11 @@
                                 }
 
                                 //  Order is important here as $field['key'] gets overwritte
-                                $_default         = isset($variation->shipping->driver_data[$shipping_driver->slug][$field['key']]) ? $variation->shipping->driver_data[$shipping_driver->slug][$field['key']] : '';
+                                $default         = isset($variation->shipping->driver_data[$shipping_driver->slug][$field['key']]) ? $variation->shipping->driver_data[$shipping_driver->slug][$field['key']] : '';
                                 $field['key']     = 'variation[' . $_counter . '][shipping][driver_data][' . $shipping_driver->slug . '][' . $field['key'] . ']';
-                                $field['default'] = set_value($field['key'], $_default);
+                                $field['default'] = set_value($field['key'], $default);
 
-                                //  TODO: Use admin form builder
-                                //  Asana ticket: https://app.asana.com/0/6627768688940/15891120890395
-
+                                //  @todo: Use admin form builder - Asana ticket: https://app.asana.com/0/6627768688940/15891120890395
                                 $_type = isset($field['type']) ? $field['type'] : '';
 
                                 switch ($_type) {
@@ -531,8 +508,8 @@
 
                         echo '</div>';
 
-                        $_display = $field['default'] ? 'block' : 'none';
-                        echo '<div class="shipping-driver-options-hidden" style="display:' . $_display . '">';
+                        $display = $field['default'] ? 'block' : 'none';
+                        echo '<div class="shipping-driver-options-hidden" style="display:' . $display . '">';
                             echo '<p class="system-alert notice" style="margin-top:1em;">';
                                 echo 'Further shipping options have been hidden because the item is set as "collection only" and will not be included while calculating shipping costs.';
                             echo '</p>';

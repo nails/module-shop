@@ -276,11 +276,11 @@
                 <?php
 
                     //  Data which will be passed to template
-                    $viewData                 = array();
-                    $viewData['is_first']     = true;
-                    $viewData['is_php']       = true;
-                    $viewData['counter']      = 0;
-                    $viewData['num_variants'] = 0;
+                    $viewData                = array();
+                    $viewData['isFirst']     = true;
+                    $viewData['isPhp']       = true;
+                    $viewData['counter']     = 0;
+                    $viewData['numVariants'] = 0;
 
                     /**
                      * Render, if there's POST then make sure we render it enough times,
@@ -311,7 +311,7 @@
                         foreach ($_variations as $variation) {
 
                             $viewData['variation']    = $variation;
-                            $viewData['num_variants'] = count($_variations);
+                            $viewData['numVariants'] = count($_variations);
 
                             $template = \Nails\Admin\Helper::loadInlineView(
                                 'utilities/template-mustache-inventory-variant',
@@ -322,7 +322,7 @@
                             echo $this->mustache->render($template, $viewData);
 
                             $viewData['counter']++;
-                            $viewData['is_first'] = false;
+                            $viewData['isFirst'] = false;
                         }
 
                     } else {
@@ -696,11 +696,11 @@
 <?php
 
     $viewData                 = array();
-    $viewData['is_first']     = false;
-    $viewData['is_php']       = false;
+    $viewData['isFirst']     = false;
+    $viewData['isPhp']       = false;
     $viewData['counter']      = false;
     $viewData['variation']    = null;
-    $viewData['num_variants'] = null;
+    $viewData['numVariants'] = null;
 
     echo \Nails\Admin\Helper::loadInlineView(
         'utilities/template-mustache-inventory-variant',
