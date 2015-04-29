@@ -123,8 +123,26 @@ class NAILS_Shop_basket_model extends NAILS_Model
         //  This variable will hold any keys which need to be unset
         $unset = array();
 
+        //  This variable will hold the labels of any adjusted items
+        $adjusted = array();
+
         foreach ($basket->items as $basketKey => $item) {
 
+            /**
+             * Set the item label, this is used to feedback to the suer should items
+             * be removed or adjusted.
+             */
+
+            if ($item->product_label === $item->variant_label) {
+
+                $itemLabel = $item->product_label;
+
+            } else {
+
+                $itemLabel = $item->product_label . ' - ' . $item->variant_label;
+            }
+
+            //  Now get the product
             $item->product = $this->shop_product_model->get_by_id($item->product_id);
 
             if (!empty($item->product)) {
@@ -142,33 +160,78 @@ class NAILS_Shop_basket_model extends NAILS_Model
                 if (empty($item->variant)) {
 
                     //  Bad variant ID, possible item has been deleted so don't get too angry
-                    $unset[] = $basketKey;
+                    $unset[] = array(
+                        $basketKey,
+                        $itemLabel
+                    );
+
+                } else {
+
+                    //  Found the item, do we still have enough of the stock?
+                    if (!empty($item->variant->quantity_available) && $item->quantity > $item->variant->quantity_available) {
+
+                        $adjusted[] = array(
+                            $basketKey,
+                            $itemLabel,
+                            $item->variant->quantity_available
+                        );
+                    }
                 }
 
             } else {
 
                 //  Bad product ID, again, possible product was deleted or deactivated - KCCO
-                $unset[] = $basketKey;
+                $unset[] = array(
+                    $basketKey,
+                    $itemLabel
+                );
             }
         }
 
         //  Removing anything?
         if (!empty($unset)) {
 
-            foreach ($unset as $key) {
+            $basket->itemsRemoved = array();
+
+            foreach ($unset as $item) {
+
+                list($key, $label, $newQuantity) = $item;
 
                 //  Remove from the local basket object
                 unset($basket->items[$key]);
 
                 //  Also remove from the main basket object
                 unset($this->basket->items[$key]);
+
+                //  Add to the itemsRemoved Array
+                $basket->itemsRemoved[] = $label;
             }
 
-            $basket->items         = array_values($basket->items);
-            $this->basket->items   = array_values($this->basket->items);
-            $basket->items_removed = count($unset);
+            //  Reset the indexes
+            $basket->items       = array_values($basket->items);
+            $this->basket->items = array_values($this->basket->items);
 
-            // --------------------------------------------------------------------------
+            $this->save();
+        }
+
+        //  Anything adjusted?
+        if (!empty($adjusted)) {
+
+            $basket->itemsAdjusted = array();
+
+            foreach ($adjusted as $item) {
+
+                list($key, $label, $newQuantity) = $item;
+
+                //  Adjust the local basket object
+                $basket->items[$key]->quantity = $newQuantity;
+
+                //  Adjust the main basket object
+                $this->basket->items[$key]->quantity = $newQuantity;
+
+                //  Add to the itemsAdjusted array
+                $basket->itemsAdjusted[] = $label;
+            }
 
             $this->save();
         }
@@ -505,33 +568,48 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
         if ($key !== false) {
 
-            $canIncrement = true;
-            $maxIncrement = null;
+            $item = $this->shop_product_model->getByVariantId($variantId);
 
-            /**
-             * Check we can increment the product
-             * @TODO; work out what the maximum number of items this product type can
-             * have. If $maxIncrement is null assume no limit on incrementations
-             */
+            if ($item) {
 
-            if ($canIncrement && (is_null($maxIncrement) || $increment <= $maxIncrement)) {
+                //  We need to check that we can increment the item by the desired amount
+                $quantity     = $this->basket->items[$key]->quantity;
+                $newQuantity  = $quantity + $incrementBy;
+                $available    = 0;
+                $maxIncrement = $item->type->max_per_order;
 
-                //  Increment
-                $this->basket->items[$key]->quantity += $incrementBy;
+                foreach ($item->variations as $variant) {
 
-                // --------------------------------------------------------------------------
+                    if ($variant->id == $variantId) {
 
-                //  Invalidate the basket cache
-                $this->saveSession();
-                $this->_unset_cache($this->cacheKey);
+                        $available = $variant->quantity_available;
+                        break;
+                    }
+                }
 
-                // --------------------------------------------------------------------------
+                $sufficient = empty($available) || $newQuantity <= $available;
+                $notExceed  = empty($maxIncrement) || $newQuantity <= $maxIncrement;
 
-                return true;
+                if ($sufficient && $notExceed) {
+
+                    //  Increment
+                    $this->basket->items[$key]->quantity = $newQuantity;
+
+                    //  Invalidate the basket cache
+                    $this->saveSession();
+                    $this->_unset_cache($this->cacheKey);
+
+                    return true;
+
+                } else {
+
+                    $this->_set_error('You cannot increment this item that many times.');
+                    return false;
+                }
 
             } else {
 
-                $this->_set_error('You cannot increment this item that many times.');
+                $this->_set_error('Could not find product.');
                 return false;
             }
 
@@ -572,8 +650,6 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
                     //  Decrement
                     $this->basket->items[$key]->quantity -= $decrementBy;
-
-                    // --------------------------------------------------------------------------
 
                     //  Invalidate the basket cache
                     $this->saveSession();

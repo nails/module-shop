@@ -49,24 +49,32 @@
 
             // --------------------------------------------------------------------------
 
-            $field                = array();
-            $field['key']         = 'max_per_order';
-            $field['label']       = 'Max Per Order';
-            $field['required']    = true;
-            $field['default']     = isset($product_type->max_per_order) ? $product_type->max_per_order : '';
-            $field['placeholder'] = 'Maximum number of times this particular product can be added to the basket. Specify 0 for unlimited.';
+            $field                 = array();
+            $field['key']          = 'max_per_order';
+            $field['label']        = 'Max Per Order';
+            $field['required']     = true;
+            $field['default']      = isset($product_type->max_per_order) ? $product_type->max_per_order : '';
+            $field['placeholder']  = 'Maximum number of times this particular product can be added to the basket. ';
+            $field['placeholder'] .= 'Specify 0 for unlimited.';
+            $field['tip']          = 'Limit the number of times an individual product can be added to an order. ';
+            $field['tip']         .= 'This only applies to a single product, i.e. an item with a limit of 1 can only ';
+            $field['tip']         .= 'be added once, but multiple (different) products of the same type can be added, ';
+            $field['tip']         .= 'but only once each. Specify 0 for unlimited.';
 
-            echo form_field($field, 'Limit the number of times an individual product can be added to an order. This only applies to a single product, i.e. an item with a limit of 1 can only be added once, but multiple (different) products of the same type can be added, but only once each. Specify 0 for unlimited.');
+            echo form_field($field);
 
             // --------------------------------------------------------------------------
 
-            $field                = array();
-            $field['key']         = 'max_variations';
-            $field['label']       = 'Max Variations';
-            $field['placeholder'] = 'The maximum number of variations this type of product can have. Specify 0 for unlimited.';
-            $field['default']     = isset($product_type->max_variations) ? $product_type->max_variations : '';
+            $field                 = array();
+            $field['key']          = 'max_variations';
+            $field['label']        = 'Max Variations';
+            $field['placeholder']  = 'The maximum number of variations this type of product can have. ';
+            $field['placeholder'] .= 'Specify 0 for unlimited.';
+            $field['default']      = isset($product_type->max_variations) ? $product_type->max_variations : '';
+            $field['tip']          = 'Define the number of variations this product can have. Specify 0 for ';
+            $field['tip']         .= 'unlimited variations.';
 
-            echo form_field($field, 'Define the number of variations this product can have. Specify 0 for unlimited variations.');
+            echo form_field($field);
 
             // --------------------------------------------------------------------------
 
@@ -75,8 +83,10 @@
             $field['label']       = 'IPN Method';
             $field['placeholder'] = 'The IPN method to call upon notification of successfull payment.';
             $field['default']     = isset($product_type->ipn_method) ? $product_type->ipn_method : '';
+            $field['tip']         = 'This method should be callable within the scope of `shop_order_model`. ';
+            $field['tip']        .= 'Do not include the `_process` method name prefix here.';
 
-            echo form_field($field, 'This method should be callable within the scope of `shop_order_model`. Do not include the `_process` method name prefix here.');
+            echo form_field($field);
 
         ?>
     </fieldset>

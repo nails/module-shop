@@ -47,21 +47,6 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         $this->data['basket'] = $this->shop_basket_model->get();
 
-        if (!empty($this->data['basket']->items_removed) && empty($this->data['message'])) {
-
-            if ($this->data['basket']->items_removed > 1) {
-
-                $this->data['message']  = '<strong>Some items were removed.</strong> ';
-                $this->data['message'] .= $this->data['basket']->items_removed . ' items were removed from your ';
-                $this->data['message'] .= 'basket because they are no longer available.';
-
-            } else {
-
-                $this->data['message']  = '<strong>Some items were removed.</strong> An item was removed from your ';
-                $this->data['message'] .= 'basket because it is no longer available.';
-            }
-        }
-
         // --------------------------------------------------------------------------
 
         if (count($this->data['basket']->items) && !$this->data['basket']->shipping->isDeliverable) {

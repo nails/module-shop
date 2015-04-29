@@ -2250,7 +2250,7 @@ class Manage extends \AdminController
 
             $this->load->library('form_validation');
 
-            $this->form_validation->set_rules('label', '', 'xss_clean|required|unique_if_diff[' . NAILS_DB_PREFIX . 'shop_product_type.label.' . $this->input->post('label_old') . ']');
+            $this->form_validation->set_rules('label', '', 'xss_clean|required|unique_if_diff[' . NAILS_DB_PREFIX . 'shop_product_type.label.' . $this->data['product_type']->label . ']');
             $this->form_validation->set_rules('description', '', 'xss_clean');
             $this->form_validation->set_rules('is_physical', '', 'xss_clean');
             $this->form_validation->set_rules('ipn_method', '', 'xss_clean');
@@ -2272,7 +2272,7 @@ class Manage extends \AdminController
                 if ($this->shop_product_type_model->update($this->data['product_type']->id, $data)) {
 
                     $this->session->set_flashdata('success', 'Product Type saved successfully.');
-                    redirect('admin/shop/product_type' . $this->isModal);
+                    redirect('admin/shop/manage/productType' . $this->isModal);
 
                 } else {
 
