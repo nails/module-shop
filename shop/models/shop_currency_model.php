@@ -693,6 +693,17 @@ class NAILS_Shop_currency_model extends NAILS_Model
         }
 
         $result = $value * pow(10, $currency->decimal_precision);
+
+        /**
+         * Due to the nature of floating point numbers (best explained here
+         * http://stackoverflow.com/a/4934594/789224) simply casting as an integer
+         * can cause some odd rounding behaviour (although eprfectly rational). If we
+         * cast as a string, then cast as an integer we can be sure that the value is
+         * correct. Others said to use round() but that gives me the fear.
+         */
+
+        $result = (string) $result;
+
         return (int) $result;
     }
 
