@@ -1147,11 +1147,11 @@ class NAILS_Shop_product_model extends NAILS_Model
                 $this->db->where_in('pvp.currency', $supportedCurrencyFlat);
                 $_price = $this->db->get($this->table_variation_price . ' pvp')->result();
 
-                $v->price_raw = $basePriceRaw;
+                //  Dirty hack to "clone" the object, otherwise all variants will have the same price
+                $v->price_raw = unserialize(serialize($basePriceRaw));
                 $v->price     = new \stdClass();
 
                 //  Set up a base object first, for consistency
-
                 foreach ($_price as $price) {
 
                     $currencyCode = $price->currency;
