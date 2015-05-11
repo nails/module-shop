@@ -19,16 +19,14 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         $this->table            = NAILS_DB_PREFIX . 'shop_inform_product_available';
-        $this->tablePrefix    = 'sipa';
+        $this->tablePrefix  = 'sipa';
 
         // --------------------------------------------------------------------------
 
         $this->load->model('shop/shop_product_model');
     }
 
-
     // --------------------------------------------------------------------------
-
 
     protected function _getcount_common($data = array(), $_caller = null)
     {
@@ -37,26 +35,23 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
         if (empty($data['sort'])) {
 
             $this->db->order_by($this->tablePrefix . '.created', 'DESC');
-
         }
 
         $this->db->select($this->tablePrefix . '.*, ue.user_id, u.first_name, u.last_name, u.profile_img, u.gender');
         $this->db->select('sp.label product_label, spv.label variation_label');
 
-        //    Join the User tables
+        //  Join the User tables
         $this->db->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ' . $this->tablePrefix . '.email', 'LEFT');
         $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = ue.user_id', 'LEFT');
 
-        //    Join the product & variartion tables
+        //  Join the product & variartion tables
         $this->db->join(NAILS_DB_PREFIX . 'shop_product sp', 'sp.id = ' . $this->tablePrefix . '.product_id');
         $this->db->join(NAILS_DB_PREFIX . 'shop_product_variation spv', 'spv.id = ' . $this->tablePrefix . '.variation_id');
     }
 
-
     // --------------------------------------------------------------------------
 
-
-    public function add($variant_id, $email)
+    public function add($variantId, $email)
     {
         $this->load->helper('email');
 
@@ -64,117 +59,115 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 
             $this->_set_error('"' . $email . '" is not a valid email address.');
             return false;
-
         }
 
-        $_product = $this->shop_product_model->getByVariantId($variant_id);
+        $product = $this->shop_product_model->getByVariantId($variantId);
 
-        if (!$_product) {
+        if (!$product) {
 
             $this->_set_error('Invalid Variant ID.');
             return false;
-
         }
 
         // --------------------------------------------------------------------------
 
-        $_data                    = array();
-        $_data['product_id']    = $_product->id;
-        $_data['variation_id']    = $variant_id;
-        $_data['email']            = $email;
+        $_data                 = array();
+        $_data['product_id']   = $product->id;
+        $_data['variation_id'] = $variantId;
+        $_data['email']        = $email;
 
         return (bool) parent::create($_data);
     }
 
-
     // --------------------------------------------------------------------------
 
-
-    public function inform($product_id, $variation_ids)
+    public function inform($productId, $variationIds)
     {
-        $variation_ids = (array) $variation_ids;
-        $variation_ids = array_filter($variation_ids);
-        $variation_ids = array_unique($variation_ids);
+        $variationIds = (array) $variationIds;
+        $variationIds = array_filter($variationIds);
+        $variationIds = array_unique($variationIds);
 
-        $_sent = array();
+        $sent = array();
 
-        if ($variation_ids) {
+        if ($variationIds) {
 
-            $_product = $this->shop_product_model->get_by_id($product_id);
+            $product = $this->shop_product_model->get_by_id($productId);
 
-            if ($_product && $_product->is_active && !$_product->is_deleted) {
+            if ($product && $product->is_active && !$product->is_deleted) {
 
-                foreach ($variation_ids as $variation_id) {
+                foreach ($variationIds as $variationId) {
 
                     $this->db->select($this->tablePrefix . '.*');
-                    $this->db->where($this->tablePrefix . '.product_id', $product_id);
-                    $this->db->where($this->tablePrefix . '.variation_id', $variation_id);
-                    $_result = $this->db->get($this->table . ' ' . $this->tablePrefix)->result();
+                    $this->db->where($this->tablePrefix . '.product_id', $productId);
+                    $this->db->where($this->tablePrefix . '.variation_id', $variationId);
+                    $results = $this->db->get($this->table . ' ' . $this->tablePrefix)->result();
 
-                    foreach ($_result as $result) {
+                    foreach ($results as $result) {
 
-                        //    Have we already sent this notification?
-                        $_sent_string = $_email->to_email . '|' . $_product_id . '|' . $variation_id;
+                        //  Have we already sent this notification?
+                        $sentStr = $_email->to_email . '|' . $product->id . '|' . $variationId;
 
-                        if (in_array($_sent_string, $_sent)) {
+                        if (in_array($sentStr, $sent)) {
 
                             continue;
-
                         }
 
-                        $_email                            = new \stdClass();
-                        $_email->to_email                = $result->email;
-                        $_email->type                    = 'shop_inform_product_available';
-                        $_email->data                    = array();
-                        $_email->data['product']        = $_product;
-                        $_email->data['variation']        = $variation_id;
-                        $_email->data['email_subject']    = $_product->label . ' is back in stock.';
+                        $_email                        = new \stdClass();
+                        $_email->to_email              = $result->email;
+                        $_email->type                  = 'shop_inform_product_available';
+                        $_email->data                  = array();
+                        $_email->data['product']       = $product;
+                        $_email->data['variation']     = $variationId;
+                        $_email->data['email_subject'] = $product->label . ' is back in stock.';
 
                         $this->emailer->send($_email);
 
-                        $_sent[] = $_sent_string;
-
+                        $sent[] = $sentStr;
                     }
-
                 }
-
             }
-
         }
 
-        //    Delete requests
-        $this->db->where('product_id', $product_id);
-        $this->db->where_in('variation_id', $variation_ids);
+        //  Delete requests
+        $this->db->where('product_id', $productId);
+        $this->db->where_in('variation_id', $variationIds);
         $this->db->delete($this->table);
     }
 
-
     // --------------------------------------------------------------------------
 
-
-    protected function _format_object(&$obj)
+    /**
+     * Formats a single object
+     *
+     * @param  object $obj      A reference to the object being formatted.
+     * @param  array  $data     The same data array which is passed to _getcount_common, for reference if needed
+     * @param  array  $integers Fields which should be cast as integers if numerical
+     * @param  array  $bools    Fields which should be cast as booleans
+     * @return void
+     */
+    protected function _format_object(&$obj, $data = array(), $integers = array(), $bools = array())
     {
-        parent::_format_object($obj);
+        parent::_format_object($obj, $data, $integers, $bools);
 
-        $obj->product            = new \stdClass();
-        $obj->product->id        = (int) $obj->product_id;
-        $obj->product->label    = $obj->product_label;
+        $obj->product        = new \stdClass();
+        $obj->product->id    = (int) $obj->product_id;
+        $obj->product->label = $obj->product_label;
         unset($obj->product_id);
         unset($obj->product_label);
 
-        $obj->variation            = new \stdClass();
-        $obj->variation->id        = (int) $obj->variation_id;
-        $obj->variation->label    = $obj->variation_label;
+        $obj->variation        = new \stdClass();
+        $obj->variation->id    = (int) $obj->variation_id;
+        $obj->variation->label = $obj->variation_label;
         unset($obj->variation_id);
         unset($obj->variation_label);
 
-        $obj->user                = new \stdClass();
-        $obj->user->id            = $obj->user_id;
-        $obj->user->email        = $obj->email;
-        $obj->user->first_name    = $obj->first_name;
-        $obj->user->last_name    = $obj->last_name;
-        $obj->user->profile_img    = $obj->profile_img;
-        $obj->user->gender        = $obj->gender;
+        $obj->user              = new \stdClass();
+        $obj->user->id          = $obj->user_id;
+        $obj->user->email       = $obj->email;
+        $obj->user->first_name  = $obj->first_name;
+        $obj->user->last_name   = $obj->last_name;
+        $obj->user->profile_img = $obj->profile_img;
+        $obj->user->gender      = $obj->gender;
         unset($obj->user_id);
         unset($obj->email);
         unset($obj->first_name);
@@ -217,8 +210,4 @@ if (!defined('NAILS_ALLOW_EXTENSION_SHOP_INFORM_PRODUCT_AVAILABLE_MODEL')) {
     class Shop_inform_product_available_model extends NAILS_Shop_inform_product_available_model
     {
     }
-
 }
-
-/* End of file shop_inform_product_available_model.php */
-/* Location: ./modules/shop/models/shop_inform_product_available_model.php */

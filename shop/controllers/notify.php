@@ -72,7 +72,7 @@ class NAILS_Notify extends NAILS_Shop_Controller
             if ($this->shop_inform_product_available_model->add($variantId, $this->input->post('email'))) {
 
                 $this->data['success']  = '<strong>Success!</strong> You were added to the ';
-                $this->Data['success'] .= 'notification list for this item.';
+                $this->data['success'] .= 'notification list for this item.';
                 $this->data['successfully_added'] = true;
 
             } else {

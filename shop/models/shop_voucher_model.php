@@ -532,33 +532,37 @@ class NAILS_Shop_voucher_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
-     * Formats a voucher object
-     * @param  stdClass &$voucher The voucher object to format
+     * Formats a single object
+     *
+     * @param  object $obj      A reference to the object being formatted.
+     * @param  array  $data     The same data array which is passed to _getcount_common, for reference if needed
+     * @param  array  $integers Fields which should be cast as integers if numerical
+     * @param  array  $bools    Fields which should be cast as booleans
      * @return void
      */
-    protected function _format_object(&$voucher)
+    protected function _format_object(&$obj, $data = array(), $integers = array(), $bools = array())
     {
-        parent::_format_object($voucher);
+        parent::_format_object($obj, $data, $integers, $bools);
 
-        $voucher->limited_use_limit = (int) $voucher->limited_use_limit;
-        $voucher->discount_value    = (float) $voucher->discount_value;
-        $voucher->gift_card_balance = (float) $voucher->gift_card_balance;
+        $obj->limited_use_limit = (int) $obj->limited_use_limit;
+        $obj->discount_value    = (float) $obj->discount_value;
+        $obj->gift_card_balance = (float) $obj->gift_card_balance;
 
         //  Creator
-        $voucher->creator               = new \stdClass();
-        $voucher->creator->id           = (int) $voucher->created_by;
-        $voucher->creator->email        = $voucher->email;
-        $voucher->creator->first_name   = $voucher->first_name;
-        $voucher->creator->last_name    = $voucher->last_name;
-        $voucher->creator->profile_img  = $voucher->profile_img;
-        $voucher->creator->gender       = $voucher->gender;
+        $obj->creator               = new \stdClass();
+        $obj->creator->id           = (int) $obj->created_by;
+        $obj->creator->email        = $obj->email;
+        $obj->creator->first_name   = $obj->first_name;
+        $obj->creator->last_name    = $obj->last_name;
+        $obj->creator->profile_img  = $obj->profile_img;
+        $obj->creator->gender       = $obj->gender;
 
-        unset($voucher->created_by);
-        unset($voucher->email);
-        unset($voucher->first_name);
-        unset($voucher->last_name);
-        unset($voucher->profile_img);
-        unset($voucher->gender);
+        unset($obj->created_by);
+        unset($obj->email);
+        unset($obj->first_name);
+        unset($obj->last_name);
+        unset($obj->profile_img);
+        unset($obj->gender);
     }
 }
 

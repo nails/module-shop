@@ -18,6 +18,11 @@
             $options[] = anchor('admin/shop/manage/brand' . $isModal, 'Brands');
         }
 
+        if (userHasPermission('admin:shop:manage:supplier:manage')) {
+
+            $options[] = anchor('admin/shop/manage/supplier' . $isModal, 'Suppliers');
+        }
+
         if (userHasPermission('admin:shop:manage:category:manage')) {
 
             $options[] = anchor('admin/shop/manage/category' . $isModal, 'Categories');

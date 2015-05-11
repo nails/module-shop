@@ -284,13 +284,10 @@ class NAILS_Shop_collection_model extends NAILS_Model
      * @param  stdClass &$object The collection object to format
      * @return void
      */
-    protected function _format_object(&$object)
+    protected function _format_object(&$obj, $data = array(), $integers = array(), $bools = array())
     {
-        //  Type casting
-        $object->id          = (int) $object->id;
-        $object->created_by  = $object->created_by ? (int) $object->created_by : null;
-        $object->modified_by = $object->modified_by ? (int) $object->modified_by : null;
-        $object->url         = $this->format_url($object->slug);
+        parent::_format_object($obj, $data, $integers, $bools);
+        $obj->url = $this->format_url($obj->slug);
     }
 }
 

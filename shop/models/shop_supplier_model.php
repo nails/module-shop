@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This model manages Shop Product ranges
+ * This model manages Shop Product suppliers
  *
  * @package     Nails
  * @subpackage  module-shop
@@ -10,14 +10,17 @@
  * @link
  */
 
-class NAILS_Shop_range_model extends NAILS_Model
+class NAILS_Shop_supplier_model extends NAILS_Model
 {
+    /**
+     * Construct the model
+     */
     public function __construct()
     {
         parent::__construct();
 
-        $this->table        = NAILS_DB_PREFIX . 'shop_range';
-        $this->tablePrefix = 'sr';
+        $this->table       = NAILS_DB_PREFIX . 'shop_supplier';
+        $this->tablePrefix = 'ss';
 
         // --------------------------------------------------------------------------
 
@@ -76,18 +79,19 @@ class NAILS_Shop_range_model extends NAILS_Model
             if (empty($this->db->ar_select)) {
 
                 //  No selects have been called, call this so that we don't *just* get the product count
-                $this->db->select($this->tablePrefix . '.*');
+                $prefix = $this->tablePrefix ? $this->tablePrefix . '.' : '';
+                $this->db->select($prefix . '*');
             }
 
-            $sql  = 'SELECT COUNT(DISTINCT(`nspr`.`product_id`)) ';
-            $sql .= 'FROM ' . NAILS_DB_PREFIX . 'shop_product_range nspr ';
-            $sql .= 'JOIN ' . NAILS_DB_PREFIX . 'shop_product nsp ON `nspr`.`product_id` = `nsp`.`id` ';
-            $sql .= 'WHERE ';
-            $sql .= '`nspr`.`range_id` = `' . $this->tablePrefix . '`.`id` ';
-            $sql .= 'AND `nsp`.`is_active` = 1 ';
-            $sql .= 'AND `nsp`.`is_deleted` = 0';
+            $query  = 'SELECT COUNT(DISTINCT(`nsps`.`product_id`)) ';
+            $query .= 'FROM ' . NAILS_DB_PREFIX . 'shop_product_supplier nsps ';
+            $query .= 'JOIN ' . NAILS_DB_PREFIX . 'shop_product nsp ON `nsps`.`product_id` = `nsp`.`id` ';
+            $query .= 'WHERE ';
+            $query .= '`nsps`.`supplier_id` = `' . $this->tablePrefix . '`.`id` ';
+            $query .= 'AND `nsp`.`is_active` = 1 ';
+            $query .= 'AND `nsp`.`is_deleted` = 0';
 
-            $this->db->select('(' . $sql . ') product_count', false);
+            $this->db->select('(' . $query . ') product_count', false);
         }
 
         // --------------------------------------------------------------------------
@@ -118,8 +122,8 @@ class NAILS_Shop_range_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
-     * Returns a range by its ID
-     * @param  integer $id   The range's ID
+     * Returns a supplier by its ID
+     * @param  integer $id   The suppliers's ID
      * @param  array   $data An array of data to pass to _getcount_common();
      * @return mixed         stdClass on success, false on failure
      */
@@ -138,7 +142,7 @@ class NAILS_Shop_range_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
-     * Return an array of ranges by their IDs
+     * Return an array of supplierss by their IDs
      * @param  array  $ids  An array if IDs
      * @param  array  $data An array of data to pass to _getcount_common();
      * @return array
@@ -158,8 +162,8 @@ class NAILS_Shop_range_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
-     * Returns a range by its slug
-     * @param  string $slug the range's slug
+     * Returns a supplier by its slug
+     * @param  string $slug the supplier's slug
      * @param  array  $data An array of data to pass to _getcount_common();
      * @return mixed        stdClass on success, false on failure
      */
@@ -178,7 +182,7 @@ class NAILS_Shop_range_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
-     * Returns an array of ranges by their IDs
+     * Returns an array of suppliers by their IDs
      * @param  array  $slugs An array of IDs
      * @param  array  $data  An array of data to pass to _getcount_common();
      * @return array
@@ -198,8 +202,8 @@ class NAILS_Shop_range_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
-     * Returns a range by its ID or slug
-     * @param  mixed  $idSlug The range's ID or slug
+     * Returns a supplier by its ID or slug
+     * @param  mixed  $idSlug The supplier's ID or slug
      * @param  array  $data   An array of data to pass to _getcount_common();
      * @return mixed          stdClass on success, false on failure
      */
@@ -218,77 +222,37 @@ class NAILS_Shop_range_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
-     * Creates a new range
-     * @param  array   $data         The array of data to create the range with
-     * @param  boolean $returnObject Whether to return the full range object or just the ID
+     * Creates a new supplier
+     * @param  array   $data         The array of data to create the supplier with
+     * @param  boolean $returnObject Whether to return the full supplier object or just the ID
      * @return mixed
      */
-    public function create($data = array(), $return_object = false)
+    public function create($data = array(), $returnObject = false)
     {
         if (!empty($data['label'])) {
 
             $data['slug'] = $this->_generate_slug($data['label']);
         }
 
-        if (empty($data['cover_id'])) {
-
-            $data['cover_id'] = null;
-        }
-
-        return parent::create($data, $return_object);
+        return parent::create($data, $returnObject);
     }
 
     // --------------------------------------------------------------------------
 
     /**
-     * Updates an existing range
-     * @param  integer $id   The ID of the range to update
-     * @param  array   $data An array of data to update the range with
+     * Updates an existing supplier
+     * @param  integer $id   The ID of the supplier to update
+     * @param  array   $data An array of data to update the supplier with
      * @return boolean
      */
     public function update($id, $data = array())
     {
-        if (!empty($data->label)) {
+        if (!empty($data['label'])) {
 
-            $data->slug = $this->_generate_slug($data->label, '', '', null, null, $id);
-
-        }
-
-        if (empty($data->cover_id)) {
-
-            $data->cover_id = null;
+            $data['slug'] = $this->_generate_slug($data['label'], '', '', null, null, $id);
         }
 
         return parent::update($id, $data);
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Formats a range's URL
-     * @param  string $slug The range's slug
-     * @return string
-     */
-    public function format_url($slug)
-    {
-        return site_url($this->shopUrl . 'range/' . $slug);
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Formats a single object
-     *
-     * @param  object $obj      A reference to the object being formatted.
-     * @param  array  $data     The same data array which is passed to _getcount_common, for reference if needed
-     * @param  array  $integers Fields which should be cast as integers if numerical
-     * @param  array  $bools    Fields which should be cast as booleans
-     * @return void
-     */
-    protected function _format_object(&$obj, $data = array(), $integers = array(), $bools = array())
-    {
-        parent::_format_object($obj, $data, $integers, $bools);
-        $obj->url = $this->format_url($obj->slug);
     }
 }
 
@@ -318,9 +282,9 @@ class NAILS_Shop_range_model extends NAILS_Model
  *
  **/
 
-if (!defined('NAILS_ALLOW_EXTENSION_SHOP_RANGE_MODEL')) {
+if (!defined('NAILS_ALLOW_EXTENSION_SHOP_SUPPLIER_MODEL')) {
 
-    class Shop_range_model extends NAILS_Shop_range_model
+    class Shop_supplier_model extends NAILS_Shop_supplier_model
     {
     }
 }

@@ -25,6 +25,7 @@ class NAILS_Shop_product_model extends NAILS_Model
         $this->tablePrefix                       = 'p';
         $this->table_attribute                   = NAILS_DB_PREFIX . 'shop_product_attribute';
         $this->table_brand                       = NAILS_DB_PREFIX . 'shop_product_brand';
+        $this->table_supplier                    = NAILS_DB_PREFIX . 'shop_product_supplier';
         $this->table_category                    = NAILS_DB_PREFIX . 'shop_product_category';
         $this->table_collection                  = NAILS_DB_PREFIX . 'shop_product_collection';
         $this->table_gallery                     = NAILS_DB_PREFIX . 'shop_product_gallery';
@@ -173,6 +174,7 @@ class NAILS_Shop_product_model extends NAILS_Model
         $_data->is_active  = isset($data['is_active']) ? (bool) $data['is_active'] : false;
         $_data->is_deleted = isset($data['is_deleted']) ? (bool) $data['is_deleted'] : false;
         $_data->brands     = isset($data['brands']) ? $data['brands'] : array();
+        $_data->suppliers  = isset($data['suppliers']) ? $data['suppliers'] : array();
         $_data->categories = isset($data['categories']) ? $data['categories'] : array();
         $_data->tags       = isset($data['tags']) ? $data['tags'] : array();
 
@@ -233,8 +235,9 @@ class NAILS_Shop_product_model extends NAILS_Model
                 $_data->variation[$index]->id = $v['id'];
             }
 
-            $_data->variation[$index]->label = isset($v['label']) ? $v['label'] : null;
-            $_data->variation[$index]->sku   = isset($v['sku']) ? $v['sku'] : null;
+            $_data->variation[$index]->label     = isset($v['label']) ? $v['label'] : null;
+            $_data->variation[$index]->sku       = isset($v['sku']) ? $v['sku'] : null;
+            $_data->variation[$index]->is_active = empty($v['is_active']) ? false : true;
 
             $skuTracker[] = $_data->variation[$index]->sku;
 
@@ -570,6 +573,7 @@ class NAILS_Shop_product_model extends NAILS_Model
             //                 //Items to loop     //Field name     //Plural human      //Table name
             $types[]   = array($data->attributes,  'attribute_id',  'attributes',       $this->table_attribute);
             $types[]   = array($data->brands,      'brand_id',      'brands',           $this->table_brand);
+            $types[]   = array($data->suppliers,   'supplier_id',   'suppliers',        $this->table_supplier);
             $types[]   = array($data->categories,  'category_id',   'categories',       $this->table_category);
             $types[]   = array($data->collections, 'collection_id', 'collections',      $this->table_collection);
             $types[]   = array($data->gallery,     'object_id',     'gallery items',    $this->table_gallery);
@@ -663,6 +667,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
                     $this->db->set('label', $v->label);
                     $this->db->set('sku', $v->sku);
+                    $this->db->set('is_active', $v->is_active);
                     $this->db->set('order', $counter);
 
 
@@ -1009,6 +1014,13 @@ class NAILS_Shop_product_model extends NAILS_Model
             $this->db->join(NAILS_DB_PREFIX . 'shop_brand b', 'b.id = pb.brand_id');
             $product->brands = $this->db->get($this->table_brand . ' pb')->result();
 
+            //  Suppliers
+            //  =========
+            $this->db->select('s.id, s.slug, s.label, s.is_active');
+            $this->db->where('ps.product_id', $product->id);
+            $this->db->join(NAILS_DB_PREFIX . 'shop_supplier s', 's.id = ps.supplier_id');
+            $product->suppliers = $this->db->get($this->table_supplier . ' ps')->result();
+
             //  Categories
             //  ==========
             $this->db->select('c.id, c.slug, c.label, c.breadcrumbs');
@@ -1071,6 +1083,10 @@ class NAILS_Shop_product_model extends NAILS_Model
             //  ==========
             $this->db->select('pv.*');
             $this->db->where('pv.product_id', $product->id);
+            if (empty($data['include_inactive_variants'])) {
+
+                $this->db->where('pv.is_active', true);
+            }
             if (empty($data['include_deleted_variants'])) {
 
                 $this->db->where('pv.is_deleted', false);
@@ -1784,7 +1800,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        //  Restricting to brand, category etc?
+        //  Restricting to brand, supplier, category etc?
 
         //  Brands
         //  ======
@@ -1794,7 +1810,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
             if (!empty($data['brand_id'])) {
 
-                //  Already being set, apend the filter brand(s)
+                //  Already being set, append the filter brand(s)
                 if (!is_array($data['brand_id'])) {
 
                     $data['brand_id'] = array($data['brand_id']);
@@ -1823,6 +1839,49 @@ class NAILS_Shop_product_model extends NAILS_Model
             } else {
 
                 $where .= '= ' . $this->db->escape($data['brand_id']);
+            }
+
+            $where .= ')';
+
+            $this->db->where($where);
+        }
+
+        //  Suppliers
+        //  =========
+
+        if (empty($data['_ignore_filters']) && !empty($data['filter']['supplier_id'])) {
+
+            if (!empty($data['supplier_id'])) {
+
+                //  Already being set, append the filter supplier(s)
+                if (!is_array($data['supplier_id'])) {
+
+                    $data['supplier_id'] = array($data['supplier_id']);
+                }
+
+            } else {
+
+                $data['supplier_id'] = $data['filter']['supplier_id'];
+            }
+
+            $data['supplier_id'] = array_merge($data['supplier_id'], $data['filter']['supplier_id']);
+            $data['supplier_id'] = array_unique($data['supplier_id']);
+            $data['supplier_id'] = array_filter($data['supplier_id']);
+            $data['supplier_id'] = array_map('intval', $data['supplier_id']);
+        }
+
+        if (!empty($data['supplier_id'])) {
+
+            $where = $this->tablePrefix . '.id IN (SELECT product_id FROM ' . $this->table_supplier . ' WHERE supplier_id ';
+
+            if (is_array($data['supplier_id'])) {
+
+                $suplierIds = array_map(array($this->db, 'escape'), $data['supplier_id']);
+                $where .= 'IN (' . implode(',', $suplierIds) . ')';
+
+            } else {
+
+                $where .= '= ' . $this->db->escape($data['supplier_id']);
             }
 
             $where .= ')';
@@ -2034,6 +2093,38 @@ class NAILS_Shop_product_model extends NAILS_Model
     {
         $data['brand_id'] = $brandId;
         return $this->count_all($data, $includeDeleted, 'COUNT_FOR_BRAND');
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Fetches all products which feature a particular supplier
+     * @param  integer $supplierId     The ID of the supplier
+     * @param  integer $page           The page number of the results, if null then no pagination
+     * @param  integer $perPage        How many items per page of paginated results
+     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
+     * @return array
+     */
+    public function getForSupplier($supplierId, $page = null, $perPage = null, $data = array(), $includeDeleted = false)
+    {
+        $data['supplier_id'] = $supplierId;
+        return $this->get_all($page, $perPage, $data, $includeDeleted, 'GET_FOR_SUPPLIER');
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Counts all products which feature a particular supplier
+     * @param  integer $supplierId     The ID of the supplier
+     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
+     * @return integer
+     */
+    public function countForSupplier($supplierId, $data = array(), $includeDeleted = false)
+    {
+        $data['supplier_id'] = $supplierId;
+        return $this->count_all($data, $includeDeleted, 'COUNT_FOR_SUPPLIER');
     }
 
     // --------------------------------------------------------------------------
@@ -2459,7 +2550,7 @@ class NAILS_Shop_product_model extends NAILS_Model
         if (!empty($productIds)) {
 
             /**
-             * Brand apply to most products, include a brand filter if we're not looking
+             * Brands apply to most products, include a brand filter if we're not looking
              * at a brand page
              */
 
@@ -2567,6 +2658,20 @@ class NAILS_Shop_product_model extends NAILS_Model
     public function getFiltersForProductsInBrand($brandId, $data = array())
     {
         $data['brand_id'] = $brandId;
+        return $this->getFiltersForProducts($data);
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Shortcut to get filters for suppliers
+     * @param  integer $supplierId The ID of the supplier
+     * @param  array   $data       A data array to pass to get_all
+     * @return array
+     */
+    public function getFiltersForProductsInSupplier($supplierId, $data = array())
+    {
+        $data['supplier_id'] = $supplierId;
         return $this->getFiltersForProducts($data);
     }
 

@@ -54,6 +54,12 @@ class Manage extends \AdminController
         $permissions['brand:edit']   = 'Brand: Edit';
         $permissions['brand:delete'] = 'Brand: Delete';
 
+        //  Suppliers
+        $permissions['supplier:manage'] = 'Supplier: Manage';
+        $permissions['supplier:create'] = 'Supplier: Create';
+        $permissions['supplier:edit']   = 'Supplier: Edit';
+        $permissions['supplier:delete'] = 'Supplier: Delete';
+
         //  Categories
         $permissions['category:manage'] = 'Category: Manage';
         $permissions['category:create'] = 'Category: Create';
@@ -453,6 +459,7 @@ class Manage extends \AdminController
         //  Define the $data variable for the queries
         $data = array(
             'include_count' => true,
+            'only_active' => false,
             'sort' => array(
                 array($sortOn, $sortOrder)
             ),
@@ -683,6 +690,268 @@ class Manage extends \AdminController
     // --------------------------------------------------------------------------
 
     /**
+     * Manage product  suppliers
+     * @return void
+     */
+    public function supplier()
+    {
+        if (!userHasPermission('admin:shop:manage:supplier:manage')) {
+
+            unauthorised();
+        }
+
+        // --------------------------------------------------------------------------
+
+        //  Load model
+        $this->load->model('shop/shop_supplier_model');
+
+        // --------------------------------------------------------------------------
+
+        $this->data['page']->title = 'Manage &rsaquo; Suppliers ';
+        $this->routeRequest('supplier');
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Browse product suppliers
+     * @return void
+     */
+    protected function supplierIndex()
+    {
+        //  Get the table prefix from the model
+        $tablePrefix = $this->shop_supplier_model->getTablePrefix();
+
+        // --------------------------------------------------------------------------
+
+        //  Get pagination and search/sort variables
+        $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
+        $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
+        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
+        $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
+
+        // --------------------------------------------------------------------------
+
+        //  Define the sortable columns and the filters
+        $sortColumns = array(
+            $tablePrefix . '.label'   => 'Label',
+            $tablePrefix . '.created' => 'Created',
+            $tablePrefix . '.modified' => 'Modified'
+       );
+
+        // --------------------------------------------------------------------------
+
+        //  Define the $data variable for the queries
+        $data = array(
+            'include_count' => true,
+            'only_active' => false,
+            'sort' => array(
+                array($sortOn, $sortOrder)
+            ),
+            'keywords' => $keywords
+       );
+
+        // --------------------------------------------------------------------------
+
+        //  Get the items for the page
+        $totalRows            = $this->shop_supplier_model->count_all($data);
+        $this->data['suppliers'] = $this->shop_supplier_model->get_all($page, $perPage, $data);
+
+        //  Set Search and Pagination objects for the view
+        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+
+        // --------------------------------------------------------------------------
+
+        //  Add header button
+        if (userHasPermission('admin:shop:manage:supplier:create')) {
+
+            \Nails\Admin\Helper::addHeaderButton(
+                'admin/shop/manage/supplier/create' . $this->isModal,
+                'Create Supplier'
+            );
+        }
+
+        // --------------------------------------------------------------------------
+
+        //  Load views
+        \Nails\Admin\Helper::loadView('supplier/index');
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Create a product supplier
+     * @return void
+     */
+    protected function supplierCreate()
+    {
+        if (!userHasPermission('admin:shop:manage:supplier:create')) {
+
+            unauthorised();
+        }
+
+        // --------------------------------------------------------------------------
+
+        if ($this->input->post()) {
+
+            $this->load->library('form_validation');
+
+            $this->form_validation->set_rules('label', '', 'xss_clean|required');
+            $this->form_validation->set_rules('is_active', '', 'xss_clean');
+
+            $this->form_validation->set_message('required', lang('fv_required'));
+            $this->form_validation->set_message('max_length', lang('fv_max_length'));
+
+            if ($this->form_validation->run()) {
+
+                $data              = array();
+                $data['label']     = $this->input->post('label');
+                $data['is_active'] = (bool) $this->input->post('is_active');
+
+                if ($this->shop_supplier_model->create($data)) {
+
+                    //  Redirect to clear form
+                    $this->session->set_flashdata('success', 'Supplier created successfully.');
+                    redirect('admin/shop/manage/supplier' . $this->isModal);
+
+                } else {
+
+                    $this->data['error']  = 'There was a problem creating the Supplier. ';
+                    $this->data['error'] .= $this->shop_supplier_model->last_error();
+                }
+
+            } else {
+
+                $this->data['error'] = lang('fv_there_were_errors');
+            }
+        }
+
+        // --------------------------------------------------------------------------
+
+        //  Page data
+        $this->data['page']->title .= '&rsaquo; Create';
+
+        // --------------------------------------------------------------------------
+
+        //  Fetch data
+        $this->data['suppliers'] = $this->shop_supplier_model->get_all();
+
+        // --------------------------------------------------------------------------
+
+        //  Load views
+        \Nails\Admin\Helper::loadView('supplier/edit');
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Edit a product supplier
+     * @return void
+     */
+    protected function supplierEdit()
+    {
+        if (!userHasPermission('admin:shop:manage:supplier:edit')) {
+
+            unauthorised();
+        }
+
+        // --------------------------------------------------------------------------
+
+        $this->data['supplier'] = $this->shop_supplier_model->get_by_id($this->uri->segment(6));
+
+        if (empty($this->data['supplier'])) {
+
+            show_404();
+        }
+
+        // --------------------------------------------------------------------------
+
+        if ($this->input->post()) {
+
+            $this->load->library('form_validation');
+
+            $this->form_validation->set_rules('label', '', 'xss_clean|required');
+            $this->form_validation->set_rules('is_active', '', 'xss_clean');
+
+            $this->form_validation->set_message('required', lang('fv_required'));
+            $this->form_validation->set_message('max_length', lang('fv_max_length'));
+
+            if ($this->form_validation->run()) {
+
+                $data              = array();
+                $data['label']     = $this->input->post('label');
+                $data['is_active'] = (bool) $this->input->post('is_active');
+
+                if ($this->shop_supplier_model->update($this->data['supplier']->id, $data)) {
+
+                    $this->session->set_flashdata('success', 'Supplier saved successfully.');
+                    redirect('admin/shop/manage/supplier' . $this->isModal);
+
+                } else {
+
+                    $this->data['error']  = 'There was a problem saving the Supplier. ';
+                    $this->data['error'] .= $this->shop_supplier_model->last_error();
+                }
+
+            } else {
+
+                $this->data['error'] = 'There was a problem saving the Supplier.';
+            }
+        }
+
+        // --------------------------------------------------------------------------
+
+        //  Page data
+        $this->data['page']->title .= 'Edit &rsaquo; ' . $this->data['supplier']->label;
+
+        // --------------------------------------------------------------------------
+
+        //  Fetch data
+        $this->data['suppliers'] = $this->shop_supplier_model->get_all();
+
+        // --------------------------------------------------------------------------
+
+        //  Load views
+        \Nails\Admin\Helper::loadView('supplier/edit');
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Delete a product supplier
+     * @return void
+     */
+    protected function supplierDelete()
+    {
+        if (!userHasPermission('admin:shop:manage:supplier:delete')) {
+
+            unauthorised();
+        }
+
+        // --------------------------------------------------------------------------
+
+        $id = $this->uri->segment(6);
+
+        if ($this->shop_supplier_model->delete($id)) {
+
+            $status  = 'success';
+            $message = 'Supplier was deleted successfully.';
+
+        } else {
+
+            $status  = 'error';
+            $message = 'There was a problem deleting the Supplier. ' . $this->shop_supplier_model->last_error();
+        }
+
+        $this->session->set_flashdata($status, $message);
+        redirect('admin/shop/manage/supplier' . $this->isModal);
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Manage product categories
      * @return void
      */
@@ -728,9 +997,9 @@ class Manage extends \AdminController
 
         //  Define the sortable columns and the filters
         $sortColumns = array(
-            $tablePrefix . '.slug'    => 'Label (maintain hierarchy)',
-            $tablePrefix . '.label'   => 'Label',
-            $tablePrefix . '.created' => 'Created',
+            $tablePrefix . '.slug'     => 'Label (maintain hierarchy)',
+            $tablePrefix . '.label'    => 'Label',
+            $tablePrefix . '.created'  => 'Created',
             $tablePrefix . '.modified' => 'Modified'
        );
 

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * This model manages Shop Product attributes
+ * This model manages Shop Product brands
  *
  * @package     Nails
  * @subpackage  module-shop
@@ -19,8 +19,8 @@ class NAILS_Shop_brand_model extends NAILS_Model
     {
         parent::__construct();
 
-        $this->table        = NAILS_DB_PREFIX . 'shop_brand';
-        $this->tablePrefix = 'sa';
+        $this->table       = NAILS_DB_PREFIX . 'shop_brand';
+        $this->tablePrefix = 'sb';
 
         // --------------------------------------------------------------------------
 
@@ -270,17 +270,18 @@ class NAILS_Shop_brand_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
-     * Formats a brand object
-     * @param  stdClass &$object The brand object to format
+     * Formats a single object
+     *
+     * @param  object $obj      A reference to the object being formatted.
+     * @param  array  $data     The same data array which is passed to _getcount_common, for reference if needed
+     * @param  array  $integers Fields which should be cast as integers if numerical
+     * @param  array  $bools    Fields which should be cast as booleans
      * @return void
      */
-    protected function _format_object(&$object)
+    protected function _format_object(&$obj, $data = array(), $integers = array(), $bools = array())
     {
-        //  Type casting
-        $object->id          = (int) $object->id;
-        $object->created_by  = $object->created_by ? (int) $object->created_by : null;
-        $object->modified_by = $object->modified_by ? (int) $object->modified_by : null;
-        $object->url         = $this->format_url($object->slug);
+        parent::_format_object($obj, $data, $integers, $bools);
+        $obj->url = $this->format_url($obj->slug);
     }
 }
 

@@ -736,23 +736,22 @@ class NAILS_Shop_category_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
-     * Format a category object
-     * @param  stdClass &$object The category object to format
+     * Formats a single object
+     *
+     * @param  object $obj      A reference to the object being formatted.
+     * @param  array  $data     The same data array which is passed to _getcount_common, for reference if needed
+     * @param  array  $integers Fields which should be cast as integers if numerical
+     * @param  array  $bools    Fields which should be cast as booleans
      * @return void
      */
-    protected function _format_object(&$object)
+    protected function _format_object(&$obj, $data = array(), $integers = array(), $bools = array())
     {
-        //  Type casting
-        $object->id          = (int) $object->id;
-        $object->parent_id   = $object->parent_id ? (int) $object->parent_id : null;
-        $object->created_by  = $object->created_by ? (int) $object->created_by : null;
-        $object->modified_by = $object->modified_by ? (int) $object->modified_by : null;
-        $object->children    = array();
+        parent::_format_object($obj, $data, $integers, $bools);
 
-        $object->breadcrumbs = (array) @json_decode($object->breadcrumbs);
-
-        $object->depth = count(explode('/', $object->slug)) - 1;
-        $object->url   = $this->format_url($object->slug);
+        $obj->children    = array();
+        $obj->breadcrumbs = (array) @json_decode($obj->breadcrumbs);
+        $obj->depth       = count(explode('/', $obj->slug)) - 1;
+        $obj->url         = $this->format_url($obj->slug);
     }
 }
 

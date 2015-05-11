@@ -59,6 +59,7 @@ class Inventory extends \AdminController
         $this->load->model('shop/shop_model');
         $this->load->model('shop/shop_category_model');
         $this->load->model('shop/shop_brand_model');
+        $this->load->model('shop/shop_supplier_model');
         $this->load->model('shop/shop_collection_model');
         $this->load->model('shop/shop_product_model');
         $this->load->model('shop/shop_product_type_model');
@@ -154,6 +155,11 @@ class Inventory extends \AdminController
             'Brand',
             array('Choose Brand') + $this->shop_brand_model->get_all_flat()
         );
+        $ddFilters['supplierId'] = \Nails\Admin\Helper::searchFilterObject(
+            '',
+            'Supplier',
+            array('Choose Supplier') + $this->shop_supplier_model->get_all_flat()
+        );
         $ddFilters['collectionId'] = \Nails\Admin\Helper::searchFilterObject(
             '',
             'Collection',
@@ -177,7 +183,7 @@ class Inventory extends \AdminController
         // --------------------------------------------------------------------------
 
         /**
-         * Determine if we're restricting to a certain category, brand or collection.
+         * Determine if we're restricting to a certain category, brand, supplier, or collection.
          *
          * Due to the way the search component works, we need to "listen" to the $_GET
          * array by hand. Each filter above will be  indexed in either DDF (DropDownFilter)
@@ -201,6 +207,14 @@ class Inventory extends \AdminController
             $data['brand_id'] = \Nails\Admin\Helper::searchFilterGetValueAtKey(
                 $ddFilters['brandId'],
                 $_GET['ddF']['brandId']
+            );
+        }
+
+        if (!empty($_GET['ddF']['supplierId'])) {
+
+            $data['supplier_id'] = \Nails\Admin\Helper::searchFilterGetValueAtKey(
+                $ddFilters['supplierId'],
+                $_GET['ddF']['supplierId']
             );
         }
 
@@ -372,6 +386,7 @@ class Inventory extends \AdminController
         //  Load additional models
         $this->load->model('shop/shop_attribute_model');
         $this->load->model('shop/shop_brand_model');
+        $this->load->model('shop/shop_supplier_model');
         $this->load->model('shop/shop_category_model');
         $this->load->model('shop/shop_collection_model');
         $this->load->model('shop/shop_range_model');
@@ -385,6 +400,7 @@ class Inventory extends \AdminController
         $this->data['tax_rates']          = $this->shop_tax_rate_model->get_all_flat();
         $this->data['attributes']         = $this->shop_attribute_model->get_all_flat();
         $this->data['brands']             = $this->shop_brand_model->get_all_flat();
+        $this->data['suppliers']          = $this->shop_supplier_model->get_all_flat();
         $this->data['categories']         = $this->shop_category_model->getAllNestedFlat();
         $this->data['collections']        = $this->shop_collection_model->get_all();
         $this->data['ranges']             = $this->shop_range_model->get_all();
@@ -431,7 +447,11 @@ class Inventory extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Fetch item
-        $this->data['item'] = $this->shop_product_model->get_by_id($this->uri->segment(5));
+        $productId = $this->uri->segment(5);
+        $data = array(
+            'include_inactive_variants' => true
+        );
+        $this->data['item'] = $this->shop_product_model->get_by_id($productId, $data);
 
         if (!$this->data['item']) {
 
@@ -521,6 +541,7 @@ class Inventory extends \AdminController
         //  Load additional models
         $this->load->model('shop/shop_attribute_model');
         $this->load->model('shop/shop_brand_model');
+        $this->load->model('shop/shop_supplier_model');
         $this->load->model('shop/shop_category_model');
         $this->load->model('shop/shop_collection_model');
         $this->load->model('shop/shop_range_model');
@@ -534,6 +555,7 @@ class Inventory extends \AdminController
         $this->data['tax_rates']          = $this->shop_tax_rate_model->get_all_flat();
         $this->data['attributes']         = $this->shop_attribute_model->get_all_flat();
         $this->data['brands']             = $this->shop_brand_model->get_all_flat();
+        $this->data['suppliers']          = $this->shop_supplier_model->get_all_flat();
         $this->data['categories']         = $this->shop_category_model->getAllNestedFlat();
         $this->data['collections']        = $this->shop_collection_model->get_all();
         $this->data['ranges']             = $this->shop_range_model->get_all();
@@ -579,6 +601,7 @@ class Inventory extends \AdminController
         $this->form_validation->set_rules('label', '', 'xss_clean|required');
         $this->form_validation->set_rules('is_active', '', 'xss_clean');
         $this->form_validation->set_rules('brands', '', 'xss_clean');
+        $this->form_validation->set_rules('suppliers', '', 'xss_clean');
         $this->form_validation->set_rules('categories', '', 'xss_clean');
         $this->form_validation->set_rules('tags', '', 'xss_clean');
         $this->form_validation->set_rules('tax_rate_id', '', 'xss_clean|required');
@@ -624,6 +647,7 @@ class Inventory extends \AdminController
 
                 $v_id = !empty($v['id']) ? $v['id'] : '';
                 $this->form_validation->set_rules('variation[' . $index . '][sku]', '', 'xss_clean|trim|callback__callback_inventory_valid_sku[' . $v_id . ']');
+                $this->form_validation->set_rules('variation[' . $index . '][is_active]', '', 'xss_clean');
 
                 //  Stock
                 //  -----

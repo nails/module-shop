@@ -109,6 +109,33 @@
             // --------------------------------------------------------------------------
 
             $field          = array();
+            $field['key']   = 'suppliers[]';
+            $field['label'] = 'Suppliers';
+            $field['class'] = 'suppliers select2';
+            $field['info']  = '<a href="#" class="manage-suppliers awesome orange small">Manage Suppliers</a>';
+            $tip            = 'If required, specify the supplier of this product.';
+
+            //  Defaults
+            if ($this->input->post('suppliers')) {
+
+                $field['default'] = $this->input->post('suppliers');
+
+            } elseif (!empty($item->suppliers)) {
+
+                $field['default'] = array();
+
+                //  Build an array which matches the potential $_POST array
+                foreach ($item->suppliers as $supplier) {
+
+                    $field['default'][] = $supplier->id;
+                }
+            }
+
+            echo form_field_dropdown_multiple($field, $suppliers, $tip);
+
+            // --------------------------------------------------------------------------
+
+            $field          = array();
             $field['key']   = 'categories[]';
             $field['label'] = 'Categories';
             $field['class'] = 'categories select2';

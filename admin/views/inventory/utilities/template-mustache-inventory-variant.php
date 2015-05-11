@@ -143,6 +143,15 @@
 
                 echo '</div>';
 
+                // --------------------------------------------------------------------------
+
+                $field            = array();
+                $field['key']     = 'variation[' . $_counter . '][is_active]';
+                $field['label']   = 'Active';
+                $field['default'] = !empty($variation->is_active) ? $variation->is_active : '';
+
+                echo form_field_boolean($field);
+
             ?>
         </div>
 
