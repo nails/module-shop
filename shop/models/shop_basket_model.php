@@ -167,8 +167,14 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
                 } else {
 
-                    //  Found the item, do we still have enough of the stock?
-                    if (!empty($item->variant->quantity_available) && $item->quantity > $item->variant->quantity_available) {
+                    /**
+                     * Found the item, do we still have enough of the stock? We have enoughs tock if:
+                     * - $available is null (unlimited)
+                     * - $item->quantity is <= $available
+                     */
+                    
+                    $available = $item->variant->quantity_available;
+                    if (!is_null($available) && $item->quantity > $item->variant->quantity_available) {
 
                         $adjusted[] = array(
                             $basketKey,
@@ -462,18 +468,20 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        //  Check there are items
-        if (!is_null($_variant->quantity_available) && $_variant->quantity_available <= 0) {
+        /**
+         * Check the product is available; a product is available if:
+         * - $_variant->quantity_available is null (unlimited)
+         * - $quantity <= $_variant->quantity_available
+         */
+
+        if (!is_null($_variant->quantity_available) && $_variant->quantity_available == 0) {
 
             $this->_set_error('Product is not available.');
             return false;
-        }
 
-        // --------------------------------------------------------------------------
+        } else if (!is_null($_variant->quantity_available) && $quantity > $_variant->quantity_available) {
 
-        //  Check quantity is available, if more are being requested, then reduce.
-        if (!is_null($_variant->quantity_available) && $quantity > $_variant->quantity_available) {
-
+            //  Asking for more items than are available, reduce.
             $quantity = $_variant->quantity_available;
         }
 
@@ -587,8 +595,42 @@ class NAILS_Shop_basket_model extends NAILS_Model
                     }
                 }
 
-                $sufficient = empty($available) || $newQuantity <= $available;
-                $notExceed  = empty($maxIncrement) || $newQuantity <= $maxIncrement;
+                /**
+                 * Determine whether the user can increment the product. In order to be 
+                 * incrementable there must:
+                 * - Be sufficient stock (or unlimited)
+                 * - not exceed any limit imposed by the product type
+                 */
+                
+                if (is_null($available)) {
+
+                    //  Unlimited quantity
+                    $sufficient = true;
+
+                } else if ($newQuantity <= $available) {
+
+                    //  Fewer than the quantity available, user can increment
+                    $sufficient = true;
+
+                } else {
+
+                    $sufficient = false;
+                }
+
+                if (empty($maxIncrement)) {
+
+                    //  Unlimited additions allowed
+                    $notExceed = true;
+
+                } else if ($newQuantity <= $maxIncrement) {
+
+                    //  Not exceeded the maximum per order, user can increment
+                    $notExceed = true;
+
+                } else {
+
+                    $notExceed = false;
+                }
 
                 if ($sufficient && $notExceed) {
 

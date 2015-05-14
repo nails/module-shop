@@ -2,10 +2,10 @@
     <?=form_open(null, 'id="product-form"')?>
     <ul class="tabs" data-tabgroup="main-product">
         <li class="tab active">
-            <a href="#" data-tab="tab-basics">Product Info</a>
+            <a href="#" data-tab="tab-basics">Info</a>
         </li>
         <li class="tab">
-            <a href="#" id="tabber-meta" data-tab="tab-meta">Product Meta</a>
+            <a href="#" id="tabber-meta" data-tab="tab-meta">Meta</a>
         </li>
         <li class="tab">
             <a href="#" id="tabber-description" data-tab="tab-description">Description</a>

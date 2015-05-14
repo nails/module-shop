@@ -954,18 +954,47 @@ class Inventory extends \AdminController
     {
         $str = trim($str);
 
-        if ($str && !is_numeric($str)) {
+        //  Quantities are valid if it's either completely blank, or numeric.
+        if ($str === '') {
 
-            $this->form_validation->set_message('_callback_inventory_valid_quantity', 'This is not a valid quantity');
-            return false;
-        } elseif (($str && is_numeric($str) && $str < 0)) {
+            return true;
 
-            $this->form_validation->set_message('_callback_inventory_valid_quantity', lang('fv_is_natural'));
-            return false;
+        } elseif (is_numeric($str)) {
+
+            //  If numeric, must be a natural number
+            if ((int) $str == $str) {
+
+                if ((int) $str >= 0) {
+
+                    return true;
+
+                } else {
+
+                    $this->form_validation->set_message(
+                        '_callback_inventory_valid_quantity',
+                        lang('fv_is_natural')
+                    );
+                    return false;
+                }
+
+            } else {
+
+                $this->form_validation->set_message(
+                    '_callback_inventory_valid_quantity',
+                    'This must be a whole number.'
+                );
+                return false;
+            }
+
+            return true;
 
         } else {
 
-            return true;
+            $this->form_validation->set_message(
+                '_callback_inventory_valid_quantity',
+                'This is not a valid quantity'
+            );
+            return false;
         }
     }
 

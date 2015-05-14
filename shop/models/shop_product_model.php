@@ -245,19 +245,30 @@ class NAILS_Shop_product_model extends NAILS_Model
             //  -----
 
             $_data->variation[$index]->stock_status = isset($v['stock_status']) ? $v['stock_status'] : 'OUT_OF_STOCK';
+            $stockStatus = $_data->variation[$index]->stock_status;
 
-            switch ($_data->variation[$index]->stock_status) {
+            switch ($stockStatus) {
 
                 case 'IN_STOCK' :
 
-                    $_data->variation[$index]->quantity_available = is_numeric($v['quantity_available']) ? (int) $v['quantity_available'] : null;
-                    $_data->variation[$index]->lead_time          = null;
+                    $available = trim($v['quantity_available']);
+
+                    if ($v['quantity_available'] === '') {
+
+                        $_data->variation[$index]->quantity_available = null;
+
+                    } else {
+
+                        $_data->variation[$index]->quantity_available = (int) $available;
+                    }
+
+                    $_data->variation[$index]->lead_time = null;
                     break;
 
                 case 'OUT_OF_STOCK' :
 
                     //  Shhh, be vewy qwiet, we're huntin' wabbits.
-                    $_data->variation[$index]->quantity_available = null;
+                    $_data->variation[$index]->quantity_available = 0;
                     $_data->variation[$index]->lead_time          = null;
                     break;
             }
@@ -266,13 +277,13 @@ class NAILS_Shop_product_model extends NAILS_Model
              * If the status is IN_STOCK but there is no stock, then we should forcibly set
              * as if OUT_OF_STOCK was set.
              */
+            
+            $available = $_data->variation[$index]->quantity_available;
 
-            if ($_data->variation[$index]->stock_status == 'IN_STOCK' && !is_null($_data->variation[$index]->quantity_available) && $_data->variation[$index]->quantity_available <= 0) {
+            if ($stockStatus == 'IN_STOCK' && !is_null($available) && $available == 0) {
 
-                $_data->variation[$index]->stock_status       = 'OUT_OF_STOCK';
-                $_data->variation[$index]->quantity_available = null;
-                $_data->variation[$index]->lead_time          = null;
-
+                $_data->variation[$index]->stock_status = 'OUT_OF_STOCK';
+                $_data->variation[$index]->lead_time    = null;
             }
 
             //  Out of Stock Behaviour
@@ -2771,11 +2782,15 @@ class NAILS_Shop_product_model extends NAILS_Model
     protected function formatVariationObject(&$variation)
     {
         //  Type casting
-        $variation->id                 = (int) $variation->id;
-        $variation->product_id         = (int) $variation->product_id;
-        $variation->order              = (int) $variation->order;
-        $variation->is_deleted         = (bool) $variation->is_deleted;
-        $variation->quantity_available = is_numeric($variation->quantity_available) ? (int) $variation->quantity_available : null;
+        $variation->id         = (int) $variation->id;
+        $variation->product_id = (int) $variation->product_id;
+        $variation->order      = (int) $variation->order;
+        $variation->is_deleted = (bool) $variation->is_deleted;
+
+        if (!is_null($variation->quantity_available)) {
+
+            $variation->quantity_available = (int) $variation->quantity_available;
+        }
 
         //  Gallery
         if (!empty($variation->gallery) && is_array($variation->gallery)) {
@@ -2802,7 +2817,10 @@ class NAILS_Shop_product_model extends NAILS_Model
         $variation->shipping->driver_data     = @unserialize($variation->ship_driver_data);
 
         //  Stock status
-        if ($variation->stock_status == 'IN_STOCK' && !is_null($variation->quantity_available) && $variation->quantity_available <= 0) {
+        $stockStatus = $variation->stock_status;
+        $available   = $variation->quantity_available;
+
+        if ($stockStatus == 'IN_STOCK' && !is_null($available) && $available == 0) {
 
             /**
              * Item is marked as IN_STOCK, but there's no stock to sell, set as out of
@@ -2812,7 +2830,7 @@ class NAILS_Shop_product_model extends NAILS_Model
             $variation->stock_status = 'OUT_OF_STOCK';
         }
 
-        if ($variation->stock_status == 'OUT_OF_STOCK') {
+        if ($stockStatus == 'OUT_OF_STOCK') {
 
             switch ($variation->out_of_stock_behaviour) {
 
@@ -2824,7 +2842,16 @@ class NAILS_Shop_product_model extends NAILS_Model
 
                     //  And... override!
                     $variation->stock_status = 'TO_ORDER';
-                    $variation->lead_time    = $variation->out_of_stock_to_order_lead_time ? $variation->out_of_stock_to_order_lead_time : $variation->lead_time;
+
+                    if ($variation->out_of_stock_to_order_lead_time) {
+
+                        $variation->lead_time = $variation->out_of_stock_to_order_lead_time;
+
+                    } else {
+
+                        $variation->lead_time = $variation->lead_time;
+                    }
+
                     break;
 
                 case 'OUT_OF_STOCK':
