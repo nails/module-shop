@@ -86,7 +86,7 @@
             $field['label'] = 'Brands';
             $field['class'] = 'brands select2';
             $field['info']  = '<a href="#" class="manage-brands awesome orange small">Manage Brands</a>';
-            $tip            = 'If this product contains multiple brands (e.g a hamper) specify them all here.';
+            $field['tip']   = 'If this product contains multiple brands (e.g a hamper) specify them all here.';
 
             //  Defaults
             if ($this->input->post('brands')) {
@@ -104,7 +104,7 @@
                 }
             }
 
-            echo form_field_dropdown_multiple($field, $brands, $tip);
+            echo form_field_dropdown_multiple($field, $brands);
 
             // --------------------------------------------------------------------------
 
@@ -113,7 +113,7 @@
             $field['label'] = 'Suppliers';
             $field['class'] = 'suppliers select2';
             $field['info']  = '<a href="#" class="manage-suppliers awesome orange small">Manage Suppliers</a>';
-            $tip            = 'If required, specify the supplier of this product.';
+            $field['tip']   = 'If required, specify the supplier of this product.';
 
             //  Defaults
             if ($this->input->post('suppliers')) {
@@ -131,7 +131,7 @@
                 }
             }
 
-            echo form_field_dropdown_multiple($field, $suppliers, $tip);
+            echo form_field_dropdown_multiple($field, $suppliers);
 
             // --------------------------------------------------------------------------
 
@@ -140,7 +140,7 @@
             $field['label'] = 'Categories';
             $field['class'] = 'categories select2';
             $field['info']  = '<a href="#" class="manage-categories awesome orange small">Manage Categories</a>';
-            $tip            = 'Specify which categories this product falls into.';
+            $field['tip']   = 'Specify which categories this product falls into.';
 
             //  Defaults
             if ($this->input->post('categories')) {
@@ -158,7 +158,18 @@
                 }
             }
 
-            echo form_field_dropdown_multiple($field, $categories, $tip);
+            echo form_field_dropdown_multiple($field);
+
+            // --------------------------------------------------------------------------
+
+            $field            = array();
+            $field['key']     = 'google_category';
+            $field['label']   = 'Google Category';
+            $field['id']      = 'google-category';
+            $field['tip']     = 'Specify which Google category this product falls into. Google only allows you to choose one category.';
+            $field['default'] = !empty($item->google_category) ? $item->google_category : '';
+
+            echo form_field($field);
 
             // --------------------------------------------------------------------------
 
@@ -167,7 +178,7 @@
             $field['label'] = 'Tags';
             $field['class'] = 'tags select2';
             $field['info']  = '<a href="#" class="manage-tags awesome orange small">Manage Tags</a>';
-            $tip            = 'Use tags to associate products together, e.g. events.';
+            $field['tip']   = 'Use tags to associate products together, e.g. events.';
 
             //  Defaults
             if ($this->input->post('tags')) {
@@ -185,7 +196,7 @@
                 }
             }
 
-            echo form_field_dropdown_multiple($field, $tags, $tip);
+            echo form_field_dropdown_multiple($field, $tags);
 
             // --------------------------------------------------------------------------
 

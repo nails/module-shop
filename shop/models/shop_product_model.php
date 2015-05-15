@@ -170,13 +170,14 @@ class NAILS_Shop_product_model extends NAILS_Model
             return false;
         }
 
-        $_data->label      = isset($data['label']) ? trim($data['label']) : null;
-        $_data->is_active  = isset($data['is_active']) ? (bool) $data['is_active'] : false;
-        $_data->is_deleted = isset($data['is_deleted']) ? (bool) $data['is_deleted'] : false;
-        $_data->brands     = isset($data['brands']) ? $data['brands'] : array();
-        $_data->suppliers  = isset($data['suppliers']) ? $data['suppliers'] : array();
-        $_data->categories = isset($data['categories']) ? $data['categories'] : array();
-        $_data->tags       = isset($data['tags']) ? $data['tags'] : array();
+        $_data->label           = isset($data['label']) ? trim($data['label']) : null;
+        $_data->is_active       = isset($data['is_active']) ? (bool) $data['is_active'] : false;
+        $_data->is_deleted      = isset($data['is_deleted']) ? (bool) $data['is_deleted'] : false;
+        $_data->brands          = isset($data['brands']) ? $data['brands'] : array();
+        $_data->suppliers       = isset($data['suppliers']) ? $data['suppliers'] : array();
+        $_data->categories      = isset($data['categories']) ? $data['categories'] : array();
+        $_data->tags            = isset($data['tags']) ? $data['tags'] : array();
+        $_data->google_category = !empty($data['google_category']) ? trim($data['google_category']) : null;
 
         if (app_setting('enable_external_products', 'shop')) {
 
@@ -277,7 +278,7 @@ class NAILS_Shop_product_model extends NAILS_Model
              * If the status is IN_STOCK but there is no stock, then we should forcibly set
              * as if OUT_OF_STOCK was set.
              */
-            
+
             $available = $_data->variation[$index]->quantity_available;
 
             if ($stockStatus == 'IN_STOCK' && !is_null($available) && $available == 0) {
@@ -534,6 +535,7 @@ class NAILS_Shop_product_model extends NAILS_Model
         $this->db->set('is_active', $data->is_active);
         $this->db->set('is_deleted', $data->is_deleted);
         $this->db->set('published', $data->published);
+        $this->db->set('google_category', $data->google_category);
 
         if (app_setting('enable_external_products', 'shop')) {
 

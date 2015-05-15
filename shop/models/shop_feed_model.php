@@ -118,12 +118,13 @@ class NAILS_Shop_feed_model extends NAILS_Model
                     $temp->title = $p->label;
                 }
 
-                $temp->url         = $p->url;
-                $temp->description = trim(strip_tags($p->description));
-                $temp->productId   = $p->id;
-                $temp->variantId   = $v->id;
-                $temp->condition   = 'new';
-                $temp->sku         = $v->sku;
+                $temp->url             = $p->url;
+                $temp->description     = trim(strip_tags($p->description));
+                $temp->productId       = $p->id;
+                $temp->variantId       = $v->id;
+                $temp->condition       = 'new';
+                $temp->sku             = $v->sku;
+                $temp->google_category = $p->google_category;
 
                 // --------------------------------------------------------------------------
 
@@ -222,6 +223,7 @@ class NAILS_Shop_feed_model extends NAILS_Model
                 $xml .= '<title><![CDATA[' . htmlentities($item->title) . ']]></title>';
                 $xml .= '<description><![CDATA[' . htmlentities($item->description) . ']]></description>';
                 $xml .= '<g:product_type><![CDATA[' . htmlentities($item->category) . ']]></g:product_type>';
+                $xml .= $item->google_category ? '<g:google_product_category>' . htmlentities($item->google_category) . '</g:google_product_category>' : '';
                 $xml .= '<link>' . $item->url . '</link>';
                 $xml .= '<g:image_link>' . $item->image . '</g:image_link>';
                 $xml .= '<g:condition>' . $item->condition . '</g:condition>';
@@ -259,6 +261,55 @@ class NAILS_Shop_feed_model extends NAILS_Model
         }
 
         return $this->cacheFile;
+    }
+
+    // --------------------------------------------------------------------------
+
+    public function searchGoogleCategories($term)
+    {
+        //  Open the cachefile, if it's not available then fetch a new one
+        $cacheFile = DEPLOY_CACHE_DIR . 'shop-feed-google-categories-' . date('m-Y') . '.txt';
+
+        if (!file_exists($cacheFile)) {
+
+            //  @todo handle multiple locales
+            $data = file_get_contents('http://www.google.com/basepages/producttype/taxonomy.en-GB.txt');
+
+            if (empty($data)) {
+
+                $this->_set_error('Failed to fetch feed from Google.');
+                return false;
+            }
+
+            file_put_contents($cacheFile, $data);
+        }
+
+        $handle  = fopen($cacheFile, 'r');
+        $results = array();
+
+        if ($handle) {
+
+            while (($line = fgets($handle)) !== false) {
+
+                if (substr($line, 0, 1) === '#') {
+                    continue;
+                }
+
+                if (preg_match('/' . $term . '/i', $line)) {
+
+                    $result[] = $line;
+                }
+            }
+
+            fclose($handle);
+
+            return $result;
+
+        } else {
+
+            $this->_set_error('Failed to read feed from cache.');
+            return false;
+        }
     }
 }
 
