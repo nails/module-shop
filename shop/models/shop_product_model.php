@@ -978,7 +978,7 @@ class NAILS_Shop_product_model extends NAILS_Model
         //  Handle requests for the raw query object
         if (!empty($data['RETURN_QUERY_OBJECT'])) {
 
-            return $posts;
+            return $products;
         }
 
         // --------------------------------------------------------------------------
