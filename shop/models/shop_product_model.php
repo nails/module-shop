@@ -1537,22 +1537,25 @@ class NAILS_Shop_product_model extends NAILS_Model
             }
 
             //  Range strings
-            if ($product->price->user->max_price == $product->price->user->min_price) {
+            if (!empty($product->price)) {
 
-                $product->price->user_formatted->price_string = $product->price->user_formatted->min_price;
+                if ($product->price->user->max_price == $product->price->user->min_price) {
 
-            } else {
+                    $product->price->user_formatted->price_string = $product->price->user_formatted->min_price;
 
-                $product->price->user_formatted->price_string = 'From ' . $product->price->user_formatted->min_price;
-            }
+                } else {
 
-            if ($product->price->user->max_sale_price == $product->price->user->min_sale_price) {
+                    $product->price->user_formatted->price_string = 'From ' . $product->price->user_formatted->min_price;
+                }
 
-                $product->price->user_formatted->sale_price_string = $product->price->user_formatted->min_sale_price;
+                if ($product->price->user->max_sale_price == $product->price->user->min_sale_price) {
 
-            } else {
+                    $product->price->user_formatted->sale_price_string = $product->price->user_formatted->min_sale_price;
 
-                $product->price->user_formatted->sale_price_string = 'From ' . $product->price->user_formatted->min_sale_price;
+                } else {
+
+                    $product->price->user_formatted->sale_price_string = 'From ' . $product->price->user_formatted->min_sale_price;
+                }
             }
         }
 

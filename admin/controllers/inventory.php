@@ -329,52 +329,66 @@ class Inventory extends \AdminController
         //  Process POST
         if ($this->input->post()) {
 
-            //  Prep the POST fields
-            $this->inventoryCreateEditPrepFields();
+            /**
+             * If not active then allow the request through, otherwise, run the
+             * validation rules.
+             */
+            if ($this->input->post('is_active')) {
 
-            //  If the product is a draft i.e. not active, go ahead and save it without any
-            if (!$this->input->post('is_active')) {
+                $this->load->library('form_validation');
+                $this->inventoryCreateEditValidationRules();
+                $bAdditionalValidationError = false;
+                $aVariations = $this->input->post('variation');
+                $iActiveVariants = 0;
 
-                //  Create draft product
+                /**
+                 * If there are no active variants, then the product itself must also be
+                 * marked as inactive.
+                 */
+                foreach ($aVariations as $aVariant) {
+                    
+                    if (!empty($aVariant['is_active'])) {
+                        $iActiveVariants++;
+                        break;
+                    }
+                }
+
+                if (!$iActiveVariants) {
+
+                    $this->data['error'] = 'A product marked as active must have at least one active variation.';
+                    $bAdditionalValidationError = true;
+                }
+
+                $bPassedValidation = $this->form_validation->run($this) && !$bAdditionalValidationError;
+
+            } else {
+
+                $bPassedValidation = true;
+            }
+
+            // --------------------------------------------------------------------------
+
+            if ($bPassedValidation) {
+
+                //  Prep the fields
+                $this->inventoryCreateEditPrepFields();
+
+                //  Validated!Create the product
                 $product = $this->shop_product_model->create($this->input->post());
 
                 if ($product) {
 
-                    $this->session->set_flashdata('success', 'Draft product was created successfully.');
+                    $this->session->set_flashdata('success', 'Product was created successfully.');
                     redirect('admin/shop/inventory');
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem creating draft product. ' . $this->shop_product_model->last_error();
+                    $this->data['error'] = 'There was a problem creating the Product. ' . $this->shop_product_model->last_error();
                 }
 
             } else {
 
-                //  Form validation, this'll be fun...
-                $this->load->library('form_validation');
-
-                //  Define all the rules
-                $this->inventoryCreateEditValidationRules();
-
-                // --------------------------------------------------------------------------
-
-                if ($this->form_validation->run($this)) {
-
-                    //  Validated!Create the product
-                    $product = $this->shop_product_model->create($this->input->post());
-
-                    if ($product) {
-
-                        $this->session->set_flashdata('success', 'Product was created successfully.');
-                        redirect('admin/shop/inventory');
-
-                    } else {
-
-                        $this->data['error'] = 'There was a problem creating the Product. ' . $this->shop_product_model->last_error();
-
-                    }
-
-                } else {
+                if (empty($this->data['error'])) {
 
                     $this->data['error'] = lang('fv_there_were_errors');
                 }
@@ -498,26 +512,51 @@ class Inventory extends \AdminController
         //  Process POST
         if ($this->input->post()) {
 
-            //  Form validation, this'll be fun...
-            $this->load->library('form_validation');
-
-            //  Define all the rules if the product is active
-            if ($this->input->post('is_active')) {
-
-                $this->inventoryCreateEditValidationRules();
-            }
-
-            $this->inventoryCreateEditPrepFields();
-
-            // --------------------------------------------------------------------------
-
             /**
              * If not active then allow the request through, otherwise, run the
              * validation rules.
              */
-            if (!$this->input->post('is_active') || $this->form_validation->run($this)) {
+            if ($this->input->post('is_active')) {
 
-                //  Validated!Create the product
+                $this->load->library('form_validation');
+                $this->inventoryCreateEditValidationRules();
+                $bAdditionalValidationError = false;
+                $aVariations = $this->input->post('variation');
+                $iActiveVariants = 0;
+
+                /**
+                 * If there are no active variants, then the product itself must also be
+                 * marked as inactive.
+                 */
+                foreach ($aVariations as $aVariant) {
+                    
+                    if (!empty($aVariant['is_active'])) {
+                        $iActiveVariants++;
+                        break;
+                    }
+                }
+
+                if (!$iActiveVariants) {
+
+                    $this->data['error'] = 'A product marked as active must have at least one active variation.';
+                    $bAdditionalValidationError = true;
+                }
+
+                $bPassedValidation = $this->form_validation->run($this) && !$bAdditionalValidationError;
+
+            } else {
+
+                $bPassedValidation = true;
+            }
+
+            // --------------------------------------------------------------------------
+
+            if ($bPassedValidation) {
+
+                //  Prep the fields
+                $this->inventoryCreateEditPrepFields();
+
+                //  Validated! Create the product
                 $product = $this->shop_product_model->update($this->data['item']->id, $this->input->post());
 
                 if ($product) {
@@ -532,7 +571,10 @@ class Inventory extends \AdminController
 
             } else {
 
-                $this->data['error'] = lang('fv_there_were_errors');
+                if (empty($this->data['error'])) {
+
+                    $this->data['error'] = lang('fv_there_were_errors');
+                }
             }
         }
 
