@@ -158,7 +158,7 @@
                 }
             }
 
-            echo form_field_dropdown_multiple($field);
+            echo form_field_dropdown_multiple($field, $categories);
 
             // --------------------------------------------------------------------------
 

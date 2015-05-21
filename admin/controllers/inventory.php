@@ -645,6 +645,7 @@ class Inventory extends \AdminController
         $this->form_validation->set_rules('brands', '', 'xss_clean');
         $this->form_validation->set_rules('suppliers', '', 'xss_clean');
         $this->form_validation->set_rules('categories', '', 'xss_clean');
+        $this->form_validation->set_rules('google_category', '', 'xss_clean');
         $this->form_validation->set_rules('tags', '', 'xss_clean');
         $this->form_validation->set_rules('tax_rate_id', '', 'xss_clean|required');
         $this->form_validation->set_rules('published', '', 'xss_clean|required');
