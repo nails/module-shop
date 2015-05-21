@@ -108,10 +108,6 @@ class NAILS_Shop_supplier_model extends NAILS_Model
                 'column' => $this->tablePrefix . '.label',
                 'value'  => $data['keywords']
             );
-            $data['or_like'][] = array(
-                'column' => $this->tablePrefix . '.description',
-                'value'  => $data['keywords']
-            );
         }
 
         // --------------------------------------------------------------------------
