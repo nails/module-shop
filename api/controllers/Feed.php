@@ -45,21 +45,21 @@ class Feed extends \ApiController
 
         } else {
 
-            $out        = array();
-            $keywords   = $this->input->get('keywords');
-            $categories = $this->shop_feed_model->searchGoogleCategories($keywords);
+            $aOut        = array();
+            $sKeywords   = $this->input->get('keywords');
+            $aCategories = $this->shop_feed_model->searchGoogleCategories($sKeywords);
 
-            if ($categories !== false) {
+            if ($aCategories !== false) {
 
-                $out['results'] = $categories;
+                $aOut['results'] = $aCategories;
 
             } else {
 
-                $out['status'] = 500;
-                $out['error']  = $this->shop_feed_model->last_error();
+                $aOut['status'] = 500;
+                $aOut['error']  = $this->shop_feed_model->last_error();
             }
 
-            return $out;
+            return $aOut;
         }
     }
 }

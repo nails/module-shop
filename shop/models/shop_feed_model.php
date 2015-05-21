@@ -284,8 +284,8 @@ class NAILS_Shop_feed_model extends NAILS_Model
             file_put_contents($cacheFile, $data);
         }
 
-        $handle  = fopen($cacheFile, 'r');
-        $results = array();
+        $handle = fopen($cacheFile, 'r');
+        $aResults = array();
 
         if ($handle) {
 
@@ -297,13 +297,13 @@ class NAILS_Shop_feed_model extends NAILS_Model
 
                 if (preg_match('/' . $term . '/i', $line)) {
 
-                    $result[] = $line;
+                    $aResults[] = $line;
                 }
             }
 
             fclose($handle);
 
-            return $result;
+            return $aResults;
 
         } else {
 
