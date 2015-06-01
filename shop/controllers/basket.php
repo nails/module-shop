@@ -41,6 +41,14 @@ class NAILS_Basket extends NAILS_Shop_Controller
      **/
     public function index()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         $this->data['page']->title = $this->shopName . ': Your Basket';
 
         // --------------------------------------------------------------------------
@@ -115,6 +123,14 @@ class NAILS_Basket extends NAILS_Shop_Controller
      **/
     public function add()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         $variantId = $this->input->get_post('variant_id');
         $quantity  = (int) $this->input->get_post('quantity');
 
@@ -144,6 +160,14 @@ class NAILS_Basket extends NAILS_Shop_Controller
      **/
     public function remove()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         $variantId = $this->input->get_post('variant_id');
 
         if ($this->shop_basket_model->remove($variantId)) {
@@ -172,6 +196,14 @@ class NAILS_Basket extends NAILS_Shop_Controller
      **/
     public function destroy()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         $this->shop_basket_model->destroy();
         redirect($this->data['return']);
     }
@@ -184,6 +216,14 @@ class NAILS_Basket extends NAILS_Shop_Controller
      **/
     public function increment()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         $variantId = $this->input->get_post('variant_id');
 
         if ($this->shop_basket_model->increment($variantId)) {
@@ -211,6 +251,14 @@ class NAILS_Basket extends NAILS_Shop_Controller
      **/
     public function decrement()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         $variantId = $this->input->get_post('variant_id');
 
         if ($this->shop_basket_model->decrement($variantId)) {
@@ -238,6 +286,14 @@ class NAILS_Basket extends NAILS_Shop_Controller
      **/
     public function add_voucher()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         $voucher = $this->shop_voucher_model->validate($this->input->get_post('voucher'), getBasket());
 
         if ($voucher) {
@@ -275,6 +331,14 @@ class NAILS_Basket extends NAILS_Shop_Controller
      **/
     public function remove_voucher()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         if ($this->shop_basket_model->remove_voucher()) {
 
             $status  = 'success';
@@ -301,6 +365,14 @@ class NAILS_Basket extends NAILS_Shop_Controller
      */
     public function add_note()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         if ($this->shop_basket_model->addNote($this->input->get_post('note'))) {
 
             $status  = 'success';
@@ -327,6 +399,14 @@ class NAILS_Basket extends NAILS_Shop_Controller
      **/
     public function set_currency()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         $currency = $this->shop_currency_model->getByCode($this->input->get_post('currency'));
 
         if ($currency) {
@@ -364,6 +444,14 @@ class NAILS_Basket extends NAILS_Shop_Controller
      */
     public function set_as_collection()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         if ($this->shop_basket_model->addShippingType('COLLECT')) {
 
             $status  = 'success';
@@ -390,6 +478,14 @@ class NAILS_Basket extends NAILS_Shop_Controller
      */
     public function set_as_delivery()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         //  Check that the basket can in fact be set as delivery
         $numCollectOnlyItems = 0;
         $basket              = $this->shop_basket_model->get();

@@ -14,6 +14,10 @@ namespace Nails\Api\Shop;
 
 class Products extends \ApiController
 {
+    protected $maintenance;
+
+    // --------------------------------------------------------------------------
+
     /**
      * Construct the controller
      */
@@ -22,6 +26,34 @@ class Products extends \ApiController
         parent::__construct();
         $this->load->model('shop/shop_model');
         $this->load->model('shop/shop_product_model');
+
+        $this->maintenance = new \stdClass();
+        $this->maintenance->enabled = (bool) app_setting('maintenance_enabled', 'shop');
+        if ($this->maintenance->enabled) {
+
+            //  Allow shop admins access
+            if (userHasPermission('admin:shop:*')) {
+                $this->maintenance->enabled = false;
+            }
+        }
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Sets the maintenance ehaders and returns the status/error message
+     * @return array
+     */
+    protected function renderMaintenance()
+    {
+        $this->output->set_header($this->input->server('SERVER_PROTOCOL') . ' 503 Service Temporarily Unavailable');
+        $this->output->set_header('Status: 503 Service Temporarily Unavailable');
+        $this->output->set_header('Retry-After: 7200');
+
+        return array(
+            'status' => '503',
+            'error'  => 'Down for maintenance'
+        );
     }
 
     // --------------------------------------------------------------------------
@@ -32,6 +64,13 @@ class Products extends \ApiController
      */
     public function getSearch()
     {
+        if ($this->maintenance->enabled) {
+
+            return $this->renderMaintenance();
+        }
+
+        // --------------------------------------------------------------------------
+
         $out = array();
 
         $limit = (int) $this->input->get('limit');
@@ -63,6 +102,13 @@ class Products extends \ApiController
      */
     public function getId($id = null)
     {
+        if ($this->maintenance->enabled) {
+
+            return $this->renderMaintenance();
+        }
+
+        // --------------------------------------------------------------------------
+
         if (empty($id)) {
 
             return array();
@@ -92,6 +138,13 @@ class Products extends \ApiController
      */
     public function getIds()
     {
+        if ($this->maintenance->enabled) {
+
+            return $this->renderMaintenance();
+        }
+
+        // --------------------------------------------------------------------------
+
         $out = array();
         $ids = trim($this->input->get('ids'));
         $ids = explode(',', $ids);

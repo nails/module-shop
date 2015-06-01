@@ -163,6 +163,9 @@ class Settings extends \AdminController
     {
         //  Prepare update
         $settings                                          = array();
+        $settings['maintenance_enabled']                   = trim($this->input->post('maintenance_enabled'));
+        $settings['maintenance_title']                     = trim($this->input->post('maintenance_title'));
+        $settings['maintenance_body']                      = trim($this->input->post('maintenance_body'));
         $settings['name']                                  = $this->input->post('name');
         $settings['url']                                   = $this->input->post('url');
         $settings['price_exclude_tax']                     = $this->input->post('price_exclude_tax');

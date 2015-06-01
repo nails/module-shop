@@ -14,10 +14,42 @@ namespace Nails\Api\Shop;
 
 class Basket extends \ApiController
 {
+    protected $maintenance;
+
+    // --------------------------------------------------------------------------
+
     public function __construct()
     {
         parent::__construct();
         $this->load->model('shop/shop_basket_model');
+
+        $this->maintenance = new \stdClass();
+        $this->maintenance->enabled = (bool) app_setting('maintenance_enabled', 'shop');
+        if ($this->maintenance->enabled) {
+
+            //  Allow shop admins access
+            if (userHasPermission('admin:shop:*')) {
+                $this->maintenance->enabled = false;
+            }
+        }
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Sets the maintenance ehaders and returns the status/error message
+     * @return array
+     */
+    protected function renderMaintenance()
+    {
+        $this->output->set_header($this->input->server('SERVER_PROTOCOL') . ' 503 Service Temporarily Unavailable');
+        $this->output->set_header('Status: 503 Service Temporarily Unavailable');
+        $this->output->set_header('Retry-After: 7200');
+
+        return array(
+            'status' => '503',
+            'error'  => 'Down for maintenance'
+        );
     }
 
     // --------------------------------------------------------------------------
@@ -28,6 +60,13 @@ class Basket extends \ApiController
      */
     public function postAdd()
     {
+        if ($this->maintenance->enabled) {
+
+            return $this->renderMaintenance();
+        }
+
+        // --------------------------------------------------------------------------
+
         $out       = array();
         $variantId = $this->input->post('variantId');
         $quantity  = $this->input->post('quantity') ? $this->input->post('quantity') : 1;
@@ -49,6 +88,13 @@ class Basket extends \ApiController
      */
     public function postRemove()
     {
+        if ($this->maintenance->enabled) {
+
+            return $this->renderMaintenance();
+        }
+
+        // --------------------------------------------------------------------------
+
         $out       = array();
         $variantId = $this->input->post('variantId');
 
@@ -69,6 +115,13 @@ class Basket extends \ApiController
      */
     public function postIncrement()
     {
+        if ($this->maintenance->enabled) {
+
+            return $this->renderMaintenance();
+        }
+
+        // --------------------------------------------------------------------------
+
         $out       = array();
         $variantId = $this->input->post('variantId');
 
@@ -90,6 +143,13 @@ class Basket extends \ApiController
      */
     public function postDecrement()
     {
+        if ($this->maintenance->enabled) {
+
+            return $this->renderMaintenance();
+        }
+
+        // --------------------------------------------------------------------------
+
         $out       = array();
         $variantId = $this->input->post('variantId');
 
@@ -110,6 +170,13 @@ class Basket extends \ApiController
      */
     public function postAddVoucher()
     {
+        if ($this->maintenance->enabled) {
+
+            return $this->renderMaintenance();
+        }
+
+        // --------------------------------------------------------------------------
+
         $out     = array();
         $voucher = $this->shop_voucher_model->validate($this->input->post('voucher'), getBasket());
 
@@ -138,6 +205,13 @@ class Basket extends \ApiController
      */
     public function postRemoveVoucher()
     {
+        if ($this->maintenance->enabled) {
+
+            return $this->renderMaintenance();
+        }
+
+        // --------------------------------------------------------------------------
+
         $out = array();
 
         if (!$this->shop_basket_model->removeVoucher()) {
@@ -157,6 +231,13 @@ class Basket extends \ApiController
      */
     public function add_note()
     {
+        if ($this->maintenance->enabled) {
+
+            return $this->renderMaintenance();
+        }
+
+        // --------------------------------------------------------------------------
+
         $out  = array();
         $note = $this->input->post('note');
 
@@ -177,6 +258,13 @@ class Basket extends \ApiController
      */
     public function postSetCurrency()
     {
+        if ($this->maintenance->enabled) {
+
+            return $this->renderMaintenance();
+        }
+
+        // --------------------------------------------------------------------------
+
         $out      = array();
         $currency = $this->shop_currency_model->getByCode($this->input->post('currency'));
 
@@ -207,6 +295,13 @@ class Basket extends \ApiController
      */
     public function postSetAsCollection()
     {
+        if ($this->maintenance->enabled) {
+
+            return $this->renderMaintenance();
+        }
+
+        // --------------------------------------------------------------------------
+
         $out = array();
 
         if (!$this->shop_basket_model->setDeliveryType('COLLECT')) {
@@ -226,6 +321,13 @@ class Basket extends \ApiController
      */
     public function postSetAsDelivery()
     {
+        if ($this->maintenance->enabled) {
+
+            return $this->renderMaintenance();
+        }
+
+        // --------------------------------------------------------------------------
+
         $out = array();
 
         if (!$this->shop_basket_model->setDeliveryType('DELIVER')) {

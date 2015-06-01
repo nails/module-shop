@@ -35,6 +35,14 @@ class NAILS_Checkout extends NAILS_Shop_Controller
      */
     public function index()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         $this->load->model('country_model');
 
         $this->data['countries_flat']   = $this->country_model->getAllFlat();
@@ -265,6 +273,14 @@ class NAILS_Checkout extends NAILS_Shop_Controller
      */
     public function processing()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         $this->data['order'] = $this->getOrder();
 
         if (empty($this->data['order'])) {
@@ -503,6 +519,14 @@ class NAILS_Checkout extends NAILS_Shop_Controller
      */
     public function cancel()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         $order = $this->getOrder(false);
 
         if (empty($order)) {
@@ -534,6 +558,14 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
     public function confirm()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         $order = $this->getOrder();
 
         if (empty($order)) {
@@ -566,6 +598,14 @@ class NAILS_Checkout extends NAILS_Shop_Controller
      */
     public function invoice()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         //  Fetch and check order
         $this->load->model('shop/shop_order_model');
 

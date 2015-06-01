@@ -34,6 +34,14 @@ class NAILS_Orders extends NAILS_Shop_Controller
      */
     public function invoice()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         $this->data['order'] = $this->shop_order_model->getByRef($this->uri->segment(4));
 
         //  Order exist?

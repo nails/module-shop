@@ -1388,6 +1388,14 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     public function _remap()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         if (is_numeric($this->uri->rsegment(2))) {
 
             //  Paginating the front page

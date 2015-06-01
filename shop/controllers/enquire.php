@@ -34,6 +34,14 @@ class NAILS_Enquire extends NAILS_Shop_Controller
      */
     public function delivery()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         $productId = $this->uri->rsegment('3');
         $variantId = $this->uri->rsegment('4');
 

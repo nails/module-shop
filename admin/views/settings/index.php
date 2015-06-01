@@ -53,6 +53,49 @@
                 Generic store settings. Use these to control some store behaviours.
             </p>
             <hr />
+            <fieldset id="shop-settings-online">
+                <legend>Maintenance</legend>
+                <p>
+                    Is the shop enabled?
+                </p>
+                <?php
+
+                    $field            = array();
+                    $field['key']     = 'maintenance_enabled';
+                    $field['label']   = 'Maintenance Mode';
+                    $field['default'] = (bool) app_setting($field['key'], 'shop');
+                    $field['tip']     = 'Use this field to temporarily disable the shop, e.g. for extended maintenance.';
+
+                    echo form_field_boolean($field);
+
+                    $display = $field['default'] ? 'block' : 'none';
+
+                ?>
+                <div id="shop-maintenance-extras" style="display:<?=$display?>">
+                    <?php
+
+                        $field                = array();
+                        $field['key']         = 'maintenance_title';
+                        $field['label']       = 'Maintenance Title';
+                        $field['default']     = app_setting($field['key'], 'shop') ? app_setting($field['key'], 'shop') : '';
+                        $field['placeholder'] = 'Customise what the maintenance page title is';
+
+                        echo form_field($field);
+
+                        // --------------------------------------------------------------------------
+
+                        $field                = array();
+                        $field['key']         = 'maintenance_body';
+                        $field['label']       = 'Maintenance Body';
+                        $field['default']     = app_setting($field['key'], 'shop') ? app_setting($field['key'], 'shop') : '';
+                        $field['placeholder'] = 'Customise what the maintenance page body text is';
+
+                        echo form_field_wysiwyg($field);
+
+
+                    ?>
+                </div>
+            </fieldset>
             <fieldset id="shop-settings-name">
                 <legend>Name</legend>
                 <p>

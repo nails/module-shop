@@ -102,6 +102,14 @@ class NAILS_Notify extends NAILS_Shop_Controller
      */
     public function _remap()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         $this->index();
     }
 }

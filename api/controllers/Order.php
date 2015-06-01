@@ -14,6 +14,10 @@ namespace Nails\Api\Shop;
 
 class Order extends \ApiController
 {
+    protected $maintenance;
+
+    // --------------------------------------------------------------------------
+
     /**
      * Construct the controller
      */
@@ -22,6 +26,34 @@ class Order extends \ApiController
         parent::__construct();
         $this->load->model('shop/shop_model');
         $this->load->model('shop/shop_order_model');
+
+        $this->maintenance = new \stdClass();
+        $this->maintenance->enabled = (bool) app_setting('maintenance_enabled', 'shop');
+        if ($this->maintenance->enabled) {
+
+            //  Allow shop admins access
+            if (userHasPermission('admin:shop:*')) {
+                $this->maintenance->enabled = false;
+            }
+        }
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Sets the maintenance ehaders and returns the status/error message
+     * @return array
+     */
+    protected function renderMaintenance()
+    {
+        $this->output->set_header($this->input->server('SERVER_PROTOCOL') . ' 503 Service Temporarily Unavailable');
+        $this->output->set_header('Status: 503 Service Temporarily Unavailable');
+        $this->output->set_header('Retry-After: 7200');
+
+        return array(
+            'status' => '503',
+            'error'  => 'Down for maintenance'
+        );
     }
 
     // --------------------------------------------------------------------------
@@ -32,6 +64,13 @@ class Order extends \ApiController
      */
     public function getStatus()
     {
+        if ($this->maintenance->enabled) {
+
+            return $this->renderMaintenance();
+        }
+
+        // --------------------------------------------------------------------------
+
         $out   = array();
         $order = $this->shop_order_model->getByRef($this->input->get('ref'));
 

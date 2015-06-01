@@ -17,46 +17,54 @@ class NAILS_Feed extends NAILS_Shop_Controller
 {
     public function index()
     {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
         $method = $this->uri->rsegment(2);
-        
+
         preg_match('/^(.+?)(\.(xml|json))?$/', $method, $matches);
 
         $provider = !empty($matches[1]) ? strtolower($matches[1]) : 'google';
         $format   = !empty($matches[3]) ? strtolower($matches[3]) : 'xml';
-        
+
         $this->load->model('shop_feed_model');
         $output = $this->shop_feed_model->serve($provider, $format);
 
         if (empty($output)) {
-        
-            show_404(); 
+
+            show_404();
         }
-        
+
         //  Set cache headers
         $this->output->set_header("Cache-Control: no-store, no-cache, must-revalidate");
         $this->output->set_header("Cache-Control: post-check=0, pre-check=0");
         $this->output->set_header("Pragma: no-cache");
-        
+
         //  Set content-type
         switch ($format) {
-            
+
             case 'xml':
-            
+
                 $this->output->set_content_type('text/xml');
                 break;
-                
+
             case 'json':
-            
+
                 $this->output->set_content_type('text/json');
                 break;
         }
-        
+
         //  Set data
         $this->output->set_output($output);
     }
-    
+
     // --------------------------------------------------------------------------
-        
+
     public function _remap()
     {
         return $this->index();

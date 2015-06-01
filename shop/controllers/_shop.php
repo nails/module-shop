@@ -15,6 +15,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
     protected $shopName;
     protected $shopUrl;
     protected $skin;
+    protected $maintenance;
 
     // --------------------------------------------------------------------------
 
@@ -51,6 +52,21 @@ class NAILS_Shop_Controller extends NAILS_Controller
         //  Pass data to the views
         $this->data['shop_name'] = $this->shopName;
         $this->data['shop_url']  = $this->shopUrl;
+
+        //  Maintenance mode?
+        $this->maintenance = new \stdClass();
+        $this->maintenance->enabled = (bool) app_setting('maintenance_enabled', 'shop');
+
+        if ($this->maintenance->enabled) {
+
+            //  Allow shop admins access
+            if (userHasPermission('admin:shop:*')) {
+
+                $this->maintenance->enabled = false;
+                $this->data['notice']  = '<strong>Maintenance mode is enabled</strong>';
+                $this->data['notice'] .= '<br />You are a shop administrator so you have permission to view the shop while in maintenance mode.';
+            }
+        }
     }
 
     // --------------------------------------------------------------------------
@@ -174,5 +190,16 @@ class NAILS_Shop_Controller extends NAILS_Controller
                 $this->asset->inline($asset, 'JS-INLINE');
             }
         }
+    }
+
+    // --------------------------------------------------------------------------
+
+    protected function renderMaintenancePage()
+    {
+        $this->data['page']->title = $this->shopName + ' - Down for maintenance';
+
+        $this->load->view('structure/header', $this->data);
+        $this->load->view($this->skin->path . 'views/maintenance', $this->data);
+        $this->load->view('structure/footer', $this->data);
     }
 }
