@@ -39,11 +39,9 @@
             <a href="#" data-tab="tab-shipping">Shipping</a>
         </li>
     </ul>
-
-    <section class="tabs pages main-tabs">
-
+    <section class="tabs" data-tabgroup="main-tabs">
         <?php $display = $this->input->post('update') == 'settings' || !$this->input->post() ? 'active' : ''?>
-        <div id="tab-general" class="tab page <?=$display?> general">
+        <div class="tab-page tab-general <?=$display?>">
             <?php
 
                 echo form_open(null, 'style="margin-bottom:0;"');
@@ -431,7 +429,7 @@
             <?=form_close()?>
         </div>
         <?php $display = $this->input->post('update') == 'browse' ? 'active' : ''?>
-        <div id="tab-browse" class="tab page <?=$display?> browse">
+        <div class="tab-page tab-browse <?=$display?>">
             <?php
 
                 echo form_open(null, 'style="margin-bottom:0;"');
@@ -504,7 +502,7 @@
             <?=form_close()?>
         </div>
         <?php $display = $this->input->post('update') == 'skin' ? 'active' : ''?>
-        <div id="tab-skin" class="tab page <?=$display?> skin">
+        <div class="tab-page tab-skin <?=$display?>">
             <?php
 
                 echo form_open(null, 'style="margin-bottom:0;"');
@@ -519,8 +517,8 @@
                     <a href="#" data-tab="tab-skin-checkout">Checkout</a>
                 </li>
             </ul>
-            <section class="tabs pages skins">
-                <div id="tab-skin-foh" class="tab page active clearfix">
+            <section class="tabs" data-tabgroup="skins">
+                <div class="tab-page tab-skin-foh active clearfix">
                     <p class="system-alert notice">
                         The "Front of House" skin is responsible for the user's experience whilst browsing your store.
                     </p>
@@ -576,7 +574,7 @@
 
                     ?>
                 </div>
-                <div id="tab-skin-checkout" class="tab page clearfix">
+                <div class="tab-page tab-skin-checkout clearfix">
                     <p class="system-alert notice">
                         The "Checkout" Skin is responsible for the user's basket and checkout experience.
                     </p>
@@ -638,7 +636,7 @@
             <?=form_close()?>
         </div>
         <?php $display = $this->input->post('update') == 'skin_config' ? 'active' : ''?>
-        <div id="tab-skin-config" class="tab page <?=$display?> skin-config">
+        <div class="tab-page tab-skin-config <?=$display?>">
             <ul class="tabs" data-tabgroup="skins-config">
                 <li class="tab active">
                     <a href="#" data-tab="tab-skin-config-foh">Front of House</a>
@@ -857,9 +855,8 @@
 
             ?>
         </div>
-
         <?php $display = $this->input->post('update') == 'payment_gateway' ? 'active' : ''?>
-        <div id="tab-payment-gateway" class="tab page <?=$display?> payment-gateway">
+        <div class="tab-page tab-payment-gateway <?=$display?>">
             <?php
 
                 echo form_open(null, 'style="margin-bottom:0;"');
@@ -923,7 +920,7 @@
             <?=form_close()?>
         </div>
         <?php $display = $this->input->post('update') == 'currencies' ? 'active' : ''?>
-        <div id="tab-currencies" class="tab page <?=$display?> currencies">
+        <div class="tab-page tab-currencies <?=$display?>">
             <?php
 
                 echo form_open(null, 'style="margin-bottom:0;"');
@@ -1024,7 +1021,7 @@
             <?=form_close()?>
         </div>
         <?php $display = $this->input->post('update') == 'shipping' ? 'active' : ''?>
-        <div id="tab-shipping" class="tab page <?=$display?> shipping">
+        <div class="tab-page tab-shipping <?=$display?>">
             <?php
 
                 echo form_open(null, 'style="margin-bottom:0;"');

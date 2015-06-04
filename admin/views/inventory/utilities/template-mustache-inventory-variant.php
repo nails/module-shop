@@ -13,7 +13,7 @@
     $_counter = isset($variation) && $counter !== false ? $counter : '{{counter}}';
 
 ?>
-<div id="variation-<?=$_counter?>" class="variation" data-counter="<?=$_counter?>">
+<div class="variation" data-counter="<?=$_counter?>">
     <?php
 
         //  Pass the vraiation ID along for the ride too
@@ -33,28 +33,28 @@
             This variation will be deleted when you submit this form.
         </p>
     </div>
-    <ul class="tabs" data-tabgroup="variation-<?=$_counter?>">
+    <ul class="tabs" data-tabgroup="variation">
         <li class="tab active">
-            <a href="#" class="tabber-variation-details" data-tab="tab-variation-<?=$_counter?>-details">Details</a>
+            <a href="#" class="tabber-variation-details" data-tab="tab-variation-details">Details</a>
         </li>
         <li class="tab">
-            <a href="#" data-tab="tab-variation-<?=$_counter?>-meta">Meta</a>
+            <a href="#" data-tab="tab-variation-meta">Meta</a>
         </li>
         <li class="tab">
-            <a href="#" data-tab="tab-variation-<?=$_counter?>-pricing">Pricing</a>
+            <a href="#" data-tab="tab-variation-pricing">Pricing</a>
         </li>
         <li class="tab">
-            <a href="#" data-tab="tab-variation-<?=$_counter?>-gallery">Gallery</a>
+            <a href="#" data-tab="tab-variation-gallery">Gallery</a>
         </li>
         <li class="tab">
-            <a href="#" class="tabber-variation-shipping" data-tab="tab-variation-<?=$_counter?>-shipping">Shipping</a>
+            <a href="#" class="tabber-variation-shipping" data-tab="tab-variation-shipping">Shipping</a>
         </li>
         <li class="action">
             <a href="#" class="delete">Delete</a>
         </li>
     </ul>
-    <section class="tabs pages variation-<?=$_counter?>">
-        <div class="tab page active fieldset" id="tab-variation-<?=$_counter?>-details">
+    <section class="tabs" data-tabgroup="variation">
+        <div class="tab-page tab-variation-details active fieldset">
             <?php
 
                 $field                = array();
@@ -154,8 +154,7 @@
 
             ?>
         </div>
-
-        <div class="tab page fieldset" id="tab-variation-<?=$_counter?>-meta">
+        <div class="tab-page tab-variation-meta fieldset">
             <?php
 
                 foreach ($product_types_meta as $productTypeId => $metaFields) {
@@ -214,8 +213,7 @@
 
             ?>
         </div>
-
-        <div class="tab page" id="tab-variation-<?=$_counter?>-pricing">
+        <div class="tab-page tab-variation-pricing">
             <?php if (count($currencies) > 1) { ?>
             <p>
                 Define the price points for this variation. If you'd like to set a specific price for a certain
@@ -400,8 +398,7 @@
 
             ?>
         </div>
-
-        <div class="tab page" id="tab-variation-<?=$_counter?>-gallery">
+        <div class="tab-page tab-variation-gallery">
             <p>
                 Specify which, if any, of the uploaded gallery images feature this product variation.
             </p>
@@ -456,8 +453,7 @@
                 </li>
             </ul>
         </div>
-
-        <div class="tab page fieldset" id="tab-variation-<?=$_counter?>-shipping">
+        <div class="tab-page tab-variation-shipping fieldset">
             <?php
 
                 if (!empty($shipping_driver)) {
@@ -466,6 +462,7 @@
 
                         $field             = array();
                         $field['key']      = 'variation[' . $_counter . '][shipping][collection_only]';
+                        $field['class']    = 'field-collection-only';
                         $field['label']    = 'Collection Only';
                         $field['readonly'] = !app_setting('warehouse_collection_enabled', 'shop');
                         $field['info']     = !app_setting('warehouse_collection_enabled', 'shop') ? '<strong>Warehouse Collection is disabled</strong>' : '';
@@ -474,6 +471,8 @@
                         $tip               = 'Items marked as collection only will be handled differently in checkout and reporting.';
 
                         echo form_field_boolean($field, $tip);
+
+                        $optionsHidden = $field['default'] ? 'block' : 'none';
 
                     echo '</div>';
 
@@ -493,10 +492,11 @@
                                     continue;
                                 }
 
-                                //  Order is important here as $field['key'] gets overwritte
-                                $default         = isset($variation->shipping->driver_data[$shipping_driver->slug][$field['key']]) ? $variation->shipping->driver_data[$shipping_driver->slug][$field['key']] : '';
+                                //  Order is important here as $field['key'] gets overwritten
+                                $default          = isset($variation->shipping->driver_data[$shipping_driver->slug][$field['key']]) ? $variation->shipping->driver_data[$shipping_driver->slug][$field['key']] : '';
                                 $field['key']     = 'variation[' . $_counter . '][shipping][driver_data][' . $shipping_driver->slug . '][' . $field['key'] . ']';
                                 $field['default'] = set_value($field['key'], $default);
+                                $field['class']   = isset($field['class']) ? $field['class'] . ' driver-option' : 'driver-option';
 
                                 //  @todo: Use admin form builder - Asana ticket: https://app.asana.com/0/6627768688940/15891120890395
                                 $_type = isset($field['type']) ? $field['type'] : '';
@@ -508,6 +508,12 @@
                                         echo form_field_dropdown($field);
                                         break;
 
+                                    case 'bool':
+                                    case 'boolean':
+
+                                        echo form_field_boolean($field);
+                                        break;
+
                                     default:
 
                                         echo form_field($field);
@@ -517,13 +523,20 @@
 
                         echo '</div>';
 
-                        $display = $field['default'] ? 'block' : 'none';
-                        echo '<div class="shipping-driver-options-hidden" style="display:' . $display . '">';
+                        echo '<div class="shipping-driver-options-hidden" style="display:' . $optionsHidden . '">';
                             echo '<p class="system-alert notice" style="margin-top:1em;">';
-                                echo 'Further shipping options have been hidden because the item is set as "collection only" and will not be included while calculating shipping costs.';
+                                echo 'Further shipping options have been hidden because the item is set as ';
+                                echo '"collection only" and will not be included while calculating shipping costs.';
                             echo '</p>';
                         echo '</div>';
                     }
+
+                    // --------------------------------------------------------------------------
+
+                    $display = empty($isFirst) || empty($numVariants) || $numVariants == 1 ? 'none' : 'block';
+                    echo '<p class="variation-sync-shipping" style="display:' . $display . '">';
+                        echo '<a href="#" class="awesome small orange">Sync Shipping</a>';
+                    echo '</p>';
 
                 } else {
 

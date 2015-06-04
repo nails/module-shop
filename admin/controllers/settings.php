@@ -555,6 +555,9 @@ class Settings extends \AdminController
             //  Render the interface
             $this->data['page']->title = 'Shop Payment Gateway Configuration &rsaquo; ' . $this->data['gateway_name'];
 
+            //  Load common assets
+            $this->asset->load('nails.admin.settings.min.js', 'NAILS');
+
             if (method_exists($this, '_shop_pg_' . $gateway)) {
 
                 //  Specific configuration form available

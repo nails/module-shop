@@ -1,36 +1,91 @@
 <div class="group-shop inventory edit">
-    <?=form_open(null, 'id="product-form"')?>
+    <?php
+
+        echo form_open(null, 'id="product-form"');
+        echo '<input type="hidden" name="activeTab" value="' . set_value('activeTab') . '" id="activeTab" />';
+
+    ?>
     <ul class="tabs" data-tabgroup="main-product">
-        <li class="tab active">
+        <?php
+
+            $active = $this->input->post('activeTab') == 'tab-basics' || !$this->input->post('activeTab') ? 'active' : '';
+
+        ?>
+        <li class="tab <?=$active?>">
             <a href="#" data-tab="tab-basics">Info</a>
         </li>
-        <li class="tab">
+        <?php
+
+            $active = $this->input->post('activeTab') == 'tab-meta' ? 'active' : '';
+
+        ?>
+        <li class="tab <?=$active?>">
             <a href="#" id="tabber-meta" data-tab="tab-meta">Meta</a>
         </li>
-        <li class="tab">
+        <?php
+
+            $active = $this->input->post('activeTab') == 'tab-description' ? 'active' : '';
+
+        ?>
+        <li class="tab <?=$active?>">
             <a href="#" id="tabber-description" data-tab="tab-description">Description</a>
         </li>
-        <li class="tab">
+        <?php
+
+            $active = $this->input->post('activeTab') == 'tab-variations' ? 'active' : '';
+
+        ?>
+        <li class="tab <?=$active?>">
             <a href="#" id="tabber-variations" data-tab="tab-variations">Variations</a>
         </li>
-        <li class="tab">
+        <?php
+
+            $active = $this->input->post('activeTab') == 'tab-gallery' ? 'active' : '';
+
+        ?>
+        <li class="tab <?=$active?>">
             <a href="#" id="tabber-gallery" data-tab="tab-gallery">Gallery</a>
         </li>
-        <li class="tab">
+        <?php
+
+            $active = $this->input->post('activeTab') == 'tab-attributes' ? 'active' : '';
+
+        ?>
+        <li class="tab <?=$active?>">
             <a href="#" id="tabber-attributes" data-tab="tab-attributes">Attributes</a>
         </li>
-        <li class="tab">
+        <?php
+
+            $active = $this->input->post('activeTab') == 'tab-ranges-collections' ? 'active' : '';
+
+        ?>
+        <li class="tab <?=$active?>">
             <a href="#" id="tabber-ranges-collections" data-tab="tab-ranges-collections">Ranges &amp; Collections</a>
         </li>
-        <li class="tab">
+        <?php
+
+            $active = $this->input->post('activeTab') == 'tab-related' ? 'active' : '';
+
+        ?>
+        <li class="tab <?=$active?>">
             <a href="#" id="tabber-related" data-tab="tab-related">Releated Products</a>
         </li>
-        <li class="tab">
+        <?php
+
+            $active = $this->input->post('activeTab') == 'tab-seo' ? 'active' : '';
+
+        ?>
+        <li class="tab <?=$active?>">
             <a href="#" id="tabber-seo" data-tab="tab-seo">SEO</a>
         </li>
     </ul>
-    <section class="tabs pages main-product">
-        <div class="tab page basics active fieldset" id="tab-basics">
+    <section class="tabs" data-tabgroup="main-product">
+        <?php
+
+            $active = $this->input->post('activeTab') == 'tab-customise' || !$this->input->post('activeTab') ? 'active' : '';
+
+        ?>
+        <div class="tab-page basics tab-basics <?=$active?> fieldset">
             <?php
 
             $field             = array();
@@ -212,7 +267,12 @@
 
             ?>
         </div>
-        <div class="tab page meta fieldset" id="tab-meta">
+        <?php
+
+            $active = $this->input->post('activeTab') == 'tab-meta' ? 'active' : '';
+
+        ?>
+        <div class="tab-page meta tab-meta <?=$active?> fieldset">
             <fieldset>
                 <legend>Dates &amp; Times</legend>
                 <?php
@@ -290,7 +350,12 @@
             </fieldset>
             <?php }; ?>
         </div>
-        <div class="tab page description" id="tab-description">
+        <?php
+
+            $active = $this->input->post('activeTab') == 'tab-description' ? 'active' : '';
+
+        ?>
+        <div class="tab-page tab-description <?=$active?>">
             <?php
 
             $field            = array();
@@ -303,7 +368,12 @@
 
             ?>
         </div>
-        <div class="tab page variations" id="tab-variations">
+        <?php
+
+            $active = $this->input->post('activeTab') == 'tab-variations' ? 'active' : '';
+
+        ?>
+        <div class="tab-page tab-variations <?=$active?>">
             <p>
                 Variations allow you to offer the same product but with different attributes (e.g colours or sizes).
                 Shoppers will be given the choice of which variation they wish to purchase. There must always be at
@@ -388,7 +458,12 @@
                 </p>
             </div>
         </div>
-        <div class="tab page gallery" id="tab-gallery" >
+        <?php
+
+            $active = $this->input->post('activeTab') == 'tab-gallery' ? 'active' : '';
+
+        ?>
+        <div class="tab-page tab-gallery <?=$active?>" >
             <p>
                 Upload images to the product gallery. Once uploaded you can specify which variations are featured
                 on the <a href="#" class="switch-to-variations">variations tab</a>.
@@ -465,7 +540,12 @@
                 ?>
             </ul>
         </div>
-        <div class="tab page attributes" id="tab-attributes">
+        <?php
+
+            $active = $this->input->post('activeTab') == 'tab-attributes' ? 'active' : '';
+
+        ?>
+        <div class="tab-page tab-attributes <?=$active?>">
             <p>
                 Specify specific product attributes, e..g for a pair of jeans you might specify a 'Style' attribute and
                 give it a value of 'Bootcut'. Attributes should be common across all variations of the product.
@@ -534,7 +614,12 @@
                 <a href="#" class="awesome small orange manage-attributes">Manage Attributes</a>
             </p>
         </div>
-        <div class="tab page ranges-collections" id="tab-ranges-collections">
+        <?php
+
+            $active = $this->input->post('activeTab') == 'tab-ranges-collections' ? 'active' : '';
+
+        ?>
+        <div class="tab-page tab-ranges-collections <?=$active?>">
             <p>
                 Specify which ranges and/or collections this product should appear in.
             </p>
@@ -643,7 +728,12 @@
                 <a href="#" class="awesome small orange manage-collections">Manage Collections</a>
             </p>
         </div>
-        <div class="tab page seo" id="tab-related">
+        <?php
+
+            $active = $this->input->post('activeTab') == 'tab-related' ? 'active' : '';
+
+        ?>
+        <div class="tab-page tab-related <?=$active?>">
             <p>
                 One-way product relations can be specified here; related products appear on the product's page.
             </p>
@@ -675,7 +765,12 @@
             ?>
             </p>
         </div>
-        <div class="tab page seo" id="tab-seo">
+        <?php
+
+            $active = $this->input->post('activeTab') == 'tab-seo' ? 'active' : '';
+
+        ?>
+        <div class="tab-page tab-seo <?=$active?>">
             <p>
                 Define some meta information here which will help search engines understand the product. Keep it
                 relevant and concise, trying too hard and 'keyword flooding' can have the opposite effect.
