@@ -529,7 +529,7 @@ class Manage extends \AdminController
                 $data                    = array();
                 $data['label']           = $this->input->post('label');
                 $data['logo_id']         = (int) $this->input->post('logo_id') ? (int) $this->input->post('logo_id') : null;
-                $data['cover_id']        = (int) $this->input->post('cover_id');
+                $data['cover_id']        = (int) $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
                 $data['description']     = $this->input->post('description');
                 $data['is_active']       = (bool) $this->input->post('is_active');
                 $data['seo_title']       = $this->input->post('seo_title');
@@ -615,7 +615,7 @@ class Manage extends \AdminController
                 $data                    = array();
                 $data['label']           = $this->input->post('label');
                 $data['logo_id']         = (int) $this->input->post('logo_id') ? (int) $this->input->post('logo_id') : null;
-                $data['cover_id']        = (int) $this->input->post('cover_id');
+                $data['cover_id']        = (int) $this->input->post('cover_id') ? (int) $this->input->post('cover_id') : null;
                 $data['description']     = $this->input->post('description');
                 $data['is_active']       = (bool) $this->input->post('is_active');
                 $data['seo_title']       = $this->input->post('seo_title');
