@@ -417,8 +417,8 @@ class Orders extends \AdminController
         //  Views
         $this->data['for_user'] = 'ADMIN';
         $this->load->library('pdf/pdf');
-        $this->pdf->set_paper_size('A4', 'landscape');
-        $this->pdf->load_view($skin->path . 'views/order/invoice', $this->data);
+        $this->pdf->setPaperSize('A4', 'landscape');
+        $this->pdf->loadView($skin->path . 'views/order/invoice', $this->data);
         $this->pdf->download('INVOICE-' . $this->data['order']->ref . '.pdf');
     }
 
