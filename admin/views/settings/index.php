@@ -654,7 +654,7 @@
             <section class="tabs pages skins-config">
             <?php
 
-                echo '<div id="tab-skin-config-foh" class="tab page active">';
+                echo '<div id="tab-skin-config-foh" class="tab-page active">';
                 if (!empty($skin_front_current)) {
 
                     if (!empty($skin_front_current->settings)) {
@@ -749,7 +749,7 @@
                 }
                 echo '</div>';
 
-                echo '<div id="tab-skin-config-checkout" class="tab page">';
+                echo '<div id="tab-skin-config-checkout" class="tab-page">';
                 if (!empty($skin_checkout_current)) {
 
                     if (!empty($skin_checkout_current->settings)) {

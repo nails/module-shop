@@ -133,51 +133,51 @@ class NAILS_Checkout extends NAILS_Shop_Controller
                 if ($this->form_validation->run()) {
 
                     //  Prepare data
-                    $data = new \stdClass();
+                    $aInsertData = array();
 
                     //  Contact details
-                    $data->contact             = new \stdClass();
-                    $data->contact->first_name = $this->input->post('first_name');
-                    $data->contact->last_name  = $this->input->post('last_name');
-                    $data->contact->email      = $this->input->post('email');
-                    $data->contact->telephone  = $this->input->post('telephone');
+                    $aInsertData['contact']             = new \stdClass();
+                    $aInsertData['contact']->first_name = $this->input->post('first_name');
+                    $aInsertData['contact']->last_name  = $this->input->post('last_name');
+                    $aInsertData['contact']->email      = $this->input->post('email');
+                    $aInsertData['contact']->telephone  = $this->input->post('telephone');
 
                     //  Delivery Details
-                    $data->delivery           = new \stdClass();
-                    $data->delivery->line_1   = $this->input->post('delivery_address_line_1');
-                    $data->delivery->line_2   = $this->input->post('delivery_address_line_2');
-                    $data->delivery->town     = $this->input->post('delivery_address_town');
-                    $data->delivery->state    = $this->input->post('delivery_address_state');
-                    $data->delivery->postcode = $this->input->post('delivery_address_postcode');
-                    $data->delivery->country  = $this->input->post('delivery_address_country');
+                    $aInsertData['delivery']           = new \stdClass();
+                    $aInsertData['delivery']->line_1   = $this->input->post('delivery_address_line_1');
+                    $aInsertData['delivery']->line_2   = $this->input->post('delivery_address_line_2');
+                    $aInsertData['delivery']->town     = $this->input->post('delivery_address_town');
+                    $aInsertData['delivery']->state    = $this->input->post('delivery_address_state');
+                    $aInsertData['delivery']->postcode = $this->input->post('delivery_address_postcode');
+                    $aInsertData['delivery']->country  = $this->input->post('delivery_address_country');
 
                     //  Billing details
                     if (!$this->input->post('same_billing_address')) {
 
-                        $data->billing           = new \stdClass();
-                        $data->billing->line_1   = $this->input->post('billing_address_line_1');
-                        $data->billing->line_2   = $this->input->post('billing_address_line_2');
-                        $data->billing->town     = $this->input->post('billing_address_town');
-                        $data->billing->state    = $this->input->post('billing_address_state');
-                        $data->billing->postcode = $this->input->post('billing_address_postcode');
-                        $data->billing->country  = $this->input->post('billing_address_country');
+                        $aInsertData['billing']           = new \stdClass();
+                        $aInsertData['billing']->line_1   = $this->input->post('billing_address_line_1');
+                        $aInsertData['billing']->line_2   = $this->input->post('billing_address_line_2');
+                        $aInsertData['billing']->town     = $this->input->post('billing_address_town');
+                        $aInsertData['billing']->state    = $this->input->post('billing_address_state');
+                        $aInsertData['billing']->postcode = $this->input->post('billing_address_postcode');
+                        $aInsertData['billing']->country  = $this->input->post('billing_address_country');
 
                     } else {
 
-                        $data->billing           = new \stdClass();
-                        $data->billing->line_1   = $this->input->post('delivery_address_line_1');
-                        $data->billing->line_2   = $this->input->post('delivery_address_line_2');
-                        $data->billing->town     = $this->input->post('delivery_address_town');
-                        $data->billing->state    = $this->input->post('delivery_address_state');
-                        $data->billing->postcode = $this->input->post('delivery_address_postcode');
-                        $data->billing->country  = $this->input->post('delivery_address_country');
+                        $aInsertData['billing']           = new \stdClass();
+                        $aInsertData['billing']->line_1   = $this->input->post('delivery_address_line_1');
+                        $aInsertData['billing']->line_2   = $this->input->post('delivery_address_line_2');
+                        $aInsertData['billing']->town     = $this->input->post('delivery_address_town');
+                        $aInsertData['billing']->state    = $this->input->post('delivery_address_state');
+                        $aInsertData['billing']->postcode = $this->input->post('delivery_address_postcode');
+                        $aInsertData['billing']->country  = $this->input->post('delivery_address_country');
                     }
 
                     //  And the basket
-                    $data->basket = $basket;
+                    $aInsertData['basket'] = $basket;
 
                     //  Generate the order and proceed to payment
-                    $order = $this->shop_order_model->create($data, true);
+                    $order = $this->shop_order_model->create($aInsertData, true);
 
                     if ($order) {
 

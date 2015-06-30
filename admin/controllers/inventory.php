@@ -346,7 +346,7 @@ class Inventory extends \AdminController
                  * marked as inactive.
                  */
                 foreach ($aVariations as $aVariant) {
-                    
+
                     if (!empty($aVariant['is_active'])) {
                         $iActiveVariants++;
                         break;
@@ -374,7 +374,8 @@ class Inventory extends \AdminController
                 $this->inventoryCreateEditPrepFields();
 
                 //  Validated!Create the product
-                $product = $this->shop_product_model->create($this->input->post());
+                $aInsertData = (array) $this->input->post();
+                $product = $this->shop_product_model->create($aInsertData);
 
                 if ($product) {
 
@@ -529,7 +530,7 @@ class Inventory extends \AdminController
                  * marked as inactive.
                  */
                 foreach ($aVariations as $aVariant) {
-                    
+
                     if (!empty($aVariant['is_active'])) {
                         $iActiveVariants++;
                         break;
@@ -557,7 +558,8 @@ class Inventory extends \AdminController
                 $this->inventoryCreateEditPrepFields();
 
                 //  Validated! Create the product
-                $product = $this->shop_product_model->update($this->data['item']->id, $this->input->post());
+                $aUpdateData = (array) $this->input->post();
+                $product = $this->shop_product_model->update($this->data['item']->id, $aUpdateData);
 
                 if ($product) {
 

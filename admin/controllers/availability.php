@@ -130,12 +130,12 @@ class Availability extends \AdminController
 
                 $item = explode(':', $this->input->post('item'));
 
-                $data               = new \stdClass();
-                $data->email        = $this->input->post('email');
-                $data->product_id   = isset($item[0]) ? (int) $item[0] : null;
-                $data->variation_id = isset($item[1]) ? (int) $item[1] : null;
+                $aInsertData               = array();
+                $aInsertData->email        = $this->input->post('email');
+                $aInsertData->product_id   = isset($item[0]) ? (int) $item[0] : null;
+                $aInsertData->variation_id = isset($item[1]) ? (int) $item[1] : null;
 
-                if ($this->shop_inform_product_available_model->create($data)) {
+                if ($this->shop_inform_product_available_model->create($aInsertData)) {
 
                     //  Redirect to clear form
                     $this->session->set_flashdata('success', 'Product Availability Notification created successfully.');
@@ -143,7 +143,8 @@ class Availability extends \AdminController
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem creating the Product Availability Notification. ' . $this->shop_inform_product_available_model->last_error();
+                    $this->data['error']  = 'There was a problem creating the Product Availability Notification. ';
+                    $this->data['error'] .= $this->shop_inform_product_available_model->last_error();
                 }
 
             } else {
@@ -204,12 +205,12 @@ class Availability extends \AdminController
 
                 $item = explode(':', $this->input->post('item'));
 
-                $data               = new \stdClass();
-                $data->email        = $this->input->post('email');
-                $data->product_id   = isset($item[0]) ? (int) $item[0] : null;
-                $data->variation_id = isset($item[1]) ? (int) $item[1] : null;
+                $aUpdateData                 = array();
+                $aUpdateData['email']        = $this->input->post('email');
+                $aUpdateData['product_id']   = isset($item[0]) ? (int) $item[0] : null;
+                $aUpdateData['variation_id'] = isset($item[1]) ? (int) $item[1] : null;
 
-                if ($this->shop_inform_product_available_model->update($this->data['notification']->id, $data)) {
+                if ($this->shop_inform_product_available_model->update($this->data['notification']->id, $aUpdateData)) {
 
                     //  Redirect to clear form
                     $this->session->set_flashdata('success', 'Product Availability Notification updated successfully.');

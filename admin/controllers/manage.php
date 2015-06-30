@@ -332,11 +332,11 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data              = array();
-                $data->label       = $this->input->post('label');
-                $data->description = $this->input->post('description');
+                $aUpdateData                = array();
+                $aUpdateData['label']       = $this->input->post('label');
+                $aUpdateData['description'] = $this->input->post('description');
 
-                if ($this->shop_attribute_model->update($this->data['attribute']->id, $data)) {
+                if ($this->shop_attribute_model->update($this->data['attribute']->id, $aUpdateData)) {
 
                     $this->session->set_flashdata('success', 'Attribute saved successfully.');
                     redirect('admin/shop/manage/attribute' . $this->isModal);
@@ -2258,11 +2258,11 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data        = new \stdClass();
-                $data->label = $this->input->post('label');
-                $data->rate  = (float) $this->input->post('rate');
+                $aUpdateData          = array();
+                $aUpdateData['label'] = $this->input->post('label');
+                $aUpdateData['rate']  = (float) $this->input->post('rate');
 
-                if ($this->shop_tax_rate_model->update($this->data['tax_rate']->id, $data)) {
+                if ($this->shop_tax_rate_model->update($this->data['tax_rate']->id, $aUpdateData)) {
 
                     $this->session->set_flashdata('success', 'Tax Rate saved successfully.');
                     redirect('admin/shop/manage/taxRate' . $this->isModal);
@@ -2530,15 +2530,15 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data                 = new \stdClass();
-                $data->label          = $this->input->post('label');
-                $data->description    = $this->input->post('description');
-                $data->is_physical    = (bool)$this->input->post('is_physical');
-                $data->ipn_method     = $this->input->post('ipn_method');
-                $data->max_per_order  = (int) $this->input->post('max_per_order');
-                $data->max_variations = (int) $this->input->post('max_variations');
+                $aUpdateData                   = array();
+                $aUpdateData['label']          = $this->input->post('label');
+                $aUpdateData['description']    = $this->input->post('description');
+                $aUpdateData['is_physical']    = (bool)$this->input->post('is_physical');
+                $aUpdateData['ipn_method']     = $this->input->post('ipn_method');
+                $aUpdateData['max_per_order']  = (int) $this->input->post('max_per_order');
+                $aUpdateData['max_variations'] = (int) $this->input->post('max_variations');
 
-                if ($this->shop_product_type_model->update($this->data['product_type']->id, $data)) {
+                if ($this->shop_product_type_model->update($this->data['product_type']->id, $aUpdateData)) {
 
                     $this->session->set_flashdata('success', 'Product Type saved successfully.');
                     redirect('admin/shop/manage/productType' . $this->isModal);
