@@ -411,15 +411,18 @@ class Inventory extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Fetch additional data
+        $data = array('only_active' => false);
+
         $this->data['product_types_flat'] = $this->shop_product_type_model->get_all_flat();
         $this->data['tax_rates']          = $this->shop_tax_rate_model->get_all_flat();
         $this->data['attributes']         = $this->shop_attribute_model->get_all_flat();
-        $this->data['brands']             = $this->shop_brand_model->get_all_flat();
-        $this->data['suppliers']          = $this->shop_supplier_model->get_all_flat();
+        $this->data['brands']             = $this->shop_brand_model->get_all_flat(null, null, $data);
+        $this->data['suppliers']          = $this->shop_supplier_model->get_all_flat(null, null, $data);
         $this->data['categories']         = $this->shop_category_model->getAllNestedFlat();
-        $this->data['collections']        = $this->shop_collection_model->get_all();
-        $this->data['ranges']             = $this->shop_range_model->get_all();
+        $this->data['collections']        = $this->shop_collection_model->get_all(null, null, $data);
+        $this->data['ranges']             = $this->shop_range_model->get_all(null, null, $data);
         $this->data['tags']               = $this->shop_tag_model->get_all_flat();
+        $this->data['relatedProducts']    = $this->shop_product_model->getRelatedProducts($this->data['item']->id);
 
         $this->data['tax_rates'] = array('No Tax') + $this->data['tax_rates'];
 
@@ -595,14 +598,16 @@ class Inventory extends \AdminController
         // --------------------------------------------------------------------------
 
         //  Fetch additional data
+        $data = array('only_active' => false);
+
         $this->data['product_types_flat'] = $this->shop_product_type_model->get_all_flat();
         $this->data['tax_rates']          = $this->shop_tax_rate_model->get_all_flat();
         $this->data['attributes']         = $this->shop_attribute_model->get_all_flat();
-        $this->data['brands']             = $this->shop_brand_model->get_all_flat();
-        $this->data['suppliers']          = $this->shop_supplier_model->get_all_flat();
+        $this->data['brands']             = $this->shop_brand_model->get_all_flat(null, null, $data);
+        $this->data['suppliers']          = $this->shop_supplier_model->get_all_flat(null, null, $data);
         $this->data['categories']         = $this->shop_category_model->getAllNestedFlat();
-        $this->data['collections']        = $this->shop_collection_model->get_all();
-        $this->data['ranges']             = $this->shop_range_model->get_all();
+        $this->data['collections']        = $this->shop_collection_model->get_all(null, null, $data);
+        $this->data['ranges']             = $this->shop_range_model->get_all(null, null, $data);
         $this->data['tags']               = $this->shop_tag_model->get_all_flat();
         $this->data['relatedProducts']    = $this->shop_product_model->getRelatedProducts($this->data['item']->id);
 
