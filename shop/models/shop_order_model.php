@@ -37,7 +37,7 @@ class NAILS_Shop_order_model extends NAILS_Model
     public function create($data, $returnObj = false)
     {
         //  Basket has items?
-        if (empty($data->basket->items)) {
+        if (empty($data['basket']->items)) {
 
             $this->_set_error('Basket is empty.');
             return false;
@@ -46,9 +46,9 @@ class NAILS_Shop_order_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Is the basket already associated with an order?
-        if (!empty($basket->order->id)) {
+        if (!empty($data['basket']->order->id)) {
 
-            $this->abandon($basket->order->id);
+            $this->abandon($data['basket']->order->id);
         }
 
         // --------------------------------------------------------------------------
@@ -64,7 +64,7 @@ class NAILS_Shop_order_model extends NAILS_Model
             //  Test it
             $this->db->where('ref', $order->ref);
 
-        } while($this->db->count_all_results(NAILS_DB_PREFIX . 'shop_order'));
+        } while ($this->db->count_all_results(NAILS_DB_PREFIX . 'shop_order'));
 
         // --------------------------------------------------------------------------
 
@@ -84,9 +84,9 @@ class NAILS_Shop_order_model extends NAILS_Model
          */
 
         //  Email
-        if (!empty($data->contact->email)) {
+        if (!empty($data['contact']->email)) {
 
-            $order->user_email = $data->contact->email;
+            $order->user_email = $data['contact']->email;
 
         } elseif ($this->user_model->isLoggedIn()) {
 
@@ -100,6 +100,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         //  User ID
         $user = $this->user_model->get_by_email($order->user_email);
+
         if ($user) {
 
             $order->user_id = $user->id;
@@ -112,12 +113,13 @@ class NAILS_Shop_order_model extends NAILS_Model
 
             $order->user_id = null;
         }
+
         unset($user);
 
         //  First name
-        if (!empty($data->contact->first_name)) {
+        if (!empty($data['contact']->first_name)) {
 
-            $order->user_first_name = $data->contact->first_name;
+            $order->user_first_name = $data['contact']->first_name;
 
         } elseif ($this->user_model->isLoggedIn()) {
 
@@ -129,9 +131,9 @@ class NAILS_Shop_order_model extends NAILS_Model
         }
 
         //  Last name
-        if (!empty($data->contact->last_name)) {
+        if (!empty($data['contact']->last_name)) {
 
-            $order->user_last_name = $data->contact->last_name;
+            $order->user_last_name = $data['contact']->last_name;
 
         } elseif ($this->user_model->isLoggedIn()) {
 
@@ -143,9 +145,9 @@ class NAILS_Shop_order_model extends NAILS_Model
         }
 
         //  Telephone
-        if (!empty($data->contact->telephone)) {
+        if (!empty($data['contact']->telephone)) {
 
-            $order->user_telephone = $data->contact->telephone;
+            $order->user_telephone = $data['contact']->telephone;
 
         } elseif ($this->user_model->isLoggedIn()) {
 
@@ -159,29 +161,29 @@ class NAILS_Shop_order_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Set voucher ID
-        if (!empty($basket->voucher->id)) {
+        if (!empty($data['basket']->voucher->id)) {
 
-            $order->voucher_id = $basket->voucher->id;
+            $order->voucher_id = $data['basket']->voucher->id;
         }
 
         // --------------------------------------------------------------------------
 
         //  Order Note
-        if (!empty($data->basket->note)) {
+        if (!empty($data['basket']->note)) {
 
-            $order->note = $data->basket->note;
+            $order->note = $data['basket']->note;
         }
 
         // --------------------------------------------------------------------------
 
         //  Does the order require shipping?
-        $order->delivery_type = $data->basket->shipping->type;
-        if ($data->basket->shipping->type == 'DELIVER') {
+        $order->delivery_type = $data['basket']->shipping->type;
+        if ($data['basket']->shipping->type == 'DELIVER') {
 
             //  Delivery order, check basket for physical items
             $order->requires_shipping = false;
 
-            foreach ($data->basket->items as $item) {
+            foreach ($data['basket']->items as $item) {
 
                 if ($item->product->type->is_physical && !$item->variant->ship_collection_only) {
 
@@ -205,33 +207,33 @@ class NAILS_Shop_order_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Delivery Address
-        $order->shipping_line_1   = $data->delivery->line_1;
-        $order->shipping_line_2   = $data->delivery->line_2;
-        $order->shipping_town     = $data->delivery->town;
-        $order->shipping_state    = $data->delivery->state;
-        $order->shipping_postcode = $data->delivery->postcode;
-        $order->shipping_country  = $data->delivery->country;
+        $order->shipping_line_1   = $data['delivery']->line_1;
+        $order->shipping_line_2   = $data['delivery']->line_2;
+        $order->shipping_town     = $data['delivery']->town;
+        $order->shipping_state    = $data['delivery']->state;
+        $order->shipping_postcode = $data['delivery']->postcode;
+        $order->shipping_country  = $data['delivery']->country;
 
         //  Billing Address
-        $order->billing_line_1   = $data->billing->line_1;
-        $order->billing_line_2   = $data->billing->line_2;
-        $order->billing_town     = $data->billing->town;
-        $order->billing_state    = $data->billing->state;
-        $order->billing_postcode = $data->billing->postcode;
-        $order->billing_country  = $data->billing->country;
+        $order->billing_line_1   = $data['billing']->line_1;
+        $order->billing_line_2   = $data['billing']->line_2;
+        $order->billing_town     = $data['billing']->town;
+        $order->billing_state    = $data['billing']->state;
+        $order->billing_postcode = $data['billing']->postcode;
+        $order->billing_country  = $data['billing']->country;
 
         // --------------------------------------------------------------------------
 
         //  Set totals
-        $order->total_base_item     = $data->basket->totals->base->item;
-        $order->total_base_shipping = $data->basket->totals->base->shipping;
-        $order->total_base_tax      = $data->basket->totals->base->tax;
-        $order->total_base_grand    = $data->basket->totals->base->grand;
+        $order->total_base_item     = $data['basket']->totals->base->item;
+        $order->total_base_shipping = $data['basket']->totals->base->shipping;
+        $order->total_base_tax      = $data['basket']->totals->base->tax;
+        $order->total_base_grand    = $data['basket']->totals->base->grand;
 
-        $order->total_user_item     = $data->basket->totals->user->item;
-        $order->total_user_shipping = $data->basket->totals->user->shipping;
-        $order->total_user_tax      = $data->basket->totals->user->tax;
-        $order->total_user_grand    = $data->basket->totals->user->grand;
+        $order->total_user_item     = $data['basket']->totals->user->item;
+        $order->total_user_shipping = $data['basket']->totals->user->shipping;
+        $order->total_user_tax      = $data['basket']->totals->user->tax;
+        $order->total_user_grand    = $data['basket']->totals->user->grand;
 
         // --------------------------------------------------------------------------
 
@@ -256,7 +258,7 @@ class NAILS_Shop_order_model extends NAILS_Model
             //  Add the items
             $items = array();
 
-            foreach ($data->basket->items as $item) {
+            foreach ($data['basket']->items as $item) {
 
                 $temp                         = array();
                 $temp['order_id']             = $order->id;
@@ -1207,7 +1209,7 @@ class NAILS_Shop_order_model extends NAILS_Model
     protected function _format_object(&$obj, $data = array(), $integers = array(), $bools = array())
     {
         parent::_format_object($obj, $data, $integers, $bools);
-        
+
         //  User
         $obj->user     = new \stdClass();
         $obj->user->id = $obj->user_id;
