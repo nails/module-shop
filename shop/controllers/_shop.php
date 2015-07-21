@@ -19,6 +19,9 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
     // --------------------------------------------------------------------------
 
+    /**
+     * Constructs the controller
+     */
     public function __construct()
     {
         parent::__construct();
@@ -71,6 +74,11 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
     // --------------------------------------------------------------------------
 
+    /**
+     * Loads a shop skin
+     * @param  string $skinType The skin's type (e.g front)
+     * @return void
+     */
     protected function loadSkin($skinType)
     {
         //  Define some vars
@@ -151,6 +159,14 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
     // --------------------------------------------------------------------------
 
+    /**
+     * Loads any assets required by the skin
+     * @param  array  $assets    An array of skin assets
+     * @param  array  $cssInline An array of inline CSS
+     * @param  array  $jsInline  An array of inline JS
+     * @param  string $url       The URL to the skin's root directory
+     * @return void
+     */
     protected function loadSkinAssets($assets, $cssInline, $jsInline, $url)
     {
         //  CSS and JS
@@ -194,6 +210,10 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
     // --------------------------------------------------------------------------
 
+    /**
+     * Renders the shop maintenance page
+     * @return void
+     */
     protected function renderMaintenancePage()
     {
         $this->data['page']->title = $this->shopName + ' - Down for maintenance';
