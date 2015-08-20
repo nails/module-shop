@@ -68,7 +68,7 @@
 
         ?>
         <li class="tab <?=$active?>">
-            <a href="#" id="tabber-related" data-tab="tab-related">Releated Products</a>
+            <a href="#" id="tabber-related" data-tab="tab-related">Related Products</a>
         </li>
         <?php
 
