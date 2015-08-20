@@ -22,8 +22,22 @@ class Availability extends \AdminController
     {
         if (userHasPermission('admin:shop:availability:manage')) {
 
+            //  Alerts
+            $alerts = array();
+            $ci     =& get_instance();
+
+            //  Get all notifications, show as an info count
+            $numAlertsAll = $ci->db->count_all_results(NAILS_DB_PREFIX . 'shop_inform_product_available');
+            $alerts[]  = \Nails\Admin\Nav::alertObject($numAlertsAll, 'info', 'Product Availability Alerts');
+
+            //  Get notifications in the last week, add an alert count
+            $ci->db->where('created', '> ADDDATE(NOW(), INTERVAL -1 WEEK');
+            $numAlertsNew = $ci->db->count_all_results(NAILS_DB_PREFIX . 'shop_inform_product_available');
+            $alerts[]  = \Nails\Admin\Nav::alertObject($numAlertsNew, 'alert', 'Product Availability Alerts');
+
             $navGroup = new \Nails\Admin\Nav('Shop', 'fa-shopping-cart');
-            $navGroup->addAction('Product Availability Notifications');
+            $navGroup->addAction('Product Availability Alerts', 'index', $alerts);
+
             return $navGroup;
         }
     }
