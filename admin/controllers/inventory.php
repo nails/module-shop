@@ -144,6 +144,8 @@ class Inventory extends \AdminController
          * anything with these values, they will be handled below.
          */
 
+        $data = array('only_active' => false);
+
         $ddFilters = array();
         $ddFilters['categoryId'] = \Nails\Admin\Helper::searchFilterObject(
             '',
@@ -153,17 +155,17 @@ class Inventory extends \AdminController
         $ddFilters['brandId'] = \Nails\Admin\Helper::searchFilterObject(
             '',
             'Brand',
-            array('Choose Brand') + $this->shop_brand_model->get_all_flat()
+            array('Choose Brand') + $this->shop_brand_model->get_all_flat(null, null, $data)
         );
         $ddFilters['supplierId'] = \Nails\Admin\Helper::searchFilterObject(
             '',
             'Supplier',
-            array('Choose Supplier') + $this->shop_supplier_model->get_all_flat()
+            array('Choose Supplier') + $this->shop_supplier_model->get_all_flat(null, null, $data)
         );
         $ddFilters['collectionId'] = \Nails\Admin\Helper::searchFilterObject(
             '',
             'Collection',
-            array('Choose Collection') + $this->shop_collection_model->get_all_flat()
+            array('Choose Collection') + $this->shop_collection_model->get_all_flat(null, null, $data)
         );
 
         // --------------------------------------------------------------------------
