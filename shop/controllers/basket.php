@@ -66,6 +66,16 @@ class NAILS_Basket extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         /**
+         * Shipping promotions.
+         * The shipping driver can optionally return strings to highlight a promotion
+         * in the basket.
+         */
+
+        $this->data['shippingDriverPromo'] = $this->shop_shipping_driver_model->getPromotion($this->data['basket']);
+
+        // --------------------------------------------------------------------------
+
+        /**
          * Continue shopping URL. Skins can render a button which takes the user to a
          * sensible place to keep shopping
          */
