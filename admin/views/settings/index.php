@@ -90,7 +90,6 @@
 
                         echo form_field_wysiwyg($field);
 
-
                     ?>
                 </div>
             </fieldset>
@@ -651,10 +650,10 @@
                 echo form_hidden('update', 'skin_config');
 
             ?>
-            <section class="tabs pages skins-config">
+            <section class="tabs" data-tabgroup="skins-config">
             <?php
 
-                echo '<div id="tab-skin-config-foh" class="tab-page active">';
+                echo '<div class="tab-page tab-skin-config-foh active">';
                 if (!empty($skin_front_current)) {
 
                     if (!empty($skin_front_current->settings)) {
@@ -673,6 +672,7 @@
                             $field['placeholder'] = !empty($setting->placeholder) ? $setting->placeholder : '';
                             $field['tip']         = !empty($setting->tip) ? $setting->tip : '';
                             $field['type']        = !empty($setting->type) ? $setting->type : '';
+                            $field['class']       = !empty($setting->class) ? $setting->class : '';
 
                             if (empty($field['key'])) {
 
@@ -725,6 +725,11 @@
                                     }
                                     break;
 
+                                case 'wysiwyg' :
+
+                                    echo form_field_wysiwyg($field);
+                                    break;
+
                                 default :
 
                                     echo form_field($field);
@@ -749,7 +754,7 @@
                 }
                 echo '</div>';
 
-                echo '<div id="tab-skin-config-checkout" class="tab-page">';
+                echo '<div class="tab-page tab-skin-config-checkout">';
                 if (!empty($skin_checkout_current)) {
 
                     if (!empty($skin_checkout_current->settings)) {
@@ -768,6 +773,7 @@
                             $field['placeholder'] = !empty($setting->placeholder) ? $setting->placeholder : '';
                             $field['tip']         = !empty($setting->tip) ? $setting->tip : '';
                             $field['type']        = !empty($setting->type) ? $setting->type : '';
+                            $field['class']       = !empty($setting->class) ? $setting->class : '';
 
                             if (empty($field['key'])) {
 
@@ -818,6 +824,11 @@
 
                                         echo form_field_dropdown($field, $options);
                                     }
+                                    break;
+
+                                case 'wysiwyg' :
+
+                                    echo form_field_wysiwyg($field);
                                     break;
 
                                 default :
