@@ -507,6 +507,38 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
+     * Returns an object containing the shipping promotions strings, if any
+     * promotion is available.
+     * @return object
+     */
+    public function getPromotion()
+    {
+        $oEmptyPromo = new \stdClass();
+        $oEmptyPromo->title = '';
+        $oEmptyPromo->body = '';
+        $oEmptyPromo->applied = false;
+
+        if (!$this->isDriverLoaded()) {
+
+            if (!$this->load()) {
+
+                return $oEmptyPromo;
+            }
+        }
+
+        if (method_exists($this->driver, 'getPromotion')) {
+
+            return $this->driver->getPromotion();
+
+        } else {
+
+            return $oEmptyPromo;
+        }
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Handles the configuration of the driver in admin
      * @return array
      */
