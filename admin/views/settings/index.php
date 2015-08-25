@@ -672,6 +672,7 @@
                             $field['placeholder'] = !empty($setting->placeholder) ? $setting->placeholder : '';
                             $field['tip']         = !empty($setting->tip) ? $setting->tip : '';
                             $field['type']        = !empty($setting->type) ? $setting->type : '';
+                            $field['class']       = !empty($setting->class) ? $setting->class : '';
 
                             if (empty($field['key'])) {
 
@@ -724,6 +725,11 @@
                                     }
                                     break;
 
+                                case 'wysiwyg' :
+
+                                    echo form_field_wysiwyg($field);
+                                    break;
+
                                 default :
 
                                     echo form_field($field);
@@ -767,6 +773,7 @@
                             $field['placeholder'] = !empty($setting->placeholder) ? $setting->placeholder : '';
                             $field['tip']         = !empty($setting->tip) ? $setting->tip : '';
                             $field['type']        = !empty($setting->type) ? $setting->type : '';
+                            $field['class']       = !empty($setting->class) ? $setting->class : '';
 
                             if (empty($field['key'])) {
 
@@ -817,6 +824,11 @@
 
                                         echo form_field_dropdown($field, $options);
                                     }
+                                    break;
+
+                                case 'wysiwyg' :
+
+                                    echo form_field_wysiwyg($field);
                                     break;
 
                                 default :
