@@ -71,7 +71,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
          * in the basket.
          */
 
-        $this->data['shippingDriverPromo'] = $this->shop_shipping_driver_model->getPromotion();
+        $this->data['shippingDriverPromo'] = $this->shop_shipping_driver_model->getPromotion($this->data['basket']);
 
         // --------------------------------------------------------------------------
 

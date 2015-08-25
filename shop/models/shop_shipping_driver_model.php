@@ -324,16 +324,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
          * to know anything else about the order.
          */
 
-        $shippableItems = array();
-
-        foreach ($basket->items as $item) {
-
-            if (!empty($item->product->type->is_physical) && empty($item->variant->shipping->collection_only)) {
-
-                $shippableItems[] = $item;
-            }
-        }
-
+        $shippableItems = $this->getShippableItemsFromBasket($basket);
         $cost = $this->driver->calculate($shippableItems, $basket);
 
         if (is_int($cost) || is_numeric($cost)) {
@@ -353,6 +344,28 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
         $out->user = $this->shop_currency_model->convertBaseToUser($cost);
 
         return $out;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns an array of the shippable items from the basket object
+     * @param  object $basket The basket object
+     * @return array
+     */
+    private function getShippableItemsFromBasket($basket)
+    {
+        $shippableItems = array();
+
+        foreach ($basket->items as $item) {
+
+            if (!empty($item->product->type->is_physical) && empty($item->variant->shipping->collection_only)) {
+
+                $shippableItems[] = $item;
+            }
+        }
+
+        return $shippableItems;
     }
 
     // --------------------------------------------------------------------------
@@ -509,9 +522,10 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
     /**
      * Returns an object containing the shipping promotions strings, if any
      * promotion is available.
+     * @param  stdClass $basket A basket object
      * @return object
      */
-    public function getPromotion()
+    public function getPromotion($basket)
     {
         $oEmptyPromo = new \stdClass();
         $oEmptyPromo->title = '';
@@ -528,7 +542,8 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
         if (method_exists($this->driver, 'getPromotion')) {
 
-            return $this->driver->getPromotion();
+            $shippableItems = $this->getShippableItemsFromBasket($basket);
+            return $this->driver->getPromotion($shippableItems, $basket);
 
         } else {
 
