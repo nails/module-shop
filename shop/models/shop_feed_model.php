@@ -161,7 +161,7 @@ class NAILS_Shop_feed_model extends NAILS_Model
                 //  Set the product image
                 if ($p->featured_img) {
 
-                    $temp->image = cdn_serve($p->featured_img);
+                    $temp->image = cdnServe($p->featured_img);
 
                 } else {
 

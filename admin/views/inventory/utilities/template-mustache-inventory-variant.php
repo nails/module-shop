@@ -438,7 +438,7 @@
                             echo '<li class="image object-id-' . $image . ' ' . $_checked . '">';
                                 echo form_checkbox('variation[' . $_counter . '][gallery][]', $image, (bool) $_checked);
                                 echo img(array(
-                                    'src'   => cdn_thumb($image, 34, 34),
+                                    'src'   => cdnCrop($image, 34, 34),
                                     'style' => 'width:34px;height:34px;'
                                 ));
                             echo '</li>';

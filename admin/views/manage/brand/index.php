@@ -32,7 +32,7 @@
                                 echo '<div class="thumbnail">';
                                 if ($brand->logo_id) {
 
-                                    echo anchor(cdn_serve($brand->logo_id), img(cdn_thumb($brand->logo_id, 32, 32)), 'class="fancybox"');
+                                    echo anchor(cdnServe($brand->logo_id), img(cdnCrop($brand->logo_id, 32, 32)), 'class="fancybox"');
 
                                 } else {
 

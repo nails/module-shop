@@ -42,7 +42,7 @@
 
                                         if (!empty($item->gallery[0])) {
 
-                                            echo anchor(cdn_serve($item->gallery[0]), img(cdn_scale($item->gallery[0], 75, 75)), 'class="fancybox"');
+                                            echo anchor(cdnServe($item->gallery[0]), img(cdnScale($item->gallery[0], 75, 75)), 'class="fancybox"');
 
                                         } else {
 

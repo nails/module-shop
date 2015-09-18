@@ -11,7 +11,7 @@
     if ($product->featured_img) {
 
         echo '<p class="text-center">';
-            echo img(array('src' => cdn_scale($product->featured_img, 250, 250 ), 'class' => 'thumbnail'));
+            echo img(array('src' => cdnScale($product->featured_img, 250, 250 ), 'class' => 'thumbnail'));
         echo '</p>';
     }
 

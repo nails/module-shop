@@ -980,7 +980,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
             $temp        = new \stdClass();
             $temp->title = $item->title;
-            $temp->url   = cdn_expiring_url($item->meta->download_id, $expires, true);
+            $temp->url   = cdnExpiringUrl($item->meta->download_id, $expires, true);
 
             $urls[] = $temp;
             $ids[]  = $item->id;
