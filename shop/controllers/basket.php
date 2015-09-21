@@ -148,6 +148,11 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
             $status  = 'success';
             $message = '<strong>Success!</strong> Item was added to your basket.';
+            $message .= anchor(
+                $this->shopUrl . 'basket',
+                'Checkout <span class="glyphicon glyphicon-chevron-right"></span>',
+                'class="btn btn-success btn-alert"'
+            );
 
         } else {
 
