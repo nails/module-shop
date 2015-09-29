@@ -73,45 +73,50 @@ class NAILS_Shop_model extends NAILS_Model
             //  Use the currency defined in the session
             $currencyCode = $this->session->userdata('shop_currency');
 
-        } elseif (activeUser('shop_currency')) {
-
-            //  Use the currency defined in the user object
-            $currencyCode = activeUser('shop_currency');
-
-            if (!headers_sent()) {
-
-                $this->session->set_userdata('shop_currency', $currencyCode);
-            }
-
         } else {
 
             /**
-             * Can we determine the user's location and set a currency based on that?
+             * First we'll look at the user's meta, see if we already know what the chosen currency is.
+             * Failing that try to determine the user's location and set a currency based on that?
              * If not, fall back to base currency
              */
 
-            $this->load->library('geo_ip/geo_ip');
+            $oUserMeta = $this->user_model->getMeta(
+                NAILS_DB_PREFIX . 'user_meta_shop',
+                activeUser('id'),
+                array(
+                    'currency'
+                )
+            );
 
-            $lookup = $this->geo_ip->country();
+            if (!empty($oUserMeta->currency)) {
 
-            if (!empty($lookup->status) && $lookup->status == 200) {
-
-                //  We know the code, does it have a known currency?
-                $countryCurrency = $this->shop_currency_model->get_by_country($lookup->country->iso);
-
-                if ($countryCurrency) {
-
-                    $currencyCode = $countryCurrency->code;
-
-                } else {
-
-                    //  Fall back to default
-                    $currencyCode = $base->code;
-                }
+                $currencyCode = $oUserMeta->currency;
 
             } else {
 
-                $currencyCode = $base->code;
+                $this->load->library('geo_ip/geo_ip');
+                $lookup = $this->geo_ip->country();
+
+                if (!empty($lookup->status) && $lookup->status == 200) {
+
+                    //  We know the code, does it have a known currency?
+                    $countryCurrency = $this->shop_currency_model->get_by_country($lookup->country->iso);
+
+                    if ($countryCurrency) {
+
+                        $currencyCode = $countryCurrency->code;
+
+                    } else {
+
+                        //  Fall back to default
+                        $currencyCode = $base->code;
+                    }
+
+                } else {
+
+                    $currencyCode = $base->code;
+                }
             }
 
             //  Save to session
@@ -136,7 +141,13 @@ class NAILS_Shop_model extends NAILS_Model
 
             if ($this->user_model->isLoggedIn()) {
 
-                $this->user_model->update(activeUser('id'), array('shop_currency' => null));
+                $this->user_model->updateMeta(
+                    NAILS_DB_PREFIX . 'user_meta_shop',
+                    activeUser('id'),
+                    array(
+                        'currency' => null
+                    )
+                );
             }
         }
 

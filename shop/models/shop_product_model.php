@@ -2481,8 +2481,13 @@ class NAILS_Shop_product_model extends NAILS_Model
         //  Logged in?
         if ($this->user_model->isLoggedIn()) {
 
-            $data = array('shop_recently_viewed' => json_encode($recentlyViewed));
-            $this->user_model->update(activeUser('id'), $data);
+            $this->user_model->updateMeta(
+                NAILS_DB_PREFIX . 'user_meta_shop',
+                activeUser('id'),
+                array(
+                    'recently_viewed' => json_encode($recentlyViewed)
+                )
+            );
         }
     }
 
@@ -2502,12 +2507,19 @@ class NAILS_Shop_product_model extends NAILS_Model
         //  Logged in?
         if (empty($recentlyViewed) && $this->user_model->isLoggedIn()) {
 
-            $recentlyViewed = activeUser('shop_recently_viewed');
+            $oUserMeta = $this->user_model->getMeta(
+                NAILS_DB_PREFIX . 'user_meta_shop',
+                activeUser('id'),
+                array(
+                    'recently_viewed'
+                )
+            );
+            $recentlyViewed = !empty($oUserMeta->recently_viewed) ? json_decode($oUserMeta->recently_viewed) : array();
         }
 
         // --------------------------------------------------------------------------
 
-        return array_filter((array) $recentlyViewed);
+        return array_filter($recentlyViewed);
     }
 
     // --------------------------------------------------------------------------

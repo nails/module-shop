@@ -432,7 +432,13 @@ class NAILS_Basket extends NAILS_Shop_Controller
             if ($this->user_model->isLoggedIn()) {
 
                 //  Save to the user object
-                $this->user_model->update(activeUser('id'), array('shop_currency' => $currency->code));
+                $this->user_model->updateMeta(
+                    NAILS_DB_PREFIX . 'user_meta_shop',
+                    activeUser('id'),
+                    array(
+                        'currency' => $currency->code
+                    )
+                );
             }
 
             $status  = 'success';

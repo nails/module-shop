@@ -42,7 +42,12 @@ class NAILS_Shop_basket_model extends NAILS_Model
         if (empty($savedBasket) && $this->user_model->isLoggedIn()) {
 
             //  Check the activeUser data in case it exists there
-            $savedBasket = @unserialize(activeUser('shop_basket'));
+            $oUserMeta = $this->user_model->getMeta(
+                NAILS_DB_PREFIX . 'user_meta_shop',
+                null,
+                array('basket')
+            );
+            $savedBasket = @unserialize($oUserMeta->basket);
         }
 
         if (!empty($savedBasket)) {
@@ -172,7 +177,7 @@ class NAILS_Shop_basket_model extends NAILS_Model
                      * - $available is null (unlimited)
                      * - $item->quantity is <= $available
                      */
-                    
+
                     $available = $item->variant->quantity_available;
                     if (!is_null($available) && $item->quantity > $item->variant->quantity_available) {
 
@@ -596,12 +601,12 @@ class NAILS_Shop_basket_model extends NAILS_Model
                 }
 
                 /**
-                 * Determine whether the user can increment the product. In order to be 
+                 * Determine whether the user can increment the product. In order to be
                  * incrementable there must:
                  * - Be sufficient stock (or unlimited)
                  * - not exceed any limit imposed by the product type
                  */
-                
+
                 if (is_null($available)) {
 
                     //  Unlimited quantity
@@ -1202,8 +1207,13 @@ class NAILS_Shop_basket_model extends NAILS_Model
         //  If logged in, save the basket to the user's meta data for safe keeping.
         if ($this->user_model->isLoggedIn()) {
 
-            $data = array('shop_basket' => $this->saveObject());
-            $this->user_model->update(activeUser('id'), $data);
+            $this->user_model->updateMeta(
+                NAILS_DB_PREFIX . 'user_meta_shop',
+                activeUser('id'),
+                array(
+                    'basket' => $this->saveObject()
+                )
+            );
         }
     }
 

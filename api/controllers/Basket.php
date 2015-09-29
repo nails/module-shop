@@ -274,8 +274,14 @@ class Basket extends \ApiController
 
             if ($this->user_model->isLoggedIn()) {
 
-                //  Save to the user object
-                $this->user_model->update(activeUser('id'), array('shop_currency' => $currency->code));
+                //  Save to the user meta object
+                $this->user_model->updateMeta(
+                    NAILS_DB_PREFIX . 'user_meta_shop',
+                    activeUser('id'),
+                    array(
+                        'currency' => $currency->code
+                    )
+                );
             }
 
         } else {
