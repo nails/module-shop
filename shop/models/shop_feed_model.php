@@ -185,7 +185,7 @@ class NAILS_Shop_feed_model extends NAILS_Model
                 $shippingData = $this->shop_shipping_driver_model->calculateVariant($v->id);
 
                 //   Calculate price and price of shipping
-                $temp->price = $p->price->user->min_price . ' ' . app_setting('base_currency', 'shop');
+                $temp->price = ($p->price->user->min_price/100) . ' ' . app_setting('base_currency', 'shop');
 
                 $temp->shipping_country = app_setting('warehouse_addr_country', 'shop');
                 $temp->shipping_service = 'Standard';
