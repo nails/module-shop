@@ -100,8 +100,12 @@ class NAILS_Shop_feed_model extends NAILS_Model
      */
     protected function getShopData()
     {
+        $sBaseCurrency = app_setting('base_currency', 'shop');
+        $oBaseCurrency = $this->shop_currency_model->getByCode($sBaseCurrency);
+        $sWarehouseCountry = app_setting('warehouse_addr_country', 'shop');
+        $sInvoiceCompany = app_setting('invoice_company', 'shop');
         $products = $this->shop_product_model->get_all();
-        $out      = array();
+        $out = array();
 
         foreach ($products as $p) {
             foreach ($p->variations as $v) {
@@ -135,7 +139,7 @@ class NAILS_Shop_feed_model extends NAILS_Model
 
                 } else {
 
-                    $temp->brand = app_setting('invoice_company', 'shop');
+                    $temp->brand = $sInvoiceCompany;
                 }
 
                 // --------------------------------------------------------------------------
@@ -184,12 +188,14 @@ class NAILS_Shop_feed_model extends NAILS_Model
 
                 $shippingData = $this->shop_shipping_driver_model->calculateVariant($v->id);
 
-                //   Calculate price and price of shipping
-                $temp->price = ($p->price->user->min_price/100) . ' ' . app_setting('base_currency', 'shop');
+                //  Calculate price and price of shipping
+                $sPrice = $this->shop_currency_model->formatBase($p->price->user->min_price, false);
+                $sShippingPrice = $this->shop_currency_model->formatBase($shippingData->base, false);
 
-                $temp->shipping_country = app_setting('warehouse_addr_country', 'shop');
+                $temp->price = $sPrice . ' ' . $oBaseCurrency->code;
+                $temp->shipping_country = $sWarehouseCountry;
                 $temp->shipping_service = 'Standard';
-                $temp->shipping_price   = $shippingData->base . ' ' . app_setting('base_currency', 'shop');
+                $temp->shipping_price   = $sShippingPrice . ' ' . $oBaseCurrency->code;
 
                 // --------------------------------------------------------------------------
 
