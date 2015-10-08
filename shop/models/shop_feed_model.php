@@ -35,7 +35,7 @@ class NAILS_Shop_feed_model extends NAILS_Model
 
             if ($fileData) {
 
-                $this->load->helper('file');
+                \Nails\Factory::helper('file');
                 $cacheFile = $this->getCacheFile($provider, $format);
 
                 if (write_file($cacheFile, $fileData)) {

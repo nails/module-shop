@@ -307,7 +307,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         $data['shippingPhone']    = $order->user->telephone;
 
         //  Any gateway specific handlers for the card object?
-        $this->load->helper('string');
+        \Nails\Factory::helper('string');
         $methodName = 'prepareCard' . ucfirst(underscoreToCamelcase($gateway, false));
 
         if (method_exists($this, $methodName)) {
@@ -813,7 +813,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
      */
     protected function extractPaymentData($gateway)
     {
-        $this->load->helper('string');
+        \Nails\Factory::helper('string');
         $methodName = 'extractPaymentData' . ucfirst(underscoreToCamelcase($gateway, false));
 
         if (method_exists($this, $methodName)) {

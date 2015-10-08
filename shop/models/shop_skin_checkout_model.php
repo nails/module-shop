@@ -88,7 +88,7 @@ class NAILS_Shop_skin_checkout_model extends NAILS_Model
          * one which is used
          */
 
-        $this->load->helper('directory');
+        \Nails\Factory::helper('directory');
 
         //  Take a fresh copy
         $_skin_locations = $this->_skin_locations;

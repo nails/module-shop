@@ -82,7 +82,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
          * last one found is the one which is used
          */
 
-        $this->load->helper('directory');
+        \Nails\Factory::helper('directory');
 
         //  Take a fresh copy
         $shippingDriverLocations = $this->shippingDriverLocations;

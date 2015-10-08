@@ -53,7 +53,7 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 
     public function add($variantId, $email)
     {
-        $this->load->helper('email');
+        \Nails\Factory::helper('email');
 
         if (!valid_email($email)) {
 

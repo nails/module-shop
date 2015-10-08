@@ -932,7 +932,7 @@ class Inventory extends \AdminController
 
         // --------------------------------------------------------------------------
 
-        $this->load->helper('string');
+        \Nails\Factory::helper('string');
         $method = $this->uri->segment(5) ? $this->uri->segment(5) : 'index';
         $method = 'import' . underscoreToCamelcase(strtolower($method), false);
 

@@ -44,7 +44,10 @@
         "nails" :
         {
             "moduleName": "shop",
-            "type": "module"
+            "type": "module",
+            "autoload": {
+                "helpers": ["shop"]
+            }
         }
     }
 }

@@ -1792,7 +1792,7 @@ class NAILS_Shop_product_model extends NAILS_Model
              * 'cause Active Record is a big pile of $%!@
              */
 
-            $this->load->helper('string');
+            \Nails\Factory::helper('string');
             $data['keywords'] = removeStopWords($data['keywords']);
             $search = $this->db->escape_like_str($data['keywords']);
 
