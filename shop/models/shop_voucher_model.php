@@ -257,7 +257,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
             $data['where'] = array();
         }
 
-        $data['where'][] = array($this->tablePrefix . '.code', $id);
+        $data['where'][] = array($this->tablePrefix . '.code', $code);
 
         $result = $this->get_all(null, null, $data, 'GET_BY_CODE');
 
