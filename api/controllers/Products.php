@@ -12,7 +12,7 @@ namespace Nails\Api\Shop;
  * @link
  */
 
-class Products extends \ApiController
+class Products extends \Nails\Api\Controllers\Base
 {
     protected $maintenance;
 

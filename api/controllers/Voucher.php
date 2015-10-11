@@ -12,7 +12,7 @@ namespace Nails\Api\Shop;
  * @link
  */
 
-class Voucher extends \ApiController
+class Voucher extends \Nails\Api\Controllers\Base
 {
     public static $requiresAuthentication = true;
     protected $maintenance;
