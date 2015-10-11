@@ -27,6 +27,7 @@
     "prefer-stable": true,
     "require":
     {
+        "nailsapp/common": "dev-develop",
         "nailsapp/module-api": "dev-develop",
         "nailsapp/module-barcode": "dev-develop",
         "nailsapp/module-cdn": "dev-develop",

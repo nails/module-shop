@@ -95,8 +95,8 @@ class NAILS_Shop_model extends NAILS_Model
 
             } else {
 
-                $this->load->library('geo_ip/geo_ip');
-                $lookup = $this->geo_ip->country();
+                $oGeoIp = \Nails\Factory::service('GeoIp', 'nailsapp/module-geo-ip');
+                $lookup = $oGeoIp->country();
 
                 if (!empty($lookup->status) && $lookup->status == 200) {
 
