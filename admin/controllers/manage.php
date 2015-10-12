@@ -2449,15 +2449,16 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $data                 = new \stdClass();
-                $data->label          = $this->input->post('label');
-                $data->description    = $this->input->post('description');
-                $data->is_physical    = (bool) $this->input->post('is_physical');
-                $data->ipn_method     = $this->input->post('ipn_method');
-                $data->max_per_order  = (int) $this->input->post('max_per_order');
-                $data->max_variations = (int) $this->input->post('max_variations');
+                $aCreateData = array(
+                    'label'          => $this->input->post('label'),
+                    'description'    => $this->input->post('description'),
+                    'is_physical'    => (bool) $this->input->post('is_physical'),
+                    'ipn_method'     => $this->input->post('ipn_method'),
+                    'max_per_order'  => (int) $this->input->post('max_per_order'),
+                    'max_variations' => (int) $this->input->post('max_variations')
+                );
 
-                if ($this->shop_product_type_model->create($data)) {
+                if ($this->shop_product_type_model->create($aCreateData)) {
 
                     //  Redirect to clear form
                     $this->session->set_flashdata('success', 'Product Type created successfully.');
@@ -2530,13 +2531,14 @@ class Manage extends \AdminController
 
             if ($this->form_validation->run()) {
 
-                $aUpdateData                   = array();
-                $aUpdateData['label']          = $this->input->post('label');
-                $aUpdateData['description']    = $this->input->post('description');
-                $aUpdateData['is_physical']    = (bool)$this->input->post('is_physical');
-                $aUpdateData['ipn_method']     = $this->input->post('ipn_method');
-                $aUpdateData['max_per_order']  = (int) $this->input->post('max_per_order');
-                $aUpdateData['max_variations'] = (int) $this->input->post('max_variations');
+                $aUpdateData = array(
+                    'label'          => $this->input->post('label'),
+                    'description'    => $this->input->post('description'),
+                    'is_physical'    => (bool) $this->input->post('is_physical'),
+                    'ipn_method'     => $this->input->post('ipn_method'),
+                    'max_per_order'  => (int) $this->input->post('max_per_order'),
+                    'max_variations' => (int) $this->input->post('max_variations')
+                );
 
                 if ($this->shop_product_type_model->update($this->data['product_type']->id, $aUpdateData)) {
 

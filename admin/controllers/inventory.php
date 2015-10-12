@@ -424,7 +424,6 @@ class Inventory extends \AdminController
         $this->data['collections']        = $this->shop_collection_model->get_all(null, null, $data);
         $this->data['ranges']             = $this->shop_range_model->get_all(null, null, $data);
         $this->data['tags']               = $this->shop_tag_model->get_all_flat();
-        $this->data['relatedProducts']    = $this->shop_product_model->getRelatedProducts($this->data['item']->id);
 
         $this->data['tax_rates'] = array('No Tax') + $this->data['tax_rates'];
 
@@ -439,11 +438,6 @@ class Inventory extends \AdminController
 
         $this->asset->inline('var _edit = new NAILS_Admin_Shop_Inventory_Create_Edit();', 'JS');
         $this->asset->inline('_edit.init(' . json_encode($this->data['product_types']) . ', "' . $uploadToken . '");', 'JS');
-
-        // --------------------------------------------------------------------------
-
-        //  Libraries
-        $this->load->library('mustache');
 
         // --------------------------------------------------------------------------
 
@@ -626,11 +620,6 @@ class Inventory extends \AdminController
 
         $this->asset->inline('var _edit = new NAILS_Admin_Shop_Inventory_Create_Edit();', 'JS');
         $this->asset->inline('_edit.init(' . json_encode($this->data['product_types']) . ', "' . $uploadToken . '");', 'JS');
-
-        // --------------------------------------------------------------------------
-
-        //  Libraries
-        $this->load->library('mustache');
 
         // --------------------------------------------------------------------------
 

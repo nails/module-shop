@@ -154,7 +154,7 @@ class NAILS_Enquire extends NAILS_Shop_Controller
                 } else {
 
                     $this->data['error']  = '<strong>Sorry,</strong> failed to send enquiry. ';
-                    $this->data['error'] .= $this->app_notification_model->last_error();
+                    $this->data['error'] .= app_notification_last_error();
                 }
 
             } else {

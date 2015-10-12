@@ -1,8 +1,8 @@
 <?php
 
 //  Country
-$this->load->model('country_model');
-$countriesFlat = $this->country_model->getAllFlat();
+$oCountryModel = \Nails\Factory::model('Country');
+$countriesFlat = $oCountryModel->getAllFlat();
 
 ?>
 Thank you very much for your order with <?=APP_NAME?>.

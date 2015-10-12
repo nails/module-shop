@@ -19,8 +19,8 @@ class NAILS_Shop_order_model extends NAILS_Model
     {
         parent::__construct();
         $this->load->model('shop/shop_currency_model');
-        $this->load->model('app_notification_model');
-        $this->load->model('country_model');
+
+        $this->oCountryModel = \Nails\Factory::model('Country');
 
         $this->table       = NAILS_DB_PREFIX . 'shop_order';
         $this->tablePrefix = 'o';
@@ -1120,7 +1120,9 @@ class NAILS_Shop_order_model extends NAILS_Model
         $email->data['order']        = $order;
         $email->data['payment_data'] = $paymentData;
 
-        $notify = $this->app_notification_model->get('orders', 'shop');
+        $oAppNotificationModel = \Nails\Factory::model('AppNotification');
+
+        $notify = $oAppNotificationModel->get('orders', 'shop');
 
         foreach ($notify as $notifyEmail) {
 
@@ -1317,7 +1319,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         $obj->shipping_address->town     = $obj->shipping_town;
         $obj->shipping_address->state    = $obj->shipping_state;
         $obj->shipping_address->postcode = $obj->shipping_postcode;
-        $obj->shipping_address->country  = $this->country_model->getByCode($obj->shipping_country);
+        $obj->shipping_address->country  = $this->oCountryModel->getByCode($obj->shipping_country);
 
         unset($obj->shipping_line_1);
         unset($obj->shipping_line_2);
@@ -1332,7 +1334,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         $obj->billing_address->town     = $obj->billing_town;
         $obj->billing_address->state    = $obj->billing_state;
         $obj->billing_address->postcode = $obj->billing_postcode;
-        $obj->billing_address->country  = $this->country_model->getByCode($obj->billing_country);
+        $obj->billing_address->country  = $this->oCountryModel->getByCode($obj->billing_country);
 
         unset($obj->billing_line_1);
         unset($obj->billing_line_2);

@@ -88,7 +88,8 @@ class Settings extends \AdminController
         $this->load->model('shop/shop_skin_front_model');
         $this->load->model('shop/shop_skin_checkout_model');
         $this->load->model('shop/shop_product_model');
-        $this->load->model('country_model');
+
+        $oCountryModel = \Nails\Factory::model('Country');
 
         // --------------------------------------------------------------------------
 
@@ -116,8 +117,8 @@ class Settings extends \AdminController
         $this->data['currencies']       = $this->shop_currency_model->getAll();
         $this->data['tax_rates']        = $this->shop_tax_rate_model->get_all();
         $this->data['tax_rates_flat']   = $this->shop_tax_rate_model->get_all_flat();
-        $this->data['countries_flat']   = $this->country_model->getAllFlat();
-        $this->data['continents_flat']  = $this->country_model->getAllContinentsFlat();
+        $this->data['countries_flat']   = $oCountryModel->getAllFlat();
+        $this->data['continents_flat']  = $oCountryModel->getAllContinentsFlat();
         array_unshift($this->data['tax_rates_flat'], 'No Tax');
 
         //  "Front of house" skins

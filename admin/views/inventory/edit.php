@@ -414,6 +414,8 @@
                         $_variations = array();
                     }
 
+                    $oMustache = \Nails\Factory::service('Mustache');
+
                     if (!empty($_variations)) {
 
                         foreach ($_variations as $variation) {
@@ -427,7 +429,7 @@
                                 true
                             );
 
-                            echo $this->mustache->render($template, $viewData);
+                            echo $oMustache->render($template, $viewData);
 
                             $viewData['counter']++;
                             $viewData['isFirst'] = false;
@@ -441,7 +443,7 @@
                             true
                         );
 
-                        echo $this->mustache->render($template, $viewData);
+                        echo $oMustache->render($template, $viewData);
                     }
 
                 ?>

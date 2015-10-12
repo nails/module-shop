@@ -43,9 +43,9 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        $this->load->model('country_model');
+        $oCountryModel = \Nails\Factory::model('Country');
 
-        $this->data['countries_flat']   = $this->country_model->getAllFlat();
+        $this->data['countries_flat']   = $oCountryModel->getAllFlat();
         $this->data['payment_gateways'] = $this->shop_payment_gateway_model->getEnabledFormatted();
 
         if (!count($this->data['payment_gateways'])) {
