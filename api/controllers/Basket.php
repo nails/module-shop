@@ -275,7 +275,8 @@ class Basket extends \Nails\Api\Controllers\Base
             if ($this->user_model->isLoggedIn()) {
 
                 //  Save to the user meta object
-                $this->user_model->updateMeta(
+                $oUserMeta = \Nails\Factory::model('UserMeta', 'nailsapp/module-auth');
+                $oUserMeta->update(
                     NAILS_DB_PREFIX . 'user_meta_shop',
                     activeUser('id'),
                     array(

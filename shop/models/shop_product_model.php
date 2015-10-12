@@ -10,14 +10,27 @@
  * @link
  */
 
-class NAILS_Shop_product_model extends NAILS_Model
+use \Nails\Factory;
+use \Nails\Common\Model\Base;
+
+class NAILS_Shop_product_model extends Base
 {
+    protected $oUser;
+    protected $oUserMeta;
+
+    // --------------------------------------------------------------------------
+
     /**
      * Construct the model
      */
     public function __construct()
     {
         parent::__construct();
+
+        // --------------------------------------------------------------------------
+
+        $this->oUser     = Factory::model('User', 'nailsapp/module-auth');
+        $this->oUserMeta = Factory::model('UserMeta', 'nailsapp/module-auth');
 
         // --------------------------------------------------------------------------
 
@@ -548,7 +561,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
             $this->db->set('created', 'NOW()', false);
 
-            if ($this->user_model->isLoggedIn()) {
+            if ($this->oUser->isLoggedIn()) {
 
                 $this->db->set('created_by', activeUser('id'));
             }
@@ -556,7 +569,7 @@ class NAILS_Shop_product_model extends NAILS_Model
 
         $this->db->set('modified', 'NOW()', false);
 
-        if ($this->user_model->isLoggedIn()) {
+        if ($this->oUser->isLoggedIn()) {
 
             $this->db->set('modified_by', activeUser('id'));
         }
@@ -2479,9 +2492,9 @@ class NAILS_Shop_product_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Logged in?
-        if ($this->user_model->isLoggedIn()) {
+        if ($this->oUser->isLoggedIn()) {
 
-            $this->user_model->updateMeta(
+            $this->oUserMeta->update(
                 NAILS_DB_PREFIX . 'user_meta_shop',
                 activeUser('id'),
                 array(
@@ -2505,9 +2518,9 @@ class NAILS_Shop_product_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Logged in?
-        if (empty($recentlyViewed) && $this->user_model->isLoggedIn()) {
+        if (empty($recentlyViewed) && $this->oUser->isLoggedIn()) {
 
-            $oUserMeta = $this->user_model->getMeta(
+            $oUserMeta = $this->oUserMeta->get(
                 NAILS_DB_PREFIX . 'user_meta_shop',
                 activeUser('id'),
                 array(

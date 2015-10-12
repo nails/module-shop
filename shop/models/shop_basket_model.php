@@ -10,8 +10,13 @@
  * @link
  */
 
-class NAILS_Shop_basket_model extends NAILS_Model
+use \Nails\Factory;
+use \Nails\Common\Model\Base;
+
+class NAILS_Shop_basket_model extends Base
 {
+    protected $oUser;
+    protected $oUserMeta;
     protected $cacheKey;
     protected $basket;
     protected $sessVar;
@@ -27,6 +32,11 @@ class NAILS_Shop_basket_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
+        $this->oUser     = Factory::model('User', 'nailsapp/module-auth');
+        $this->oUserMeta = Factory::model('UserMeta', 'nailsapp/module-auth');
+
+        // --------------------------------------------------------------------------
+
         //  Defaults
         $this->cacheKey = 'basket';
         $this->sessVar  = 'shop_basket';
@@ -39,12 +49,12 @@ class NAILS_Shop_basket_model extends NAILS_Model
         //  Populate basket from session data?
         $savedBasket = @unserialize($this->session->userdata($this->sessVar));
 
-        if (empty($savedBasket) && $this->user_model->isLoggedIn()) {
+        if (empty($savedBasket) && $this->oUser->isLoggedIn()) {
 
             //  Check the activeUser data in case it exists there
-            $oUserMeta = $this->user_model->getMeta(
+            $oUserMeta = $this->oUserMeta->get(
                 NAILS_DB_PREFIX . 'user_meta_shop',
-                null,
+                activeUser('id'),
                 array('basket')
             );
             $savedBasket = @unserialize($oUserMeta->basket);
@@ -1205,9 +1215,9 @@ class NAILS_Shop_basket_model extends NAILS_Model
     protected function saveUser()
     {
         //  If logged in, save the basket to the user's meta data for safe keeping.
-        if ($this->user_model->isLoggedIn()) {
+        if ($this->oUser->isLoggedIn()) {
 
-            $this->user_model->updateMeta(
+            $this->oUserMeta->update(
                 NAILS_DB_PREFIX . 'user_meta_shop',
                 activeUser('id'),
                 array(

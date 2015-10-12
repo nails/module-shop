@@ -432,7 +432,8 @@ class NAILS_Basket extends NAILS_Shop_Controller
             if ($this->user_model->isLoggedIn()) {
 
                 //  Save to the user object
-                $this->user_model->updateMeta(
+                $oUserMeta = \Nails\Factory::model('UserMeta', 'nailsapp/module-auth');
+                $oUserMeta->update(
                     NAILS_DB_PREFIX . 'user_meta_shop',
                     activeUser('id'),
                     array(

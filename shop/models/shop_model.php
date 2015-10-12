@@ -10,8 +10,13 @@
  * @link
  */
 
-class NAILS_Shop_model extends NAILS_Model
+use \Nails\Factory;
+use \Nails\Common\Model\Base;
+
+class NAILS_Shop_model extends Base
 {
+    protected $oUser;
+    protected $oUserMeta;
     protected $settings;
     protected $base_currency;
 
@@ -24,6 +29,11 @@ class NAILS_Shop_model extends NAILS_Model
     public function __construct($config = array())
     {
         parent::__construct();
+
+        // --------------------------------------------------------------------------
+
+        $this->oUser     = Factory::model('User', 'nailsapp/module-auth');
+        $this->oUserMeta = Factory::model('UserMeta', 'nailsapp/module-auth');
 
         // --------------------------------------------------------------------------
 
@@ -81,7 +91,7 @@ class NAILS_Shop_model extends NAILS_Model
              * If not, fall back to base currency
              */
 
-            $oUserMeta = $this->user_model->getMeta(
+            $oUserMeta = $this->oUserMeta->get(
                 NAILS_DB_PREFIX . 'user_meta_shop',
                 activeUser('id'),
                 array(
@@ -139,9 +149,9 @@ class NAILS_Shop_model extends NAILS_Model
                 $this->session->unset_userdata('shop_currency', $currencyCode);
             }
 
-            if ($this->user_model->isLoggedIn()) {
+            if ($this->oUser->isLoggedIn()) {
 
-                $this->user_model->updateMeta(
+                $this->oUserMeta->update(
                     NAILS_DB_PREFIX . 'user_meta_shop',
                     activeUser('id'),
                     array(
