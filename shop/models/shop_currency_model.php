@@ -146,6 +146,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
         $oerEtag              = app_setting('openexchangerates_etag', 'shop');
         $oerLastModified      = app_setting('openexchangerates_last_modified', 'shop');
         $additionalCurrencies = app_setting('additional_currencies', 'shop');
+        $oLogger              = \Nails\Factory::service('Logger');
 
         if (empty($additionalCurrencies)) {
 
@@ -154,7 +155,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
             if (empty($muteLog)) {
 
-                _LOG('... ' . $message);
+                $oLogger->line('... ' . $message);
             }
 
             return false;
@@ -170,7 +171,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
             if (empty($muteLog)) {
 
-                _LOG('... Base Currency is ' . SHOP_BASE_CURRENCY_CODE);
+                $oLogger->line('... Base Currency is ' . SHOP_BASE_CURRENCY_CODE);
             }
 
             /**
@@ -204,7 +205,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
                     //  304 Not Modified, abort sync.
                     if (empty($muteLog)) {
 
-                        _LOG('... OER reported 304 Not Modified, aborting sync');
+                        $oLogger->line('... OER reported 304 Not Modified, aborting sync');
                     }
 
                     return true;
@@ -220,8 +221,8 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
                     if (empty($muteLog)) {
 
-                        _LOG('... OER reported 401 unauthorised, aborting sync.');
-                        _LOG('A valid `app_id` must be present, double check it is correct?');
+                        $oLogger->line('... OER reported 401 unauthorised, aborting sync.');
+                        $oLogger->line('A valid `app_id` must be present, double check it is correct?');
                     }
 
                     showFatalError(
@@ -247,7 +248,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
                             //  304 Not Modified, abort sync.
                             if (empty($muteLog)) {
 
-                                _LOG('... OER reported 304 Not Modified, aborting sync');
+                                $oLogger->line('... OER reported 304 Not Modified, aborting sync');
                             }
 
                             return true;
@@ -257,8 +258,8 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
                         if (empty($muteLog)) {
 
-                            _LOG('... OER reported ' . $e->getMessage());
-                            _LOG('This is the second attempt, aborting sync');
+                            $oLogger->line('... OER reported ' . $e->getMessage());
+                            $oLogger->line('This is the second attempt, aborting sync');
                         }
 
                         showFatalError(
@@ -293,7 +294,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
             if (empty($oBody)) {
 
-                _LOG('Failed to parse response body.');
+                $oLogger->line('Failed to parse response body.');
                 return false;
             }
 
@@ -305,7 +306,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
                         if (empty($muteLog)) {
 
-                            _LOG('... ' . $toCurrency . ' > ' . $rate);
+                            $oLogger->line('... ' . $toCurrency . ' > ' . $rate);
                         }
 
                         $toSave[] = array(
@@ -321,7 +322,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
                 if (empty($muteLog)) {
 
-                    _LOG('... API base is ' . $oBody->base . '; calculating differences...');
+                    $oLogger->line('... API base is ' . $oBody->base . '; calculating differences...');
                 }
 
                 $base = 1;
@@ -349,7 +350,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
                         if (empty($muteLog)) {
 
-                            _LOG('... Calculating and saving new exchange rate for ' . SHOP_BASE_CURRENCY_CODE . ' > ' . $toCurrency . ' (' . $newRate . ')');
+                            $oLogger->line('... Calculating and saving new exchange rate for ' . SHOP_BASE_CURRENCY_CODE . ' > ' . $toCurrency . ' (' . $newRate . ')');
                         }
                     }
                 }
@@ -401,7 +402,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
                         if (empty($muteLog)) {
 
-                            _LOG('... ' . $message);
+                            $oLogger->line('... ' . $message);
                         }
 
                         return false;
@@ -419,7 +420,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
                 if (empty($muteLog)) {
 
-                    _LOG('... ' . $message);
+                    $oLogger->line('... ' . $message);
                 }
 
                 return false;
@@ -432,7 +433,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
             if (empty($muteLog)) {
 
-                _LOG('... ' . $message);
+                $oLogger->line('... ' . $message);
             }
 
             return false;

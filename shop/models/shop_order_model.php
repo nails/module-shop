@@ -22,8 +22,9 @@ class NAILS_Shop_order_model extends NAILS_Model
         $this->load->model('app_notification_model');
         $this->load->model('country_model');
 
-        $this->table        = NAILS_DB_PREFIX . 'shop_order';
+        $this->table       = NAILS_DB_PREFIX . 'shop_order';
         $this->tablePrefix = 'o';
+        $this->oLogger     = \Nails\Factory::service('Logger');
     }
 
     // --------------------------------------------------------------------------
@@ -886,12 +887,12 @@ class NAILS_Shop_order_model extends NAILS_Model
         //  If an ID has been passed, look it up
         if (is_numeric($order)) {
 
-            _LOG('Looking up order #' . $order);
+            $this->oLogger->line('Looking up order #' . $order);
             $order = $this->get_by_id($order);
 
             if (!$order) {
 
-                _LOG('Invalid order ID');
+                $this->oLogger->line('Invalid order ID');
                 $this->_set_error('Invalid order ID');
                 return false;
             }
@@ -899,7 +900,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        _LOG('Processing order #' . $order->id);
+        $this->oLogger->line('Processing order #' . $order->id);
 
         /**
          * Loop through all the items in the order. If there's a proccessor method
@@ -911,7 +912,9 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         foreach ($order->items as $item) {
 
-            _LOG('Processing item #' . $item->id . ': ' . $item->title . '(' . $item->type->label . ')');
+            $this->oLogger->line(
+                'Processing item #' . $item->id . ': ' . $item->title . '(' . $item->type->label . ')'
+            );
 
             $methodName = 'process' . $item->type->ipn_method;
 
@@ -931,11 +934,11 @@ class NAILS_Shop_order_model extends NAILS_Model
         //  Execute the processors
         if ($_processors) {
 
-            _LOG('Executing processors...');
+            $this->oLogger->line('Executing processors...');
 
             foreach ($_processors as $method => $products) {
 
-                _LOG('... ' . $method . '(); with ' . count($products) . ' items.');
+                $this->oLogger->line('... ' . $method . '(); with ' . count($products) . ' items.');
                 call_user_func_array(array($this, $method), array(&$products, &$order));
             }
         }
@@ -991,7 +994,9 @@ class NAILS_Shop_order_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Send the user an email with the links
-        _LOG('Sending download email to ' . $order->user->email  . '; email contains ' . count($urls) . ' expiring URLs');
+        $this->oLogger->line(
+            'Sending download email to ' . $order->user->email  . '; email contains ' . count($urls) . ' expiring URLs'
+        );
 
         $email                         = new \stdClass();
         $email->type                   = 'shop_product_type_download';
@@ -1014,8 +1019,8 @@ class NAILS_Shop_order_model extends NAILS_Model
         } else {
 
             //  Email failed to send, alert developers
-            _LOG('!!Failed to send download links, alerting developers');
-            _LOG(implode("\n", $this->emailer->get_errors()));
+            $this->oLogger->line('!!Failed to send download links, alerting developers');
+            $this->oLogger->line(implode("\n", $this->emailer->get_errors()));
 
             $subject  = 'Unable to send download email';
             $message  = 'Unable to send the email with download links to ' . $email->to_email . '; ';
@@ -1037,12 +1042,12 @@ class NAILS_Shop_order_model extends NAILS_Model
      */
     public function sendReceipt($orderId, $paymentData = array(), $partial = false)
     {
-        _LOG('Looking up order #' . $orderId);
+        $this->oLogger->line('Looking up order #' . $orderId);
         $order = $this->get_by_id($orderId);
 
         if (!$order) {
 
-            _LOG('Invalid order ID');
+            $this->oLogger->line('Invalid order ID');
             $this->_set_error('Invalid order ID');
             return false;
         }
@@ -1063,16 +1068,16 @@ class NAILS_Shop_order_model extends NAILS_Model
 
             if ($partial) {
 
-                _LOG('!!Failed to send receipt(partial payment) to customer, alerting developers');
+                $this->oLogger->line('!!Failed to send receipt(partial payment) to customer, alerting developers');
                 $subject  = 'Unable to send customer receipt email(partial payment)';
 
             } else {
 
-                _LOG('!!Failed to send receipt to customer, alerting developers');
+                $this->oLogger->line('!!Failed to send receipt to customer, alerting developers');
                 $subject  = 'Unable to send customer receipt email';
 
             }
-            _LOG(implode("\n", $emailErrors));
+            $this->oLogger->line(implode("\n", $emailErrors));
 
             $message  = 'Unable to send the customer receipt to ' . $email->to_email . '; order: #' . $order->id . "\n\n";
             $message .= 'Emailer errors:' . "\n\n" . print_r($emailErrors, true);
@@ -1097,12 +1102,12 @@ class NAILS_Shop_order_model extends NAILS_Model
      */
     public function sendOrderNotification($orderId, $paymentData = array(), $partial = false)
     {
-        _LOG('Looking up order #' . $orderId);
+        $this->oLogger->line('Looking up order #' . $orderId);
         $order = $this->get_by_id($orderId);
 
         if (!$order) {
 
-            _LOG('Invalid order ID');
+            $this->oLogger->line('Invalid order ID');
             $this->_set_error('Invalid order ID.');
             return false;
         }
@@ -1127,17 +1132,19 @@ class NAILS_Shop_order_model extends NAILS_Model
 
                 if ($partial) {
 
-                    _LOG('!!Failed to send order notification(partially payment) to ' . $email . ', alerting developers.');
+                    $this->oLogger->line(
+                        '!!Failed to send order notification(partially payment) to ' . $email . ', alerting developers.'
+                    );
                     $subject  = 'Unable to send order notification email(partial payment)';
 
                 } else {
 
-                    _LOG('!!Failed to send order notification to ' . $email . ', alerting developers.');
+                    $this->oLogger->line('!!Failed to send order notification to ' . $email . ', alerting developers.');
                     $subject  = 'Unable to send order notification email';
 
                 }
 
-                _LOG(implode("\n", $emailErrors));
+                $this->oLogger->line(implode("\n", $emailErrors));
 
                 $message  = 'Unable to send the order notification to ' . $email . '; order{ #' . $order->id . "\n\n";
                 $message .= 'Emailer errors:' . "\n\n" . print_r($emailErrors, true);

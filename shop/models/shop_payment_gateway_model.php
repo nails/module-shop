@@ -20,6 +20,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
     protected $supported;
     protected $isRedirect;
     protected $checkoutSessionKey;
+    protected $oLogger;
 
     // --------------------------------------------------------------------------
 
@@ -60,6 +61,10 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         $this->load->model('shop/shop_currency_model');
+
+        // --------------------------------------------------------------------------
+
+        $this->oLogger = \Nails\Factory::service('Logger');
     }
 
     // --------------------------------------------------------------------------
@@ -425,7 +430,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
                 } else {
 
-                    _LOG('Order is partially paid.');
+                    $this->oLogger->line('Order is partially paid.');
 
                     //  Send notifications to manager(s) and customer
                     $this->shop_order_model->sendOrderNotification($order->id, $paymentData, true);
@@ -501,7 +506,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
     public function webhookCompletePayment($gateway, $enableLog = false)
     {
         /**
-         * Set the logger's dummy mode. If set to false calls to _LOG()
+         * Set the logger's dummy mode. If set to false calls to $this->oLogger->line()
          * will do nothing. We do this to keep the method clean and not
          * littered with conditionals.
          */
@@ -515,13 +520,13 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         if (empty($gatewayName)) {
 
             $error = '"' . $gateway . '" is not a valid gateway.';
-            _LOG($error);
+            $this->oLogger->line($error);
             $this->_set_error($error);
             return false;
 
         } else {
 
-            _LOG('Detected gateway: ' . $gatewayName);
+            $this->oLogger->line('Detected gateway: ' . $gatewayName);
         }
 
         // --------------------------------------------------------------------------
@@ -540,46 +545,46 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
          * Totally foul.
          */
 
-        _LOG('Fetching Payment Data');
+        $this->oLogger->line('Fetching Payment Data');
         $paymentData = $this->extractPaymentData($gatewayName);
 
         //  Verify ID
         if (empty($paymentData['order_id'])) {
 
             $error = 'Unable to extract Order ID from request.';
-            _LOG($error);
+            $this->oLogger->line($error);
             $this->_set_error($error);
             return false;
 
         } else {
 
-            _LOG('Order ID: #' . $paymentData['order_id']);
+            $this->oLogger->line('Order ID: #' . $paymentData['order_id']);
         }
 
         //  Verify Amount
         if (empty($paymentData['amount'])) {
 
             $error = 'Unable to extract payment amount from request.';
-            _LOG($error);
+            $this->oLogger->line($error);
             $this->_set_error($error);
             return false;
 
         } else {
 
-            _LOG('Payment Amount: ' . $paymentData['amount']);
+            $this->oLogger->line('Payment Amount: ' . $paymentData['amount']);
         }
 
         //  Verify Currency
         if (empty($paymentData['currency'])) {
 
             $error = 'Unable to extract currency from request.';
-            _LOG($error);
+            $this->oLogger->line($error);
             $this->_set_error($error);
             return false;
 
         } else {
 
-            _LOG('Payment Currency: ' . $paymentData['currency']);
+            $this->oLogger->line('Payment Currency: ' . $paymentData['currency']);
         }
 
         // --------------------------------------------------------------------------
@@ -592,7 +597,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         if (!$order) {
 
             $error = 'Could not find order #' . $paymentData['order_id'] . '.';
-            _LOG($error);
+            $this->oLogger->line($error);
             $this->_set_error($error);
             return false;
         }
@@ -619,13 +624,13 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
         try
         {
-            _LOG('Attempting completePurchase()');
+            $this->oLogger->line('Attempting completePurchase()');
             $gatewayResponse = $gateway->completePurchase($paymentData)->send();
         }
         catch (Exception $e)
         {
             $error = 'Payment Failed with exception: ' . $e->getMessage();
-            _LOG($error);
+            $this->oLogger->line($error);
             $this->_set_error($error);
             return false;
         }
@@ -633,7 +638,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         if (!$gatewayResponse->isSuccessful()){
 
             $error = 'Payment Failed with error: ' . $gatewayResponse->getMessage();
-            _LOG($error);
+            $this->oLogger->line($error);
             $this->_set_error($error);
             return false;
         }
@@ -656,13 +661,13 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         if (empty($data['transaction_id'])) {
 
             $error = 'Unable to extract payment transaction ID from request.';
-            _LOG($error);
+            $this->oLogger->line($error);
             $this->_set_error($error);
             return false;
 
         } else {
 
-            _LOG('Payment Transaction ID: #' . $paymentData['transaction_id']);
+            $this->oLogger->line('Payment Transaction ID: #' . $paymentData['transaction_id']);
         }
 
         $payment = $this->shop_order_payment_model->get_by_transaction_id($data['transaction_id'], $gatewayName);
@@ -670,7 +675,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         if ($payment){
 
             $error = 'Payment with ID ' . $gatewayName . ':' . $data['transaction_id'] . ' has already been processed by this system.';
-            _LOG($error);
+            $this->oLogger->line($error);
             $this->_set_error($error);
             return false;
         }
@@ -678,7 +683,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         if (!$this->shop_order_payment_model->create($data)) {
 
             $error = 'Failed to create payment reference. ' . $this->shop_order_payment_model->last_error();
-            _LOG($error);
+            $this->oLogger->line($error);
             $this->_set_error($error);
             return false;
         }
@@ -688,18 +693,18 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         //  Update order
         if ($this->shop_order_payment_model->order_is_paid($order->id)) {
 
-            _LOG('Order is completely paid.');
+            $this->oLogger->line('Order is completely paid.');
 
             if (!$this->shop_order_model->paid($order->id)) {
 
                 $error = 'Failed to mark order #' . $order->id . ' as PAID.';
-                _LOG($error);
+                $this->oLogger->line($error);
                 $this->_set_error($error);
                 return false;
 
             } else {
 
-                _LOG('Marked order #' . $order->id . ' as PAID.');
+                $this->oLogger->line('Marked order #' . $order->id . ' as PAID.');
             }
 
             // --------------------------------------------------------------------------
@@ -708,13 +713,13 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
             if (!$this->shop_order_model->process($order->id)) {
 
                 $error = 'Failed to process order #' . $order->id . '.';
-                _LOG($error);
+                $this->oLogger->line($error);
                 $this->_set_error($error);
                 return false;
 
             } else {
 
-                _LOG('Successfully processed order #' . $order->id);
+                $this->oLogger->line('Successfully processed order #' . $order->id);
             }
 
             // --------------------------------------------------------------------------
@@ -725,7 +730,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
         } else {
 
-            _LOG('Order is partially paid.');
+            $this->oLogger->line('Order is partially paid.');
 
             //  Send notifications to manager(s) and customer
             $this->shop_order_model->sendOrderNotification($order->id, $paymentData, true);
@@ -746,20 +751,20 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
     protected function prepareGateway($gatewayName, $enableLog = false)
     {
         /**
-         * Set the logger's dummy mode. If set to false calls to _LOG()
+         * Set the logger's dummy mode. If set to false calls to $this->oLogger->line()
          * will do nothing. We do this to keep the method clean and not
          * littered with conditionals.
          */
 
         _LOG_DUMMY_MODE(!$enableLog);
-        _LOG('Preparing "' . $gatewayName . '"');
+        $this->oLogger->line('Preparing "' . $gatewayName . '"');
 
         $gateway = Omnipay::create($gatewayName);
         $params  = $gateway->getDefaultParameters();
 
         foreach ($params as $param => $default) {
 
-            _LOG('Setting value for "omnipay_' . $gatewayName . '_' . $param . '"');
+            $this->oLogger->line('Setting value for "omnipay_' . $gatewayName . '_' . $param . '"');
             $value = app_setting('omnipay_' . $gatewayName . '_' . $param,    'shop');
             $gateway->{'set' . ucfirst($param)}($value);
         }
@@ -770,7 +775,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
         if ($testMode) {
 
-            _LOG('TEST MODE');
+            $this->oLogger->line('TEST MODE');
         }
 
         return $gateway;

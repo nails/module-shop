@@ -21,9 +21,9 @@ class Products extends \Nails\Api\Controllers\Base
     /**
      * Construct the controller
      */
-    public function __construct()
+    public function __construct($oApiRouter)
     {
-        parent::__construct();
+        parent::__construct($oApiRouter);
         $this->load->model('shop/shop_model');
         $this->load->model('shop/shop_product_model');
 

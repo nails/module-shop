@@ -18,9 +18,9 @@ class Basket extends \Nails\Api\Controllers\Base
 
     // --------------------------------------------------------------------------
 
-    public function __construct()
+    public function __construct($oApiRouter)
     {
-        parent::__construct();
+        parent::__construct($oApiRouter);
         $this->load->model('shop/shop_basket_model');
 
         $this->maintenance = new \stdClass();

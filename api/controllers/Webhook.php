@@ -21,9 +21,9 @@ class Webhook extends \Nails\Api\Controllers\Base
     /**
      * Construct the controller
      */
-    public function __construct()
+    public function __construct($oApiRouter)
     {
-        parent::__construct();
+        parent::__construct($oApiRouter);
 
         $this->maintenance = new \stdClass();
         $this->maintenance->enabled = (bool) app_setting('maintenance_enabled', 'shop');
@@ -69,17 +69,17 @@ class Webhook extends \Nails\Api\Controllers\Base
          * we keep a history of the things which happen
          */
 
-        _LOG('Webhook initialising');
-        _LOG('State:');
-        _LOG('RAW GET Data: ' . $this->input->server('QUERY_STRING'));
-        _LOG('RAW POST Data: ' . file_get_contents('php://input'));
+        $this->writeLog('Webhook initialising');
+        $this->writeLog('State:');
+        $this->writeLog('RAW GET Data: ' . $this->input->server('QUERY_STRING'));
+        $this->writeLog('RAW POST Data: ' . file_get_contents('php://input'));
 
         // --------------------------------------------------------------------------
 
         //  @todo consider not blocking this (in case a payment needs to come through)
         if ($this->maintenance->enabled) {
 
-            _LOG('***MAINTENANCE MODE***');
+            $this->writeLog('***MAINTENANCE MODE***');
             return $this->renderMaintenance();
         }
 
@@ -100,14 +100,14 @@ class Webhook extends \Nails\Api\Controllers\Base
 
         // --------------------------------------------------------------------------
 
-        _LOG('Webhook terminating');
+        $this->writeLog('Webhook terminating');
 
         /**
          * Don't set a header. Most gateways will keep trying, or send false positive
          * failures if this comes back as non-200.
          */
 
-        $this->data['apiRouter']->outputSendHeader(false);
+        $this->oApiRouter->outputSendHeader(false);
 
         return $out;
     }

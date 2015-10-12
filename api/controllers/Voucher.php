@@ -22,9 +22,9 @@ class Voucher extends \Nails\Api\Controllers\Base
     /**
      * Construct the controller
      */
-    public function __construct()
+    public function __construct($oApiRouter)
     {
-        parent::__construct();
+        parent::__construct($oApiRouter);
         $this->load->model('shop/shop_voucher_model');
 
         $this->maintenance = new \stdClass();
