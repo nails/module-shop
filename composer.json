@@ -31,7 +31,6 @@
         "nailsapp/module-api": "dev-develop",
         "nailsapp/module-barcode": "dev-develop",
         "nailsapp/module-cdn": "dev-develop",
-        "nailsapp/module-curl": "dev-develop",
         "nailsapp/module-email": "dev-develop",
         "nailsapp/module-geo-ip": "dev-develop",
         "nailsapp/module-pdf": "dev-develop",

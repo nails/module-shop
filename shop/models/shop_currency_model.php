@@ -174,297 +174,252 @@ class NAILS_Shop_currency_model extends NAILS_Model
             }
 
             /**
-             * Set up the CURL request
+             * Set up the HTTP request
              * First attempt to get the rates using the Shop's base currency
              * (only available to paid subscribers, but probably more accurate)
              */
 
-            $this->load->library('curl/curl');
+            $oHttpClient = \Nails\Factory::factory('HttpClient');
 
-            $params            = array();
-            $params['app_id']  = $oerAppId;
-            $params['base']    = SHOP_BASE_CURRENCY_CODE;
-
-            $this->curl->create($this->oerUrl . '?' . http_build_query($params));
-            $this->curl->option(CURLOPT_FAILONERROR, false);
-            $this->curl->option(CURLOPT_HEADER, true);
+            $aParams = array(
+                'query' => array(
+                    'app_id' => $oerAppId,
+                    'base' => SHOP_BASE_CURRENCY_CODE
+                ),
+                'headers' => array()
+            );
 
             if (!empty($oerEtag) && !empty($oerLastModified)) {
 
-                $this->curl->http_header('If-None-Match', '"' . $oerEtag . '"');
-                $this->curl->http_header('If-Modified-Since', $oerLastModified);
+                $aParams['headers']['If-None-Match']     = $oerEtag;
+                $aParams['headers']['If-Modified-Since'] = $oerLastModified;
             }
 
-            $response = $this->curl->execute();
+            try {
 
-            /**
-             * If this failed, it's probably due to requesting a non-USD base
-             * Try again with but using USD base this time.
-             */
+                $oResponse = $oHttpClient->request('GET', $this->oerUrl, $aParams);
 
-            if (empty($this->curl->info['http_code']) || $this->curl->info['http_code'] != 200) {
+                if ($oResponse->getStatusCode() === 304) {
 
-                //  Attempt to extract the body and see if the reason is an invalid App ID
-                $response = explode("\r\n\r\n", $response, 2);
-                $response = !empty($response[1]) ? @json_decode($response[1]) : null;
+                    //  304 Not Modified, abort sync.
+                    if (empty($muteLog)) {
 
-                if (!empty($response->message) && $response->message == 'invalid_app_id') {
+                        _LOG('... OER reported 304 Not Modified, aborting sync');
+                    }
 
-                    $message = $oerAppId . ' is not a valid OER app ID.';
-                    $this->_set_error($message);
+                    return true;
+                }
+
+            } catch (Exception $e) {
+
+                if ($e->getCode() ===  401) {
+
+                    /**
+                     * Probably due to invalid `app_id`
+                     */
 
                     if (empty($muteLog)) {
 
-                        _LOG($message);
+                        _LOG('... OER reported 401 unauthorised, aborting sync.');
+                        _LOG('A valid `app_id` must be present, double check it is correct?');
                     }
 
-                    return false;
-                }
-
-                if (empty($muteLog)) {
-
-                    _LOG('... Query using base as ' . SHOP_BASE_CURRENCY_CODE  . ' failed, trying agian using USD');
-                }
-
-                $params['base'] = 'USD';
-
-                $this->curl->create($this->oerUrl . '?' . http_build_query($params));
-                $this->curl->option(CURLOPT_FAILONERROR, false);
-                $this->curl->option(CURLOPT_HEADER, true);
-
-                if (!empty($oerEtag) && !empty($oerLastModified)) {
-
-                    $this->curl->http_header('If-None-Match', '"' . $oerEtag . '"');
-                    $this->curl->http_header('If-Modified-Since', $oerLastModified);
-                }
-
-                $response = $this->curl->execute();
-
-            } elseif (!empty($this->curl->info['http_code']) && $this->curl->info['http_code'] == 304) {
-
-                //  304 Not Modified, abort sync.
-                if (empty($muteLog)) {
-
-                    _LOG('... OER reported 304 Not Modified, aborting sync');
-                }
-
-                return true;
-            }
-
-            if (!empty($this->curl->info['http_code']) && $this->curl->info['http_code'] == 200) {
-
-                /**
-                 * Ok, now we know the rates we need to work out what the base_exchange rate is.
-                 * If the store's base rate is the same as the API's base rate then we're golden,
-                 * if it's not then we'll need to do some calculations.
-                 *
-                 * Attempt to extract the headers (so we can use the E-Tag) and then parse
-                 * the body.
-                 */
-
-                $response = explode("\r\n\r\n", $response, 2);
-
-                if (empty($response[1])) {
-
-                    $message = 'Could not extract the body of the request.';
-                    $this->_set_error($message);
-
-                    if (empty($muteLog)) {
-
-                        _LOG($message);
-                        _LOG(print_r($response, true));
-                    }
-
-                    return false;
-                }
-
-                //  Body
-                $response[1] = !empty($response[1]) ? @json_decode($response[1]) : null;
-
-                if (empty($response[1])) {
-
-                    $message = 'Could not parse the body of the request.';
-                    $this->_set_error($message);
-
-                    if (empty($muteLog)) {
-
-                        _LOG($message);
-                        _LOG(print_r($response, true));
-                    }
-
-                    return false;
-                }
-
-                //  Headers, look for the E-Tag and last modified
-                preg_match('/ETag: "(.*?)"/', $response[0], $matches);
-                if (!empty($matches[1])) {
-
-                    //  Save ETag to shop settings
-                    set_app_setting('openexchangerates_etag', 'shop', $matches[1]);
-                }
-
-                preg_match('/Last-Modified{ (.*)/', $response[0], $matches);
-                if (!empty($matches[1])) {
-
-                    //  Save Last-Modified to shop settings
-                    set_app_setting('openexchangerates_last_modified', 'shop', $matches[1]);
-                }
-
-                $response = $response[1];
-
-                $toSave = array();
-
-                if (SHOP_BASE_CURRENCY_CODE == $response->base) {
-
-                    foreach ($response->rates as $toCurrency => $rate) {
-
-                        if (array_search($toCurrency, $additionalCurrencies) !== false) {
-
-                            if (empty($muteLog)) {
-
-                                _LOG('... ' . $toCurrency . ' > ' . $rate);
-                            }
-
-                            $toSave[] = array(
-                                'from'     => $response->base,
-                                'to'       => $toCurrency,
-                                'rate'     => $rate,
-                                'modified' => date('Y-m-d H:i{s')
-                            );
-                        }
-                    }
-
-                } else {
-
-                    if (empty($muteLog)) {
-
-                        _LOG('... API base is ' . $response->base . '; calculating differences...');
-                    }
-
-                    $base = 1;
-                    foreach ($response->rates as $code => $rate) {
-
-                        if ($code == SHOP_BASE_CURRENCY_CODE) {
-
-                            $base = $rate;
-                            break;
-                        }
-                    }
-
-                    foreach ($response->rates as $toCurrency => $rate) {
-
-                        if (array_search($toCurrency, $additionalCurrencies) !== false) {
-
-                            //  We calculate the new exchange rate as so: $rate / $base
-                            $newRate  = $rate / $base;
-                            $toSave[] = array(
-                                'from'     => SHOP_BASE_CURRENCY_CODE,
-                                'to'       => $toCurrency,
-                                'rate'     => $newRate,
-                                'modified' => date('Y-m-d H:i{s')
-                            );
-
-                            if (empty($muteLog)) {
-
-                                _LOG('... Calculating and saving new exchange rate for ' . SHOP_BASE_CURRENCY_CODE . ' > ' . $toCurrency . ' (' . $newRate . ')');
-                            }
-                        }
-                    }
-                }
-
-                // --------------------------------------------------------------------------
-
-                /**
-                 * Ok, we've done all the BASE -> CURRENCY conversions, now how about we work
-                 * out the reverse?
-                 */
-                $toSaveReverse = array();
-
-                //  Easy one first, base to base, base, bass, drop da bass. BASS.
-                $toSaveReverse[] = array(
-                    'from'     => SHOP_BASE_CURRENCY_CODE,
-                    'to'       => SHOP_BASE_CURRENCY_CODE,
-                    'rate'     => 1,
-                    'modified' => date('Y-m-d H:i{s')
-                );
-
-                foreach ($toSave as $old) {
-
-                    $toSaveReverse[] = array(
-                        'from'     => $old['to'],
-                        'to'       => SHOP_BASE_CURRENCY_CODE,
-                        'rate'     => 1 / $old['rate'],
-                        'modified' => date('Y-m-d H:i{s')
+                    showFatalError(
+                        'OER Reported an error',
+                        $e->getCode()
                     );
 
-                }
+                } else if ($e->getCode() === 403) {
 
-                $toSave = array_merge($toSave, $toSaveReverse);
+                    /**
+                     * Probably failed due to requesting a non-USD base
+                     * Try again with but using USD base this time.
+                     */
 
-                // --------------------------------------------------------------------------
+                    $aParams['query']['base'] = 'USD';
 
-                if ($this->db->truncate(NAILS_DB_PREFIX . 'shop_currency_exchange')) {
+                    try {
 
-                    if (!empty($toSave)) {
+                        $oResponse = $oHttpClient->request('GET', $this->oerUrl, $aParams);
 
-                        if ($this->db->insert_batch(NAILS_DB_PREFIX . 'shop_currency_exchange', $toSave)) {
+                        if ($oResponse->getStatusCode() === 304) {
 
-                            return true;
-
-                        } else {
-
-                            $message = 'Failed to insert new currency data.';
-                            $this->_set_error($message);
-
+                            //  304 Not Modified, abort sync.
                             if (empty($muteLog)) {
 
-                                _LOG('... ' . $message);
+                                _LOG('... OER reported 304 Not Modified, aborting sync');
                             }
 
-                            return false;
+                            return true;
                         }
 
-                    } else {
+                    } catch (Exception $e) {
 
-                        return true;
+                        if (empty($muteLog)) {
+
+                            _LOG('... OER reported ' . $e->getMessage());
+                            _LOG('This is the second attempt, aborting sync');
+                        }
+
+                        showFatalError(
+                            'OER Reported an error',
+                            $e->getCode()
+                        );
                     }
+                }
+            }
 
-                } else {
+            /**
+             * Ok, now we know the rates we need to work out what the base_exchange rate is.
+             * If the store's base rate is the same as the API's base rate then we're golden,
+             * if it's not then we'll need to do some calculations.
+             */
 
-                    $message = 'Failed to truncate currency table.';
-                    $this->_set_error($message);
+            //  Headers, look for the E-Tag and last modified
+            if ($oResponse->hasHeader('ETag')) {
 
-                    if (empty($muteLog)) {
+                $aHeaders = $oResponse->getHeader('ETag');
+                set_app_setting('openexchangerates_etag', 'shop', $aHeaders[0]);
+            }
 
-                        _LOG('... ' . $message);
+            if ($oResponse->hasHeader('Last-Modified')) {
+
+                $aHeaders = $oResponse->getHeader('Last-Modified');
+                set_app_setting('openexchangerates_last_modified', 'shop', $aHeaders[0]);
+            }
+
+            $toSave = array();
+            $oBody  = @json_decode($oResponse->getBody());
+
+            if (empty($oBody)) {
+
+                _LOG('Failed to parse response body.');
+                return false;
+            }
+
+            if (SHOP_BASE_CURRENCY_CODE == $oBody->base) {
+
+                foreach ($oBody->rates as $toCurrency => $rate) {
+
+                    if (array_search($toCurrency, $additionalCurrencies) !== false) {
+
+                        if (empty($muteLog)) {
+
+                            _LOG('... ' . $toCurrency . ' > ' . $rate);
+                        }
+
+                        $toSave[] = array(
+                            'from'     => $oBody->base,
+                            'to'       => $toCurrency,
+                            'rate'     => $rate,
+                            'modified' => date('Y-m-d H:i:s')
+                        );
                     }
-
-                    return false;
                 }
-
-            } elseif (!empty($this->curl->info['http_code']) && $this->curl->info['http_code'] == 304) {
-
-                //  304 Not Modified, abort sync.
-                if (empty($muteLog)) {
-
-                    _LOG('... OER reported 304 Not Modified, aborting sync');
-                }
-
-                return true;
 
             } else {
 
-                //  Attempt to extract the body so we can get our failure reason
-                $response = explode("\r\n\r\n", $response, 2);
-                $response = !empty($response[1]) ? @json_decode($response[1]) : null;
+                if (empty($muteLog)) {
 
-                $message = 'An error occurred when querying the API.';
+                    _LOG('... API base is ' . $oBody->base . '; calculating differences...');
+                }
+
+                $base = 1;
+                foreach ($oBody->rates as $code => $rate) {
+
+                    if ($code == SHOP_BASE_CURRENCY_CODE) {
+
+                        $base = $rate;
+                        break;
+                    }
+                }
+
+                foreach ($oBody->rates as $toCurrency => $rate) {
+
+                    if (array_search($toCurrency, $additionalCurrencies) !== false) {
+
+                        //  We calculate the new exchange rate as so: $rate / $base
+                        $newRate  = $rate / $base;
+                        $toSave[] = array(
+                            'from'     => SHOP_BASE_CURRENCY_CODE,
+                            'to'       => $toCurrency,
+                            'rate'     => $newRate,
+                            'modified' => date('Y-m-d H:i:s')
+                        );
+
+                        if (empty($muteLog)) {
+
+                            _LOG('... Calculating and saving new exchange rate for ' . SHOP_BASE_CURRENCY_CODE . ' > ' . $toCurrency . ' (' . $newRate . ')');
+                        }
+                    }
+                }
+            }
+
+            // --------------------------------------------------------------------------
+
+            /**
+             * Ok, we've done all the BASE -> CURRENCY conversions, now how about we work
+             * out the reverse?
+             */
+            $toSaveReverse = array();
+
+            //  Easy one first, base to base, base, bass, drop da bass. BASS.
+            $toSaveReverse[] = array(
+                'from'     => SHOP_BASE_CURRENCY_CODE,
+                'to'       => SHOP_BASE_CURRENCY_CODE,
+                'rate'     => 1,
+                'modified' => date('Y-m-d H:i:s')
+            );
+
+            foreach ($toSave as $old) {
+
+                $toSaveReverse[] = array(
+                    'from'     => $old['to'],
+                    'to'       => SHOP_BASE_CURRENCY_CODE,
+                    'rate'     => 1 / $old['rate'],
+                    'modified' => date('Y-m-d H:i:s')
+                );
+
+            }
+
+            $toSave = array_merge($toSave, $toSaveReverse);
+
+            // --------------------------------------------------------------------------
+
+            if ($this->db->truncate(NAILS_DB_PREFIX . 'shop_currency_exchange')) {
+
+                if (!empty($toSave)) {
+
+                    if ($this->db->insert_batch(NAILS_DB_PREFIX . 'shop_currency_exchange', $toSave)) {
+
+                        return true;
+
+                    } else {
+
+                        $message = 'Failed to insert new currency data.';
+                        $this->_set_error($message);
+
+                        if (empty($muteLog)) {
+
+                            _LOG('... ' . $message);
+                        }
+
+                        return false;
+                    }
+
+                } else {
+
+                    return true;
+                }
+
+            } else {
+
+                $message = 'Failed to truncate currency table.';
                 $this->_set_error($message);
 
                 if (empty($muteLog)) {
 
                     _LOG('... ' . $message);
-                    _LOG(print_r($response, true));
                 }
 
                 return false;
