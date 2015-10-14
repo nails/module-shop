@@ -222,9 +222,11 @@
                 $_options['download']         = 'Download';
 
                 echo '<div class="panel" id="batch-action">';
-                    echo 'With checked: ';
-                    echo form_dropdown('', $_options, null);
-                    echo ' <a href="#" class="awesome small">Go</a>';
+                    echo '<div class="panel-body">';
+                        echo 'With checked: ';
+                        echo form_dropdown('', $_options, null);
+                        echo ' <a href="#" class="awesome small">Go</a>';
+                    echo '</div>';
                 echo '</div>';
             }
 

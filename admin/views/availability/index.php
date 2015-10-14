@@ -126,9 +126,11 @@
 
                 ?>
                 <div class="panel" id="batch-action">
-                    With checked:
-                    <?=form_dropdown('', $_options, null)?>
-                    <a href="#" class="awesome small">Go</a>
+                    <div class="panel-body">
+                        With checked:
+                        <?=form_dropdown('', $_options, null)?>
+                        <a href="#" class="awesome small">Go</a>
+                    </div>
                 </div>
                 <?php
 
