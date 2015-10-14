@@ -1,7 +1,5 @@
 <?php
 
-namespace Nails\Routes\Shop;
-
 /**
  * Generates shop routes
  *
@@ -11,6 +9,8 @@ namespace Nails\Routes\Shop;
  * @author      Nails Dev Team
  * @link
  */
+
+namespace Nails\Routes\Shop;
 
 class Routes
 {

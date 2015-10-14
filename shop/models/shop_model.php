@@ -10,8 +10,8 @@
  * @link
  */
 
-use \Nails\Factory;
-use \Nails\Common\Model\Base;
+use Nails\Factory;
+use Nails\Common\Model\Base;
 
 class NAILS_Shop_model extends Base
 {
@@ -105,7 +105,7 @@ class NAILS_Shop_model extends Base
 
             } else {
 
-                $oGeoIp = \Nails\Factory::service('GeoIp', 'nailsapp/module-geo-ip');
+                $oGeoIp = Factory::service('GeoIp', 'nailsapp/module-geo-ip');
                 $lookup = $oGeoIp->country();
 
                 if (!empty($lookup->status) && $lookup->status == 200) {

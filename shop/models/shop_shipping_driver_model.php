@@ -10,6 +10,8 @@
  * @link
  */
 
+use Nails\Factory;
+
 class NAILS_Shop_shipping_driver_model extends NAILS_Model
 {
     protected $available;
@@ -82,7 +84,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
          * last one found is the one which is used
          */
 
-        \Nails\Factory::helper('directory');
+        Factory::helper('directory');
 
         //  Take a fresh copy
         $shippingDriverLocations = $this->shippingDriverLocations;

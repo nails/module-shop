@@ -11,6 +11,8 @@
  * @todo Remove this in favour of a generic Nails skin model
  */
 
+use Nails\Factory;
+
 class NAILS_Shop_skin_front_model extends NAILS_Model
 {
     protected $_available;
@@ -88,7 +90,7 @@ class NAILS_Shop_skin_front_model extends NAILS_Model
          * one which is used
          */
 
-        \Nails\Factory::helper('directory');
+        Factory::helper('directory');
 
         //  Take a fresh copy
         $_skin_locations = $this->_skin_locations;

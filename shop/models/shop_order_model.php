@@ -10,6 +10,8 @@
  * @link
  */
 
+use Nails\Factory;
+
 class NAILS_Shop_order_model extends NAILS_Model
 {
     /**
@@ -20,11 +22,11 @@ class NAILS_Shop_order_model extends NAILS_Model
         parent::__construct();
         $this->load->model('shop/shop_currency_model');
 
-        $this->oCountryModel = \Nails\Factory::model('Country');
+        $this->oCountryModel = Factory::model('Country');
 
         $this->table       = NAILS_DB_PREFIX . 'shop_order';
         $this->tablePrefix = 'o';
-        $this->oLogger     = \Nails\Factory::service('Logger');
+        $this->oLogger     = Factory::service('Logger');
     }
 
     // --------------------------------------------------------------------------
@@ -1120,7 +1122,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         $email->data['order']        = $order;
         $email->data['payment_data'] = $paymentData;
 
-        $oAppNotificationModel = \Nails\Factory::model('AppNotification');
+        $oAppNotificationModel = Factory::model('AppNotification');
 
         $notify = $oAppNotificationModel->get('orders', 'shop');
 

@@ -10,8 +10,8 @@
  * @link
  */
 
-use \Nails\Factory;
-use \Nails\Common\Model\Base;
+use Nails\Factory;
+use Nails\Common\Model\Base;
 
 class NAILS_Shop_product_model extends Base
 {
@@ -1805,7 +1805,7 @@ class NAILS_Shop_product_model extends Base
              * 'cause Active Record is a big pile of $%!@
              */
 
-            \Nails\Factory::helper('string');
+            Factory::helper('string');
             $data['keywords'] = removeStopWords($data['keywords']);
             $search = $this->db->escape_like_str($data['keywords']);
 

@@ -10,6 +10,8 @@
  * @link
  */
 
+use Nails\Factory;
+
 class NAILS_Shop_currency_model extends NAILS_Model
 {
     protected $oerUrl;
@@ -146,7 +148,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
         $oerEtag              = app_setting('openexchangerates_etag', 'shop');
         $oerLastModified      = app_setting('openexchangerates_last_modified', 'shop');
         $additionalCurrencies = app_setting('additional_currencies', 'shop');
-        $oLogger              = \Nails\Factory::service('Logger');
+        $oLogger              = Factory::service('Logger');
 
         if (empty($additionalCurrencies)) {
 
@@ -180,7 +182,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
              * (only available to paid subscribers, but probably more accurate)
              */
 
-            $oHttpClient = \Nails\Factory::factory('HttpClient');
+            $oHttpClient = Factory::factory('HttpClient');
 
             $aParams = array(
                 'query' => array(

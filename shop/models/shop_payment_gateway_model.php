@@ -10,7 +10,7 @@
  * @link
  */
 
-//  Namespace malarky
+use Nails\Factory;
 use Omnipay\Common;
 use Omnipay\Common\CreditCard;
 use Omnipay\Omnipay;
@@ -64,7 +64,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        $this->oLogger = \Nails\Factory::service('Logger');
+        $this->oLogger = Factory::service('Logger');
     }
 
     // --------------------------------------------------------------------------
@@ -312,7 +312,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         $data['shippingPhone']    = $order->user->telephone;
 
         //  Any gateway specific handlers for the card object?
-        \Nails\Factory::helper('string');
+        Factory::helper('string');
         $methodName = 'prepareCard' . ucfirst(underscoreToCamelcase($gateway, false));
 
         if (method_exists($this, $methodName)) {
@@ -818,7 +818,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
      */
     protected function extractPaymentData($gateway)
     {
-        \Nails\Factory::helper('string');
+        Factory::helper('string');
         $methodName = 'extractPaymentData' . ucfirst(underscoreToCamelcase($gateway, false));
 
         if (method_exists($this, $methodName)) {

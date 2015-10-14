@@ -10,6 +10,8 @@
  * @link
  */
 
+use Nails\Factory;
+
 class NAILS_Shop_voucher_model extends NAILS_Model
 {
     public function __construct()
@@ -386,7 +388,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Check custom voucher type conditions
-        \Nails\Factory::helper('string');
+        Factory::helper('string');
         $method = 'validate' . underscoreToCamelcase(strtolower($voucher->type));
 
         if (method_exists($this, $method)) {
@@ -516,7 +518,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 
     public function generateValidCode()
     {
-        \Nails\Factory::helper('string');
+        Factory::helper('string');
 
         do {
 

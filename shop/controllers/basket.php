@@ -13,6 +13,8 @@ require_once '_shop.php';
  * @link
  */
 
+use Nails\Factory;
+
 class NAILS_Basket extends NAILS_Shop_Controller
 {
     /**
@@ -432,7 +434,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
             if ($this->user_model->isLoggedIn()) {
 
                 //  Save to the user object
-                $oUserMeta = \Nails\Factory::model('UserMeta', 'nailsapp/module-auth');
+                $oUserMeta = Factory::model('UserMeta', 'nailsapp/module-auth');
                 $oUserMeta->update(
                     NAILS_DB_PREFIX . 'user_meta_shop',
                     activeUser('id'),

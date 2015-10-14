@@ -10,6 +10,8 @@
  * @link
  */
 
+use Nails\Factory;
+
 class NAILS_Shop_inform_product_available_model extends NAILS_Model
 {
     public function __construct()
@@ -53,7 +55,7 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 
     public function add($variantId, $email)
     {
-        \Nails\Factory::helper('email');
+        Factory::helper('email');
 
         if (!valid_email($email)) {
 

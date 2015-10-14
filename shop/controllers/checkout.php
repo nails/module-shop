@@ -13,6 +13,8 @@ require_once '_shop.php';
  * @link
  */
 
+use Nails\Factory;
+
 class NAILS_Checkout extends NAILS_Shop_Controller
 {
     /**
@@ -43,7 +45,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        $oCountryModel = \Nails\Factory::model('Country');
+        $oCountryModel = Factory::model('Country');
 
         $this->data['countries_flat']   = $oCountryModel->getAllFlat();
         $this->data['payment_gateways'] = $this->shop_payment_gateway_model->getEnabledFormatted();

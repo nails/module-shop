@@ -1,7 +1,5 @@
 <?php
 
-namespace Nails\Api\Shop;
-
 /**
  * Admin API end points: Shop Vouchers
  *
@@ -11,6 +9,8 @@ namespace Nails\Api\Shop;
  * @author      Nails Dev Team
  * @link
  */
+
+namespace Nails\Api\Shop;
 
 class Voucher extends \Nails\Api\Controller\Base
 {

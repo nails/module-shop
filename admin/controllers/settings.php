@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Shop;
 
+use Nails\Factory;
 use Nails\Shop\Controller\BaseAdmin;
 
 class Settings extends BaseAdmin
@@ -91,7 +92,7 @@ class Settings extends BaseAdmin
         $this->load->model('shop/shop_skin_checkout_model');
         $this->load->model('shop/shop_product_model');
 
-        $oCountryModel = \Nails\Factory::model('Country');
+        $oCountryModel = Factory::model('Country');
 
         // --------------------------------------------------------------------------
 
@@ -219,7 +220,6 @@ class Settings extends BaseAdmin
                 // --------------------------------------------------------------------------
 
                 //  Rewrite routes
-                $this->load->model('routes_model');
                 if (!$this->routes_model->update()) {
 
                     $this->data['warning'] = '<strong>Warning:</strong> while the shop settings were updated, the routes file could not be updated. The shop may not behave as expected,';

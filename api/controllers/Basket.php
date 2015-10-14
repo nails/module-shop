@@ -1,7 +1,5 @@
 <?php
 
-namespace Nails\Api\Shop;
-
 /**
  * Shop API end points: Basket
  *
@@ -11,6 +9,10 @@ namespace Nails\Api\Shop;
  * @author      Nails Dev Team
  * @link
  */
+
+namespace Nails\Api\Shop;
+
+use Nails\Factory;
 
 class Basket extends \Nails\Api\Controller\Base
 {
@@ -275,7 +277,7 @@ class Basket extends \Nails\Api\Controller\Base
             if ($this->user_model->isLoggedIn()) {
 
                 //  Save to the user meta object
-                $oUserMeta = \Nails\Factory::model('UserMeta', 'nailsapp/module-auth');
+                $oUserMeta = Factory::model('UserMeta', 'nailsapp/module-auth');
                 $oUserMeta->update(
                     NAILS_DB_PREFIX . 'user_meta_shop',
                     activeUser('id'),

@@ -10,6 +10,8 @@
  * @link
  */
 
+use Nails\Factory;
+
 class NAILS_Shop_feed_model extends NAILS_Model
 {
     protected $cacheFile;
@@ -35,7 +37,7 @@ class NAILS_Shop_feed_model extends NAILS_Model
 
             if ($fileData) {
 
-                \Nails\Factory::helper('file');
+                Factory::helper('file');
                 $cacheFile = $this->getCacheFile($provider, $format);
 
                 if (write_file($cacheFile, $fileData)) {

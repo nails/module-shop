@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Shop;
 
+use Nails\Factory;
 use Nails\Shop\Controller\BaseAdmin;
 
 class Inventory extends BaseAdmin
@@ -923,7 +924,7 @@ class Inventory extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        \Nails\Factory::helper('string');
+        Factory::helper('string');
         $method = $this->uri->segment(5) ? $this->uri->segment(5) : 'index';
         $method = 'import' . underscoreToCamelcase(strtolower($method), false);
 

@@ -10,8 +10,8 @@
  * @link
  */
 
-use \Nails\Factory;
-use \Nails\Common\Model\Base;
+use Nails\Factory;
+use Nails\Common\Model\Base;
 
 class NAILS_Shop_basket_model extends Base
 {

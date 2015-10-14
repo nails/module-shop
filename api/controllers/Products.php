@@ -1,7 +1,5 @@
 <?php
 
-namespace Nails\Api\Shop;
-
 /**
  * Shop API end points: Products
  *
@@ -11,6 +9,8 @@ namespace Nails\Api\Shop;
  * @author      Nails Dev Team
  * @link
  */
+
+namespace Nails\Api\Shop;
 
 class Products extends \Nails\Api\Controller\Base
 {
