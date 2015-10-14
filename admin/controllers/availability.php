@@ -12,7 +12,9 @@
 
 namespace Nails\Admin\Shop;
 
-class Availability extends \AdminController
+use Nails\Shop\Controller\BaseAdmin;
+
+class Availability extends BaseAdmin
 {
     /**
      * Announces this controller's navGroups

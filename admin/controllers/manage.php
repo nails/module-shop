@@ -12,7 +12,9 @@
 
 namespace Nails\Admin\Shop;
 
-class Manage extends \AdminController
+use Nails\Shop\Controller\BaseAdmin;
+
+class Manage extends BaseAdmin
 {
     protected $isModal;
 

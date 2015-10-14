@@ -12,7 +12,7 @@ namespace Nails\Api\Shop;
  * @link
  */
 
-class Feed extends \Nails\Api\Controllers\Base
+class Feed extends \Nails\Api\Controller\Base
 {
     public static $requiresAuthentication = true;
     protected $maintenance;

@@ -12,7 +12,9 @@
 
 namespace Nails\Admin\Shop;
 
-class Inventory extends \AdminController
+use Nails\Shop\Controller\BaseAdmin;
+
+class Inventory extends BaseAdmin
 {
     /**
      * Announces this controller's navGroups

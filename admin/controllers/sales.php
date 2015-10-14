@@ -12,7 +12,9 @@
 
 namespace Nails\Admin\Shop;
 
-class Sales extends \AdminController
+use Nails\Shop\Controller\BaseAdmin;
+
+class Sales extends BaseAdmin
 {
     /**
      * Announces this controller's navGroups

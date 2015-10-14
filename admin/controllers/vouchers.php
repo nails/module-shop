@@ -12,7 +12,9 @@
 
 namespace Nails\Admin\Shop;
 
-class Vouchers extends \AdminController
+use Nails\Shop\Controller\BaseAdmin;
+
+class Vouchers extends BaseAdmin
 {
     /**
      * Announces this controller's navGroups

@@ -12,7 +12,7 @@ namespace Nails\Api\Shop;
  * @link
  */
 
-class Webhook extends \Nails\Api\Controllers\Base
+class Webhook extends \Nails\Api\Controller\Base
 {
     protected $maintenance;
 

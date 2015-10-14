@@ -12,7 +12,9 @@
 
 namespace Nails\Admin\Shop;
 
-class Settings extends \AdminController
+use Nails\Shop\Controller\BaseAdmin;
+
+class Settings extends BaseAdmin
 {
     /**
      * Announces this controller's navGroups

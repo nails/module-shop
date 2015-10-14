@@ -12,7 +12,9 @@
 
 namespace Nails\Admin\Shop;
 
-class Reports extends \AdminController
+use Nails\Shop\Controller\BaseAdmin;
+
+class Reports extends BaseAdmin
 {
     protected $sources;
     protected $periods;
