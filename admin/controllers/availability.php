@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Shop;
 
+use Nails\Admin\Helper;
 use Nails\Shop\Controller\BaseAdmin;
 
 class Availability extends BaseAdmin
@@ -109,12 +110,12 @@ class Availability extends BaseAdmin
         //  Add a header button
         if (userHasPermission('admin:shop:availability:create')) {
 
-            \Nails\Admin\Helper::addHeaderButton('admin/shop/availability/create', 'Add New Notification');
+            Helper::addHeaderButton('admin/shop/availability/create', 'Add New Notification');
         }
 
         // --------------------------------------------------------------------------
 
-        \Nails\Admin\Helper::loadView('index');
+        Helper::loadView('index');
     }
 
     // --------------------------------------------------------------------------
@@ -180,7 +181,7 @@ class Availability extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        \Nails\Admin\Helper::loadView('edit');
+        Helper::loadView('edit');
     }
 
     // --------------------------------------------------------------------------
@@ -255,7 +256,7 @@ class Availability extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        \Nails\Admin\Helper::loadView('edit');
+        Helper::loadView('edit');
     }
 
     // --------------------------------------------------------------------------

@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Shop;
 
+use Nails\Admin\Helper;
 use Nails\Shop\Controller\BaseAdmin;
 
 class Reports extends BaseAdmin
@@ -390,7 +391,7 @@ class Reports extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        \Nails\Admin\Helper::loadView('index');
+        Helper::loadView('index');
     }
 
     // --------------------------------------------------------------------------
@@ -666,13 +667,13 @@ class Reports extends BaseAdmin
             //  Load view
         if (!$returnData) {
 
-            \Nails\Admin\Helper::loadView('format/csv', false);
+            Helper::loadView('format/csv', false);
 
         } else {
 
             $out   = array();
             $out[] = $data->filename . '.csv';
-            $out[] = \Nails\Admin\Helper::loadView('format/csv', false, true);
+            $out[] = Helper::loadView('format/csv', false, true);
 
             return $out;
         }
@@ -712,13 +713,13 @@ class Reports extends BaseAdmin
         //  Load view
         if (!$returnData) {
 
-            \Nails\Admin\Helper::loadView('format/html', false);
+            Helper::loadView('format/html', false);
 
         } else {
 
             $out   = array();
             $out[] = $data->filename . '.html';
-            $out[] = \Nails\Admin\Helper::loadView('format/html', false, true);
+            $out[] = Helper::loadView('format/html', false, true);
 
             return $out;
         }
@@ -813,13 +814,13 @@ class Reports extends BaseAdmin
         //  Load view
         if (!$returnData) {
 
-            \Nails\Admin\Helper::loadView('format/serialize', false);
+            Helper::loadView('format/serialize', false);
 
         } else {
 
             $out   = array();
             $out[] = $data->filename . '.txt';
-            $out[] = \Nails\Admin\Helper::loadView('format/serialize', false, true);
+            $out[] = Helper::loadView('format/serialize', false, true);
 
             return $out;
         }
@@ -857,13 +858,13 @@ class Reports extends BaseAdmin
         //  Load view
         if (!$returnData) {
 
-            \Nails\Admin\Helper::loadView('format/json', false);
+            Helper::loadView('format/json', false);
 
         } else {
 
             $out   = array();
             $out[] = $data->filename . '.json';
-            $out[] = \Nails\Admin\Helper::loadView('format/json', false, true);
+            $out[] = Helper::loadView('format/json', false, true);
 
             return $out;
         }

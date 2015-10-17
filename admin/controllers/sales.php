@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Shop;
 
+use Nails\Admin\Helper;
 use Nails\Shop\Controller\BaseAdmin;
 
 class Sales extends BaseAdmin
@@ -88,7 +89,7 @@ class Sales extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        \Nails\Admin\Helper::loadView('index');
+        Helper::loadView('index');
     }
 
     // --------------------------------------------------------------------------
@@ -110,7 +111,7 @@ class Sales extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        \Nails\Admin\Helper::loadView('edit');
+        Helper::loadView('edit');
     }
 
     // --------------------------------------------------------------------------
@@ -132,7 +133,7 @@ class Sales extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        \Nails\Admin\Helper::loadView('edit');
+        Helper::loadView('edit');
     }
 
     // --------------------------------------------------------------------------

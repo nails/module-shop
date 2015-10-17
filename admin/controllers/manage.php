@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Shop;
 
+use Nails\Admin\Helper;
 use Nails\Shop\Controller\BaseAdmin;
 
 class Manage extends BaseAdmin
@@ -142,7 +143,7 @@ class Manage extends BaseAdmin
      */
     public function index()
     {
-        \Nails\Admin\Helper::loadView('index');
+        Helper::loadView('index');
     }
 
     // --------------------------------------------------------------------------
@@ -216,15 +217,15 @@ class Manage extends BaseAdmin
         $this->data['attributes'] = $this->shop_attribute_model->get_all($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
-        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
-        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+        $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = Helper::paginationObject($page, $perPage, $totalRows);
 
         // --------------------------------------------------------------------------
 
         //  Add header button
         if (userHasPermission('admin:shop:manage:attribute:create')) {
 
-            \Nails\Admin\Helper::addHeaderButton(
+            Helper::addHeaderButton(
                 'admin/shop/manage/attribute/create' . $this->isModal,
                 'Create Attribute'
             );
@@ -233,7 +234,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('attribute/index');
+        Helper::loadView('attribute/index');
     }
 
     // --------------------------------------------------------------------------
@@ -296,7 +297,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('attribute/edit');
+        Helper::loadView('attribute/edit');
     }
 
     // --------------------------------------------------------------------------
@@ -368,7 +369,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('attribute/edit');
+        Helper::loadView('attribute/edit');
     }
 
     // --------------------------------------------------------------------------
@@ -475,15 +476,15 @@ class Manage extends BaseAdmin
         $this->data['brands'] = $this->shop_brand_model->get_all($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
-        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
-        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+        $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = Helper::paginationObject($page, $perPage, $totalRows);
 
         // --------------------------------------------------------------------------
 
         //  Add header button
         if (userHasPermission('admin:shop:manage:brand:create')) {
 
-            \Nails\Admin\Helper::addHeaderButton(
+            Helper::addHeaderButton(
                 'admin/shop/manage/brand/create' . $this->isModal,
                 'Create Brand'
             );
@@ -492,7 +493,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('brand/index');
+        Helper::loadView('brand/index');
     }
 
     // --------------------------------------------------------------------------
@@ -569,7 +570,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('brand/edit');
+        Helper::loadView('brand/edit');
     }
 
     // --------------------------------------------------------------------------
@@ -654,7 +655,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('brand/edit');
+        Helper::loadView('brand/edit');
     }
 
     // --------------------------------------------------------------------------
@@ -761,15 +762,15 @@ class Manage extends BaseAdmin
         $this->data['suppliers'] = $this->shop_supplier_model->get_all($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
-        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
-        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+        $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = Helper::paginationObject($page, $perPage, $totalRows);
 
         // --------------------------------------------------------------------------
 
         //  Add header button
         if (userHasPermission('admin:shop:manage:supplier:create')) {
 
-            \Nails\Admin\Helper::addHeaderButton(
+            Helper::addHeaderButton(
                 'admin/shop/manage/supplier/create' . $this->isModal,
                 'Create Supplier'
             );
@@ -778,7 +779,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('supplier/index');
+        Helper::loadView('supplier/index');
     }
 
     // --------------------------------------------------------------------------
@@ -843,7 +844,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('supplier/edit');
+        Helper::loadView('supplier/edit');
     }
 
     // --------------------------------------------------------------------------
@@ -916,7 +917,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('supplier/edit');
+        Helper::loadView('supplier/edit');
     }
 
     // --------------------------------------------------------------------------
@@ -1023,15 +1024,15 @@ class Manage extends BaseAdmin
         $this->data['categories'] = $this->shop_category_model->get_all($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
-        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
-        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+        $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = Helper::paginationObject($page, $perPage, $totalRows);
 
         // --------------------------------------------------------------------------
 
         //  Add header button
         if (userHasPermission('admin:shop:manage:category:create')) {
 
-            \Nails\Admin\Helper::addHeaderButton(
+            Helper::addHeaderButton(
                 'admin/shop/manage/category/create' . $this->isModal,
                 'Create Category'
             );
@@ -1040,7 +1041,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('category/index');
+        Helper::loadView('category/index');
     }
 
     // --------------------------------------------------------------------------
@@ -1114,7 +1115,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('category/edit');
+        Helper::loadView('category/edit');
     }
 
     // --------------------------------------------------------------------------
@@ -1197,7 +1198,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('category/edit');
+        Helper::loadView('category/edit');
     }
 
     // --------------------------------------------------------------------------
@@ -1304,15 +1305,15 @@ class Manage extends BaseAdmin
         $this->data['collections'] = $this->shop_collection_model->get_all($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
-        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
-        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+        $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = Helper::paginationObject($page, $perPage, $totalRows);
 
         // --------------------------------------------------------------------------
 
         //  Add header button
         if (userHasPermission('admin:shop:manage:collection:create')) {
 
-            \Nails\Admin\Helper::addHeaderButton(
+            Helper::addHeaderButton(
                 'admin/shop/manage/collection/create' . $this->isModal,
                 'Create Collection'
             );
@@ -1321,7 +1322,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('collection/index');
+        Helper::loadView('collection/index');
     }
 
     // --------------------------------------------------------------------------
@@ -1395,7 +1396,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('collection/edit');
+        Helper::loadView('collection/edit');
     }
 
     // --------------------------------------------------------------------------
@@ -1478,7 +1479,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('collection/edit');
+        Helper::loadView('collection/edit');
     }
 
     // --------------------------------------------------------------------------
@@ -1584,15 +1585,15 @@ class Manage extends BaseAdmin
         $this->data['ranges'] = $this->shop_range_model->get_all($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
-        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
-        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+        $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = Helper::paginationObject($page, $perPage, $totalRows);
 
         // --------------------------------------------------------------------------
 
         //  Add header button
         if (userHasPermission('admin:shop:manage:range:create')) {
 
-            \Nails\Admin\Helper::addHeaderButton(
+            Helper::addHeaderButton(
                 'admin/shop/manage/range/create' . $this->isModal,
                 'Create Range'
             );
@@ -1601,7 +1602,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('range/index');
+        Helper::loadView('range/index');
     }
 
     // --------------------------------------------------------------------------
@@ -1675,7 +1676,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('range/edit');
+        Helper::loadView('range/edit');
     }
 
     // --------------------------------------------------------------------------
@@ -1758,7 +1759,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('range/edit');
+        Helper::loadView('range/edit');
     }
 
     // --------------------------------------------------------------------------
@@ -1864,15 +1865,15 @@ class Manage extends BaseAdmin
         $this->data['tags'] = $this->shop_tag_model->get_all($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
-        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
-        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+        $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = Helper::paginationObject($page, $perPage, $totalRows);
 
         // --------------------------------------------------------------------------
 
         //  Add header button
         if (userHasPermission('admin:shop:manage:tag:create')) {
 
-            \Nails\Admin\Helper::addHeaderButton(
+            Helper::addHeaderButton(
                 'admin/shop/manage/tag/create' . $this->isModal,
                 'Create Tag'
             );
@@ -1881,7 +1882,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('tag/index');
+        Helper::loadView('tag/index');
     }
 
     // --------------------------------------------------------------------------
@@ -1953,7 +1954,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('tag/edit');
+        Helper::loadView('tag/edit');
     }
 
     // --------------------------------------------------------------------------
@@ -2034,7 +2035,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('tag/edit');
+        Helper::loadView('tag/edit');
     }
 
     // --------------------------------------------------------------------------
@@ -2140,15 +2141,15 @@ class Manage extends BaseAdmin
         $this->data['taxRates'] = $this->shop_tax_rate_model->get_all($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
-        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
-        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+        $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = Helper::paginationObject($page, $perPage, $totalRows);
 
         // --------------------------------------------------------------------------
 
         //  Add header button
         if (userHasPermission('admin:shop:manage:tax:rate_create')) {
 
-            \Nails\Admin\Helper::addHeaderButton(
+            Helper::addHeaderButton(
                 'admin/shop/manage/taxRate/create' . $this->isModal,
                 'Create Tax Rate'
             );
@@ -2157,7 +2158,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('taxRate/index');
+        Helper::loadView('taxRate/index');
     }
 
     // --------------------------------------------------------------------------
@@ -2221,7 +2222,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('taxRate/edit');
+        Helper::loadView('taxRate/edit');
     }
 
     // --------------------------------------------------------------------------
@@ -2294,7 +2295,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('taxRate/edit');
+        Helper::loadView('taxRate/edit');
     }
 
     // --------------------------------------------------------------------------
@@ -2400,15 +2401,15 @@ class Manage extends BaseAdmin
         $this->data['productTypes'] = $this->shop_product_type_model->get_all($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
-        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
-        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+        $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = Helper::paginationObject($page, $perPage, $totalRows);
 
         // --------------------------------------------------------------------------
 
         //  Add header button
         if (userHasPermission('admin:shop:manage:product:type_create')) {
 
-            \Nails\Admin\Helper::addHeaderButton(
+            Helper::addHeaderButton(
                 'admin/shop/manage/productType/create' . $this->isModal,
                 'Create Product Type'
             );
@@ -2417,7 +2418,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('productType/index');
+        Helper::loadView('productType/index');
     }
 
     // --------------------------------------------------------------------------
@@ -2491,7 +2492,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('productType/edit');
+        Helper::loadView('productType/edit');
     }
 
     // --------------------------------------------------------------------------
@@ -2572,7 +2573,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('productType/edit');
+        Helper::loadView('productType/edit');
     }
 
     // --------------------------------------------------------------------------
@@ -2663,15 +2664,15 @@ class Manage extends BaseAdmin
         $this->data['metaFields'] = $this->shop_product_type_meta_model->get_all($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
-        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
-        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+        $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
+        $this->data['pagination'] = Helper::paginationObject($page, $perPage, $totalRows);
 
         // --------------------------------------------------------------------------
 
         //  Add header button
         if (userHasPermission('admin:shop:manage:product:type_meta_create')) {
 
-            \Nails\Admin\Helper::addHeaderButton(
+            Helper::addHeaderButton(
                 'admin/shop/manage/productTypeMeta/create' . $this->isModal,
                 'Create Product Type Meta Field'
             );
@@ -2680,7 +2681,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('productTypeMeta/index');
+        Helper::loadView('productTypeMeta/index');
     }
 
     // --------------------------------------------------------------------------
@@ -2753,7 +2754,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('productTypeMeta/edit');
+        Helper::loadView('productTypeMeta/edit');
     }
 
     // --------------------------------------------------------------------------
@@ -2836,7 +2837,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('productTypeMeta/edit');
+        Helper::loadView('productTypeMeta/edit');
     }
 
     // --------------------------------------------------------------------------

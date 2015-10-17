@@ -13,6 +13,7 @@
 namespace Nails\Admin\Shop;
 
 use Nails\Factory;
+use Nails\Admin\Helper;
 use Nails\Shop\Controller\BaseAdmin;
 
 class Inventory extends BaseAdmin
@@ -124,7 +125,7 @@ class Inventory extends BaseAdmin
 
         //  Checkbox Filters
         $cbFilters = array();
-        $cbFilters['isActive'] = \Nails\Admin\Helper::searchFilterObject(
+        $cbFilters['isActive'] = Helper::searchFilterObject(
             $tablePrefix . '.is_active',
             'Active',
             array(
@@ -132,7 +133,7 @@ class Inventory extends BaseAdmin
                 array('No', 0, true)
            )
         );
-        $cbFilters['stockStatus'] = \Nails\Admin\Helper::searchFilterObject(
+        $cbFilters['stockStatus'] = Helper::searchFilterObject(
             '',
             'Status',
             array(
@@ -150,22 +151,22 @@ class Inventory extends BaseAdmin
         $data = array('only_active' => false);
 
         $ddFilters = array();
-        $ddFilters['categoryId'] = \Nails\Admin\Helper::searchFilterObject(
+        $ddFilters['categoryId'] = Helper::searchFilterObject(
             '',
             'Category',
             array('Choose Category') + $this->shop_category_model->getAllNestedFlat()
         );
-        $ddFilters['brandId'] = \Nails\Admin\Helper::searchFilterObject(
+        $ddFilters['brandId'] = Helper::searchFilterObject(
             '',
             'Brand',
             array('Choose Brand') + $this->shop_brand_model->get_all_flat(null, null, $data)
         );
-        $ddFilters['supplierId'] = \Nails\Admin\Helper::searchFilterObject(
+        $ddFilters['supplierId'] = Helper::searchFilterObject(
             '',
             'Supplier',
             array('Choose Supplier') + $this->shop_supplier_model->get_all_flat(null, null, $data)
         );
-        $ddFilters['collectionId'] = \Nails\Admin\Helper::searchFilterObject(
+        $ddFilters['collectionId'] = Helper::searchFilterObject(
             '',
             'Collection',
             array('Choose Collection') + $this->shop_collection_model->get_all_flat(null, null, $data)
@@ -198,7 +199,7 @@ class Inventory extends BaseAdmin
 
         if (!empty($_GET['ddF']['categoryId'])) {
 
-            $categoryId = \Nails\Admin\Helper::searchFilterGetValueAtKey(
+            $categoryId = Helper::searchFilterGetValueAtKey(
                 $ddFilters['categoryId'],
                 $_GET['ddF']['categoryId']
             );
@@ -209,7 +210,7 @@ class Inventory extends BaseAdmin
 
         if (!empty($_GET['ddF']['brandId'])) {
 
-            $data['brand_id'] = \Nails\Admin\Helper::searchFilterGetValueAtKey(
+            $data['brand_id'] = Helper::searchFilterGetValueAtKey(
                 $ddFilters['brandId'],
                 $_GET['ddF']['brandId']
             );
@@ -217,7 +218,7 @@ class Inventory extends BaseAdmin
 
         if (!empty($_GET['ddF']['supplierId'])) {
 
-            $data['supplier_id'] = \Nails\Admin\Helper::searchFilterGetValueAtKey(
+            $data['supplier_id'] = Helper::searchFilterGetValueAtKey(
                 $ddFilters['supplierId'],
                 $_GET['ddF']['supplierId']
             );
@@ -225,7 +226,7 @@ class Inventory extends BaseAdmin
 
         if (!empty($_GET['ddF']['collectionId'])) {
 
-            $data['collection_id'] = \Nails\Admin\Helper::searchFilterGetValueAtKey(
+            $data['collection_id'] = Helper::searchFilterGetValueAtKey(
                 $ddFilters['collectionId'],
                 $_GET['ddF']['collectionId']
             );
@@ -237,7 +238,7 @@ class Inventory extends BaseAdmin
 
             foreach ($_GET['cbF']['stockStatus'] as $filterKey => $checked)
             {
-                $data['stockStatus'][] = \Nails\Admin\Helper::searchFilterGetValueAtKey(
+                $data['stockStatus'][] = Helper::searchFilterGetValueAtKey(
                     $cbFilters['stockStatus'],
                     $filterKey
                 );
@@ -251,7 +252,7 @@ class Inventory extends BaseAdmin
         $this->data['products'] = $this->shop_product_model->get_all($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
-        $this->data['search'] = \Nails\Admin\Helper::searchObject(
+        $this->data['search'] = Helper::searchObject(
             true,
             $sortColumns,
             $sortOn,
@@ -261,14 +262,14 @@ class Inventory extends BaseAdmin
             $cbFilters,
             $ddFilters
         );
-        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+        $this->data['pagination'] = Helper::paginationObject($page, $perPage, $totalRows);
 
         // --------------------------------------------------------------------------
 
         if (userHasPermission('admin:shop:inventory:create')) {
 
-            \Nails\Admin\Helper::addHeaderButton('admin/shop/inventory/import', 'Import Items', 'orange');
-            \Nails\Admin\Helper::addHeaderButton('admin/shop/inventory/create', 'Add New Item');
+            Helper::addHeaderButton('admin/shop/inventory/import', 'Import Items', 'orange');
+            Helper::addHeaderButton('admin/shop/inventory/create', 'Add New Item');
         }
 
         // --------------------------------------------------------------------------
@@ -278,7 +279,7 @@ class Inventory extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        \Nails\Admin\Helper::loadView('index');
+        Helper::loadView('index');
     }
 
     // --------------------------------------------------------------------------
@@ -445,7 +446,7 @@ class Inventory extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('edit');
+        Helper::loadView('edit');
     }
 
     // --------------------------------------------------------------------------
@@ -627,7 +628,7 @@ class Inventory extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('edit');
+        Helper::loadView('edit');
     }
 
     // --------------------------------------------------------------------------
@@ -950,7 +951,7 @@ class Inventory extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        \Nails\Admin\Helper::loadView('import');
+        Helper::loadView('import');
     }
 
     // --------------------------------------------------------------------------

@@ -13,6 +13,7 @@
 namespace Nails\Admin\Shop;
 
 use Nails\Factory;
+use Nails\Admin\Helper;
 use Nails\Shop\Controller\BaseAdmin;
 
 class Settings extends BaseAdmin
@@ -154,7 +155,7 @@ class Settings extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('index');
+        Helper::loadView('index');
     }
 
     // --------------------------------------------------------------------------
@@ -587,7 +588,7 @@ class Settings extends BaseAdmin
      */
     protected function _shop_pg_generic()
     {
-        \Nails\Admin\Helper::loadView('shop_pg/generic');
+        Helper::loadView('shop_pg/generic');
     }
 
     // --------------------------------------------------------------------------
@@ -603,7 +604,7 @@ class Settings extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        \Nails\Admin\Helper::loadView('shop_pg/worldpay');
+        Helper::loadView('shop_pg/worldpay');
     }
 
     // --------------------------------------------------------------------------
@@ -615,7 +616,7 @@ class Settings extends BaseAdmin
     protected function _shop_pg_stripe()
     {
         //  Additional params
-        \Nails\Admin\Helper::loadView('shop_pg/stripe');
+        Helper::loadView('shop_pg/stripe');
     }
 
     // --------------------------------------------------------------------------
@@ -627,7 +628,7 @@ class Settings extends BaseAdmin
     protected function _shop_pg_paypal_express()
     {
         //  Additional params
-        \Nails\Admin\Helper::loadView('shop_pg/paypal_express');
+        Helper::loadView('shop_pg/paypal_express');
     }
 
     // --------------------------------------------------------------------------

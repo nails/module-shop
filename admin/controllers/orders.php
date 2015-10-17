@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Shop;
 
+use Nails\Admin\Helper;
 use Nails\Shop\Controller\BaseAdmin;
 
 class Orders extends BaseAdmin
@@ -126,7 +127,7 @@ class Orders extends BaseAdmin
 
         //  Filter Checkboxes
         $cbFilters   = array();
-        $cbFilters[] = \Nails\Admin\Helper::searchFilterObject(
+        $cbFilters[] = Helper::searchFilterObject(
             $tablePrefix . '.status',
             'Status',
             array(
@@ -138,7 +139,7 @@ class Orders extends BaseAdmin
                 array('Pending', 'PENDING')
            )
         );
-        $cbFilters[] = \Nails\Admin\Helper::searchFilterObject(
+        $cbFilters[] = Helper::searchFilterObject(
             $tablePrefix . '.fulfilment_status',
             'Fulfilled',
             array(
@@ -146,7 +147,7 @@ class Orders extends BaseAdmin
                 array('No', 'UNFULFILLED')
            )
         );
-        $cbFilters[] = \Nails\Admin\Helper::searchFilterObject(
+        $cbFilters[] = Helper::searchFilterObject(
             $tablePrefix . '.delivery_type',
             'Delivery Type',
             array(
@@ -173,8 +174,8 @@ class Orders extends BaseAdmin
         $this->data['orders'] = $this->shop_order_model->get_all($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
-        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords, $cbFilters);
-        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+        $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords, $cbFilters);
+        $this->data['pagination'] = Helper::paginationObject($page, $perPage, $totalRows);
 
         // --------------------------------------------------------------------------
 
@@ -183,7 +184,7 @@ class Orders extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        \Nails\Admin\Helper::loadView('index');
+        Helper::loadView('index');
     }
 
     // --------------------------------------------------------------------------
@@ -247,7 +248,7 @@ class Orders extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        \Nails\Admin\Helper::loadView('view');
+        Helper::loadView('view');
     }
 
     // --------------------------------------------------------------------------

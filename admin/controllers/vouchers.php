@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Shop;
 
+use Nails\Admin\Helper;
 use Nails\Shop\Controller\BaseAdmin;
 
 class Vouchers extends BaseAdmin
@@ -115,7 +116,7 @@ class Vouchers extends BaseAdmin
 
         //  Filter columns
         $filters   = array();
-        $filters[] = \Nails\Admin\Helper::searchFilterObject(
+        $filters[] = Helper::searchFilterObject(
             $tablePrefix . '.type',
             'View only',
             array(
@@ -143,19 +144,19 @@ class Vouchers extends BaseAdmin
         $this->data['vouchers'] = $this->shop_voucher_model->get_all($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
-        $this->data['search']     = \Nails\Admin\Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords, $filters);
-        $this->data['pagination'] = \Nails\Admin\Helper::paginationObject($page, $perPage, $totalRows);
+        $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords, $filters);
+        $this->data['pagination'] = Helper::paginationObject($page, $perPage, $totalRows);
 
         // --------------------------------------------------------------------------
 
         if (userHasPermission('admin:shop:voucher:create')) {
 
-            \Nails\Admin\Helper::addHeaderButton('admin/shop/vouchers/create', 'Create Voucher');
+            Helper::addHeaderButton('admin/shop/vouchers/create', 'Create Voucher');
         }
 
         // --------------------------------------------------------------------------
 
-        \Nails\Admin\Helper::loadView('index');
+        Helper::loadView('index');
     }
 
     // --------------------------------------------------------------------------
@@ -335,7 +336,7 @@ class Vouchers extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load views
-        \Nails\Admin\Helper::loadView('edit');
+        Helper::loadView('edit');
     }
 
     // --------------------------------------------------------------------------
