@@ -422,7 +422,7 @@
 
                 ?>
             </fieldset>
-            <p style="margin-top:1em;margin-bottom:0;">
+            <p>
                 <?=form_submit('submit', lang('action_save_changes'), 'class="awesome" style="margin-bottom:0;"')?>
             </p>
             <?=form_close()?>
@@ -495,7 +495,7 @@
 
                 ?>
             </fieldset>
-            <p style="margin-top:1em;margin-bottom:0;">
+            <p>
                 <?=form_submit('submit', lang('action_save_changes'), 'class="awesome" style="margin-bottom:0;"')?>
             </p>
             <?=form_close()?>
@@ -859,7 +859,7 @@
             </section>
             <?php
 
-                echo '<p style="margin-top:1em;margin-bottom:0;">';
+                echo '<p>';
                     echo form_submit('submit', lang('action_save_changes'), 'class="awesome" style="margin-bottom:0;"');
                 echo '</p>';
                 echo form_close();
@@ -925,7 +925,7 @@
                 }
 
             ?>
-            <p style="margin-top:1em;margin-bottom:0;">
+            <p>
                 <?=form_submit('submit', lang('action_save_changes'), 'class="awesome" style="margin-bottom:0;"')?>
             </p>
             <?=form_close()?>
@@ -1026,7 +1026,7 @@
 
                 ?>
             </fieldset>
-            <p style="margin-top:1em;margin-bottom:0;">
+            <p>
                 <?=form_submit('submit', lang('action_save_changes'), 'class="awesome" style="margin-bottom:0;"')?>
             </p>
             <?=form_close()?>
@@ -1085,7 +1085,7 @@
                 }
 
             ?>
-            <p style="margin-top:1em;margin-bottom:0;">
+            <p>
                 <?=form_submit('submit', lang('action_save_changes'), 'class="awesome" style="margin-bottom:0;"')?>
             </p>
             <?=form_close()?>
