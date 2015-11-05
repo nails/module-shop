@@ -115,7 +115,7 @@
         anchor(
             'admin/shop/manage/product_type_meta' . $isModal,
             'Cancel',
-            'class="awesome red confirm" data-title="Are you sure?" data-body="All unsaved changes will be lost."'
+            'class="awesome red confirm" data-body="All unsaved changes will be lost."'
         );
 
     ?>

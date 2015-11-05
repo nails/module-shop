@@ -265,7 +265,8 @@ class NAILS_Shop_feed_model extends NAILS_Model
     {
         if (empty($this->cacheFile)) {
 
-            $this->cacheFile = DEPLOY_CACHE_DIR . 'shop-feed-' . $provider . '-' . date('Y-m-d') . '.' . $format;
+            $oDate = Factory::factory('DateTime');
+            $this->cacheFile = DEPLOY_CACHE_DIR . 'shop-feed-' . $provider . '-' . $oDate->format('Y-m-d') . '.' . $format;
         }
 
         return $this->cacheFile;

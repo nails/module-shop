@@ -63,7 +63,7 @@
 
                                 if (userHasPermission('admin:shop:manage:category:delete')) {
 
-                                    echo anchor('admin/shop/manage/category/delete/' . $category->id . $isModal, lang('action_delete'), 'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone, any child categories will also be deleted."');
+                                    echo anchor('admin/shop/manage/category/delete/' . $category->id . $isModal, lang('action_delete'), 'class="awesome small red confirm" data-body="This action cannot be undone, any child categories will also be deleted."');
                                 }
 
                                 echo anchor($shopUrl . 'category/' . $category->slug, lang('action_view'), 'class="awesome small orange" target="_blank"');

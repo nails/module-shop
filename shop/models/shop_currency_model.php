@@ -293,6 +293,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
             $toSave = array();
             $oBody  = @json_decode($oResponse->getBody());
+            $oDate  = Factory::factory('DateTime');
 
             if (empty($oBody)) {
 
@@ -315,7 +316,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
                             'from'     => $oBody->base,
                             'to'       => $toCurrency,
                             'rate'     => $rate,
-                            'modified' => date('Y-m-d H:i:s')
+                            'modified' => $oDate->format('Y-m-d H:i:s')
                         );
                     }
                 }
@@ -347,7 +348,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
                             'from'     => SHOP_BASE_CURRENCY_CODE,
                             'to'       => $toCurrency,
                             'rate'     => $newRate,
-                            'modified' => date('Y-m-d H:i:s')
+                            'modified' => $oDate->format('Y-m-d H:i:s')
                         );
 
                         if (empty($muteLog)) {
@@ -371,7 +372,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
                 'from'     => SHOP_BASE_CURRENCY_CODE,
                 'to'       => SHOP_BASE_CURRENCY_CODE,
                 'rate'     => 1,
-                'modified' => date('Y-m-d H:i:s')
+                'modified' => $oDate->format('Y-m-d H:i:s')
             );
 
             foreach ($toSave as $old) {
@@ -380,7 +381,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
                     'from'     => $old['to'],
                     'to'       => SHOP_BASE_CURRENCY_CODE,
                     'rate'     => 1 / $old['rate'],
-                    'modified' => date('Y-m-d H:i:s')
+                    'modified' => $oDate->format('Y-m-d H:i:s')
                 );
 
             }

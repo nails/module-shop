@@ -171,7 +171,7 @@
                                              $_buttons[] = anchor(
                                                 'admin/shop/orders/reprocess/' . $order->id,
                                                 'Process',
-                                                'class="awesome small orange confirm" data-title="Are you sure?" data-body="Processing the order again may result in multiple dispatch of items, or dispatch of unpaid items."'
+                                                'class="awesome small orange confirm" data-body="Processing the order again may result in multiple dispatch of items, or dispatch of unpaid items."'
                                             );
                                         }
 

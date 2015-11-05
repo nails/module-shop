@@ -64,7 +64,7 @@
 
                                 if (userHasPermission('admin:shop:manage:brand:delete')) {
 
-                                    echo anchor('admin/shop/manage/brand/delete/' . $brand->id . $isModal, lang('action_delete'), 'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."');
+                                    echo anchor('admin/shop/manage/brand/delete/' . $brand->id . $isModal, lang('action_delete'), 'class="awesome small red confirm" data-body="This action cannot be undone."');
 
                                 }
 

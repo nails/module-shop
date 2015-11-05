@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Shop;
 
+use Nails\Factory;
 use Nails\Admin\Helper;
 use Nails\Shop\Controller\BaseAdmin;
 
@@ -72,6 +73,7 @@ class Reports extends BaseAdmin
          * and end dates.
          */
 
+        $oDate                     = Factory::factory('DateTime');
         $firstFinancialYearEndDate = app_setting('firstFinancialYearEndDate', 'shop');
 
         if (!empty($firstFinancialYearEndDate)) {
@@ -94,14 +96,14 @@ class Reports extends BaseAdmin
 
 
                 //  If we're before the
-                $yearEnd[0] = date('Y');
+                $yearEnd[0] = $oDate->format('Y');
                 $this->currentFY        = new \stdClass();
                 $this->currentFY->start = null;
                 $this->currentFY->end   = new \DateTime(implode('-', $yearEnd) . ' 23:59:59');
                 $this->currentFY->start = new \DateTime(implode('-', $yearEnd) . ' 23:59:59');
                 $this->currentFY->start->sub($yearInvterval)->add($secondInvterval);
 
-                $yearEnd[0] = date('Y') - 1;
+                $yearEnd[0] = $oDate->format('Y') - 1;
                 $this->previousFY        = new \stdClass();
                 $this->previousFY->start = null;
                 $this->previousFY->end   = new \DateTime(implode('-', $yearEnd) . ' 23:59:59');
@@ -355,7 +357,8 @@ class Reports extends BaseAdmin
                                 $this->zip->add_data($file[0], $file[1]);
                             }
 
-                            $this->zip->download('shop-report-' . $source[2] . '-' . date('Y-m-d_H-i-s'));
+                            $oDate = Factory::factory('DateTime');
+                            $this->zip->download('shop-report-' . $source[2] . '-' . $oDate->format('Y-m-d_H-i-s'));
 
                         } else {
 
@@ -646,12 +649,14 @@ class Reports extends BaseAdmin
         //  Send header
         if (!$returnData) {
 
+            $oDate = Factory::factory('DateTime');
+
             $this->output->set_content_type('application/octet-stream');
             $this->output->set_header('Pragma: public');
             $this->output->set_header('Expires: 0');
             $this->output->set_header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
             $this->output->set_header('Cache-Control: private', false);
-            $this->output->set_header('Content-Disposition: attachment; filename=shop-report-' . $data->filename . '-' . date('Y-m-d_H-i-s') . '.csv;');
+            $this->output->set_header('Content-Disposition: attachment; filename=shop-report-' . $data->filename . '-' . $oDate->format('Y-m-d_H-i-s') . '.csv;');
             $this->output->set_header('Content-Transfer-Encoding: binary');
         }
 
@@ -692,12 +697,14 @@ class Reports extends BaseAdmin
         //  Send header
         if (!$returnData) {
 
+            $oDate = Factory::factory('DateTime');
+
             $this->output->set_content_type('application/octet-stream');
             $this->output->set_header('Pragma: public');
             $this->output->set_header('Expires: 0');
             $this->output->set_header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
             $this->output->set_header('Cache-Control: private', false);
-            $this->output->set_header('Content-Disposition: attachment; filename=shop-report-' . $data->filename . '-' . date('Y-m-d_H-i-s') . '.html;');
+            $this->output->set_header('Content-Disposition: attachment; filename=shop-report-' . $data->filename . '-' . $oDate->format('Y-m-d_H-i-s') . '.html;');
             $this->output->set_header('Content-Transfer-Encoding: binary');
         }
 
@@ -795,12 +802,14 @@ class Reports extends BaseAdmin
         //  Send header
         if (!$returnData) {
 
+            $oDate = Factory::factory('DateTime');
+
             $this->output->set_content_type('application/octet-stream');
             $this->output->set_header('Pragma: public');
             $this->output->set_header('Expires: 0');
             $this->output->set_header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
             $this->output->set_header('Cache-Control: private', false);
-            $this->output->set_header('Content-Disposition: attachment; filename=shop-report-' . $data->filename . '-' . date('Y-m-d_H-i-s') . '.txt;');
+            $this->output->set_header('Content-Disposition: attachment; filename=shop-report-' . $data->filename . '-' . $oDate->format('Y-m-d_H-i-s') . '.txt;');
             $this->output->set_header('Content-Transfer-Encoding: binary');
         }
 
@@ -839,12 +848,14 @@ class Reports extends BaseAdmin
         //  Send header
         if (!$returnData) {
 
+            $oDate = Factory::factory('DateTime');
+
             $this->output->set_content_type('application/octet-stream');
             $this->output->set_header('Pragma: public');
             $this->output->set_header('Expires: 0');
             $this->output->set_header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
             $this->output->set_header('Cache-Control: private', false);
-            $this->output->set_header('Content-Disposition: attachment; filename=shop-report-' . $data->filename . '-' . date('Y-m-d_H-i-s') . '.json;');
+            $this->output->set_header('Content-Disposition: attachment; filename=shop-report-' . $data->filename . '-' . $oDate->format('Y-m-d_H-i-s') . '.json;');
             $this->output->set_header('Content-Transfer-Encoding: binary');
         }
 

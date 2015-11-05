@@ -42,7 +42,7 @@
                                 if (userHasPermission('admin:shop:manage:supplier:edit')) {
 
                                     echo anchor(
-                                        'admin/shop/manage/supplier/edit/' . $supplier->id . $isModal, 
+                                        'admin/shop/manage/supplier/edit/' . $supplier->id . $isModal,
                                         lang('action_edit'),
                                         'class="awesome small"'
                                     );
@@ -54,7 +54,7 @@
                                     echo anchor(
                                         'admin/shop/manage/supplier/delete/' . $supplier->id . $isModal,
                                         lang('action_delete'),
-                                        'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."'
+                                        'class="awesome small red confirm" data-body="This action cannot be undone."'
                                     );
 
                                 }

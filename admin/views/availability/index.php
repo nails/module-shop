@@ -76,7 +76,7 @@
 
                                         if (userHasPermission('admin:shop:availability:delete')) {
 
-                                            $_buttons[] = anchor('admin/shop/availability/delete/' . $item->id, lang('action_delete'), 'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."');
+                                            $_buttons[] = anchor('admin/shop/availability/delete/' . $item->id, lang('action_delete'), 'class="awesome small red confirm" data-body="This action cannot be undone."');
 
                                         }
 

@@ -97,7 +97,7 @@
             $field                = array();
             $field['key']         = 'valid_from';
             $field['label']       = 'Valid From';
-            $field['default']     = date('Y-m-d H:i:s', strtotime('TODAY'));
+            $field['default']     = date('Y-m-d H:i:s');
             $field['placeholder'] = 'YYYY-MM-DD HH:MM:SS';
             $field['class']       = 'datetime1';
             $field['required']    = true;

@@ -95,7 +95,7 @@
         echo anchor(
             'admin/shop/manage/collection' . $isModal,
             'Cancel',
-            'class="awesome red confirm" data-title="Are you sure?" data-body="All unsaved changes will be lost."'
+            'class="awesome red confirm" data-body="All unsaved changes will be lost."'
         );
 
     ?>

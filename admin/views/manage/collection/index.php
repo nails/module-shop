@@ -50,7 +50,7 @@
 
                                 if (userHasPermission('admin:shop:manage:collection:delete')) {
 
-                                    echo anchor('admin/shop/manage/collection/delete/' . $collection->id . $isModal, lang('action_delete'), 'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."');
+                                    echo anchor('admin/shop/manage/collection/delete/' . $collection->id . $isModal, lang('action_delete'), 'class="awesome small red confirm" data-body="This action cannot be undone."');
                                 }
 
                                 echo anchor($shopUrl . 'collection/' . $collection->slug, lang('action_view'), 'class="awesome small orange" target="_blank"');

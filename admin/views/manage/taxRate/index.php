@@ -53,7 +53,7 @@
                                     echo anchor(
                                         'admin/shop/manage/taxRate/delete/' . $taxRate->id . $isModal,
                                         lang('action_delete'),
-                                        'class="awesome small red confirm" data-title="Are you sure?" data-body="This action cannot be undone."'
+                                        'class="awesome small red confirm" data-body="This action cannot be undone."'
                                     );
                                 }
 

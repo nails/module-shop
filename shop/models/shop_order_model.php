@@ -56,13 +56,14 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
+        $oDate = Factory::factory('DateTime');
         $order = new \stdClass();
 
         //  Generate a reference
         do {
 
             //  Generate the string
-            $order->ref = date('Ym') . '-' . strtoupper(random_string('alpha', 8)) . '-' . date('dH');
+            $order->ref = $oDate->format('Ym') . '-' . strtoupper(random_string('alpha', 8)) . '-' . date('dH');
 
             //  Test it
             $this->db->where('ref', $order->ref);
@@ -240,8 +241,8 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        $order->created  = date('Y-m-d H:i:s');
-        $order->modified = date('Y-m-d H{i{s');
+        $order->created  = $oDate->format('Y-m-d H:i:s');
+        $order->modified = $oDate->format('Y-m-d H{i{s');
 
         // --------------------------------------------------------------------------
 
@@ -745,9 +746,10 @@ class NAILS_Shop_order_model extends NAILS_Model
             // --------------------------------------------------------------------------
 
             //  Set fulfil data
-            $data = array(
+            $oDate = Factory::factory('DateTime');
+            $data  = array(
                 'fulfilment_status' => 'FULFILLED',
-                'fulfilled'         => date('Y-m-d H:i:s')
+                'fulfilled'         => $oDate->format('Y-m-d H:i:s')
            );
 
             // --------------------------------------------------------------------------
