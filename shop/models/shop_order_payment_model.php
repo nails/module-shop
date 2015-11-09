@@ -10,6 +10,8 @@
  * @link
  */
 
+use Nails\Factory;
+
 class NAILS_Shop_order_payment_model extends NAILS_Model
 {
     public function __construct()
@@ -24,10 +26,11 @@ class NAILS_Shop_order_payment_model extends NAILS_Model
     public function create($data)
     {
         $this->load->model('shop/shop_model');
-        $this->load->model('shop/shop_currency_model');
 
-        $data['amount_base']    = $this->shop_currency_model->convert($data['amount'], $data['currency'], SHOP_BASE_CURRENCY_CODE);
-        $data['currency_base']    = SHOP_BASE_CURRENCY_CODE;
+        $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
+
+        $data['amount_base']   = $oCurrencyModel->convert($data['amount'], $data['currency'], SHOP_BASE_CURRENCY_CODE);
+        $data['currency_base'] = SHOP_BASE_CURRENCY_CODE;
 
         return parent::create($data);
     }

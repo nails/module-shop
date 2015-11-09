@@ -268,7 +268,7 @@ class Inventory extends BaseAdmin
 
         if (userHasPermission('admin:shop:inventory:create')) {
 
-            Helper::addHeaderButton('admin/shop/inventory/import', 'Import Items', 'orange');
+            Helper::addHeaderButton('admin/shop/inventory/import', 'Import Items', 'warning');
             Helper::addHeaderButton('admin/shop/inventory/create', 'Add New Item');
         }
 
@@ -302,13 +302,18 @@ class Inventory extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data, this data is used in both the view and the form submission
-        $this->data['currencies']    = $this->shop_currency_model->getAllSupported();
+        $oCurrencyModel              = Factory::model('Currency', 'nailsapp/module-shop');
+        $this->data['currencies']    = $oCurrencyModel->getAllSupported();
         $this->data['product_types'] = $this->shop_product_type_model->get_all();
 
         if (!$this->data['product_types']) {
 
             //  No Product types, some need added, yo!
-            $this->session->set_flashdata('message', '<strong>Hey!</strong> No product types have been defined. You must set some before you can add inventory items.');
+            $this->session->set_flashdata(
+                'negative',
+                '<strong>Missing Product Types</strong>' .
+                '<br />No product types have been defined. You must create some before you can add inventory items.'
+            );
             redirect('admin/shop/manage/productType/create');
         }
 
@@ -493,7 +498,8 @@ class Inventory extends BaseAdmin
             redirect('admin/shop/manage/productType/create');
         }
 
-        $this->data['currencies'] = $this->shop_currency_model->getAllSupported();
+        $oCurrencyModel           = Factory::model('Currency', 'nailsapp/module-shop');
+        $this->data['currencies'] = $oCurrencyModel->getAllSupported();
 
         //  Fetch product type meta fields
         $this->data['product_types_meta'] = array();

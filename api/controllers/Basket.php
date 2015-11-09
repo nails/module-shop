@@ -179,24 +179,25 @@ class Basket extends \Nails\Api\Controller\Base
 
         // --------------------------------------------------------------------------
 
-        $out     = array();
-        $voucher = $this->shop_voucher_model->validate($this->input->post('voucher'), getBasket());
+        $aOut          = array();
+        $oVoucherModel = Factory::model('Voucher', 'nailsapp/module-shop');
+        $oVoucher      = $oVoucherModel->validate($this->input->post('voucher'), getBasket());
 
-        if ($voucher) {
+        if ($oVoucher) {
 
-            if (!$this->shop_basket_model->addVoucher($voucher->code)) {
+            if (!$this->shop_basket_model->addVoucher($oVoucher->code)) {
 
-                $out['status'] = 400;
-                $out['error']  = $this->shop_basket_model->last_error();
+                $aOut['status'] = 400;
+                $aOut['error']  = $this->shop_basket_model->last_error();
             }
 
         } else {
 
-            $out['status'] = 400;
-            $out['error']  = $this->shop_voucher_model->last_error();
+            $aOut['status'] = 400;
+            $aOut['error']  = $oVoucherModel->last_error();
         }
 
-        return $out;
+        return $aOut;
     }
 
     // --------------------------------------------------------------------------
@@ -267,12 +268,13 @@ class Basket extends \Nails\Api\Controller\Base
 
         // --------------------------------------------------------------------------
 
-        $out      = array();
-        $currency = $this->shop_currency_model->getByCode($this->input->post('currency'));
+        $aOut            = array();
+        $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
+        $oCurrency       = $oCurrencyModel->getByCode($this->input->post('currency'));
 
-        if ($currency) {
+        if ($oCurrency) {
 
-            $this->session->set_userdata('shop_currency', $currency->code);
+            $this->session->set_userdata('shop_currency', $oCurrency->code);
 
             if ($this->user_model->isLoggedIn()) {
 
@@ -282,18 +284,18 @@ class Basket extends \Nails\Api\Controller\Base
                     NAILS_DB_PREFIX . 'user_meta_shop',
                     activeUser('id'),
                     array(
-                        'currency' => $currency->code
+                        'currency' => $oCurrency->code
                     )
                 );
             }
 
         } else {
 
-            $out['status'] = 400;
-            $out['error']  = $this->shop_currency_model->last_error();
+            $aOut['status'] = 400;
+            $aOut['error']  = $oCurrencyModel->last_error();
         }
 
-        return $out;
+        return $aOut;
     }
 
     // --------------------------------------------------------------------------

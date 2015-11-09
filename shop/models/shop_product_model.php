@@ -17,6 +17,7 @@ class NAILS_Shop_product_model extends Base
 {
     protected $oUser;
     protected $oUserMeta;
+    protected $oCurrencyModel;
 
     // --------------------------------------------------------------------------
 
@@ -29,8 +30,9 @@ class NAILS_Shop_product_model extends Base
 
         // --------------------------------------------------------------------------
 
-        $this->oUser     = Factory::model('User', 'nailsapp/module-auth');
-        $this->oUserMeta = Factory::model('UserMeta', 'nailsapp/module-auth');
+        $this->oUser          = Factory::model('User', 'nailsapp/module-auth');
+        $this->oUserMeta      = Factory::model('UserMeta', 'nailsapp/module-auth');
+        $this->oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
 
         // --------------------------------------------------------------------------
 
@@ -395,11 +397,11 @@ class NAILS_Shop_product_model extends Base
                     }
 
                     //  Convert the prices into the correct format for the database
-                    $_data->variation[$index]->pricing[$priceIndex]->price = $this->shop_currency_model->floatToInt(
+                    $_data->variation[$index]->pricing[$priceIndex]->price = $this->oCurrencyModel->floatToInt(
                         $_data->variation[$index]->pricing[$priceIndex]->price,
                         $_data->variation[$index]->pricing[$priceIndex]->currency
                     );
-                    $_data->variation[$index]->pricing[$priceIndex]->sale_price = $this->shop_currency_model->floatToInt(
+                    $_data->variation[$index]->pricing[$priceIndex]->sale_price = $this->oCurrencyModel->floatToInt(
                         $_data->variation[$index]->pricing[$priceIndex]->sale_price,
                         $_data->variation[$index]->pricing[$priceIndex]->currency
                     );
@@ -1001,7 +1003,7 @@ class NAILS_Shop_product_model extends Base
          * where everything is 0. the code below can fill in the gaps where appropriate
          */
 
-        $supportedCurrency     = $this->shop_currency_model->getAllSupported();
+        $supportedCurrency     = $this->oCurrencyModel->getAllSupported();
         $supportedCurrencyFlat = array();
         $basePriceRaw          = new \stdClass();
 
@@ -1257,11 +1259,11 @@ class NAILS_Shop_product_model extends Base
                     if (empty($userPrice->price)) {
 
                         //  The user's price is empty() so we should automatically calculate it from the base price
-                        $_price = $this->shop_currency_model->convertBaseToUser($basePrice->price);
+                        $_price = $this->oCurrencyModel->convertBaseToUser($basePrice->price);
 
                         if ($_price === false) {
 
-                            showFatalError('Failed to convert currency', 'Could not convert from ' . SHOP_BASE_CURRENCY_CODE . ' to ' . SHOP_USER_CURRENCY_CODE . '. ' . $this->shop_currency_model->last_error());
+                            showFatalError('Failed to convert currency', 'Could not convert from ' . SHOP_BASE_CURRENCY_CODE . ' to ' . SHOP_USER_CURRENCY_CODE . '. ' . $this->oCurrencyModel->last_error());
                         }
 
                     } else {
@@ -1279,11 +1281,11 @@ class NAILS_Shop_product_model extends Base
                     if (empty($userPrice->sale_price)) {
 
                         //  The user's sale_price is empty() so we should automatically calculate it from the base price
-                        $salePrice = $this->shop_currency_model->convertBaseToUser($basePrice->sale_price);
+                        $salePrice = $this->oCurrencyModel->convertBaseToUser($basePrice->sale_price);
 
                         if ($_price === false) {
 
-                            showFatalError('Failed to convert currency', 'Could not convert from ' . SHOP_BASE_CURRENCY_CODE . ' to ' . SHOP_USER_CURRENCY_CODE . '. ' . $this->shop_currency_model->last_error());
+                            showFatalError('Failed to convert currency', 'Could not convert from ' . SHOP_BASE_CURRENCY_CODE . ' to ' . SHOP_USER_CURRENCY_CODE . '. ' . $this->oCurrencyModel->last_error());
                         }
 
                     } else {
@@ -1418,20 +1420,20 @@ class NAILS_Shop_product_model extends Base
                 $v->price->price->base->value_ex_tax  = (int) $v->price->price->base->value_ex_tax;
                 $v->price->price->base->value_tax     = (int) $v->price->price->base->value_tax;
 
-                $v->price->price->base_formatted->value         = $this->shop_currency_model->formatBase($v->price->price->base->value);
-                $v->price->price->base_formatted->value_inc_tax = $this->shop_currency_model->formatBase($v->price->price->base->value_inc_tax);
-                $v->price->price->base_formatted->value_ex_tax  = $this->shop_currency_model->formatBase($v->price->price->base->value_ex_tax);
-                $v->price->price->base_formatted->value_tax     = $this->shop_currency_model->formatBase($v->price->price->base->value_tax);
+                $v->price->price->base_formatted->value         = $this->oCurrencyModel->formatBase($v->price->price->base->value);
+                $v->price->price->base_formatted->value_inc_tax = $this->oCurrencyModel->formatBase($v->price->price->base->value_inc_tax);
+                $v->price->price->base_formatted->value_ex_tax  = $this->oCurrencyModel->formatBase($v->price->price->base->value_ex_tax);
+                $v->price->price->base_formatted->value_tax     = $this->oCurrencyModel->formatBase($v->price->price->base->value_tax);
 
                 $v->price->price->user->value         = (int) $v->price->price->user->value;
                 $v->price->price->user->value_inc_tax = (int) $v->price->price->user->value_inc_tax;
                 $v->price->price->user->value_ex_tax  = (int) $v->price->price->user->value_ex_tax;
                 $v->price->price->user->value_tax     = (int) $v->price->price->user->value_tax;
 
-                $v->price->price->user_formatted->value         = $this->shop_currency_model->formatUser($v->price->price->user->value);
-                $v->price->price->user_formatted->value_inc_tax = $this->shop_currency_model->formatUser($v->price->price->user->value_inc_tax);
-                $v->price->price->user_formatted->value_ex_tax  = $this->shop_currency_model->formatUser($v->price->price->user->value_ex_tax);
-                $v->price->price->user_formatted->value_tax     = $this->shop_currency_model->formatUser($v->price->price->user->value_tax);
+                $v->price->price->user_formatted->value         = $this->oCurrencyModel->formatUser($v->price->price->user->value);
+                $v->price->price->user_formatted->value_inc_tax = $this->oCurrencyModel->formatUser($v->price->price->user->value_inc_tax);
+                $v->price->price->user_formatted->value_ex_tax  = $this->oCurrencyModel->formatUser($v->price->price->user->value_ex_tax);
+                $v->price->price->user_formatted->value_tax     = $this->oCurrencyModel->formatUser($v->price->price->user->value_tax);
 
 
                 $v->price->sale_price->base->value         = (int) $v->price->sale_price->base->value;
@@ -1439,20 +1441,20 @@ class NAILS_Shop_product_model extends Base
                 $v->price->sale_price->base->value_ex_tax  = (int) $v->price->sale_price->base->value_ex_tax;
                 $v->price->sale_price->base->value_tax     = (int) $v->price->sale_price->base->value_tax;
 
-                $v->price->sale_price->base_formatted->value         = $this->shop_currency_model->formatBase($v->price->sale_price->base->value);
-                $v->price->sale_price->base_formatted->value_inc_tax = $this->shop_currency_model->formatBase($v->price->sale_price->base->value_inc_tax);
-                $v->price->sale_price->base_formatted->value_ex_tax  = $this->shop_currency_model->formatBase($v->price->sale_price->base->value_ex_tax);
-                $v->price->sale_price->base_formatted->value_tax     = $this->shop_currency_model->formatBase($v->price->sale_price->base->value_tax);
+                $v->price->sale_price->base_formatted->value         = $this->oCurrencyModel->formatBase($v->price->sale_price->base->value);
+                $v->price->sale_price->base_formatted->value_inc_tax = $this->oCurrencyModel->formatBase($v->price->sale_price->base->value_inc_tax);
+                $v->price->sale_price->base_formatted->value_ex_tax  = $this->oCurrencyModel->formatBase($v->price->sale_price->base->value_ex_tax);
+                $v->price->sale_price->base_formatted->value_tax     = $this->oCurrencyModel->formatBase($v->price->sale_price->base->value_tax);
 
                 $v->price->sale_price->user->value         = (int) $v->price->sale_price->user->value;
                 $v->price->sale_price->user->value_inc_tax = (int) $v->price->sale_price->user->value_inc_tax;
                 $v->price->sale_price->user->value_ex_tax  = (int) $v->price->sale_price->user->value_ex_tax;
                 $v->price->sale_price->user->value_tax     = (int) $v->price->sale_price->user->value_tax;
 
-                $v->price->sale_price->user_formatted->value         = $this->shop_currency_model->formatUser($v->price->sale_price->user->value);
-                $v->price->sale_price->user_formatted->value_inc_tax = $this->shop_currency_model->formatUser($v->price->sale_price->user->value_inc_tax);
-                $v->price->sale_price->user_formatted->value_ex_tax  = $this->shop_currency_model->formatUser($v->price->sale_price->user->value_ex_tax);
-                $v->price->sale_price->user_formatted->value_tax     = $this->shop_currency_model->formatUser($v->price->sale_price->user->value_tax);
+                $v->price->sale_price->user_formatted->value         = $this->oCurrencyModel->formatUser($v->price->sale_price->user->value);
+                $v->price->sale_price->user_formatted->value_inc_tax = $this->oCurrencyModel->formatUser($v->price->sale_price->user->value_inc_tax);
+                $v->price->sale_price->user_formatted->value_ex_tax  = $this->oCurrencyModel->formatUser($v->price->sale_price->user->value_ex_tax);
+                $v->price->sale_price->user_formatted->value_tax     = $this->oCurrencyModel->formatUser($v->price->sale_price->user->value_tax);
 
                 // --------------------------------------------------------------------------
 
@@ -2513,7 +2515,7 @@ class NAILS_Shop_product_model extends Base
     public function getRecentlyViewed()
     {
         //  Session
-        $recentlyViewed = $this->session->userdata('shop_recently_viewed');
+        $recentlyViewed = $this->session->userdata('shop_recently_viewed') ?: array();
 
         // --------------------------------------------------------------------------
 

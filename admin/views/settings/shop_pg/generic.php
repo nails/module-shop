@@ -5,7 +5,7 @@
     <hr />
     <?php
 
-        echo form_open('admin/shop/settings/shop_pg/' . $this->uri->segment(4) . '?isModal=' . $this->input->get('isModal'));
+        echo form_open('admin/shop/settings/shop_pg?gateway=' . $gateway_slug . '&isModal=' . $isModal);
         echo '<input type="hidden" name="activeTab" value="' . set_value('activeTab') . '" id="activeTab" />';
     ?>
     <ul class="tabs">
@@ -95,7 +95,7 @@
         </div>
     </section>
     <p>
-        <button type="submit" class="awesome">
+        <button type="submit" class="btn btn-primary">
             Save Changes
         </button>
     </p>

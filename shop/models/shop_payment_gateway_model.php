@@ -21,6 +21,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
     protected $isRedirect;
     protected $checkoutSessionKey;
     protected $oLogger;
+    protected $oCurrencyModel;
 
     // --------------------------------------------------------------------------
 
@@ -60,11 +61,8 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        $this->load->model('shop/shop_currency_model');
-
-        // --------------------------------------------------------------------------
-
-        $this->oLogger = Factory::service('Logger');
+        $this->oLogger        = Factory::service('Logger');
+        $this->oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
     }
 
     // --------------------------------------------------------------------------
@@ -324,7 +322,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
         //  And now the purchase request
         $data                  = array();
-        $data['amount']        = $this->shop_currency_model->intToFloat($order->totals->user->grand, $order->currency);
+        $data['amount']        = $this->oCurrencyModel->intToFloat($order->totals->user->grand, $order->currency);
         $data['currency']      = $order->currency;
         $data['card']          = $creditCard;
         $data['transactionId'] = $order->id;
@@ -374,7 +372,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
                 $paymentData                   = array();
                 $paymentData['order_id']       = $order->id;
                 $paymentData['transaction_id'] = $transactionId;
-                $paymentData['amount']         = $this->shop_currency_model->intToFloat($order->totals->user->grand, $order->currency);
+                $paymentData['amount']         = $this->oCurrencyModel->intToFloat($order->totals->user->grand, $order->currency);
                 $paymentData['currency']       = $order->currency;
 
                 // --------------------------------------------------------------------------
@@ -849,7 +847,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         $out['order_id']       = (int) $this->input->post('cartId');
         $out['transaction_id'] = $this->input->post('transId');
         $out['currency']       = $this->input->post('currency');
-        $out['amount']         = $this->shop_currency_model->floatToInt($this->input->post('amount'), $out['currency']);
+        $out['amount']         = $this->oCurrencyModel->floatToInt($this->input->post('amount'), $out['currency']);
 
         return $out;
     }

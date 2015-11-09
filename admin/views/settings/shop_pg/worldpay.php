@@ -6,7 +6,7 @@
     <hr />
     <?php
 
-        echo form_open('admin/shop/settings/shop_pg/' . $gateway_slug . '?isModal=' . $this->input->get('isModal'));
+        echo form_open('admin/shop/settings/shop_pg?gateway=' . $gateway_slug . '&isModal=' . $isModal);
         echo '<input type="hidden" name="activeTab" value="' . set_value('activeTab') . '" id="activeTab" />';
 
     ?>
@@ -68,8 +68,8 @@
                     // --------------------------------------------------------------------------
 
                     $field            = array();
-                    $field['key']     = 'omnipay_' . $gateway_slug . '_customise_image';
-                    $field['label']   = 'Label';
+                    $field['key']     = 'omnipay_' . $gateway_slug . '_customise_img';
+                    $field['label']   = 'Image';
                     $field['bucket']  = 'shop-pg-img-' . $gateway_slug;
                     $field['default'] = app_setting($field['key'], 'shop');
 
@@ -122,7 +122,7 @@
                 $field                = array();
                 $field['key']         = 'omnipay_' . $gateway_slug . '_callbackPassword';
                 $field['label']       = 'Payment Response Password';
-                $field['info']        = '<a href="#" id="generate-password" class="awesome small">Generate</a>';
+                $field['info']        = '<a href="#" id="generate-password" class="btn btn-xs btn-default">Generate</a>';
                 $field['default']     = app_setting($field['key'], 'shop');
                 $field['placeholder'] = 'The Payment Response Password for this installation.';
                 $field['type']        = 'password';
@@ -137,7 +137,7 @@
                 $field                = array();
                 $field['key']         = 'omnipay_' . $gateway_slug . '_secretWord';
                 $field['label']       = 'MD5 Secret for Transactions';
-                $field['info']        = '<a href="#" id="generate-secret" class="awesome small">Generate</a>';
+                $field['info']        = '<a href="#" id="generate-secret" class="btn btn-xs btn-default">Generate</a>';
                 $field['default']     = app_setting($field['key'], 'shop');
                 $field['placeholder'] = 'The MD5 Secret for this installation\'s transactions.';
                 $field['type']        = 'password';
@@ -335,7 +335,7 @@
         </div>
     </section>
     <p>
-        <button type="submit" class="awesome">
+        <button type="submit" class="btn btn-primary">
             Save Changes
         </button>
     </p>

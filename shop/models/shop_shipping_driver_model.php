@@ -342,8 +342,8 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
         $out->base = $cost;
 
         //  Convert the base price to the user's currency
-        $this->load->model('shop/shop_currency_model');
-        $out->user = $this->shop_currency_model->convertBaseToUser($cost);
+        $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
+        $out->user = $oCurrencyModel->convertBaseToUser($cost);
 
         return $out;
     }
@@ -455,8 +455,8 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
         $out->base = $cost;
 
         //  Convert the base price to the user's currency
-        $this->load->model('shop/shop_currency_model');
-        $out->user = $this->shop_currency_model->convertBaseToUser($cost);
+        $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
+        $out->user = $oCurrencyModel->convertBaseToUser($cost);
 
         return $out;
     }

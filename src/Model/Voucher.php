@@ -10,16 +10,66 @@
  * @link
  */
 
-use Nails\Factory;
+namespace Nails\Shop\Model;
 
-class NAILS_Shop_voucher_model extends NAILS_Model
+use Nails\Factory;
+use Nails\Common\Model\Base;
+
+class Voucher extends Base
 {
+    const TYPE_NORMAL                       = 'NORMAL';
+    const TYPE_LIMITED_USE                  = 'LIMITED_USE';
+    const TYPE_GIFT_CARD                    = 'GIFT_CARD';
+    const STATUS_ACTIVE                     = 'ACTIVE';
+    const STATUS_INACTIVE                   = 'INACTIVE';
+    const STATUS_EXPIRED                    = 'EXPIRED';
+    const STATUS_PENDING                    = 'PENDING';
+    const STATUS_LIMIT_REACHED              = 'LIMIT_REACHED';
+    const STATUS_ZERO_BALANCE               = 'ZERO_BALANCE';
+    const DISCOUNT_TYPE_PERCENT             = 'PERCENTAGE';
+    const DISCOUNT_TYPE_AMOUNT              = 'AMOUNT';
+    const DISCOUNT_APPLICATION_PRODUCTS     = 'PRODUCTS';
+    const DISCOUNT_APPLICATION_PRODUCT_TYPE = 'PRODUCT_TYPES';
+    const DISCOUNT_APPLICATION_SHIPPING     = 'SHIPPING';
+    const DISCOUNT_APPLICATION_ALL          = 'ALL';
+
+
+    // --------------------------------------------------------------------------
+
     public function __construct()
     {
         parent::__construct();
         $this->table = NAILS_DB_PREFIX . 'shop_voucher';
         $this->tablePrefix = 'sv';
         $this->destructiveDelete = false;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Return the varying types of voucher
+     * @return array
+     */
+    public function getTypes()
+    {
+        return array(
+            self::TYPE_NORMAL      => 'Normal',
+            self::TYPE_LIMITED_USE => 'Limited Use',
+            self::TYPE_GIFT_CARD   => 'Gift Card'
+        );
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Determines whether a passed string is a valid status
+     * @param  string  $sType The string to check
+     * @return boolean
+     */
+    public function isValidStatus($sStatus)
+    {
+        $aStatuses = $this->getStatuses();
+        return !empty($aStatuses[$sStatus]);
     }
 
     // --------------------------------------------------------------------------
@@ -58,17 +108,17 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 
         switch ($voucher->type) {
 
-            case 'GIFT_CARD':
+            case self::TYPE_GIFT_CARD:
 
                 return $this->redeemGiftCard($voucher, $order);
                 break;
 
-            case 'LIMITED_USE':
+            case self::TYPE_LIMITED_USE:
 
                 return $this->redeemLimitedUse($voucher, $order);
                 break;
 
-            case 'NORMAL':
+            case self::TYPE_NORMAL:
             default:
 
                 return $this->redeemNormal($voucher, $order);
@@ -154,7 +204,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 
         //  Alter the available balance
 
-        $this->db->set('gift_card_balance', 'gift_card_balance-' . $spend , false);
+        $this->db->set('gift_card_balance', 'gift_card_balance-' . $spend, false);
 
         $this->db->where('id', $voucher->id);
         return $this->db->update($this->table);
@@ -191,25 +241,83 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 
             switch ($voucher->discount_application) {
 
-                case 'PRODUCT_TYPES':
+                case self::DISCOUNT_APPLICATION_PRODUCT_TYPE:
 
                     $cache = $this->_get_cache($cacheKey);
                     if ($cache) {
 
                         //  Exists in cache
-                        $voucher->product = $_cache;
+                        $voucher->product = $cache;
 
                     } else {
 
                         //  Doesn't exist, fetch and save
                         $voucher->product = $this->shop_product_type_model->get_by_id($voucher->product_type_id);
-                        $this->_set_cache($cacheKey);
+                        $this->_set_cache($cacheKey, $voucher->product);
                     }
                     break;
             }
         }
 
         return $result;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Calculates how much if a discount the voucher will give to a basket
+     * @param  int    $iVoucherId The voucher's ID
+     * @param  object $oBasket    The user's basket object
+     * @return int
+     */
+    public function calculateDiscount($iVoucherId, $oBasket)
+    {
+        $oVoucher = $this->get_by_id($iVoucherId);
+
+        if (!$oVoucher) {
+
+            $this->_set_error('Invalid voucher ID.');
+            return false;
+        }
+
+        /**
+         * Work out the total we're working with, this will vary depending on the
+         * type of voucher being applied, but will be one of:
+         * - Products
+         * - Products of a certain kind only
+         * - Shipping
+         * - Both Products and Shipping
+         */
+
+        switch ($oVoucher->discount_application) {
+
+            case self::DISCOUNT_APPLICATION_PRODUCTS:
+                $iTotal = $oBasket->totals->base;
+                break;
+
+            case self::DISCOUNT_APPLICATION_PRODUCT_TYPE:
+                $iTotal = 0;
+                foreach ($oBasket->items as $oItem) {
+                    if ($oItem->product->type->id == $oVoucher->product_type_id) {
+                        dumpanddie($oItem->variant->price->price->base->value_ex_tax);
+                        $iTotal += 0;
+                    }
+                }
+                break;
+
+            case self::DISCOUNT_APPLICATION_SHIPPING:
+                $iTotal = $oBasket->totals->shipping;
+                break;
+
+            case self::DISCOUNT_APPLICATION_ALL:
+            default:
+                $iTotal = $oBasket->totals->item + $iTotal = $oBasket->totals->shipping;
+                break;
+        }
+
+        dump($iTotal);
+        dumpanddie($oVoucher);
+        return 100;
     }
 
     // --------------------------------------------------------------------------
@@ -233,7 +341,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
             $data['or_like'][] = array(
                 'column' => $this->tablePrefix . '.code',
                 'value'  => $data['keywords']
-           );
+            );
         }
 
         parent::_getcount_common($data, $_caller);
@@ -252,7 +360,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
      * @param  mixed  $data Any data to pass to _getcount_common()
      * @return mixed        stdClass on success, false on failure
      */
-    public function get_by_code($code, $data = array())
+    public function getByCode($code, $data = array())
     {
         if (!isset($data['where'])) {
 
@@ -291,7 +399,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
             return false;
         }
 
-        $voucher = $this->get_by_code($code);
+        $voucher = $this->getByCode($code);
 
         if (!$voucher) {
 
@@ -302,43 +410,53 @@ class NAILS_Shop_voucher_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         /**
-         * Voucher exists, now we need to check it's still valid; this depends on the
-         * type of vocuher it is.
+         * Voucher exists, now we need to check it's still valid.
          */
 
-        //  Is active?
-        if (!$voucher->is_active) {
+        //  Check voucher's status
+        switch ($voucher->status) {
 
-            $this->_set_error('Invalid voucher code.');
+            case \Nails\Shop\Model\Voucher::STATUS_PENDING:
+
+                // @todo: User user datetime functions
+                $bIsValid  = false;
+                $sMessage  = 'Voucher is not available yet. This voucher becomes available on the ';
+                $sMessage .= date('jS F Y \a\t H:i', strtotime($voucher->valid_from)) . '.';
+
+                $this->_set_error($sMessage);
+                break;
+
+            case \Nails\Shop\Model\Voucher::STATUS_EXPIRED:
+
+                $bIsValid = false;
+                $sMessage = 'Voucher has expired.';
+
+                $this->_set_error($sMessage);
+                break;
+
+            case \Nails\Shop\Model\Voucher::STATUS_INACTIVE:
+
+                $bIsValid = false;
+                $sMessage = 'Invalid voucher code.';
+
+                $this->_set_error($sMessage);
+                break;
+
+            default:
+
+                $bIsValid = true;
+                break;
+        }
+
+        if (!$bIsValid) {
             return false;
         }
 
-        //  Voucher started?
-        if (strtotime($voucher->valid_from) > time()) {
-
-            // @TODO: User user datetime functions
-            $message  = 'Voucher is not available yet. This voucher becomes available on the ';
-            $message .= date('jS F Y \a\t H:i', strtotime($voucher->valid_from)) . '.';
-
-            $this->_set_error($message);
-            return false;
-        }
-
-        //  Voucher expired?
-        if (
-            !is_null($voucher->valid_to)
-            && $voucher->valid_to != '0000-00-00 00:00:00'
-            && strtotime($voucher->valid_to) < time()
-       ) {
-
-            $this->_set_error('Voucher has expired.');
-            return false;
-        }
-
+        //  Check the voucher is valid for the basket
         if (!is_null($basket)) {
 
             //  Is this a shipping voucher being applied to an order with no shippable items?
-            if ($voucher->discount_application == 'SHIPPING' && !$basket->requires_shipping) {
+            if ($voucher->discount_application == self::DISCOUNT_APPLICATION_SHIPPING && !$basket->requires_shipping) {
 
                 $this->_set_error('Your order does not contian any items which require shipping, voucher not needed!');
                 return false;
@@ -350,7 +468,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
              * make sense.
              */
 
-            if (app_setting('free_shipping_threshold', 'shop') && $voucher->discount_application == 'SHIPPING') {
+            if (app_setting('free_shipping_threshold', 'shop') && $voucher->discount_application == self::DISCOUNT_APPLICATION_SHIPPING) {
 
                 if ($basket->totals->sub >= app_setting('free_shipping_threshold', 'shop')) {
 
@@ -364,21 +482,18 @@ class NAILS_Shop_voucher_model extends NAILS_Model
              * that product, otherwise it doesn't make sense to add it
              */
 
-            if ($voucher->discount_application == 'PRODUCT_TYPES') {
+            if ($voucher->discount_application == self::DISCOUNT_APPLICATION_PRODUCT_TYPE) {
 
                 $matched = false;
 
                 foreach ($basket->items as $item) {
-
-                    if ($item->type->id == $voucher->product_type_id) {
-
+                    if ($item->product->type->id == $voucher->product_type_id) {
                         $matched = true;
                         break;
                     }
                 }
 
                 if (!$matched) {
-
                     $this->_set_error('This voucher does not apply to any items in your basket.');
                     return false;
                 }
@@ -429,7 +544,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
-     * Additional checks for vouchers of type "LIMITED_USE"
+     * Additional checks for vouchers of type self::TYPE_LIMITED_USE
      * @param  stdClass $voucher The voucher being validated
      * @return boolean
      */
@@ -485,7 +600,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 
         $data = array(
             'is_active' => true
-       );
+        );
 
         return $this->update($voucher->id, $data);
     }
@@ -509,7 +624,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
 
         $data = array(
             'is_active' => false
-       );
+        );
 
         return $this->update($voucher->id, $data);
     }
@@ -526,7 +641,7 @@ class NAILS_Shop_voucher_model extends NAILS_Model
             $this->db->where('code', $code);
             $codeExists = (bool) $this->db->count_all_results($this->table);
 
-        } while($codeExists);
+        } while ($codeExists);
 
         return $code;
     }
@@ -565,38 +680,36 @@ class NAILS_Shop_voucher_model extends NAILS_Model
         unset($obj->last_name);
         unset($obj->profile_img);
         unset($obj->gender);
-    }
-}
 
-// --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-/**
- * OVERLOADING NAILS' MODELS
- *
- * The following block of code makes it simple to extend one of the core shop
- * models. Some might argue it's a little hacky but it's a simple 'fix'
- * which negates the need to massively extend the CodeIgniter Loader class
- * even further (in all honesty I just can't face understanding the whole
- * Loader class well enough to change it 'properly').
- *
- * Here's how it works:
- *
- * CodeIgniter instantiate a class with the same name as the file, therefore
- * when we try to extend the parent class we get 'cannot redeclare class X' errors
- * and if we call our overloading class something else it will never get instantiated.
- *
- * We solve this by prefixing the main class with NAILS_ and then conditionally
- * declaring this helper class below; the helper gets instantiated et voila.
- *
- * If/when we want to extend the main class we simply define NAILS_ALLOW_EXTENSION
- * before including this PHP file and extend as normal (i.e in the same way as below);
- * the helper won't be declared so we can declare our own one, app specific.
- *
- **/
+        $oDate = Factory::factory('DateTime');
+        $iNow  = $oDate->format('U');
 
-if (!defined('NAILS_ALLOW_EXTENSION_SHOP_VOUCHER_MODEL')) {
+        if ($obj->is_active && strtotime($obj->valid_from) > $iNow) {
 
-    class Shop_voucher_model extends NAILS_Shop_voucher_model
-    {
+            $obj->status = self::STATUS_PENDING;
+
+        } elseif ($obj->is_active && !empty($obj->valid_to) && strtotime($obj->valid_to) < $iNow) {
+
+            $obj->status = self::STATUS_EXPIRED;
+
+        } elseif ($obj->is_active) {
+
+            $obj->status = self::STATUS_ACTIVE;
+
+        } else {
+
+            $obj->status = self::STATUS_INACTIVE;
+        }
+
+        //  Has the voucher reached it's us limit
+        if ($obj->type === self::TYPE_LIMITED_USE && $obj->use_count >= $obj->limited_use_limit) {
+            $obj->status = self::STATUS_LIMIT_REACHED;
+        }
+
+        if ($obj->type === self::TYPE_GIFT_CARD && $obj->gift_card_balance == 0) {
+            $obj->status = self::STATUS_ZERO_BALANCE;
+        }
     }
 }

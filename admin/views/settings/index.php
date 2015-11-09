@@ -2,55 +2,41 @@
     <p>
         Configure various aspects of the shop.
     </p>
-    <hr />
-    <ul class="tabs" data-tabgroup="main-tabs">
-        <?php $activeTab = $this->input->post('update') == 'settings' || !$this->input->post() ? 'active' : ''?>
-        <li class="tab <?=$activeTab?>">
+    <?php
+
+        echo form_open();
+        $sActiveTab = $this->input->post('active_tab') ?: 'tab-general';
+        echo '<input type="hidden" name="active_tab" value="' . $sActiveTab . '" id="active-tab">';
+
+    ?>
+    <ul class="tabs" data-tabgroup="main-tabs" data-active-tab-input="#active-tab">
+        <li class="tab">
             <a href="#" data-tab="tab-general">General</a>
         </li>
-
-        <?php $activeTab = $this->input->post('update') == 'browse' ? 'active' : ''?>
-        <li class="tab <?=$activeTab?>">
+        <li class="tab">
             <a href="#" data-tab="tab-browse">Browsing</a>
         </li>
-
-        <?php $activeTab = $this->input->post('update') == 'skin' ? 'active' : ''?>
-        <li class="tab <?=$activeTab?>">
+        <li class="tab">
             <a href="#" data-tab="tab-skin">Skin</a>
         </li>
-
-        <?php $activeTab = $this->input->post('update') == 'skin-configure' ? 'active' : ''?>
-        <li class="tab <?=$activeTab?>">
+        <li class="tab">
             <a href="#" data-tab="tab-skin-config">Skin - Configure</a>
         </li>
-
-        <?php $activeTab = $this->input->post('update') == 'payment_gateway' ? 'active' : ''?>
-        <li class="tab <?=$activeTab?>">
+        <li class="tab">
             <a href="#" data-tab="tab-payment-gateway">Payment Gateways</a>
         </li>
-
-        <?php $activeTab = $this->input->post('update') == 'currencies' ? 'active' : ''?>
-        <li class="tab <?=$activeTab?>">
+        <li class="tab">
             <a href="#" data-tab="tab-currencies">Currencies</a>
         </li>
-
-        <?php $activeTab = $this->input->post('update') == 'shipping' ? 'active' : ''?>
-        <li class="tab <?=$activeTab?>">
+        <li class="tab">
             <a href="#" data-tab="tab-shipping">Shipping</a>
         </li>
     </ul>
     <section class="tabs" data-tabgroup="main-tabs">
-        <?php $display = $this->input->post('update') == 'settings' || !$this->input->post() ? 'active' : ''?>
-        <div class="tab-page tab-general <?=$display?>">
-            <?php
-
-                echo form_open(null, 'style="margin-bottom:0;"');
-                echo form_hidden('update', 'settings');
-            ?>
+        <div class="tab-page tab-general">
             <p>
                 Generic store settings. Use these to control some store behaviours.
             </p>
-            <hr />
             <fieldset id="shop-settings-online">
                 <legend>Maintenance</legend>
                 <p>
@@ -94,10 +80,7 @@
                 </div>
             </fieldset>
             <fieldset id="shop-settings-name">
-                <legend>Name</legend>
-                <p>
-                    Is this a shop? Or is it store? Maybe a boutique...?
-                </p>
+                <legend>Name &amp; URL</legend>
                 <?php
 
                     //  Shop Name
@@ -109,14 +92,7 @@
 
                     echo form_field($field);
 
-                ?>
-            </fieldset>
-            <fieldset id="shop-settings-url">
-                <legend>URL</legend>
-                <p>
-                    Customise the shop's URL by specifying it here.
-                </p>
-                <?php
+                    // --------------------------------------------------------------------------
 
                     //  Shop URL
                     $field                = array();
@@ -126,24 +102,6 @@
                     $field['placeholder'] = 'Customise the Shop\'s URL (include trialing slash)';
 
                     echo form_field($field);
-
-                ?>
-            </fieldset>
-            <fieldset id="shop-settings-tax">
-                <legend>Taxes</legend>
-                <p>
-                    Configure how the shop calculates taxes on the products you sell.
-                </p>
-                <?php
-
-                    $field             = array();
-                    $field['key']      = 'price_exclude_tax';
-                    $field['label']    = 'Product price exclude Taxes';
-                    $field['default']  = app_setting($field['key'], 'shop');
-                    $field['text_on']  = strtoupper(lang('yes'));
-                    $field['text_off'] = strtoupper(lang('no'));
-
-                    echo form_field_boolean($field);
 
                 ?>
             </fieldset>
@@ -158,6 +116,24 @@
                     $field             = array();
                     $field['key']      = 'enable_external_products';
                     $field['label']    = 'Enable External Products';
+                    $field['default']  = app_setting($field['key'], 'shop');
+                    $field['text_on']  = strtoupper(lang('yes'));
+                    $field['text_off'] = strtoupper(lang('no'));
+
+                    echo form_field_boolean($field);
+
+                ?>
+            </fieldset>
+            <fieldset id="shop-settings-tax">
+                <legend>Taxes</legend>
+                <p>
+                    Configure how the shop calculates taxes on the products you sell.
+                </p>
+                <?php
+
+                    $field             = array();
+                    $field['key']      = 'price_exclude_tax';
+                    $field['label']    = 'Product price exclude Taxes';
                     $field['default']  = app_setting($field['key'], 'shop');
                     $field['text_on']  = strtoupper(lang('yes'));
                     $field['text_off'] = strtoupper(lang('no'));
@@ -422,23 +398,11 @@
 
                 ?>
             </fieldset>
-            <p>
-                <?=form_submit('submit', lang('action_save_changes'), 'class="awesome" style="margin-bottom:0;"')?>
-            </p>
-            <?=form_close()?>
         </div>
-        <?php $display = $this->input->post('update') == 'browse' ? 'active' : ''?>
-        <div class="tab-page tab-browse <?=$display?>">
-            <?php
-
-                echo form_open(null, 'style="margin-bottom:0;"');
-                echo form_hidden('update', 'browse');
-
-            ?>
+        <div class="tab-page tab-browse">
             <p>
                 Configure the default browsing experience for your customers.
             </p>
-            <hr />
             <fieldset id="shop-browsing-tweaks">
                 <legend>Browsing Tweaks</legend>
                 <?php
@@ -495,20 +459,15 @@
 
                 ?>
             </fieldset>
-            <p>
-                <?=form_submit('submit', lang('action_save_changes'), 'class="awesome" style="margin-bottom:0;"')?>
-            </p>
-            <?=form_close()?>
         </div>
-        <?php $display = $this->input->post('update') == 'skin' ? 'active' : ''?>
-        <div class="tab-page tab-skin <?=$display?>">
+        <div class="tab-page tab-skin">
             <?php
 
-                echo form_open(null, 'style="margin-bottom:0;"');
-                echo form_hidden('update', 'skin');
+                $sActiveTab = $this->input->post('active_tab_skins') ?: 'tab-skin-foh';
+                echo '<input type="hidden" name="active_tab_skins" value="' . $sActiveTab . '" id="active-tab-skins">';
 
             ?>
-            <ul class="tabs" data-tabgroup="skins">
+            <ul class="tabs" data-tabgroup="skins" data-active-tab-input="#active-tab-skins">
                 <li class="tab active">
                     <a href="#" data-tab="tab-skin-foh">Front of House</a>
                 </li>
@@ -629,14 +588,15 @@
                     ?>
                 </div>
             </section>
-            <p>
-                <?=form_submit('submit', lang('action_save_changes'), 'class="awesome" style="margin-bottom:0;"')?>
-            </p>
-            <?=form_close()?>
         </div>
-        <?php $display = $this->input->post('update') == 'skin_config' ? 'active' : ''?>
-        <div class="tab-page tab-skin-config <?=$display?>">
-            <ul class="tabs" data-tabgroup="skins-config">
+        <div class="tab-page tab-skin-config">
+            <?php
+
+                $sActiveTab = $this->input->post('active_tab_skins_config') ?: 'tab-skin-config-foh';
+                echo '<input type="hidden" name="active_tab_skins_config" value="' . $sActiveTab . '" id="active-tab-skins-config">';
+
+            ?>
+            <ul class="tabs" data-tabgroup="skins-config" data-active-tab-input="#active-tab-skins-config">
                 <li class="tab active">
                     <a href="#" data-tab="tab-skin-config-foh">Front of House</a>
                 </li>
@@ -644,12 +604,6 @@
                     <a href="#" data-tab="tab-skin-config-checkout">Checkout</a>
                 </li>
             </ul>
-            <?php
-
-                echo form_open(null, 'style="margin-bottom:0;"');
-                echo form_hidden('update', 'skin_config');
-
-            ?>
             <section class="tabs" data-tabgroup="skins-config">
             <?php
 
@@ -857,26 +811,11 @@
 
             ?>
             </section>
-            <?php
-
-                echo '<p>';
-                    echo form_submit('submit', lang('action_save_changes'), 'class="awesome" style="margin-bottom:0;"');
-                echo '</p>';
-                echo form_close();
-
-            ?>
         </div>
-        <?php $display = $this->input->post('update') == 'payment_gateway' ? 'active' : ''?>
-        <div class="tab-page tab-payment-gateway <?=$display?>">
-            <?php
-
-                echo form_open(null, 'style="margin-bottom:0;"');
-                echo form_hidden('update', 'payment_gateway');
-            ?>
+        <div class="tab-page tab-payment-gateway">
             <p>
                 Set Payment Gateway credentials.
             </p>
-            <hr />
             <?php
 
                 if (!empty($payment_gateways)) {
@@ -907,14 +846,17 @@
                                     echo str_replace('_', ' ', $slug);
                                 echo '</td>';
                                 echo '<td class="configure">';
-                                    echo anchor('admin/shop/settings/shop_pg/' . $slug, 'Configure', 'data-fancybox-type="iframe" class="fancybox awesome small"');
+                                    echo anchor(
+                                        'admin/shop/settings/shop_pg?gateway=' . $slug,
+                                        'Configure',
+                                        'data-fancybox-type="iframe" class="fancybox btn btn-xs btn-primary"'
+                                    );
                                 echo '</td>';
                             echo '</tr>';
                         }
 
                         echo '<tbody>';
                     echo '</table>';
-                    echo '<hr />';
 
                 } else {
 
@@ -925,23 +867,11 @@
                 }
 
             ?>
-            <p>
-                <?=form_submit('submit', lang('action_save_changes'), 'class="awesome" style="margin-bottom:0;"')?>
-            </p>
-            <?=form_close()?>
         </div>
-        <?php $display = $this->input->post('update') == 'currencies' ? 'active' : ''?>
-        <div class="tab-page tab-currencies <?=$display?>">
-            <?php
-
-                echo form_open(null, 'style="margin-bottom:0;"');
-                echo form_hidden('update', 'currencies');
-
-            ?>
+        <div class="tab-page tab-currencies">
             <p>
                 Configure supported currencies.
             </p>
-            <hr />
             <fieldset id="shop-currencies-base">
                 <legend>Base Currency</legend>
                 <p>
@@ -1006,7 +936,6 @@
 
                 ?>
                 </p>
-                <hr />
                 <p class="system-alert message">
                     <strong>Important:</strong> If you wish to support multiple currencies you must also provide an
                     App ID for the <a href="https://openexchangerates.org" target="_blank">Open Exchange Rates</a>
@@ -1026,69 +955,66 @@
 
                 ?>
             </fieldset>
-            <p>
-                <?=form_submit('submit', lang('action_save_changes'), 'class="awesome" style="margin-bottom:0;"')?>
-            </p>
-            <?=form_close()?>
         </div>
-        <?php $display = $this->input->post('update') == 'shipping' ? 'active' : ''?>
-        <div class="tab-page tab-shipping <?=$display?>">
+        <div class="tab-page tab-shipping">
             <?php
 
-                echo form_open(null, 'style="margin-bottom:0;"');
-                echo form_hidden('update', 'shipping');
+            if (!empty($shipping_drivers)) {
 
-                if (!empty($shipping_drivers)) {
+                echo '<table id="shipping-modules">';
+                    echo '<thead class="shipping-modules">';
+                        echo '<tr>';
+                            echo '<th class="selected">Selected</th>';
+                            echo '<th class="label">Label</th>';
+                            echo '<th class="configure">Configure</th>';
+                        echo '</tr>';
+                    echo '</thead>';
+                    echo '<tbody>';
 
-                    echo '<table id="shipping-modules">';
-                        echo '<thead class="shipping-modules">';
-                            echo '<tr>';
-                                echo '<th class="selected">Selected</th>';
-                                echo '<th class="label">Label</th>';
-                                echo '<th class="configure">Configure</th>';
-                            echo '</tr>';
-                        echo '</thead>';
-                        echo '<tbody>';
+                    $enabledShippingDriver = set_value('enabled_shipping_driver', app_setting('enabled_shipping_driver', 'shop'));
 
-                        $enabledShippingDriver = set_value('enabled_shipping_driver', app_setting('enabled_shipping_driver', 'shop'));
+                    foreach ($shipping_drivers as $driver) {
 
-                        foreach ($shipping_drivers as $driver) {
+                        $_name        = !empty($driver->name) ? $driver->name : 'Untitled';
+                        $_description = !empty($driver->description) ? $driver->description : '';
+                        $_enabled     = $driver->slug == $enabledShippingDriver ? true : false;
 
-                            $_name        = !empty($driver->name) ? $driver->name : 'Untitled';
-                            $_description = !empty($driver->description) ? $driver->description : '';
-                            $_enabled     = $driver->slug == $enabledShippingDriver ? true : false;
+                        echo '<tr>';
+                            echo '<td class="selected">';
+                                echo form_radio('enabled_shipping_driver', $driver->slug, $_enabled);
+                            echo '</td>';
+                            echo '<td class="label">';
+                                echo $_name;
+                                echo $_description ? '<small>' . $_description . '</small>' : '';
+                            echo '</td>';
+                            echo '<td class="configure">';
+                                if (!empty($driver->configurable)) {
+                                    echo anchor(
+                                        'admin/shop/settings/shop_sd?driver=' . $driver->slug,
+                                        'Configure',
+                                        'data-fancybox-type="iframe" class="fancybox btn btn-xs btn-primary"'
+                                    );
+                                }
+                            echo '</td>';
+                        echo '</tr>';
+                    }
 
-                            echo '<tr>';
-                                echo '<td class="selected">';
-                                    echo form_radio('enabled_shipping_driver', $driver->slug, $_enabled);
-                                echo '</td>';
-                                echo '<td class="label">';
-                                    echo $_name;
-                                    echo $_description ? '<small>' . $_description . '</small>' : '';
-                                echo '</td>';
-                                echo '<td class="configure">';
-                                    echo !empty($driver->configurable) ? anchor('admin/shop/settings/shop_sd?driver=' . $driver->slug, 'Configure', 'data-fancybox-type="iframe" class="fancybox awesome small"') : '';
-                                echo '</td>';
-                            echo '</tr>';
-                        }
+                    echo '<tbody>';
+                echo '</table>';
 
-                        echo '<tbody>';
-                    echo '</table>';
-                    echo '<hr />';
+            } else {
 
-                } else {
-
-                    echo '<p class="system-alert error">';
-                        echo '<strong>No shipping drivers are available.</strong>';
-                        echo '<br />I could not find any shipping drivers. Please contact the developers on ' . mailto(APP_DEVELOPER_EMAIL) . ' for assistance.';
-                    echo '</p>';
-                }
+                echo '<p class="system-alert error">';
+                    echo '<strong>No shipping drivers are available.</strong>';
+                    echo '<br />I could not find any shipping drivers. Please contact the developers on ' . mailto(APP_DEVELOPER_EMAIL) . ' for assistance.';
+                echo '</p>';
+            }
 
             ?>
-            <p>
-                <?=form_submit('submit', lang('action_save_changes'), 'class="awesome" style="margin-bottom:0;"')?>
-            </p>
-            <?=form_close()?>
         </div>
     </section>
+    <p>
+        <?=form_submit('submit', lang('action_save_changes'), 'class="btn btn-primary"')?>
+    </p>
+    <?=form_close()?>
 </div>

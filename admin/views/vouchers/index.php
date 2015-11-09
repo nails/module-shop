@@ -27,62 +27,149 @@
             <tbody>
                 <?php
 
-                    if ($vouchers) {
+                if ($vouchers) {
 
-                        foreach ($vouchers as $voucher) {
+                    foreach ($vouchers as $voucher) {
 
-                            echo '<tr id="order-<?=number_format($voucher->id)?>">';
-                                echo '<td class="code">' . $voucher->code . '</td>';
+                        ?>
+                        <tr id="order-<?=$voucher->id?>">
+                            <td class="code">
+                                <?=$voucher->code?>
+                                <button class="btn btn-xs btn-info btn-block copy-code" data-clipboard-text="<?=$voucher->code?>">
+                                    <span class="waiting">
+                                        <b class="fa fa-clipboard"></b>
+                                        Copy
+                                    </span>
+                                    <span class="copied">
+                                        <b class="fa fa-check-circle"></b>
+                                        Copied!
+                                    </span>
+                                </button>
+                            </td>
+                            <?php
 
-                                if ($voucher->is_active && strtotime($voucher->valid_from) > time()) {
+                            switch ($voucher->status) {
 
-                                    echo '<td class="boolean notice">';
-                                        echo '<b class="fa fa-clock-o fa-lg"></b>';
-                                        echo '<small>Pending</small>';
-                                    echo '</td>';
+                                case \Nails\Shop\Model\Voucher::STATUS_PENDING:
 
-                                } elseif ($voucher->is_active && $voucher->valid_to && strtotime($voucher->valid_to) < time()) {
+                                    ?>
+                                    <td class="boolean notice">
+                                        <b class="fa fa-clock-o fa-lg"></b>
+                                        <small>Pending</small>
+                                    </td>
+                                    <?php
+                                    break;
 
-                                    echo '<td class="boolean error">';
-                                        echo '<b class="fa fa-times-circle fa-lg"></b>';
-                                        echo '<small>Expired</small>';
-                                    echo '</td>';
+                                case \Nails\Shop\Model\Voucher::STATUS_EXPIRED:
 
-                                } else {
+                                    ?>
+                                    <td class="boolean error">
+                                        <b class="fa fa-times-circle fa-lg"></b>
+                                        <small>Expired</small>
+                                    </td>
+                                    <?php
+                                    break;
 
-                                    echo \Nails\Admin\Helper::loadBoolCell($voucher->is_active);
-                                }
-                                echo '<td class="details">';
+                                case \Nails\Shop\Model\Voucher::STATUS_LIMIT_REACHED:
 
-                                    echo $voucher->label;
+                                    ?>
+                                    <td class="boolean error">
+                                        <b class="fa fa-times-circle fa-lg"></b>
+                                        <small>Limit Reached</small>
+                                    </td>
+                                    <?php
+                                    break;
 
-                                    switch ($voucher->type) {
+                                case \Nails\Shop\Model\Voucher::STATUS_ZERO_BALANCE:
 
-                                        case 'NORMAL':
+                                    ?>
+                                    <td class="boolean error">
+                                        <b class="fa fa-times-circle fa-lg"></b>
+                                        <small>Zero Balance</small>
+                                    </td>
+                                    <?php
+                                    break;
 
-                                            echo '<small>Type: Normal</small>';
-                                            break;
+                                case \Nails\Shop\Model\Voucher::STATUS_ACTIVE:
 
-                                        // --------------------------------------------------------------------------
+                                    ?>
+                                    <td class="boolean success">
+                                        <b class="fa fa-check-circle fa-lg"></b>
+                                    </td>
+                                    <?php
+                                    break;
 
-                                        case 'LIMITED_USE':
+                                case \Nails\Shop\Model\Voucher::STATUS_INACTIVE:
 
-                                            echo '<small>Type: Limited Use</small>';
-                                            echo '<small>Limited to ' . $voucher->limited_use_limit . ' uses; used ' . $voucher->use_count . ' times</small>';
-                                            break;
+                                    ?>
+                                    <td class="boolean success">
+                                        <b class="fa fa-check-circle fa-lg"></b>
+                                    </td>
+                                    <?php
+                                    break;
+                            }
 
-                                        // --------------------------------------------------------------------------
+                            ?>
+                            <td class="details">
+                                <?php
 
-                                        case 'GIFT_CARD':
+                                echo $voucher->label;
 
-                                            echo '<small>Type: Gift card</small>';
-                                            echo '<small>Remaining Balance: ' . SHOP_BASE_CURRENCY_SYMBOL . number_format($voucher->gift_card_balance, SHOP_BASE_CURRENCY_PRECISION). '</small>';
-                                            break;
-                                    }
+                                switch ($voucher->type) {
+
+                                    case 'NORMAL':
+
+                                        ?>
+                                        <small>
+                                            Type: Normal
+                                        </small>
+                                        <?php
+                                        break;
 
                                     // --------------------------------------------------------------------------
 
-                                    echo '<small>Applies to: ';
+                                    case 'LIMITED_USE':
+
+                                        ?>
+                                        <small>
+                                            Type: Limited Use
+                                        </small>
+                                        <small>
+                                            Limited to <?=$voucher->limited_use_limit?> uses;
+                                            used <?=$voucher->use_count?> times
+                                        </small>
+                                        <?php
+                                        break;
+
+                                    // --------------------------------------------------------------------------
+
+                                    case 'GIFT_CARD':
+
+                                        ?>
+                                        <small>
+                                            Type: Gift card
+                                        </small>
+                                        <small>
+                                            Remaining Balance:
+                                            <?php
+
+                                            echo SHOP_BASE_CURRENCY_SYMBOL;
+                                            echo number_format(
+                                                $voucher->gift_card_balance,
+                                                SHOP_BASE_CURRENCY_PRECISION
+                                            );
+
+                                            ?>
+                                        </small>
+                                        <?php
+                                        break;
+                                }
+
+                                ?>
+                                <small>
+                                    Applies to:
+                                    <?php
+
                                     switch ($voucher->discount_application) {
 
                                         case 'PRODUCTS':
@@ -105,83 +192,108 @@
                                             echo 'Both Products and Shipping';
                                             break;
                                     }
-                                    echo '</small>';
 
-                                echo '</td>';
+                                    ?>
+                                </small>
+                            </td>
+                            <?php
 
-                                echo \Nails\Admin\Helper::loadUserCell($voucher->creator);
-                                echo \Nails\Admin\Helper::loadDatetimeCell($voucher->created);
+                            echo \Nails\Admin\Helper::loadUserCell($voucher->creator);
+                            echo \Nails\Admin\Helper::loadDatetimeCell($voucher->created);
 
-                                echo '<td class="value">';
+                            ?>
 
-                                    switch ($voucher->discount_type) {
+                            <td class="value">
+                                <?php
 
-                                        case 'AMOUNT':
+                                switch ($voucher->discount_type) {
 
-                                            echo SHOP_BASE_CURRENCY_SYMBOL . number_format($voucher->discount_value, SHOP_BASE_CURRENCY_PRECISION);
-                                            break;
+                                    case 'AMOUNT':
 
-                                        case 'PERCENTAGE':
+                                        echo SHOP_BASE_CURRENCY_SYMBOL;
+                                        echo number_format($voucher->discount_value, SHOP_BASE_CURRENCY_PRECISION);
+                                        break;
 
-                                            echo $voucher->discount_value . '%';
-                                            break;
+                                    case 'PERCENTAGE':
+
+                                        echo $voucher->discount_value . '%';
+                                        break;
+                                }
+
+                                ?>
+                            </td>
+                            <?php
+
+                            echo \Nails\Admin\Helper::loadDatetimeCell($voucher->valid_from);
+                            echo \Nails\Admin\Helper::loadDatetimeCell($voucher->valid_to, 'Does not expire');
+
+                            ?>
+                            <td class="uses">
+                                <?=number_format($voucher->use_count)?>
+                            </td>
+                            <td class="actions">
+                                <?php
+
+                                $buttons = array();
+
+                                // --------------------------------------------------------------------------
+
+                                if ($voucher->is_active) {
+
+                                    if (userHasPermission('admin:shop:vouchers:deactivate')) {
+
+                                        $buttons[] = anchor(
+                                            'admin/shop/vouchers/deactivate/' . $voucher->id,
+                                            'Suspend',
+                                            'class="btn btn-xs btn-danger confirm"'
+                                        );
                                     }
 
-                                echo '</td>';
+                                } else {
 
-                                echo \Nails\Admin\Helper::loadDatetimeCell($voucher->valid_from);
-                                echo \Nails\Admin\Helper::loadDatetimeCell($voucher->valid_to, 'Does not expire');
+                                    if (userHasPermission('admin:shop:vouchers:activate')) {
 
-                                echo '<td class="uses">';
-                                    echo number_format($voucher->use_count);
-                                echo '</td>';
-                                echo '<td class="actions">';
+                                        $buttons[] = anchor(
+                                            'admin/shop/vouchers/activate/' . $voucher->id,
+                                            'Activate',
+                                            'class="btn btn-xs btn-success"'
+                                        );
+                                    }
+                                }
 
-                                    $buttons = array();
+                                // --------------------------------------------------------------------------
 
-                                    // --------------------------------------------------------------------------
+                                if ($buttons) {
 
-                                    if ($voucher->is_active) {
+                                    foreach ($buttons as $button) {
 
-                                        if (userHasPermission('admin:shop:vouchers:deactivate')) {
-
-                                            $buttons[] = anchor('admin/shop/vouchers/deactivate/' . $voucher->id, 'Suspend', 'class="awesome small red confirm"');
-                                        }
-
-                                    } else {
-
-                                        if (userHasPermission('admin:shop:vouchers:activate')) {
-
-                                            $buttons[] = anchor('admin/shop/vouchers/activate/' . $voucher->id, 'Activate', 'class="awesome small green"');
-                                        }
+                                        echo $button;
                                     }
 
-                                    // --------------------------------------------------------------------------
+                                } else {
 
-                                    if ($buttons) {
+                                    echo '<span class="blank">There are no actions you can do on this item.</span>';
+                                }
 
-                                        foreach ($buttons as $button) {
+                                ?>
+                            </td>
+                        </tr>
+                        <?php
 
-                                            echo $button;
-                                        }
-
-                                    } else {
-
-                                        echo '<span class="blank">There are no actions you can do on this item.</span>';
-                                    }
-
-                                echo '</td>';
-                            echo '</tr>';
-                        }
-
-                    } else {
-
-                        echo '<tr>';
-                            echo '<td colspan="10" class="no-data">';
-                                echo '<p>No Vouchers found</p>';
-                            echo '</td>';
-                        echo '</tr>';
                     }
+
+                } else {
+
+                    ?>
+                    <tr>
+                        <td colspan="10" class="no-data">
+                            <p>
+                                No Vouchers found
+                            </p>
+                        </td>
+                    </tr>
+                    <?php
+                }
 
                 ?>
             </tbody>

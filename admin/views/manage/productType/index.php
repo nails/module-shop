@@ -61,7 +61,7 @@
                                     echo anchor(
                                         'admin/shop/manage/productType/edit/' . $productType->id . $isModal,
                                         lang('action_edit'),
-                                        'class="awesome small"'
+                                        'class="btn btn-xs btn-primary"'
                                     );
                                 }
 
@@ -70,7 +70,7 @@
                                     echo anchor(
                                         'admin/shop/manage/productType/delete/' . $productType->id . $isModal,
                                         lang('action_delete'),
-                                        'class="awesome small red confirm" data-body="This action cannot be undone."'
+                                        'class="btn btn-xs btn-danger confirm" data-body="This action cannot be undone."'
                                     );
                                 }
 

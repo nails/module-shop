@@ -454,6 +454,8 @@
 
                     if (!empty($payments)) {
 
+                        $oCurrencyModel = \Nails\Factory::model('Currency', 'nailsapp/module-shop');
+
                         foreach ($payments as $payment) {
 
                             echo '<tr>';
@@ -464,7 +466,7 @@
                                     echo $payment->transaction_id;
                                 echo '</td>';
                                 echo '<td>';
-                                    echo $this->shop_currency_model->formatBase($payment->amount_base);
+                                    echo $oCurrencyModel->formatBase($payment->amount_base);
                                 echo '</td>';
 
                                 echo \Nails\Admin\Helper::loadDatetimeCell($payment->created);

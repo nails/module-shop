@@ -14,13 +14,7 @@
             $field['class']    = 'select2';
             $field['required'] = true;
 
-            $options = array(
-                'NORMAL'      => 'Normal',
-                'LIMITED_USE' => 'Limited use',
-                'GIFT_CARD'   => 'Gift Card'
-          );
-
-            echo form_field_dropdown($field, $options);
+            echo form_field_dropdown($field, $voucherTypes);
 
             // --------------------------------------------------------------------------
 
@@ -28,7 +22,7 @@
             $field                = array();
             $field['key']         = 'code';
             $field['label']       = 'Code';
-            $field['info']        = '<a href="#" id="generate-code" class="awesome small">Generate Valid Code</a> ';
+            $field['info']        = '<a href="#" id="generate-code" class="btn btn-xs btn-default">Generate Valid Code</a> ';
             $field['info']       .= '<b id="generateCodeSpinner" class="fa fa-spin fa-spinner"></b>';
             $field['placeholder'] = 'Define the code for this voucher or generate one using the link on the left.';
             $field['required']    = true;
@@ -58,7 +52,7 @@
             $options = array(
                 'PERCENTAGE' => 'Percentage',
                 'AMOUNT'     => 'Specific amount'
-          );
+           );
 
             echo form_field_dropdown($field, $options);
 
@@ -120,10 +114,8 @@
     </fieldset>
     <fieldset id="create-voucher-meta">
         <legend>Extended Data</legend>
-        <div id="no-extended-data" style="display:block;">
-            <p class="system-alert">
-                <strong>Note:</strong> More options may become available depending on your choices above.
-            </p>
+        <div id="no-extended-data" class="alert alert-warning" style="display:block;">
+            More options may become available depending on your choices above.
         </div>
         <div id="type-limited" style="display:none;">
             <?php
@@ -144,12 +136,13 @@
 
             if (empty($product_types)) {
 
-                echo '<p class="system-alert error">';
-                    echo '<strong>No product types are defined</strong>';
-                    echo '<br />At least one product type must be defined before you can create vouchers ';
-                    echo 'which apply to particular product types. ';
-                    echo anchor('admin/shop/manage/productType','Create Products Now') . '.';
-                echo '</p>';
+                ?>
+                <p class="alert alert-danger">
+                    <strong>No product types are defined</strong>
+                    <br />At least one product type must be defined before you can create vouchers which apply
+                    to particular product types.  <?=anchor('admin/shop/manage/productType','Create Products Now')?>
+                </p>
+                <?php
 
             } else {
 
@@ -168,7 +161,7 @@
         </div>
     </fieldset>
     <p>
-        <?=form_submit('submit', lang('action_create'), 'class="awesome"')?>
+        <?=form_submit('submit', lang('action_create'), 'class="btn btn-primary"')?>
     </p>
     <?=form_close()?>
 </div>

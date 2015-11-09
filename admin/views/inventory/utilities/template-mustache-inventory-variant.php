@@ -239,10 +239,12 @@
 
                         if (!empty($variation->price_raw)) {
 
+                            $oCurrencyModel = \Nails\Factory::model('Currency', 'nailsapp/module-shop');
+
                             foreach ($variation->price_raw as $priceRaw) {
 
-                                $price[$priceRaw->currency->code]     = $this->shop_currency_model->intToFloat($priceRaw->price, $priceRaw->currency->code);
-                                $salePrice[$priceRaw->currency->code] = $this->shop_currency_model->intToFloat($priceRaw->sale_price, $priceRaw->currency->code);
+                                $price[$priceRaw->currency->code]     = $oCurrencyModel->intToFloat($priceRaw->price, $priceRaw->currency->code);
+                                $salePrice[$priceRaw->currency->code] = $oCurrencyModel->intToFloat($priceRaw->sale_price, $priceRaw->currency->code);
                             }
                         }
 

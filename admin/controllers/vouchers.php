@@ -12,11 +12,17 @@
 
 namespace Nails\Admin\Shop;
 
+use Nails\Factory;
 use Nails\Admin\Helper;
 use Nails\Shop\Controller\BaseAdmin;
 
 class Vouchers extends BaseAdmin
 {
+    protected $oVoucherModel;
+    protected $aVoucherTypes;
+
+    // --------------------------------------------------------------------------
+
     /**
      * Announces this controller's navGroups
      * @return stdClass
@@ -58,7 +64,8 @@ class Vouchers extends BaseAdmin
     {
         parent::__construct();
         $this->load->model('shop/shop_model');
-        $this->load->model('shop/shop_voucher_model');
+        $this->oVoucherModel = Factory::model('Voucher', 'nailsapp/module-shop');
+        $this->aVoucherTypes = $this->oVoucherModel->getTypes();
 
         // --------------------------------------------------------------------------
 
@@ -87,11 +94,12 @@ class Vouchers extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Set method info
-        $this->data['page']->title = 'Manage Vouchers';
+        $this->data['page']->title  = 'Manage Vouchers';
+        $this->data['voucherTypes'] = $this->aVoucherTypes;
 
         // --------------------------------------------------------------------------
 
-        $tablePrefix = $this->shop_voucher_model->getTablePrefix();
+        $tablePrefix = $this->oVoucherModel->getTablePrefix();
 
         // --------------------------------------------------------------------------
 
@@ -115,15 +123,15 @@ class Vouchers extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Filter columns
+        $aTypeFilter = array();
+        foreach ($this->data['voucherTypes'] as $sValue => $sLabel) {
+            $aTypeFilter[] = array($sLabel, $sValue);
+        }
         $filters   = array();
         $filters[] = Helper::searchFilterObject(
             $tablePrefix . '.type',
             'View only',
-            array(
-                array('Normal', 'NORMAL'),
-                array('Limited Use', 'LIMITED_USE'),
-                array('Gift Card', 'GIFT_CARD')
-           )
+            $aTypeFilter
         );
 
         // --------------------------------------------------------------------------
@@ -140,8 +148,8 @@ class Vouchers extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows              = $this->shop_voucher_model->count_all($data);
-        $this->data['vouchers'] = $this->shop_voucher_model->get_all($page, $perPage, $data);
+        $totalRows              = $this->oVoucherModel->count_all($data);
+        $this->data['vouchers'] = $this->oVoucherModel->get_all($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords, $filters);
@@ -153,6 +161,13 @@ class Vouchers extends BaseAdmin
 
             Helper::addHeaderButton('admin/shop/vouchers/create', 'Create Voucher');
         }
+
+        // --------------------------------------------------------------------------
+
+        //  Load assets
+        $this->asset->library('ZEROCLIPBOARD');
+        $this->asset->load('nails.admin.shop.vouchers.min.js', 'NAILS');
+        $this->asset->inline('voucher = new NAILS_Admin_Shop_Vouchers();', 'JS');
 
         // --------------------------------------------------------------------------
 
@@ -300,7 +315,7 @@ class Vouchers extends BaseAdmin
                 // --------------------------------------------------------------------------
 
                 //  Attempt to create
-                if ($this->shop_voucher_model->create($data)) {
+                if ($this->oVoucherModel->create($data)) {
 
                     $this->session->set_flashdata('success', 'Voucher "' . $data['code'] . '" was created successfully.');
                     redirect('admin/shop/vouchers');
@@ -308,7 +323,7 @@ class Vouchers extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the voucher. ';
-                    $this->Data['error'] .= $this->shop_voucher_model->last_error();
+                    $this->Data['error'] .= $this->oVoucherModel->last_error();
                 }
 
             } else {
@@ -319,7 +334,8 @@ class Vouchers extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['page']->title = 'Create Voucher';
+        $this->data['page']->title  = 'Create Voucher';
+        $this->data['voucherTypes'] = $this->aVoucherTypes;
 
         // --------------------------------------------------------------------------
 
@@ -330,8 +346,8 @@ class Vouchers extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load assets
-        $this->asset->load('nails.admin.shop.vouchers.min.js', 'NAILS');
-        $this->asset->inline('voucher = new NAILS_Admin_Shop_Vouchers_Edit();', 'JS');
+        $this->asset->load('nails.admin.shop.vouchers.createEdit.min.js', 'NAILS');
+        $this->asset->inline('voucher = new NAILS_Admin_Shop_Vouchers_CreateEdit();', 'JS');
 
         // --------------------------------------------------------------------------
 
@@ -356,7 +372,7 @@ class Vouchers extends BaseAdmin
 
             $id = $this->uri->segment(5);
 
-            if ($this->shop_voucher_model->activate($id)) {
+            if ($this->oVoucherModel->activate($id)) {
 
                 $status  = 'success';
                 $message = 'Voucher was activated successfully.';
@@ -365,7 +381,7 @@ class Vouchers extends BaseAdmin
 
                 $status   = 'error';
                 $message  = 'There was a problem activating the voucher. ';
-                $message .= $this->shop_voucher_model->last_error();
+                $message .= $this->oVoucherModel->last_error();
             }
         }
 
@@ -391,7 +407,7 @@ class Vouchers extends BaseAdmin
 
             $id = $this->uri->segment(5);
 
-            if ($this->shop_voucher_model->suspend($id)) {
+            if ($this->oVoucherModel->suspend($id)) {
 
                 $status  = 'success';
                 $message = 'Voucher was suspended successfully.';
@@ -400,7 +416,7 @@ class Vouchers extends BaseAdmin
 
                 $status   = 'error';
                 $message  = 'There was a problem suspending the voucher. ';
-                $message .= $this->shop_voucher_model->last_error();
+                $message .= $this->oVoucherModel->last_error();
             }
         }
 
@@ -440,9 +456,8 @@ class Vouchers extends BaseAdmin
      */
     public function _callback_voucher_valid_type($str)
     {
-        $valid_types = array('NORMAL', 'LIMITED_USE', 'GIFT_CARD');
         $this->form_validation->set_message('_callback_voucher_valid_type', 'Invalid voucher type.');
-        return array_search($str, $valid_types) !== false;
+        return !empty($this->aVoucherTypes[$str]);
     }
 
     // --------------------------------------------------------------------------

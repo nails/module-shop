@@ -102,8 +102,9 @@ class NAILS_Shop_feed_model extends NAILS_Model
      */
     protected function getShopData()
     {
-        $sBaseCurrency = app_setting('base_currency', 'shop');
-        $oBaseCurrency = $this->shop_currency_model->getByCode($sBaseCurrency);
+        $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
+        $sBaseCurrency  = app_setting('base_currency', 'shop');
+        $oBaseCurrency  = $oCurrencyModel->getByCode($sBaseCurrency);
         $sWarehouseCountry = app_setting('warehouse_addr_country', 'shop');
         $sInvoiceCompany = app_setting('invoice_company', 'shop');
         $products = $this->shop_product_model->get_all();
@@ -191,8 +192,8 @@ class NAILS_Shop_feed_model extends NAILS_Model
                 $shippingData = $this->shop_shipping_driver_model->calculateVariant($v->id);
 
                 //  Calculate price and price of shipping
-                $sPrice = $this->shop_currency_model->formatBase($p->price->user->min_price, false);
-                $sShippingPrice = $this->shop_currency_model->formatBase($shippingData->base, false);
+                $sPrice         = $oCurrencyModel->formatBase($p->price->user->min_price, false);
+                $sShippingPrice = $oCurrencyModel->formatBase($shippingData->base, false);
 
                 $temp->price = $sPrice . ' ' . $oBaseCurrency->code;
                 $temp->shipping_country = $sWarehouseCountry;

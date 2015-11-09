@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Shop;
 
+use Nails\Factory;
 use Nails\Admin\Helper;
 use Nails\Shop\Controller\BaseAdmin;
 
@@ -297,8 +298,8 @@ class Orders extends BaseAdmin
         if ($order->voucher) {
 
             //  Redeem the voucher, if it's there
-            $this->load->model('shop/shop_voucher_model');
-            $this->shop_voucher_model->redeem($order->voucher->id, $order);
+            $oVoucherModel = Factory::model('Voucher', 'nailsapp/module-shop');
+            $oVoucherModel->redeem($order->voucher->id, $order);
         }
 
         // --------------------------------------------------------------------------

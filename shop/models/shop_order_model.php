@@ -14,19 +14,25 @@ use Nails\Factory;
 
 class NAILS_Shop_order_model extends NAILS_Model
 {
+    protected $oCurrencyModel;
+    protected $oCountryModel;
+    protected $oLogger;
+
+    // --------------------------------------------------------------------------
+
     /**
      * Constructs the model
      */
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('shop/shop_currency_model');
-
-        $this->oCountryModel = Factory::model('Country');
 
         $this->table       = NAILS_DB_PREFIX . 'shop_order';
         $this->tablePrefix = 'o';
-        $this->oLogger     = Factory::service('Logger');
+
+        $this->oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
+        $this->oCountryModel  = Factory::model('Country');
+        $this->oLogger        = Factory::service('Logger');
     }
 
     // --------------------------------------------------------------------------
@@ -1288,10 +1294,10 @@ class NAILS_Shop_order_model extends NAILS_Model
         $obj->totals->base->grand    = (int) $obj->total_base_grand;
 
         $obj->totals->base_formatted           = new \stdClass();
-        $obj->totals->base_formatted->item     = $this->shop_currency_model->formatBase($obj->totals->base->item);
-        $obj->totals->base_formatted->shipping = $this->shop_currency_model->formatBase($obj->totals->base->shipping);
-        $obj->totals->base_formatted->tax      = $this->shop_currency_model->formatBase($obj->totals->base->tax);
-        $obj->totals->base_formatted->grand    = $this->shop_currency_model->formatBase($obj->totals->base->grand);
+        $obj->totals->base_formatted->item     = $this->oCurrencyModel->formatBase($obj->totals->base->item);
+        $obj->totals->base_formatted->shipping = $this->oCurrencyModel->formatBase($obj->totals->base->shipping);
+        $obj->totals->base_formatted->tax      = $this->oCurrencyModel->formatBase($obj->totals->base->tax);
+        $obj->totals->base_formatted->grand    = $this->oCurrencyModel->formatBase($obj->totals->base->grand);
 
         $obj->totals->user           = new \stdClass();
         $obj->totals->user->item     = (int) $obj->total_user_item;
@@ -1300,10 +1306,10 @@ class NAILS_Shop_order_model extends NAILS_Model
         $obj->totals->user->grand    = (int) $obj->total_user_grand;
 
         $obj->totals->user_formatted           = new \stdClass();
-        $obj->totals->user_formatted->item     = $this->shop_currency_model->formatUser($obj->totals->user->item);
-        $obj->totals->user_formatted->shipping = $this->shop_currency_model->formatUser($obj->totals->user->shipping);
-        $obj->totals->user_formatted->tax      = $this->shop_currency_model->formatUser($obj->totals->user->tax);
-        $obj->totals->user_formatted->grand    = $this->shop_currency_model->formatUser($obj->totals->user->grand);
+        $obj->totals->user_formatted->item     = $this->oCurrencyModel->formatUser($obj->totals->user->item);
+        $obj->totals->user_formatted->shipping = $this->oCurrencyModel->formatUser($obj->totals->user->shipping);
+        $obj->totals->user_formatted->tax      = $this->oCurrencyModel->formatUser($obj->totals->user->tax);
+        $obj->totals->user_formatted->grand    = $this->oCurrencyModel->formatUser($obj->totals->user->grand);
 
         unset($obj->total_base_item);
         unset($obj->total_base_shipping);
@@ -1420,11 +1426,11 @@ class NAILS_Shop_order_model extends NAILS_Model
         $item->price->base->value_total   = $item->price_base_value * $item->quantity;
 
         $item->price->base_formatted                = new \stdClass();
-        $item->price->base_formatted->value         = $this->shop_currency_model->formatBase($item->price_base_value);
-        $item->price->base_formatted->value_inc_tax = $this->shop_currency_model->formatBase($item->price_base_value_inc_tax);
-        $item->price->base_formatted->value_ex_tax  = $this->shop_currency_model->formatBase($item->price_base_value_ex_tax);
-        $item->price->base_formatted->value_tax     = $this->shop_currency_model->formatBase($item->price_base_value_tax);
-        $item->price->base_formatted->value_total   = $this->shop_currency_model->formatBase($item->price_base_value * $item->quantity);
+        $item->price->base_formatted->value         = $this->oCurrencyModel->formatBase($item->price_base_value);
+        $item->price->base_formatted->value_inc_tax = $this->oCurrencyModel->formatBase($item->price_base_value_inc_tax);
+        $item->price->base_formatted->value_ex_tax  = $this->oCurrencyModel->formatBase($item->price_base_value_ex_tax);
+        $item->price->base_formatted->value_tax     = $this->oCurrencyModel->formatBase($item->price_base_value_tax);
+        $item->price->base_formatted->value_total   = $this->oCurrencyModel->formatBase($item->price_base_value * $item->quantity);
 
         $item->price->user                = new \stdClass();
         $item->price->user->value         = $item->price_user_value;
@@ -1434,11 +1440,11 @@ class NAILS_Shop_order_model extends NAILS_Model
         $item->price->user->value_total   = $item->price_user_value * $item->quantity;
 
         $item->price->user_formatted                = new \stdClass();
-        $item->price->user_formatted->value         = $this->shop_currency_model->formatUser($item->price_user_value);
-        $item->price->user_formatted->value_inc_tax = $this->shop_currency_model->formatUser($item->price_user_value_inc_tax);
-        $item->price->user_formatted->value_ex_tax  = $this->shop_currency_model->formatUser($item->price_user_value_ex_tax);
-        $item->price->user_formatted->value_tax     = $this->shop_currency_model->formatUser($item->price_user_value_tax);
-        $item->price->user_formatted->value_total   = $this->shop_currency_model->formatUser($item->price_user_value * $item->quantity);
+        $item->price->user_formatted->value         = $this->oCurrencyModel->formatUser($item->price_user_value);
+        $item->price->user_formatted->value_inc_tax = $this->oCurrencyModel->formatUser($item->price_user_value_inc_tax);
+        $item->price->user_formatted->value_ex_tax  = $this->oCurrencyModel->formatUser($item->price_user_value_ex_tax);
+        $item->price->user_formatted->value_tax     = $this->oCurrencyModel->formatUser($item->price_user_value_tax);
+        $item->price->user_formatted->value_total   = $this->oCurrencyModel->formatUser($item->price_user_value * $item->quantity);
 
         $item->sale_price                      = new \stdClass();
         $item->sale_price->base                = new \stdClass();
@@ -1449,11 +1455,11 @@ class NAILS_Shop_order_model extends NAILS_Model
         $item->sale_price->base->value_total   = $item->sale_price_base_value * $item->quantity;
 
         $item->sale_price->base_formatted                = new \stdClass();
-        $item->sale_price->base_formatted->value         = $this->shop_currency_model->formatBase($item->sale_price_base_value);
-        $item->sale_price->base_formatted->value_inc_tax = $this->shop_currency_model->formatBase($item->sale_price_base_value_inc_tax);
-        $item->sale_price->base_formatted->value_ex_tax  = $this->shop_currency_model->formatBase($item->sale_price_base_value_ex_tax);
-        $item->sale_price->base_formatted->value_tax     = $this->shop_currency_model->formatBase($item->sale_price_base_value_tax);
-        $item->sale_price->base_formatted->value_total   = $this->shop_currency_model->formatBase($item->sale_price_base_value * $item->quantity);
+        $item->sale_price->base_formatted->value         = $this->oCurrencyModel->formatBase($item->sale_price_base_value);
+        $item->sale_price->base_formatted->value_inc_tax = $this->oCurrencyModel->formatBase($item->sale_price_base_value_inc_tax);
+        $item->sale_price->base_formatted->value_ex_tax  = $this->oCurrencyModel->formatBase($item->sale_price_base_value_ex_tax);
+        $item->sale_price->base_formatted->value_tax     = $this->oCurrencyModel->formatBase($item->sale_price_base_value_tax);
+        $item->sale_price->base_formatted->value_total   = $this->oCurrencyModel->formatBase($item->sale_price_base_value * $item->quantity);
 
         $item->sale_price->user                = new \stdClass();
         $item->sale_price->user->value         = $item->sale_price_user_value;
@@ -1463,11 +1469,11 @@ class NAILS_Shop_order_model extends NAILS_Model
         $item->sale_price->user->value_total   = $item->sale_price_user_value * $item->quantity;
 
         $item->sale_price->user_formatted                = new \stdClass();
-        $item->sale_price->user_formatted->value         = $this->shop_currency_model->formatUser($item->sale_price_user_value);
-        $item->sale_price->user_formatted->value_inc_tax = $this->shop_currency_model->formatUser($item->sale_price_user_value_inc_tax);
-        $item->sale_price->user_formatted->value_ex_tax  = $this->shop_currency_model->formatUser($item->sale_price_user_value_ex_tax);
-        $item->sale_price->user_formatted->value_tax     = $this->shop_currency_model->formatUser($item->sale_price_user_value_tax);
-        $item->sale_price->user_formatted->value_total   = $this->shop_currency_model->formatUser($item->sale_price_user_value * $item->quantity);
+        $item->sale_price->user_formatted->value         = $this->oCurrencyModel->formatUser($item->sale_price_user_value);
+        $item->sale_price->user_formatted->value_inc_tax = $this->oCurrencyModel->formatUser($item->sale_price_user_value_inc_tax);
+        $item->sale_price->user_formatted->value_ex_tax  = $this->oCurrencyModel->formatUser($item->sale_price_user_value_ex_tax);
+        $item->sale_price->user_formatted->value_tax     = $this->oCurrencyModel->formatUser($item->sale_price_user_value_tax);
+        $item->sale_price->user_formatted->value_total   = $this->oCurrencyModel->formatUser($item->sale_price_user_value * $item->quantity);
 
         $item->processed = (bool) $item->processed;
         $item->refunded  = (bool) $item->refunded;

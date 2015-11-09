@@ -34,7 +34,6 @@ class NAILS_Shop_Controller extends NAILS_Controller
         $this->load->model('shop/shop_brand_model');
         $this->load->model('shop/shop_category_model');
         $this->load->model('shop/shop_collection_model');
-        $this->load->model('shop/shop_currency_model');
         $this->load->model('shop/shop_order_model');
         $this->load->model('shop/shop_product_model');
         $this->load->model('shop/shop_product_type_model');
@@ -42,7 +41,6 @@ class NAILS_Shop_Controller extends NAILS_Controller
         $this->load->model('shop/shop_shipping_driver_model');
         $this->load->model('shop/shop_sale_model');
         $this->load->model('shop/shop_tag_model');
-        $this->load->model('shop/shop_voucher_model');
         $this->load->model('shop/shop_skin_front_model');
         $this->load->model('shop/shop_skin_checkout_model');
 
