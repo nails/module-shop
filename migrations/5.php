@@ -28,11 +28,15 @@ class Migration_5 extends Base {
         $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_order` ADD `total_base_item_discount` INT(11)  NOT NULL  AFTER `total_base_item`;");
         $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_order` ADD `total_base_shipping_discount` INT(11)  NOT NULL  AFTER `total_base_shipping`;");
         $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_order` ADD `total_base_tax_discount` INT(11)  NOT NULL  AFTER `total_base_tax`;");
-        $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_order` ADD `total_base_grand-discount` INT(11)  NOT NULL  AFTER `total_base_grand`;");
+        $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_order` ADD `total_base_grand_discount` INT(11)  NOT NULL  AFTER `total_base_grand`;");
         $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_order` ADD `total_user_item_discount` INT(11)  NOT NULL  AFTER `total_user_item`;");
         $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_order` ADD `total_user_shipping_discount` INT(11)  NOT NULL  AFTER `total_user_shipping`;");
         $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_order` ADD `total_user_tax_discount` INT(11)  NOT NULL  AFTER `total_user_tax`;");
-        $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_order` ADD `total_user_grand-discount` INT(11)  NOT NULL  AFTER `total_user_grand`;");
+        $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_order` ADD `total_user_grand_discount` INT(11)  NOT NULL  AFTER `total_user_grand`;");
+        $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_voucher` CHANGE `discount_value` `discount_value` INT(11)  UNSIGNED  NOT NULL  DEFAULT '0';");
+        $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_voucher` CHANGE `gift_card_balance` `gift_card_balance` INT(11)  UNSIGNED  NOT NULL  DEFAULT '0';");
+
+
         //  @todo convert saved baskets to json objects
     }
 }

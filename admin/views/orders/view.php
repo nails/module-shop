@@ -50,8 +50,9 @@
 
                                     } else {
 
-                                        //  @todo: Show voucher details
-                                        echo 'TODO: voucher display';
+
+                                        echo $order->voucher->label;
+                                        echo '<small>' . $order->voucher->code . '</small>';
                                     }
 
                                 ?>
@@ -102,6 +103,23 @@
 
                                         echo '<small>';
                                             echo 'User checked out in ' . $order->currency . ': ' . $order->totals->user_formatted->tax;
+                                        echo '</small>';
+                                    }
+
+                                ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">Discount</td>
+                                <td class="value">
+                                <?php
+
+                                    echo $order->totals->base_formatted->grand_discount;
+
+                                    if ($order->currency != $order->base_currency) {
+
+                                        echo '<small>';
+                                            echo 'User checked out in ' . $order->currency . ': ' . $order->totals->user_formatted->grand_discount;
                                         echo '</small>';
                                     }
 

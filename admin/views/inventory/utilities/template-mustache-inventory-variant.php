@@ -388,17 +388,17 @@
                             }
                         }
 
+
+                        $display = empty($isFirst) || empty($numVariants) || $numVariants == 1 ? 'none' : 'block';
+                        echo '<tr class="variation-sync-prices" style="display:' . $display . '">';
+                            echo '<td colspan="3">';
+                                echo '<a href="#" class="btn btn-xs btn-warning">Sync Prices</a>';
+                            echo '</td>';
+                        echo '</tr>';
+
                     ?>
                 </tbody>
             </table>
-            <?php
-
-                $display = empty($isFirst) || empty($numVariants) || $numVariants == 1 ? 'none' : 'block';
-                echo '<p class="variation-sync-prices" style="display:' . $display . '">';
-                    echo '<a href="#" class="awesome small orange">Sync Prices</a>';
-                echo '</p>';
-
-            ?>
         </div>
         <div class="tab-page tab-variation-gallery">
             <p>

@@ -2188,11 +2188,12 @@ class Manage extends BaseAdmin
 
             if ($this->form_validation->run()) {
 
-                $data        = new \stdClass();
-                $data->label = $this->input->post('label');
-                $data->rate  = $this->input->post('rate');
+                $aCreateData = array(
+                    'label' => $this->input->post('label'),
+                    'rate'  => $this->input->post('rate')
+                );
 
-                if ($this->shop_tax_rate_model->create($data)) {
+                if ($this->shop_tax_rate_model->create($aCreateData)) {
 
                     $this->session->set_flashdata('success', 'Tax Rate created successfully.');
                     redirect('admin/shop/manage/taxRate' . $this->isModal);

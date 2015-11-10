@@ -151,15 +151,7 @@
                                         </small>
                                         <small>
                                             Remaining Balance:
-                                            <?php
-
-                                            echo SHOP_BASE_CURRENCY_SYMBOL;
-                                            echo number_format(
-                                                $voucher->gift_card_balance,
-                                                SHOP_BASE_CURRENCY_PRECISION
-                                            );
-
-                                            ?>
+                                            <?=$voucher->gift_card_balance_formatted?>
                                         </small>
                                         <?php
                                         break;
@@ -210,8 +202,7 @@
 
                                     case 'AMOUNT':
 
-                                        echo SHOP_BASE_CURRENCY_SYMBOL;
-                                        echo number_format($voucher->discount_value, SHOP_BASE_CURRENCY_PRECISION);
+                                        echo $voucher->discount_value_formatted;
                                         break;
 
                                     case 'PERCENTAGE':

@@ -20,6 +20,10 @@ class NAILS_Shop_basket_model extends Base
     protected $cacheKey;
     protected $basket;
     protected $sessVar;
+    protected $iTotalItemDiscount;
+    protected $iTotalShipDiscount;
+    protected $iTotalTaxDiscount;
+    protected $iTotalDiscount;
 
     // --------------------------------------------------------------------------
 
@@ -109,11 +113,8 @@ class NAILS_Shop_basket_model extends Base
     public function get($skipCache = false)
     {
         if (!empty($skipCache)) {
-
             $cache = $this->_get_cache($this->cacheKey);
-
             if (!empty($cache)) {
-
                 return $cache;
             }
         }
@@ -307,10 +308,10 @@ class NAILS_Shop_basket_model extends Base
         if ($basket->shipping->type === 'DELIVER' || $basket->shipping->type === 'DELIVER_COLLECT') {
 
             $this->load->model('shop/shop_shipping_driver_model');
-            $_shipping_costs = $this->shop_shipping_driver_model->calculate($basket);
+            $oShippingCosts = $this->shop_shipping_driver_model->calculate($basket);
 
-            $basket->totals->base->shipping = $_shipping_costs->base;
-            $basket->totals->user->shipping = $_shipping_costs->user;
+            $basket->totals->base->shipping = $oShippingCosts->base;
+            $basket->totals->user->shipping = $oShippingCosts->user;
 
         } else {
 
@@ -321,49 +322,123 @@ class NAILS_Shop_basket_model extends Base
         // --------------------------------------------------------------------------
 
         /**
-         * Apply discounts.
-         *
-         * Discounts are always applied to pre-tax values. If we apply any discounts
-         * then the tax totals need to be recalculated using the discounted values.
+         * Apply discounts. Track the totals in a class variable so that in the case
+         * of a specific voucher the calculate methods can bail out when the voucher
+         * is maxed.
          */
 
         if (!empty($basket->voucher->id)) {
 
+            $this->iTotalItemDiscount = 0;
+            $this->iTotalShipDiscount = 0;
+            $this->iTotalTaxDiscount  = 0;
+            $this->iTotalDiscount     = 0;
+
+            //  Voucher applies to products onlt
             if ($basket->voucher->discount_application == 'PRODUCTS') {
 
-                //  Voucher applies to all items in the basket
+                foreach ($basket->items as $oItem) {
 
-            } elseif ($basket->voucher->discount_application == 'PRODUCT_TYPE') {
+                    $iDiscount = $this->calculateItemDiscount($basket->voucher, $oItem);
+                    $this->iTotalItemDiscount += $iDiscount;
+                    $this->iTotalDiscount     += $iDiscount;
 
-                //  Voucher applies to specific item types in the basket
+                    $iDiscount = $this->calculateTaxDiscount($basket->voucher, $oItem);
+                    $this->iTotalTaxDiscount += $iDiscount;
+                    $this->iTotalDiscount    += $iDiscount;
+                }
 
+            //  Voucher applies to specific item types in the basket
+            } elseif ($basket->voucher->discount_application == 'PRODUCT_TYPES') {
+
+                foreach ($basket->items as $oItem) {
+                    if ($oItem->product->type->id == $basket->voucher->product_type_id) {
+
+                        $iDiscount = $this->calculateItemDiscount($basket->voucher, $oItem);
+                        $this->iTotalItemDiscount += $iDiscount;
+                        $this->iTotalDiscount     += $iDiscount;
+
+                        $iDiscount = $this->calculateTaxDiscount($basket->voucher, $oItem);
+                        $this->iTotalTaxDiscount += $iDiscount;
+                        $this->iTotalDiscount    += $iDiscount;
+                    }
+                }
+
+            //  Voucher applies to shipping costs
             } elseif ($basket->voucher->discount_application == 'SHIPPING') {
 
-                //  Voucher applies to shipping costs
+                $iDiscount = $this->calculateShippingDiscount($basket->voucher, $basket);
+                $this->iTotalShipDiscount += $iDiscount;
+                $this->iTotalDiscount     += $iDiscount;
 
+            //  Voucher applies to everything, all products and shipping
             } elseif ($basket->voucher->discount_application == 'ALL') {
 
-                //  Voucher applies to everything, all products and shipping
+                foreach ($basket->items as $oItem) {
 
+                    $iDiscount = $this->calculateItemDiscount($basket->voucher, $oItem);
+                    $this->iTotalItemDiscount += $iDiscount;
+                    $this->iTotalDiscount     += $iDiscount;
+
+                    $iDiscount = $this->calculateTaxDiscount($basket->voucher, $oItem);
+                    $this->iTotalTaxDiscount += $iDiscount;
+                    $this->iTotalDiscount    += $iDiscount;
+                }
+
+                /**
+                 * If the voucher is an AMOUNT voucher then we need to do some edits here
+                 * to avoid the entire voucher value being applied to the shipping cost
+                 * (as the two totals are tracked independently).
+                 */
+
+                if ($basket->voucher->discount_type == 'AMOUNT' && $this->iTotalDiscount < $basket->voucher->discount_value) {
+
+                    //  Store the existing value
+                    $iVoucherValue = $basket->voucher->discount_value;
+
+                    //  Temporarily reduce the voucher's worth (for the following calculation
+                    $basket->voucher->discount_value = $basket->voucher->discount_value - $this->iTotalDiscount;
+
+                    //  Perform the calculation
+                    $iDiscount = $this->calculateShippingDiscount($basket->voucher, $basket);
+                    $this->iTotalShipDiscount += $iDiscount;
+                    $this->iTotalDiscount     += $iDiscount;
+
+                    //  And reset it back to it's previous value
+                    $basket->voucher->discount_value = $iVoucherValue;
+
+                } else {
+
+                    $iDiscount = $this->calculateShippingDiscount($basket->voucher, $basket);
+                    $this->iTotalShipDiscount += $iDiscount;
+                    $this->iTotalDiscount     += $iDiscount;
+                }
             }
+
+            //  Apply the new values
+            $basket->totals->base->item_discount     = $this->iTotalItemDiscount;
+            $basket->totals->base->shipping_discount = $this->iTotalShipDiscount;
+            $basket->totals->base->tax_discount      = $this->iTotalTaxDiscount;
+            $basket->totals->base->grand_discount    = $this->iTotalDiscount;
+
+            $basket->totals->user->item_discount     = $oCurrencyModel->convertBaseToUser($basket->totals->base->item_discount);
+            $basket->totals->user->shipping_discount = $oCurrencyModel->convertBaseToUser($basket->totals->base->shipping_discount);
+            $basket->totals->user->tax_discount      = $oCurrencyModel->convertBaseToUser($basket->totals->base->tax_discount);
+            $basket->totals->user->grand_discount    = $oCurrencyModel->convertBaseToUser($basket->totals->base->grand_discount);
         }
 
         // --------------------------------------------------------------------------
 
         //  Calculate grand totals
         $basket->totals->base->grand  = $basket->totals->base->item;
-        $basket->totals->base->grand -= $basket->totals->base->item_discount;
         $basket->totals->base->grand += $basket->totals->base->shipping;
-        $basket->totals->base->grand -= $basket->totals->base->shipping_discount;
         $basket->totals->base->grand += $basket->totals->base->tax;
-        $basket->totals->base->grand -= $basket->totals->base->tax_discount;
+        $basket->totals->base->grand -= $basket->totals->base->grand_discount;
 
         $basket->totals->user->grand  = $basket->totals->user->item;
-        $basket->totals->user->grand -= $basket->totals->user->item_discount;
         $basket->totals->user->grand += $basket->totals->user->shipping;
-        $basket->totals->user->grand -= $basket->totals->user->shipping_discount;
         $basket->totals->user->grand += $basket->totals->user->tax;
-        $basket->totals->user->grand -= $basket->totals->user->tax_discount;
+        $basket->totals->user->grand -= $basket->totals->user->grand_discount;
 
         // --------------------------------------------------------------------------
 
@@ -405,6 +480,86 @@ class NAILS_Shop_basket_model extends Base
 
     // --------------------------------------------------------------------------
 
+    protected function calculateItemDiscount($oVoucher, $oItem)
+    {
+        $iItemPrice = $oItem->variant->price->price->base->value_ex_tax;
+        $iDiscount  = 0;
+        if ($oVoucher->discount_type == 'PERCENTAGE') {
+
+            $iDiscount = (int) round($iItemPrice * ($oVoucher->discount_value/100));
+
+        } else if ($oVoucher->discount_type == 'AMOUNT') {
+
+            //  Ensure we've not maxed the discount
+            if ($this->iTotalItemDiscount < $oVoucher->discount_value) {
+                if ($oVoucher->discount_value < $iItemPrice) {
+                    $iDiscount = $oVoucher->discount_value;
+                } else {
+                    $iDiscount = $iItemPrice;
+                }
+            }
+        }
+
+        return $iDiscount;
+    }
+
+    // --------------------------------------------------------------------------
+
+    protected function calculateTaxDiscount($oVoucher, $oItem)
+    {
+        $iItemPrice = $oItem->variant->price->price->base->value_tax;
+        $iDiscount  = 0;
+        if ($oVoucher->discount_type == 'PERCENTAGE') {
+
+            $iDiscount = (int) round($iItemPrice * ($oVoucher->discount_value/100));
+
+        } else if ($oVoucher->discount_type == 'AMOUNT') {
+
+            //  Ensure we've not maxed the discount
+            if ($this->iTotalItemDiscount < $oVoucher->discount_value) {
+                if ($oVoucher->discount_value < $iItemPrice) {
+                    $iDiscount = $oVoucher->discount_value;
+                } else {
+                    $iDiscount = $iItemPrice;
+                }
+            }
+        }
+
+        return $iDiscount;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Calculate the discount to apply to the basket's shipping costs
+     * @param  object $oVoucher The voucher object
+     * @param  object $oBasket  The basket object
+     * @return int
+     */
+    protected function calculateShippingDiscount($oVoucher, $oBasket)
+    {
+        $iDiscount = 0;
+        if ($oVoucher->discount_type == 'PERCENTAGE') {
+
+            $iDiscount = (int) round($oBasket->totals->base->shipping * ($oVoucher->discount_value/100));
+
+        } else if ($oVoucher->discount_type == 'AMOUNT') {
+
+            //  Ensure we've not maxed the discount
+            if ($this->iTotalShipDiscount < $oVoucher->discount_value) {
+                if ($oVoucher->discount_value < $oBasket->totals->base->shipping) {
+                    $iDiscount = $oVoucher->discount_value;
+                } else {
+                    $iDiscount = $oBasket->totals->base->shipping;
+                }
+            }
+        }
+
+        return $iDiscount;
+    }
+
+    // --------------------------------------------------------------------------
+
     /**
      * Returns the number of items in the basket.
      * @param  boolean $respectQuantity If true then the number of items in the basket is counted rather than just the number of items
@@ -434,7 +589,7 @@ class NAILS_Shop_basket_model extends Base
     /**
      * Returns the total value of the basket, in the user's currency, optionally
      * formatted
-     * @param  boolean $formatted Whether to return the fromatted value or not
+     * @param  boolean $formatted Whether to return the formatted value or not
      * @return string
      */
     public function getTotal($formatted = true)

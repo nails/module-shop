@@ -1287,38 +1287,62 @@ class NAILS_Shop_order_model extends NAILS_Model
         //  Totals
         $obj->totals = new \stdClass();
 
-        $obj->totals->base           = new \stdClass();
-        $obj->totals->base->item     = (int) $obj->total_base_item;
-        $obj->totals->base->shipping = (int) $obj->total_base_shipping;
-        $obj->totals->base->tax      = (int) $obj->total_base_tax;
-        $obj->totals->base->grand    = (int) $obj->total_base_grand;
+        $obj->totals->base                    = new \stdClass();
+        $obj->totals->base->item              = (int) $obj->total_base_item;
+        $obj->totals->base->item_discount     = (int) $obj->total_base_item_discount;
+        $obj->totals->base->shipping          = (int) $obj->total_base_shipping;
+        $obj->totals->base->shipping_discount = (int) $obj->total_base_shipping_discount;
+        $obj->totals->base->tax               = (int) $obj->total_base_tax;
+        $obj->totals->base->tax_discount      = (int) $obj->total_base_tax_discount;
+        $obj->totals->base->grand             = (int) $obj->total_base_grand;
+        $obj->totals->base->grand_discount    = (int) $obj->total_base_grand_discount;
 
-        $obj->totals->base_formatted           = new \stdClass();
-        $obj->totals->base_formatted->item     = $this->oCurrencyModel->formatBase($obj->totals->base->item);
-        $obj->totals->base_formatted->shipping = $this->oCurrencyModel->formatBase($obj->totals->base->shipping);
-        $obj->totals->base_formatted->tax      = $this->oCurrencyModel->formatBase($obj->totals->base->tax);
-        $obj->totals->base_formatted->grand    = $this->oCurrencyModel->formatBase($obj->totals->base->grand);
+        $obj->totals->base_formatted                     = new \stdClass();
+        $obj->totals->base_formatted->item              = $this->oCurrencyModel->formatBase($obj->totals->base->item);
+        $obj->totals->base_formatted->item_discount     = $this->oCurrencyModel->formatBase($obj->totals->base->item_discount);
+        $obj->totals->base_formatted->shipping          = $this->oCurrencyModel->formatBase($obj->totals->base->shipping);
+        $obj->totals->base_formatted->shipping_discount = $this->oCurrencyModel->formatBase($obj->totals->base->shipping_discount);
+        $obj->totals->base_formatted->tax               = $this->oCurrencyModel->formatBase($obj->totals->base->tax);
+        $obj->totals->base_formatted->tax_discount      = $this->oCurrencyModel->formatBase($obj->totals->base->tax_discount);
+        $obj->totals->base_formatted->grand             = $this->oCurrencyModel->formatBase($obj->totals->base->grand);
+        $obj->totals->base_formatted->grand_discount    = $this->oCurrencyModel->formatBase($obj->totals->base->grand_discount);
 
-        $obj->totals->user           = new \stdClass();
-        $obj->totals->user->item     = (int) $obj->total_user_item;
-        $obj->totals->user->shipping = (int) $obj->total_user_shipping;
-        $obj->totals->user->tax      = (int) $obj->total_user_tax;
-        $obj->totals->user->grand    = (int) $obj->total_user_grand;
+        $obj->totals->user                    = new \stdClass();
+        $obj->totals->user->item              = (int) $obj->total_user_item;
+        $obj->totals->user->item_discount     = (int) $obj->total_user_item_discount;
+        $obj->totals->user->shipping          = (int) $obj->total_user_shipping;
+        $obj->totals->user->shipping_discount = (int) $obj->total_user_shipping_discount;
+        $obj->totals->user->tax               = (int) $obj->total_user_tax;
+        $obj->totals->user->tax_discount      = (int) $obj->total_user_tax_discount;
+        $obj->totals->user->grand             = (int) $obj->total_user_grand;
+        $obj->totals->user->grand_discount    = (int) $obj->total_user_grand_discount;
 
-        $obj->totals->user_formatted           = new \stdClass();
-        $obj->totals->user_formatted->item     = $this->oCurrencyModel->formatUser($obj->totals->user->item);
-        $obj->totals->user_formatted->shipping = $this->oCurrencyModel->formatUser($obj->totals->user->shipping);
-        $obj->totals->user_formatted->tax      = $this->oCurrencyModel->formatUser($obj->totals->user->tax);
-        $obj->totals->user_formatted->grand    = $this->oCurrencyModel->formatUser($obj->totals->user->grand);
+        $obj->totals->user_formatted                     = new \stdClass();
+        $obj->totals->user_formatted->item              = $this->oCurrencyModel->formatUSer($obj->totals->user->item);
+        $obj->totals->user_formatted->item_discount     = $this->oCurrencyModel->formatUSer($obj->totals->user->item_discount);
+        $obj->totals->user_formatted->shipping          = $this->oCurrencyModel->formatUSer($obj->totals->user->shipping);
+        $obj->totals->user_formatted->shipping_discount = $this->oCurrencyModel->formatUSer($obj->totals->user->shipping_discount);
+        $obj->totals->user_formatted->tax               = $this->oCurrencyModel->formatUSer($obj->totals->user->tax);
+        $obj->totals->user_formatted->tax_discount      = $this->oCurrencyModel->formatUSer($obj->totals->user->tax_discount);
+        $obj->totals->user_formatted->grand             = $this->oCurrencyModel->formatUSer($obj->totals->user->grand);
+        $obj->totals->user_formatted->grand_discount    = $this->oCurrencyModel->formatUSer($obj->totals->user->grand_discount);
 
         unset($obj->total_base_item);
+        unset($obj->total_base_item_discount);
         unset($obj->total_base_shipping);
+        unset($obj->total_base_shipping_discount);
         unset($obj->total_base_tax);
+        unset($obj->total_base_tax_discount);
         unset($obj->total_base_grand);
+        unset($obj->total_base_grand_discount);
         unset($obj->total_user_item);
+        unset($obj->total_user_item_discount);
         unset($obj->total_user_shipping);
+        unset($obj->total_user_shipping_discount);
         unset($obj->total_user_tax);
+        unset($obj->total_user_tax_discount);
         unset($obj->total_user_grand);
+        unset($obj->total_user_grand_discount);
 
         // --------------------------------------------------------------------------
 

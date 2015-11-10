@@ -33,15 +33,19 @@ class Voucher extends Base
     const DISCOUNT_APPLICATION_SHIPPING     = 'SHIPPING';
     const DISCOUNT_APPLICATION_ALL          = 'ALL';
 
+    // --------------------------------------------------------------------------
+
+    protected $oCurrencyModel;
 
     // --------------------------------------------------------------------------
 
     public function __construct()
     {
         parent::__construct();
-        $this->table = NAILS_DB_PREFIX . 'shop_voucher';
-        $this->tablePrefix = 'sv';
+        $this->table             = NAILS_DB_PREFIX . 'shop_voucher';
+        $this->tablePrefix       = 'sv';
         $this->destructiveDelete = false;
+        $this->oCurrencyModel    = Factory::model('Currency', 'nailsapp/module-shop');
     }
 
     // --------------------------------------------------------------------------
@@ -55,7 +59,7 @@ class Voucher extends Base
         return array(
             self::TYPE_NORMAL      => 'Normal',
             self::TYPE_LIMITED_USE => 'Limited Use',
-            self::TYPE_GIFT_CARD   => 'Gift Card'
+            // self::TYPE_GIFT_CARD   => 'Gift Card'
         );
     }
 
@@ -168,7 +172,7 @@ class Voucher extends Base
      */
     protected function redeemGiftCard($voucher, $order)
     {
-        if ($order->requires_shipping) {
+        if ($order->shipping->isDeliverable) {
 
             if (app_setting('free_shipping_threshold', 'shop') <= $order->totals->sub) {
 
@@ -203,7 +207,6 @@ class Voucher extends Base
         // --------------------------------------------------------------------------
 
         //  Alter the available balance
-
         $this->db->set('gift_card_balance', 'gift_card_balance-' . $spend, false);
 
         $this->db->where('id', $voucher->id);
@@ -260,64 +263,6 @@ class Voucher extends Base
         }
 
         return $result;
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Calculates how much if a discount the voucher will give to a basket
-     * @param  int    $iVoucherId The voucher's ID
-     * @param  object $oBasket    The user's basket object
-     * @return int
-     */
-    public function calculateDiscount($iVoucherId, $oBasket)
-    {
-        $oVoucher = $this->get_by_id($iVoucherId);
-
-        if (!$oVoucher) {
-
-            $this->_set_error('Invalid voucher ID.');
-            return false;
-        }
-
-        /**
-         * Work out the total we're working with, this will vary depending on the
-         * type of voucher being applied, but will be one of:
-         * - Products
-         * - Products of a certain kind only
-         * - Shipping
-         * - Both Products and Shipping
-         */
-
-        switch ($oVoucher->discount_application) {
-
-            case self::DISCOUNT_APPLICATION_PRODUCTS:
-                $iTotal = $oBasket->totals->base;
-                break;
-
-            case self::DISCOUNT_APPLICATION_PRODUCT_TYPE:
-                $iTotal = 0;
-                foreach ($oBasket->items as $oItem) {
-                    if ($oItem->product->type->id == $oVoucher->product_type_id) {
-                        dumpanddie($oItem->variant->price->price->base->value_ex_tax);
-                        $iTotal += 0;
-                    }
-                }
-                break;
-
-            case self::DISCOUNT_APPLICATION_SHIPPING:
-                $iTotal = $oBasket->totals->shipping;
-                break;
-
-            case self::DISCOUNT_APPLICATION_ALL:
-            default:
-                $iTotal = $oBasket->totals->item + $iTotal = $oBasket->totals->shipping;
-                break;
-        }
-
-        dump($iTotal);
-        dumpanddie($oVoucher);
-        return 100;
     }
 
     // --------------------------------------------------------------------------
@@ -407,6 +352,13 @@ class Voucher extends Base
             return false;
         }
 
+        //  @todo allow the use of gift cards
+        if ($voucher->type == self::TYPE_GIFT_CARD) {
+
+            $this->_set_error('Gift Cards are not currently supported in this store.');
+            return false;
+        }
+
         // --------------------------------------------------------------------------
 
         /**
@@ -456,7 +408,8 @@ class Voucher extends Base
         if (!is_null($basket)) {
 
             //  Is this a shipping voucher being applied to an order with no shippable items?
-            if ($voucher->discount_application == self::DISCOUNT_APPLICATION_SHIPPING && !$basket->requires_shipping) {
+            $bIsShippingVoucher = $voucher->discount_application == self::DISCOUNT_APPLICATION_SHIPPING;
+            if ($bIsShippingVoucher && !$basket->shipping->isDeliverable) {
 
                 $this->_set_error('Your order does not contian any items which require shipping, voucher not needed!');
                 return false;
@@ -649,6 +602,83 @@ class Voucher extends Base
     // --------------------------------------------------------------------------
 
     /**
+     * Creates a new voucher
+     * @param  array   $aData         The data to create the voucher with
+     * @param  boolean $bReturnObject Whether to return just the new ID or the full voucher
+     * @return mixed
+     */
+    public function create($aData = array(), $bReturnObject = false)
+    {
+        if (empty($aData['label'])) {
+            $this->_set_error('Discount label is a required field.');
+            return false;
+        }
+
+        if (empty($aData['type'])) {
+            $this->_set_error('Voucher type is a required field.');
+            return false;
+        }
+
+        if (empty($aData['code'])) {
+            $this->_set_error('Voucher code is a required field.');
+            return false;
+        }
+
+        if (empty($aData['discount_type'])) {
+            $this->_set_error('Discount type is a required field.');
+            return false;
+        }
+
+        if (empty($aData['discount_value'])) {
+            $this->_set_error('Discount value is a required field.');
+            return false;
+        }
+
+        if (empty($aData['discount_application'])) {
+            $this->_set_error('Discount application is a required field.');
+            return false;
+        }
+
+        /**
+         * Ensure that fields which might contain figures are properly stored
+         * in their minimum units. This only applies in certain conditions
+         */
+
+        switch ($aData['discount_type']) {
+
+            case self::DISCOUNT_TYPE_PERCENT:
+
+                if ($aData['discount_value'] < 0 || $aData['discount_value'] > 100) {
+
+                    $this->_set_error('Discount value must be within the range 0-100.');
+                    return false;
+                }
+                break;
+
+            case self::DISCOUNT_TYPE_AMOUNT:
+
+                if ($aData['discount_value'] < 0 ) {
+
+                    $this->_set_error('Discount value must be greater than 0.');
+                    return false;
+
+                } else {
+
+                    //  Convert to integer
+                    $aData['discount_value'] = $this->oCurrencyModel->floatToInt(
+                        $aData['discount_value'],
+                        SHOP_BASE_CURRENCY_CODE
+                    );
+                }
+                break;
+        }
+
+        return parent::create($aData, $bReturnObject);
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Formats a single object
      *
      * @param  object $obj      A reference to the object being formatted.
@@ -661,9 +691,11 @@ class Voucher extends Base
     {
         parent::_format_object($obj, $data, $integers, $bools);
 
-        $obj->limited_use_limit = (int) $obj->limited_use_limit;
-        $obj->discount_value    = (float) $obj->discount_value;
-        $obj->gift_card_balance = (float) $obj->gift_card_balance;
+        $obj->limited_use_limit           = (int) $obj->limited_use_limit;
+        $obj->discount_value              = (int) $obj->discount_value;
+        $obj->discount_value_formatted    = $this->oCurrencyModel->formatBase($obj->discount_value);
+        $obj->gift_card_balance           = (int) $obj->gift_card_balance;
+        $obj->gift_card_balance_formatted = $this->oCurrencyModel->formatBase($obj->gift_card_balance);
 
         //  Creator
         $obj->creator               = new \stdClass();
