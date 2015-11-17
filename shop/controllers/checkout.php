@@ -95,44 +95,44 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
             } else {
 
-                $this->load->library('form_validation');
+                $oFormValidation = Factory::service('FormValidation');
 
-                $this->form_validation->set_rules('delivery_address_line_1', '', 'xss_clean|trim|required');
-                $this->form_validation->set_rules('delivery_address_line_2', '', 'xss_clean|trim');
-                $this->form_validation->set_rules('delivery_address_town', '', 'xss_clean|trim|required');
-                $this->form_validation->set_rules('delivery_address_state', '', 'xss_clean|trim');
-                $this->form_validation->set_rules('delivery_address_postcode', '', 'xss_clean|trim|required');
-                $this->form_validation->set_rules('delivery_address_country', '', 'xss_clean|required');
+                $oFormValidation->set_rules('delivery_address_line_1', '', 'xss_clean|trim|required');
+                $oFormValidation->set_rules('delivery_address_line_2', '', 'xss_clean|trim');
+                $oFormValidation->set_rules('delivery_address_town', '', 'xss_clean|trim|required');
+                $oFormValidation->set_rules('delivery_address_state', '', 'xss_clean|trim');
+                $oFormValidation->set_rules('delivery_address_postcode', '', 'xss_clean|trim|required');
+                $oFormValidation->set_rules('delivery_address_country', '', 'xss_clean|required');
 
-                $this->form_validation->set_rules('first_name', '', 'xss_clean|trim|required');
-                $this->form_validation->set_rules('last_name', '', 'xss_clean|trim|required');
-                $this->form_validation->set_rules('email', '', 'xss_clean|trim|required');
-                $this->form_validation->set_rules('telephone', '', 'xss_clean|trim|required');
+                $oFormValidation->set_rules('first_name', '', 'xss_clean|trim|required');
+                $oFormValidation->set_rules('last_name', '', 'xss_clean|trim|required');
+                $oFormValidation->set_rules('email', '', 'xss_clean|trim|required');
+                $oFormValidation->set_rules('telephone', '', 'xss_clean|trim|required');
 
                 if (!$this->input->post('same_billing_address')) {
 
-                    $this->form_validation->set_rules('billing_address_line_1', '', 'xss_clean|trim|required');
-                    $this->form_validation->set_rules('billing_address_line_2', '', 'xss_clean|trim');
-                    $this->form_validation->set_rules('billing_address_town', '', 'xss_clean|trim|required');
-                    $this->form_validation->set_rules('billing_address_state', '', 'xss_clean|trim');
-                    $this->form_validation->set_rules('billing_address_postcode', '', 'xss_clean|trim|required');
-                    $this->form_validation->set_rules('billing_address_country', '', 'xss_clean|trim|required');
+                    $oFormValidation->set_rules('billing_address_line_1', '', 'xss_clean|trim|required');
+                    $oFormValidation->set_rules('billing_address_line_2', '', 'xss_clean|trim');
+                    $oFormValidation->set_rules('billing_address_town', '', 'xss_clean|trim|required');
+                    $oFormValidation->set_rules('billing_address_state', '', 'xss_clean|trim');
+                    $oFormValidation->set_rules('billing_address_postcode', '', 'xss_clean|trim|required');
+                    $oFormValidation->set_rules('billing_address_country', '', 'xss_clean|trim|required');
 
                 } else {
 
-                    $this->form_validation->set_rules('billing_address_line_1', '', 'xss_clean|trim');
-                    $this->form_validation->set_rules('billing_address_line_2', '', 'xss_clean|trim');
-                    $this->form_validation->set_rules('billing_address_town', '', 'xss_clean|trim');
-                    $this->form_validation->set_rules('billing_address_state', '', 'xss_clean|trim');
-                    $this->form_validation->set_rules('billing_address_postcode', '', 'xss_clean|trim');
-                    $this->form_validation->set_rules('billing_address_country', '', 'xss_clean|trim');
+                    $oFormValidation->set_rules('billing_address_line_1', '', 'xss_clean|trim');
+                    $oFormValidation->set_rules('billing_address_line_2', '', 'xss_clean|trim');
+                    $oFormValidation->set_rules('billing_address_town', '', 'xss_clean|trim');
+                    $oFormValidation->set_rules('billing_address_state', '', 'xss_clean|trim');
+                    $oFormValidation->set_rules('billing_address_postcode', '', 'xss_clean|trim');
+                    $oFormValidation->set_rules('billing_address_country', '', 'xss_clean|trim');
                 }
 
-                $this->form_validation->set_rules('payment_gateway', '', 'xss_clean|trim|required');
+                $oFormValidation->set_rules('payment_gateway', '', 'xss_clean|trim|required');
 
-                $this->form_validation->set_message('required', lang('fv_required'));
+                $oFormValidation->set_message('required', lang('fv_required'));
 
-                if ($this->form_validation->run()) {
+                if ($oFormValidation->run()) {
 
                     //  Prepare data
                     $aInsertData = array();

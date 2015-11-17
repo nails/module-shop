@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Shop;
 
+use Nails\Factory;
 use Nails\Admin\Helper;
 use Nails\Shop\Controller\BaseAdmin;
 
@@ -135,15 +136,14 @@ class Availability extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $oFormValidation = Factory::service('FormValidation');
+            $oFormValidation->set_rules('email', '', 'xss_clean|required|valid_email');
+            $oFormValidation->set_rules('item', '', 'xss_clean|required');
 
-            $this->form_validation->set_rules('email', '', 'xss_clean|required|valid_email');
-            $this->form_validation->set_rules('item', '', 'xss_clean|required');
+            $oFormValidation->set_message('required', lang('fv_required'));
+            $oFormValidation->set_message('valid_email',  lang('fv_valid_email'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('valid_email',  lang('fv_valid_email'));
-
-            if ($this->form_validation->run()) {
+            if ($oFormValidation->run()) {
 
                 $item = explode(':', $this->input->post('item'));
 
@@ -210,15 +210,14 @@ class Availability extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $oFormValidation = Factory::service('FormValidation');
+            $oFormValidation->set_rules('email', '', 'xss_clean|required|valid_email');
+            $oFormValidation->set_rules('item', '', 'xss_clean|required');
 
-            $this->form_validation->set_rules('email', '', 'xss_clean|required|valid_email');
-            $this->form_validation->set_rules('item', '', 'xss_clean|required');
+            $oFormValidation->set_message('required', lang('fv_required'));
+            $oFormValidation->set_message('valid_email',  lang('fv_valid_email'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('valid_email',  lang('fv_valid_email'));
-
-            if ($this->form_validation->run()) {
+            if ($oFormValidation->run()) {
 
                 $item = explode(':', $this->input->post('item'));
 

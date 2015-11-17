@@ -68,6 +68,8 @@ class Inventory extends BaseAdmin
         $this->load->model('shop/shop_product_model');
         $this->load->model('shop/shop_product_type_model');
 
+        $this->oFormValidation = Factory::service('FormValidation');
+
         // --------------------------------------------------------------------------
 
         //  @todo Move this into a common constructor
@@ -346,7 +348,6 @@ class Inventory extends BaseAdmin
              */
             if ($this->input->post('is_active')) {
 
-                $this->load->library('form_validation');
                 $this->inventoryCreateEditValidationRules();
                 $bAdditionalValidationError = false;
                 $aVariations = $this->input->post('variation');
@@ -370,7 +371,7 @@ class Inventory extends BaseAdmin
                     $bAdditionalValidationError = true;
                 }
 
-                $bPassedValidation = $this->form_validation->run($this) && !$bAdditionalValidationError;
+                $bPassedValidation = $this->oFormValidation->run($this) && !$bAdditionalValidationError;
 
             } else {
 
@@ -528,7 +529,6 @@ class Inventory extends BaseAdmin
              */
             if ($this->input->post('is_active')) {
 
-                $this->load->library('form_validation');
                 $this->inventoryCreateEditValidationRules();
                 $bAdditionalValidationError = false;
                 $aVariations = $this->input->post('variation');
@@ -552,7 +552,7 @@ class Inventory extends BaseAdmin
                     $bAdditionalValidationError = true;
                 }
 
-                $bPassedValidation = $this->form_validation->run($this) && !$bAdditionalValidationError;
+                $bPassedValidation = $this->oFormValidation->run($this) && !$bAdditionalValidationError;
 
             } else {
 
@@ -647,33 +647,33 @@ class Inventory extends BaseAdmin
     {
         //  Product Info
         //  ============
-        $this->form_validation->set_rules('type_id', '', 'xss_clean|required');
-        $this->form_validation->set_rules('label', '', 'xss_clean|required');
-        $this->form_validation->set_rules('is_active', '', 'xss_clean');
-        $this->form_validation->set_rules('brands', '', 'xss_clean');
-        $this->form_validation->set_rules('suppliers', '', 'xss_clean');
-        $this->form_validation->set_rules('categories', '', 'xss_clean');
-        $this->form_validation->set_rules('google_category', '', 'xss_clean');
-        $this->form_validation->set_rules('tags', '', 'xss_clean');
-        $this->form_validation->set_rules('tax_rate_id', '', 'xss_clean|required');
-        $this->form_validation->set_rules('published', '', 'xss_clean|required');
+        $this->oFormValidation->set_rules('type_id', '', 'xss_clean|required');
+        $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
+        $this->oFormValidation->set_rules('is_active', '', 'xss_clean');
+        $this->oFormValidation->set_rules('brands', '', 'xss_clean');
+        $this->oFormValidation->set_rules('suppliers', '', 'xss_clean');
+        $this->oFormValidation->set_rules('categories', '', 'xss_clean');
+        $this->oFormValidation->set_rules('google_category', '', 'xss_clean');
+        $this->oFormValidation->set_rules('tags', '', 'xss_clean');
+        $this->oFormValidation->set_rules('tax_rate_id', '', 'xss_clean|required');
+        $this->oFormValidation->set_rules('published', '', 'xss_clean|required');
 
         // --------------------------------------------------------------------------
 
         //  External product
         if (app_setting('enable_external_products', 'shop')) {
 
-            $this->form_validation->set_rules('is_external', '', 'xss_clean');
+            $this->oFormValidation->set_rules('is_external', '', 'xss_clean');
 
             if ($this->input->post('is_external')) {
 
-                $this->form_validation->set_rules('external_vendor_label', '', 'xss_clean|required');
-                $this->form_validation->set_rules('external_vendor_url', '', 'xss_clean|required');
+                $this->oFormValidation->set_rules('external_vendor_label', '', 'xss_clean|required');
+                $this->oFormValidation->set_rules('external_vendor_url', '', 'xss_clean|required');
 
             } else {
 
-                $this->form_validation->set_rules('external_vendor_label', '', 'xss_clean');
-                $this->form_validation->set_rules('external_vendor_url', '', 'xss_clean');
+                $this->oFormValidation->set_rules('external_vendor_label', '', 'xss_clean');
+                $this->oFormValidation->set_rules('external_vendor_url', '', 'xss_clean');
             }
         }
 
@@ -681,7 +681,7 @@ class Inventory extends BaseAdmin
 
         //  Description
         //  ===========
-        $this->form_validation->set_rules('description', '', 'required');
+        $this->oFormValidation->set_rules('description', '', 'required');
 
         // --------------------------------------------------------------------------
 
@@ -694,16 +694,16 @@ class Inventory extends BaseAdmin
                 //  Details
                 //  -------
 
-                $this->form_validation->set_rules('variation[' . $index . '][label]', '', 'xss_clean|trim|required');
+                $this->oFormValidation->set_rules('variation[' . $index . '][label]', '', 'xss_clean|trim|required');
 
                 $v_id = !empty($v['id']) ? $v['id'] : '';
-                $this->form_validation->set_rules('variation[' . $index . '][sku]', '', 'xss_clean|trim|callback__callback_inventory_valid_sku[' . $v_id . ']');
-                $this->form_validation->set_rules('variation[' . $index . '][is_active]', '', 'xss_clean');
+                $this->oFormValidation->set_rules('variation[' . $index . '][sku]', '', 'xss_clean|trim|callback__callback_inventory_valid_sku[' . $v_id . ']');
+                $this->oFormValidation->set_rules('variation[' . $index . '][is_active]', '', 'xss_clean');
 
                 //  Stock
                 //  -----
 
-                $this->form_validation->set_rules('variation[' . $index . '][stock_status]', '', 'xss_clean|callback__callback_inventory_valid_stock_status|required');
+                $this->oFormValidation->set_rules('variation[' . $index . '][stock_status]', '', 'xss_clean|callback__callback_inventory_valid_stock_status|required');
 
                 $stock_status = isset($v['stock_status']) ? $v['stock_status'] : '';
 
@@ -711,14 +711,14 @@ class Inventory extends BaseAdmin
 
                     case 'IN_STOCK':
 
-                        $this->form_validation->set_rules('variation[' . $index . '][quantity_available]', '', 'xss_clean|trim|callback__callback_inventory_valid_quantity');
-                        $this->form_validation->set_rules('variation[' . $index . '][lead_time]', '', 'xss_clean|trim');
+                        $this->oFormValidation->set_rules('variation[' . $index . '][quantity_available]', '', 'xss_clean|trim|callback__callback_inventory_valid_quantity');
+                        $this->oFormValidation->set_rules('variation[' . $index . '][lead_time]', '', 'xss_clean|trim');
                         break;
 
                     case 'OUT_OF_STOCK':
 
-                        $this->form_validation->set_rules('variation[' . $index . '][quantity_available]', '', 'xss_clean|trim');
-                        $this->form_validation->set_rules('variation[' . $index . '][lead_time]', '', 'xss_clean|trim');
+                        $this->oFormValidation->set_rules('variation[' . $index . '][quantity_available]', '', 'xss_clean|trim');
+                        $this->oFormValidation->set_rules('variation[' . $index . '][lead_time]', '', 'xss_clean|trim');
                         break;
                 }
 
@@ -730,7 +730,7 @@ class Inventory extends BaseAdmin
 
                         $required = $price['currency'] == SHOP_BASE_CURRENCY_CODE ? '|required' : '';
 
-                        $this->form_validation->set_rules('variation[' . $index . '][pricing][' . $price_index . '][price]', '', 'xss_clean|callback__callback_inventory_valid_price' . $required);
+                        $this->oFormValidation->set_rules('variation[' . $index . '][pricing][' . $price_index . '][price]', '', 'xss_clean|callback__callback_inventory_valid_price' . $required);
                     }
                 }
 
@@ -740,7 +740,7 @@ class Inventory extends BaseAdmin
 
                     foreach ($v['gallery'] as $gallery_index => $image) {
 
-                        $this->form_validation->set_rules('variation[' . $index . '][gallery][' . $gallery_index . ']', '', 'xss_clean');
+                        $this->oFormValidation->set_rules('variation[' . $index . '][gallery][' . $gallery_index . ']', '', 'xss_clean');
                     }
                 }
 
@@ -748,7 +748,7 @@ class Inventory extends BaseAdmin
                 //  --------
 
                 //  Collect only switch
-                $this->form_validation->set_rules('variation[' . $index . '][shipping][collection_only]', '', 'xss_clean');
+                $this->oFormValidation->set_rules('variation[' . $index . '][shipping][collection_only]', '', 'xss_clean');
 
                 //  Foreach of the driver's settings and apply any rules, but if collect only is on then don't bother
                 $shipping_options = $this->shop_shipping_driver_model->optionsVariant();
@@ -775,7 +775,7 @@ class Inventory extends BaseAdmin
                     $rules = array_unique($rules);
                     $rules = implode('|', $rules);
 
-                    $this->form_validation->set_rules('variation[' . $index . '][shipping][driver_data][' . $this->data['shipping_driver']->slug . '][' . $option['key'] . ']', $option['label'], $rules);
+                    $this->oFormValidation->set_rules('variation[' . $index . '][shipping][driver_data][' . $this->data['shipping_driver']->slug . '][' . $option['key'] . ']', $option['label'], $rules);
                 }
             }
         }
@@ -783,38 +783,38 @@ class Inventory extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Gallery
-        $this->form_validation->set_rules('gallery', '', 'xss_clean');
+        $this->oFormValidation->set_rules('gallery', '', 'xss_clean');
 
         // --------------------------------------------------------------------------
 
         //  Attributes
-        $this->form_validation->set_rules('attributes', '', 'xss_clean');
+        $this->oFormValidation->set_rules('attributes', '', 'xss_clean');
 
         // --------------------------------------------------------------------------
 
         //  Ranges & Collections
-        $this->form_validation->set_rules('ranges', '', 'xss_clean');
-        $this->form_validation->set_rules('collections', '', 'xss_clean');
+        $this->oFormValidation->set_rules('ranges', '', 'xss_clean');
+        $this->oFormValidation->set_rules('collections', '', 'xss_clean');
 
         // --------------------------------------------------------------------------
 
         //  Related products
-        $this->form_validation->set_rules('related', '', 'xss_clean');
+        $this->oFormValidation->set_rules('related', '', 'xss_clean');
 
         // --------------------------------------------------------------------------
 
         //  SEO
-        $this->form_validation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-        $this->form_validation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-        $this->form_validation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+        $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
+        $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
+        $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
 
         // --------------------------------------------------------------------------
 
         //  Set messages
-        $this->form_validation->set_message('required', lang('fv_required'));
-        $this->form_validation->set_message('numeric', lang('fv_numeric'));
-        $this->form_validation->set_message('is_natural', lang('fv_is_natural'));
-        $this->form_validation->set_message('max_length', lang('fv_max_length'));
+        $this->oFormValidation->set_message('required', lang('fv_required'));
+        $this->oFormValidation->set_message('numeric', lang('fv_numeric'));
+        $this->oFormValidation->set_message('is_natural', lang('fv_is_natural'));
+        $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
     }
 
     // --------------------------------------------------------------------------
@@ -984,7 +984,7 @@ class Inventory extends BaseAdmin
 
         if ($str && !is_numeric($str)) {
 
-            $this->form_validation->set_message('_callback_inventory_valid_price', 'This is not a valid price');
+            $this->oFormValidation->set_message('_callback_inventory_valid_price', 'This is not a valid price');
             return false;
 
         } else {
@@ -1020,7 +1020,7 @@ class Inventory extends BaseAdmin
 
                 } else {
 
-                    $this->form_validation->set_message(
+                    $this->oFormValidation->set_message(
                         '_callback_inventory_valid_quantity',
                         lang('fv_is_natural')
                     );
@@ -1029,7 +1029,7 @@ class Inventory extends BaseAdmin
 
             } else {
 
-                $this->form_validation->set_message(
+                $this->oFormValidation->set_message(
                     '_callback_inventory_valid_quantity',
                     'This must be a whole number.'
                 );
@@ -1040,7 +1040,7 @@ class Inventory extends BaseAdmin
 
         } else {
 
-            $this->form_validation->set_message(
+            $this->oFormValidation->set_message(
                 '_callback_inventory_valid_quantity',
                 'This is not a valid quantity'
             );
@@ -1075,7 +1075,7 @@ class Inventory extends BaseAdmin
 
         if ($result) {
 
-            $this->form_validation->set_message('_callback_inventory_valid_sku', 'This SKU is already in use.');
+            $this->oFormValidation->set_message('_callback_inventory_valid_sku', 'This SKU is already in use.');
             return false;
 
         } else {

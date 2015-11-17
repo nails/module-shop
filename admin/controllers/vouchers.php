@@ -197,32 +197,32 @@ class Vouchers extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $oFormValidation = Factory::service('FormValidation');
 
             //  Common
-            $this->form_validation->set_rules('type', '', 'required|callback__callback_voucher_valid_type');
-            $this->form_validation->set_rules('code', '', 'required|is_unique[' . NAILS_DB_PREFIX . 'shop_voucher.code]|callback__callback_voucher_valid_code');
-            $this->form_validation->set_rules('label', '', 'required');
-            $this->form_validation->set_rules('valid_from', '', 'required|callback__callback_voucher_valid_from');
-            $this->form_validation->set_rules('valid_to', '', 'callback__callback_voucher_valid_to');
+            $oFormValidation->set_rules('type', '', 'required|callback__callback_voucher_valid_type');
+            $oFormValidation->set_rules('code', '', 'required|is_unique[' . NAILS_DB_PREFIX . 'shop_voucher.code]|callback__callback_voucher_valid_code');
+            $oFormValidation->set_rules('label', '', 'required');
+            $oFormValidation->set_rules('valid_from', '', 'required|callback__callback_voucher_valid_from');
+            $oFormValidation->set_rules('valid_to', '', 'callback__callback_voucher_valid_to');
 
             //  Voucher Type specific rules
             switch ($this->input->post('type')) {
 
                 case 'LIMITED_USE':
 
-                    $this->form_validation->set_rules('limited_use_limit', '', 'required|is_natural_no_zero');
-                    $this->form_validation->set_rules('discount_type', '', 'required|callback__callback_voucher_valid_discount_type');
-                    $this->form_validation->set_rules('discount_application', '', 'required|callback__callback_voucher_valid_discount_application');
+                    $oFormValidation->set_rules('limited_use_limit', '', 'required|is_natural_no_zero');
+                    $oFormValidation->set_rules('discount_type', '', 'required|callback__callback_voucher_valid_discount_type');
+                    $oFormValidation->set_rules('discount_application', '', 'required|callback__callback_voucher_valid_discount_application');
 
-                    $this->form_validation->set_message('is_natural_no_zero', 'Only positive integers are valid.');
+                    $oFormValidation->set_message('is_natural_no_zero', 'Only positive integers are valid.');
                     break;
 
                 case 'NORMAL':
                 default:
 
-                    $this->form_validation->set_rules('discount_type', '', 'required|callback__callback_voucher_valid_discount_type');
-                    $this->form_validation->set_rules('discount_application', '', 'required|callback__callback_voucher_valid_discount_application');
+                    $oFormValidation->set_rules('discount_type', '', 'required|callback__callback_voucher_valid_discount_type');
+                    $oFormValidation->set_rules('discount_application', '', 'required|callback__callback_voucher_valid_discount_application');
                     break;
 
                 case 'GIFT_CARD':
@@ -238,16 +238,16 @@ class Vouchers extends BaseAdmin
 
                 case 'PERCENTAGE':
 
-                    $this->form_validation->set_rules('discount_value', '', 'required|is_natural_no_zero|greater_than[0]|less_than[101]');
-                    $this->form_validation->set_message('is_natural_no_zero', 'Only positive integers are valid.');
-                    $this->form_validation->set_message('greater_than', 'Must be in the range 1-100');
-                    $this->form_validation->set_message('less_than', 'Must be in the range 1-100');
+                    $oFormValidation->set_rules('discount_value', '', 'required|is_natural_no_zero|greater_than[0]|less_than[101]');
+                    $oFormValidation->set_message('is_natural_no_zero', 'Only positive integers are valid.');
+                    $oFormValidation->set_message('greater_than', 'Must be in the range 1-100');
+                    $oFormValidation->set_message('less_than', 'Must be in the range 1-100');
                     break;
 
                 case 'AMOUNT':
 
-                    $this->form_validation->set_rules('discount_value', '', 'required|numeric|greater_than[0]');
-                    $this->form_validation->set_message('greater_than', 'Must be greater than 0');
+                    $oFormValidation->set_rules('discount_value', '', 'required|numeric|greater_than[0]');
+                    $oFormValidation->set_message('greater_than', 'Must be greater than 0');
                     break;
 
                 default:
@@ -261,12 +261,12 @@ class Vouchers extends BaseAdmin
 
                 case 'PRODUCT_TYPES':
 
-                    $this->form_validation->set_rules('product_type_id', '', 'required|callback__callback_voucher_valid_product_type');
+                    $oFormValidation->set_rules('product_type_id', '', 'required|callback__callback_voucher_valid_product_type');
                     break;
 
                 case 'PRODUCT':
 
-                    $this->form_validation->set_rules('product_id', '', 'required|callback__callback_voucher_valid_product');
+                    $oFormValidation->set_rules('product_id', '', 'required|callback__callback_voucher_valid_product');
                     break;
 
                 case 'PRODUCTS':
@@ -278,10 +278,10 @@ class Vouchers extends BaseAdmin
                     break;
             }
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('is_unique', 'Code already in use.');
+            $oFormValidation->set_message('required', lang('fv_required'));
+            $oFormValidation->set_message('is_unique', 'Code already in use.');
 
-            if ($this->form_validation->run($this)) {
+            if ($oFormValidation->run($this)) {
 
                 //  Prepare the $data variable
                 $data = array();
@@ -448,7 +448,8 @@ class Vouchers extends BaseAdmin
 
         if  (preg_match('/[^a-zA-Z0-9]/', $str)) {
 
-            $this->form_validation->set_message('_callback_voucher_valid_code', 'Invalid characters.');
+            $oFormValidation = Factory::service('FormValidation');
+            $oFormValidation->set_message('_callback_voucher_valid_code', 'Invalid characters.');
             return false;
 
         } else {
@@ -466,7 +467,8 @@ class Vouchers extends BaseAdmin
      */
     public function _callback_voucher_valid_type($str)
     {
-        $this->form_validation->set_message('_callback_voucher_valid_type', 'Invalid voucher type.');
+        $oFormValidation = Factory::service('FormValidation');
+        $oFormValidation->set_message('_callback_voucher_valid_type', 'Invalid voucher type.');
         return !empty($this->aVoucherTypes[$str]);
     }
 
@@ -479,8 +481,9 @@ class Vouchers extends BaseAdmin
      */
     public function _callback_voucher_valid_discount_type($str)
     {
-        $valid_types = array('PERCENTAGE', 'AMOUNT');
-        $this->form_validation->set_message('_callback_voucher_valid_discount_type', 'Invalid discount type.');
+        $valid_types     = array('PERCENTAGE', 'AMOUNT');
+        $oFormValidation = Factory::service('FormValidation');
+        $oFormValidation->set_message('_callback_voucher_valid_discount_type', 'Invalid discount type.');
         return array_search($str, $valid_types) !== false;
     }
 
@@ -493,7 +496,8 @@ class Vouchers extends BaseAdmin
      */
     public function _callback_voucher_valid_product_type($str)
     {
-        $this->form_validation->set_message('_callback_voucher_valid_product_type', 'Invalid product type.');
+        $oFormValidation = Factory::service('FormValidation');
+        $oFormValidation->set_message('_callback_voucher_valid_product_type', 'Invalid product type.');
         return (bool) $this->shop_product_type_model->get_by_id($str);
     }
 
@@ -506,7 +510,8 @@ class Vouchers extends BaseAdmin
      */
     public function _callback_voucher_valid_product($str)
     {
-        $this->form_validation->set_message('_callback_voucher_valid_product', 'Invalid product.');
+        $oFormValidation = Factory::service('FormValidation');
+        $oFormValidation->set_message('_callback_voucher_valid_product', 'Invalid product.');
         return (bool) $this->shop_product_model->get_by_id($str);
     }
 
@@ -519,6 +524,8 @@ class Vouchers extends BaseAdmin
      */
     public function _callback_voucher_valid_from(&$str)
     {
+        $oFormValidation = Factory::service('FormValidation');
+
         //  Check $str is a valid date
         $date = date('Y-m-d H:i:s', strtotime($str));
 
@@ -531,7 +538,7 @@ class Vouchers extends BaseAdmin
 
         if ($date != $str) {
 
-            $this->form_validation->set_message('_callback_voucher_valid_from', 'Invalid date.');
+            $oFormValidation->set_message('_callback_voucher_valid_from', 'Invalid date.');
             return false;
         }
 
@@ -542,7 +549,7 @@ class Vouchers extends BaseAdmin
 
             if (strtotime($str) >= $date) {
 
-                $this->form_validation->set_message('_callback_voucher_valid_from', 'Valid From date cannot be after Valid To date.');
+                $oFormValidation->set_message('_callback_voucher_valid_from', 'Valid From date cannot be after Valid To date.');
                 return false;
             }
         }
@@ -560,10 +567,13 @@ class Vouchers extends BaseAdmin
     public function _callback_voucher_valid_to(&$str)
     {
         //  If empty ignore
-        if (!$str)
+        if (!$str) {
             return true;
+        }
 
         // --------------------------------------------------------------------------
+
+        $oFormValidation = Factory::service('FormValidation');
 
         //  Check $str is a valid date
         $date = date('Y-m-d H:i:s', strtotime($str));
@@ -577,7 +587,7 @@ class Vouchers extends BaseAdmin
 
         if ($date != $str) {
 
-            $this->form_validation->set_message('_callback_voucher_valid_to', 'Invalid date.');
+            $oFormValidation->set_message('_callback_voucher_valid_to', 'Invalid date.');
             return false;
         }
 
@@ -586,7 +596,7 @@ class Vouchers extends BaseAdmin
 
         if (strtotime($str) <= $date) {
 
-            $this->form_validation->set_message('_callback_voucher_valid_to', 'Valid To date cannot be before Valid To date.');
+            $oFormValidation->set_message('_callback_voucher_valid_to', 'Valid To date cannot be before Valid To date.');
             return false;
         }
 

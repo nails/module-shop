@@ -190,11 +190,11 @@ class Settings extends BaseAdmin
             // --------------------------------------------------------------------------
 
             //  Validation
-            $this->load->library('form_validation');
-            $this->form_validation->set_rules('firstFinancialYearEndDate', '', 'valid_date');
-            $this->form_validation->set_message('valid_date', lang('fv_valid_date'));
+            $oFormValidation = Factory::service('FormValidation');
+            $oFormValidation->set_rules('firstFinancialYearEndDate', '', 'valid_date');
+            $oFormValidation->set_message('valid_date', lang('fv_valid_date'));
 
-            if ($this->form_validation->run()) {
+            if ($oFormValidation->run()) {
 
                 $this->db->trans_begin();
                 $bRollback = false;
@@ -350,7 +350,6 @@ class Settings extends BaseAdmin
             //  Handle POST
             if ($this->input->post()) {
 
-                $this->load->library('form_validation');
                 $aRules = array();
 
                 //  Common
@@ -399,11 +398,12 @@ class Settings extends BaseAdmin
                     );
                 }
 
-                $this->form_validation->set_rules($aRulesFV);
+                $oFormValidation = Factory::service('FormValidation');
+                $oFormValidation->set_rules($aRulesFV);
 
-                $this->form_validation->set_message('required', lang('fv_required'));
+                $oFormValidation->set_message('required', lang('fv_required'));
 
-                if ($this->form_validation->run()) {
+                if ($oFormValidation->run()) {
 
                     $settings           = array();
                     $settings_encrypted = array();

@@ -300,15 +300,15 @@ class Reports extends BaseAdmin
         if ($this->input->post()) {
 
             //  Form validation and update
-            $this->load->library('form_validation');
+            $oFormValidation = Factory::service('FormValidation');
 
             //  Define rules
-            $this->form_validation->set_rules('report', '', 'xss_clean|required');
-            $this->form_validation->set_rules('period', '', 'xss_clean');
-            $this->form_validation->set_rules('format', '', 'xss_clean|required');
+            $oFormValidation->set_rules('report', '', 'xss_clean|required');
+            $oFormValidation->set_rules('period', '', 'xss_clean');
+            $oFormValidation->set_rules('format', '', 'xss_clean|required');
 
             //  Set Messages
-            $this->form_validation->set_message('required', lang('fv_required'));
+            $oFormValidation->set_message('required', lang('fv_required'));
 
             //  Execute
             $source = $this->input->post('report');
@@ -322,7 +322,7 @@ class Reports extends BaseAdmin
             $format = $this->input->post('format');
             $formatExists = isset($this->formats[$format]);
 
-            if ($this->form_validation->run() && $sourceExists && $periodExists && $formatExists) {
+            if ($oFormValidation->run() && $sourceExists && $periodExists && $formatExists) {
 
                 $source = $this->sources[$source];
                 $format = $this->formats[$format];
