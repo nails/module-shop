@@ -731,7 +731,6 @@ class Inventory extends BaseAdmin
                         $required = $price['currency'] == SHOP_BASE_CURRENCY_CODE ? '|required' : '';
 
                         $this->form_validation->set_rules('variation[' . $index . '][pricing][' . $price_index . '][price]', '', 'xss_clean|callback__callback_inventory_valid_price' . $required);
-                        $this->form_validation->set_rules('variation[' . $index . '][pricing][' . $price_index . '][sale_price]', '', 'xss_clean|callback__callback_inventory_valid_price' . $required);
                     }
                 }
 

@@ -29,6 +29,7 @@ class Voucher extends Base
     const DISCOUNT_TYPE_PERCENT             = 'PERCENTAGE';
     const DISCOUNT_TYPE_AMOUNT              = 'AMOUNT';
     const DISCOUNT_APPLICATION_PRODUCTS     = 'PRODUCTS';
+    const DISCOUNT_APPLICATION_PRODUCT      = 'PRODUCT';
     const DISCOUNT_APPLICATION_PRODUCT_TYPE = 'PRODUCT_TYPES';
     const DISCOUNT_APPLICATION_SHIPPING     = 'SHIPPING';
     const DISCOUNT_APPLICATION_ALL          = 'ALL';
@@ -81,28 +82,32 @@ class Voucher extends Base
     /**
      * Redeems a voucher
      * @param  int      $voucherId The ID of the voucher to redeem
-     * @param  stdClass $order     The order object
+     * @param  stdClass $mOrder     The order ID or object
      * @return boolean
      */
-    public function redeem($voucherId, $order)
+    public function redeem($iVoucherId, $mOrder)
     {
-        if (is_numeric($order)) {
+        if (is_numeric($mOrder)) {
 
             $this->load->model('shop/shop_order_model');
-            $order = $this->shop_order_model->get_by_id($order);
+            $oOrder = $this->shop_order_model->get_by_id($mOrder);
 
-            if (empty($order)) {
+            if (empty($oOrder)) {
 
                 $this->_set_error('Invalid Order ID');
                 return false;
             }
+
+        } else {
+
+            $oOrder = $mOrder;
         }
 
         // --------------------------------------------------------------------------
 
-        $voucher = $this->get_by_id($voucherId);
+        $oVoucher = $this->get_by_id($iVoucherId);
 
-        if (empty($voucher)) {
+        if (empty($oVoucher)) {
 
             $this->_set_error('Invalid Voucher ID');
             return false;
@@ -110,22 +115,22 @@ class Voucher extends Base
 
         // --------------------------------------------------------------------------
 
-        switch ($voucher->type) {
+        switch ($oVoucher->type) {
 
             case self::TYPE_GIFT_CARD:
 
-                return $this->redeemGiftCard($voucher, $order);
+                return $this->redeemGiftCard($oVoucher, $oOrder);
                 break;
 
             case self::TYPE_LIMITED_USE:
 
-                return $this->redeemLimitedUse($voucher, $order);
+                return $this->redeemLimitedUse($oVoucher, $oOrder);
                 break;
 
             case self::TYPE_NORMAL:
             default:
 
-                return $this->redeemNormal($voucher, $order);
+                return $this->redeemNormal($oVoucher, $oOrder);
                 break;
         }
     }
@@ -235,18 +240,18 @@ class Voucher extends Base
 
         // --------------------------------------------------------------------------
 
+        $this->load->model('shop/shop_product_model');
         $this->load->model('shop/shop_product_type_model');
 
+        //  Fetch extra data
         foreach ($result as $voucher) {
-
-            //  Fetch extra data
-            $cacheKey = 'voucher-product-type-' . $voucher->product_type_id;
 
             switch ($voucher->discount_application) {
 
-                case self::DISCOUNT_APPLICATION_PRODUCT_TYPE:
+                case self::DISCOUNT_APPLICATION_PRODUCT:
 
-                    $cache = $this->_get_cache($cacheKey);
+                    $cacheKey = 'voucher-product-type-' . $voucher->product_type_id;
+                    $cache    = $this->_get_cache($cacheKey);
                     if ($cache) {
 
                         //  Exists in cache
@@ -255,8 +260,25 @@ class Voucher extends Base
                     } else {
 
                         //  Doesn't exist, fetch and save
-                        $voucher->product = $this->shop_product_type_model->get_by_id($voucher->product_type_id);
+                        $voucher->product = $this->shop_product_model->get_by_id($voucher->product_id);
                         $this->_set_cache($cacheKey, $voucher->product);
+                    }
+                    break;
+
+                case self::DISCOUNT_APPLICATION_PRODUCT_TYPE:
+
+                    $cacheKey = 'voucher-product-type-' . $voucher->product_type_id;
+                    $cache    = $this->_get_cache($cacheKey);
+                    if ($cache) {
+
+                        //  Exists in cache
+                        $voucher->product = $cache;
+
+                    } else {
+
+                        //  Doesn't exist, fetch and save
+                        $voucher->product_type = $this->shop_product_type_model->get_by_id($voucher->product_type_id);
+                        $this->_set_cache($cacheKey, $voucher->product_type);
                     }
                     break;
             }
@@ -438,9 +460,29 @@ class Voucher extends Base
             if ($voucher->discount_application == self::DISCOUNT_APPLICATION_PRODUCT_TYPE) {
 
                 $matched = false;
-
                 foreach ($basket->items as $item) {
                     if ($item->product->type->id == $voucher->product_type_id) {
+                        $matched = true;
+                        break;
+                    }
+                }
+
+                if (!$matched) {
+                    $this->_set_error('This voucher does not apply to any items in your basket.');
+                    return false;
+                }
+            }
+
+            /**
+             * If the voucher applies to a particular product, check the basket contains
+             * that product, otherwise it doesn't make sense to add it
+             */
+
+            if ($voucher->discount_application == self::DISCOUNT_APPLICATION_PRODUCT) {
+
+                $matched = false;
+                foreach ($basket->items as $item) {
+                    if ($item->product->id == $voucher->product_id) {
                         $matched = true;
                         break;
                     }

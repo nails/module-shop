@@ -327,6 +327,21 @@ class NAILS_Shop_basket_model extends Base
          * is maxed.
          */
 
+        /**
+         * For each item, define a discount_item, discount_tax property, discounted_item,
+         * discounted_tax on it's base price.
+         */
+        foreach ($basket->items as $oItem) {
+
+            $oItemPrice = $oItem->variant->price->price->base;
+
+            $oItemPrice->discount_item          = 0;
+            $oItemPrice->discount_tax           = 0;
+            $oItemPrice->discount_value_inc_tax = $oItemPrice->value_inc_tax;
+            $oItemPrice->discount_value_ex_tax  = $oItemPrice->value_ex_tax;
+            $oItemPrice->discount_value_tax     = $oItemPrice->value_tax;
+        }
+
         if (!empty($basket->voucher->id)) {
 
             $this->iTotalItemDiscount = 0;
@@ -338,14 +353,17 @@ class NAILS_Shop_basket_model extends Base
             if ($basket->voucher->discount_application == 'PRODUCTS') {
 
                 foreach ($basket->items as $oItem) {
+                    $this->applyDiscountToItem($oItem, $basket->voucher);
+                }
 
-                    $iDiscount = $this->calculateItemDiscount($basket->voucher, $oItem);
-                    $this->iTotalItemDiscount += $iDiscount;
-                    $this->iTotalDiscount     += $iDiscount;
+            //  Voucher applies to specific item in the basket
+            } elseif ($basket->voucher->discount_application == 'PRODUCT') {
 
-                    $iDiscount = $this->calculateTaxDiscount($basket->voucher, $oItem);
-                    $this->iTotalTaxDiscount += $iDiscount;
-                    $this->iTotalDiscount    += $iDiscount;
+                foreach ($basket->items as $oItem) {
+                    if ($oItem->product->id == $basket->voucher->product_id) {
+                        $this->applyDiscountToItem($oItem, $basket->voucher);
+                        break;
+                    }
                 }
 
             //  Voucher applies to specific item types in the basket
@@ -353,14 +371,7 @@ class NAILS_Shop_basket_model extends Base
 
                 foreach ($basket->items as $oItem) {
                     if ($oItem->product->type->id == $basket->voucher->product_type_id) {
-
-                        $iDiscount = $this->calculateItemDiscount($basket->voucher, $oItem);
-                        $this->iTotalItemDiscount += $iDiscount;
-                        $this->iTotalDiscount     += $iDiscount;
-
-                        $iDiscount = $this->calculateTaxDiscount($basket->voucher, $oItem);
-                        $this->iTotalTaxDiscount += $iDiscount;
-                        $this->iTotalDiscount    += $iDiscount;
+                        $this->applyDiscountToItem($oItem, $basket->voucher);
                     }
                 }
 
@@ -375,14 +386,7 @@ class NAILS_Shop_basket_model extends Base
             } elseif ($basket->voucher->discount_application == 'ALL') {
 
                 foreach ($basket->items as $oItem) {
-
-                    $iDiscount = $this->calculateItemDiscount($basket->voucher, $oItem);
-                    $this->iTotalItemDiscount += $iDiscount;
-                    $this->iTotalDiscount     += $iDiscount;
-
-                    $iDiscount = $this->calculateTaxDiscount($basket->voucher, $oItem);
-                    $this->iTotalTaxDiscount += $iDiscount;
-                    $this->iTotalDiscount    += $iDiscount;
+                    $this->applyDiscountToItem($oItem, $basket->voucher);
                 }
 
                 /**
@@ -425,6 +429,32 @@ class NAILS_Shop_basket_model extends Base
             $basket->totals->user->shipping_discount = $oCurrencyModel->convertBaseToUser($basket->totals->base->shipping_discount);
             $basket->totals->user->tax_discount      = $oCurrencyModel->convertBaseToUser($basket->totals->base->tax_discount);
             $basket->totals->user->grand_discount    = $oCurrencyModel->convertBaseToUser($basket->totals->base->grand_discount);
+        }
+
+        /**
+         * For each item, format it's discount_item and discount_tax property and
+         * calculate the user's version
+         */
+        foreach ($basket->items as $oItem) {
+
+            $oItemPrice = $oItem->variant->price->price;
+
+            //  Convert user prices
+            $oItemPrice->user->discount_item          = $oCurrencyModel->convertBaseToUser($oItemPrice->base->discount_item);
+            $oItemPrice->user->discount_tax           = $oCurrencyModel->convertBaseToUser($oItemPrice->base->discount_tax);
+            $oItemPrice->user->discount_value_inc_tax = $oCurrencyModel->convertBaseToUser($oItemPrice->base->discount_value_inc_tax);
+            $oItemPrice->user->discount_value_ex_tax  = $oCurrencyModel->convertBaseToUser($oItemPrice->base->discount_value_ex_tax);
+
+            // Formatted strings
+            $oItemPrice->base_formatted->discount_item          = $oCurrencyModel->formatBase($oItemPrice->base->discount_item);
+            $oItemPrice->base_formatted->discount_tax           = $oCurrencyModel->formatBase($oItemPrice->base->discount_tax);
+            $oItemPrice->base_formatted->discount_value_inc_tax = $oCurrencyModel->formatBase($oItemPrice->base->discount_value_inc_tax);
+            $oItemPrice->base_formatted->discount_value_ex_tax  = $oCurrencyModel->formatBase($oItemPrice->base->discount_value_ex_tax);
+
+            $oItemPrice->user_formatted->discount_item          = $oCurrencyModel->formatBase($oItemPrice->user->discount_item);
+            $oItemPrice->user_formatted->discount_tax           = $oCurrencyModel->formatBase($oItemPrice->user->discount_tax);
+            $oItemPrice->user_formatted->discount_value_inc_tax = $oCurrencyModel->formatBase($oItemPrice->user->discount_value_inc_tax);
+            $oItemPrice->user_formatted->discount_value_ex_tax  = $oCurrencyModel->formatBase($oItemPrice->user->discount_value_ex_tax);
         }
 
         // --------------------------------------------------------------------------
@@ -480,13 +510,39 @@ class NAILS_Shop_basket_model extends Base
 
     // --------------------------------------------------------------------------
 
+    protected function applyDiscountToItem($oItem, $oVoucher)
+    {
+        //  Shortcut
+        $oItemPrice = $oItem->variant->price->price;
+
+        //  Item discount (pre-tax)
+        $iItemDiscount = $this->calculateItemDiscount($oVoucher, $oItem);
+        $this->iTotalItemDiscount += $iItemDiscount;
+        $this->iTotalDiscount     += $iItemDiscount;
+
+        //  Tax Discount
+        $iTaxDiscount = $this->calculateTaxDiscount($oVoucher, $oItem);
+        $this->iTotalTaxDiscount += $iTaxDiscount;
+        $this->iTotalDiscount    += $iTaxDiscount;
+
+        //  Update values
+        $oItemPrice->base->discount_item           = $iItemDiscount;
+        $oItemPrice->base->discount_tax            = $iTaxDiscount;
+        $oItemPrice->base->discount_value_inc_tax -= $iItemDiscount;
+        $oItemPrice->base->discount_value_inc_tax -= $iTaxDiscount;
+        $oItemPrice->base->discount_value_ex_tax  -= $iItemDiscount;
+        $oItemPrice->base->discount_value_tax     -= $iTaxDiscount;
+    }
+
+    // --------------------------------------------------------------------------
+
     protected function calculateItemDiscount($oVoucher, $oItem)
     {
         $iItemPrice = $oItem->variant->price->price->base->value_ex_tax;
         $iDiscount  = 0;
         if ($oVoucher->discount_type == 'PERCENTAGE') {
 
-            $iDiscount = (int) round($iItemPrice * ($oVoucher->discount_value/100));
+            $iDiscount = (int) round($iItemPrice * $oItem->quantity * ($oVoucher->discount_value/100));
 
         } else if ($oVoucher->discount_type == 'AMOUNT') {
 
@@ -511,7 +567,7 @@ class NAILS_Shop_basket_model extends Base
         $iDiscount  = 0;
         if ($oVoucher->discount_type == 'PERCENTAGE') {
 
-            $iDiscount = (int) round($iItemPrice * ($oVoucher->discount_value/100));
+            $iDiscount = (int) round($iItemPrice * $oItem->quantity * ($oVoucher->discount_value/100));
 
         } else if ($oVoucher->discount_type == 'AMOUNT') {
 

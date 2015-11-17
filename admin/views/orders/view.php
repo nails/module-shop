@@ -16,8 +16,8 @@
     data-delivery-type="<?=$order->delivery_type?>"
     data-num-collect-items="<?=$numCollectItems?>"
 >
-    <div class="col-3-container">
-        <div class="col-3">
+    <div class="row col-3-container">
+        <div class="col-md-4">
             <fieldset>
                 <legend>Order Details</legend>
                 <div class="table-responsive">
@@ -110,20 +110,89 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td class="label">Discount</td>
-                                <td class="value">
-                                <?php
+                                <td class="label">Discounts</td>
+                                <td class="value" style="padding: 0;">
+                                    <table>
+                                        <tr>
+                                            <td style="width: 80px;">Items</td>
+                                            <td>
+                                                <?php
 
-                                    echo $order->totals->base_formatted->grand_discount;
+                                                echo $order->totals->base_formatted->item_discount;
 
-                                    if ($order->currency != $order->base_currency) {
+                                                if ($order->currency != $order->base_currency) {
+                                                    echo '<small>';
+                                                    echo 'User checked out in ' . $order->currency . ': ';
+                                                    echo $order->totals->user_formatted->item_discount;
+                                                    echo '</small>';
+                                                }
 
-                                        echo '<small>';
-                                            echo 'User checked out in ' . $order->currency . ': ' . $order->totals->user_formatted->grand_discount;
-                                        echo '</small>';
-                                    }
+                                                ?>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width: 80px;">Tax</td>
+                                            <td>
+                                                <?php
 
-                                ?>
+                                                echo $order->totals->base_formatted->tax_discount;
+
+                                                if ($order->currency != $order->base_currency) {
+                                                    echo '<small>';
+                                                    echo 'User checked out in ' . $order->currency . ': ';
+                                                    echo $order->totals->user_formatted->tax_discount;
+                                                    echo '</small>';
+                                                }
+
+                                                ?>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width: 80px;">Shipping</td>
+                                            <td>
+                                                <?php
+
+                                                echo $order->totals->base_formatted->shipping_discount;
+
+                                                if ($order->currency != $order->base_currency) {
+                                                    echo '<small>';
+                                                    echo 'User checked out in ' . $order->currency . ': ';
+                                                    echo $order->totals->user_formatted->shipping_discount;
+                                                    echo '</small>';
+                                                }
+
+                                                ?>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width: 80px;">Total</td>
+                                            <td>
+                                                <?php
+
+                                                echo $order->totals->base_formatted->grand_discount;
+
+                                                if ($order->currency != $order->base_currency) {
+                                                    echo '<small>';
+                                                    echo 'User checked out in ' . $order->currency . ': ';
+                                                    echo $order->totals->user_formatted->grand_discount;
+                                                    echo '</small>';
+                                                }
+
+                                                ?>
+                                            </td>
+                                        </tr>
+
+                                    <?php
+
+                                        // if ($order->currency != $order->base_currency) {
+
+                                        //     echo '<small>';
+                                        //         echo 'User checked out in ' . $order->currency . ': ' . $order->totals->user_formatted->grand_discount;
+                                        //     echo '</small>';
+                                        // }
+
+                                    ?>
+                                    </table>
                                 </td>
                             </tr>
                             <tr>
@@ -166,7 +235,7 @@
                 </div>
             </fieldset>
         </div>
-        <div class="col-3">
+        <div class="col-md-4">
             <fieldset>
                 <legend>Customer Details</legend>
                 <div class="table-responsive">
@@ -247,7 +316,7 @@
                 </div>
             </fieldset>
         </div>
-        <div class="col-3">
+        <div class="col-md-4">
             <fieldset>
                 <legend>Order Status</legend>
                 <div class="order-status-container">

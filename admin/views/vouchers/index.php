@@ -166,7 +166,12 @@
 
                                         case 'PRODUCTS':
 
-                                            echo 'Purchases only';
+                                            echo 'Products only';
+                                            break;
+
+                                        case 'PRODUCT':
+
+                                            echo 'Specific Product &rsaquo; ' . $voucher->product->label;
                                             break;
 
                                         case 'SHIPPING':
@@ -176,7 +181,7 @@
 
                                         case 'PRODUCT_TYPES':
 
-                                            echo 'Certain product types only &rsaquo; ' . $voucher->product->label;
+                                            echo 'Certain product types only &rsaquo; ' . $voucher->product_type->label;
                                             break;
 
                                         case 'ALL':

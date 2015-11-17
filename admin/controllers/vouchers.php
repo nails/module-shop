@@ -190,6 +190,11 @@ class Vouchers extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
+        $this->load->model('shop/shop_product_model');
+        $this->load->model('shop/shop_product_type_model');
+
+        // --------------------------------------------------------------------------
+
         if ($this->input->post()) {
 
             $this->load->library('form_validation');
@@ -234,7 +239,6 @@ class Vouchers extends BaseAdmin
                 case 'PERCENTAGE':
 
                     $this->form_validation->set_rules('discount_value', '', 'required|is_natural_no_zero|greater_than[0]|less_than[101]');
-
                     $this->form_validation->set_message('is_natural_no_zero', 'Only positive integers are valid.');
                     $this->form_validation->set_message('greater_than', 'Must be in the range 1-100');
                     $this->form_validation->set_message('less_than', 'Must be in the range 1-100');
@@ -243,7 +247,6 @@ class Vouchers extends BaseAdmin
                 case 'AMOUNT':
 
                     $this->form_validation->set_rules('discount_value', '', 'required|numeric|greater_than[0]');
-
                     $this->form_validation->set_message('greater_than', 'Must be greater than 0');
                     break;
 
@@ -259,8 +262,11 @@ class Vouchers extends BaseAdmin
                 case 'PRODUCT_TYPES':
 
                     $this->form_validation->set_rules('product_type_id', '', 'required|callback__callback_voucher_valid_product_type');
+                    break;
 
-                    $this->form_validation->set_message('greater_than', 'Must be greater than 0');
+                case 'PRODUCT':
+
+                    $this->form_validation->set_rules('product_id', '', 'required|callback__callback_voucher_valid_product');
                     break;
 
                 case 'PRODUCTS':
@@ -307,6 +313,11 @@ class Vouchers extends BaseAdmin
                     $data['limited_use_limit'] = $this->input->post('limited_use_limit');
                 }
 
+                if ($this->input->post('discount_application') == 'PRODUCT') {
+
+                    $data['product_id'] = $this->input->post('product_id');
+                }
+
                 if ($this->input->post('discount_application') == 'PRODUCT_TYPES') {
 
                     $data['product_type_id'] = $this->input->post('product_type_id');
@@ -340,7 +351,6 @@ class Vouchers extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->load->model('shop/shop_product_type_model');
         $this->data['product_types'] = $this->shop_product_type_model->get_all_flat();
 
         // --------------------------------------------------------------------------
@@ -485,6 +495,19 @@ class Vouchers extends BaseAdmin
     {
         $this->form_validation->set_message('_callback_voucher_valid_product_type', 'Invalid product type.');
         return (bool) $this->shop_product_type_model->get_by_id($str);
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Form Validation: Validate a voucher's product ID
+     * @param  string $str The voucher product ID
+     * @return boolean
+     */
+    public function _callback_voucher_valid_product($str)
+    {
+        $this->form_validation->set_message('_callback_voucher_valid_product', 'Invalid product.');
+        return (bool) $this->shop_product_model->get_by_id($str);
     }
 
     // --------------------------------------------------------------------------

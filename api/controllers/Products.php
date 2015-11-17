@@ -15,6 +15,7 @@ namespace Nails\Api\Shop;
 class Products extends \Nails\Api\Controller\Base
 {
     protected $maintenance;
+    const MIN_SEARCH_LENGTH = 3;
 
     // --------------------------------------------------------------------------
 
@@ -75,20 +76,29 @@ class Products extends \Nails\Api\Controller\Base
 
         $limit = (int) $this->input->get('limit');
         $limit = empty($limit) || $limit > 50 ? 50 : $limit;
+        $limit = $limit > 100 ? 100 : $limit;
 
         $data             = array();
         $data['where']    = array();
         $data['where'][]  = array('column' => 'p.published <=', 'value' => 'NOW()', 'escape' => false);
-        $data['keywords'] = $this->input->get('keywords');
+        $data['keywords'] = trim($this->input->get('keywords'));
 
-        $products = $this->shop_product_model->get_all(0, 25, $data);
+        if (strlen($data['keywords']) >= self::MIN_SEARCH_LENGTH) {
 
-        //  Return only basic details
-        $out['results'] = array();
+            $products = $this->shop_product_model->get_all(0, $limit, $data);
 
-        foreach ($products as $product) {
+            //  Return only basic details
+            $out['results'] = array();
 
-            $out['results'][] = $this->formatProduct($product);
+            foreach ($products as $product) {
+
+                $out['results'][] = $this->formatProduct($product);
+            }
+
+        } else {
+
+            $out['status'] = 400;
+            $out['error']  = 'Search term is too short. Minimum length is ' . self::MIN_SEARCH_LENGTH . ' characters.';
         }
 
         return $out;

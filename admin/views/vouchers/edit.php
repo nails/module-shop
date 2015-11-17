@@ -52,7 +52,7 @@
             $options = array(
                 'PERCENTAGE' => 'Percentage',
                 'AMOUNT'     => 'Specific amount'
-           );
+            );
 
             echo form_field_dropdown($field, $options);
 
@@ -64,8 +64,9 @@
             $field['label']       = 'Discount Value';
             $field['placeholder'] = 'Define the value of the discount as appropriate (i.e percentage or amount)';
             $field['required']    = true;
+            $field['tip']         = 'If Discount Type is Percentage then specify a number 1-100, if it\'s a Specific Amount then define the amount.';
 
-            echo form_field($field, 'If Discount Type is Percentage then specify a number 1-100, if it\'s a Specific Amount then define the amount.');
+            echo form_field($field);
 
             // --------------------------------------------------------------------------
 
@@ -77,11 +78,12 @@
             $field['required'] = true;
 
             $options = array(
-                'PRODUCTS'      => 'Purchases Only',
+                'PRODUCTS'      => 'Products Only',
                 'PRODUCT_TYPES' => 'Certain Type of Product Only',
-                'SHIPPING'      => 'Shipping Costs Only',
+                'PRODUCT'       => 'Certain Product Only',
+                // 'SHIPPING'      => 'Shipping Costs Only',
                 'ALL'           => 'Both Products and Shipping'
-          );
+            );
 
             echo form_field_dropdown($field, $options);
 
@@ -117,7 +119,7 @@
         <div id="no-extended-data" class="alert alert-warning" style="display:block;">
             More options may become available depending on your choices above.
         </div>
-        <div id="type-limited" style="display:none;">
+        <div id="type-limited" class="extended-data" style="display:none;">
             <?php
 
             //  Limited Use Limit
@@ -131,7 +133,7 @@
 
             ?>
         </div>
-        <div id="application-product_types" style="display:none;">
+        <div id="application-product_types" class="extended-data" style="display:none;">
             <?php
 
             if (empty($product_types)) {
@@ -140,7 +142,7 @@
                 <p class="alert alert-danger">
                     <strong>No product types are defined</strong>
                     <br />At least one product type must be defined before you can create vouchers which apply
-                    to particular product types.  <?=anchor('admin/shop/manage/productType','Create Products Now')?>
+                    to particular product types.  <?=anchor('admin/shop/manage/productType', 'Create Products Now')?>
                 </p>
                 <?php
 
@@ -156,6 +158,21 @@
                 echo form_field_dropdown($field, $product_types);
 
             }
+
+            ?>
+        </div>
+        <div id="application-product" class="extended-data" style="display:none;">
+            <?php
+
+            //  Product Types application
+            $field             = array();
+            $field['key']      = 'product_id';
+            $field['label']    = 'Limit to product';
+            $field['required'] = true;
+            $field['class']    = 'select2';
+            $field['id']       = 'product-id';
+
+            echo form_field($field, $product_types);
 
             ?>
         </div>

@@ -226,7 +226,6 @@
                     <tr>
                         <th>Currency</th>
                         <th>Price</th>
-                        <th>Sale Price</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -234,8 +233,7 @@
                     <?php
 
                         //  Prep the prices into an easy to access array
-                        $price     = array();
-                        $salePrice = array();
+                        $price = array();
 
                         if (!empty($variation->price_raw)) {
 
@@ -244,7 +242,6 @@
                             foreach ($variation->price_raw as $priceRaw) {
 
                                 $price[$priceRaw->currency->code]     = $oCurrencyModel->intToFloat($priceRaw->price, $priceRaw->currency->code);
-                                $salePrice[$priceRaw->currency->code] = $oCurrencyModel->intToFloat($priceRaw->sale_price, $priceRaw->currency->code);
                             }
                         }
 
@@ -280,31 +277,6 @@
                                 'data-code="' . SHOP_BASE_CURRENCY_CODE . '" ' .
                                 'class="' . implode(' ', $class) . '" ' .
                                 'placeholder="Price"'
-                            );
-                            echo $error;
-
-                        ?>
-                        </td>
-                        <td class="price-sale">
-                        <?php
-
-                            $key     = 'variation[' . $_counter . '][pricing][0][sale_price]';
-                            $error   = form_error($key, '<span class="error show-in-tabs">', '</span>');
-                            $class   = array('variation-price-sale', SHOP_BASE_CURRENCY_CODE);
-                            $default = !empty($salePrice[SHOP_BASE_CURRENCY_CODE]) ? $salePrice[SHOP_BASE_CURRENCY_CODE] : '';
-
-                            if ($error) {
-
-                                $class[] = 'error';
-                            }
-
-                            echo form_input(
-                                $key,
-                                set_value($key, $default),
-                                'data-prefix="' . SHOP_BASE_CURRENCY_SYMBOL . '" ' .
-                                'data-code="' . SHOP_BASE_CURRENCY_CODE . '" ' .
-                                'class="' . implode(' ', $class) . '" ' .
-                                'placeholder="Sale Price"'
                             );
                             echo $error;
 
@@ -350,31 +322,6 @@
                                                 'data-prefix="' . $currency->symbol . '" ' .
                                                 'data-code="' . $currency->code . '" ' .
                                                 'class="' . implode(' ', $class) . '" ' .
-                                                'placeholder="Calculate automatically from ' . SHOP_BASE_CURRENCY_CODE . '"'
-                                            );
-                                            echo $error;
-
-                                        ?>
-                                    </td>
-                                    <td class="price-sale">
-                                        <?php
-
-                                            $key     = 'variation[' . $_counter . '][pricing][' . $counterInside . '][sale_price]';
-                                            $error   = form_error($key, '<span class="error show-in-tabs">', '</span>');
-                                            $class   = array('variation-price-sale', $currency->code);
-                                            $default = !empty($salePrice[$currency->code]) ? $salePrice[$currency->code] : '';
-
-                                            if ($error) {
-
-                                                $class[] = 'error';
-                                            }
-
-                                            echo form_input(
-                                                $key,
-                                                set_value($key, $default),
-                                                'data-prefix="' . $currency->symbol . '" ' .
-                                                'data-code="' . $currency->code . '" ' .
-                                                'class="' . implode(' ', $class) . '"' .
                                                 'placeholder="Calculate automatically from ' . SHOP_BASE_CURRENCY_CODE . '"'
                                             );
                                             echo $error;

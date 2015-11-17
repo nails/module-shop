@@ -29,6 +29,7 @@
                     <th class="value">Tax</th>
                     <th class="value">Shipping</th>
                     <th class="value">Total</th>
+                    <th class="value">Discount</th>
                     <th class="status">Status</th>
                     <th class="fulfilment">Fulfilled</th>
                     <th class="actions">Actions</th>
@@ -97,6 +98,18 @@
                                     if ($order->currency !== $order->base_currency) {
 
                                         echo '<small>' . $order->totals->user_formatted->grand . '</small>';
+                                    }
+
+                                ?>
+                                </td>
+                                <td class="value">
+                                <?php
+
+                                    echo $order->totals->base_formatted->grand_discount;
+
+                                    if ($order->currency !== $order->base_currency) {
+
+                                        echo '<small>' . $order->totals->user_formatted->grand_discount . '</small>';
                                     }
 
                                 ?>

@@ -16,8 +16,8 @@ namespace Nails\Database\Migration\Nailsapp\ModuleShop;
 
 use Nails\Common\Console\Migrate\Base;
 
-class Migration_5 extends Base {
-
+class Migration5 extends Base
+{
     /**
      * Execute the migration
      * @return Void
@@ -35,8 +35,8 @@ class Migration_5 extends Base {
         $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_order` ADD `total_user_grand_discount` INT(11)  NOT NULL  AFTER `total_user_grand`;");
         $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_voucher` CHANGE `discount_value` `discount_value` INT(11)  UNSIGNED  NOT NULL  DEFAULT '0';");
         $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_voucher` CHANGE `gift_card_balance` `gift_card_balance` INT(11)  UNSIGNED  NOT NULL  DEFAULT '0';");
-
-
-        //  @todo convert saved baskets to json objects
+        $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_voucher` CHANGE `discount_application` `discount_application` ENUM('PRODUCTS','PRODUCT','PRODUCT_TYPES','SHIPPING','ALL')  CHARACTER SET utf8  COLLATE utf8_general_ci  NOT NULL  DEFAULT 'PRODUCTS';");
+        $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_voucher` ADD `product_id` INT(11)  UNSIGNED  NULL  DEFAULT NULL  AFTER `product_type_id`;");
+        $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_voucher` ADD FOREIGN KEY (`product_id`) REFERENCES `{{NAILS_DB_PREFIX}}shop_product` (`id`) ON DELETE CASCADE;");
     }
 }

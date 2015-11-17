@@ -295,7 +295,7 @@ class Orders extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        if ($order->voucher) {
+        if ($order->voucher->id) {
 
             //  Redeem the voucher, if it's there
             $oVoucherModel = Factory::model('Voucher', 'nailsapp/module-shop');
