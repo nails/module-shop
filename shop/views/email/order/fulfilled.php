@@ -4,7 +4,7 @@
 $shopUrl = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
 
 //  Country
-$oCountryModel = \Nails\Factory::model('Country');
+$oCountryModel = nailsFactory('model', 'Country');
 $countriesFlat = $oCountryModel->getAllFlat();
 
 ?>

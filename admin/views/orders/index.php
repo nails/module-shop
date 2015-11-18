@@ -4,8 +4,8 @@
     </p>
     <?php
 
-        echo \Nails\Admin\Helper::loadSearch($search);
-        echo \Nails\Admin\Helper::loadPagination($pagination);
+        echo adminHelper('loadSearch', $search);
+        echo adminHelper('loadPagination', $pagination);
 
     ?>
     <div class="table-responsive">
@@ -50,8 +50,8 @@
                                 <td class="ref"><?=$order->ref?></td>
                                 <?php
 
-                                    echo \Nails\Admin\Helper::loadDatetimeCell($order->created);
-                                    echo \Nails\Admin\Helper::loadUserCell($order->user);
+                                    echo adminHelper('loadDatetimeCell', $order->created);
+                                    echo adminHelper('loadUserCell', $order->user);
 
                                 ?>
                                 <td class="value">
@@ -152,7 +152,7 @@
                                     echo '</td>';
 
                                     $boolValue = $order->fulfilment_status == 'FULFILLED';
-                                    echo \Nails\Admin\Helper::loadBoolCell($boolValue, $order->fulfilled);
+                                    echo adminHelper('loadBoolCell', $boolValue, $order->fulfilled);
 
                                 ?>
                                 <td class="actions">
@@ -247,7 +247,7 @@
     </div>
     <?php
 
-        echo \Nails\Admin\Helper::loadPagination($pagination);
+        echo adminHelper('loadPagination', $pagination);
 
     ?>
 </div>

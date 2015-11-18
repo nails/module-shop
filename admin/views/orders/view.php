@@ -33,11 +33,11 @@
                             </tr>
                             <tr>
                                 <td class="label">Created</td>
-                                <?php echo \Nails\Admin\Helper::loadDatetimeCell($order->created); ?>
+                                <?php echo adminHelper('loadDatetimeCell', $order->created); ?>
                             </tr>
                             <tr>
                                 <td class="label">Modified</td>
-                                <?php echo \Nails\Admin\Helper::loadDatetimeCell($order->modified); ?>
+                                <?php echo adminHelper('loadDatetimeCell', $order->modified); ?>
                             </tr>
                             <tr>
                                 <td class="label">Voucher</td>
@@ -243,7 +243,7 @@
                         <tbody>
                             <tr>
                                 <td class="label">Name &amp; Email</td>
-                                <?php echo \Nails\Admin\Helper::loadUserCell($order->user); ?>
+                                <?php echo adminHelper('loadUserCell', $order->user); ?>
                             </tr>
                             <tr>
                                 <td class="label">Telephone</td>
@@ -541,7 +541,7 @@
 
                     if (!empty($payments)) {
 
-                        $oCurrencyModel = \Nails\Factory::model('Currency', 'nailsapp/module-shop');
+                        $oCurrencyModel = nailsFactory('model', 'Currency', 'nailsapp/module-shop');
 
                         foreach ($payments as $payment) {
 
@@ -556,7 +556,7 @@
                                     echo $oCurrencyModel->formatBase($payment->amount_base);
                                 echo '</td>';
 
-                                echo \Nails\Admin\Helper::loadDatetimeCell($payment->created);
+                                echo adminHelper('loadDatetimeCell', $payment->created);
 
                             echo '</tr>';
 

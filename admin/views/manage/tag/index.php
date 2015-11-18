@@ -4,8 +4,8 @@
     </p>
     <?php
 
-        echo \Nails\Admin\Helper::loadSearch($search);
-        echo \Nails\Admin\Helper::loadPagination($pagination);
+        echo adminHelper('loadSearch', $search);
+        echo adminHelper('loadPagination', $pagination);
 
     ?>
     <div class="table-responsive">
@@ -35,7 +35,7 @@
                             echo '<td class="count">';
                                 echo !isset($tag->product_count) ? 'Unknown' : $tag->product_count;
                             echo '</td>';
-                            echo \Nails\Admin\Helper::loadDatetimeCell($tag->modified);
+                            echo adminHelper('loadDatetimeCell', $tag->modified);
                             echo '<td class="actions">';
 
                                 if (userHasPermission('admin:shop:manage:tag:edit')) {
@@ -81,10 +81,10 @@
     </div>
     <?php
 
-        echo \Nails\Admin\Helper::loadPagination($pagination);
+        echo adminHelper('loadPagination', $pagination);
 
     ?>
 </div>
 <?php
 
-    echo \Nails\Admin\Helper::loadInlineView('utilities/footer', array('items' => $tags));
+    echo adminHelper('loadInlineView', 'utilities/footer', array('items' => $tags));

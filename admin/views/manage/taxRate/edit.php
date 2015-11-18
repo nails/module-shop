@@ -39,4 +39,4 @@
 </div>
 <?php
 
-    echo \Nails\Admin\Helper::loadInlineView('utilities/footer', array('items' => $taxRates));
+    echo adminHelper('loadInlineView', 'utilities/footer', array('items' => $taxRates));

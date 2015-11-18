@@ -39,7 +39,7 @@
 
                                 <?php
 
-                                    echo \Nails\Admin\Helper::loadUserCell($item->user);
+                                    echo adminHelper('loadUserCell', $item->user);
 
                                 ?>
                                 <td class="product">
@@ -57,7 +57,7 @@
                                 </td>
                                 <?php
 
-                                    echo \Nails\Admin\Helper::loadDatetimeCell($item->created);
+                                    echo adminHelper('loadDatetimeCell', $item->created);
 
                                 ?>
                                 <td class="actions text-center">

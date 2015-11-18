@@ -26,7 +26,9 @@ class Inventory extends BaseAdmin
     {
         if (userHasPermission('admin:shop:inventory:manage')) {
 
-            $navGroup = new \Nails\Admin\Nav('Shop', 'fa-shopping-cart');
+            $navGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+            $navGroup->setLabel('Shop');
+            $navGroup->setIcon('fa-shopping-cart');
             $navGroup->addAction('Manage Inventory', 'index', array(), 0);
             return $navGroup;
         }

@@ -8,8 +8,8 @@
     </p>
     <?php
 
-        echo \Nails\Admin\Helper::loadSearch($search);
-        echo \Nails\Admin\Helper::loadPagination($pagination);
+        echo adminHelper('loadSearch', $search);
+        echo adminHelper('loadPagination', $pagination);
 
     ?>
     <div class="table-responsive">
@@ -53,7 +53,7 @@
                             echo '<td class="count">';
                                 echo !isset($productType->product_count) ? 'Unknown' : $productType->product_count;
                             echo '</td>';
-                            echo \Nails\Admin\Helper::loadDatetimeCell($productType->modified);
+                            echo adminHelper('loadDatetimeCell', $productType->modified);
                             echo '<td class="actions">';
 
                                 if (userHasPermission('admin:shop:manage:productType:edit')) {
@@ -93,10 +93,10 @@
     </div>
     <?php
 
-        echo \Nails\Admin\Helper::loadPagination($pagination);
+        echo adminHelper('loadPagination', $pagination);
 
     ?>
 </div>
 <?php
 
-    echo \Nails\Admin\Helper::loadInlineView('utilities/footer', array('items' => $productTypes));
+    echo adminHelper('loadInlineView', 'utilities/footer', array('items' => $productTypes));

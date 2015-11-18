@@ -35,7 +35,9 @@ class Reports extends BaseAdmin
     {
         if (userHasPermission('admin:shop:reports:generate')) {
 
-            $navGroup = new \Nails\Admin\Nav('Shop', 'fa-shopping-cart');
+            $navGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+            $navGroup->setLabel('Shop');
+            $navGroup->setIcon('fa-shopping-cart');
             $navGroup->addAction('Generate Reports');
             return $navGroup;
         }

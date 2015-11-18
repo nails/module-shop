@@ -5,8 +5,8 @@
     </p>
     <?php
 
-        echo \Nails\Admin\Helper::loadSearch($search);
-        echo \Nails\Admin\Helper::loadPagination($pagination);
+        echo adminHelper('loadSearch', $search);
+        echo adminHelper('loadPagination', $pagination);
 
     ?>
     <div class="table-responsive">
@@ -38,8 +38,8 @@
                                 echo !isset($collection->product_count) ? 'Unknown' : $collection->product_count;
                             echo '</td>';
 
-                            echo \Nails\Admin\Helper::loadDatetimeCell($collection->modified);
-                            echo \Nails\Admin\Helper::loadBoolCell($collection->is_active);
+                            echo adminHelper('loadDatetimeCell', $collection->modified);
+                            echo adminHelper('loadBoolCell', $collection->is_active);
 
                             echo '<td class="actions">';
 
@@ -74,10 +74,10 @@
     </div>
     <?php
 
-        echo \Nails\Admin\Helper::loadPagination($pagination);
+        echo adminHelper('loadPagination', $pagination);
 
     ?>
 </div>
 <?php
 
-    echo \Nails\Admin\Helper::loadInlineView('utilities/footer', array('items' => $collections));
+    echo adminHelper('loadInlineView', 'utilities/footer', array('items' => $collections));

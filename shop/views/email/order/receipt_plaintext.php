@@ -1,7 +1,7 @@
 <?php
 
 //  Country
-$oCountryModel = \Nails\Factory::model('Country');
+$oCountryModel = nailsFactory('model', 'Country');
 $countriesFlat = $oCountryModel->getAllFlat();
 
 ?>

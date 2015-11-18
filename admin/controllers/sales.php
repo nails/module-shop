@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Shop;
 
+use Nails\Factory;
 use Nails\Admin\Helper;
 use Nails\Shop\Controller\BaseAdmin;
 
@@ -25,7 +26,9 @@ class Sales extends BaseAdmin
     {
         if (userHasPermission('admin:shop:sales:manage')) {
 
-            $navGroup = new \Nails\Admin\Nav('Shop', 'fa-shopping-cart');
+            $navGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+            $navGroup->setLabel('Shop');
+            $navGroup->setIcon('fa-shopping-cart');
             $navGroup->addAction('Manage Sales');
             return $navGroup;
         }

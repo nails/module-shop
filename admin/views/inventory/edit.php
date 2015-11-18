@@ -414,7 +414,7 @@
                         $_variations = array();
                     }
 
-                    $oMustache = \Nails\Factory::service('Mustache');
+                    $oMustache = nailsFactory('service', 'Mustache');
 
                     if (!empty($_variations)) {
 
@@ -423,7 +423,8 @@
                             $viewData['variation']    = $variation;
                             $viewData['numVariants'] = count($_variations);
 
-                            $template = \Nails\Admin\Helper::loadInlineView(
+                            $template = adminHelper(
+                                'loadInlineView',
                                 'utilities/template-mustache-inventory-variant',
                                 $viewData,
                                 true
@@ -437,7 +438,8 @@
 
                     } else {
 
-                        $template = \Nails\Admin\Helper::loadInlineView(
+                        $template = adminHelper(
+                            'loadInlineView',
                             'utilities/template-mustache-inventory-variant',
                             $viewData,
                             true
@@ -531,7 +533,8 @@
                                 'objectId' => $image
                             );
 
-                            echo \Nails\Admin\Helper::loadInlineView(
+                            echo adminHelper(
+                                'loadInlineView',
                                 'utilities/template-mustache-gallery-item',
                                 $viewData,
                                 true
@@ -598,7 +601,8 @@
 
                                 $viewData = array('attribute' => $attribute, 'counter' => $counter);
 
-                                echo \Nails\Admin\Helper::loadInlineView(
+                                echo adminHelper(
+                                    'loadInlineView',
                                     'utilities/template-mustache-attribute',
                                     $viewData,
                                     true
@@ -837,7 +841,8 @@
     $viewData['variation']    = null;
     $viewData['numVariants'] = null;
 
-    echo \Nails\Admin\Helper::loadInlineView(
+    echo adminHelper(
+        'loadInlineView',
         'utilities/template-mustache-inventory-variant',
         $viewData,
         true
@@ -871,7 +876,8 @@
     $viewData             = array();
     $viewData['objectId'] = false;
 
-    echo \Nails\Admin\Helper::loadInlineView(
+    echo adminHelper(
+        'loadInlineView',
         'utilities/template-mustache-gallery-item',
         $viewData,
         true
@@ -883,7 +889,8 @@
 <?php
 
     $viewData = array('attribute' => null);
-    echo \Nails\Admin\Helper::loadInlineView(
+    echo adminHelper(
+        'loadInlineView',
         'utilities/template-mustache-attribute',
         $viewData,
         true

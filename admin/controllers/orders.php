@@ -27,17 +27,23 @@ class Orders extends BaseAdmin
         if (userHasPermission('admin:shop:orders:manage')) {
 
             //  Alerts
-            $alerts = array();
-            $ci     =& get_instance();
+            $ci =& get_instance();
 
             //  Unfulfilled orders
             $ci->db->where('fulfilment_status', 'UNFULFILLED');
             $ci->db->where('status', 'PAID');
             $numUnfulfilled = $ci->db->count_all_results(NAILS_DB_PREFIX . 'shop_order');
-            $alerts[]  = \Nails\Admin\Nav::alertObject($numUnfulfilled, 'alert', 'Unfulfilled Orders');
 
-            $navGroup = new \Nails\Admin\Nav('Shop', 'fa-shopping-cart');
-            $navGroup->addAction('Manage Orders', 'index', $alerts, 0);
+            $oAlert = Factory::factory('NavAlert', 'nailsapp/module-admin');
+            $oAlert->setValue($numUnfulfilled);
+            $oAlert->setSeverity('danger');
+            $oAlert->setLabel('Unfulfilled Orders');
+
+            $navGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+            $navGroup->setLabel('Shop');
+            $navGroup->setIcon('fa-shopping-cart');
+            $navGroup->addAction('Manage Orders', 'index', array($oAlert), 0);
+
             return $navGroup;
         }
     }

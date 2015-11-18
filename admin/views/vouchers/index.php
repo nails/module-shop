@@ -4,8 +4,8 @@
     </p>
     <?php
 
-        echo \Nails\Admin\Helper::loadSearch($search);
-        echo \Nails\Admin\Helper::loadPagination($pagination);
+        echo adminHelper('loadSearch', $search);
+        echo adminHelper('loadPagination', $pagination);
 
     ?>
     <div class="table-responsive">
@@ -195,8 +195,8 @@
                             </td>
                             <?php
 
-                            echo \Nails\Admin\Helper::loadUserCell($voucher->creator);
-                            echo \Nails\Admin\Helper::loadDatetimeCell($voucher->created);
+                            echo adminHelper('loadUserCell', $voucher->creator);
+                            echo adminHelper('loadDatetimeCell', $voucher->created);
 
                             ?>
 
@@ -220,8 +220,8 @@
                             </td>
                             <?php
 
-                            echo \Nails\Admin\Helper::loadDatetimeCell($voucher->valid_from);
-                            echo \Nails\Admin\Helper::loadDatetimeCell($voucher->valid_to, 'Does not expire');
+                            echo adminHelper('loadDatetimeCell', $voucher->valid_from);
+                            echo adminHelper('loadDatetimeCell', $voucher->valid_to, 'Does not expire');
 
                             ?>
                             <td class="uses">
@@ -297,7 +297,7 @@
     </div>
     <?php
 
-        echo \Nails\Admin\Helper::loadPagination($pagination);
+        echo adminHelper('loadPagination', $pagination);
 
     ?>
 </div>

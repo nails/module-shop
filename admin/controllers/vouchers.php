@@ -31,7 +31,9 @@ class Vouchers extends BaseAdmin
     {
         if (userHasPermission('admin:shop:vouchers:manage')) {
 
-            $navGroup = new \Nails\Admin\Nav('Shop', 'fa-shopping-cart');
+            $navGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+            $navGroup->setLabel('Shop');
+            $navGroup->setIcon('fa-shopping-cart');
             $navGroup->addAction('Manage Vouchers');
             return $navGroup;
         }

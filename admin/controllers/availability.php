@@ -27,20 +27,28 @@ class Availability extends BaseAdmin
         if (userHasPermission('admin:shop:availability:manage')) {
 
             //  Alerts
-            $alerts = array();
-            $ci     =& get_instance();
+            $ci =& get_instance();
 
             //  Get all notifications, show as an info count
             $numAlertsAll = $ci->db->count_all_results(NAILS_DB_PREFIX . 'shop_inform_product_available');
-            $alerts[]  = \Nails\Admin\Nav::alertObject($numAlertsAll, 'info', 'All notifications');
+
+            $oAlertAll = Factory::factory('NavAlert', 'nailsapp/module-admin');
+            $oAlertAll->setValue($numAlertsAll);
+            $oAlertAll->setLabel('All Notifications');
 
             //  Get notifications in the last week, add an alert count
             $ci->db->where('created >', 'ADDDATE(NOW(), INTERVAL -1 WEEK)', false);
             $numAlertsNew = $ci->db->count_all_results(NAILS_DB_PREFIX . 'shop_inform_product_available');
-            $alerts[]  = \Nails\Admin\Nav::alertObject($numAlertsNew, 'alert', 'Added within the last week');
 
-            $navGroup = new \Nails\Admin\Nav('Shop', 'fa-shopping-cart');
-            $navGroup->addAction('Product Availability Alerts', 'index', $alerts);
+            $oAlertNew = Factory::factory('NavAlert', 'nailsapp/module-admin');
+            $oAlertNew->setValue($numAlertsNew);
+            $oAlertNew->setSeverity('danger');
+            $oAlertNew->setLabel('Added within the last week');
+
+            $navGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+            $navGroup->setLabel('Shop');
+            $navGroup->setIcon('fa-shopping-cart');
+            $navGroup->addAction('Product Availability Alerts', 'index', array($oAlertAll, $oAlertNew));
 
             return $navGroup;
         }
