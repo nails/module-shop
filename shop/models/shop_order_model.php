@@ -289,13 +289,18 @@ class NAILS_Shop_order_model extends NAILS_Model
                 $temp['ship_collection_only'] = $item->variant->ship_collection_only;
 
                 //  Price
-                $temp['price_base_value_inc_tax'] = $item->variant->price->price->base->value_inc_tax;
-                $temp['price_base_value_ex_tax']  = $item->variant->price->price->base->value_ex_tax;
-                $temp['price_base_value_tax']     = $item->variant->price->price->base->value_tax;
-
-                $temp['price_user_value_inc_tax'] = $item->variant->price->price->user->value_inc_tax;
-                $temp['price_user_value_ex_tax']  = $item->variant->price->price->user->value_ex_tax;
-                $temp['price_user_value_tax']     = $item->variant->price->price->user->value_tax;
+                $temp['price_base_value_inc_tax']          = $item->price->base->value_inc_tax;
+                $temp['price_base_value_ex_tax']           = $item->price->base->value_ex_tax;
+                $temp['price_base_value_tax']              = $item->price->base->value_tax;
+                $temp['price_base_discount_value_inc_tax'] = $item->price->base->discount_value_inc_tax;
+                $temp['price_base_discount_value_ex_tax']  = $item->price->base->discount_value_ex_tax;
+                $temp['price_base_discount_value_tax']     = $item->price->base->discount_value_tax;
+                $temp['price_user_value_inc_tax']          = $item->price->user->value_inc_tax;
+                $temp['price_user_value_ex_tax']           = $item->price->user->value_ex_tax;
+                $temp['price_user_value_tax']              = $item->price->user->value_tax;
+                $temp['price_user_discount_value_inc_tax'] = $item->price->user->discount_value_inc_tax;
+                $temp['price_user_discount_value_ex_tax']  = $item->price->user->discount_value_ex_tax;
+                $temp['price_user_discount_value_tax']     = $item->price->user->discount_value_tax;
 
                 /**
                  * To order?
@@ -408,9 +413,12 @@ class NAILS_Shop_order_model extends NAILS_Model
     {
         //  Selects
         $this->db->select($this->tablePrefix . '.*');
-        $this->db->select('ue.email, u.first_name, u.last_name, u.gender, u.profile_img,ug.id user_group_id,ug.label user_group_label');
-        $this->db->select('v.code v_code,v.label v_label, v.type v_type, v.discount_type v_discount_type, v.discount_value v_discount_value, v.discount_application v_discount_application');
-        $this->db->select('v.product_type_id v_product_type_id, v.is_active v_is_active, v.is_deleted v_is_deleted, v.valid_from v_valid_from, v.valid_to v_valid_to');
+        $this->db->select('ue.email, u.first_name, u.last_name, u.gender, u.profile_img,ug.id user_group_id');
+        $this->db->select('ug.label user_group_label');
+        $this->db->select('v.code v_code,v.label v_label, v.type v_type, v.discount_type v_discount_type');
+        $this->db->select('v.discount_value v_discount_value, v.discount_application v_discount_application');
+        $this->db->select('v.product_type_id v_product_type_id, v.is_active v_is_active, v.is_deleted v_is_deleted');
+        $this->db->select('v.valid_from v_valid_from, v.valid_to v_valid_to');
 
         //  Joins
         $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = o.user_id', 'LEFT');
@@ -1224,6 +1232,8 @@ class NAILS_Shop_order_model extends NAILS_Model
     {
         parent::_format_object($obj, $data, $integers, $bools);
 
+        $obj->requires_shipping = (bool) $obj->requires_shipping;
+
         //  User
         $obj->user     = new \stdClass();
         $obj->user->id = $obj->user_id;
@@ -1292,7 +1302,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         $obj->totals->base->grand             = (int) $obj->total_base_grand;
         $obj->totals->base->grand_discount    = (int) $obj->total_base_grand_discount;
 
-        $obj->totals->base_formatted                     = new \stdClass();
+        $obj->totals->base_formatted                    = new \stdClass();
         $obj->totals->base_formatted->item              = $this->oCurrencyModel->formatBase($obj->totals->base->item);
         $obj->totals->base_formatted->item_discount     = $this->oCurrencyModel->formatBase($obj->totals->base->item_discount);
         $obj->totals->base_formatted->shipping          = $this->oCurrencyModel->formatBase($obj->totals->base->shipping);
@@ -1312,7 +1322,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         $obj->totals->user->grand             = (int) $obj->total_user_grand;
         $obj->totals->user->grand_discount    = (int) $obj->total_user_grand_discount;
 
-        $obj->totals->user_formatted                     = new \stdClass();
+        $obj->totals->user_formatted                    = new \stdClass();
         $obj->totals->user_formatted->item              = $this->oCurrencyModel->formatUSer($obj->totals->user->item);
         $obj->totals->user_formatted->item_discount     = $this->oCurrencyModel->formatUSer($obj->totals->user->item_discount);
         $obj->totals->user_formatted->shipping          = $this->oCurrencyModel->formatUSer($obj->totals->user->shipping);
@@ -1436,42 +1446,67 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        $item->price                      = new \stdClass();
-        $item->price->base                = new \stdClass();
-        $item->price->base->value_inc_tax = $item->price_base_value_inc_tax;
-        $item->price->base->value_ex_tax  = $item->price_base_value_ex_tax;
-        $item->price->base->value_tax     = $item->price_base_value_tax;
-        $item->price->base->value_total   = $item->price_base_value * $item->quantity;
+        $item->price                               = new \stdClass();
+        $item->price->base                         = new \stdClass();
+        $item->price->base->value_inc_tax          = (int) $item->price_base_value_inc_tax;
+        $item->price->base->value_ex_tax           = (int) $item->price_base_value_ex_tax;
+        $item->price->base->value_tax              = (int) $item->price_base_value_tax;
+        $item->price->base->discount_value_inc_tax = (int) $item->price_base_discount_value_inc_tax;
+        $item->price->base->discount_value_ex_tax  = (int) $item->price_base_discount_value_ex_tax;
+        $item->price->base->discount_value_tax     = (int) $item->price_base_discount_value_tax;
+        $item->price->base->discount_item          = (int) $item->price_base_discount_item;
+        $item->price->base->discount_tax           = (int) $item->price_base_discount_tax;
+        $item->price->base->item_total             = (int) ($item->price_base_value_ex_tax + $item->price_base_value_tax) * $item->quantity;
 
-        $item->price->base_formatted                = new \stdClass();
-        $item->price->base_formatted->value_inc_tax = $this->oCurrencyModel->formatBase($item->price_base_value_inc_tax);
-        $item->price->base_formatted->value_ex_tax  = $this->oCurrencyModel->formatBase($item->price_base_value_ex_tax);
-        $item->price->base_formatted->value_tax     = $this->oCurrencyModel->formatBase($item->price_base_value_tax);
-        $item->price->base_formatted->value_total   = $this->oCurrencyModel->formatBase($item->price_base_value * $item->quantity);
+        $item->price->base_formatted                         = new \stdClass();
+        $item->price->base_formatted->value_inc_tax          = $this->oCurrencyModel->formatBase($item->price_base_value_inc_tax);
+        $item->price->base_formatted->value_ex_tax           = $this->oCurrencyModel->formatBase($item->price_base_value_ex_tax);
+        $item->price->base_formatted->value_tax              = $this->oCurrencyModel->formatBase($item->price_base_value_tax);
+        $item->price->base_formatted->discount_value_inc_tax = $this->oCurrencyModel->formatBase($item->price_base_discount_value_inc_tax);
+        $item->price->base_formatted->discount_value_ex_tax  = $this->oCurrencyModel->formatBase($item->price_base_discount_value_ex_tax);
+        $item->price->base_formatted->discount_value_tax     = $this->oCurrencyModel->formatBase($item->price_base_discount_value_tax);
+        $item->price->base_formatted->discount_item          = $this->oCurrencyModel->formatBase($item->price_base_discount_item);
+        $item->price->base_formatted->discount_tax           = $this->oCurrencyModel->formatBase($item->price_base_discount_tax);
+        $item->price->base_formatted->item_total             = $this->oCurrencyModel->formatBase($item->price->base->item_total);
 
-        $item->price->user                = new \stdClass();
-        $item->price->user->value_inc_tax = $item->price_user_value_inc_tax;
-        $item->price->user->value_ex_tax  = $item->price_user_value_ex_tax;
-        $item->price->user->value_tax     = $item->price_user_value_tax;
-        $item->price->user->value_total   = $item->price_user_value * $item->quantity;
+        $item->price->user                         = new \stdClass();
+        $item->price->user->value_inc_tax          = (int) $item->price_user_value_inc_tax;
+        $item->price->user->value_ex_tax           = (int) $item->price_user_value_ex_tax;
+        $item->price->user->value_tax              = (int) $item->price_user_value_tax;
+        $item->price->user->discount_value_inc_tax = (int) $item->price_user_discount_value_inc_tax;
+        $item->price->user->discount_value_ex_tax  = (int) $item->price_user_discount_value_ex_tax;
+        $item->price->user->discount_value_tax     = (int) $item->price_user_discount_value_tax;
+        $item->price->user->discount_item          = (int) $item->price_user_discount_item;
+        $item->price->user->discount_tax           = (int) $item->price_user_discount_tax;
+        $item->price->user->item_total             = (int) ($item->price_user_value_ex_tax + $item->price_user_value_tax) * $item->quantity;
 
-        $item->price->user_formatted                = new \stdClass();
-        $item->price->user_formatted->value_inc_tax = $this->oCurrencyModel->formatUser($item->price_user_value_inc_tax);
-        $item->price->user_formatted->value_ex_tax  = $this->oCurrencyModel->formatUser($item->price_user_value_ex_tax);
-        $item->price->user_formatted->value_tax     = $this->oCurrencyModel->formatUser($item->price_user_value_tax);
-        $item->price->user_formatted->value_total   = $this->oCurrencyModel->formatUser($item->price_user_value * $item->quantity);
+        $item->price->user_formatted                         = new \stdClass();
+        $item->price->user_formatted->value_inc_tax          = $this->oCurrencyModel->formatUser($item->price_user_value_inc_tax);
+        $item->price->user_formatted->value_ex_tax           = $this->oCurrencyModel->formatUser($item->price_user_value_ex_tax);
+        $item->price->user_formatted->value_tax              = $this->oCurrencyModel->formatUser($item->price_user_value_tax);
+        $item->price->user_formatted->discount_value_inc_tax = $this->oCurrencyModel->formatUser($item->price_user_discount_value_inc_tax);
+        $item->price->user_formatted->discount_value_ex_tax  = $this->oCurrencyModel->formatUser($item->price_user_discount_value_ex_tax);
+        $item->price->user_formatted->discount_value_tax     = $this->oCurrencyModel->formatUser($item->price_user_discount_value_tax);
+        $item->price->user_formatted->discount_item          = $this->oCurrencyModel->formatUser($item->price_user_discount_item);
+        $item->price->user_formatted->discount_tax           = $this->oCurrencyModel->formatUser($item->price_user_discount_tax);
+        $item->price->user_formatted->item_total             = $this->oCurrencyModel->formatUser($item->price->user->item_total);
 
         $item->processed = (bool) $item->processed;
         $item->refunded  = (bool) $item->refunded;
 
-        unset($item->price_base_value);
         unset($item->price_base_value_inc_tax);
         unset($item->price_base_value_ex_tax);
         unset($item->price_base_value_tax);
-        unset($item->price_user_value);
+        unset($item->price_base_discount_value_inc_tax);
+        unset($item->price_base_discount_value_ex_tax);
+        unset($item->price_base_discount_value_tax);
+
         unset($item->price_user_value_inc_tax);
         unset($item->price_user_value_ex_tax);
         unset($item->price_user_value_tax);
+        unset($item->price_user_discount_value_inc_tax);
+        unset($item->price_user_discount_value_ex_tax);
+        unset($item->price_user_discount_value_tax);
 
         // --------------------------------------------------------------------------
 

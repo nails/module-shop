@@ -444,17 +444,23 @@ class NAILS_Shop_basket_model extends Base
             $oItemPrice->user->discount_tax           = $oCurrencyModel->convertBaseToUser($oItemPrice->base->discount_tax);
             $oItemPrice->user->discount_value_inc_tax = $oCurrencyModel->convertBaseToUser($oItemPrice->base->discount_value_inc_tax);
             $oItemPrice->user->discount_value_ex_tax  = $oCurrencyModel->convertBaseToUser($oItemPrice->base->discount_value_ex_tax);
+            $oItemPrice->user->discount_value_tax     = $oCurrencyModel->convertBaseToUser($oItemPrice->base->discount_value_tax);
 
             // Formatted strings
             $oItemPrice->base_formatted->discount_item          = $oCurrencyModel->formatBase($oItemPrice->base->discount_item);
             $oItemPrice->base_formatted->discount_tax           = $oCurrencyModel->formatBase($oItemPrice->base->discount_tax);
             $oItemPrice->base_formatted->discount_value_inc_tax = $oCurrencyModel->formatBase($oItemPrice->base->discount_value_inc_tax);
             $oItemPrice->base_formatted->discount_value_ex_tax  = $oCurrencyModel->formatBase($oItemPrice->base->discount_value_ex_tax);
+            $oItemPrice->base_formatted->discount_value_tax     = $oCurrencyModel->formatBase($oItemPrice->base->discount_value_tax);
 
-            $oItemPrice->user_formatted->discount_item          = $oCurrencyModel->formatBase($oItemPrice->user->discount_item);
-            $oItemPrice->user_formatted->discount_tax           = $oCurrencyModel->formatBase($oItemPrice->user->discount_tax);
-            $oItemPrice->user_formatted->discount_value_inc_tax = $oCurrencyModel->formatBase($oItemPrice->user->discount_value_inc_tax);
-            $oItemPrice->user_formatted->discount_value_ex_tax  = $oCurrencyModel->formatBase($oItemPrice->user->discount_value_ex_tax);
+            $oItemPrice->user_formatted->discount_item          = $oCurrencyModel->formatUser($oItemPrice->user->discount_item);
+            $oItemPrice->user_formatted->discount_tax           = $oCurrencyModel->formatUser($oItemPrice->user->discount_tax);
+            $oItemPrice->user_formatted->discount_value_inc_tax = $oCurrencyModel->formatUser($oItemPrice->user->discount_value_inc_tax);
+            $oItemPrice->user_formatted->discount_value_ex_tax  = $oCurrencyModel->formatUser($oItemPrice->user->discount_value_ex_tax);
+            $oItemPrice->user_formatted->discount_value_tax     = $oCurrencyModel->formatUser($oItemPrice->user->discount_value_tax);
+
+            //  Place this at the top level of the ite, too
+            $oItem->price = $oItemPrice;
         }
 
         // --------------------------------------------------------------------------
