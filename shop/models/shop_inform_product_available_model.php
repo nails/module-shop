@@ -30,9 +30,9 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 
     // --------------------------------------------------------------------------
 
-    protected function _getcount_common($data = array(), $_caller = null)
+    protected function _getcount_common($data = array())
     {
-        parent::_getcount_common($data, $_caller);
+        parent::_getcount_common($data);
 
         if (empty($data['sort'])) {
 

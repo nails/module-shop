@@ -976,14 +976,13 @@ class NAILS_Shop_product_model extends Base
      * @param  integer $perPage        How many items per page of paginated results
      * @param  array   $data           Any data to pass to _getcount_common()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
-     * @param  string  $_caller        Internal flag to pass to _getcount_common(), contains the calling method
      * @return array
      */
-    public function get_all($page = null, $perPage = null, $data = array(), $includeDeleted = false, $_caller = 'GET_ALL')
+    public function get_all($page = null, $perPage = null, $data = array(), $includeDeleted = false)
     {
         $this->load->model('shop/shop_category_model');
 
-        $products = parent::get_all($page, $perPage, $data, $includeDeleted, $_caller);
+        $products = parent::get_all($page, $perPage, $data, $includeDeleted);
 
         //  Handle requests for the raw query object
         if (!empty($data['RETURN_QUERY_OBJECT'])) {
@@ -1480,10 +1479,9 @@ class NAILS_Shop_product_model extends Base
      * This method applies the conditionals which are common across the get_*()
      * methods and the count() method.
      * @param  string $data    Data passed from the calling method
-     * @param  string $_caller The name of the calling method
      * @return void
      */
-    protected function _getcount_common($data = array(), $_caller = null)
+    protected function _getcount_common($data = array())
     {
         /**
          * If we're sorting on price or recently added then some magic needs to happen ahead
@@ -1503,19 +1501,7 @@ class NAILS_Shop_product_model extends Base
 
         // --------------------------------------------------------------------------
 
-        parent::_getcount_common($data, $_caller);
-
-        // --------------------------------------------------------------------------
-
-        /**
-         * Don't do anything if the caller is getAllProductVariationFlat(), it
-         * will handle everything itself
-         */
-
-        if ($_caller == 'GET_ALL_PRODUCT_VARIATION_FLAT') {
-
-            return;
-        }
+        parent::_getcount_common($data);
 
         // --------------------------------------------------------------------------
 

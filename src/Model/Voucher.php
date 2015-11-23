@@ -225,12 +225,11 @@ class Voucher extends Base
      * @param int    $page    The page number of the results, if null then no pagination
      * @param int    $perPage How many items per page of paginated results
      * @param mixed  $data    Any data to pass to _getcount_common()
-     * @param string $_caller Internal flag to pass to _getcount_common(), contains the calling method
      * @return array
      **/
-    public function get_all($page = null, $perPage = null, $data = array(), $_caller = 'GET_ALL')
+    public function get_all($page = null, $perPage = null, $data = array())
     {
-        $result = parent::get_all($page, $perPage, $data, false, $_caller);
+        $result = parent::get_all($page, $perPage, $data, false);
 
         //  Handle requests for the raw query object
         if (!empty($data['RETURN_QUERY_OBJECT'])) {
@@ -295,7 +294,7 @@ class Voucher extends Base
      * @param  string $search Keywords to restrict the query by
      * @return void
      */
-    protected function _getcount_common($data = array(), $_caller = null)
+    protected function _getcount_common($data = array())
     {
         //  Search
         if (!empty($data['keywords'])) {
@@ -311,7 +310,7 @@ class Voucher extends Base
             );
         }
 
-        parent::_getcount_common($data, $_caller);
+        parent::_getcount_common($data);
 
         $this->db->select($this->tablePrefix . '.*,u.first_name, u.last_name, u.gender, u.profile_img, ue.email');
         $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = ' . $this->tablePrefix . '.created_by', 'LEFT');
