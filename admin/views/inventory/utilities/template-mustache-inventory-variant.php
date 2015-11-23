@@ -413,9 +413,9 @@
                         $field['key']      = 'variation[' . $_counter . '][shipping][collection_only]';
                         $field['class']    = 'field-collection-only';
                         $field['label']    = 'Collection Only';
-                        $field['readonly'] = !app_setting('warehouse_collection_enabled', 'shop');
-                        $field['info']     = !app_setting('warehouse_collection_enabled', 'shop') ? '<strong>Warehouse Collection is disabled</strong>' : '';
-                        $field['info']    .= !app_setting('warehouse_collection_enabled', 'shop') && userHasPermission('admin:shop:settings:update') ? '<br />if you wish to allow customers to collect from your warehouse you must enable it in ' . anchor('admin/shop/settings', 'settings', 'class="confirm" data-title="Stop Editing?" data-body="Any unsaved changes will be lost."') . '.' : '';
+                        $field['readonly'] = !appSetting('warehouse_collection_enabled', 'shop');
+                        $field['info']     = !appSetting('warehouse_collection_enabled', 'shop') ? '<strong>Warehouse Collection is disabled</strong>' : '';
+                        $field['info']    .= !appSetting('warehouse_collection_enabled', 'shop') && userHasPermission('admin:shop:settings:update') ? '<br />if you wish to allow customers to collect from your warehouse you must enable it in ' . anchor('admin/shop/settings', 'settings', 'class="confirm" data-title="Stop Editing?" data-body="Any unsaved changes will be lost."') . '.' : '';
                         $field['default']  = isset($variation->shipping->collection_only) ? (bool) $variation->shipping->collection_only : false;
                         $tip               = 'Items marked as collection only will be handled differently in checkout and reporting.';
 

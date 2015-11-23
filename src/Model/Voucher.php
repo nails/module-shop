@@ -179,7 +179,7 @@ class Voucher extends Base
     {
         if ($order->shipping->isDeliverable) {
 
-            if (app_setting('free_shipping_threshold', 'shop') <= $order->totals->sub) {
+            if (appSetting('free_shipping_threshold', 'shop') <= $order->totals->sub) {
 
                 /**
                  * The order qualifies for free shipping, ignore the discount given
@@ -442,7 +442,7 @@ class Voucher extends Base
              * make sense.
              */
 
-            if (app_setting('free_shipping_threshold', 'shop') && $voucher->discount_application == self::DISCOUNT_APPLICATION_SHIPPING) {
+            if (appSetting('free_shipping_threshold', 'shop') && $voucher->discount_application == self::DISCOUNT_APPLICATION_SHIPPING) {
 
                 if ($basket->totals->sub >= appSetting('free_shipping_threshold', 'shop')) {
 

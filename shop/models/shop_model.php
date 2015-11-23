@@ -214,7 +214,7 @@ class NAILS_Shop_model extends Base
         // --------------------------------------------------------------------------
 
         //  Fetch base currency
-        $base = $this->oCurrency->getByCode(app_setting('base_currency', 'shop'));
+        $base = $this->oCurrency->getByCode(appSetting('base_currency', 'shop'));
 
         //  If no base currency is found, default to GBP
         if (!$base) {

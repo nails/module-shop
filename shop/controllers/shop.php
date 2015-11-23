@@ -240,7 +240,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function brandIndex()
     {
-        if (!app_setting('page_brand_listing', 'shop')) {
+        if (!appSetting('page_brand_listing', 'shop')) {
 
             show_404();
         }
@@ -388,7 +388,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function categoryIndex()
     {
-        if (!app_setting('page_category_listing', 'shop')) {
+        if (!appSetting('page_category_listing', 'shop')) {
 
             show_404();
         }
@@ -576,7 +576,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function collectionIndex()
     {
-        if (!app_setting('page_collection_listing', 'shop')) {
+        if (!appSetting('page_collection_listing', 'shop')) {
 
             show_404();
         }
@@ -825,7 +825,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function rangeIndex()
     {
-        if (!app_setting('page_range_listing', 'shop')) {
+        if (!appSetting('page_range_listing', 'shop')) {
 
             show_404();
         }
@@ -973,7 +973,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function saleIndex()
     {
-        if (!app_setting('page_sale_listing', 'shop')) {
+        if (!appSetting('page_sale_listing', 'shop')) {
 
             show_404();
         }
@@ -1120,7 +1120,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function tagIndex()
     {
-        if (!app_setting('page_tag_listing', 'shop')) {
+        if (!appSetting('page_tag_listing', 'shop')) {
 
             show_404();
         }

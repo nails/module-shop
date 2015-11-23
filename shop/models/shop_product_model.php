@@ -194,7 +194,7 @@ class NAILS_Shop_product_model extends Base
         $_data->tags            = isset($data['tags']) ? $data['tags'] : array();
         $_data->google_category = !empty($data['google_category']) ? trim($data['google_category']) : null;
 
-        if (app_setting('enable_external_products', 'shop')) {
+        if (appSetting('enable_external_products', 'shop')) {
 
             $_data->is_external           = isset($data['is_external']) ? (bool) $data['is_external'] : false;
             $_data->external_vendor_label = isset($data['external_vendor_label']) ? $data['external_vendor_label'] : '';
@@ -547,7 +547,7 @@ class NAILS_Shop_product_model extends Base
         $this->db->set('published', $data->published);
         $this->db->set('google_category', $data->google_category);
 
-        if (app_setting('enable_external_products', 'shop')) {
+        if (appSetting('enable_external_products', 'shop')) {
 
             $this->db->set('is_external', $data->is_external);
             $this->db->set('external_vendor_label', $data->external_vendor_label);
@@ -1230,7 +1230,7 @@ class NAILS_Shop_product_model extends Base
                 // --------------------------------------------------------------------------
 
                 //  Tax pricing
-                if (app_setting('price_exclude_tax', 'shop')) {
+                if (appSetting('price_exclude_tax', 'shop')) {
 
                     //  Prices do not include any applicable taxes
                     $v->price->price->base->value_ex_tax = $basePrice;

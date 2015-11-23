@@ -663,7 +663,7 @@ class Inventory extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  External product
-        if (app_setting('enable_external_products', 'shop')) {
+        if (appSetting('enable_external_products', 'shop')) {
 
             $this->oFormValidation->set_rules('is_external', '', 'xss_clean');
 
