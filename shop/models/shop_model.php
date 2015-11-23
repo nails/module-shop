@@ -229,7 +229,7 @@ class NAILS_Shop_model extends Base
 
             } else {
 
-                set_app_setting('base_currency', 'shop', 'GBP');
+                setAppSetting('base_currency', 'shop', 'GBP');
             }
         }
 
@@ -247,7 +247,7 @@ class NAILS_Shop_model extends Base
      */
     public function getShopUrl()
     {
-        return app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
+        return appSetting('url', 'shop') ? appSetting('url', 'shop') : 'shop/';
     }
 
     // --------------------------------------------------------------------------
@@ -258,7 +258,7 @@ class NAILS_Shop_model extends Base
      */
     public function getShopName()
     {
-        return app_setting('name', 'shop') ? app_setting('name', 'shop') : 'Shop';
+        return appSetting('name', 'shop') ? appSetting('name', 'shop') : 'Shop';
     }
 }
 

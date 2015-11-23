@@ -260,7 +260,7 @@ class Settings extends BaseAdmin
                     if ($bHasAdditionalCurrency && $bHasOpenExchangeRatesId) {
 
                         //  Force a refresh of the settings
-                        app_setting(null, 'shop', true);
+                        appSetting(null, 'shop', true);
 
                         if (!$oCurrencyModel->sync()) {
 
@@ -286,7 +286,7 @@ class Settings extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Get data
-        $this->data['settings']         = app_setting(null, 'shop', true);
+        $this->data['settings']         = appSetting(null, 'shop', true);
         $this->data['payment_gateways'] = $this->shop_payment_gateway_model->getAvailable();
         $this->data['shipping_drivers'] = $this->shop_shipping_driver_model->getAvailable();
         $this->data['currencies']       = $oCurrencyModel->getAll();
@@ -298,12 +298,12 @@ class Settings extends BaseAdmin
 
         //  "Front of house" skins
         $this->data['skins_front']         = $this->shop_skin_front_model->get_available();
-        $this->data['skin_front_selected'] = app_setting('skin_front', 'shop') ? app_setting('skin_front', 'shop') : 'shop-skin-front-classic';
+        $this->data['skin_front_selected'] = appSetting('skin_front', 'shop') ? appSetting('skin_front', 'shop') : 'shop-skin-front-classic';
         $this->data['skin_front_current']  = $this->shop_skin_front_model->get($this->data['skin_front_selected']);
 
         //  "Checkout" skins
         $this->data['skins_checkout']         = $this->shop_skin_checkout_model->get_available();
-        $this->data['skin_checkout_selected'] = app_setting('skin_checkout', 'shop') ? app_setting('skin_checkout', 'shop') : 'shop-skin-checkout-classic';
+        $this->data['skin_checkout_selected'] = appSetting('skin_checkout', 'shop') ? appSetting('skin_checkout', 'shop') : 'shop-skin-checkout-classic';
         $this->data['skin_checkout_current']  = $this->shop_skin_checkout_model->get($this->data['skin_checkout_selected']);
 
         //  Count the number of products (including deleted) - base currency is locked if > 1

@@ -205,7 +205,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
                             $this->shop_order_model->paid($order->id);
                             $this->shop_order_model->process($order->id);
 
-                            $shopUrl = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
+                            $shopUrl = appSetting('url', 'shop') ? appSetting('url', 'shop') : 'shop/';
                             redirect($shopUrl . 'checkout/processing?ref=' . $order->ref);
 
                         } else {
@@ -620,7 +620,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Load up the shop's skin
-        $skin = app_setting('skin_checkout', 'shop');
+        $skin = appSetting('skin_checkout', 'shop');
         $skin = empty($skin) ? 'shop-skin-checkout-classic' : $skin;
 
         $this->load->model('shop/shop_skin_checkout_model');

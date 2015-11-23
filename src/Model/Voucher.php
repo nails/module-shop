@@ -444,7 +444,7 @@ class Voucher extends Base
 
             if (app_setting('free_shipping_threshold', 'shop') && $voucher->discount_application == self::DISCOUNT_APPLICATION_SHIPPING) {
 
-                if ($basket->totals->sub >= app_setting('free_shipping_threshold', 'shop')) {
+                if ($basket->totals->sub >= appSetting('free_shipping_threshold', 'shop')) {
 
                     $this->_set_error('Your order qualifies for free shipping, voucher not needed!');
                     return false;

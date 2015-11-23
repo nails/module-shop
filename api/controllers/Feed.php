@@ -29,7 +29,7 @@ class Feed extends \Nails\Api\Controller\Base
         $this->load->model('shop/shop_feed_model');
 
         $this->maintenance = new \stdClass();
-        $this->maintenance->enabled = (bool) app_setting('maintenance_enabled', 'shop');
+        $this->maintenance->enabled = (bool) appSetting('maintenance_enabled', 'shop');
         if ($this->maintenance->enabled) {
 
             //  Allow shop admins access

@@ -412,7 +412,7 @@ class Orders extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load up the shop's skin
-        $skin = app_setting('skin_checkout', 'shop') ? app_setting('skin_checkout', 'shop') : 'shop-skin-checkout-classic';
+        $skin = appSetting('skin_checkout', 'shop') ? appSetting('skin_checkout', 'shop') : 'shop-skin-checkout-classic';
 
         $this->load->model('shop/shop_skin_checkout_model');
         $skin = $this->shop_skin_checkout_model->get($skin);

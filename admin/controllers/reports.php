@@ -76,7 +76,7 @@ class Reports extends BaseAdmin
          */
 
         $oDate                     = Factory::factory('DateTime');
-        $firstFinancialYearEndDate = app_setting('firstFinancialYearEndDate', 'shop');
+        $firstFinancialYearEndDate = appSetting('firstFinancialYearEndDate', 'shop');
 
         if (!empty($firstFinancialYearEndDate)) {
 

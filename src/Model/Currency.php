@@ -81,8 +81,8 @@ class Currency extends Base
     public function getAllSupported()
     {
         $currencies = $this->getAll();
-        $additional = app_setting('additional_currencies', 'shop');
-        $base       = app_setting('base_currency', 'shop');
+        $additional = appSetting('additional_currencies', 'shop');
+        $base       = appSetting('base_currency', 'shop');
         $supported  = array();
 
         if (isset($currencies[$base])) {
@@ -147,10 +147,10 @@ class Currency extends Base
      */
     public function sync($muteLog = true)
     {
-        $oerAppId             = app_setting('openexchangerates_app_id', 'shop');
-        $oerEtag              = app_setting('openexchangerates_etag', 'shop');
-        $oerLastModified      = app_setting('openexchangerates_last_modified', 'shop');
-        $additionalCurrencies = app_setting('additional_currencies', 'shop');
+        $oerAppId             = appSetting('openexchangerates_app_id', 'shop');
+        $oerEtag              = appSetting('openexchangerates_etag', 'shop');
+        $oerLastModified      = appSetting('openexchangerates_last_modified', 'shop');
+        $additionalCurrencies = appSetting('additional_currencies', 'shop');
         $oLogger              = Factory::service('Logger');
 
         if (empty($additionalCurrencies)) {
@@ -285,13 +285,13 @@ class Currency extends Base
             if ($oResponse->hasHeader('ETag')) {
 
                 $aHeaders = $oResponse->getHeader('ETag');
-                set_app_setting('openexchangerates_etag', 'shop', $aHeaders[0]);
+                setAppSetting('openexchangerates_etag', 'shop', $aHeaders[0]);
             }
 
             if ($oResponse->hasHeader('Last-Modified')) {
 
                 $aHeaders = $oResponse->getHeader('Last-Modified');
-                set_app_setting('openexchangerates_last_modified', 'shop', $aHeaders[0]);
+                setAppSetting('openexchangerates_last_modified', 'shop', $aHeaders[0]);
             }
 
             $toSave = array();

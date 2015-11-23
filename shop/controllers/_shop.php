@@ -56,7 +56,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
         //  Maintenance mode?
         $this->maintenance = new \stdClass();
-        $this->maintenance->enabled = (bool) app_setting('maintenance_enabled', 'shop');
+        $this->maintenance->enabled = (bool) appSetting('maintenance_enabled', 'shop');
 
         if ($this->maintenance->enabled) {
 
@@ -90,7 +90,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
             case 'front':
 
                 //  Determine the name of the skin
-                $skinName = app_setting('skin_front', 'shop');
+                $skinName = appSetting('skin_front', 'shop');
                 $skinName = !empty($skinName) ? $skinName : 'shop-skin-front-classic';
 
                 //  Load it
@@ -111,7 +111,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
             case 'checkout':
 
                 //  Determine the name of the skin
-                $skinName = app_setting('skin_checkout', 'shop');
+                $skinName = appSetting('skin_checkout', 'shop');
                 $skinName = !empty($skinName) ? $skinName : 'shop-skin-checkout-classic';
 
                 //  Load it

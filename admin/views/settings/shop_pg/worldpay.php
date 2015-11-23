@@ -61,7 +61,7 @@
                     $field['key']         = 'omnipay_' . $gateway_slug . '_customise_label';
                     $field['label']       = 'Label';
                     $field['placeholder'] = 'Give this Payment Gateway a custom customer facing label';
-                    $field['default']     = app_setting($field['key'], 'shop');
+                    $field['default']     = appSetting($field['key'], 'shop');
 
                     echo form_field($field);
 
@@ -71,7 +71,7 @@
                     $field['key']     = 'omnipay_' . $gateway_slug . '_customise_img';
                     $field['label']   = 'Image';
                     $field['bucket']  = 'shop-pg-img-' . $gateway_slug;
-                    $field['default'] = app_setting($field['key'], 'shop');
+                    $field['default'] = appSetting($field['key'], 'shop');
 
                     echo form_field_mm_image($field);
 
@@ -93,7 +93,7 @@
                 $field                = array();
                 $field['key']         = 'omnipay_' . $gateway_slug . '_installationId';
                 $field['label']       = 'Installation ID';
-                $field['default']     = app_setting($field['key'], 'shop');
+                $field['default']     = appSetting($field['key'], 'shop');
                 $field['placeholder'] = 'The Installation ID for this shop.';
                 $field['required']    = true;
 
@@ -104,7 +104,7 @@
                 $field                = array();
                 $field['key']         = 'omnipay_' . $gateway_slug . '_accountId';
                 $field['label']       = 'Administratrion Code';
-                $field['default']     = app_setting($field['key'], 'shop');
+                $field['default']     = appSetting($field['key'], 'shop');
                 $field['placeholder'] = 'The Account ID for this shop.';
                 $field['required']    = true;
 
@@ -123,7 +123,7 @@
                 $field['key']         = 'omnipay_' . $gateway_slug . '_callbackPassword';
                 $field['label']       = 'Payment Response Password';
                 $field['info']        = '<a href="#" id="generate-password" class="btn btn-xs btn-default">Generate</a>';
-                $field['default']     = app_setting($field['key'], 'shop');
+                $field['default']     = appSetting($field['key'], 'shop');
                 $field['placeholder'] = 'The Payment Response Password for this installation.';
                 $field['type']        = 'password';
                 $field['required']    = true;
@@ -138,7 +138,7 @@
                 $field['key']         = 'omnipay_' . $gateway_slug . '_secretWord';
                 $field['label']       = 'MD5 Secret for Transactions';
                 $field['info']        = '<a href="#" id="generate-secret" class="btn btn-xs btn-default">Generate</a>';
-                $field['default']     = app_setting($field['key'], 'shop');
+                $field['default']     = appSetting($field['key'], 'shop');
                 $field['placeholder'] = 'The MD5 Secret for this installation\'s transactions.';
                 $field['type']        = 'password';
                 $field['required']    = true;
@@ -203,7 +203,7 @@
 
                     // --------------------------------------------------------------------------
 
-                    $shop_url = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
+                    $shop_url = appSetting('url', 'shop') ? appSetting('url', 'shop') : 'shop/';
 
                     $field              = array();
                     $field['key']       = '';
@@ -351,7 +351,7 @@
 <textarea readonly="readonly" onClick="this.select();" style="width:100%;box-sizing:border-box;height:400px;margin:0;">
 <?php
 $app_name          = APP_NAME;
-$shop_url          = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
+$shop_url          = appSetting('url', 'shop') ? appSetting('url', 'shop') : 'shop/';
 $processing_url    = site_url($shop_url . 'checkout/processing');
 $html = <<<EOT
 <html>
@@ -414,7 +414,7 @@ EOT;
 <textarea readonly="readonly" onClick="this.select();" style="width:100%;box-sizing:border-box;height:400px;margin:0;">
 <?php
 $app_name          = APP_NAME;
-$shop_url          = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
+$shop_url          = appSetting('url', 'shop') ? appSetting('url', 'shop') : 'shop/';
 $processing_url    = site_url($shop_url . 'checkout/cancel');
 $html = <<<EOT
 <html>

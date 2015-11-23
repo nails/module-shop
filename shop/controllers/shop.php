@@ -39,7 +39,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         //  Defaults
         $this->_product_sort       = new \stdClass();
-        $this->_product_sort->sort = app_setting('default_product_sort', 'shop');
+        $this->_product_sort->sort = appSetting('default_product_sort', 'shop');
         $this->_product_sort->sort = $this->_product_sort->sort ? $this->_product_sort->sort : 'recent';
 
         //  Actual Values
@@ -84,7 +84,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->_product_pagination->page     = 0;
         $this->_product_pagination->rsegment = 2;
         $this->_product_pagination->total    = 0;
-        $this->_product_pagination->per_page = app_setting('default_product_per_page', 'shop');
+        $this->_product_pagination->per_page = appSetting('default_product_per_page', 'shop');
         $this->_product_pagination->per_page = $this->_product_pagination->per_page ? $this->_product_pagination->per_page : 25;
 
         //  Actual Values

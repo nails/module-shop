@@ -219,7 +219,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
      */
     public function getEnabled()
     {
-        $slug = app_setting('enabled_shipping_driver', 'shop');
+        $slug = appSetting('enabled_shipping_driver', 'shop');
 
         if (!$slug) {
 
@@ -240,7 +240,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
     {
         if (is_null($slug)) {
 
-            $slug = app_setting('enabled_shipping_driver', 'shop');
+            $slug = appSetting('enabled_shipping_driver', 'shop');
 
             if (!$slug) {
 
@@ -307,7 +307,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
         if (!$this->isDriverLoaded()) {
 
             //  No driver loaded, detect enabled driver and attempt to load
-            $enabledDriver = app_setting('enabled_shipping_driver', 'shop');
+            $enabledDriver = appSetting('enabled_shipping_driver', 'shop');
 
             if (empty($enabledDriver) || !$this->load($enabledDriver)) {
 
@@ -399,7 +399,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
         if (!$this->isDriverLoaded()) {
 
             //  No driver loaded, detect enabled driver and attempt to load
-            $enabledDriver = app_setting('enabled_shipping_driver', 'shop');
+            $enabledDriver = appSetting('enabled_shipping_driver', 'shop');
 
             if (empty($enabledDriver) || !$this->load($enabledDriver)) {
 

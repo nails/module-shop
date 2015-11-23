@@ -43,7 +43,7 @@
                 $field['key']         = 'omnipay_' . $gateway_slug . '_customise_label';
                 $field['label']       = 'Label';
                 $field['placeholder'] = 'Give this Payment Gateway a custom customer facing label';
-                $field['default']     = app_setting($field['key'], 'shop');
+                $field['default']     = appSetting($field['key'], 'shop');
                 $field['tip']         = 'Set this to override the default payment gateway name.';
 
                 echo form_field($field);
@@ -54,7 +54,7 @@
                 $field['key']     = 'omnipay_' . $gateway_slug . '_customise_img';
                 $field['label']   = 'Image';
                 $field['bucket']  = 'shop-pg-img-' . $gateway_slug;
-                $field['default'] = app_setting($field['key'], 'shop');
+                $field['default'] = appSetting($field['key'], 'shop');
                 $field['tip']     = 'No image is shown by default, but you can choose to show one, perhaps a logo, or an image showing which cards are accepted.';
 
                 echo form_field_mm_image($field);
@@ -85,7 +85,7 @@
                     $field             = array();
                     $field['key']      = 'omnipay_' . $gateway_slug . '_' . $key;
                     $field['label']    = $label;
-                    $field['default']  = app_setting($field['key'], 'shop');
+                    $field['default']  = appSetting($field['key'], 'shop');
                     $field['required'] = true;
 
                     echo form_field($field);

@@ -103,10 +103,10 @@ class NAILS_Shop_feed_model extends NAILS_Model
     protected function getShopData()
     {
         $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
-        $sBaseCurrency  = app_setting('base_currency', 'shop');
+        $sBaseCurrency  = appSetting('base_currency', 'shop');
         $oBaseCurrency  = $oCurrencyModel->getByCode($sBaseCurrency);
-        $sWarehouseCountry = app_setting('warehouse_addr_country', 'shop');
-        $sInvoiceCompany = app_setting('invoice_company', 'shop');
+        $sWarehouseCountry = appSetting('warehouse_addr_country', 'shop');
+        $sInvoiceCompany = appSetting('invoice_company', 'shop');
         $products = $this->shop_product_model->get_all();
         $out = array();
 
@@ -221,8 +221,8 @@ class NAILS_Shop_feed_model extends NAILS_Model
         $xml = '<?xml version="1.0" encoding="utf-8"?>';
         $xml .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">';
         $xml .= '<channel>';
-        $xml .= '<title><![CDATA[' . app_setting('invoice_company', 'shop') . ']]></title>';
-        $xml .= '<description><![CDATA[' . app_setting('invoice_address', 'shop') . ']]></description>';
+        $xml .= '<title><![CDATA[' . appSetting('invoice_company', 'shop') . ']]></title>';
+        $xml .= '<description><![CDATA[' . appSetting('invoice_address', 'shop') . ']]></description>';
         $xml .= '<link><![CDATA[' . BASE_URL . ']]></link>';
 
         foreach ($items as $item) {
