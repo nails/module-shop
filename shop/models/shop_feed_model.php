@@ -107,7 +107,7 @@ class NAILS_Shop_feed_model extends NAILS_Model
         $oBaseCurrency  = $oCurrencyModel->getByCode($sBaseCurrency);
         $sWarehouseCountry = appSetting('warehouse_addr_country', 'shop');
         $sInvoiceCompany = appSetting('invoice_company', 'shop');
-        $products = $this->shop_product_model->get_all();
+        $products = $this->shop_product_model->getAll();
         $out = array();
 
         foreach ($products as $p) {

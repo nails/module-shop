@@ -60,7 +60,7 @@ class Availability extends BaseAdmin
      * Returns an array of extra permissions for this controller
      * @return array
      */
-    static function permissions()
+    public static function permissions()
     {
         $permissions = parent::permissions();
 
@@ -107,7 +107,7 @@ class Availability extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['notifications'] = $this->shop_inform_product_available_model->get_all();
+        $this->data['notifications'] = $this->shop_inform_product_available_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -149,7 +149,7 @@ class Availability extends BaseAdmin
             $oFormValidation->set_rules('item', '', 'xss_clean|required');
 
             $oFormValidation->set_message('required', lang('fv_required'));
-            $oFormValidation->set_message('valid_email',  lang('fv_valid_email'));
+            $oFormValidation->set_message('valid_email', lang('fv_valid_email'));
 
             if ($oFormValidation->run()) {
 
@@ -207,7 +207,7 @@ class Availability extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['notification'] = $this->shop_inform_product_available_model->get_by_id($this->uri->segment(5));
+        $this->data['notification'] = $this->shop_inform_product_available_model->getById($this->uri->segment(5));
 
         if (!$this->data['notification']) {
 
@@ -223,7 +223,7 @@ class Availability extends BaseAdmin
             $oFormValidation->set_rules('item', '', 'xss_clean|required');
 
             $oFormValidation->set_message('required', lang('fv_required'));
-            $oFormValidation->set_message('valid_email',  lang('fv_valid_email'));
+            $oFormValidation->set_message('valid_email', lang('fv_valid_email'));
 
             if ($oFormValidation->run()) {
 
@@ -242,7 +242,8 @@ class Availability extends BaseAdmin
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem updated the Product Availability Notification. ' . $this->shop_inform_product_available_model->lastError();
+                    $this->data['error']  = 'There was a problem updated the Product Availability Notification. ';
+                    $this->data['error'] .= $this->shop_inform_product_available_model->lastError();
 
                 }
 

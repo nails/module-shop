@@ -36,7 +36,7 @@ class NAILS_Shop_tag_model extends NAILS_Model
      * @param  array $data Data passed from the calling method
      * @return void
      **/
-    protected function _getcount_common($data = array())
+    protected function getCountCommon($data = array())
     {
         //  Default sort
         if (empty($data['sort'])) {
@@ -84,7 +84,7 @@ class NAILS_Shop_tag_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        parent::_getcount_common($data);
+        parent::getCountCommon($data);
     }
 
     // --------------------------------------------------------------------------
@@ -99,7 +99,7 @@ class NAILS_Shop_tag_model extends NAILS_Model
     {
         if (!empty($data['label'])) {
 
-            $data['slug'] = $this->_generate_slug($data['label']);
+            $data['slug'] = $this->generateSlug($data['label']);
         }
 
         if (empty($data['cover_id'])) {
@@ -122,7 +122,7 @@ class NAILS_Shop_tag_model extends NAILS_Model
     {
         if (!empty($data['label'])) {
 
-            $data['slug'] = $this->_generate_slug($data['label'], '', '', null, null, $id);
+            $data['slug'] = $this->generateSlug($data['label'], '', '', null, null, $id);
         }
 
         if (empty($data['cover_id'])) {
@@ -140,7 +140,7 @@ class NAILS_Shop_tag_model extends NAILS_Model
      * @param  string $slug The tag's slug
      * @return string
      */
-    public function format_url($slug)
+    public function formatUrl($slug)
     {
         return site_url($this->shopUrl . 'tag/' . $slug);
     }
@@ -156,10 +156,10 @@ class NAILS_Shop_tag_model extends NAILS_Model
      * @param  array  $bools    Fields which should be cast as booleans
      * @return void
      */
-    protected function _format_object(&$obj, $data = array(), $integers = array(), $bools = array())
+    protected function formatObject(&$obj, $data = array(), $integers = array(), $bools = array())
     {
-        parent::_format_object($obj, $data, $integers, $bools);
-        $obj->url = $this->format_url($obj->slug);
+        parent::formatObject($obj, $data, $integers, $bools);
+        $obj->url = $this->formatUrl($obj->slug);
     }
 }
 

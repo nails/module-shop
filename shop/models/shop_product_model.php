@@ -93,7 +93,7 @@ class NAILS_Shop_product_model extends Base
 
             if ($returnObj) {
 
-                return $this->get_by_id($id);
+                return $this->getById($id);
 
             } else {
 
@@ -112,7 +112,7 @@ class NAILS_Shop_product_model extends Base
      */
     public function update($id, $data = array())
     {
-        $current = $this->get_by_id($id);
+        $current = $this->getById($id);
 
         if (!$current) {
 
@@ -172,7 +172,7 @@ class NAILS_Shop_product_model extends Base
         //  Slug
         //  ====
 
-        $_data->slug = $this->_generate_slug($data['label'], '', '', $this->table, null, $id);
+        $_data->slug = $this->generateSlug($data['label'], '', '', $this->table, null, $id);
 
         //  Product Info
         //  ============
@@ -221,7 +221,7 @@ class NAILS_Shop_product_model extends Base
         }
 
         $_data->variation = array();
-        $productType      = $this->shop_product_type_model->get_by_id($_data->type_id);
+        $productType      = $this->shop_product_type_model->getById($_data->type_id);
 
         if (!$productType) {
 
@@ -478,7 +478,7 @@ class NAILS_Shop_product_model extends Base
         $_data->related = isset($data['related']) ? explode(',', $data['related']) : array();
         $_data->related = array_filter($_data->related);
         $_data->related = array_unique($_data->related);
-        $_data->related = array_map(function($val) {
+        $_data->related = array_map(function ($val) {
             return (int) $val;
         }, $_data->related);
 
@@ -515,7 +515,7 @@ class NAILS_Shop_product_model extends Base
 
         if (!empty($data->id)) {
 
-            $current = $this->get_by_id($data->id);
+            $current = $this->getById($data->id);
 
         } else {
 
@@ -782,7 +782,7 @@ class NAILS_Shop_product_model extends Base
                             $rollback = true;
                         }
 
-                        if  (!$rollback) {
+                        if (!$rollback) {
 
                             $temp = array();
                             foreach ($v->gallery as $objectId) {
@@ -920,7 +920,7 @@ class NAILS_Shop_product_model extends Base
             $this->db->where('is_deleted', false);
             $this->db->where('stock_status', 'IN_STOCK');
             $this->db->where('(quantity_available IS null OR quantity_available > 0)');
-            $variantsAvailable_raw = $this->db->get($this->table_variation   )->result();
+            $variantsAvailable_raw = $this->db->get($this->table_variation)->result();
             $variantsAvailable = array();
 
             foreach ($variantsAvailable_raw as $v) {
@@ -974,15 +974,15 @@ class NAILS_Shop_product_model extends Base
      * Fetches all products
      * @param  integer $page           The page number of the results, if null then no pagination
      * @param  integer $perPage        How many items per page of paginated results
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return array
      */
-    public function get_all($page = null, $perPage = null, $data = array(), $includeDeleted = false)
+    public function getAll($page = null, $perPage = null, $data = array(), $includeDeleted = false)
     {
         $this->load->model('shop/shop_category_model');
 
-        $products = parent::get_all($page, $perPage, $data, $includeDeleted);
+        $products = parent::getAll($page, $perPage, $data, $includeDeleted);
 
         //  Handle requests for the raw query object
         if (!empty($data['RETURN_QUERY_OBJECT'])) {
@@ -1052,7 +1052,7 @@ class NAILS_Shop_product_model extends Base
 
                 $category->id          = (int) $category->id;
                 $category->breadcrumbs = json_decode($category->breadcrumbs);
-                $category->url         = $this->shop_category_model->format_url($category->slug);
+                $category->url         = $this->shop_category_model->formatUrl($category->slug);
             }
 
             //  Collections
@@ -1362,14 +1362,14 @@ class NAILS_Shop_product_model extends Base
      * @param  array $data An array of mutation options
      * @return mixed       false on failre, stdClass on success
      */
-    public function get_by_id($id, $data = array())
+    public function getById($id, $data = array())
     {
         if (!isset($data['include_inactive'])) {
 
             $data['include_inactive'] = true;
         }
 
-        return parent::get_by_id($id, $data);
+        return parent::getById($id, $data);
     }
 
     // --------------------------------------------------------------------------
@@ -1380,14 +1380,14 @@ class NAILS_Shop_product_model extends Base
      * @param  array $data An array of mutation options
      * @return array
      */
-    public function get_by_ids($ids, $data = array())
+    public function getByIds($ids, $data = array())
     {
         if (!isset($data['include_inactive'])) {
 
             $data['include_inactive'] = true;
         }
 
-        return parent::get_by_ids($ids, $data);
+        return parent::getByIds($ids, $data);
     }
 
     // --------------------------------------------------------------------------
@@ -1398,14 +1398,14 @@ class NAILS_Shop_product_model extends Base
      * @param  array  $data An array of mutation options
      * @return mixed        false on failre, stdClass on success
      */
-    public function get_by_slug($slug, $data = array())
+    public function getBySlug($slug, $data = array())
     {
         if (!isset($data['include_inactive'])) {
 
             $data['include_inactive'] = true;
         }
 
-        return parent::get_by_slug($slug, $data);
+        return parent::getBySlug($slug, $data);
     }
 
     // --------------------------------------------------------------------------
@@ -1416,14 +1416,14 @@ class NAILS_Shop_product_model extends Base
      * @param  array $data An array of mutation options
      * @return array
      */
-    public function get_by_slugs($slugs, $data = array())
+    public function getBySlugs($slugs, $data = array())
     {
         if (!isset($data['include_inactive'])) {
 
             $data['include_inactive'] = true;
         }
 
-        return parent::get_by_slugs($slugs, $data);
+        return parent::getBySlugs($slugs, $data);
     }
 
     // --------------------------------------------------------------------------
@@ -1442,7 +1442,7 @@ class NAILS_Shop_product_model extends Base
 
         if ($variant) {
 
-            return $this->get_by_id($variant->product_id);
+            return $this->getById($variant->product_id);
 
         } else {
 
@@ -1469,7 +1469,7 @@ class NAILS_Shop_product_model extends Base
                 $ids[] = $item->related_id;
             }
 
-            return $this->get_by_ids($ids);
+            return $this->getByIds($ids);
         }
     }
 
@@ -1481,11 +1481,11 @@ class NAILS_Shop_product_model extends Base
      * @param  string $data    Data passed from the calling method
      * @return void
      */
-    protected function _getcount_common($data = array())
+    protected function getCountCommon($data = array())
     {
         /**
          * If we're sorting on price or recently added then some magic needs to happen ahead
-         * of calling _getcount_common();
+         * of calling getCountCommon();
          */
 
         $customSortStrings   = array();
@@ -1501,7 +1501,7 @@ class NAILS_Shop_product_model extends Base
 
         // --------------------------------------------------------------------------
 
-        parent::_getcount_common($data);
+        parent::getCountCommon($data);
 
         // --------------------------------------------------------------------------
 
@@ -1820,7 +1820,10 @@ class NAILS_Shop_product_model extends Base
                 $valuesClean = array_map(array($this->db, 'escape'), $valuesClean);
                 $valuesClean = implode(',', $valuesClean);
 
-                $this->db->join($this->table_variation_product_type_meta . ' spvptm' . $meta_field_id , 'spvptm' . $meta_field_id . '.variation_id = spv.id AND spvptm' . $meta_field_id . '.meta_field_id = \'' . $meta_field_id . '\' AND spvptm' . $meta_field_id . '.value IN (' . $valuesClean . ')');
+                $this->db->join(
+                    $this->table_variation_product_type_meta . ' spvptm' . $meta_field_id,
+                    'spvptm' . $meta_field_id . '.variation_id = spv.id AND spvptm' . $meta_field_id . '.meta_field_id = \'' . $meta_field_id . '\' AND spvptm' . $meta_field_id . '.value IN (' . $valuesClean . ')'
+                );
             }
 
             $this->db->group_by($this->tablePrefix . '.id');
@@ -1834,14 +1837,14 @@ class NAILS_Shop_product_model extends Base
      * @param  integer $brandId        The ID of the brand
      * @param  integer $page           The page number of the results, if null then no pagination
      * @param  integer $perPage        How many items per page of paginated results
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return array
      */
     public function getForBrand($brandId, $page = null, $perPage = null, $data = array(), $includeDeleted = false)
     {
         $data['brand_id'] = $brandId;
-        return $this->get_all($page, $perPage, $data, $includeDeleted, 'GET_FOR_BRAND');
+        return $this->getAll($page, $perPage, $data, $includeDeleted, 'GET_FOR_BRAND');
     }
 
     // --------------------------------------------------------------------------
@@ -1849,14 +1852,14 @@ class NAILS_Shop_product_model extends Base
     /**
      * Counts all products which feature a particular brand
      * @param  integer $brandId        The ID of the brand
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return integer
      */
     public function countForBrand($brandId, $data = array(), $includeDeleted = false)
     {
         $data['brand_id'] = $brandId;
-        return $this->count_all($data, $includeDeleted, 'COUNT_FOR_BRAND');
+        return $this->countAll($data, $includeDeleted, 'COUNT_FOR_BRAND');
     }
 
     // --------------------------------------------------------------------------
@@ -1866,14 +1869,14 @@ class NAILS_Shop_product_model extends Base
      * @param  integer $supplierId     The ID of the supplier
      * @param  integer $page           The page number of the results, if null then no pagination
      * @param  integer $perPage        How many items per page of paginated results
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return array
      */
     public function getForSupplier($supplierId, $page = null, $perPage = null, $data = array(), $includeDeleted = false)
     {
         $data['supplier_id'] = $supplierId;
-        return $this->get_all($page, $perPage, $data, $includeDeleted, 'GET_FOR_SUPPLIER');
+        return $this->getAll($page, $perPage, $data, $includeDeleted, 'GET_FOR_SUPPLIER');
     }
 
     // --------------------------------------------------------------------------
@@ -1881,14 +1884,14 @@ class NAILS_Shop_product_model extends Base
     /**
      * Counts all products which feature a particular supplier
      * @param  integer $supplierId     The ID of the supplier
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return integer
      */
     public function countForSupplier($supplierId, $data = array(), $includeDeleted = false)
     {
         $data['supplier_id'] = $supplierId;
-        return $this->count_all($data, $includeDeleted, 'COUNT_FOR_SUPPLIER');
+        return $this->countAll($data, $includeDeleted, 'COUNT_FOR_SUPPLIER');
     }
 
     // --------------------------------------------------------------------------
@@ -1898,7 +1901,7 @@ class NAILS_Shop_product_model extends Base
      * @param  integer $categoryId     The ID of the category
      * @param  integer $page           The page number of the results, if null then no pagination
      * @param  integer $perPage        How many items per page of paginated results
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return array
      */
@@ -1907,7 +1910,7 @@ class NAILS_Shop_product_model extends Base
         //  Fetch this category's children also
         $this->load->model('shop/shop_category_model');
         $data['category_id'] = array_merge(array($categoryId), $this->shop_category_model->getIdsOfChildren($categoryId));
-        return $this->get_all($page, $perPage, $data, $includeDeleted, 'GET_FOR_CATEGORY');
+        return $this->getAll($page, $perPage, $data, $includeDeleted, 'GET_FOR_CATEGORY');
     }
 
     // --------------------------------------------------------------------------
@@ -1915,7 +1918,7 @@ class NAILS_Shop_product_model extends Base
     /**
      * Counts all products which feature a particular category
      * @param  integer $categoryId     The ID of the category
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return integer
      */
@@ -1924,7 +1927,7 @@ class NAILS_Shop_product_model extends Base
         //  Fetch this category's children also
         $this->load->model('shop/shop_category_model');
         $data['category_id'] = array_merge(array($categoryId), $this->shop_category_model->getIdsOfChildren($categoryId));
-        return $this->count_all($data, $includeDeleted, 'COUNT_FOR_CATEGORY');
+        return $this->countAll($data, $includeDeleted, 'COUNT_FOR_CATEGORY');
     }
 
     // --------------------------------------------------------------------------
@@ -1934,14 +1937,14 @@ class NAILS_Shop_product_model extends Base
      * @param  integer $collectionId   The ID of the collection
      * @param  integer $page           The page number of the results, if null then no pagination
      * @param  integer $perPage        How many items per page of paginated results
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return array
      */
     public function getForCollection($collectionId, $page = null, $perPage = null, $data = array(), $includeDeleted = false)
     {
         $data['collection_id'] = $collectionId;
-        return $this->get_all($page, $perPage, $data, $includeDeleted, 'GET_FOR_COLLECTION');
+        return $this->getAll($page, $perPage, $data, $includeDeleted, 'GET_FOR_COLLECTION');
     }
 
     // --------------------------------------------------------------------------
@@ -1949,14 +1952,14 @@ class NAILS_Shop_product_model extends Base
     /**
      * Counts all products which feature a particular collection
      * @param  integer  $collectionId   The ID of the collection
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return integer
      */
     public function countForCollection($collectionId, $data = array(), $includeDeleted = false)
     {
         $data['collection_id'] = $collectionId;
-        return $this->count_all($data, $includeDeleted, 'COUNT_FOR_COLLECTION');
+        return $this->countAll($data, $includeDeleted, 'COUNT_FOR_COLLECTION');
     }
 
     // --------------------------------------------------------------------------
@@ -1966,14 +1969,14 @@ class NAILS_Shop_product_model extends Base
      * @param  integer $rangeId        The ID of the range
      * @param  integer $page           The page number of the results, if null then no pagination
      * @param  integer $perPage        How many items per page of paginated results
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return array
      */
     public function getForRange($rangeId, $page = null, $perPage = null, $data = array(), $includeDeleted = false)
     {
         $data['range_id'] = $rangeId;
-        return $this->get_all($page, $perPage, $data, $includeDeleted, 'GET_FOR_RANGE');
+        return $this->getAll($page, $perPage, $data, $includeDeleted, 'GET_FOR_RANGE');
     }
 
     // --------------------------------------------------------------------------
@@ -1981,14 +1984,14 @@ class NAILS_Shop_product_model extends Base
     /**
      * Counts all products which feature a particular range
      * @param  integer $rangeId        The ID of the range
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return integer
      */
     public function countForRange($rangeId, $data = array(), $includeDeleted = false)
     {
         $data['range_id'] = $rangeId;
-        return $this->count_all($data, $includeDeleted, 'COUNT_FOR_RANGE');
+        return $this->countAll($data, $includeDeleted, 'COUNT_FOR_RANGE');
     }
 
     // --------------------------------------------------------------------------
@@ -1998,14 +2001,14 @@ class NAILS_Shop_product_model extends Base
      * @param  integer $saleId         The ID of the sale
      * @param  integer $page           The page number of the results, if null then no pagination
      * @param  integer $perPage        How many items per page of paginated results
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return array
      */
     public function getForSale($saleId, $page = null, $perPage = null, $data = array(), $includeDeleted = false)
     {
         $data['sale_id'] = $saleId;
-        return $this->get_all($page, $perPage, $data, $includeDeleted, 'GET_FOR_SALE');
+        return $this->getAll($page, $perPage, $data, $includeDeleted, 'GET_FOR_SALE');
     }
 
     // --------------------------------------------------------------------------
@@ -2013,14 +2016,14 @@ class NAILS_Shop_product_model extends Base
     /**
      * Counts all products which feature a particular sale
      * @param  integer $saleId         The ID of the sale
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return integer
      */
     public function countForSale($saleId, $data = array(), $includeDeleted = false)
     {
         $data['sale_id'] = $saleId;
-        return $this->count_all($data, $includeDeleted, 'COUNT_FOR_SALE');
+        return $this->countAll($data, $includeDeleted, 'COUNT_FOR_SALE');
     }
 
     // --------------------------------------------------------------------------
@@ -2030,14 +2033,14 @@ class NAILS_Shop_product_model extends Base
      * @param  integer $tagId          The ID of the tag
      * @param  integer $page           The page number of the results, if null then no pagination
      * @param  integer $perPage        How many items per page of paginated results
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return array
      */
     public function getForTag($tagId, $page = null, $perPage = null, $data = array(), $includeDeleted = false)
     {
         $data['tag_id'] = $tagId;
-        return $this->get_all($page, $perPage, $data, $includeDeleted, 'GET_FOR_TAG');
+        return $this->getAll($page, $perPage, $data, $includeDeleted, 'GET_FOR_TAG');
     }
 
     // --------------------------------------------------------------------------
@@ -2045,14 +2048,14 @@ class NAILS_Shop_product_model extends Base
     /**
      * Counts all products which feature a particular tag
      * @param  integer $tagId          The ID of the tag
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return integer
      */
     public function countForTag($tagId, $data = array(), $includeDeleted = false)
     {
         $data['tag_id'] = $tagId;
-        return $this->count_all($data, $includeDeleted, 'COUNT_FOR_TAG');
+        return $this->countAll($data, $includeDeleted, 'COUNT_FOR_TAG');
     }
 
     // --------------------------------------------------------------------------
@@ -2062,7 +2065,7 @@ class NAILS_Shop_product_model extends Base
      * @param  string $slug The product's slug
      * @return string       The product's URL
      */
-    public function format_url($slug)
+    public function formatUrl($slug)
     {
         return site_url($this->shopUrl . 'product/' . $slug);
     }
@@ -2104,7 +2107,7 @@ class NAILS_Shop_product_model extends Base
         unset($product->tax_rate_rate);
 
         //  URL
-        $product->url = $this->format_url($product->slug);
+        $product->url = $this->formatUrl($product->slug);
     }
 
     // --------------------------------------------------------------------------
@@ -2281,7 +2284,7 @@ class NAILS_Shop_product_model extends Base
     {
         if (!$this->table) {
 
-            show_error(get_called_class() . '::count_all() Table variable not set');
+            show_error(get_called_class() . '::countAll() Table variable not set');
 
         } else {
 
@@ -2304,7 +2307,7 @@ class NAILS_Shop_product_model extends Base
         //  Fetch the products in the result set
         $data['_do_not_select']  = true;
         $data['_ignore_filters'] = true;
-        $this->_getcount_common($data, 'GET_FILTERS_FOR_PRODUCTS');
+        $this->getCountCommon($data, 'GET_FILTERS_FOR_PRODUCTS');
         $this->db->select('p.id, p.type_id');
         $productIdsRaw  = $this->db->get($table)->result();
         $productIds     = array();

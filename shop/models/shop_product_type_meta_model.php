@@ -32,13 +32,13 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
      * Fetches all meta fields, optionally paginated.
      * @param int    $page           The page number of the results, if null then no pagination
      * @param int    $perPage        How many items per page of paginated results
-     * @param mixed  $data           Any data to pass to _getcount_common()
+     * @param mixed  $data           Any data to pass to getCountCommon()
      * @param bool   $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return array
      **/
-    public function get_all($page = null, $per_page = null, $data = array(), $include_deleted = false)
+    public function getAll($page = null, $per_page = null, $data = array(), $include_deleted = false)
     {
-        $fields = parent::get_all($page, $per_page, $data, $include_deleted);
+        $fields = parent::getAll($page, $per_page, $data, $include_deleted);
 
         //  Handle requests for the raw query object
         if (!empty($data['RETURN_QUERY_OBJECT'])) {
@@ -70,7 +70,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
      * @param  array $data Data passed from the calling method
      * @return void
      **/
-    protected function _getcount_common($data = array())
+    protected function getCountCommon($data = array())
     {
         //  Default sort
         if (empty($data['sort'])) {
@@ -101,7 +101,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        parent::_getcount_common($data);
+        parent::getCountCommon($data);
     }
 
     // --------------------------------------------------------------------------
@@ -146,7 +146,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
 
         foreach ($results as $result) {
 
-            $this->_format_object($result);
+            $this->formatObject($result);
         }
 
         return $results;

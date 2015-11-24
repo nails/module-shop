@@ -36,7 +36,7 @@ class NAILS_Shop_supplier_model extends NAILS_Model
      * @param  array $data Data passed from the calling method
      * @return void
      **/
-    protected function _getcount_common($data = array())
+    protected function getCountCommon($data = array())
     {
         //  Default sort
         if (empty($data['sort'])) {
@@ -111,7 +111,7 @@ class NAILS_Shop_supplier_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        parent::_getcount_common($data);
+        parent::getCountCommon($data);
     }
 
     // --------------------------------------------------------------------------
@@ -119,10 +119,10 @@ class NAILS_Shop_supplier_model extends NAILS_Model
     /**
      * Returns a supplier by its ID
      * @param  integer $id   The suppliers's ID
-     * @param  array   $data An array of data to pass to _getcount_common();
+     * @param  array   $data An array of data to pass to getCountCommon();
      * @return mixed         stdClass on success, false on failure
      */
-    public function get_by_id($id, $data = array())
+    public function getById($id, $data = array())
     {
         if (!isset($data['only_active'])) {
 
@@ -131,7 +131,7 @@ class NAILS_Shop_supplier_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        return parent::get_by_id($id, $data);
+        return parent::getById($id, $data);
     }
 
     // --------------------------------------------------------------------------
@@ -139,10 +139,10 @@ class NAILS_Shop_supplier_model extends NAILS_Model
     /**
      * Return an array of supplierss by their IDs
      * @param  array  $ids  An array if IDs
-     * @param  array  $data An array of data to pass to _getcount_common();
+     * @param  array  $data An array of data to pass to getCountCommon();
      * @return array
      */
-    public function get_by_ids($ids, $data = array())
+    public function getByIds($ids, $data = array())
     {
         if (!isset($data['only_active'])) {
 
@@ -151,7 +151,7 @@ class NAILS_Shop_supplier_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        return parent::get_by_ids($ids, $data);
+        return parent::getByIds($ids, $data);
     }
 
     // --------------------------------------------------------------------------
@@ -159,10 +159,10 @@ class NAILS_Shop_supplier_model extends NAILS_Model
     /**
      * Returns a supplier by its slug
      * @param  string $slug the supplier's slug
-     * @param  array  $data An array of data to pass to _getcount_common();
+     * @param  array  $data An array of data to pass to getCountCommon();
      * @return mixed        stdClass on success, false on failure
      */
-    public function get_by_slug($slug, $data = array())
+    public function getBySlug($slug, $data = array())
     {
         if (!isset($data['only_active'])) {
 
@@ -171,7 +171,7 @@ class NAILS_Shop_supplier_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        return parent::get_by_slug($slug, $data);
+        return parent::getBySlug($slug, $data);
     }
 
     // --------------------------------------------------------------------------
@@ -179,10 +179,10 @@ class NAILS_Shop_supplier_model extends NAILS_Model
     /**
      * Returns an array of suppliers by their IDs
      * @param  array  $slugs An array of IDs
-     * @param  array  $data  An array of data to pass to _getcount_common();
+     * @param  array  $data  An array of data to pass to getCountCommon();
      * @return array
      */
-    public function get_by_slugs($slugs, $data = array())
+    public function getBySlugs($slugs, $data = array())
     {
         if (!isset($data['only_active'])) {
 
@@ -191,7 +191,7 @@ class NAILS_Shop_supplier_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        return parent::get_by_slugs($slugs, $data);
+        return parent::getBySlugs($slugs, $data);
     }
 
     // --------------------------------------------------------------------------
@@ -199,10 +199,10 @@ class NAILS_Shop_supplier_model extends NAILS_Model
     /**
      * Returns a supplier by its ID or slug
      * @param  mixed  $idSlug The supplier's ID or slug
-     * @param  array  $data   An array of data to pass to _getcount_common();
+     * @param  array  $data   An array of data to pass to getCountCommon();
      * @return mixed          stdClass on success, false on failure
      */
-    public function get_by_id_or_slug($idSlug, $data = array())
+    public function getByIdOrSlug($idSlug, $data = array())
     {
         if (!isset($data['only_active'])) {
 
@@ -211,7 +211,7 @@ class NAILS_Shop_supplier_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        return parent::get_by_id_or_slug($idSlug, $data);
+        return parent::getByIdOrSlug($idSlug, $data);
     }
 
     // --------------------------------------------------------------------------
@@ -226,7 +226,7 @@ class NAILS_Shop_supplier_model extends NAILS_Model
     {
         if (!empty($data['label'])) {
 
-            $data['slug'] = $this->_generate_slug($data['label']);
+            $data['slug'] = $this->generateSlug($data['label']);
         }
 
         return parent::create($data, $returnObject);
@@ -244,7 +244,7 @@ class NAILS_Shop_supplier_model extends NAILS_Model
     {
         if (!empty($data['label'])) {
 
-            $data['slug'] = $this->_generate_slug($data['label'], '', '', null, null, $id);
+            $data['slug'] = $this->generateSlug($data['label'], '', '', null, null, $id);
         }
 
         return parent::update($id, $data);

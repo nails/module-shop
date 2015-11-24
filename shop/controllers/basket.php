@@ -90,7 +90,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         if (!empty($recentlyViewed)) {
 
             $productId = end($recentlyViewed);
-            $product   = $this->shop_product_model->get_by_id($productId);
+            $product   = $this->shop_product_model->getById($productId);
 
             if ($product && $product->is_active) {
 
@@ -103,8 +103,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         //  Other recently viewed items
         $this->data['recently_viewed'] = array();
         if (!empty($recentlyViewed)) {
-
-            $this->data['recently_viewed'] = $this->shop_product_model->get_by_ids($recentlyViewed);
+            $this->data['recently_viewed'] = $this->shop_product_model->getByIds($recentlyViewed);
         }
 
         // --------------------------------------------------------------------------

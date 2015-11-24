@@ -70,7 +70,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 
             if ($returnObject) {
 
-                return $this->get_by_id($_id);
+                return $this->getById($_id);
 
             } else {
 
@@ -174,7 +174,7 @@ class NAILS_Shop_category_model extends NAILS_Model
             $_prefix = '';
         }
 
-        $_data['slug']     = $this->_generate_slug($_data['label'], $_prefix, '', null, null, $id);
+        $_data['slug']     = $this->generateSlug($_data['label'], $_prefix, '', null, null, $id);
         $_data['slug_end'] = array_pop(explode('/', $_data['slug']));
 
         // --------------------------------------------------------------------------
@@ -234,7 +234,7 @@ class NAILS_Shop_category_model extends NAILS_Model
                         $_parent = $this->db->get($this->table)->row();
                         $_prefix = empty($_parent) ? '' : $_parent->slug . '/';
 
-                        $_child_data->slug     = $this->_generate_slug($_child->label, $_prefix, '', null, null, $child_id);
+                        $_child_data->slug     = $this->generateSlug($_child->label, $_prefix, '', null, null, $child_id);
                         $_child_data->slug_end = array_pop(explode('/', $_child_data->slug));
                     }
 
@@ -293,7 +293,7 @@ class NAILS_Shop_category_model extends NAILS_Model
      */
     public function delete($id)
     {
-        $current = $this->get_by_id($id);
+        $current = $this->getById($id);
 
         if (!$current) {
 
@@ -454,7 +454,7 @@ class NAILS_Shop_category_model extends NAILS_Model
      * Returns a category's descendants in object form
      * @param  integer $categoryId    The ID of the category
      * @param  boolean $onlyImmediate Whether to only looka s far as the immediate children
-     * @param  array   $data          An array of data to pass to get_by_ids()
+     * @param  array   $data          An array of data to pass to getByIds()
      * @return array
      */
     public function get_children($categoryId, $onlyImmediate = false, $data = array())
@@ -463,7 +463,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 
         if (!empty($children)) {
 
-            return $this->get_by_ids($children, $data);
+            return $this->getByIds($children, $data);
         }
 
         return array();
@@ -496,7 +496,7 @@ class NAILS_Shop_category_model extends NAILS_Model
     /**
      * Returns an array of a category's siblings
      * @param  integer $categoryId The category's ID
-     * @param  array   $data       An array of data to pass to get_by_ids()
+     * @param  array   $data       An array of data to pass to getByIds()
      * @return array
      */
     public function getSiblings($categoryId, $data = array())
@@ -505,7 +505,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 
         if (!empty($children)) {
 
-            return $this->get_by_ids($children, $data);
+            return $this->getByIds($children, $data);
         }
 
         return array();
@@ -515,19 +515,19 @@ class NAILS_Shop_category_model extends NAILS_Model
 
     /**
      * Returns an array of all categories, nested
-     * @param  array  $data An array of data to pass to get_all()
+     * @param  array  $data An array of data to pass to getAll()
      * @return array
      */
     public function getAllNested($data = array())
     {
-        return $this->nestItems($this->get_all(null, null, $data), null);
+        return $this->nestItems($this->getAll(null, null, $data), null);
     }
 
     // --------------------------------------------------------------------------
 
     /**
      * Get all top level categories (i.e., those without a parent)
-     * @param  array  $data an aray of data to pass to get_all()
+     * @param  array  $data an aray of data to pass to getAll()
      * @return array
      */
     public function getTopLevel($data = array())
@@ -541,11 +541,11 @@ class NAILS_Shop_category_model extends NAILS_Model
 
             $data['include_count'] = true;
         }
-        $this->get_all(null, null, $data);
+        $this->getAll(null, null, $data);
 
         // --------------------------------------------------------------------------
 
-        return $this->get_all(null, null, $data);
+        return $this->getAll(null, null, $data);
     }
 
     // --------------------------------------------------------------------------
@@ -582,7 +582,7 @@ class NAILS_Shop_category_model extends NAILS_Model
      */
     public function getAllNestedFlat($separator = ' &rsaquo; ')
     {
-        $categories = $this->get_all(null, null);
+        $categories = $this->getAll(null, null);
         $out        = array();
 
         foreach ($categories as $cat) {
@@ -608,7 +608,7 @@ class NAILS_Shop_category_model extends NAILS_Model
      * @param  array $data Data passed from the calling method
      * @return void
      **/
-    protected function _getcount_common($data = array())
+    protected function getCountCommon($data = array())
     {
         //  Default sort
         if (empty($data['sort'])) {
@@ -663,7 +663,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        parent::_getcount_common($data);
+        parent::getCountCommon($data);
     }
 
     // --------------------------------------------------------------------------
@@ -673,7 +673,7 @@ class NAILS_Shop_category_model extends NAILS_Model
      * @param  string $slug The category's slug
      * @return string
      */
-    public function format_url($slug)
+    public function formatUrl($slug)
     {
         return site_url($this->shopUrl . 'category/' . $slug);
     }
@@ -743,14 +743,14 @@ class NAILS_Shop_category_model extends NAILS_Model
      * @param  array  $bools    Fields which should be cast as booleans
      * @return void
      */
-    protected function _format_object(&$obj, $data = array(), $integers = array(), $bools = array())
+    protected function formatObject(&$obj, $data = array(), $integers = array(), $bools = array())
     {
-        parent::_format_object($obj, $data, $integers, $bools);
+        parent::formatObject($obj, $data, $integers, $bools);
 
         $obj->children    = array();
         $obj->breadcrumbs = (array) @json_decode($obj->breadcrumbs);
         $obj->depth       = count(explode('/', $obj->slug)) - 1;
-        $obj->url         = $this->format_url($obj->slug);
+        $obj->url         = $this->formatUrl($obj->slug);
     }
 }
 

@@ -37,13 +37,13 @@ class NAILS_Shop_order_payment_model extends NAILS_Model
 
     // --------------------------------------------------------------------------
 
-    public function get_by_transaction_id($transaction_id, $gateway)
+    public function getByTransactionId($transaction_id, $gateway)
     {
         $_data['where']        = array();
         $_data['where'][]    = array('column' => $this->tablePrefix . '.transaction_id', 'value' => $transaction_id);
         $_data['where'][]    = array('column' => $this->tablePrefix . '.payment_gateway', 'value' => $gateway);
 
-        $_result = $this->get_all(null, null, $_data);
+        $_result = $this->getAll(null, null, $_data);
 
         if (empty($_result)) {
 
@@ -58,12 +58,12 @@ class NAILS_Shop_order_payment_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
 
-    public function get_for_order($order_id)
+    public function getForOrder($order_id)
     {
         $_data['where']        = array();
         $_data['where'][]    = array('column' => $this->tablePrefix . '.order_id', 'value' => $order_id);
 
-        return $this->get_all(null, null, $_data);
+        return $this->getAll(null, null, $_data);
     }
 
 
@@ -73,7 +73,7 @@ class NAILS_Shop_order_payment_model extends NAILS_Model
     public function order_is_paid($order_id)
     {
         $this->load->model('shop/shop_order_model');
-        $_order = $this->shop_order_model->get_by_id($order_id);
+        $_order = $this->shop_order_model->getById($order_id);
 
         if (!$_order) {
 
@@ -125,6 +125,3 @@ if (!defined('NAILS_ALLOW_EXTENSION_SHOP_ORDER_PAYMENT_MODEL')) {
     }
 
 }
-
-/* End of file shop_order_payment_model.php */
-/* Location: ./modules/shop/models/shop_order_payment_model.php */

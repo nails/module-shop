@@ -40,7 +40,7 @@ class Inventory extends BaseAdmin
      * Returns an array of extra permissions for this controller
      * @return array
      */
-    static function permissions()
+    public static function permissions()
     {
         $permissions = parent::permissions();
 
@@ -135,7 +135,7 @@ class Inventory extends BaseAdmin
             array(
                 array('Yes', 1, true),
                 array('No', 0, true)
-           )
+            )
         );
         $cbFilters['stockStatus'] = Helper::searchFilterObject(
             '',
@@ -143,12 +143,12 @@ class Inventory extends BaseAdmin
             array(
                 array('In Stock', 'IN_STOCK', true),
                 array('Out of Stock', 'OUT_OF_STOCK', true)
-           )
+            )
         );
 
         /**
          * Dropdown Filters
-         * Leaving columns blank so that _getcount_common() doesn't try and do
+         * Leaving columns blank so that getCountCommon() doesn't try and do
          * anything with these values, they will be handled below.
          */
 
@@ -163,17 +163,17 @@ class Inventory extends BaseAdmin
         $ddFilters['brandId'] = Helper::searchFilterObject(
             '',
             'Brand',
-            array('Choose Brand') + $this->shop_brand_model->get_all_flat(null, null, $data)
+            array('Choose Brand') + $this->shop_brand_model->getAllFlat(null, null, $data)
         );
         $ddFilters['supplierId'] = Helper::searchFilterObject(
             '',
             'Supplier',
-            array('Choose Supplier') + $this->shop_supplier_model->get_all_flat(null, null, $data)
+            array('Choose Supplier') + $this->shop_supplier_model->getAllFlat(null, null, $data)
         );
         $ddFilters['collectionId'] = Helper::searchFilterObject(
             '',
             'Collection',
-            array('Choose Collection') + $this->shop_collection_model->get_all_flat(null, null, $data)
+            array('Choose Collection') + $this->shop_collection_model->getAllFlat(null, null, $data)
         );
 
         // --------------------------------------------------------------------------
@@ -240,8 +240,7 @@ class Inventory extends BaseAdmin
 
             $data['stockStatus'] = array();
 
-            foreach ($_GET['cbF']['stockStatus'] as $filterKey => $checked)
-            {
+            foreach ($_GET['cbF']['stockStatus'] as $filterKey => $checked) {
                 $data['stockStatus'][] = Helper::searchFilterGetValueAtKey(
                     $cbFilters['stockStatus'],
                     $filterKey
@@ -252,8 +251,8 @@ class Inventory extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows              = $this->shop_product_model->count_all($data);
-        $this->data['products'] = $this->shop_product_model->get_all($page, $perPage, $data);
+        $totalRows              = $this->shop_product_model->countAll($data);
+        $this->data['products'] = $this->shop_product_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search'] = Helper::searchObject(
@@ -279,7 +278,7 @@ class Inventory extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch other required bits of data
-        $this->data['productTypes']   = $this->shop_product_type_model->get_all();
+        $this->data['productTypes']   = $this->shop_product_type_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -308,7 +307,7 @@ class Inventory extends BaseAdmin
         //  Fetch data, this data is used in both the view and the form submission
         $oCurrencyModel              = Factory::model('Currency', 'nailsapp/module-shop');
         $this->data['currencies']    = $oCurrencyModel->getAllSupported();
-        $this->data['product_types'] = $this->shop_product_type_model->get_all();
+        $this->data['product_types'] = $this->shop_product_type_model->getAll();
 
         if (!$this->data['product_types']) {
 
@@ -427,15 +426,15 @@ class Inventory extends BaseAdmin
         //  Fetch additional data
         $data = array('only_active' => false);
 
-        $this->data['product_types_flat'] = $this->shop_product_type_model->get_all_flat();
-        $this->data['tax_rates']          = $this->shop_tax_rate_model->get_all_flat();
-        $this->data['attributes']         = $this->shop_attribute_model->get_all_flat();
-        $this->data['brands']             = $this->shop_brand_model->get_all_flat(null, null, $data);
-        $this->data['suppliers']          = $this->shop_supplier_model->get_all_flat(null, null, $data);
+        $this->data['product_types_flat'] = $this->shop_product_type_model->getAllFlat();
+        $this->data['tax_rates']          = $this->shop_tax_rate_model->getAllFlat();
+        $this->data['attributes']         = $this->shop_attribute_model->getAllFlat();
+        $this->data['brands']             = $this->shop_brand_model->getAllFlat(null, null, $data);
+        $this->data['suppliers']          = $this->shop_supplier_model->getAllFlat(null, null, $data);
         $this->data['categories']         = $this->shop_category_model->getAllNestedFlat();
-        $this->data['collections']        = $this->shop_collection_model->get_all(null, null, $data);
-        $this->data['ranges']             = $this->shop_range_model->get_all(null, null, $data);
-        $this->data['tags']               = $this->shop_tag_model->get_all_flat();
+        $this->data['collections']        = $this->shop_collection_model->getAll(null, null, $data);
+        $this->data['ranges']             = $this->shop_range_model->getAll(null, null, $data);
+        $this->data['tags']               = $this->shop_tag_model->getAllFlat();
 
         $this->data['tax_rates'] = array('No Tax') + $this->data['tax_rates'];
 
@@ -477,7 +476,7 @@ class Inventory extends BaseAdmin
         $data = array(
             'include_inactive_variants' => true
         );
-        $this->data['item'] = $this->shop_product_model->get_by_id($productId, $data);
+        $this->data['item'] = $this->shop_product_model->getById($productId, $data);
 
         if (!$this->data['item']) {
 
@@ -492,7 +491,7 @@ class Inventory extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data, this data is used in both the view and the form submission
-        $this->data['product_types'] = $this->shop_product_type_model->get_all();
+        $this->data['product_types'] = $this->shop_product_type_model->getAll();
 
         if (!$this->data['product_types']) {
 
@@ -608,15 +607,15 @@ class Inventory extends BaseAdmin
         //  Fetch additional data
         $data = array('only_active' => false);
 
-        $this->data['product_types_flat'] = $this->shop_product_type_model->get_all_flat();
-        $this->data['tax_rates']          = $this->shop_tax_rate_model->get_all_flat();
-        $this->data['attributes']         = $this->shop_attribute_model->get_all_flat();
-        $this->data['brands']             = $this->shop_brand_model->get_all_flat(null, null, $data);
-        $this->data['suppliers']          = $this->shop_supplier_model->get_all_flat(null, null, $data);
+        $this->data['product_types_flat'] = $this->shop_product_type_model->getAllFlat();
+        $this->data['tax_rates']          = $this->shop_tax_rate_model->getAllFlat();
+        $this->data['attributes']         = $this->shop_attribute_model->getAllFlat();
+        $this->data['brands']             = $this->shop_brand_model->getAllFlat(null, null, $data);
+        $this->data['suppliers']          = $this->shop_supplier_model->getAllFlat(null, null, $data);
         $this->data['categories']         = $this->shop_category_model->getAllNestedFlat();
-        $this->data['collections']        = $this->shop_collection_model->get_all(null, null, $data);
-        $this->data['ranges']             = $this->shop_range_model->get_all(null, null, $data);
-        $this->data['tags']               = $this->shop_tag_model->get_all_flat();
+        $this->data['collections']        = $this->shop_collection_model->getAll(null, null, $data);
+        $this->data['ranges']             = $this->shop_range_model->getAll(null, null, $data);
+        $this->data['tags']               = $this->shop_tag_model->getAllFlat();
         $this->data['relatedProducts']    = $this->shop_product_model->getRelatedProducts($this->data['item']->id);
 
         $this->data['tax_rates'] = array('No Tax') + $this->data['tax_rates'];
@@ -699,7 +698,7 @@ class Inventory extends BaseAdmin
                 $this->oFormValidation->set_rules('variation[' . $index . '][label]', '', 'xss_clean|trim|required');
 
                 $v_id = !empty($v['id']) ? $v['id'] : '';
-                $this->oFormValidation->set_rules('variation[' . $index . '][sku]', '', 'xss_clean|trim|callback__callback_inventory_valid_sku[' . $v_id . ']');
+                $this->oFormValidation->set_rules('variation[' . $index . '][sku]', '', 'xss_clean|trim|callback_callbackInventoryValidSku[' . $v_id . ']');
                 $this->oFormValidation->set_rules('variation[' . $index . '][is_active]', '', 'xss_clean');
 
                 //  Stock
@@ -713,7 +712,7 @@ class Inventory extends BaseAdmin
 
                     case 'IN_STOCK':
 
-                        $this->oFormValidation->set_rules('variation[' . $index . '][quantity_available]', '', 'xss_clean|trim|callback__callback_inventory_valid_quantity');
+                        $this->oFormValidation->set_rules('variation[' . $index . '][quantity_available]', '', 'xss_clean|trim|callback_callbackInventoryValidQuantity');
                         $this->oFormValidation->set_rules('variation[' . $index . '][lead_time]', '', 'xss_clean|trim');
                         break;
 
@@ -732,7 +731,7 @@ class Inventory extends BaseAdmin
 
                         $required = $price['currency'] == SHOP_BASE_CURRENCY_CODE ? '|required' : '';
 
-                        $this->oFormValidation->set_rules('variation[' . $index . '][pricing][' . $price_index . '][price]', '', 'xss_clean|callback__callback_inventory_valid_price' . $required);
+                        $this->oFormValidation->set_rules('variation[' . $index . '][pricing][' . $price_index . '][price]', '', 'xss_clean|callback_callbackInventoryValidPrice' . $required);
                     }
                 }
 
@@ -856,7 +855,7 @@ class Inventory extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $product = $this->shop_product_model->get_by_id($this->uri->segment(5));
+        $product = $this->shop_product_model->getById($this->uri->segment(5));
 
         if (!$product) {
 
@@ -980,13 +979,13 @@ class Inventory extends BaseAdmin
      * @param  string $str The price to validate
      * @return boolean
      */
-    public function _callback_inventory_valid_price($str)
+    public function callbackInventoryValidPrice($str)
     {
         $str = trim($str);
 
         if ($str && !is_numeric($str)) {
 
-            $this->oFormValidation->set_message('_callback_inventory_valid_price', 'This is not a valid price');
+            $this->oFormValidation->set_message('callbackInventoryValidPrice', 'This is not a valid price');
             return false;
 
         } else {
@@ -1002,7 +1001,7 @@ class Inventory extends BaseAdmin
      * @param  string $str The quantity to validate
      * @return boolean
      */
-    public function _callback_inventory_valid_quantity($str)
+    public function callbackInventoryValidQuantity($str)
     {
         $str = trim($str);
 
@@ -1023,7 +1022,7 @@ class Inventory extends BaseAdmin
                 } else {
 
                     $this->oFormValidation->set_message(
-                        '_callback_inventory_valid_quantity',
+                        'callbackInventoryValidQuantity',
                         lang('fv_is_natural')
                     );
                     return false;
@@ -1032,7 +1031,7 @@ class Inventory extends BaseAdmin
             } else {
 
                 $this->oFormValidation->set_message(
-                    '_callback_inventory_valid_quantity',
+                    'callbackInventoryValidQuantity',
                     'This must be a whole number.'
                 );
                 return false;
@@ -1043,7 +1042,7 @@ class Inventory extends BaseAdmin
         } else {
 
             $this->oFormValidation->set_message(
-                '_callback_inventory_valid_quantity',
+                'callbackInventoryValidQuantity',
                 'This is not a valid quantity'
             );
             return false;
@@ -1057,7 +1056,7 @@ class Inventory extends BaseAdmin
      * @param  string $str The SKU to validate
      * @return boolean
      */
-    public function _callback_inventory_valid_sku($str, $variation_id)
+    public function callbackInventoryValidSku($str, $variation_id)
     {
         $str = trim($str);
 
@@ -1077,7 +1076,7 @@ class Inventory extends BaseAdmin
 
         if ($result) {
 
-            $this->oFormValidation->set_message('_callback_inventory_valid_sku', 'This SKU is already in use.');
+            $this->oFormValidation->set_message('callbackInventoryValidSku', 'This SKU is already in use.');
             return false;
 
         } else {

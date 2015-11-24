@@ -113,7 +113,7 @@ class NAILS_Shop_model extends Base
                 if (!empty($lookup->status) && $lookup->status == 200) {
 
                     //  We know the code, does it have a known currency?
-                    $countryCurrency = $this->oCurrency->get_by_country($lookup->country->iso);
+                    $countryCurrency = $this->oCurrency->getByCountry($lookup->country->iso);
 
                     if ($countryCurrency) {
 

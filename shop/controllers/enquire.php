@@ -47,7 +47,7 @@ class NAILS_Enquire extends NAILS_Shop_Controller
         $productId = $this->uri->rsegment('3');
         $variantId = $this->uri->rsegment('4');
 
-        $this->data['product'] = $this->shop_product_model->get_by_id($productId);
+        $this->data['product'] = $this->shop_product_model->getById($productId);
         $this->data['variant'] = null;
 
         if (!$this->data['product']) {

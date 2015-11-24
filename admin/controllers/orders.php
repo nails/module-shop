@@ -54,7 +54,7 @@ class Orders extends BaseAdmin
      * Returns an array of extra permissions for this controller
      * @return array
      */
-    static function permissions()
+    public static function permissions()
     {
         $permissions = parent::permissions();
 
@@ -144,7 +144,7 @@ class Orders extends BaseAdmin
                 array('Cancelled', 'CANCELLED'),
                 array('Failed', 'FAILED'),
                 array('Pending', 'PENDING')
-           )
+            )
         );
         $cbFilters[] = Helper::searchFilterObject(
             $tablePrefix . '.fulfilment_status',
@@ -152,7 +152,7 @@ class Orders extends BaseAdmin
             array(
                 array('Yes', 'FULFILLED'),
                 array('No', 'UNFULFILLED')
-           )
+            )
         );
         $cbFilters[] = Helper::searchFilterObject(
             $tablePrefix . '.delivery_type',
@@ -160,7 +160,7 @@ class Orders extends BaseAdmin
             array(
                 array('Delivery', 'DELIVER'),
                 array('Collection', 'COLLECT')
-           )
+            )
         );
 
         // --------------------------------------------------------------------------
@@ -177,8 +177,8 @@ class Orders extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows            = $this->shop_order_model->count_all($data);
-        $this->data['orders'] = $this->shop_order_model->get_all($page, $perPage, $data);
+        $totalRows            = $this->shop_order_model->countAll($data);
+        $this->data['orders'] = $this->shop_order_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords, $cbFilters);
@@ -213,7 +213,7 @@ class Orders extends BaseAdmin
         //  Fetch and check order
         $this->load->model('shop/shop_order_model');
 
-        $this->data['order'] = $this->shop_order_model->get_by_id($this->uri->segment(5));
+        $this->data['order'] = $this->shop_order_model->getById($this->uri->segment(5));
 
         if (!$this->data['order']) {
 
@@ -225,7 +225,7 @@ class Orders extends BaseAdmin
 
         //  Get associated payments
         $this->load->model('shop/shop_order_payment_model');
-        $this->data['payments'] = $this->shop_order_payment_model->get_for_order($this->data['order']->id);
+        $this->data['payments'] = $this->shop_order_payment_model->getForOrder($this->data['order']->id);
 
         // --------------------------------------------------------------------------
 
@@ -276,7 +276,7 @@ class Orders extends BaseAdmin
 
         //  Check order exists
         $this->load->model('shop/shop_order_model');
-        $order = $this->shop_order_model->get_by_id($this->uri->segment(5));
+        $order = $this->shop_order_model->getById($this->uri->segment(5));
 
         if (!$order) {
 
@@ -401,7 +401,7 @@ class Orders extends BaseAdmin
         //  Fetch and check order
         $this->load->model('shop/shop_order_model');
 
-        $this->data['order'] = $this->shop_order_model->get_by_id($this->uri->segment(5));
+        $this->data['order'] = $this->shop_order_model->getById($this->uri->segment(5));
 
         if (!$this->data['order']) {
 
@@ -453,7 +453,7 @@ class Orders extends BaseAdmin
         //    Fetch and check order
         $this->load->model('shop/shop_order_model');
 
-        $order = $this->shop_order_model->get_by_id($this->uri->segment(5));
+        $order = $this->shop_order_model->getById($this->uri->segment(5));
 
         if (!$order) {
 
@@ -538,7 +538,7 @@ class Orders extends BaseAdmin
         //    Fetch and check order
         $this->load->model('shop/shop_order_model');
 
-        $order = $this->shop_order_model->get_by_id($this->uri->segment(5));
+        $order = $this->shop_order_model->getById($this->uri->segment(5));
 
         if (!$order) {
 
@@ -623,7 +623,7 @@ class Orders extends BaseAdmin
         //    Fetch and check order
         $this->load->model('shop/shop_order_model');
 
-        $order = $this->shop_order_model->get_by_id($this->uri->segment(5));
+        $order = $this->shop_order_model->getById($this->uri->segment(5));
 
         if (!$order) {
 

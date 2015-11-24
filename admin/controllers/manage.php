@@ -45,7 +45,7 @@ class Manage extends BaseAdmin
      * Returns an array of extra permissions for this controller
      * @return array
      */
-    static function permissions()
+    public static function permissions()
     {
         $permissions = parent::permissions();
 
@@ -202,7 +202,7 @@ class Manage extends BaseAdmin
             $tablePrefix . '.label'   => 'Label',
             $tablePrefix . '.created' => 'Created',
             $tablePrefix . '.modified' => 'Modified'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -218,8 +218,8 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows                = $this->shop_attribute_model->count_all($data);
-        $this->data['attributes'] = $this->shop_attribute_model->get_all($page, $perPage, $data);
+        $totalRows                = $this->shop_attribute_model->countAll($data);
+        $this->data['attributes'] = $this->shop_attribute_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
@@ -295,7 +295,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['attributes'] = $this->shop_attribute_model->get_all();
+        $this->data['attributes'] = $this->shop_attribute_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -318,7 +318,7 @@ class Manage extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['attribute'] = $this->shop_attribute_model->get_by_id($this->uri->segment(6));
+        $this->data['attribute'] = $this->shop_attribute_model->getById($this->uri->segment(6));
 
         if (empty($this->data['attribute'])) {
 
@@ -365,7 +365,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['attributes'] = $this->shop_attribute_model->get_all();
+        $this->data['attributes'] = $this->shop_attribute_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -456,7 +456,7 @@ class Manage extends BaseAdmin
             $tablePrefix . '.label'   => 'Label',
             $tablePrefix . '.created' => 'Created',
             $tablePrefix . '.modified' => 'Modified'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -468,13 +468,13 @@ class Manage extends BaseAdmin
                 array($sortOn, $sortOrder)
             ),
             'keywords' => $keywords
-       );
+        );
 
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows            = $this->shop_brand_model->count_all($data);
-        $this->data['brands'] = $this->shop_brand_model->get_all($page, $perPage, $data);
+        $totalRows            = $this->shop_brand_model->countAll($data);
+        $this->data['brands'] = $this->shop_brand_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
@@ -564,7 +564,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['brands'] = $this->shop_brand_model->get_all();
+        $this->data['brands'] = $this->shop_brand_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -587,7 +587,7 @@ class Manage extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['brand'] = $this->shop_brand_model->get_by_id($this->uri->segment(6));
+        $this->data['brand'] = $this->shop_brand_model->getById($this->uri->segment(6));
 
         if (empty($this->data['brand'])) {
 
@@ -647,7 +647,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['brands'] = $this->shop_brand_model->get_all();
+        $this->data['brands'] = $this->shop_brand_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -738,7 +738,7 @@ class Manage extends BaseAdmin
             $tablePrefix . '.label'   => 'Label',
             $tablePrefix . '.created' => 'Created',
             $tablePrefix . '.modified' => 'Modified'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -750,13 +750,13 @@ class Manage extends BaseAdmin
                 array($sortOn, $sortOrder)
             ),
             'keywords' => $keywords
-       );
+        );
 
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows            = $this->shop_supplier_model->count_all($data);
-        $this->data['suppliers'] = $this->shop_supplier_model->get_all($page, $perPage, $data);
+        $totalRows            = $this->shop_supplier_model->countAll($data);
+        $this->data['suppliers'] = $this->shop_supplier_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
@@ -834,7 +834,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['suppliers'] = $this->shop_supplier_model->get_all();
+        $this->data['suppliers'] = $this->shop_supplier_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -857,7 +857,7 @@ class Manage extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['supplier'] = $this->shop_supplier_model->get_by_id($this->uri->segment(6));
+        $this->data['supplier'] = $this->shop_supplier_model->getById($this->uri->segment(6));
 
         if (empty($this->data['supplier'])) {
 
@@ -905,7 +905,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['suppliers'] = $this->shop_supplier_model->get_all();
+        $this->data['suppliers'] = $this->shop_supplier_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -997,7 +997,7 @@ class Manage extends BaseAdmin
             $tablePrefix . '.label'    => 'Label',
             $tablePrefix . '.created'  => 'Created',
             $tablePrefix . '.modified' => 'Modified'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -1008,13 +1008,13 @@ class Manage extends BaseAdmin
                 array($sortOn, $sortOrder)
             ),
             'keywords' => $keywords
-       );
+        );
 
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows                = $this->shop_category_model->count_all($data);
-        $this->data['categories'] = $this->shop_category_model->get_all($page, $perPage, $data);
+        $totalRows                = $this->shop_category_model->countAll($data);
+        $this->data['categories'] = $this->shop_category_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
@@ -1101,7 +1101,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['categories'] = $this->shop_category_model->get_all();
+        $this->data['categories'] = $this->shop_category_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -1124,7 +1124,7 @@ class Manage extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['category'] = $this->shop_category_model->get_by_id($this->uri->segment(6));
+        $this->data['category'] = $this->shop_category_model->getById($this->uri->segment(6));
 
         if (empty($this->data['category'])) {
 
@@ -1182,7 +1182,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['categories'] = $this->shop_category_model->get_all();
+        $this->data['categories'] = $this->shop_category_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -1273,7 +1273,7 @@ class Manage extends BaseAdmin
             $tablePrefix . '.label'   => 'Label',
             $tablePrefix . '.created' => 'Created',
             $tablePrefix . '.modified' => 'Modified'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -1285,13 +1285,13 @@ class Manage extends BaseAdmin
                 array($sortOn, $sortOrder)
             ),
             'keywords' => $keywords
-       );
+        );
 
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows                 = $this->shop_collection_model->count_all($data);
-        $this->data['collections'] = $this->shop_collection_model->get_all($page, $perPage, $data);
+        $totalRows                 = $this->shop_collection_model->countAll($data);
+        $this->data['collections'] = $this->shop_collection_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
@@ -1378,7 +1378,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['collections'] = $this->shop_collection_model->get_all();
+        $this->data['collections'] = $this->shop_collection_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -1401,7 +1401,7 @@ class Manage extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['collection'] = $this->shop_collection_model->get_by_id($this->uri->segment(6));
+        $this->data['collection'] = $this->shop_collection_model->getById($this->uri->segment(6));
 
         if (empty($this->data['collection'])) {
 
@@ -1459,7 +1459,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['collections'] = $this->shop_collection_model->get_all();
+        $this->data['collections'] = $this->shop_collection_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -1550,7 +1550,7 @@ class Manage extends BaseAdmin
             $tablePrefix . '.label'   => 'Label',
             $tablePrefix . '.created' => 'Created',
             $tablePrefix . '.modified' => 'Modified'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -1561,13 +1561,13 @@ class Manage extends BaseAdmin
                 array($sortOn, $sortOrder)
             ),
             'keywords' => $keywords
-       );
+        );
 
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows            = $this->shop_range_model->count_all($data);
-        $this->data['ranges'] = $this->shop_range_model->get_all($page, $perPage, $data);
+        $totalRows            = $this->shop_range_model->countAll($data);
+        $this->data['ranges'] = $this->shop_range_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
@@ -1654,7 +1654,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['ranges'] = $this->shop_range_model->get_all();
+        $this->data['ranges'] = $this->shop_range_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -1677,7 +1677,7 @@ class Manage extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['range'] = $this->shop_range_model->get_by_id($this->uri->segment(6));
+        $this->data['range'] = $this->shop_range_model->getById($this->uri->segment(6));
 
         if (empty($this->data['range'])) {
 
@@ -1735,7 +1735,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['ranges'] = $this->shop_range_model->get_all();
+        $this->data['ranges'] = $this->shop_range_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -1826,7 +1826,7 @@ class Manage extends BaseAdmin
             $tablePrefix . '.label'   => 'Label',
             $tablePrefix . '.created' => 'Created',
             $tablePrefix . '.modified' => 'Modified'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -1837,13 +1837,13 @@ class Manage extends BaseAdmin
                 array($sortOn, $sortOrder)
             ),
             'keywords' => $keywords
-       );
+        );
 
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows          = $this->shop_tag_model->count_all($data);
-        $this->data['tags'] = $this->shop_tag_model->get_all($page, $perPage, $data);
+        $totalRows          = $this->shop_tag_model->countAll($data);
+        $this->data['tags'] = $this->shop_tag_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
@@ -1928,7 +1928,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['tags'] = $this->shop_tag_model->get_all();
+        $this->data['tags'] = $this->shop_tag_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -1951,7 +1951,7 @@ class Manage extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['tag'] = $this->shop_tag_model->get_by_id($this->uri->segment(6));
+        $this->data['tag'] = $this->shop_tag_model->getById($this->uri->segment(6));
 
         if (empty($this->data['tag'])) {
 
@@ -2007,7 +2007,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['tags'] = $this->shop_tag_model->get_all();
+        $this->data['tags'] = $this->shop_tag_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -2098,7 +2098,7 @@ class Manage extends BaseAdmin
             $tablePrefix . '.label'   => 'Label',
             $tablePrefix . '.created' => 'Created',
             $tablePrefix . '.modified' => 'Modified'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -2109,13 +2109,13 @@ class Manage extends BaseAdmin
                 array($sortOn, $sortOrder)
             ),
             'keywords' => $keywords
-       );
+        );
 
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows              = $this->shop_tax_rate_model->count_all($data);
-        $this->data['taxRates'] = $this->shop_tax_rate_model->get_all($page, $perPage, $data);
+        $totalRows              = $this->shop_tax_rate_model->countAll($data);
+        $this->data['taxRates'] = $this->shop_tax_rate_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
@@ -2193,7 +2193,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['taxRates'] = $this->shop_tax_rate_model->get_all();
+        $this->data['taxRates'] = $this->shop_tax_rate_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -2216,7 +2216,7 @@ class Manage extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['tax_rate'] = $this->shop_tax_rate_model->get_by_id($this->uri->segment(6));
+        $this->data['tax_rate'] = $this->shop_tax_rate_model->getById($this->uri->segment(6));
 
         if (empty($this->data['tax_rate'])) {
 
@@ -2264,7 +2264,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['taxRates'] = $this->shop_tax_rate_model->get_all();
+        $this->data['taxRates'] = $this->shop_tax_rate_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -2355,7 +2355,7 @@ class Manage extends BaseAdmin
             $tablePrefix . '.label'   => 'Label',
             $tablePrefix . '.created' => 'Created',
             $tablePrefix . '.modified' => 'Modified'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -2366,13 +2366,13 @@ class Manage extends BaseAdmin
                 array($sortOn, $sortOrder)
             ),
             'keywords' => $keywords
-       );
+        );
 
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows                 = $this->shop_product_type_model->count_all($data);
-        $this->data['productTypes'] = $this->shop_product_type_model->get_all($page, $perPage, $data);
+        $totalRows                 = $this->shop_product_type_model->countAll($data);
+        $this->data['productTypes'] = $this->shop_product_type_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
@@ -2459,7 +2459,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['productTypes'] = $this->shop_product_type_model->get_all();
+        $this->data['productTypes'] = $this->shop_product_type_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -2482,7 +2482,7 @@ class Manage extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['product_type'] = $this->shop_product_type_model->get_by_id($this->uri->segment(6));
+        $this->data['product_type'] = $this->shop_product_type_model->getById($this->uri->segment(6));
 
         if (empty($this->data['product_type'])) {
 
@@ -2538,7 +2538,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['productTypes'] = $this->shop_product_type_model->get_all();
+        $this->data['productTypes'] = $this->shop_product_type_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -2614,7 +2614,7 @@ class Manage extends BaseAdmin
             $tablePrefix . '.label'   => 'Label',
             $tablePrefix . '.created' => 'Created',
             $tablePrefix . '.modified' => 'Modified'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -2625,13 +2625,13 @@ class Manage extends BaseAdmin
                 array($sortOn, $sortOrder)
             ),
             'keywords' => $keywords
-       );
+        );
 
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows                = $this->shop_product_type_meta_model->count_all($data);
-        $this->data['metaFields'] = $this->shop_product_type_meta_model->get_all($page, $perPage, $data);
+        $totalRows                = $this->shop_product_type_meta_model->countAll($data);
+        $this->data['metaFields'] = $this->shop_product_type_meta_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
@@ -2717,7 +2717,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['productTypes'] = $this->shop_product_type_model->get_all();
+        $this->data['productTypes'] = $this->shop_product_type_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -2741,7 +2741,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         $data = array('includeAssociatedProductTypes' => true);
-        $this->data['meta_field'] = $this->shop_product_type_meta_model->get_by_id($this->uri->segment(6), $data);
+        $this->data['meta_field'] = $this->shop_product_type_meta_model->getById($this->uri->segment(6), $data);
 
         if (empty($this->data['meta_field'])) {
 
@@ -2798,7 +2798,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['productTypes'] = $this->shop_product_type_model->get_all();
+        $this->data['productTypes'] = $this->shop_product_type_model->getAll();
 
         // --------------------------------------------------------------------------
 

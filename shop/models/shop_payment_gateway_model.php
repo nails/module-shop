@@ -274,7 +274,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
         $this->load->model('shop/shop_model');
         $this->load->model('shop/shop_order_model');
-        $order = $this->shop_order_model->get_by_id($orderId);
+        $order = $this->shop_order_model->getById($orderId);
 
         if (!$order || $order->status != 'UNPAID') {
 
@@ -346,8 +346,8 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Attempt the purchase
-        try
-        {
+        try {
+
             $gatewayResponse = $gatewayPrepared->purchase($data)->send();
 
             if ($gatewayResponse->isSuccessful()) {
@@ -358,7 +358,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
                 $transactionId = $gatewayResponse->getTransactionReference();
 
                 //  First, check we've not already handled this payment. This should NOT happen.
-                $payment = $this->shop_order_payment_model->get_by_transaction_id($transactionId, $gatewayName);
+                $payment = $this->shop_order_payment_model->getByTransactionId($transactionId, $gatewayName);
 
                 if ($payment) {
 
@@ -450,9 +450,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
                 $this->setError($error);
                 return false;
             }
-        }
-        catch(Exception $e)
-        {
+        } catch (Exception $e) {
             $this->setError('Payment Request failed. ' . $e->getMessage());
             return false;
         }
@@ -590,7 +588,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         //  Verify order exists
         $this->load->model('shop/shop_model');
         $this->load->model('shop/shop_order_model');
-        $order = $this->shop_order_model->get_by_id($paymentData['order_id']);
+        $order = $this->shop_order_model->getById($paymentData['order_id']);
 
         if (!$order) {
 
@@ -620,20 +618,20 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
     {
         $gateway = $this->prepareGateway($gatewayName, $enableLog);
 
-        try
-        {
+        try {
+
             $this->oLogger->line('Attempting completePurchase()');
             $gatewayResponse = $gateway->completePurchase($paymentData)->send();
-        }
-        catch (Exception $e)
-        {
+
+        } catch (Exception $e) {
+
             $error = 'Payment Failed with exception: ' . $e->getMessage();
             $this->oLogger->line($error);
             $this->setError($error);
             return false;
         }
 
-        if (!$gatewayResponse->isSuccessful()){
+        if (!$gatewayResponse->isSuccessful()) {
 
             $error = 'Payment Failed with error: ' . $gatewayResponse->getMessage();
             $this->oLogger->line($error);
@@ -668,9 +666,9 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
             $this->oLogger->line('Payment Transaction ID: #' . $paymentData['transaction_id']);
         }
 
-        $payment = $this->shop_order_payment_model->get_by_transaction_id($data['transaction_id'], $gatewayName);
+        $payment = $this->shop_order_payment_model->getByTransactionId($data['transaction_id'], $gatewayName);
 
-        if ($payment){
+        if ($payment) {
 
             $error = 'Payment with ID ' . $gatewayName . ':' . $data['transaction_id'] . ' has already been processed by this system.';
             $this->oLogger->line($error);
@@ -763,7 +761,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         foreach ($params as $param => $default) {
 
             $this->oLogger->line('Setting value for "omnipay_' . $gatewayName . '_' . $param . '"');
-            $value = appSetting('omnipay_' . $gatewayName . '_' . $param,    'shop');
+            $value = appSetting('omnipay_' . $gatewayName . '_' . $param, 'shop');
             $gateway->{'set' . ucfirst($param)}($value);
         }
 

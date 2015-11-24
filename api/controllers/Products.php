@@ -85,7 +85,7 @@ class Products extends \Nails\Api\Controller\Base
 
         if (strlen($data['keywords']) >= self::MIN_SEARCH_LENGTH) {
 
-            $products = $this->shop_product_model->get_all(0, $limit, $data);
+            $products = $this->shop_product_model->getAll(0, $limit, $data);
 
             //  Return only basic details
             $out['results'] = array();
@@ -124,7 +124,7 @@ class Products extends \Nails\Api\Controller\Base
             return array();
         }
 
-        $product = $this->shop_product_model->get_by_id($id);
+        $product = $this->shop_product_model->getById($id);
 
         if (empty($product)) {
 
@@ -166,7 +166,7 @@ class Products extends \Nails\Api\Controller\Base
             return array();
         }
 
-        $products = $this->shop_product_model->get_by_ids($ids);
+        $products = $this->shop_product_model->getByIds($ids);
 
         //  Return only basic details
         $out['products'] = array();

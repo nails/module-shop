@@ -32,7 +32,7 @@ class NAILS_Shop_tax_rate_model extends NAILS_Model
      * @param  array $data Data passed from the calling method
      * @return void
      **/
-    protected function _getcount_common($data = array())
+    protected function getCountCommon($data = array())
     {
         //  Default sort
         if (empty($data['sort'])) {
@@ -76,7 +76,7 @@ class NAILS_Shop_tax_rate_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        parent::_getcount_common($data);
+        parent::getCountCommon($data);
     }
 }
 

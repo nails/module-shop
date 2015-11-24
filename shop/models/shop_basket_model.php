@@ -153,7 +153,7 @@ class NAILS_Shop_basket_model extends Base
             }
 
             //  Now get the product
-            $item->product = $this->shop_product_model->get_by_id($item->product_id);
+            $item->product = $this->shop_product_model->getById($item->product_id);
 
             if (!empty($item->product)) {
 

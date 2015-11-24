@@ -109,7 +109,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         }
 
         //  User ID
-        $user = $this->user_model->get_by_email($order->user_email);
+        $user = $this->user_model->getByEmail($order->user_email);
 
         if ($user) {
 
@@ -366,7 +366,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
             if ($returnObj) {
 
-                return $this->get_by_id($order->id);
+                return $this->getById($order->id);
 
             } else {
 
@@ -403,12 +403,12 @@ class NAILS_Shop_order_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
-     * This method applies the conditionals which are common across the get_*()
+     * This method applies the conditionals which are common across the get*()
      * methods and the count() method.
      * @param  array $data Data passed from the calling method
      * @return void
      **/
-    protected function _getcount_common($data = array())
+    protected function getCountCommon($data = array())
     {
         //  Selects
         $this->db->select($this->tablePrefix . '.*');
@@ -473,7 +473,7 @@ class NAILS_Shop_order_model extends NAILS_Model
             );
         }
 
-        parent::_getcount_common($data);
+        parent::getCountCommon($data);
     }
 
     // --------------------------------------------------------------------------
@@ -496,7 +496,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         $data['where'][] = array($this->tablePrefix . '.ref', $ref);
 
-        $result = $this->get_all(null, null, $data, false, 'GET_BY_REF');
+        $result = $this->getAll(null, null, $data);
 
         if (!$result) {
 
@@ -526,7 +526,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         $data['where_in'][] = array($this->tablePrefix . '.ref', $refs);
 
-        return $this->get_all(null, null, $data, 'GET_BY_REFS');
+        return $this->getAll(null, null, $data);
     }
 
     // --------------------------------------------------------------------------
@@ -553,7 +553,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         foreach ($items as $item) {
 
-            $this->_format_object_item($item);
+            $this->formatObjectItem($item);
         }
 
         return $items;
@@ -570,7 +570,7 @@ class NAILS_Shop_order_model extends NAILS_Model
     {
         $this->db->where_in($this->tablePrefix . '.status', array('PAID', 'UNPAID'));
         $this->db->where($this->tablePrefix . '.user_id', $userId);
-        return $this->get_all();
+        return $this->getAll();
     }
 
     // --------------------------------------------------------------------------
@@ -584,14 +584,14 @@ class NAILS_Shop_order_model extends NAILS_Model
     {
         $this->db->where_in($this->tablePrefix . '.status', array('PAID', 'UNPAID'));
         $this->db->where($this->tablePrefix . '.user_email', $email);
-        return $this->get_all();
+        return $this->getAll();
     }
 
     // --------------------------------------------------------------------------
 
     /**
      * Counts the total amount of orders for a partricular query/search key. Essentially performs
-     * the same query as $this->get_all() but without limiting.
+     * the same query as $this->getAll() but without limiting.
      *
      * @access  public
      * @param   string  $where  An array of where conditions
@@ -749,7 +749,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         } else {
 
             // Fetch order details
-            $order = $this->get_by_id($orderId);
+            $order = $this->getById($orderId);
 
             // --------------------------------------------------------------------------
 
@@ -758,7 +758,7 @@ class NAILS_Shop_order_model extends NAILS_Model
             $data  = array(
                 'fulfilment_status' => 'FULFILLED',
                 'fulfilled'         => $oDate->format('Y-m-d H:i:s')
-           );
+            );
 
             // --------------------------------------------------------------------------
 
@@ -810,10 +810,10 @@ class NAILS_Shop_order_model extends NAILS_Model
 
             if ($informCustomer) {
 
-            foreach ($orderIds as $o) {
+                foreach ($orderIds as $o) {
 
                     // Fetch order details
-                    $order = $this->get_by_id($o);
+                    $order = $this->getById($o);
 
                     // --------------------------------------------------------------------------
 
@@ -854,7 +854,7 @@ class NAILS_Shop_order_model extends NAILS_Model
             $data = array(
                 'fulfilment_status' => 'UNFULFILLED',
                 'fulfilled'         => null
-           );
+            );
 
             return $this->update($orderId, $data);
         }
@@ -900,7 +900,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         if (is_numeric($order)) {
 
             $this->oLogger->line('Looking up order #' . $order);
-            $order = $this->get_by_id($order);
+            $order = $this->getById($order);
 
             if (!$order) {
 
@@ -1055,7 +1055,7 @@ class NAILS_Shop_order_model extends NAILS_Model
     public function sendReceipt($orderId, $paymentData = array(), $partial = false)
     {
         $this->oLogger->line('Looking up order #' . $orderId);
-        $order = $this->get_by_id($orderId);
+        $order = $this->getById($orderId);
 
         if (!$order) {
 
@@ -1115,7 +1115,7 @@ class NAILS_Shop_order_model extends NAILS_Model
     public function sendOrderNotification($orderId, $paymentData = array(), $partial = false)
     {
         $this->oLogger->line('Looking up order #' . $orderId);
-        $order = $this->get_by_id($orderId);
+        $order = $this->getById($orderId);
 
         if (!$order) {
 
@@ -1227,9 +1227,9 @@ class NAILS_Shop_order_model extends NAILS_Model
      * @param  array  $bools    Fields which should be cast as booleans
      * @return void
      */
-    protected function _format_object(&$obj, $data = array(), $integers = array(), $bools = array())
+    protected function formatObject(&$obj, $data = array(), $integers = array(), $bools = array())
     {
-        parent::_format_object($obj, $data, $integers, $bools);
+        parent::formatObject($obj, $data, $integers, $bools);
 
         $obj->requires_shipping = (bool) $obj->requires_shipping;
 
@@ -1431,9 +1431,9 @@ class NAILS_Shop_order_model extends NAILS_Model
      * @param  stdClass &$item The item to format
      * @return void
      */
-    protected function _format_object_item(&$item)
+    protected function formatObjectItem(&$item)
     {
-        parent::_format_object($item);
+        parent::formatObject($item);
 
         // --------------------------------------------------------------------------
 

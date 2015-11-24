@@ -90,7 +90,7 @@ class Voucher extends Base
         if (is_numeric($mOrder)) {
 
             $this->load->model('shop/shop_order_model');
-            $oOrder = $this->shop_order_model->get_by_id($mOrder);
+            $oOrder = $this->shop_order_model->getById($mOrder);
 
             if (empty($oOrder)) {
 
@@ -105,7 +105,7 @@ class Voucher extends Base
 
         // --------------------------------------------------------------------------
 
-        $oVoucher = $this->get_by_id($iVoucherId);
+        $oVoucher = $this->getById($iVoucherId);
 
         if (empty($oVoucher)) {
 
@@ -224,12 +224,12 @@ class Voucher extends Base
      * Fetches all vouchers, optionally paginated.
      * @param int    $page    The page number of the results, if null then no pagination
      * @param int    $perPage How many items per page of paginated results
-     * @param mixed  $data    Any data to pass to _getcount_common()
+     * @param mixed  $data    Any data to pass to getCountCommon()
      * @return array
      **/
-    public function get_all($page = null, $perPage = null, $data = array())
+    public function getAll($page = null, $perPage = null, $data = array())
     {
-        $result = parent::get_all($page, $perPage, $data, false);
+        $result = parent::getAll($page, $perPage, $data, false);
 
         //  Handle requests for the raw query object
         if (!empty($data['RETURN_QUERY_OBJECT'])) {
@@ -259,7 +259,7 @@ class Voucher extends Base
                     } else {
 
                         //  Doesn't exist, fetch and save
-                        $voucher->product = $this->shop_product_model->get_by_id($voucher->product_id);
+                        $voucher->product = $this->shop_product_model->getById($voucher->product_id);
                         $this->setCache($cacheKey, $voucher->product);
                     }
                     break;
@@ -276,7 +276,7 @@ class Voucher extends Base
                     } else {
 
                         //  Doesn't exist, fetch and save
-                        $voucher->product_type = $this->shop_product_type_model->get_by_id($voucher->product_type_id);
+                        $voucher->product_type = $this->shop_product_type_model->getById($voucher->product_type_id);
                         $this->setCache($cacheKey, $voucher->product_type);
                     }
                     break;
@@ -294,7 +294,7 @@ class Voucher extends Base
      * @param  string $search Keywords to restrict the query by
      * @return void
      */
-    protected function _getcount_common($data = array())
+    protected function getCountCommon($data = array())
     {
         //  Search
         if (!empty($data['keywords'])) {
@@ -310,7 +310,7 @@ class Voucher extends Base
             );
         }
 
-        parent::_getcount_common($data);
+        parent::getCountCommon($data);
 
         $this->db->select($this->tablePrefix . '.*,u.first_name, u.last_name, u.gender, u.profile_img, ue.email');
         $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = ' . $this->tablePrefix . '.created_by', 'LEFT');
@@ -323,7 +323,7 @@ class Voucher extends Base
      * Get a voucher by its code
      * @todo Update once get_all is updated
      * @param  string $code The voucher's code
-     * @param  mixed  $data Any data to pass to _getcount_common()
+     * @param  mixed  $data Any data to pass to getCountCommon()
      * @return mixed        stdClass on success, false on failure
      */
     public function getByCode($code, $data = array())
@@ -335,7 +335,7 @@ class Voucher extends Base
 
         $data['where'][] = array($this->tablePrefix . '.code', $code);
 
-        $result = $this->get_all(null, null, $data, 'GET_BY_CODE');
+        $result = $this->getAll(null, null, $data, 'GET_BY_CODE');
 
         // --------------------------------------------------------------------------
 
@@ -584,7 +584,7 @@ class Voucher extends Base
      */
     public function activate($voucherId)
     {
-        $voucher = $this->get_by_id($voucherId);
+        $voucher = $this->getById($voucherId);
 
         if (!$voucher) {
 
@@ -608,7 +608,7 @@ class Voucher extends Base
      */
     public function suspend($voucherId)
     {
-        $voucher = $this->get_by_id($voucherId);
+        $voucher = $this->getById($voucherId);
 
         if (!$voucher) {
 
@@ -698,7 +698,7 @@ class Voucher extends Base
 
             case self::DISCOUNT_TYPE_AMOUNT:
 
-                if ($aData['discount_value'] < 0 ) {
+                if ($aData['discount_value'] < 0) {
 
                     $this->setError('Discount value must be greater than 0.');
                     return false;
@@ -728,9 +728,9 @@ class Voucher extends Base
      * @param  array  $bools    Fields which should be cast as booleans
      * @return void
      */
-    protected function _format_object(&$obj, $data = array(), $integers = array(), $bools = array())
+    protected function formatObject(&$obj, $data = array(), $integers = array(), $bools = array())
     {
-        parent::_format_object($obj, $data, $integers, $bools);
+        parent::formatObject($obj, $data, $integers, $bools);
 
         $obj->limited_use_limit           = (int) $obj->limited_use_limit;
         $obj->discount_value              = (int) $obj->discount_value;

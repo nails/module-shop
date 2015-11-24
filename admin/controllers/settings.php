@@ -290,8 +290,8 @@ class Settings extends BaseAdmin
         $this->data['payment_gateways'] = $this->shop_payment_gateway_model->getAvailable();
         $this->data['shipping_drivers'] = $this->shop_shipping_driver_model->getAvailable();
         $this->data['currencies']       = $oCurrencyModel->getAll();
-        $this->data['tax_rates']        = $this->shop_tax_rate_model->get_all();
-        $this->data['tax_rates_flat']   = $this->shop_tax_rate_model->get_all_flat();
+        $this->data['tax_rates']        = $this->shop_tax_rate_model->getAll();
+        $this->data['tax_rates_flat']   = $this->shop_tax_rate_model->getAllFlat();
         $this->data['countries_flat']   = $oCountryModel->getAllFlat();
         $this->data['continents_flat']  = $oCountryModel->getAllContinentsFlat();
         array_unshift($this->data['tax_rates_flat'], 'No Tax');
@@ -307,7 +307,7 @@ class Settings extends BaseAdmin
         $this->data['skin_checkout_current']  = $this->shop_skin_checkout_model->get($this->data['skin_checkout_selected']);
 
         //  Count the number of products (including deleted) - base currency is locked if > 1
-        $this->data['productCount'] = $this->shop_product_model->count_all(null, true);
+        $this->data['productCount'] = $this->shop_product_model->countAll(null, true);
 
         // --------------------------------------------------------------------------
 
@@ -458,15 +458,20 @@ class Settings extends BaseAdmin
             //  Load common assets
             $this->asset->load('nails.admin.settings.min.js', 'NAILS');
 
-            if (method_exists($this, '_shop_pg_' . $gateway)) {
+            $sMethodName = strtolower($gateway);
+            $sMethodName = str_replace('_', ' ', $sMethodName);
+            $sMethodName = ucwords($sMethodName);
+            $sMethodName = str_replace(' ', '', $sMethodName);
+
+            if (method_exists($this, 'shopPg' . ucfirst(strtolower($gateway)))) {
 
                 //  Specific configuration form available
-                $this->{'_shop_pg_' . $gateway}();
+                $this->{'shopPg' . ucfirst(strtolower($gateway))}();
 
             } else {
 
                 //  Show the generic gateway configuration form
-                $this->_shop_pg_generic($gateway);
+                $this->shopPgGeneric($gateway);
             }
 
         } else {
@@ -482,7 +487,7 @@ class Settings extends BaseAdmin
      * Renders a generic Payment Gateway configuration interface
      * @return void
      */
-    protected function _shop_pg_generic()
+    protected function shopPgGeneric()
     {
         Helper::loadView('shop_pg/generic');
     }
@@ -493,7 +498,7 @@ class Settings extends BaseAdmin
      * Renders an interface specific for WorldPay
      * @return void
      */
-    protected function _shop_pg_worldpay()
+    protected function shopPgWorldpay()
     {
         $this->asset->load('nails.admin.shop.settings.paymentgateway.worldpay.min.js', 'NAILS');
         $this->asset->inline('<script>_worldpay_config = new NAILS_Admin_Shop_Settings_PaymentGateway_WorldPay();</script>');
@@ -509,7 +514,7 @@ class Settings extends BaseAdmin
      * Renders an interface specific for Stripe
      * @return void
      */
-    protected function _shop_pg_stripe()
+    protected function shopPgStripe()
     {
         //  Additional params
         Helper::loadView('shop_pg/stripe');
@@ -521,7 +526,7 @@ class Settings extends BaseAdmin
      * Renders an interface specific for PayPal_Express
      * @return void
      */
-    protected function _shop_pg_paypal_express()
+    protected function shopPgPaypalExpress()
     {
         //  Additional params
         Helper::loadView('shop_pg/paypal_express');

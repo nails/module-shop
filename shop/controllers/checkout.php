@@ -294,7 +294,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
             //  Fetch the product/variants associated with each order item
             foreach ($this->data['order']->items as $item) {
 
-                $item->product = $this->shop_product_model->get_by_id($item->product_id);
+                $item->product = $this->shop_product_model->getById($item->product_id);
 
                 if (!empty($item->product)) {
 
@@ -668,7 +668,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
             if ($orderId) {
 
-                $order = $this->shop_order_model->get_by_id($orderId);
+                $order = $this->shop_order_model->getById($orderId);
 
                 if ($order) {
 
