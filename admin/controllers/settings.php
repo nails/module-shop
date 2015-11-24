@@ -204,14 +204,14 @@ class Settings extends BaseAdmin
                 //  Normal settings
                 if (!$this->app_setting_model->set($aSettings, 'shop')) {
 
-                    $sError    = $this->app_setting_model->last_error();
+                    $sError    = $this->app_setting_model->lastError();
                     $bRollback = true;
                 }
 
                 //  Encrypted settings
                 if (!$this->app_setting_model->set($aSettingsEncrypted, 'shop', null, true)) {
 
-                    $sError    = $this->app_setting_model->last_error();
+                    $sError    = $this->app_setting_model->lastError();
                     $bRollback = true;
                 }
 
@@ -226,7 +226,7 @@ class Settings extends BaseAdmin
                         if (!$this->app_setting_model->set($aSkinConfig, 'shop-' . $sSkinSlug)) {
 
                             $sError    = 'Failed to update skin settings for skin "' . $sSkinSlug . '". ';
-                            $sError   .= $this->app_setting_model->last_error();
+                            $sError   .= $this->app_setting_model->lastError();
                             $bRollback = true;
                             break;
                         }
@@ -266,7 +266,7 @@ class Settings extends BaseAdmin
 
                             $this->data['message']  = '<strong>Warning:</strong> an attempted sync with Open Exchange ';
                             $this->data['message'] .= 'Rates service failed with the following reason: ';
-                            $this->data['message'] .= $oCurrencyModel->last_error();
+                            $this->data['message'] .= $oCurrencyModel->lastError();
 
                         }
                     }

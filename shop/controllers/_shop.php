@@ -103,7 +103,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
                     $errorSubject  = 'Failed to load shop front skin "' . $skinName . '"';
                     $errorMessage  = 'Shop front skin "' . $skinName . '" failed to load at ' . APP_NAME;
                     $errorMessage .= ', the following reason was given: ';
-                    $errorMessage .= $this->shop_skin_front_model->last_error();
+                    $errorMessage .= $this->shop_skin_front_model->lastError();
 
                 }
                 break;
@@ -124,7 +124,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
                     $errorSubject  = 'Failed to load shop checkout skin "' . $skin . '"';
                     $errorMessage  = 'Shop checkout skin "' . $skin . '" failed to load at ' . APP_NAME;
                     $errorMessage .= ', the following reason was given: ';
-                    $errorMessage .= $this->shop_skin_checkout_model->last_error();
+                    $errorMessage .= $this->shop_skin_checkout_model->lastError();
 
                 }
                 break;

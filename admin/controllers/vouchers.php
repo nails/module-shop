@@ -336,7 +336,7 @@ class Vouchers extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the voucher. ';
-                    $this->Data['error'] .= $this->oVoucherModel->last_error();
+                    $this->Data['error'] .= $this->oVoucherModel->lastError();
                 }
 
             } else {
@@ -393,7 +393,7 @@ class Vouchers extends BaseAdmin
 
                 $status   = 'error';
                 $message  = 'There was a problem activating the voucher. ';
-                $message .= $this->oVoucherModel->last_error();
+                $message .= $this->oVoucherModel->lastError();
             }
         }
 
@@ -428,7 +428,7 @@ class Vouchers extends BaseAdmin
 
                 $status   = 'error';
                 $message  = 'There was a problem suspending the voucher. ';
-                $message .= $this->oVoucherModel->last_error();
+                $message .= $this->oVoucherModel->lastError();
             }
         }
 

@@ -278,7 +278,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Attribute. ';
-                    $this->data['error'] .= $this->shop_category_model->last_error();
+                    $this->data['error'] .= $this->shop_category_model->lastError();
                 }
 
             } else {
@@ -348,7 +348,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem saving the Attribute. ';
-                    $this->data['error'] .= $this->shop_attribute_model->last_error();
+                    $this->data['error'] .= $this->shop_attribute_model->lastError();
                 }
 
             } else {
@@ -398,7 +398,7 @@ class Manage extends BaseAdmin
         } else {
 
             $status  = 'error';
-            $message = 'There was a problem deleting the attribute. ' . $this->shop_attribute_model->last_error();
+            $message = 'There was a problem deleting the attribute. ' . $this->shop_attribute_model->lastError();
         }
 
         $this->session->set_flashdata($status, $message);
@@ -547,7 +547,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Brand. ';
-                    $this->data['error'] .= $this->shop_brand_model->last_error();
+                    $this->data['error'] .= $this->shop_brand_model->lastError();
                 }
 
             } else {
@@ -630,7 +630,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem saving the Brand. ';
-                    $this->data['error'] .= $this->shop_brand_model->last_error();
+                    $this->data['error'] .= $this->shop_brand_model->lastError();
                 }
 
             } else {
@@ -680,7 +680,7 @@ class Manage extends BaseAdmin
         } else {
 
             $status  = 'error';
-            $message = 'There was a problem deleting the Brand. ' . $this->shop_brand_model->last_error();
+            $message = 'There was a problem deleting the Brand. ' . $this->shop_brand_model->lastError();
         }
 
         $this->session->set_flashdata($status, $message);
@@ -817,7 +817,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Supplier. ';
-                    $this->data['error'] .= $this->shop_supplier_model->last_error();
+                    $this->data['error'] .= $this->shop_supplier_model->lastError();
                 }
 
             } else {
@@ -888,7 +888,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem saving the Supplier. ';
-                    $this->data['error'] .= $this->shop_supplier_model->last_error();
+                    $this->data['error'] .= $this->shop_supplier_model->lastError();
                 }
 
             } else {
@@ -938,7 +938,7 @@ class Manage extends BaseAdmin
         } else {
 
             $status  = 'error';
-            $message = 'There was a problem deleting the Supplier. ' . $this->shop_supplier_model->last_error();
+            $message = 'There was a problem deleting the Supplier. ' . $this->shop_supplier_model->lastError();
         }
 
         $this->session->set_flashdata($status, $message);
@@ -1084,7 +1084,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Category. ';
-                    $this->data['error'] .= $this->shop_category_model->last_error();
+                    $this->data['error'] .= $this->shop_category_model->lastError();
                 }
 
             } else {
@@ -1165,7 +1165,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem saving the Category. ';
-                    $this->data['error'] .= $this->shop_category_model->last_error();
+                    $this->data['error'] .= $this->shop_category_model->lastError();
                 }
 
             } else {
@@ -1215,7 +1215,7 @@ class Manage extends BaseAdmin
         } else {
 
             $status  = 'error';
-            $message = 'There was a problem deleting the Category. ' . $this->shop_category_model->last_error();
+            $message = 'There was a problem deleting the Category. ' . $this->shop_category_model->lastError();
         }
 
         $this->session->set_flashdata($status, $message);
@@ -1361,7 +1361,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Collection. ';
-                    $this->data['error'] .= $this->shop_collection_model->last_error();
+                    $this->data['error'] .= $this->shop_collection_model->lastError();
                 }
 
             } else {
@@ -1442,7 +1442,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem saving the Collection. ';
-                    $this->data['error'] .= $this->shop_collection_model->last_error();
+                    $this->data['error'] .= $this->shop_collection_model->lastError();
                 }
 
             } else {
@@ -1492,7 +1492,7 @@ class Manage extends BaseAdmin
         } else {
 
             $status  = 'error';
-            $message = 'There was a problem deleting the Collection. ' . $this->shop_collection_model->last_error();
+            $message = 'There was a problem deleting the Collection. ' . $this->shop_collection_model->lastError();
         }
 
         $this->session->set_flashdata($status, $message);
@@ -1637,7 +1637,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Range. ';
-                    $this->data['error'] .= $this->shop_range_model->last_error();
+                    $this->data['error'] .= $this->shop_range_model->lastError();
                 }
 
             } else {
@@ -1718,7 +1718,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem saving the Range. ';
-                    $this->data['error'] .= $this->shop_range_model->last_error();
+                    $this->data['error'] .= $this->shop_range_model->lastError();
                 }
 
             } else {
@@ -1768,7 +1768,7 @@ class Manage extends BaseAdmin
         } else {
 
             $status  = 'error';
-            $message = 'There was a problem deleting the Range. ' . $this->shop_range_model->last_error();
+            $message = 'There was a problem deleting the Range. ' . $this->shop_range_model->lastError();
         }
 
         $this->session->set_flashdata($status, $message);
@@ -1911,7 +1911,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Tag. ';
-                    $this->data['error'] .= $this->shop_tag_model->last_error();
+                    $this->data['error'] .= $this->shop_tag_model->lastError();
                 }
 
             } else {
@@ -1990,7 +1990,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem saving the Tag. ';
-                    $this->data['error'] .= $this->shop_tag_model->last_error();
+                    $this->data['error'] .= $this->shop_tag_model->lastError();
                 }
 
             } else {
@@ -2040,7 +2040,7 @@ class Manage extends BaseAdmin
         } else {
 
             $status  = 'error';
-            $message = 'There was a problem deleting the Tag. ' . $this->shop_tag_model->last_error();
+            $message = 'There was a problem deleting the Tag. ' . $this->shop_tag_model->lastError();
         }
 
         $this->session->set_flashdata($status, $message);
@@ -2176,7 +2176,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Tax Rate. ';
-                    $this->data['error'] .= $this->shop_tax_rate_model->last_error();
+                    $this->data['error'] .= $this->shop_tax_rate_model->lastError();
                 }
 
             } else {
@@ -2247,7 +2247,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem saving the Tax Rate. ';
-                    $this->data['error'] .= $this->shop_tax_rate_model->last_error();
+                    $this->data['error'] .= $this->shop_tax_rate_model->lastError();
                 }
 
             } else {
@@ -2297,7 +2297,7 @@ class Manage extends BaseAdmin
         } else {
 
             $status  = 'error';
-            $message = 'There was a problem deleting the Tax Rate. ' . $this->shop_tax_rate_model->last_error();
+            $message = 'There was a problem deleting the Tax Rate. ' . $this->shop_tax_rate_model->lastError();
         }
 
         $this->session->set_flashdata($status, $message);
@@ -2442,7 +2442,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Product Type. ';
-                    $this->data['error'] .= $this->shop_product_model->last_error();
+                    $this->data['error'] .= $this->shop_product_model->lastError();
                 }
 
             } else {
@@ -2521,7 +2521,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem saving the Product Type. ';
-                    $this->data['error'] .= $this->shop_product_type_model->last_error();
+                    $this->data['error'] .= $this->shop_product_type_model->lastError();
                 }
 
             } else {
@@ -2700,7 +2700,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Product Type Meta Field. ';
-                    $this->data['error'] .= $this->shop_product_type_meta_model->last_error();
+                    $this->data['error'] .= $this->shop_product_type_meta_model->lastError();
                 }
 
             } else {
@@ -2781,7 +2781,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem saving the Product Type Meta Field. ';
-                    $this->data['error'] .= $this->shop_product_type_meta_model->last_error();
+                    $this->data['error'] .= $this->shop_product_type_meta_model->lastError();
                 }
 
             } else {
@@ -2831,7 +2831,7 @@ class Manage extends BaseAdmin
         } else {
 
             $status  = 'error';
-            $message = 'There was a problem deleting the Product Type. ' . $this->shop_product_type_model->last_error();
+            $message = 'There was a problem deleting the Product Type. ' . $this->shop_product_type_model->lastError();
         }
 
         $this->session->set_flashdata($status, $message);

@@ -92,7 +92,7 @@ class Feed extends \Nails\Api\Controller\Base
             } else {
 
                 $aOut['status'] = 500;
-                $aOut['error']  = $this->shop_feed_model->last_error();
+                $aOut['error']  = $this->shop_feed_model->lastError();
             }
 
             return $aOut;

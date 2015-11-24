@@ -59,7 +59,7 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 
         if (!valid_email($email)) {
 
-            $this->_set_error('"' . $email . '" is not a valid email address.');
+            $this->setError('"' . $email . '" is not a valid email address.');
             return false;
         }
 
@@ -67,7 +67,7 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 
         if (!$product) {
 
-            $this->_set_error('Invalid Variant ID.');
+            $this->setError('Invalid Variant ID.');
             return false;
         }
 

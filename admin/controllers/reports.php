@@ -759,7 +759,7 @@ class Reports extends BaseAdmin
 
                 $status  = 'error';
                 $message = 'Failed to render PDF. ';
-                $message .= $this->pdf->last_error() ? 'DOMPDF gave the following error: ' . $this->pdf->last_error() : '';
+                $message .= $this->pdf->lastError() ? 'DOMPDF gave the following error: ' . $this->pdf->lastError() : '';
 
                 $this->session->set_flashdata($status, $message);
                 redirect('admin/shop/reports');

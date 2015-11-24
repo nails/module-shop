@@ -171,7 +171,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
 
         if (!$result) {
 
-            $this->_set_error('Failed to create parent object.');
+            $this->setError('Failed to create parent object.');
             $this->db->trans_rollback();
             return false;
         }
@@ -192,7 +192,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
 
             if (!$this->db->insert_batch($this->table_taxonomy, $data)) {
 
-                $this->_set_error('Failed to add new product type/meta field relationships.');
+                $this->setError('Failed to add new product type/meta field relationships.');
                 $this->db->trans_rollback();
                 return false;
             }
@@ -221,7 +221,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
 
         if (!$result) {
 
-            $this->_set_error('Failed to update parent object.');
+            $this->setError('Failed to update parent object.');
             $this->db->trans_rollback();
             return false;
         }
@@ -229,7 +229,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
         $this->db->where('meta_field_id', $id);
         if (!$this->db->delete($this->table_taxonomy)) {
 
-            $this->_set_error('Failed to remove existing product type/meta field relationships.');
+            $this->setError('Failed to remove existing product type/meta field relationships.');
             $this->db->trans_rollback();
             return false;
         }
@@ -248,7 +248,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
 
             if (!$this->db->insert_batch($this->table_taxonomy, $data)) {
 
-                $this->_set_error('Failed to add new product type/meta field relationships.');
+                $this->setError('Failed to add new product type/meta field relationships.');
                 $this->db->trans_rollback();
                 return false;
             }

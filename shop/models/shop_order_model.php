@@ -48,7 +48,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         //  Basket has items?
         if (empty($data['basket']->items)) {
 
-            $this->_set_error('Basket is empty.');
+            $this->setError('Basket is empty.');
             return false;
         }
 
@@ -104,7 +104,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         } else {
 
-            $this->_set_error('An email address must be supplied');
+            $this->setError('An email address must be supplied');
             return false;
         }
 
@@ -342,14 +342,14 @@ class NAILS_Shop_order_model extends NAILS_Model
 
                 //  Set error message
                 $rollback = true;
-                $this->_set_error('Unable to add products to order, aborting.');
+                $this->setError('Unable to add products to order, aborting.');
             }
 
         } else {
 
             //  Failed to create order
             $rollback = true;
-            $this->_set_error('An error occurred while creating the order.');
+            $this->setError('An error occurred while creating the order.');
         }
 
         // --------------------------------------------------------------------------
@@ -700,7 +700,7 @@ class NAILS_Shop_order_model extends NAILS_Model
     {
         if (empty($orderIds)) {
 
-            $this->_set_error('No IDs were supplied.');
+            $this->setError('No IDs were supplied.');
             return false;
         }
 
@@ -714,7 +714,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         } else {
 
-            $this->_set_error('Failed to cancel batch.');
+            $this->setError('Failed to cancel batch.');
             return false;
         }
     }
@@ -779,7 +779,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
             } else {
 
-                $this->_set_error('Failed to update fulfilment status on this order.');
+                $this->setError('Failed to update fulfilment status on this order.');
                 return false;
             }
         }
@@ -797,7 +797,7 @@ class NAILS_Shop_order_model extends NAILS_Model
     {
         if (empty($orderIds)) {
 
-            $this->_set_error('No IDs were supplied.');
+            $this->setError('No IDs were supplied.');
             return false;
         }
 
@@ -831,7 +831,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         } else {
 
-            $this->_set_error('Failed to update fulfilment status on batch.');
+            $this->setError('Failed to update fulfilment status on batch.');
             return false;
         }
     }
@@ -871,7 +871,7 @@ class NAILS_Shop_order_model extends NAILS_Model
     {
         if (empty($orderIds)) {
 
-            $this->_set_error('No IDs were supplied.');
+            $this->setError('No IDs were supplied.');
             return false;
         }
 
@@ -905,7 +905,7 @@ class NAILS_Shop_order_model extends NAILS_Model
             if (!$order) {
 
                 $this->oLogger->line('Invalid order ID');
-                $this->_set_error('Invalid order ID');
+                $this->setError('Invalid order ID');
                 return false;
             }
         }
@@ -1032,12 +1032,12 @@ class NAILS_Shop_order_model extends NAILS_Model
 
             //  Email failed to send, alert developers
             $this->oLogger->line('!!Failed to send download links, alerting developers');
-            $this->oLogger->line(implode("\n", $this->emailer->get_errors()));
+            $this->oLogger->line(implode("\n", $this->emailer->getErrors()));
 
             $subject  = 'Unable to send download email';
             $message  = 'Unable to send the email with download links to ' . $email->to_email . '; ';
             $message .= 'order #' . $order->id . "\n\nEmailer errors:\n\n";
-            $message .= print_r($this->emailer->get_errors(), true);
+            $message .= print_r($this->emailer->getErrors(), true);
 
             sendDeveloperMail($subject, $message);
         }
@@ -1060,7 +1060,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         if (!$order) {
 
             $this->oLogger->line('Invalid order ID');
-            $this->_set_error('Invalid order ID');
+            $this->setError('Invalid order ID');
             return false;
         }
 
@@ -1076,7 +1076,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         if (!$this->emailer->send($email, true)) {
 
             //  Email failed to send, alert developers
-            $emailErrors = $this->emailer->get_errors();
+            $emailErrors = $this->emailer->getErrors();
 
             if ($partial) {
 
@@ -1120,7 +1120,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         if (!$order) {
 
             $this->oLogger->line('Invalid order ID');
-            $this->_set_error('Invalid order ID.');
+            $this->setError('Invalid order ID.');
             return false;
         }
 
@@ -1142,7 +1142,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
             if (!$this->emailer->send($email, true)) {
 
-                $emailErrors = $this->emailer->get_errors();
+                $emailErrors = $this->emailer->getErrors();
 
                 if ($partial) {
 

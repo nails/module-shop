@@ -156,7 +156,7 @@ class Currency extends Base
         if (empty($additionalCurrencies)) {
 
             $message = 'No additional currencies are supported, aborting sync.';
-            $this->_set_error($message);
+            $this->setError($message);
 
             if (empty($muteLog)) {
 
@@ -404,7 +404,7 @@ class Currency extends Base
                     } else {
 
                         $message = 'Failed to insert new currency data.';
-                        $this->_set_error($message);
+                        $this->setError($message);
 
                         if (empty($muteLog)) {
 
@@ -422,7 +422,7 @@ class Currency extends Base
             } else {
 
                 $message = 'Failed to truncate currency table.';
-                $this->_set_error($message);
+                $this->setError($message);
 
                 if (empty($muteLog)) {
 
@@ -435,7 +435,7 @@ class Currency extends Base
         } else {
 
             $message = '`openexchangerates_app_id` setting is not set. Sync aborted.';
-            $this->_set_error($message);
+            $this->setError($message);
 
             if (empty($muteLog)) {
 
@@ -472,7 +472,7 @@ class Currency extends Base
 
         if (!$currencyFrom) {
 
-            $this->_set_error('Invalid `from` currency code.');
+            $this->setError('Invalid `from` currency code.');
             return false;
         }
 
@@ -480,7 +480,7 @@ class Currency extends Base
 
         if (!$currencyTo) {
 
-            $this->_set_error('Invalid `to` currency code.');
+            $this->setError('Invalid `to` currency code.');
             return false;
         }
 
@@ -515,7 +515,7 @@ class Currency extends Base
 
         } else {
 
-            $this->_set_error('No exchange rate available for those currencies; does the system need to sync?');
+            $this->setError('No exchange rate available for those currencies; does the system need to sync?');
             return false;
         }
     }
@@ -559,7 +559,7 @@ class Currency extends Base
 
         if (!$currency) {
 
-            $this->_set_error('Invalid currency code.');
+            $this->setError('Invalid currency code.');
             return false;
         }
 
@@ -627,7 +627,7 @@ class Currency extends Base
 
         if (!$currency) {
 
-            $this->_set_error('Invalid currency code.');
+            $this->setError('Invalid currency code.');
             return false;
         }
 
@@ -650,7 +650,7 @@ class Currency extends Base
 
         if (!$currency) {
 
-            $this->_set_error('Invalid currency code.');
+            $this->setError('Invalid currency code.');
             return false;
         }
 

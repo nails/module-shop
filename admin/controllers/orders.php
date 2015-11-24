@@ -419,7 +419,7 @@ class Orders extends BaseAdmin
 
         if (!$skin) {
 
-            showFatalError('Failed to load shop skin "' . $skin . '"', 'Shop skin "' . $skin . '" failed to load at ' . APP_NAME . ', the following reason was given: ' . $this->shop_skin_checkout_model->last_error());
+            showFatalError('Failed to load shop skin "' . $skin . '"', 'Shop skin "' . $skin . '" failed to load at ' . APP_NAME . ', the following reason was given: ' . $this->shop_skin_checkout_model->lastError());
         }
 
         // --------------------------------------------------------------------------
@@ -509,7 +509,7 @@ class Orders extends BaseAdmin
         } else {
 
             $msg     = 'Failed to mark orders as fulfilled. ';
-            $msg    .= $this->shop_order_model->last_error();
+            $msg    .= $this->shop_order_model->lastError();
             $status  = 'error';
         }
 
@@ -594,7 +594,7 @@ class Orders extends BaseAdmin
         } else {
 
             $msg     = 'Failed to mark orders as unfulfilled. ';
-            $msg    .= $this->shop_order_model->last_error();
+            $msg    .= $this->shop_order_model->lastError();
             $status  = 'error';
         }
 
@@ -679,7 +679,7 @@ class Orders extends BaseAdmin
         } else {
 
             $msg     = 'Failed to mark orders as cancelled. ';
-            $msg    .= $this->shop_order_model->last_error();
+            $msg    .= $this->shop_order_model->lastError();
             $status  = 'error';
         }
 

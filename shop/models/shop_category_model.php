@@ -41,7 +41,7 @@ class NAILS_Shop_category_model extends NAILS_Model
         //  Some basic sanity testing
         if (empty($data['label'])) {
 
-            $this->_set_error('"label" is a required field.');
+            $this->setError('"label" is a required field.');
             return false;
         }
 
@@ -60,7 +60,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 
         if (!$_id) {
 
-            $this->_set_error('Unable to create base category object.');
+            $this->setError('Unable to create base category object.');
             $this->db->trans_rollback();
             return false;
 
@@ -99,7 +99,7 @@ class NAILS_Shop_category_model extends NAILS_Model
         //  Prep the data
         if (empty($data['label'])) {
 
-            $this->_set_error('"label" is a required field.');
+            $this->setError('"label" is a required field.');
             return false;
 
         } else {
@@ -113,7 +113,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 
             if ($_data['parent_id'] == $id) {
 
-                $this->_set_error('"parent_id" cannot be the same as the category\'s ID.');
+                $this->setError('"parent_id" cannot be the same as the category\'s ID.');
                 return false;
             }
         }
@@ -204,7 +204,7 @@ class NAILS_Shop_category_model extends NAILS_Model
             if (!parent::update($id, $_data)) {
 
                 $this->db->trans_rollback();
-                $this->_set_error('Failed to update category breadcrumbs.');
+                $this->setError('Failed to update category breadcrumbs.');
                 return false;
             }
 
@@ -241,7 +241,7 @@ class NAILS_Shop_category_model extends NAILS_Model
                     if (!parent::update($child_id, $_child_data)) {
 
                         $this->db->trans_rollback();
-                        $this->_set_error('Failed to update child category.');
+                        $this->setError('Failed to update child category.');
                         return false;
                     }
                 }
@@ -267,7 +267,7 @@ class NAILS_Shop_category_model extends NAILS_Model
                 if (!parent::update($parent_id, $_data)) {
 
                     $this->db->trans_rollback();
-                    $this->_set_error('Failed to update parent\'s children IDs.');
+                    $this->setError('Failed to update parent\'s children IDs.');
                     return false;
                 }
             }
@@ -297,7 +297,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 
         if (!$current) {
 
-            $this->_set_error('Invalid Category ID');
+            $this->setError('Invalid Category ID');
             return false;
         }
 
@@ -322,7 +322,7 @@ class NAILS_Shop_category_model extends NAILS_Model
                 if (!parent::update($parentId, $data)) {
 
                     $this->db->trans_rollback();
-                    $this->_set_error('Failed to update parent\'s children IDs.');
+                    $this->setError('Failed to update parent\'s children IDs.');
                     return false;
                 }
             }
@@ -332,7 +332,7 @@ class NAILS_Shop_category_model extends NAILS_Model
 
         } else {
 
-            $this->_set_error('Invalid Category ID');
+            $this->setError('Invalid Category ID');
             $this->db->trans_rollback();
             return false;
         }

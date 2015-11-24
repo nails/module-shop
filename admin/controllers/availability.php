@@ -169,7 +169,7 @@ class Availability extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Product Availability Notification. ';
-                    $this->data['error'] .= $this->shop_inform_product_available_model->last_error();
+                    $this->data['error'] .= $this->shop_inform_product_available_model->lastError();
                 }
 
             } else {
@@ -242,7 +242,7 @@ class Availability extends BaseAdmin
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem updated the Product Availability Notification. ' . $this->shop_inform_product_available_model->last_error();
+                    $this->data['error'] = 'There was a problem updated the Product Availability Notification. ' . $this->shop_inform_product_available_model->lastError();
 
                 }
 
@@ -289,7 +289,7 @@ class Availability extends BaseAdmin
 
         } else {
 
-            $this->session->set_flashdata('error', 'There was a problem deleting the Product availability Notification. ' . $this->shop_inform_product_available_model->last_error());
+            $this->session->set_flashdata('error', 'There was a problem deleting the Product availability Notification. ' . $this->shop_inform_product_available_model->lastError());
         }
 
         redirect('admin/shop/availability');

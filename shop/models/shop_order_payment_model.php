@@ -77,7 +77,7 @@ class NAILS_Shop_order_payment_model extends NAILS_Model
 
         if (!$_order) {
 
-            $this->_set_error('Invalid Order ID.');
+            $this->setError('Invalid Order ID.');
             return false;
 
         }

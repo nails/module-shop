@@ -204,7 +204,7 @@ class NAILS_Shop_model extends Base
      */
     public function getBaseCurrency()
     {
-        $cache = $this->_get_cache('base_currency');
+        $cache = $this->getCache('base_currency');
 
         if ($cache) {
 
@@ -234,7 +234,7 @@ class NAILS_Shop_model extends Base
         }
 
         //  Cache
-        $this->_set_cache('base_currency', $base);
+        $this->setCache('base_currency', $base);
 
         return $base;
     }

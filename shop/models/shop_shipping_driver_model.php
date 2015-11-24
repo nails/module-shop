@@ -207,7 +207,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
             }
         }
 
-        $this->_set_error('"' . $slug . '" was not found.');
+        $this->setError('"' . $slug . '" was not found.');
         return false;
     }
 

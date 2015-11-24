@@ -100,7 +100,7 @@ class NAILS_Shop_basket_model extends Base
         // --------------------------------------------------------------------------
 
         //  Clear any startup errors
-        $this->clear_errors();
+        $this->clearErrors();
     }
 
     // --------------------------------------------------------------------------
@@ -113,7 +113,7 @@ class NAILS_Shop_basket_model extends Base
     public function get($skipCache = false)
     {
         if (!empty($skipCache)) {
-            $cache = $this->_get_cache($this->cacheKey);
+            $cache = $this->getCache($this->cacheKey);
             if (!empty($cache)) {
                 return $cache;
             }
@@ -509,7 +509,7 @@ class NAILS_Shop_basket_model extends Base
         // --------------------------------------------------------------------------
 
         //  Save to cache and spit it back
-        $this->_set_cache($this->cacheKey, $basket);
+        $this->setCache($this->cacheKey, $basket);
 
         return $basket;
     }
@@ -689,7 +689,7 @@ class NAILS_Shop_basket_model extends Base
 
         if ($quantity < 1) {
 
-            $this->_set_error('Quantity must be greater than 0.');
+            $this->setError('Quantity must be greater than 0.');
             return false;
         }
 
@@ -715,7 +715,7 @@ class NAILS_Shop_basket_model extends Base
 
         if (!$_product) {
 
-            $this->_set_error('No Product for that Variant ID.');
+            $this->setError('No Product for that Variant ID.');
             return false;
         }
 
@@ -731,7 +731,7 @@ class NAILS_Shop_basket_model extends Base
 
         if (!$_variant) {
 
-            $this->_set_error('Invalid Variant ID.');
+            $this->setError('Invalid Variant ID.');
             return false;
         }
 
@@ -740,7 +740,7 @@ class NAILS_Shop_basket_model extends Base
         //  Check product is active
         if (!$_product->is_active) {
 
-            $this->_set_error('Product is not available.');
+            $this->setError('Product is not available.');
             return false;
         }
 
@@ -754,7 +754,7 @@ class NAILS_Shop_basket_model extends Base
 
         if (!is_null($_variant->quantity_available) && $_variant->quantity_available == 0) {
 
-            $this->_set_error('Product is not available.');
+            $this->setError('Product is not available.');
             return false;
 
         } else if (!is_null($_variant->quantity_available) && $quantity > $_variant->quantity_available) {
@@ -784,7 +784,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         // --------------------------------------------------------------------------
 
@@ -810,7 +810,7 @@ class NAILS_Shop_basket_model extends Base
 
         } else {
 
-            $this->_set_error('This item is not in your basket.');
+            $this->setError('This item is not in your basket.');
             return false;
         }
     }
@@ -831,7 +831,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         // --------------------------------------------------------------------------
 
@@ -917,25 +917,25 @@ class NAILS_Shop_basket_model extends Base
 
                     //  Invalidate the basket cache
                     $this->saveSession();
-                    $this->_unset_cache($this->cacheKey);
+                    $this->unsetCache($this->cacheKey);
 
                     return true;
 
                 } else {
 
-                    $this->_set_error('You cannot increment this item that many times.');
+                    $this->setError('You cannot increment this item that many times.');
                     return false;
                 }
 
             } else {
 
-                $this->_set_error('Could not find product.');
+                $this->setError('Could not find product.');
                 return false;
             }
 
         } else {
 
-            $this->_set_error('This item is not in your basket.');
+            $this->setError('This item is not in your basket.');
             return false;
         }
     }
@@ -973,7 +973,7 @@ class NAILS_Shop_basket_model extends Base
 
                     //  Invalidate the basket cache
                     $this->saveSession();
-                    $this->_unset_cache($this->cacheKey);
+                    $this->unsetCache($this->cacheKey);
                 }
 
             } else {
@@ -985,7 +985,7 @@ class NAILS_Shop_basket_model extends Base
 
         } else {
 
-            $this->_set_error('This item is not in your basket.');
+            $this->setError('This item is not in your basket.');
             return false;
         }
     }
@@ -1014,7 +1014,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -1031,7 +1031,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -1060,7 +1060,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -1077,7 +1077,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -1138,13 +1138,13 @@ class NAILS_Shop_basket_model extends Base
 
             //  Invalidate the basket cache
             $this->saveSession();
-            $this->_unset_cache($this->cacheKey);
+            $this->unsetCache($this->cacheKey);
 
             return true;
 
         } else {
 
-            $this->_set_error('"' . $deliveryType . '" is not a valid delivery type.');
+            $this->setError('"' . $deliveryType . '" is not a valid delivery type.');
             return false;
         }
     }
@@ -1161,7 +1161,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -1208,7 +1208,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -1225,7 +1225,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -1254,7 +1254,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -1271,7 +1271,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -1297,7 +1297,7 @@ class NAILS_Shop_basket_model extends Base
     {
         if (empty($voucher_code)) {
 
-            $this->_set_error('No voucher code supplied.');
+            $this->setError('No voucher code supplied.');
             return false;
         }
 
@@ -1310,14 +1310,14 @@ class NAILS_Shop_basket_model extends Base
 
             //  Invalidate the basket cache
             $this->saveSession();
-            $this->_unset_cache($this->cacheKey);
+            $this->unsetCache($this->cacheKey);
 
             return true;
 
         } else {
 
             $this->removeVoucher();
-            $this->_set_error($oVoucherModel->last_error());
+            $this->setError($oVoucherModel->lastError());
 
             return false;
 
@@ -1336,7 +1336,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -1364,7 +1364,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -1381,7 +1381,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -1498,7 +1498,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
     }
 
     // --------------------------------------------------------------------------

@@ -116,7 +116,7 @@ class NAILS_Shop_product_model extends Base
 
         if (!$current) {
 
-            $this->_set_error('Invalid product ID');
+            $this->setError('Invalid product ID');
             return false;
         }
 
@@ -163,7 +163,7 @@ class NAILS_Shop_product_model extends Base
 
         if (empty($data['label'])) {
 
-            $this->_set_error('Label is a required field.');
+            $this->setError('Label is a required field.');
             return false;
         }
 
@@ -181,7 +181,7 @@ class NAILS_Shop_product_model extends Base
 
         if (!$_data->type_id) {
 
-            $this->_set_error('Product type must be defined.');
+            $this->setError('Product type must be defined.');
             return false;
         }
 
@@ -216,7 +216,7 @@ class NAILS_Shop_product_model extends Base
 
         if (!isset($data['variation']) || !$data['variation']) {
 
-            $this->_set_error('At least one variation is required.');
+            $this->setError('At least one variation is required.');
             return false;
         }
 
@@ -225,7 +225,7 @@ class NAILS_Shop_product_model extends Base
 
         if (!$productType) {
 
-            $this->_set_error('Invalid Product Type');
+            $this->setError('Invalid Product Type');
             return false;
 
         } else {
@@ -382,7 +382,7 @@ class NAILS_Shop_product_model extends Base
 
                     if (empty($price['currency'])) {
 
-                        $this->_set_error('"Currency" field is required for all variant prices.');
+                        $this->setError('"Currency" field is required for all variant prices.');
                         return false;
                     }
 
@@ -404,7 +404,7 @@ class NAILS_Shop_product_model extends Base
 
                 if (!$basePriceSet) {
 
-                    $this->_set_error('The ' . SHOP_BASE_CURRENCY_CODE . ' price must be set for all variants.');
+                    $this->setError('The ' . SHOP_BASE_CURRENCY_CODE . ' price must be set for all variants.');
                     return false;
                 }
             }
@@ -452,7 +452,7 @@ class NAILS_Shop_product_model extends Base
              * the same, if not then it'll vary.
              */
 
-            $this->_set_error('All variations which have defined SKUs must be unique.');
+            $this->setError('All variations which have defined SKUs must be unique.');
             return false;
         }
 
@@ -612,7 +612,7 @@ class NAILS_Shop_product_model extends Base
                 $this->db->where('product_id', $data->id);
                 if (!$this->db->delete($table)) {
 
-                    $this->_set_error('Failed to clear old product ' . $human . '.');
+                    $this->setError('Failed to clear old product ' . $human . '.');
                     $rollback = true;
                     break;
                 }
@@ -663,7 +663,7 @@ class NAILS_Shop_product_model extends Base
 
                     if (!$this->db->insert_batch($table, $temp)) {
 
-                        $this->_set_error('Failed to add product ' . $human . '.');
+                        $this->setError('Failed to add product ' . $human . '.');
                         $rollback = true;
                     }
                 }
@@ -778,7 +778,7 @@ class NAILS_Shop_product_model extends Base
                         $this->db->where('variation_id', $v->id);
                         if (!$this->db->delete($this->table_variation_gallery)) {
 
-                            $this->_set_error('Failed to clear gallery items for variant with label "' . $v->label . '"');
+                            $this->setError('Failed to clear gallery items for variant with label "' . $v->label . '"');
                             $rollback = true;
                         }
 
@@ -797,7 +797,7 @@ class NAILS_Shop_product_model extends Base
 
                                 if (!$this->db->insert_batch($this->table_variation_gallery, $temp)) {
 
-                                    $this->_set_error('Failed to update gallery items variant with label "' . $v->label . '"');
+                                    $this->setError('Failed to update gallery items variant with label "' . $v->label . '"');
                                     $rollback = true;
                                 }
                             }
@@ -818,7 +818,7 @@ class NAILS_Shop_product_model extends Base
 
                             if (!$this->db->delete($this->table_variation_product_type_meta)) {
 
-                                $this->_set_error('Failed to clear meta data for variant with label "' . $v->label . '"');
+                                $this->setError('Failed to clear meta data for variant with label "' . $v->label . '"');
                                 $rollback = true;
                             }
 
@@ -826,7 +826,7 @@ class NAILS_Shop_product_model extends Base
 
                                 if (!$this->db->insert_batch($this->table_variation_product_type_meta, $v->meta)) {
 
-                                    $this->_set_error('Failed to update meta data for variant with label "' . $v->label . '"');
+                                    $this->setError('Failed to update meta data for variant with label "' . $v->label . '"');
                                     $rollback = true;
                                 }
                             }
@@ -841,7 +841,7 @@ class NAILS_Shop_product_model extends Base
                             $this->db->where('variation_id', $v->id);
                             if (!$this->db->delete($this->table_variation_price)) {
 
-                                $this->_set_error('Failed to clear price data for variant with label "' . $v->label . '"');
+                                $this->setError('Failed to clear price data for variant with label "' . $v->label . '"');
                                 $rollback = true;
                             }
 
@@ -859,7 +859,7 @@ class NAILS_Shop_product_model extends Base
 
                                     if (!$this->db->insert_batch($this->table_variation_price, $v->pricing)) {
 
-                                        $this->_set_error('Failed to update price data for variant with label "' . $v->label . '"');
+                                        $this->setError('Failed to update price data for variant with label "' . $v->label . '"');
                                         $rollback = true;
                                     }
                                 }
@@ -868,7 +868,7 @@ class NAILS_Shop_product_model extends Base
 
                     } else {
 
-                        $this->_set_error('Unable to ' . $action . ' variation with label "' . $v->label . '".');
+                        $this->setError('Unable to ' . $action . ' variation with label "' . $v->label . '".');
                         $rollback = true;
                         break;
                     }
@@ -885,7 +885,7 @@ class NAILS_Shop_product_model extends Base
 
                     if (!$this->db->update($this->table_variation)) {
 
-                        $this->_set_error('Unable to delete old variations.');
+                        $this->setError('Unable to delete old variations.');
                         $rollback = true;
                     }
                 }
@@ -893,7 +893,7 @@ class NAILS_Shop_product_model extends Base
 
         } else {
 
-            $this->_set_error('Failed to ' . $action . ' base product.');
+            $this->setError('Failed to ' . $action . ' base product.');
             $rollback = true;
         }
 

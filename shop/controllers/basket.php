@@ -160,7 +160,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
             $status   = 'error';
             $message  = '<strong>Sorry,</strong> there was a problem adding to your basket: ';
-            $message .= $this->shop_basket_model->last_error();
+            $message .= $this->shop_basket_model->lastError();
         }
 
         // --------------------------------------------------------------------------
@@ -196,7 +196,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
             $status   = 'error';
             $message  = '<strong>Sorry,</strong> there was a problem removing the item from your basket: ';
-            $message .= $this->shop_basket_model->last_error();
+            $message .= $this->shop_basket_model->lastError();
         }
 
         // --------------------------------------------------------------------------
@@ -251,7 +251,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         } else {
 
             $status  = 'error';
-            $message = '<strong>Sorry,</strong> could not adjust quantity. ' . $this->shop_basket_model->last_error();
+            $message = '<strong>Sorry,</strong> could not adjust quantity. ' . $this->shop_basket_model->lastError();
         }
 
         // --------------------------------------------------------------------------
@@ -286,7 +286,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         } else {
 
             $status  = 'error';
-            $message = '<strong>Sorry,</strong> could not adjust quantity. ' . $this->shop_basket_model->last_error();
+            $message = '<strong>Sorry,</strong> could not adjust quantity. ' . $this->shop_basket_model->lastError();
         }
 
         // --------------------------------------------------------------------------
@@ -317,7 +317,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         } else {
 
             $status  = 'error';
-            $message = '<Strong>Sorry,</strong> failed to add voucher. ' . $this->shop_basket_model->last_error();
+            $message = '<Strong>Sorry,</strong> failed to add voucher. ' . $this->shop_basket_model->lastError();
         }
 
         // --------------------------------------------------------------------------
@@ -350,7 +350,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         } else {
 
             $status  = 'error';
-            $message = '<strong>Sorry,</strong> failed to remove voucher. ' . $this->shop_basket_model->last_error();
+            $message = '<strong>Sorry,</strong> failed to remove voucher. ' . $this->shop_basket_model->lastError();
 
         }
 
@@ -384,7 +384,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         } else {
 
             $status  = 'error';
-            $message = '<strong>Sorry,</strong> failed to save note. ' . $this->shop_basket_model->last_error();
+            $message = '<strong>Sorry,</strong> failed to save note. ' . $this->shop_basket_model->lastError();
 
         }
 
@@ -414,7 +414,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         } else {
 
             $status  = 'error';
-            $message = '<strong>Sorry,</strong> failed to remove note. ' . $this->shop_basket_model->last_error();
+            $message = '<strong>Sorry,</strong> failed to remove note. ' . $this->shop_basket_model->lastError();
 
         }
 
@@ -502,7 +502,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
             $status   = 'error';
             $message  = '<strong>Sorry,</strong> failed to set your basket as a "Collection" order. ';
-            $message .= $this->shop_basket_model->last_error();
+            $message .= $this->shop_basket_model->lastError();
         }
 
         // --------------------------------------------------------------------------
@@ -562,7 +562,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
             $status   = 'error';
             $message  = '<strong>Sorry,</strong> failed to set your basket as a "Delivery" order. ';
-            $message .= $this->shop_basket_model->last_error();
+            $message .= $this->shop_basket_model->lastError();
         }
 
         // --------------------------------------------------------------------------

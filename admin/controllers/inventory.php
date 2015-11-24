@@ -398,7 +398,7 @@ class Inventory extends BaseAdmin
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem creating the Product. ' . $this->shop_product_model->last_error();
+                    $this->data['error'] = 'There was a problem creating the Product. ' . $this->shop_product_model->lastError();
                 }
 
             } else {
@@ -579,7 +579,7 @@ class Inventory extends BaseAdmin
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem updating the Product. ' . $this->shop_product_model->last_error();
+                    $this->data['error'] = 'There was a problem updating the Product. ' . $this->shop_product_model->lastError();
                 }
 
             } else {
@@ -878,7 +878,7 @@ class Inventory extends BaseAdmin
 
             $status = 'error';
             $msg    = 'That product could not be deleted. ';
-            $msg   .= $this->shop_product_model->last_error();
+            $msg   .= $this->shop_product_model->lastError();
         }
 
         $this->session->set_flashdata($status, $msg);

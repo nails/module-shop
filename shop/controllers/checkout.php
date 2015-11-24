@@ -211,11 +211,11 @@ class NAILS_Checkout extends NAILS_Shop_Controller
                         } else {
 
                             //  Payment failed, mark this order as a failure too.
-                            $this->shop_order_model->fail($order->id, $this->shop_payment_gateway_model->last_error());
+                            $this->shop_order_model->fail($order->id, $this->shop_payment_gateway_model->lastError());
 
                             $this->data['error']  = '<strong>Sorry,</strong> something went wrong during checkout. ';
-                            $this->data['error'] .= $this->shop_payment_gateway_model->last_error();
-                            $this->data['payment_error'] = $this->shop_payment_gateway_model->last_error();
+                            $this->data['error'] .= $this->shop_payment_gateway_model->lastError();
+                            $this->data['payment_error'] = $this->shop_payment_gateway_model->lastError();
 
                             $this->shop_payment_gateway_model->checkoutSessionClear();
                         }
@@ -223,7 +223,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
                     } else {
 
                         $this->data['error']  = '<strong>Sorry,</strong> there was a problem processing your order. ';
-                        $this->data['error'] .= $this->shop_order_model->last_error();
+                        $this->data['error'] .= $this->shop_order_model->lastError();
                     }
 
                 } else {
@@ -585,7 +585,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
             $status   = 'error';
             $message  = 'An error occurred during checkout, you may have been charged. ';
-            $message .= $this->shop_payment_gateway_model->last_error();
+            $message .= $this->shop_payment_gateway_model->lastError();
 
             $this->session->set_flashdata($status, $message);
             redirect($this->shopUrl . 'checkout');
@@ -630,7 +630,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
             $subject  = 'Failed to load shop skin "' . $skin . '"';
             $message  = 'Shop skin "' . $skin . '" failed to load at ' . APP_NAME . ', for the following reason: ';
-            $message .= $this->shop_skin_checkout_model->last_error();
+            $message .= $this->shop_skin_checkout_model->lastError();
 
             showFatalError($subject, $message);
         }

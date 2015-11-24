@@ -47,21 +47,21 @@ class NAILS_Shop_feed_model extends NAILS_Model
                 } else {
 
                     $error = 'Failed to write shop feed to disk "' . $provider . '" in format "' . $format . '"';
-                    $this->_set_error($error);
+                    $this->setError($error);
                     return false;
                 }
 
             } else {
 
                 $error = 'Failed to generate data for "' . $provider . '" in format "' . $format . '"';
-                $this->_set_error($error);
+                $this->setError($error);
                 return false;
             }
 
         } else {
 
             $error = 'Invalid feed parameters.';
-            $this->_set_error($error);
+            $this->setError($error);
             return false;
         }
     }
@@ -287,7 +287,7 @@ class NAILS_Shop_feed_model extends NAILS_Model
 
             if (empty($data)) {
 
-                $this->_set_error('Failed to fetch feed from Google.');
+                $this->setError('Failed to fetch feed from Google.');
                 return false;
             }
 
@@ -317,7 +317,7 @@ class NAILS_Shop_feed_model extends NAILS_Model
 
         } else {
 
-            $this->_set_error('Failed to read feed from cache.');
+            $this->setError('Failed to read feed from cache.');
             return false;
         }
     }

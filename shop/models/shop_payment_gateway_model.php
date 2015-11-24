@@ -268,7 +268,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
         if (empty($gatewayName) || array_search($gatewayName, $enabledGateways) === false) {
 
-            $this->_set_error('"' . $gateway . '" is not an enabled Payment Gatway.');
+            $this->setError('"' . $gateway . '" is not an enabled Payment Gatway.');
             return false;
         }
 
@@ -278,7 +278,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
         if (!$order || $order->status != 'UNPAID') {
 
-            $this->_set_error('Cannot create payment against order.');
+            $this->setError('Cannot create payment against order.');
             return false;
         }
 
@@ -391,7 +391,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
                     $subject  = 'Failed to create payment reference against order ' . $order->id;
                     $message  = 'The customer was charged but the payment failed to associate with the order. ';
-                    $message .= $this->shop_order_payment_model->last_error();
+                    $message .= $this->shop_order_payment_model->lastError();
                     showFatalError(
                         $subject,
                         $message
@@ -447,13 +447,13 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
                 //  Payment failed: display message to customer
                 $error  = 'Our payment processor denied the transaction and did not charge you.';
                 $error .= $gatewayResponse->getMessage() ? ' Reason: ' . $gatewayResponse->getMessage() : '';
-                $this->_set_error($error);
+                $this->setError($error);
                 return false;
             }
         }
         catch(Exception $e)
         {
-            $this->_set_error('Payment Request failed. ' . $e->getMessage());
+            $this->setError('Payment Request failed. ' . $e->getMessage());
             return false;
         }
 
@@ -474,7 +474,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
         if (!$gatewayName) {
 
-            $this->_set_error('"' . $gateway . '" is not a valid gateway.');
+            $this->setError('"' . $gateway . '" is not a valid gateway.');
             return false;
         }
 
@@ -519,7 +519,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
             $error = '"' . $gateway . '" is not a valid gateway.';
             $this->oLogger->line($error);
-            $this->_set_error($error);
+            $this->setError($error);
             return false;
 
         } else {
@@ -551,7 +551,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
             $error = 'Unable to extract Order ID from request.';
             $this->oLogger->line($error);
-            $this->_set_error($error);
+            $this->setError($error);
             return false;
 
         } else {
@@ -564,7 +564,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
             $error = 'Unable to extract payment amount from request.';
             $this->oLogger->line($error);
-            $this->_set_error($error);
+            $this->setError($error);
             return false;
 
         } else {
@@ -577,7 +577,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
             $error = 'Unable to extract currency from request.';
             $this->oLogger->line($error);
-            $this->_set_error($error);
+            $this->setError($error);
             return false;
 
         } else {
@@ -596,7 +596,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
             $error = 'Could not find order #' . $paymentData['order_id'] . '.';
             $this->oLogger->line($error);
-            $this->_set_error($error);
+            $this->setError($error);
             return false;
         }
 
@@ -629,7 +629,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         {
             $error = 'Payment Failed with exception: ' . $e->getMessage();
             $this->oLogger->line($error);
-            $this->_set_error($error);
+            $this->setError($error);
             return false;
         }
 
@@ -637,7 +637,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
             $error = 'Payment Failed with error: ' . $gatewayResponse->getMessage();
             $this->oLogger->line($error);
-            $this->_set_error($error);
+            $this->setError($error);
             return false;
         }
 
@@ -660,7 +660,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
             $error = 'Unable to extract payment transaction ID from request.';
             $this->oLogger->line($error);
-            $this->_set_error($error);
+            $this->setError($error);
             return false;
 
         } else {
@@ -674,15 +674,15 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
             $error = 'Payment with ID ' . $gatewayName . ':' . $data['transaction_id'] . ' has already been processed by this system.';
             $this->oLogger->line($error);
-            $this->_set_error($error);
+            $this->setError($error);
             return false;
         }
 
         if (!$this->shop_order_payment_model->create($data)) {
 
-            $error = 'Failed to create payment reference. ' . $this->shop_order_payment_model->last_error();
+            $error = 'Failed to create payment reference. ' . $this->shop_order_payment_model->lastError();
             $this->oLogger->line($error);
-            $this->_set_error($error);
+            $this->setError($error);
             return false;
         }
 
@@ -697,7 +697,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
                 $error = 'Failed to mark order #' . $order->id . ' as PAID.';
                 $this->oLogger->line($error);
-                $this->_set_error($error);
+                $this->setError($error);
                 return false;
 
             } else {
@@ -712,7 +712,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
                 $error = 'Failed to process order #' . $order->id . '.';
                 $this->oLogger->line($error);
-                $this->_set_error($error);
+                $this->setError($error);
                 return false;
 
             } else {
@@ -938,31 +938,31 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
                         } else {
 
-                            $this->_set_error('Wrong number of hash parts. Error #5');
+                            $this->setError('Wrong number of hash parts. Error #5');
                             return false;
                         }
 
                     } else {
 
-                        $this->_set_error('Unable to decrypt hash. Error #4');
+                        $this->setError('Unable to decrypt hash. Error #4');
                         return false;
                     }
 
                 } else {
 
-                    $this->_set_error('Invalid signature. Error #3');
+                    $this->setError('Invalid signature. Error #3');
                     return false;
                 }
 
             } else {
 
-                $this->_set_error('Session data missing elements. Error #2');
+                $this->setError('Session data missing elements. Error #2');
                 return false;
             }
 
         } else {
 
-            $this->_set_error('Invalid session data. Error #1');
+            $this->setError('Invalid session data. Error #1');
             return false;
         }
     }

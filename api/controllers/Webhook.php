@@ -95,7 +95,7 @@ class Webhook extends \Nails\Api\Controller\Base
         if (!$result) {
 
             $out['status'] = 500;
-            $out['error']  = $this->shop_payment_gateway_model->last_error();
+            $out['error']  = $this->shop_payment_gateway_model->lastError();
         }
 
         // --------------------------------------------------------------------------

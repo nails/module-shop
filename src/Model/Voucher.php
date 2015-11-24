@@ -94,7 +94,7 @@ class Voucher extends Base
 
             if (empty($oOrder)) {
 
-                $this->_set_error('Invalid Order ID');
+                $this->setError('Invalid Order ID');
                 return false;
             }
 
@@ -109,7 +109,7 @@ class Voucher extends Base
 
         if (empty($oVoucher)) {
 
-            $this->_set_error('Invalid Voucher ID');
+            $this->setError('Invalid Voucher ID');
             return false;
         }
 
@@ -250,7 +250,7 @@ class Voucher extends Base
                 case self::DISCOUNT_APPLICATION_PRODUCT:
 
                     $cacheKey = 'voucher-product-type-' . $voucher->product_type_id;
-                    $cache    = $this->_get_cache($cacheKey);
+                    $cache    = $this->getCache($cacheKey);
                     if ($cache) {
 
                         //  Exists in cache
@@ -260,14 +260,14 @@ class Voucher extends Base
 
                         //  Doesn't exist, fetch and save
                         $voucher->product = $this->shop_product_model->get_by_id($voucher->product_id);
-                        $this->_set_cache($cacheKey, $voucher->product);
+                        $this->setCache($cacheKey, $voucher->product);
                     }
                     break;
 
                 case self::DISCOUNT_APPLICATION_PRODUCT_TYPE:
 
                     $cacheKey = 'voucher-product-type-' . $voucher->product_type_id;
-                    $cache    = $this->_get_cache($cacheKey);
+                    $cache    = $this->getCache($cacheKey);
                     if ($cache) {
 
                         //  Exists in cache
@@ -277,7 +277,7 @@ class Voucher extends Base
 
                         //  Doesn't exist, fetch and save
                         $voucher->product_type = $this->shop_product_type_model->get_by_id($voucher->product_type_id);
-                        $this->_set_cache($cacheKey, $voucher->product_type);
+                        $this->setCache($cacheKey, $voucher->product_type);
                     }
                     break;
             }
@@ -361,7 +361,7 @@ class Voucher extends Base
     {
         if (!$code) {
 
-            $this->_set_error('No voucher code supplied.');
+            $this->setError('No voucher code supplied.');
             return false;
         }
 
@@ -369,14 +369,14 @@ class Voucher extends Base
 
         if (!$voucher) {
 
-            $this->_set_error('Invalid voucher code.');
+            $this->setError('Invalid voucher code.');
             return false;
         }
 
         //  @todo allow the use of gift cards
         if ($voucher->type == self::TYPE_GIFT_CARD) {
 
-            $this->_set_error('Gift Cards are not currently supported in this store.');
+            $this->setError('Gift Cards are not currently supported in this store.');
             return false;
         }
 
@@ -396,7 +396,7 @@ class Voucher extends Base
                 $sMessage  = 'Voucher is not available yet. This voucher becomes available on the ';
                 $sMessage .= date('jS F Y \a\t H:i', strtotime($voucher->valid_from)) . '.';
 
-                $this->_set_error($sMessage);
+                $this->setError($sMessage);
                 break;
 
             case \Nails\Shop\Model\Voucher::STATUS_EXPIRED:
@@ -404,7 +404,7 @@ class Voucher extends Base
                 $bIsValid = false;
                 $sMessage = 'Voucher has expired.';
 
-                $this->_set_error($sMessage);
+                $this->setError($sMessage);
                 break;
 
             case \Nails\Shop\Model\Voucher::STATUS_INACTIVE:
@@ -412,7 +412,7 @@ class Voucher extends Base
                 $bIsValid = false;
                 $sMessage = 'Invalid voucher code.';
 
-                $this->_set_error($sMessage);
+                $this->setError($sMessage);
                 break;
 
             default:
@@ -432,7 +432,7 @@ class Voucher extends Base
             $bIsShippingVoucher = $voucher->discount_application == self::DISCOUNT_APPLICATION_SHIPPING;
             if ($bIsShippingVoucher && !$basket->shipping->isDeliverable) {
 
-                $this->_set_error('Your order does not contian any items which require shipping, voucher not needed!');
+                $this->setError('Your order does not contian any items which require shipping, voucher not needed!');
                 return false;
             }
 
@@ -446,7 +446,7 @@ class Voucher extends Base
 
                 if ($basket->totals->sub >= appSetting('free_shipping_threshold', 'shop')) {
 
-                    $this->_set_error('Your order qualifies for free shipping, voucher not needed!');
+                    $this->setError('Your order qualifies for free shipping, voucher not needed!');
                     return false;
                 }
             }
@@ -467,7 +467,7 @@ class Voucher extends Base
                 }
 
                 if (!$matched) {
-                    $this->_set_error('This voucher does not apply to any items in your basket.');
+                    $this->setError('This voucher does not apply to any items in your basket.');
                     return false;
                 }
             }
@@ -488,7 +488,7 @@ class Voucher extends Base
                 }
 
                 if (!$matched) {
-                    $this->_set_error('This voucher does not apply to any items in your basket.');
+                    $this->setError('This voucher does not apply to any items in your basket.');
                     return false;
                 }
             }
@@ -513,7 +513,7 @@ class Voucher extends Base
 
         } else {
 
-            $this->_set_error('This voucher is corrupt and cannot be used just now.');
+            $this->setError('This voucher is corrupt and cannot be used just now.');
             return false;
         }
     }
@@ -550,7 +550,7 @@ class Voucher extends Base
 
         } else {
 
-            $this->_set_error('Voucher has exceeded its use limit.');
+            $this->setError('Voucher has exceeded its use limit.');
             return false;
         }
     }
@@ -570,7 +570,7 @@ class Voucher extends Base
 
         } else {
 
-            $this->_set_error('Gift card has no available balance.');
+            $this->setError('Gift card has no available balance.');
             return false;
         }
     }
@@ -588,7 +588,7 @@ class Voucher extends Base
 
         if (!$voucher) {
 
-            $this->_set_error('Invalid voucher ID');
+            $this->setError('Invalid voucher ID');
             return false;
         }
 
@@ -612,7 +612,7 @@ class Voucher extends Base
 
         if (!$voucher) {
 
-            $this->_set_error('Invalid voucher ID');
+            $this->setError('Invalid voucher ID');
             return false;
         }
 
@@ -651,32 +651,32 @@ class Voucher extends Base
     public function create($aData = array(), $bReturnObject = false)
     {
         if (empty($aData['label'])) {
-            $this->_set_error('Discount label is a required field.');
+            $this->setError('Discount label is a required field.');
             return false;
         }
 
         if (empty($aData['type'])) {
-            $this->_set_error('Voucher type is a required field.');
+            $this->setError('Voucher type is a required field.');
             return false;
         }
 
         if (empty($aData['code'])) {
-            $this->_set_error('Voucher code is a required field.');
+            $this->setError('Voucher code is a required field.');
             return false;
         }
 
         if (empty($aData['discount_type'])) {
-            $this->_set_error('Discount type is a required field.');
+            $this->setError('Discount type is a required field.');
             return false;
         }
 
         if (empty($aData['discount_value'])) {
-            $this->_set_error('Discount value is a required field.');
+            $this->setError('Discount value is a required field.');
             return false;
         }
 
         if (empty($aData['discount_application'])) {
-            $this->_set_error('Discount application is a required field.');
+            $this->setError('Discount application is a required field.');
             return false;
         }
 
@@ -691,7 +691,7 @@ class Voucher extends Base
 
                 if ($aData['discount_value'] < 0 || $aData['discount_value'] > 100) {
 
-                    $this->_set_error('Discount value must be within the range 0-100.');
+                    $this->setError('Discount value must be within the range 0-100.');
                     return false;
                 }
                 break;
@@ -700,7 +700,7 @@ class Voucher extends Base
 
                 if ($aData['discount_value'] < 0 ) {
 
-                    $this->_set_error('Discount value must be greater than 0.');
+                    $this->setError('Discount value must be greater than 0.');
                     return false;
 
                 } else {
