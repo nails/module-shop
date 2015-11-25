@@ -39,12 +39,12 @@ class Orders extends BaseAdmin
             $oAlert->setSeverity('danger');
             $oAlert->setLabel('Unfulfilled Orders');
 
-            $navGroup = Factory::factory('Nav', 'nailsapp/module-admin');
-            $navGroup->setLabel('Shop');
-            $navGroup->setIcon('fa-shopping-cart');
-            $navGroup->addAction('Manage Orders', 'index', array($oAlert), 0);
+            $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+            $oNavGroup->setLabel('Shop');
+            $oNavGroup->setIcon('fa-shopping-cart');
+            $oNavGroup->addAction('Manage Orders', 'index', array($oAlert), 0);
 
-            return $navGroup;
+            return $oNavGroup;
         }
     }
 

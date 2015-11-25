@@ -31,11 +31,11 @@ class Manage extends BaseAdmin
     {
         if (userHasPermission('admin:shop:manage:.*')) {
 
-            $navGroup = Factory::factory('Nav', 'nailsapp/module-admin');
-            $navGroup->setLabel('Shop');
-            $navGroup->setIcon('fa-shopping-cart');
-            $navGroup->addAction('Other Managers');
-            return $navGroup;
+            $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+            $oNavGroup->setLabel('Shop');
+            $oNavGroup->setIcon('fa-shopping-cart');
+            $oNavGroup->addAction('Other Managers');
+            return $oNavGroup;
         }
     }
 

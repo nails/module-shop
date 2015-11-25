@@ -26,11 +26,11 @@ class Inventory extends BaseAdmin
     {
         if (userHasPermission('admin:shop:inventory:manage')) {
 
-            $navGroup = Factory::factory('Nav', 'nailsapp/module-admin');
-            $navGroup->setLabel('Shop');
-            $navGroup->setIcon('fa-shopping-cart');
-            $navGroup->addAction('Manage Inventory', 'index', array(), 0);
-            return $navGroup;
+            $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+            $oNavGroup->setLabel('Shop');
+            $oNavGroup->setIcon('fa-shopping-cart');
+            $oNavGroup->addAction('Manage Inventory', 'index', array(), 0);
+            return $oNavGroup;
         }
     }
 
@@ -704,7 +704,7 @@ class Inventory extends BaseAdmin
                 //  Stock
                 //  -----
 
-                $this->oFormValidation->set_rules('variation[' . $index . '][stock_status]', '', 'xss_clean|callback__callback_inventory_valid_stock_status|required');
+                $this->oFormValidation->set_rules('variation[' . $index . '][stock_status]', '', 'xss_clean|callback_callbackInventoryValidStockStatus|required');
 
                 $stock_status = isset($v['stock_status']) ? $v['stock_status'] : '';
 
@@ -1083,5 +1083,17 @@ class Inventory extends BaseAdmin
 
             return true;
         }
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * @todo: complete this callback, I'm sure it used to be here.
+     * @param  string  $str The string to validate
+     * @return boolean
+     */
+    public function callbackInventoryValidStockStatus($str)
+    {
+        return true;
     }
 }

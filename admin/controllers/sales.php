@@ -26,11 +26,11 @@ class Sales extends BaseAdmin
     {
         if (userHasPermission('admin:shop:sales:manage')) {
 
-            $navGroup = Factory::factory('Nav', 'nailsapp/module-admin');
-            $navGroup->setLabel('Shop');
-            $navGroup->setIcon('fa-shopping-cart');
-            $navGroup->addAction('Manage Sales');
-            return $navGroup;
+            $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+            $oNavGroup->setLabel('Shop');
+            $oNavGroup->setIcon('fa-shopping-cart');
+            $oNavGroup->addAction('Manage Sales');
+            return $oNavGroup;
         }
     }
 
@@ -40,7 +40,7 @@ class Sales extends BaseAdmin
      * Returns an array of extra permissions for this controller
      * @return array
      */
-    static function permissions()
+    public static function permissions()
     {
         $permissions = parent::permissions();
 

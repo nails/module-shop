@@ -45,12 +45,12 @@ class Availability extends BaseAdmin
             $oAlertNew->setSeverity('danger');
             $oAlertNew->setLabel('Added within the last week');
 
-            $navGroup = Factory::factory('Nav', 'nailsapp/module-admin');
-            $navGroup->setLabel('Shop');
-            $navGroup->setIcon('fa-shopping-cart');
-            $navGroup->addAction('Product Availability Alerts', 'index', array($oAlertAll, $oAlertNew));
+            $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+            $oNavGroup->setLabel('Shop');
+            $oNavGroup->setIcon('fa-shopping-cart');
+            $oNavGroup->addAction('Product Availability Alerts', 'index', array($oAlertAll, $oAlertNew));
 
-            return $navGroup;
+            return $oNavGroup;
         }
     }
 

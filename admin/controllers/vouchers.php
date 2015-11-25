@@ -31,11 +31,11 @@ class Vouchers extends BaseAdmin
     {
         if (userHasPermission('admin:shop:vouchers:manage')) {
 
-            $navGroup = Factory::factory('Nav', 'nailsapp/module-admin');
-            $navGroup->setLabel('Shop');
-            $navGroup->setIcon('fa-shopping-cart');
-            $navGroup->addAction('Manage Vouchers');
-            return $navGroup;
+            $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+            $oNavGroup->setLabel('Shop');
+            $oNavGroup->setIcon('fa-shopping-cart');
+            $oNavGroup->addAction('Manage Vouchers');
+            return $oNavGroup;
         }
     }
 
@@ -215,7 +215,7 @@ class Vouchers extends BaseAdmin
 
                     $oFormValidation->set_rules('limited_use_limit', '', 'required|is_natural_no_zero');
                     $oFormValidation->set_rules('discount_type', '', 'required|callback_callbackVoucherValidDiscountType');
-                    $oFormValidation->set_rules('discount_application', '', 'required|callback__callback_voucher_valid_discount_application');
+                    $oFormValidation->set_rules('discount_application', '', 'required|callback_callbackVoucherValidDiscountApplication');
 
                     $oFormValidation->set_message('is_natural_no_zero', 'Only positive integers are valid.');
                     break;
@@ -224,7 +224,7 @@ class Vouchers extends BaseAdmin
                 default:
 
                     $oFormValidation->set_rules('discount_type', '', 'required|callback_callbackVoucherValidDiscountType');
-                    $oFormValidation->set_rules('discount_application', '', 'required|callback__callback_voucher_valid_discount_application');
+                    $oFormValidation->set_rules('discount_application', '', 'required|callback_callbackVoucherValidDiscountApplication');
                     break;
 
                 case 'GIFT_CARD':
@@ -487,6 +487,19 @@ class Vouchers extends BaseAdmin
         $oFormValidation = Factory::service('FormValidation');
         $oFormValidation->set_message('callbackVoucherValidDiscountType', 'Invalid discount type.');
         return array_search($str, $valid_types) !== false;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Form Validation: Validate a voucher's discount application
+     * @todo: complete this, I'm sure it used to be here
+     * @param  string $str The voucher discount type
+     * @return boolean
+     */
+    public function callbackVoucherValidDiscountApplication($str)
+    {
+        return true;
     }
 
     // --------------------------------------------------------------------------
