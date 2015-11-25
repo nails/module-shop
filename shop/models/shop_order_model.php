@@ -14,19 +14,25 @@ use Nails\Factory;
 
 class NAILS_Shop_order_model extends NAILS_Model
 {
+    protected $oCurrencyModel;
+    protected $oCountryModel;
+    protected $oLogger;
+
+    // --------------------------------------------------------------------------
+
     /**
      * Constructs the model
      */
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('shop/shop_currency_model');
-
-        $this->oCountryModel = Factory::model('Country');
 
         $this->table       = NAILS_DB_PREFIX . 'shop_order';
         $this->tablePrefix = 'o';
-        $this->oLogger     = Factory::service('Logger');
+
+        $this->oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
+        $this->oCountryModel  = Factory::model('Country');
+        $this->oLogger        = Factory::service('Logger');
     }
 
     // --------------------------------------------------------------------------
@@ -42,7 +48,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         //  Basket has items?
         if (empty($data['basket']->items)) {
 
-            $this->_set_error('Basket is empty.');
+            $this->setError('Basket is empty.');
             return false;
         }
 
@@ -73,12 +79,12 @@ class NAILS_Shop_order_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  User's IP address
-        $order->ip_address = $this->input->ip_address();
+        $order->ip_address = $this->input->ipAddress();
 
         // --------------------------------------------------------------------------
 
         //  Generate a code(used as a secondary verification method)
-        $order->code = md5($this->input->ip_address() . '|'. time() . '|' . random_string('alnum', 15));
+        $order->code = md5($this->input->ipAddress() . '|'. time() . '|' . random_string('alnum', 15));
 
         // --------------------------------------------------------------------------
 
@@ -98,12 +104,12 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         } else {
 
-            $this->_set_error('An email address must be supplied');
+            $this->setError('An email address must be supplied');
             return false;
         }
 
         //  User ID
-        $user = $this->user_model->get_by_email($order->user_email);
+        $user = $this->user_model->getByEmail($order->user_email);
 
         if ($user) {
 
@@ -229,15 +235,23 @@ class NAILS_Shop_order_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Set totals
-        $order->total_base_item     = $data['basket']->totals->base->item;
-        $order->total_base_shipping = $data['basket']->totals->base->shipping;
-        $order->total_base_tax      = $data['basket']->totals->base->tax;
-        $order->total_base_grand    = $data['basket']->totals->base->grand;
+        $order->total_base_item              = $data['basket']->totals->base->item;
+        $order->total_base_item_discount     = $data['basket']->totals->base->item_discount;
+        $order->total_base_shipping          = $data['basket']->totals->base->shipping;
+        $order->total_base_shipping_discount = $data['basket']->totals->base->shipping_discount;
+        $order->total_base_tax               = $data['basket']->totals->base->tax;
+        $order->total_base_tax_discount      = $data['basket']->totals->base->tax_discount;
+        $order->total_base_grand             = $data['basket']->totals->base->grand;
+        $order->total_base_grand_discount    = $data['basket']->totals->base->grand_discount;
 
-        $order->total_user_item     = $data['basket']->totals->user->item;
-        $order->total_user_shipping = $data['basket']->totals->user->shipping;
-        $order->total_user_tax      = $data['basket']->totals->user->tax;
-        $order->total_user_grand    = $data['basket']->totals->user->grand;
+        $order->total_user_item              = $data['basket']->totals->user->item;
+        $order->total_user_item_discount     = $data['basket']->totals->user->item_discount;
+        $order->total_user_shipping          = $data['basket']->totals->user->shipping;
+        $order->total_user_shipping_discount = $data['basket']->totals->user->shipping_discount;
+        $order->total_user_tax               = $data['basket']->totals->user->tax;
+        $order->total_user_tax_discount      = $data['basket']->totals->user->tax_discount;
+        $order->total_user_grand             = $data['basket']->totals->user->grand;
+        $order->total_user_grand_discount    = $data['basket']->totals->user->grand_discount;
 
         // --------------------------------------------------------------------------
 
@@ -275,26 +289,18 @@ class NAILS_Shop_order_model extends NAILS_Model
                 $temp['ship_collection_only'] = $item->variant->ship_collection_only;
 
                 //  Price
-                $temp['price_base_value']         = $item->variant->price->price->base->value;
-                $temp['price_base_value_inc_tax'] = $item->variant->price->price->base->value_inc_tax;
-                $temp['price_base_value_ex_tax']  = $item->variant->price->price->base->value_ex_tax;
-                $temp['price_base_value_tax']     = $item->variant->price->price->base->value_tax;
-
-                $temp['price_user_value']         = $item->variant->price->price->user->value;
-                $temp['price_user_value_inc_tax'] = $item->variant->price->price->user->value_inc_tax;
-                $temp['price_user_value_ex_tax']  = $item->variant->price->price->user->value_ex_tax;
-                $temp['price_user_value_tax']     = $item->variant->price->price->user->value_tax;
-
-                //  Sale Price
-                $temp['sale_price_base_value']         = $item->variant->price->sale_price->base->value;
-                $temp['sale_price_base_value_inc_tax'] = $item->variant->price->sale_price->base->value_inc_tax;
-                $temp['sale_price_base_value_ex_tax']  = $item->variant->price->sale_price->base->value_ex_tax;
-                $temp['sale_price_base_value_tax']     = $item->variant->price->sale_price->base->value_tax;
-
-                $temp['sale_price_user_value']         = $item->variant->price->sale_price->user->value;
-                $temp['sale_price_user_value_inc_tax'] = $item->variant->price->sale_price->user->value_inc_tax;
-                $temp['sale_price_user_value_ex_tax']  = $item->variant->price->sale_price->user->value_ex_tax;
-                $temp['sale_price_user_value_tax']     = $item->variant->price->sale_price->user->value_tax;
+                $temp['price_base_value_inc_tax']          = $item->price->base->value_inc_tax;
+                $temp['price_base_value_ex_tax']           = $item->price->base->value_ex_tax;
+                $temp['price_base_value_tax']              = $item->price->base->value_tax;
+                $temp['price_base_discount_value_inc_tax'] = $item->price->base->discount_value_inc_tax;
+                $temp['price_base_discount_value_ex_tax']  = $item->price->base->discount_value_ex_tax;
+                $temp['price_base_discount_value_tax']     = $item->price->base->discount_value_tax;
+                $temp['price_user_value_inc_tax']          = $item->price->user->value_inc_tax;
+                $temp['price_user_value_ex_tax']           = $item->price->user->value_ex_tax;
+                $temp['price_user_value_tax']              = $item->price->user->value_tax;
+                $temp['price_user_discount_value_inc_tax'] = $item->price->user->discount_value_inc_tax;
+                $temp['price_user_discount_value_ex_tax']  = $item->price->user->discount_value_ex_tax;
+                $temp['price_user_discount_value_tax']     = $item->price->user->discount_value_tax;
 
                 /**
                  * To order?
@@ -336,14 +342,14 @@ class NAILS_Shop_order_model extends NAILS_Model
 
                 //  Set error message
                 $rollback = true;
-                $this->_set_error('Unable to add products to order, aborting.');
+                $this->setError('Unable to add products to order, aborting.');
             }
 
         } else {
 
             //  Failed to create order
             $rollback = true;
-            $this->_set_error('An error occurred while creating the order.');
+            $this->setError('An error occurred while creating the order.');
         }
 
         // --------------------------------------------------------------------------
@@ -360,7 +366,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
             if ($returnObj) {
 
-                return $this->get_by_id($order->id);
+                return $this->getById($order->id);
 
             } else {
 
@@ -397,19 +403,21 @@ class NAILS_Shop_order_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
-     * This method applies the conditionals which are common across the get_*()
+     * This method applies the conditionals which are common across the get*()
      * methods and the count() method.
-     * @param array  $data    Data passed from the calling method
-     * @param string $_caller The name of the calling method
+     * @param  array $data Data passed from the calling method
      * @return void
      **/
-    protected function _getcount_common($data = array(), $_caller = null)
+    protected function getCountCommon($data = array())
     {
         //  Selects
         $this->db->select($this->tablePrefix . '.*');
-        $this->db->select('ue.email, u.first_name, u.last_name, u.gender, u.profile_img,ug.id user_group_id,ug.label user_group_label');
-        $this->db->select('v.code v_code,v.label v_label, v.type v_type, v.discount_type v_discount_type, v.discount_value v_discount_value, v.discount_application v_discount_application');
-        $this->db->select('v.product_type_id v_product_type_id, v.is_active v_is_active, v.is_deleted v_is_deleted, v.valid_from v_valid_from, v.valid_to v_valid_to');
+        $this->db->select('ue.email, u.first_name, u.last_name, u.gender, u.profile_img,ug.id user_group_id');
+        $this->db->select('ug.label user_group_label');
+        $this->db->select('v.code v_code,v.label v_label, v.type v_type, v.discount_type v_discount_type');
+        $this->db->select('v.discount_value v_discount_value, v.discount_application v_discount_application');
+        $this->db->select('v.product_type_id v_product_type_id, v.is_active v_is_active, v.is_deleted v_is_deleted');
+        $this->db->select('v.valid_from v_valid_from, v.valid_to v_valid_to');
 
         //  Joins
         $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = o.user_id', 'LEFT');
@@ -465,7 +473,7 @@ class NAILS_Shop_order_model extends NAILS_Model
             );
         }
 
-        parent::_getcount_common($data, $_caller);
+        parent::getCountCommon($data);
     }
 
     // --------------------------------------------------------------------------
@@ -488,7 +496,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         $data['where'][] = array($this->tablePrefix . '.ref', $ref);
 
-        $result = $this->get_all(null, null, $data, false, 'GET_BY_REF');
+        $result = $this->getAll(null, null, $data);
 
         if (!$result) {
 
@@ -518,7 +526,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         $data['where_in'][] = array($this->tablePrefix . '.ref', $refs);
 
-        return $this->get_all(null, null, $data, 'GET_BY_REFS');
+        return $this->getAll(null, null, $data);
     }
 
     // --------------------------------------------------------------------------
@@ -545,7 +553,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         foreach ($items as $item) {
 
-            $this->_format_object_item($item);
+            $this->formatObjectItem($item);
         }
 
         return $items;
@@ -562,7 +570,7 @@ class NAILS_Shop_order_model extends NAILS_Model
     {
         $this->db->where_in($this->tablePrefix . '.status', array('PAID', 'UNPAID'));
         $this->db->where($this->tablePrefix . '.user_id', $userId);
-        return $this->get_all();
+        return $this->getAll();
     }
 
     // --------------------------------------------------------------------------
@@ -576,14 +584,14 @@ class NAILS_Shop_order_model extends NAILS_Model
     {
         $this->db->where_in($this->tablePrefix . '.status', array('PAID', 'UNPAID'));
         $this->db->where($this->tablePrefix . '.user_email', $email);
-        return $this->get_all();
+        return $this->getAll();
     }
 
     // --------------------------------------------------------------------------
 
     /**
      * Counts the total amount of orders for a partricular query/search key. Essentially performs
-     * the same query as $this->get_all() but without limiting.
+     * the same query as $this->getAll() but without limiting.
      *
      * @access  public
      * @param   string  $where  An array of where conditions
@@ -692,7 +700,7 @@ class NAILS_Shop_order_model extends NAILS_Model
     {
         if (empty($orderIds)) {
 
-            $this->_set_error('No IDs were supplied.');
+            $this->setError('No IDs were supplied.');
             return false;
         }
 
@@ -706,7 +714,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         } else {
 
-            $this->_set_error('Failed to cancel batch.');
+            $this->setError('Failed to cancel batch.');
             return false;
         }
     }
@@ -741,7 +749,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         } else {
 
             // Fetch order details
-            $order = $this->get_by_id($orderId);
+            $order = $this->getById($orderId);
 
             // --------------------------------------------------------------------------
 
@@ -750,7 +758,7 @@ class NAILS_Shop_order_model extends NAILS_Model
             $data  = array(
                 'fulfilment_status' => 'FULFILLED',
                 'fulfilled'         => $oDate->format('Y-m-d H:i:s')
-           );
+            );
 
             // --------------------------------------------------------------------------
 
@@ -771,7 +779,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
             } else {
 
-                $this->_set_error('Failed to update fulfilment status on this order.');
+                $this->setError('Failed to update fulfilment status on this order.');
                 return false;
             }
         }
@@ -789,7 +797,7 @@ class NAILS_Shop_order_model extends NAILS_Model
     {
         if (empty($orderIds)) {
 
-            $this->_set_error('No IDs were supplied.');
+            $this->setError('No IDs were supplied.');
             return false;
         }
 
@@ -802,10 +810,10 @@ class NAILS_Shop_order_model extends NAILS_Model
 
             if ($informCustomer) {
 
-            foreach ($orderIds as $o) {
+                foreach ($orderIds as $o) {
 
                     // Fetch order details
-                    $order = $this->get_by_id($o);
+                    $order = $this->getById($o);
 
                     // --------------------------------------------------------------------------
 
@@ -823,7 +831,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         } else {
 
-            $this->_set_error('Failed to update fulfilment status on batch.');
+            $this->setError('Failed to update fulfilment status on batch.');
             return false;
         }
     }
@@ -846,7 +854,7 @@ class NAILS_Shop_order_model extends NAILS_Model
             $data = array(
                 'fulfilment_status' => 'UNFULFILLED',
                 'fulfilled'         => null
-           );
+            );
 
             return $this->update($orderId, $data);
         }
@@ -863,7 +871,7 @@ class NAILS_Shop_order_model extends NAILS_Model
     {
         if (empty($orderIds)) {
 
-            $this->_set_error('No IDs were supplied.');
+            $this->setError('No IDs were supplied.');
             return false;
         }
 
@@ -892,12 +900,12 @@ class NAILS_Shop_order_model extends NAILS_Model
         if (is_numeric($order)) {
 
             $this->oLogger->line('Looking up order #' . $order);
-            $order = $this->get_by_id($order);
+            $order = $this->getById($order);
 
             if (!$order) {
 
                 $this->oLogger->line('Invalid order ID');
-                $this->_set_error('Invalid order ID');
+                $this->setError('Invalid order ID');
                 return false;
             }
         }
@@ -1024,12 +1032,12 @@ class NAILS_Shop_order_model extends NAILS_Model
 
             //  Email failed to send, alert developers
             $this->oLogger->line('!!Failed to send download links, alerting developers');
-            $this->oLogger->line(implode("\n", $this->emailer->get_errors()));
+            $this->oLogger->line(implode("\n", $this->emailer->getErrors()));
 
             $subject  = 'Unable to send download email';
             $message  = 'Unable to send the email with download links to ' . $email->to_email . '; ';
             $message .= 'order #' . $order->id . "\n\nEmailer errors:\n\n";
-            $message .= print_r($this->emailer->get_errors(), true);
+            $message .= print_r($this->emailer->getErrors(), true);
 
             sendDeveloperMail($subject, $message);
         }
@@ -1047,12 +1055,12 @@ class NAILS_Shop_order_model extends NAILS_Model
     public function sendReceipt($orderId, $paymentData = array(), $partial = false)
     {
         $this->oLogger->line('Looking up order #' . $orderId);
-        $order = $this->get_by_id($orderId);
+        $order = $this->getById($orderId);
 
         if (!$order) {
 
             $this->oLogger->line('Invalid order ID');
-            $this->_set_error('Invalid order ID');
+            $this->setError('Invalid order ID');
             return false;
         }
 
@@ -1068,7 +1076,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         if (!$this->emailer->send($email, true)) {
 
             //  Email failed to send, alert developers
-            $emailErrors = $this->emailer->get_errors();
+            $emailErrors = $this->emailer->getErrors();
 
             if ($partial) {
 
@@ -1107,12 +1115,12 @@ class NAILS_Shop_order_model extends NAILS_Model
     public function sendOrderNotification($orderId, $paymentData = array(), $partial = false)
     {
         $this->oLogger->line('Looking up order #' . $orderId);
-        $order = $this->get_by_id($orderId);
+        $order = $this->getById($orderId);
 
         if (!$order) {
 
             $this->oLogger->line('Invalid order ID');
-            $this->_set_error('Invalid order ID.');
+            $this->setError('Invalid order ID.');
             return false;
         }
 
@@ -1134,7 +1142,7 @@ class NAILS_Shop_order_model extends NAILS_Model
 
             if (!$this->emailer->send($email, true)) {
 
-                $emailErrors = $this->emailer->get_errors();
+                $emailErrors = $this->emailer->getErrors();
 
                 if ($partial) {
 
@@ -1219,9 +1227,11 @@ class NAILS_Shop_order_model extends NAILS_Model
      * @param  array  $bools    Fields which should be cast as booleans
      * @return void
      */
-    protected function _format_object(&$obj, $data = array(), $integers = array(), $bools = array())
+    protected function formatObject(&$obj, $data = array(), $integers = array(), $bools = array())
     {
-        parent::_format_object($obj, $data, $integers, $bools);
+        parent::formatObject($obj, $data, $integers, $bools);
+
+        $obj->requires_shipping = (bool) $obj->requires_shipping;
 
         //  User
         $obj->user     = new \stdClass();
@@ -1281,38 +1291,62 @@ class NAILS_Shop_order_model extends NAILS_Model
         //  Totals
         $obj->totals = new \stdClass();
 
-        $obj->totals->base           = new \stdClass();
-        $obj->totals->base->item     = (int) $obj->total_base_item;
-        $obj->totals->base->shipping = (int) $obj->total_base_shipping;
-        $obj->totals->base->tax      = (int) $obj->total_base_tax;
-        $obj->totals->base->grand    = (int) $obj->total_base_grand;
+        $obj->totals->base                    = new \stdClass();
+        $obj->totals->base->item              = (int) $obj->total_base_item;
+        $obj->totals->base->item_discount     = (int) $obj->total_base_item_discount;
+        $obj->totals->base->shipping          = (int) $obj->total_base_shipping;
+        $obj->totals->base->shipping_discount = (int) $obj->total_base_shipping_discount;
+        $obj->totals->base->tax               = (int) $obj->total_base_tax;
+        $obj->totals->base->tax_discount      = (int) $obj->total_base_tax_discount;
+        $obj->totals->base->grand             = (int) $obj->total_base_grand;
+        $obj->totals->base->grand_discount    = (int) $obj->total_base_grand_discount;
 
-        $obj->totals->base_formatted           = new \stdClass();
-        $obj->totals->base_formatted->item     = $this->shop_currency_model->formatBase($obj->totals->base->item);
-        $obj->totals->base_formatted->shipping = $this->shop_currency_model->formatBase($obj->totals->base->shipping);
-        $obj->totals->base_formatted->tax      = $this->shop_currency_model->formatBase($obj->totals->base->tax);
-        $obj->totals->base_formatted->grand    = $this->shop_currency_model->formatBase($obj->totals->base->grand);
+        $obj->totals->base_formatted                    = new \stdClass();
+        $obj->totals->base_formatted->item              = $this->oCurrencyModel->formatBase($obj->totals->base->item);
+        $obj->totals->base_formatted->item_discount     = $this->oCurrencyModel->formatBase($obj->totals->base->item_discount);
+        $obj->totals->base_formatted->shipping          = $this->oCurrencyModel->formatBase($obj->totals->base->shipping);
+        $obj->totals->base_formatted->shipping_discount = $this->oCurrencyModel->formatBase($obj->totals->base->shipping_discount);
+        $obj->totals->base_formatted->tax               = $this->oCurrencyModel->formatBase($obj->totals->base->tax);
+        $obj->totals->base_formatted->tax_discount      = $this->oCurrencyModel->formatBase($obj->totals->base->tax_discount);
+        $obj->totals->base_formatted->grand             = $this->oCurrencyModel->formatBase($obj->totals->base->grand);
+        $obj->totals->base_formatted->grand_discount    = $this->oCurrencyModel->formatBase($obj->totals->base->grand_discount);
 
-        $obj->totals->user           = new \stdClass();
-        $obj->totals->user->item     = (int) $obj->total_user_item;
-        $obj->totals->user->shipping = (int) $obj->total_user_shipping;
-        $obj->totals->user->tax      = (int) $obj->total_user_tax;
-        $obj->totals->user->grand    = (int) $obj->total_user_grand;
+        $obj->totals->user                    = new \stdClass();
+        $obj->totals->user->item              = (int) $obj->total_user_item;
+        $obj->totals->user->item_discount     = (int) $obj->total_user_item_discount;
+        $obj->totals->user->shipping          = (int) $obj->total_user_shipping;
+        $obj->totals->user->shipping_discount = (int) $obj->total_user_shipping_discount;
+        $obj->totals->user->tax               = (int) $obj->total_user_tax;
+        $obj->totals->user->tax_discount      = (int) $obj->total_user_tax_discount;
+        $obj->totals->user->grand             = (int) $obj->total_user_grand;
+        $obj->totals->user->grand_discount    = (int) $obj->total_user_grand_discount;
 
-        $obj->totals->user_formatted           = new \stdClass();
-        $obj->totals->user_formatted->item     = $this->shop_currency_model->formatUser($obj->totals->user->item);
-        $obj->totals->user_formatted->shipping = $this->shop_currency_model->formatUser($obj->totals->user->shipping);
-        $obj->totals->user_formatted->tax      = $this->shop_currency_model->formatUser($obj->totals->user->tax);
-        $obj->totals->user_formatted->grand    = $this->shop_currency_model->formatUser($obj->totals->user->grand);
+        $obj->totals->user_formatted                    = new \stdClass();
+        $obj->totals->user_formatted->item              = $this->oCurrencyModel->formatUSer($obj->totals->user->item);
+        $obj->totals->user_formatted->item_discount     = $this->oCurrencyModel->formatUSer($obj->totals->user->item_discount);
+        $obj->totals->user_formatted->shipping          = $this->oCurrencyModel->formatUSer($obj->totals->user->shipping);
+        $obj->totals->user_formatted->shipping_discount = $this->oCurrencyModel->formatUSer($obj->totals->user->shipping_discount);
+        $obj->totals->user_formatted->tax               = $this->oCurrencyModel->formatUSer($obj->totals->user->tax);
+        $obj->totals->user_formatted->tax_discount      = $this->oCurrencyModel->formatUSer($obj->totals->user->tax_discount);
+        $obj->totals->user_formatted->grand             = $this->oCurrencyModel->formatUSer($obj->totals->user->grand);
+        $obj->totals->user_formatted->grand_discount    = $this->oCurrencyModel->formatUSer($obj->totals->user->grand_discount);
 
         unset($obj->total_base_item);
+        unset($obj->total_base_item_discount);
         unset($obj->total_base_shipping);
+        unset($obj->total_base_shipping_discount);
         unset($obj->total_base_tax);
+        unset($obj->total_base_tax_discount);
         unset($obj->total_base_grand);
+        unset($obj->total_base_grand_discount);
         unset($obj->total_user_item);
+        unset($obj->total_user_item_discount);
         unset($obj->total_user_shipping);
+        unset($obj->total_user_shipping_discount);
         unset($obj->total_user_tax);
+        unset($obj->total_user_tax_discount);
         unset($obj->total_user_grand);
+        unset($obj->total_user_grand_discount);
 
         // --------------------------------------------------------------------------
 
@@ -1397,9 +1431,9 @@ class NAILS_Shop_order_model extends NAILS_Model
      * @param  stdClass &$item The item to format
      * @return void
      */
-    protected function _format_object_item(&$item)
+    protected function formatObjectItem(&$item)
     {
-        parent::_format_object($item);
+        parent::formatObject($item);
 
         // --------------------------------------------------------------------------
 
@@ -1411,83 +1445,67 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        $item->price                      = new \stdClass();
-        $item->price->base                = new \stdClass();
-        $item->price->base->value         = $item->price_base_value;
-        $item->price->base->value_inc_tax = $item->price_base_value_inc_tax;
-        $item->price->base->value_ex_tax  = $item->price_base_value_ex_tax;
-        $item->price->base->value_tax     = $item->price_base_value_tax;
-        $item->price->base->value_total   = $item->price_base_value * $item->quantity;
+        $item->price                               = new \stdClass();
+        $item->price->base                         = new \stdClass();
+        $item->price->base->value_inc_tax          = (int) $item->price_base_value_inc_tax;
+        $item->price->base->value_ex_tax           = (int) $item->price_base_value_ex_tax;
+        $item->price->base->value_tax              = (int) $item->price_base_value_tax;
+        $item->price->base->discount_value_inc_tax = (int) $item->price_base_discount_value_inc_tax;
+        $item->price->base->discount_value_ex_tax  = (int) $item->price_base_discount_value_ex_tax;
+        $item->price->base->discount_value_tax     = (int) $item->price_base_discount_value_tax;
+        $item->price->base->discount_item          = (int) $item->price_base_discount_item;
+        $item->price->base->discount_tax           = (int) $item->price_base_discount_tax;
+        $item->price->base->item_total             = (int) ($item->price_base_value_ex_tax + $item->price_base_value_tax) * $item->quantity;
 
-        $item->price->base_formatted                = new \stdClass();
-        $item->price->base_formatted->value         = $this->shop_currency_model->formatBase($item->price_base_value);
-        $item->price->base_formatted->value_inc_tax = $this->shop_currency_model->formatBase($item->price_base_value_inc_tax);
-        $item->price->base_formatted->value_ex_tax  = $this->shop_currency_model->formatBase($item->price_base_value_ex_tax);
-        $item->price->base_formatted->value_tax     = $this->shop_currency_model->formatBase($item->price_base_value_tax);
-        $item->price->base_formatted->value_total   = $this->shop_currency_model->formatBase($item->price_base_value * $item->quantity);
+        $item->price->base_formatted                         = new \stdClass();
+        $item->price->base_formatted->value_inc_tax          = $this->oCurrencyModel->formatBase($item->price_base_value_inc_tax);
+        $item->price->base_formatted->value_ex_tax           = $this->oCurrencyModel->formatBase($item->price_base_value_ex_tax);
+        $item->price->base_formatted->value_tax              = $this->oCurrencyModel->formatBase($item->price_base_value_tax);
+        $item->price->base_formatted->discount_value_inc_tax = $this->oCurrencyModel->formatBase($item->price_base_discount_value_inc_tax);
+        $item->price->base_formatted->discount_value_ex_tax  = $this->oCurrencyModel->formatBase($item->price_base_discount_value_ex_tax);
+        $item->price->base_formatted->discount_value_tax     = $this->oCurrencyModel->formatBase($item->price_base_discount_value_tax);
+        $item->price->base_formatted->discount_item          = $this->oCurrencyModel->formatBase($item->price_base_discount_item);
+        $item->price->base_formatted->discount_tax           = $this->oCurrencyModel->formatBase($item->price_base_discount_tax);
+        $item->price->base_formatted->item_total             = $this->oCurrencyModel->formatBase($item->price->base->item_total);
 
-        $item->price->user                = new \stdClass();
-        $item->price->user->value         = $item->price_user_value;
-        $item->price->user->value_inc_tax = $item->price_user_value_inc_tax;
-        $item->price->user->value_ex_tax  = $item->price_user_value_ex_tax;
-        $item->price->user->value_tax     = $item->price_user_value_tax;
-        $item->price->user->value_total   = $item->price_user_value * $item->quantity;
+        $item->price->user                         = new \stdClass();
+        $item->price->user->value_inc_tax          = (int) $item->price_user_value_inc_tax;
+        $item->price->user->value_ex_tax           = (int) $item->price_user_value_ex_tax;
+        $item->price->user->value_tax              = (int) $item->price_user_value_tax;
+        $item->price->user->discount_value_inc_tax = (int) $item->price_user_discount_value_inc_tax;
+        $item->price->user->discount_value_ex_tax  = (int) $item->price_user_discount_value_ex_tax;
+        $item->price->user->discount_value_tax     = (int) $item->price_user_discount_value_tax;
+        $item->price->user->discount_item          = (int) $item->price_user_discount_item;
+        $item->price->user->discount_tax           = (int) $item->price_user_discount_tax;
+        $item->price->user->item_total             = (int) ($item->price_user_value_ex_tax + $item->price_user_value_tax) * $item->quantity;
 
-        $item->price->user_formatted                = new \stdClass();
-        $item->price->user_formatted->value         = $this->shop_currency_model->formatUser($item->price_user_value);
-        $item->price->user_formatted->value_inc_tax = $this->shop_currency_model->formatUser($item->price_user_value_inc_tax);
-        $item->price->user_formatted->value_ex_tax  = $this->shop_currency_model->formatUser($item->price_user_value_ex_tax);
-        $item->price->user_formatted->value_tax     = $this->shop_currency_model->formatUser($item->price_user_value_tax);
-        $item->price->user_formatted->value_total   = $this->shop_currency_model->formatUser($item->price_user_value * $item->quantity);
-
-        $item->sale_price                      = new \stdClass();
-        $item->sale_price->base                = new \stdClass();
-        $item->sale_price->base->value         = $item->sale_price_base_value;
-        $item->sale_price->base->value_inc_tax = $item->sale_price_base_value_inc_tax;
-        $item->sale_price->base->value_ex_tax  = $item->sale_price_base_value_ex_tax;
-        $item->sale_price->base->value_tax     = $item->sale_price_base_value_tax;
-        $item->sale_price->base->value_total   = $item->sale_price_base_value * $item->quantity;
-
-        $item->sale_price->base_formatted                = new \stdClass();
-        $item->sale_price->base_formatted->value         = $this->shop_currency_model->formatBase($item->sale_price_base_value);
-        $item->sale_price->base_formatted->value_inc_tax = $this->shop_currency_model->formatBase($item->sale_price_base_value_inc_tax);
-        $item->sale_price->base_formatted->value_ex_tax  = $this->shop_currency_model->formatBase($item->sale_price_base_value_ex_tax);
-        $item->sale_price->base_formatted->value_tax     = $this->shop_currency_model->formatBase($item->sale_price_base_value_tax);
-        $item->sale_price->base_formatted->value_total   = $this->shop_currency_model->formatBase($item->sale_price_base_value * $item->quantity);
-
-        $item->sale_price->user                = new \stdClass();
-        $item->sale_price->user->value         = $item->sale_price_user_value;
-        $item->sale_price->user->value_inc_tax = $item->sale_price_user_value_inc_tax;
-        $item->sale_price->user->value_ex_tax  = $item->sale_price_user_value_ex_tax;
-        $item->sale_price->user->value_tax     = $item->sale_price_user_value_tax;
-        $item->sale_price->user->value_total   = $item->sale_price_user_value * $item->quantity;
-
-        $item->sale_price->user_formatted                = new \stdClass();
-        $item->sale_price->user_formatted->value         = $this->shop_currency_model->formatUser($item->sale_price_user_value);
-        $item->sale_price->user_formatted->value_inc_tax = $this->shop_currency_model->formatUser($item->sale_price_user_value_inc_tax);
-        $item->sale_price->user_formatted->value_ex_tax  = $this->shop_currency_model->formatUser($item->sale_price_user_value_ex_tax);
-        $item->sale_price->user_formatted->value_tax     = $this->shop_currency_model->formatUser($item->sale_price_user_value_tax);
-        $item->sale_price->user_formatted->value_total   = $this->shop_currency_model->formatUser($item->sale_price_user_value * $item->quantity);
+        $item->price->user_formatted                         = new \stdClass();
+        $item->price->user_formatted->value_inc_tax          = $this->oCurrencyModel->formatUser($item->price_user_value_inc_tax);
+        $item->price->user_formatted->value_ex_tax           = $this->oCurrencyModel->formatUser($item->price_user_value_ex_tax);
+        $item->price->user_formatted->value_tax              = $this->oCurrencyModel->formatUser($item->price_user_value_tax);
+        $item->price->user_formatted->discount_value_inc_tax = $this->oCurrencyModel->formatUser($item->price_user_discount_value_inc_tax);
+        $item->price->user_formatted->discount_value_ex_tax  = $this->oCurrencyModel->formatUser($item->price_user_discount_value_ex_tax);
+        $item->price->user_formatted->discount_value_tax     = $this->oCurrencyModel->formatUser($item->price_user_discount_value_tax);
+        $item->price->user_formatted->discount_item          = $this->oCurrencyModel->formatUser($item->price_user_discount_item);
+        $item->price->user_formatted->discount_tax           = $this->oCurrencyModel->formatUser($item->price_user_discount_tax);
+        $item->price->user_formatted->item_total             = $this->oCurrencyModel->formatUser($item->price->user->item_total);
 
         $item->processed = (bool) $item->processed;
         $item->refunded  = (bool) $item->refunded;
 
-        unset($item->price_base_value);
         unset($item->price_base_value_inc_tax);
         unset($item->price_base_value_ex_tax);
         unset($item->price_base_value_tax);
-        unset($item->price_user_value);
+        unset($item->price_base_discount_value_inc_tax);
+        unset($item->price_base_discount_value_ex_tax);
+        unset($item->price_base_discount_value_tax);
+
         unset($item->price_user_value_inc_tax);
         unset($item->price_user_value_ex_tax);
         unset($item->price_user_value_tax);
-        unset($item->sale_price_base_value);
-        unset($item->sale_price_base_value_inc_tax);
-        unset($item->sale_price_base_value_ex_tax);
-        unset($item->sale_price_base_value_tax);
-        unset($item->sale_price_user_value);
-        unset($item->sale_price_user_value_inc_tax);
-        unset($item->sale_price_user_value_ex_tax);
-        unset($item->sale_price_user_value_tax);
+        unset($item->price_user_discount_value_inc_tax);
+        unset($item->price_user_discount_value_ex_tax);
+        unset($item->price_user_discount_value_tax);
 
         // --------------------------------------------------------------------------
 

@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Shop;
 
+use Nails\Factory;
 use Nails\Admin\Helper;
 use Nails\Shop\Controller\BaseAdmin;
 
@@ -26,18 +27,24 @@ class Orders extends BaseAdmin
         if (userHasPermission('admin:shop:orders:manage')) {
 
             //  Alerts
-            $alerts = array();
-            $ci     =& get_instance();
+            $ci =& get_instance();
 
             //  Unfulfilled orders
             $ci->db->where('fulfilment_status', 'UNFULFILLED');
             $ci->db->where('status', 'PAID');
             $numUnfulfilled = $ci->db->count_all_results(NAILS_DB_PREFIX . 'shop_order');
-            $alerts[]  = \Nails\Admin\Nav::alertObject($numUnfulfilled, 'alert', 'Unfulfilled Orders');
 
-            $navGroup = new \Nails\Admin\Nav('Shop', 'fa-shopping-cart');
-            $navGroup->addAction('Manage Orders', 'index', $alerts, 0);
-            return $navGroup;
+            $oAlert = Factory::factory('NavAlert', 'nailsapp/module-admin');
+            $oAlert->setValue($numUnfulfilled);
+            $oAlert->setSeverity('danger');
+            $oAlert->setLabel('Unfulfilled Orders');
+
+            $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+            $oNavGroup->setLabel('Shop');
+            $oNavGroup->setIcon('fa-shopping-cart');
+            $oNavGroup->addAction('Manage Orders', 'index', array($oAlert), 0);
+
+            return $oNavGroup;
         }
     }
 
@@ -47,7 +54,7 @@ class Orders extends BaseAdmin
      * Returns an array of extra permissions for this controller
      * @return array
      */
-    static function permissions()
+    public static function permissions()
     {
         $permissions = parent::permissions();
 
@@ -137,7 +144,7 @@ class Orders extends BaseAdmin
                 array('Cancelled', 'CANCELLED'),
                 array('Failed', 'FAILED'),
                 array('Pending', 'PENDING')
-           )
+            )
         );
         $cbFilters[] = Helper::searchFilterObject(
             $tablePrefix . '.fulfilment_status',
@@ -145,7 +152,7 @@ class Orders extends BaseAdmin
             array(
                 array('Yes', 'FULFILLED'),
                 array('No', 'UNFULFILLED')
-           )
+            )
         );
         $cbFilters[] = Helper::searchFilterObject(
             $tablePrefix . '.delivery_type',
@@ -153,7 +160,7 @@ class Orders extends BaseAdmin
             array(
                 array('Delivery', 'DELIVER'),
                 array('Collection', 'COLLECT')
-           )
+            )
         );
 
         // --------------------------------------------------------------------------
@@ -170,8 +177,8 @@ class Orders extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows            = $this->shop_order_model->count_all($data);
-        $this->data['orders'] = $this->shop_order_model->get_all($page, $perPage, $data);
+        $totalRows            = $this->shop_order_model->countAll($data);
+        $this->data['orders'] = $this->shop_order_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords, $cbFilters);
@@ -206,7 +213,7 @@ class Orders extends BaseAdmin
         //  Fetch and check order
         $this->load->model('shop/shop_order_model');
 
-        $this->data['order'] = $this->shop_order_model->get_by_id($this->uri->segment(5));
+        $this->data['order'] = $this->shop_order_model->getById($this->uri->segment(5));
 
         if (!$this->data['order']) {
 
@@ -218,7 +225,7 @@ class Orders extends BaseAdmin
 
         //  Get associated payments
         $this->load->model('shop/shop_order_payment_model');
-        $this->data['payments'] = $this->shop_order_payment_model->get_for_order($this->data['order']->id);
+        $this->data['payments'] = $this->shop_order_payment_model->getForOrder($this->data['order']->id);
 
         // --------------------------------------------------------------------------
 
@@ -269,7 +276,7 @@ class Orders extends BaseAdmin
 
         //  Check order exists
         $this->load->model('shop/shop_order_model');
-        $order = $this->shop_order_model->get_by_id($this->uri->segment(5));
+        $order = $this->shop_order_model->getById($this->uri->segment(5));
 
         if (!$order) {
 
@@ -294,11 +301,11 @@ class Orders extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        if ($order->voucher) {
+        if ($order->voucher->id) {
 
             //  Redeem the voucher, if it's there
-            $this->load->model('shop/shop_voucher_model');
-            $this->shop_voucher_model->redeem($order->voucher->id, $order);
+            $oVoucherModel = Factory::model('Voucher', 'nailsapp/module-shop');
+            $oVoucherModel->redeem($order->voucher->id, $order);
         }
 
         // --------------------------------------------------------------------------
@@ -394,7 +401,7 @@ class Orders extends BaseAdmin
         //  Fetch and check order
         $this->load->model('shop/shop_order_model');
 
-        $this->data['order'] = $this->shop_order_model->get_by_id($this->uri->segment(5));
+        $this->data['order'] = $this->shop_order_model->getById($this->uri->segment(5));
 
         if (!$this->data['order']) {
 
@@ -405,14 +412,14 @@ class Orders extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load up the shop's skin
-        $skin = app_setting('skin_checkout', 'shop') ? app_setting('skin_checkout', 'shop') : 'shop-skin-checkout-classic';
+        $skin = appSetting('skin_checkout', 'shop') ? appSetting('skin_checkout', 'shop') : 'shop-skin-checkout-classic';
 
         $this->load->model('shop/shop_skin_checkout_model');
         $skin = $this->shop_skin_checkout_model->get($skin);
 
         if (!$skin) {
 
-            showFatalError('Failed to load shop skin "' . $skin . '"', 'Shop skin "' . $skin . '" failed to load at ' . APP_NAME . ', the following reason was given: ' . $this->shop_skin_checkout_model->last_error());
+            showFatalError('Failed to load shop skin "' . $skin . '"', 'Shop skin "' . $skin . '" failed to load at ' . APP_NAME . ', the following reason was given: ' . $this->shop_skin_checkout_model->lastError());
         }
 
         // --------------------------------------------------------------------------
@@ -446,7 +453,7 @@ class Orders extends BaseAdmin
         //    Fetch and check order
         $this->load->model('shop/shop_order_model');
 
-        $order = $this->shop_order_model->get_by_id($this->uri->segment(5));
+        $order = $this->shop_order_model->getById($this->uri->segment(5));
 
         if (!$order) {
 
@@ -502,7 +509,7 @@ class Orders extends BaseAdmin
         } else {
 
             $msg     = 'Failed to mark orders as fulfilled. ';
-            $msg    .= $this->shop_order_model->last_error();
+            $msg    .= $this->shop_order_model->lastError();
             $status  = 'error';
         }
 
@@ -531,7 +538,7 @@ class Orders extends BaseAdmin
         //    Fetch and check order
         $this->load->model('shop/shop_order_model');
 
-        $order = $this->shop_order_model->get_by_id($this->uri->segment(5));
+        $order = $this->shop_order_model->getById($this->uri->segment(5));
 
         if (!$order) {
 
@@ -587,7 +594,7 @@ class Orders extends BaseAdmin
         } else {
 
             $msg     = 'Failed to mark orders as unfulfilled. ';
-            $msg    .= $this->shop_order_model->last_error();
+            $msg    .= $this->shop_order_model->lastError();
             $status  = 'error';
         }
 
@@ -616,7 +623,7 @@ class Orders extends BaseAdmin
         //    Fetch and check order
         $this->load->model('shop/shop_order_model');
 
-        $order = $this->shop_order_model->get_by_id($this->uri->segment(5));
+        $order = $this->shop_order_model->getById($this->uri->segment(5));
 
         if (!$order) {
 
@@ -672,7 +679,7 @@ class Orders extends BaseAdmin
         } else {
 
             $msg     = 'Failed to mark orders as cancelled. ';
-            $msg    .= $this->shop_order_model->last_error();
+            $msg    .= $this->shop_order_model->lastError();
             $status  = 'error';
         }
 

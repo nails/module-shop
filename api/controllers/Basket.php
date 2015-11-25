@@ -26,7 +26,7 @@ class Basket extends \Nails\Api\Controller\Base
         $this->load->model('shop/shop_basket_model');
 
         $this->maintenance = new \stdClass();
-        $this->maintenance->enabled = (bool) app_setting('maintenance_enabled', 'shop');
+        $this->maintenance->enabled = (bool) appSetting('maintenance_enabled', 'shop');
         if ($this->maintenance->enabled) {
 
             //  Allow shop admins access
@@ -76,7 +76,7 @@ class Basket extends \Nails\Api\Controller\Base
         if (!$this->shop_basket_model->add($variantId, $$quantity)) {
 
             $out['status'] = 400;
-            $out['error']  = $this->shop_basket_model->last_error();
+            $out['error']  = $this->shop_basket_model->lastError();
         }
 
         return $out;
@@ -103,7 +103,7 @@ class Basket extends \Nails\Api\Controller\Base
         if (!$this->shop_basket_model->remove($variantId)) {
 
             $out['status'] = 400;
-            $out['error']  = $this->shop_basket_model->last_error();
+            $out['error']  = $this->shop_basket_model->lastError();
         }
 
         return $out;
@@ -130,7 +130,7 @@ class Basket extends \Nails\Api\Controller\Base
         if (!$this->shop_basket_model->increment($variantId)) {
 
             $out['status'] = 400;
-            $out['error']  = $this->shop_basket_model->last_error();
+            $out['error']  = $this->shop_basket_model->lastError();
         }
 
         return $out;
@@ -158,7 +158,7 @@ class Basket extends \Nails\Api\Controller\Base
         if (!$this->shop_basket_model->decrement($variantId)) {
 
             $out['status'] = 400;
-            $out['error']  = $this->shop_basket_model->last_error();
+            $out['error']  = $this->shop_basket_model->lastError();
         }
 
         return $out;
@@ -179,24 +179,25 @@ class Basket extends \Nails\Api\Controller\Base
 
         // --------------------------------------------------------------------------
 
-        $out     = array();
-        $voucher = $this->shop_voucher_model->validate($this->input->post('voucher'), getBasket());
+        $aOut          = array();
+        $oVoucherModel = Factory::model('Voucher', 'nailsapp/module-shop');
+        $oVoucher      = $oVoucherModel->validate($this->input->post('voucher'), getBasket());
 
-        if ($voucher) {
+        if ($oVoucher) {
 
-            if (!$this->shop_basket_model->addVoucher($voucher->code)) {
+            if (!$this->shop_basket_model->addVoucher($oVoucher->code)) {
 
-                $out['status'] = 400;
-                $out['error']  = $this->shop_basket_model->last_error();
+                $aOut['status'] = 400;
+                $aOut['error']  = $this->shop_basket_model->lastError();
             }
 
         } else {
 
-            $out['status'] = 400;
-            $out['error']  = $this->shop_voucher_model->last_error();
+            $aOut['status'] = 400;
+            $aOut['error']  = $oVoucherModel->lastError();
         }
 
-        return $out;
+        return $aOut;
     }
 
     // --------------------------------------------------------------------------
@@ -219,7 +220,7 @@ class Basket extends \Nails\Api\Controller\Base
         if (!$this->shop_basket_model->removeVoucher()) {
 
             $out['status'] = 400;
-            $out['error']  = $this->shop_basket_model->last_error();
+            $out['error']  = $this->shop_basket_model->lastError();
         }
 
         return $out;
@@ -246,7 +247,7 @@ class Basket extends \Nails\Api\Controller\Base
         if (!$this->shop_basket_model->addNote($note)) {
 
             $out['status'] = 400;
-            $out['error']  = $this->shop_basket_model->last_error();
+            $out['error']  = $this->shop_basket_model->lastError();
         }
 
         return $out;
@@ -267,12 +268,13 @@ class Basket extends \Nails\Api\Controller\Base
 
         // --------------------------------------------------------------------------
 
-        $out      = array();
-        $currency = $this->shop_currency_model->getByCode($this->input->post('currency'));
+        $aOut            = array();
+        $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
+        $oCurrency       = $oCurrencyModel->getByCode($this->input->post('currency'));
 
-        if ($currency) {
+        if ($oCurrency) {
 
-            $this->session->set_userdata('shop_currency', $currency->code);
+            $this->session->set_userdata('shop_currency', $oCurrency->code);
 
             if ($this->user_model->isLoggedIn()) {
 
@@ -282,18 +284,18 @@ class Basket extends \Nails\Api\Controller\Base
                     NAILS_DB_PREFIX . 'user_meta_shop',
                     activeUser('id'),
                     array(
-                        'currency' => $currency->code
+                        'currency' => $oCurrency->code
                     )
                 );
             }
 
         } else {
 
-            $out['status'] = 400;
-            $out['error']  = $this->shop_currency_model->last_error();
+            $aOut['status'] = 400;
+            $aOut['error']  = $oCurrencyModel->lastError();
         }
 
-        return $out;
+        return $aOut;
     }
 
     // --------------------------------------------------------------------------
@@ -316,7 +318,7 @@ class Basket extends \Nails\Api\Controller\Base
         if (!$this->shop_basket_model->setDeliveryType('COLLECT')) {
 
             $out['status'] = 400;
-            $out['error']  = $this->shop_basket_model->last_error();
+            $out['error']  = $this->shop_basket_model->lastError();
         }
 
         return $out;
@@ -342,7 +344,7 @@ class Basket extends \Nails\Api\Controller\Base
         if (!$this->shop_basket_model->setDeliveryType('DELIVER')) {
 
             $out['status'] = 400;
-            $out['error']  = $this->shop_basket_model->last_error();
+            $out['error']  = $this->shop_basket_model->lastError();
         }
 
         return $out;

@@ -5,7 +5,7 @@
     <hr />
     <?php
 
-        echo form_open('admin/shop/settings/shop_pg/' . $this->uri->segment(4) . '?isModal=' . $this->input->get('isModal'));
+        echo form_open('admin/shop/settings/shop_pg?gateway=' . $gateway_slug . '&isModal=' . $isModal);
         echo '<input type="hidden" name="activeTab" value="' . set_value('activeTab') . '" id="activeTab" />';
     ?>
     <ul class="tabs">
@@ -43,7 +43,7 @@
                 $field['key']         = 'omnipay_' . $gateway_slug . '_customise_label';
                 $field['label']       = 'Label';
                 $field['placeholder'] = 'Give this Payment Gateway a custom customer facing label';
-                $field['default']     = app_setting($field['key'], 'shop');
+                $field['default']     = appSetting($field['key'], 'shop');
                 $field['tip']         = 'Set this to override the default payment gateway name.';
 
                 echo form_field($field);
@@ -54,7 +54,7 @@
                 $field['key']     = 'omnipay_' . $gateway_slug . '_customise_img';
                 $field['label']   = 'Image';
                 $field['bucket']  = 'shop-pg-img-' . $gateway_slug;
-                $field['default'] = app_setting($field['key'], 'shop');
+                $field['default'] = appSetting($field['key'], 'shop');
                 $field['tip']     = 'No image is shown by default, but you can choose to show one, perhaps a logo, or an image showing which cards are accepted.';
 
                 echo form_field_mm_image($field);
@@ -85,7 +85,7 @@
                     $field             = array();
                     $field['key']      = 'omnipay_' . $gateway_slug . '_' . $key;
                     $field['label']    = $label;
-                    $field['default']  = app_setting($field['key'], 'shop');
+                    $field['default']  = appSetting($field['key'], 'shop');
                     $field['required'] = true;
 
                     echo form_field($field);
@@ -95,7 +95,7 @@
         </div>
     </section>
     <p>
-        <button type="submit" class="awesome">
+        <button type="submit" class="btn btn-primary">
             Save Changes
         </button>
     </p>

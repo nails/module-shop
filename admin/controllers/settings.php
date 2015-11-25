@@ -26,9 +26,11 @@ class Settings extends BaseAdmin
     {
         if (userHasPermission('admin:shop:settings:update')) {
 
-            $navGroup = new \Nails\Admin\Nav('Settings', 'fa-wrench');
-            $navGroup->addAction('Shop');
-            return $navGroup;
+            $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+            $oNavGroup->setLabel('Settings');
+            $oNavGroup->setIcon('fa-wrench');
+            $oNavGroup->addAction('Shop');
+            return $oNavGroup;
         }
     }
 
@@ -85,7 +87,6 @@ class Settings extends BaseAdmin
 
         //  Load models
         $this->load->model('shop/shop_model');
-        $this->load->model('shop/shop_currency_model');
         $this->load->model('shop/shop_shipping_driver_model');
         $this->load->model('shop/shop_payment_gateway_model');
         $this->load->model('shop/shop_tax_rate_model');
@@ -93,52 +94,220 @@ class Settings extends BaseAdmin
         $this->load->model('shop/shop_skin_checkout_model');
         $this->load->model('shop/shop_product_model');
 
-        $oCountryModel = Factory::model('Country');
+        $oCountryModel  = Factory::model('Country');
+        $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
 
         // --------------------------------------------------------------------------
 
         //  Process POST
         if ($this->input->post()) {
 
-            $method =  $this->input->post('update');
+            $aSettings = array(
 
-            if (method_exists($this, '_shop_update_' . $method)) {
+                //  General Settings
+                'maintenance_enabled'                   => trim($this->input->post('maintenance_enabled')),
+                'maintenance_title'                     => trim($this->input->post('maintenance_title')),
+                'maintenance_body'                      => trim($this->input->post('maintenance_body')),
+                'name'                                  => $this->input->post('name'),
+                'url'                                   => $this->input->post('url'),
+                'price_exclude_tax'                     => $this->input->post('price_exclude_tax'),
+                'enable_external_products'              => (bool) $this->input->post('enable_external_products'),
+                'firstFinancialYearEndDate'             => $this->input->post('firstFinancialYearEndDate'),
+                'invoice_company'                       => $this->input->post('invoice_company'),
+                'invoice_company'                       => $this->input->post('invoice_company'),
+                'invoice_address'                       => $this->input->post('invoice_address'),
+                'invoice_vat_no'                        => $this->input->post('invoice_vat_no'),
+                'invoice_company_no'                    => $this->input->post('invoice_company_no'),
+                'invoice_footer'                        => $this->input->post('invoice_footer'),
+                'warehouse_collection_enabled'          => (bool) $this->input->post('warehouse_collection_enabled'),
+                'warehouse_addr_addressee'              => $this->input->post('warehouse_addr_addressee'),
+                'warehouse_addr_line1'                  => $this->input->post('warehouse_addr_line1'),
+                'warehouse_addr_line2'                  => $this->input->post('warehouse_addr_line2'),
+                'warehouse_addr_town'                   => $this->input->post('warehouse_addr_town'),
+                'warehouse_addr_postcode'               => $this->input->post('warehouse_addr_postcode'),
+                'warehouse_addr_state'                  => $this->input->post('warehouse_addr_state'),
+                'warehouse_addr_country'                => $this->input->post('warehouse_addr_country'),
+                'warehouse_collection_delivery_enquiry' => (bool) $this->input->post('warehouse_collection_delivery_enquiry'),
+                'page_brand_listing'                    => $this->input->post('page_brand_listing'),
+                'page_category_listing'                 => $this->input->post('page_category_listing'),
+                'page_collection_listing'               => $this->input->post('page_collection_listing'),
+                'page_range_listing'                    => $this->input->post('page_range_listing'),
+                'page_sale_listing'                     => $this->input->post('page_sale_listing'),
+                'page_tag_listing'                      => $this->input->post('page_tag_listing'),
 
-                $this->{'_shop_update_' . $method}();
+                //  Browse Settings
+                'expand_variants'          => (bool) $this->input->post('expand_variants'),
+                'default_product_per_page' => $this->input->post('default_product_per_page'),
+                'default_product_sort'     => $this->input->post('default_product_sort'),
+
+                //  Skin settings
+                'skin_front'    => $this->input->post('skin_front'),
+                'skin_checkout' => $this->input->post('skin_checkout'),
+
+                //  Payment gteway settings
+                'enabled_payment_gateways' => array_filter((array) $this->input->post('enabled_payment_gateways')),
+
+                //  Shipping driver settings
+                'enabled_shipping_driver' => $this->input->post('enabled_shipping_driver'),
+
+                //  Currency Settings
+                'additional_currencies' => $this->input->post('additional_currencies')
+            );
+
+            if ($this->input->post('base_currency')) {
+
+                $aSettings['base_currency'] = $this->input->post('base_currency');
+            }
+
+            $aSettingsEncrypted = array(
+
+                //  Currency settings
+                'openexchangerates_app_id' => $this->input->post('openexchangerates_app_id')
+            );
+
+            //  Skin configs
+            $aSettingsSkins = array();
+
+            $aConfigs = (array) $this->input->post('skin_config');
+            $aConfigs = array_filter($aConfigs);
+
+            foreach ($aConfigs as $sSlug => $aSkinConfig) {
+
+                $aSettingsSkins[$sSlug] = array();
+                foreach ($aSkinConfig as $sKey => $sValue) {
+                    $aSettingsSkins[$sSlug][$sKey] = $sValue;
+                }
+            }
+
+            // --------------------------------------------------------------------------
+
+            //  Sanitize shop url
+            $aSettings['url'] .= substr($aSettings['url'], -1) != '/' ? '/' : '';
+
+            //  Sanitize default_product_per_page
+            if (is_numeric($aSettings['default_product_per_page'])) {
+                $aSettings['default_product_per_page'] = (int) $aSettings['default_product_per_page'];
+            }
+
+            // --------------------------------------------------------------------------
+
+            //  Validation
+            $oFormValidation = Factory::service('FormValidation');
+            $oFormValidation->set_rules('firstFinancialYearEndDate', '', 'valid_date');
+            $oFormValidation->set_message('valid_date', lang('fv_valid_date'));
+
+            if ($oFormValidation->run()) {
+
+                $this->db->trans_begin();
+                $bRollback = false;
+
+                //  Normal settings
+                if (!$this->app_setting_model->set($aSettings, 'shop')) {
+
+                    $sError    = $this->app_setting_model->lastError();
+                    $bRollback = true;
+                }
+
+                //  Encrypted settings
+                if (!$this->app_setting_model->set($aSettingsEncrypted, 'shop', null, true)) {
+
+                    $sError    = $this->app_setting_model->lastError();
+                    $bRollback = true;
+                }
+
+                //  Skin configs
+                foreach ($aSettingsSkins as $sSkinSlug => $aSkinConfig) {
+
+                    //  Clear out the grouping; booleans not specified should be assumed false
+                    $this->app_setting_model->deleteGroup('shop-' . $sSkinSlug);
+
+                    if (!empty($aSkinConfig)) {
+
+                        if (!$this->app_setting_model->set($aSkinConfig, 'shop-' . $sSkinSlug)) {
+
+                            $sError    = 'Failed to update skin settings for skin "' . $sSkinSlug . '". ';
+                            $sError   .= $this->app_setting_model->lastError();
+                            $bRollback = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (empty($bRollback)) {
+
+                    $this->db->trans_commit();
+                    $this->data['success'] = 'Shop settings were saved.';
+
+                    // --------------------------------------------------------------------------
+
+                    //  Rewrite routes
+                    if (!$this->routes_model->update()) {
+
+                        $this->data['warning']  = '<strong>Warning:</strong> while the shop settings were updated, ';
+                        $this->data['warning'] .= 'the routes file could not be updated. The shop may not behave ';
+                        $this->data['warning'] .= 'as expected.';
+                    }
+
+                    // --------------------------------------------------------------------------
+
+                    /**
+                     * If there are multiple currencies and an Open Exchange Rates App ID provided
+                     * then attempt a sync
+                     */
+
+                    $bHasAdditionalCurrency  = !empty($aSettings['additional_currencies']);
+                    $bHasOpenExchangeRatesId = !empty($aSettingsEncrypted['openexchangerates_app_id']);
+                    if ($bHasAdditionalCurrency && $bHasOpenExchangeRatesId) {
+
+                        //  Force a refresh of the settings
+                        appSetting(null, 'shop', true);
+
+                        if (!$oCurrencyModel->sync()) {
+
+                            $this->data['message']  = '<strong>Warning:</strong> an attempted sync with Open Exchange ';
+                            $this->data['message'] .= 'Rates service failed with the following reason: ';
+                            $this->data['message'] .= $oCurrencyModel->lastError();
+
+                        }
+                    }
+
+                } else {
+
+                    $this->db->trans_rollback();
+                    $this->data['error'] = 'There was a problem saving shop settings. ' . $sError;
+                }
 
             } else {
 
-                $this->data['error'] = 'I can\'t determine what type of update you are trying to perform.';
+                $this->data['error'] = lang('fv_there_were_errors');
             }
         }
 
         // --------------------------------------------------------------------------
 
         //  Get data
-        $this->data['settings']         = app_setting(null, 'shop', true);
+        $this->data['settings']         = appSetting(null, 'shop', true);
         $this->data['payment_gateways'] = $this->shop_payment_gateway_model->getAvailable();
         $this->data['shipping_drivers'] = $this->shop_shipping_driver_model->getAvailable();
-        $this->data['currencies']       = $this->shop_currency_model->getAll();
-        $this->data['tax_rates']        = $this->shop_tax_rate_model->get_all();
-        $this->data['tax_rates_flat']   = $this->shop_tax_rate_model->get_all_flat();
+        $this->data['currencies']       = $oCurrencyModel->getAll();
+        $this->data['tax_rates']        = $this->shop_tax_rate_model->getAll();
+        $this->data['tax_rates_flat']   = $this->shop_tax_rate_model->getAllFlat();
         $this->data['countries_flat']   = $oCountryModel->getAllFlat();
         $this->data['continents_flat']  = $oCountryModel->getAllContinentsFlat();
         array_unshift($this->data['tax_rates_flat'], 'No Tax');
 
         //  "Front of house" skins
         $this->data['skins_front']         = $this->shop_skin_front_model->get_available();
-        $this->data['skin_front_selected'] = app_setting('skin_front', 'shop') ? app_setting('skin_front', 'shop') : 'shop-skin-front-classic';
+        $this->data['skin_front_selected'] = appSetting('skin_front', 'shop') ? appSetting('skin_front', 'shop') : 'shop-skin-front-classic';
         $this->data['skin_front_current']  = $this->shop_skin_front_model->get($this->data['skin_front_selected']);
 
         //  "Checkout" skins
         $this->data['skins_checkout']         = $this->shop_skin_checkout_model->get_available();
-        $this->data['skin_checkout_selected'] = app_setting('skin_checkout', 'shop') ? app_setting('skin_checkout', 'shop') : 'shop-skin-checkout-classic';
+        $this->data['skin_checkout_selected'] = appSetting('skin_checkout', 'shop') ? appSetting('skin_checkout', 'shop') : 'shop-skin-checkout-classic';
         $this->data['skin_checkout_current']  = $this->shop_skin_checkout_model->get($this->data['skin_checkout_selected']);
 
-        /**
-         * Count the number of products (including deleted) - base currency is locked if > 1
-         */
-        $this->data['productCount'] = $this->shop_product_model->count_all(null, true);
+        //  Count the number of products (including deleted) - base currency is locked if > 1
+        $this->data['productCount'] = $this->shop_product_model->countAll(null, true);
 
         // --------------------------------------------------------------------------
 
@@ -161,305 +330,6 @@ class Settings extends BaseAdmin
     // --------------------------------------------------------------------------
 
     /**
-     * Set Shop settings
-     * @return void
-     */
-    protected function _shop_update_settings()
-    {
-        //  Prepare update
-        $settings                                          = array();
-        $settings['maintenance_enabled']                   = trim($this->input->post('maintenance_enabled'));
-        $settings['maintenance_title']                     = trim($this->input->post('maintenance_title'));
-        $settings['maintenance_body']                      = trim($this->input->post('maintenance_body'));
-        $settings['name']                                  = $this->input->post('name');
-        $settings['url']                                   = $this->input->post('url');
-        $settings['price_exclude_tax']                     = $this->input->post('price_exclude_tax');
-        $settings['enable_external_products']              = (bool) $this->input->post('enable_external_products');
-        $settings['firstFinancialYearEndDate']             = $this->input->post('firstFinancialYearEndDate');
-        $settings['invoice_company']                       = $this->input->post('invoice_company');
-        $settings['invoice_company']                       = $this->input->post('invoice_company');
-        $settings['invoice_address']                       = $this->input->post('invoice_address');
-        $settings['invoice_vat_no']                        = $this->input->post('invoice_vat_no');
-        $settings['invoice_company_no']                    = $this->input->post('invoice_company_no');
-        $settings['invoice_footer']                        = $this->input->post('invoice_footer');
-        $settings['warehouse_collection_enabled']          = (bool) $this->input->post('warehouse_collection_enabled');
-        $settings['warehouse_addr_addressee']              = $this->input->post('warehouse_addr_addressee');
-        $settings['warehouse_addr_line1']                  = $this->input->post('warehouse_addr_line1');
-        $settings['warehouse_addr_line2']                  = $this->input->post('warehouse_addr_line2');
-        $settings['warehouse_addr_town']                   = $this->input->post('warehouse_addr_town');
-        $settings['warehouse_addr_postcode']               = $this->input->post('warehouse_addr_postcode');
-        $settings['warehouse_addr_state']                  = $this->input->post('warehouse_addr_state');
-        $settings['warehouse_addr_country']                = $this->input->post('warehouse_addr_country');
-        $settings['warehouse_collection_delivery_enquiry'] = (bool) $this->input->post('warehouse_collection_delivery_enquiry');
-        $settings['page_brand_listing']                    = $this->input->post('page_brand_listing');
-        $settings['page_category_listing']                 = $this->input->post('page_category_listing');
-        $settings['page_collection_listing']               = $this->input->post('page_collection_listing');
-        $settings['page_range_listing']                    = $this->input->post('page_range_listing');
-        $settings['page_sale_listing']                     = $this->input->post('page_sale_listing');
-        $settings['page_tag_listing']                      = $this->input->post('page_tag_listing');
-
-        // --------------------------------------------------------------------------
-
-        //  Sanitize shop url
-        $settings['url'] .= substr($settings['url'], -1) != '/' ? '/' : '';
-
-        // --------------------------------------------------------------------------
-
-        //  Validation
-        $this->load->library('form_validation');
-
-        $this->form_validation->set_rules('firstFinancialYearEndDate', '', 'valid_date');
-
-        $this->form_validation->set_message('valid_date', lang('fv_valid_date'));
-
-        if ($this->form_validation->run()) {
-
-            if ($this->app_setting_model->set($settings, 'shop')) {
-
-                $this->data['success'] = 'Store settings have been saved.';
-
-                // --------------------------------------------------------------------------
-
-                //  Rewrite routes
-                if (!$this->routes_model->update()) {
-
-                    $this->data['warning'] = '<strong>Warning:</strong> while the shop settings were updated, the routes file could not be updated. The shop may not behave as expected,';
-                }
-
-            } else {
-
-                $this->data['error'] = 'There was a problem saving settings.';
-            }
-
-        } else {
-
-            $this->data['error'] = lang('fv_there_were_errors');
-        }
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Set Shop Browse settings
-     * @return void
-     */
-    protected function _shop_update_browse()
-    {
-        //  Prepare update
-        $settings                             = array();
-        $settings['expand_variants']          = (bool) $this->input->post('expand_variants');
-        $settings['default_product_per_page'] = $this->input->post('default_product_per_page');
-        $settings['default_product_per_page'] = is_numeric($settings['default_product_per_page']) ? (int) $settings['default_product_per_page'] : $settings['default_product_per_page'];
-        $settings['default_product_sort']     = $this->input->post('default_product_sort');
-
-        // --------------------------------------------------------------------------
-
-        if ($this->app_setting_model->set($settings, 'shop')) {
-
-            $this->data['success'] = 'Browsing settings have been saved.';
-
-        } else {
-
-            $this->data['error'] = 'There was a problem saving settings.';
-        }
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Set Shop skin settings
-     * @return void
-     */
-    protected function _shop_update_skin()
-    {
-        //  Prepare update
-        $settings                  = array();
-        $settings['skin_front']    = $this->input->post('skin_front');
-        $settings['skin_checkout'] = $this->input->post('skin_checkout');
-
-        // --------------------------------------------------------------------------
-
-        if ($this->app_setting_model->set($settings, 'shop')) {
-
-            $this->data['success'] = 'Skin settings have been saved.';
-
-        } else {
-
-            $this->data['error'] = 'There was a problem saving settings.';
-        }
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Set Shop skin config
-     * @return void
-     */
-    protected function _shop_update_skin_config()
-    {
-        //  Prepare update
-        $configs = (array) $this->input->post('skin_config');
-        $configs = array_filter($configs);
-        $success = true;
-
-        foreach ($configs as $slug => $configs) {
-
-            //  Clear out the grouping; booleans not specified should be assumed false
-            $this->app_setting_model->deleteGroup('shop-' . $slug);
-
-            //  New settings
-            $settings = array();
-            foreach ($configs as $key => $value) {
-
-                $settings[$key] = $value;
-            }
-
-            if ($settings) {
-
-                if (!$this->app_setting_model->set($settings, 'shop-' . $slug)) {
-
-                    $success = false;
-                    break;
-                }
-            }
-        }
-
-        // --------------------------------------------------------------------------
-
-        if ($success) {
-
-            $this->data['success'] = 'Skin settings have been saved.';
-
-        } else {
-
-            $this->data['error'] = 'There was a problem saving settings.';
-        }
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Set Shop Payment Gateway settings
-     * @return [type] [description]
-     */
-    protected function _shop_update_payment_gateway()
-    {
-        //  Prepare update
-        $settings                             = array();
-        $settings['enabled_payment_gateways'] = array_filter((array) $this->input->post('enabled_payment_gateways'));
-
-        // --------------------------------------------------------------------------
-
-        if ($this->app_setting_model->set($settings, 'shop')) {
-
-            $this->data['success'] = 'Payment Gateway settings have been saved.';
-
-        } else {
-
-            $this->data['error'] = 'There was a problem saving settings.';
-        }
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Set Shop Currency settings
-     * @return void
-     */
-    protected function _shop_update_currencies()
-    {
-        //  Prepare update
-        $settings = array();
-
-        if ($this->input->post('base_currency')) {
-
-            $settings['base_currency'] = $this->input->post('base_currency');
-        }
-        $settings['additional_currencies'] = $this->input->post('additional_currencies');
-
-        $settings_encrypted                             = array();
-        $settings_encrypted['openexchangerates_app_id'] = $this->input->post('openexchangerates_app_id');
-
-        // --------------------------------------------------------------------------
-
-        $this->db->trans_begin();
-        $rollback = false;
-
-        if (!$this->app_setting_model->set($settings, 'shop')) {
-
-            $error    = $this->app_setting_model->last_error();
-            $rollback = true;
-        }
-
-        if (!$this->app_setting_model->set($settings_encrypted, 'shop', null, true)) {
-
-            $error    = $this->app_setting_model->last_error();
-            $rollback = true;
-        }
-
-        if ($rollback) {
-
-            $this->db->trans_rollback();
-            $this->data['error'] = 'There was a problem saving currency settings. ' . $error;
-
-        } else {
-
-            $this->db->trans_commit();
-            $this->data['success'] = 'Currency settings were saved.';
-
-            // --------------------------------------------------------------------------
-
-            /**
-             * If there are multiple currencies and an Open Exchange Rates App ID provided
-             * then attempt a sync
-             */
-
-            if (!empty($settings['additional_currencies']) && !empty($settings_encrypted['openexchangerates_app_id'])) {
-
-                $this->load->model('shop/shop_currency_model');
-
-                //  Force a refresh of the settings
-                app_setting(null, 'shop', true);
-
-                if (!$this->shop_currency_model->sync()) {
-
-                    $this->data['message'] = '<strong>Warning:</strong> an attempted sync with Open Exchange Rates service failed with the following reason: ' . $this->shop_currency_model->last_error();
-
-                } else {
-
-                    $this->data['notice'] = '<strong>Currency Sync Complete.</strong><br />The system successfully synced with the Open Exchange Rates service.';
-                }
-            }
-        }
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Set Shop shipping settings
-     * @return void
-     */
-    protected function _shop_update_shipping()
-    {
-        //  Prepare update
-        $settings                            = array();
-        $settings['enabled_shipping_driver'] = $this->input->post('enabled_shipping_driver');
-
-        // --------------------------------------------------------------------------
-
-        if ($this->app_setting_model->set($settings, 'shop')) {
-
-            $this->data['success'] = 'Shipping settings have been saved.';
-
-        } else {
-
-            $this->data['error'] = 'There was a problem saving settings.';
-        }
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
      * Set Payment Gateway settings
      * @return void
      */
@@ -468,7 +338,7 @@ class Settings extends BaseAdmin
         //  Check if valid gateway
         $this->load->model('shop/shop_payment_gateway_model');
 
-        $gateway    = $this->uri->segment(5) ? strtolower($this->uri->segment(5)) : '';
+        $gateway   = strtolower($this->input->get('gateway'));
         $available = $this->shop_payment_gateway_model->isAvailable($gateway);
 
         if ($available) {
@@ -482,35 +352,60 @@ class Settings extends BaseAdmin
             //  Handle POST
             if ($this->input->post()) {
 
-                $this->load->library('form_validation');
+                $aRules = array();
 
+                //  Common
+                $aRules['omnipay_' . $this->data['gateway_slug'] . '_customise_label'] = 'xss_clean';
+                $aRules['omnipay_' . $this->data['gateway_slug'] . '_customise_img']   = 'xss_clean';
+
+
+                //  Gateway specific
                 foreach ($params as $key => $value) {
 
                     if ($key == 'testMode') {
 
-                        $this->form_validation->set_rules('omnipay_' . $this->data['gateway_slug'] . '_' . $key, '', 'xss_clean');
+                        $aRules['omnipay_' . $this->data['gateway_slug'] . '_' . $key] = 'xss_clean';
 
                     } else {
 
-                        $this->form_validation->set_rules('omnipay_' . $this->data['gateway_slug'] . '_' . $key, '', 'xss_clean|required');
+                        $aRules['omnipay_' . $this->data['gateway_slug'] . '_' . $key] = 'xss_clean|required';
                     }
                 }
 
-                //  Additional params
+                //  Additional params (manually added in view)
                 switch ($gateway) {
+
+                    case 'stripe':
+
+                        $aRules['omnipay_' . $this->data['gateway_slug'] . '_publishableKey'] = 'xss_clean';
+                        break;
 
                     case 'paypal_express':
 
-                        $this->form_validation->set_rules('omnipay_' . $this->data['gateway_slug'] . '_brandName', '', 'xss_clean');
-                        $this->form_validation->set_rules('omnipay_' . $this->data['gateway_slug'] . '_headerImageUrl', '', 'xss_clean');
-                        $this->form_validation->set_rules('omnipay_' . $this->data['gateway_slug'] . '_logoImageUrl', '', 'xss_clean');
-                        $this->form_validation->set_rules('omnipay_' . $this->data['gateway_slug'] . '_borderColor', '', 'xss_clean');
+                        //  Defining these here despite being default parameters to make them not required.
+                        $aRules['omnipay_' . $this->data['gateway_slug'] . '_brandName']      = 'xss_clean';
+                        $aRules['omnipay_' . $this->data['gateway_slug'] . '_headerImageUrl'] = 'xss_clean';
+                        $aRules['omnipay_' . $this->data['gateway_slug'] . '_logoImageUrl']   = 'xss_clean';
+                        $aRules['omnipay_' . $this->data['gateway_slug'] . '_borderColor']    = 'xss_clean';
                         break;
                 }
 
-                $this->form_validation->set_message('required', lang('fv_required'));
+                //  Format rules into format accepted by validation class
+                $aRulesFV = array();
+                foreach ($aRules as $sKey => $sRules) {
+                    $aRulesFV[] = array(
+                        'field' => $sKey,
+                        'label' => '',
+                        'rules' => $sRules
+                    );
+                }
 
-                if ($this->form_validation->run()) {
+                $oFormValidation = Factory::service('FormValidation');
+                $oFormValidation->set_rules($aRulesFV);
+
+                $oFormValidation->set_message('required', lang('fv_required'));
+
+                if ($oFormValidation->run()) {
 
                     $settings           = array();
                     $settings_encrypted = array();
@@ -558,19 +453,25 @@ class Settings extends BaseAdmin
 
             //  Render the interface
             $this->data['page']->title = 'Shop Payment Gateway Configuration &rsaquo; ' . $this->data['gateway_name'];
+            $this->data['isModal']     = $this->input->get('isModal');
 
             //  Load common assets
             $this->asset->load('nails.admin.settings.min.js', 'NAILS');
 
-            if (method_exists($this, '_shop_pg_' . $gateway)) {
+            $sMethodName = strtolower($gateway);
+            $sMethodName = str_replace('_', ' ', $sMethodName);
+            $sMethodName = ucwords($sMethodName);
+            $sMethodName = str_replace(' ', '', $sMethodName);
+
+            if (method_exists($this, 'shopPg' . ucfirst(strtolower($gateway)))) {
 
                 //  Specific configuration form available
-                $this->{'_shop_pg_' . $gateway}();
+                $this->{'shopPg' . ucfirst(strtolower($gateway))}();
 
             } else {
 
                 //  Show the generic gateway configuration form
-                $this->_shop_pg_generic($gateway);
+                $this->shopPgGeneric($gateway);
             }
 
         } else {
@@ -586,7 +487,7 @@ class Settings extends BaseAdmin
      * Renders a generic Payment Gateway configuration interface
      * @return void
      */
-    protected function _shop_pg_generic()
+    protected function shopPgGeneric()
     {
         Helper::loadView('shop_pg/generic');
     }
@@ -597,7 +498,7 @@ class Settings extends BaseAdmin
      * Renders an interface specific for WorldPay
      * @return void
      */
-    protected function _shop_pg_worldpay()
+    protected function shopPgWorldpay()
     {
         $this->asset->load('nails.admin.shop.settings.paymentgateway.worldpay.min.js', 'NAILS');
         $this->asset->inline('<script>_worldpay_config = new NAILS_Admin_Shop_Settings_PaymentGateway_WorldPay();</script>');
@@ -613,7 +514,7 @@ class Settings extends BaseAdmin
      * Renders an interface specific for Stripe
      * @return void
      */
-    protected function _shop_pg_stripe()
+    protected function shopPgStripe()
     {
         //  Additional params
         Helper::loadView('shop_pg/stripe');
@@ -625,7 +526,7 @@ class Settings extends BaseAdmin
      * Renders an interface specific for PayPal_Express
      * @return void
      */
-    protected function _shop_pg_paypal_express()
+    protected function shopPgPaypalExpress()
     {
         //  Additional params
         Helper::loadView('shop_pg/paypal_express');
@@ -641,22 +542,19 @@ class Settings extends BaseAdmin
     {
         $this->load->model('shop/shop_shipping_driver_model');
 
-        $body = $this->shop_shipping_driver_model->configure($this->input->get('driver'));
+        $this->data['driver'] = $this->shop_shipping_driver_model->get($this->input->get('driver'));
 
-        if (empty($body)) {
-
+        if (empty($this->data['driver'])) {
             show_404();
         }
 
         // --------------------------------------------------------------------------
 
-        $this->data['page']->title = 'Shop Shipping Driver Configuration &rsaquo; ';
+        $this->data['page']->title = 'Shop Shipping Driver Configuration &rsaquo; ' . $this->data['driver']->name;
+        $this->data['isModal']     = $this->input->get('isModal');
 
         // --------------------------------------------------------------------------
 
-        dumpanddie('todo');
-        $this->load->view('structure/header', $this->data);
-        $this->load->view('admin/settings/shop_sd', array('body' => $body));
-        $this->load->view('structure/footer', $this->data);
+        Helper::loadView('shop_sd');
     }
 }

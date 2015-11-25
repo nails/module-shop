@@ -1,10 +1,10 @@
 <?php
 
 //  Shop's URL
-$shopUrl = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
+$shopUrl = appSetting('url', 'shop') ? appSetting('url', 'shop') : 'shop/';
 
 //  Country
-$oCountryModel = \Nails\Factory::model('Country');
+$oCountryModel = nailsFactory('model', 'Country');
 $countriesFlat = $oCountryModel->getAllFlat();
 
 ?>
@@ -18,13 +18,13 @@ $countriesFlat = $oCountryModel->getAllFlat();
 <?php
 
     $address   = array();
-    $address[] = app_setting('warehouse_addr_addressee', 'shop');
-    $address[] = app_setting('warehouse_addr_line1', 'shop');
-    $address[] = app_setting('warehouse_addr_line2', 'shop');
-    $address[] = app_setting('warehouse_addr_town', 'shop');
-    $address[] = app_setting('warehouse_addr_postcode', 'shop');
-    $address[] = app_setting('warehouse_addr_state', 'shop');
-    $address[] = app_setting('warehouse_addr_country', 'shop');
+    $address[] = appSetting('warehouse_addr_addressee', 'shop');
+    $address[] = appSetting('warehouse_addr_line1', 'shop');
+    $address[] = appSetting('warehouse_addr_line2', 'shop');
+    $address[] = appSetting('warehouse_addr_town', 'shop');
+    $address[] = appSetting('warehouse_addr_postcode', 'shop');
+    $address[] = appSetting('warehouse_addr_state', 'shop');
+    $address[] = appSetting('warehouse_addr_country', 'shop');
     $address   = array_filter($address);
 
     if ($order->delivery_type === 'COLLECT') {
@@ -120,11 +120,11 @@ $countriesFlat = $oCountryModel->getAllFlat();
 </table>
 <?php
 
-$invoiceCompany   = app_setting('invoice_company', 'shop');
-$invoiceAddress   = app_setting('invoice_address', 'shop');
-$invoiceVatNo     = app_setting('invoice_vat_no', 'shop');
-$invoiceCompanyNo = app_setting('invoice_company_no', 'shop');
-$invoiceFooter    = app_setting('invoice_footer', 'shop');
+$invoiceCompany   = appSetting('invoice_company', 'shop');
+$invoiceAddress   = appSetting('invoice_address', 'shop');
+$invoiceVatNo     = appSetting('invoice_vat_no', 'shop');
+$invoiceCompanyNo = appSetting('invoice_company_no', 'shop');
+$invoiceFooter    = appSetting('invoice_footer', 'shop');
 
 if (!empty($invoiceCompany)||!empty($invoiceAddress)||!empty($invoiceVatNo)||!empty($invoiceCompanyNo)) {
 

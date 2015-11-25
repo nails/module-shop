@@ -90,7 +90,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         if (!empty($recentlyViewed)) {
 
             $productId = end($recentlyViewed);
-            $product   = $this->shop_product_model->get_by_id($productId);
+            $product   = $this->shop_product_model->getById($productId);
 
             if ($product && $product->is_active) {
 
@@ -103,8 +103,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         //  Other recently viewed items
         $this->data['recently_viewed'] = array();
         if (!empty($recentlyViewed)) {
-
-            $this->data['recently_viewed'] = $this->shop_product_model->get_by_ids($recentlyViewed);
+            $this->data['recently_viewed'] = $this->shop_product_model->getByIds($recentlyViewed);
         }
 
         // --------------------------------------------------------------------------
@@ -153,14 +152,14 @@ class NAILS_Basket extends NAILS_Shop_Controller
             $message .= anchor(
                 $this->shopUrl . 'basket',
                 'Checkout <span class="glyphicon glyphicon-chevron-right"></span>',
-                'class="btn btn-success btn-alert"'
+                'class="btn btn-success btn-xs pull-right"'
             );
 
         } else {
 
             $status   = 'error';
             $message  = '<strong>Sorry,</strong> there was a problem adding to your basket: ';
-            $message .= $this->shop_basket_model->last_error();
+            $message .= $this->shop_basket_model->lastError();
         }
 
         // --------------------------------------------------------------------------
@@ -196,7 +195,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
             $status   = 'error';
             $message  = '<strong>Sorry,</strong> there was a problem removing the item from your basket: ';
-            $message .= $this->shop_basket_model->last_error();
+            $message .= $this->shop_basket_model->lastError();
         }
 
         // --------------------------------------------------------------------------
@@ -251,7 +250,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         } else {
 
             $status  = 'error';
-            $message = '<strong>Sorry,</strong> could not adjust quantity. ' . $this->shop_basket_model->last_error();
+            $message = '<strong>Sorry,</strong> could not adjust quantity. ' . $this->shop_basket_model->lastError();
         }
 
         // --------------------------------------------------------------------------
@@ -286,7 +285,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         } else {
 
             $status  = 'error';
-            $message = '<strong>Sorry,</strong> could not adjust quantity. ' . $this->shop_basket_model->last_error();
+            $message = '<strong>Sorry,</strong> could not adjust quantity. ' . $this->shop_basket_model->lastError();
         }
 
         // --------------------------------------------------------------------------
@@ -309,29 +308,15 @@ class NAILS_Basket extends NAILS_Shop_Controller
             return;
         }
 
-        // --------------------------------------------------------------------------
+        if ($this->shop_basket_model->addVoucher($this->input->post('voucher'))) {
 
-        $voucher = $this->shop_voucher_model->validate($this->input->get_post('voucher'), getBasket());
-
-        if ($voucher) {
-
-            //  Validated, add to basket
-            if ($this->shop_basket_model->addVoucher($voucher->code)) {
-
-                $status  = 'success';
-                $message = '<strong>Success!</strong> Voucher has been applied to your basket.';
-
-            } else {
-
-                $status  = 'error';
-                $message = '<Strong>Sorry,</strong> failed to add voucher. ' . $this->shop_basket_model->last_error();
-            }
+            $status  = 'success';
+            $message = '<strong>Success!</strong> Voucher has been applied to your basket.';
 
         } else {
 
-            //  Failed to validate, feedback
             $status  = 'error';
-            $message = '<strong>Sorry,</strong> that voucher is not valid. ' . $this->shop_voucher_model->last_error();
+            $message = '<Strong>Sorry,</strong> failed to add voucher. ' . $this->shop_basket_model->lastError();
         }
 
         // --------------------------------------------------------------------------
@@ -356,7 +341,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        if ($this->shop_basket_model->remove_voucher()) {
+        if ($this->shop_basket_model->removeVoucher()) {
 
             $status  = 'success';
             $message = '<strong>Success!</strong> Your voucher was removed.';
@@ -364,7 +349,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         } else {
 
             $status  = 'error';
-            $message = '<strong>Sorry,</strong> failed to remove voucher. ' . $this->shop_basket_model->last_error();
+            $message = '<strong>Sorry,</strong> failed to remove voucher. ' . $this->shop_basket_model->lastError();
 
         }
 
@@ -398,7 +383,37 @@ class NAILS_Basket extends NAILS_Shop_Controller
         } else {
 
             $status  = 'error';
-            $message = '<strong>Sorry,</strong> failed to save note. ' . $this->shop_basket_model->last_error();
+            $message = '<strong>Sorry,</strong> failed to save note. ' . $this->shop_basket_model->lastError();
+
+        }
+
+        // --------------------------------------------------------------------------
+
+        $this->session->set_flashdata($status, $message);
+        redirect($this->data['return']);
+    }
+
+    // --------------------------------------------------------------------------
+
+    public function remove_note()
+    {
+        if ($this->maintenance->enabled) {
+
+            $this->renderMaintenancePage();
+            return;
+        }
+
+        // --------------------------------------------------------------------------
+
+        if ($this->shop_basket_model->removeNote()) {
+
+            $status  = 'success';
+            $message = '<strong>Success!</strong> Note was removed from your basket.';
+
+        } else {
+
+            $status  = 'error';
+            $message = '<strong>Sorry,</strong> failed to remove note. ' . $this->shop_basket_model->lastError();
 
         }
 
@@ -424,12 +439,13 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        $currency = $this->shop_currency_model->getByCode($this->input->get_post('currency'));
+        $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
+        $oCurrency      = $oCurrencyModel->getByCode($this->input->get_post('currency'));
 
-        if ($currency) {
+        if ($oCurrency) {
 
             //  Valid currency
-            $this->session->set_userdata('shop_currency', $currency->code);
+            $this->session->set_userdata('shop_currency', $oCurrency->code);
 
             if ($this->user_model->isLoggedIn()) {
 
@@ -439,24 +455,24 @@ class NAILS_Basket extends NAILS_Shop_Controller
                     NAILS_DB_PREFIX . 'user_meta_shop',
                     activeUser('id'),
                     array(
-                        'currency' => $currency->code
+                        'currency' => $oCurrency->code
                     )
                 );
             }
 
-            $status  = 'success';
-            $message = '<strong>Success!</strong> Your currency has been updated.';
+            $sStatus  = 'success';
+            $sMessage = '<strong>Success!</strong> Your currency has been updated.';
 
         } else {
 
             //  Failed to validate, feedback
-            $status  = 'error';
-            $message = '<strong>Sorry,</strong> that currency is not supported.';
+            $sStatus  = 'error';
+            $sMessage = '<strong>Sorry,</strong> that currency is not supported.';
         }
 
         // --------------------------------------------------------------------------
 
-        $this->session->set_flashdata($status, $message);
+        $this->session->set_flashdata($sStatus, $sMessage);
         redirect($this->data['return']);
     }
 
@@ -485,7 +501,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
             $status   = 'error';
             $message  = '<strong>Sorry,</strong> failed to set your basket as a "Collection" order. ';
-            $message .= $this->shop_basket_model->last_error();
+            $message .= $this->shop_basket_model->lastError();
         }
 
         // --------------------------------------------------------------------------
@@ -545,7 +561,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
             $status   = 'error';
             $message  = '<strong>Sorry,</strong> failed to set your basket as a "Delivery" order. ';
-            $message .= $this->shop_basket_model->last_error();
+            $message .= $this->shop_basket_model->lastError();
         }
 
         // --------------------------------------------------------------------------

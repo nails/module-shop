@@ -4,8 +4,8 @@
     </p>
     <?php
 
-        echo \Nails\Admin\Helper::loadSearch($search);
-        echo \Nails\Admin\Helper::loadPagination($pagination);
+        echo adminHelper('loadSearch', $search);
+        echo adminHelper('loadPagination', $pagination);
 
     ?>
     <div class="table-responsive">
@@ -36,7 +36,7 @@
                             echo '<td class="count">';
                                 echo !isset($taxRate->product_count) ? 'Unknown' : $taxRate->product_count;
                             echo '</td>';
-                            echo \Nails\Admin\Helper::loadDatetimeCell($taxRate->modified);
+                            echo adminHelper('loadDatetimeCell', $taxRate->modified);
                             echo '<td class="actions">';
 
                                 if (userHasPermission('admin:shop:manage:taxRate:edit')) {
@@ -44,7 +44,7 @@
                                     echo anchor(
                                         'admin/shop/manage/taxRate/edit/' . $taxRate->id . $isModal,
                                         lang('action_edit'),
-                                        'class="awesome small"'
+                                        'class="btn btn-xs btn-primary"'
                                     );
                                 }
 
@@ -53,7 +53,7 @@
                                     echo anchor(
                                         'admin/shop/manage/taxRate/delete/' . $taxRate->id . $isModal,
                                         lang('action_delete'),
-                                        'class="awesome small red confirm" data-body="This action cannot be undone."'
+                                        'class="btn btn-xs btn-danger confirm" data-body="This action cannot be undone."'
                                     );
                                 }
 
@@ -76,11 +76,11 @@
     </div>
     <?php
 
-        echo \Nails\Admin\Helper::loadPagination($pagination);
+        echo adminHelper('loadPagination', $pagination);
 
     ?>
 </div>
 <?php
 
-    echo \Nails\Admin\Helper::loadPagination($pagination);
-    echo \Nails\Admin\Helper::loadInlineView('utilities/footer', array('items' => $taxRates));
+    echo adminHelper('loadPagination', $pagination);
+    echo adminHelper('loadInlineView', 'utilities/footer', array('items' => $taxRates));

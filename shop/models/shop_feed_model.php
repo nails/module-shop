@@ -47,21 +47,21 @@ class NAILS_Shop_feed_model extends NAILS_Model
                 } else {
 
                     $error = 'Failed to write shop feed to disk "' . $provider . '" in format "' . $format . '"';
-                    $this->_set_error($error);
+                    $this->setError($error);
                     return false;
                 }
 
             } else {
 
                 $error = 'Failed to generate data for "' . $provider . '" in format "' . $format . '"';
-                $this->_set_error($error);
+                $this->setError($error);
                 return false;
             }
 
         } else {
 
             $error = 'Invalid feed parameters.';
-            $this->_set_error($error);
+            $this->setError($error);
             return false;
         }
     }
@@ -102,11 +102,12 @@ class NAILS_Shop_feed_model extends NAILS_Model
      */
     protected function getShopData()
     {
-        $sBaseCurrency = app_setting('base_currency', 'shop');
-        $oBaseCurrency = $this->shop_currency_model->getByCode($sBaseCurrency);
-        $sWarehouseCountry = app_setting('warehouse_addr_country', 'shop');
-        $sInvoiceCompany = app_setting('invoice_company', 'shop');
-        $products = $this->shop_product_model->get_all();
+        $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
+        $sBaseCurrency  = appSetting('base_currency', 'shop');
+        $oBaseCurrency  = $oCurrencyModel->getByCode($sBaseCurrency);
+        $sWarehouseCountry = appSetting('warehouse_addr_country', 'shop');
+        $sInvoiceCompany = appSetting('invoice_company', 'shop');
+        $products = $this->shop_product_model->getAll();
         $out = array();
 
         foreach ($products as $p) {
@@ -191,8 +192,8 @@ class NAILS_Shop_feed_model extends NAILS_Model
                 $shippingData = $this->shop_shipping_driver_model->calculateVariant($v->id);
 
                 //  Calculate price and price of shipping
-                $sPrice = $this->shop_currency_model->formatBase($p->price->user->min_price, false);
-                $sShippingPrice = $this->shop_currency_model->formatBase($shippingData->base, false);
+                $sPrice         = $oCurrencyModel->formatBase($p->price->user->min_price, false);
+                $sShippingPrice = $oCurrencyModel->formatBase($shippingData->base, false);
 
                 $temp->price = $sPrice . ' ' . $oBaseCurrency->code;
                 $temp->shipping_country = $sWarehouseCountry;
@@ -220,8 +221,8 @@ class NAILS_Shop_feed_model extends NAILS_Model
         $xml = '<?xml version="1.0" encoding="utf-8"?>';
         $xml .= '<rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">';
         $xml .= '<channel>';
-        $xml .= '<title><![CDATA[' . app_setting('invoice_company', 'shop') . ']]></title>';
-        $xml .= '<description><![CDATA[' . app_setting('invoice_address', 'shop') . ']]></description>';
+        $xml .= '<title><![CDATA[' . appSetting('invoice_company', 'shop') . ']]></title>';
+        $xml .= '<description><![CDATA[' . appSetting('invoice_address', 'shop') . ']]></description>';
         $xml .= '<link><![CDATA[' . BASE_URL . ']]></link>';
 
         foreach ($items as $item) {
@@ -286,7 +287,7 @@ class NAILS_Shop_feed_model extends NAILS_Model
 
             if (empty($data)) {
 
-                $this->_set_error('Failed to fetch feed from Google.');
+                $this->setError('Failed to fetch feed from Google.');
                 return false;
             }
 
@@ -316,7 +317,7 @@ class NAILS_Shop_feed_model extends NAILS_Model
 
         } else {
 
-            $this->_set_error('Failed to read feed from cache.');
+            $this->setError('Failed to read feed from cache.');
             return false;
         }
     }

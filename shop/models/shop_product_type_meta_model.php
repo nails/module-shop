@@ -32,14 +32,13 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
      * Fetches all meta fields, optionally paginated.
      * @param int    $page           The page number of the results, if null then no pagination
      * @param int    $perPage        How many items per page of paginated results
-     * @param mixed  $data           Any data to pass to _getcount_common()
+     * @param mixed  $data           Any data to pass to getCountCommon()
      * @param bool   $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
-     * @param string $_caller        Internal flag to pass to _getcount_common(), contains the calling method
      * @return array
      **/
-    public function get_all($page = null, $per_page = null, $data = array(), $include_deleted = false, $_caller = 'GET_ALL')
+    public function getAll($page = null, $per_page = null, $data = array(), $include_deleted = false)
     {
-        $fields = parent::get_all($page, $per_page, $data, $include_deleted, $_caller);
+        $fields = parent::getAll($page, $per_page, $data, $include_deleted);
 
         //  Handle requests for the raw query object
         if (!empty($data['RETURN_QUERY_OBJECT'])) {
@@ -68,11 +67,10 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
     /**
      * This method applies the conditionals which are common across the get_*()
      * methods and the count() method.
-     * @param array  $data    Data passed from the calling method
-     * @param string $_caller The name of the calling method
+     * @param  array $data Data passed from the calling method
      * @return void
      **/
-    protected function _getcount_common($data = array(), $_caller = null)
+    protected function getCountCommon($data = array())
     {
         //  Default sort
         if (empty($data['sort'])) {
@@ -103,7 +101,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        parent::_getcount_common($data, $_caller);
+        parent::getCountCommon($data);
     }
 
     // --------------------------------------------------------------------------
@@ -148,7 +146,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
 
         foreach ($results as $result) {
 
-            $this->_format_object($result);
+            $this->formatObject($result);
         }
 
         return $results;
@@ -173,7 +171,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
 
         if (!$result) {
 
-            $this->_set_error('Failed to create parent object.');
+            $this->setError('Failed to create parent object.');
             $this->db->trans_rollback();
             return false;
         }
@@ -194,7 +192,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
 
             if (!$this->db->insert_batch($this->table_taxonomy, $data)) {
 
-                $this->_set_error('Failed to add new product type/meta field relationships.');
+                $this->setError('Failed to add new product type/meta field relationships.');
                 $this->db->trans_rollback();
                 return false;
             }
@@ -223,7 +221,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
 
         if (!$result) {
 
-            $this->_set_error('Failed to update parent object.');
+            $this->setError('Failed to update parent object.');
             $this->db->trans_rollback();
             return false;
         }
@@ -231,7 +229,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
         $this->db->where('meta_field_id', $id);
         if (!$this->db->delete($this->table_taxonomy)) {
 
-            $this->_set_error('Failed to remove existing product type/meta field relationships.');
+            $this->setError('Failed to remove existing product type/meta field relationships.');
             $this->db->trans_rollback();
             return false;
         }
@@ -250,7 +248,7 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
 
             if (!$this->db->insert_batch($this->table_taxonomy, $data)) {
 
-                $this->_set_error('Failed to add new product type/meta field relationships.');
+                $this->setError('Failed to add new product type/meta field relationships.');
                 $this->db->trans_rollback();
                 return false;
             }

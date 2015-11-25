@@ -17,6 +17,7 @@ class NAILS_Shop_model extends Base
 {
     protected $oUser;
     protected $oUserMeta;
+    protected $oCurrency;
     protected $settings;
     protected $base_currency;
 
@@ -34,6 +35,7 @@ class NAILS_Shop_model extends Base
 
         $this->oUser     = Factory::model('User', 'nailsapp/module-auth');
         $this->oUserMeta = Factory::model('UserMeta', 'nailsapp/module-auth');
+        $this->oCurrency = Factory::model('Currency', 'nailsapp/module-shop');
 
         // --------------------------------------------------------------------------
 
@@ -111,7 +113,7 @@ class NAILS_Shop_model extends Base
                 if (!empty($lookup->status) && $lookup->status == 200) {
 
                     //  We know the code, does it have a known currency?
-                    $countryCurrency = $this->shop_currency_model->get_by_country($lookup->country->iso);
+                    $countryCurrency = $this->oCurrency->getByCountry($lookup->country->iso);
 
                     if ($countryCurrency) {
 
@@ -137,7 +139,7 @@ class NAILS_Shop_model extends Base
         }
 
         //  Fetch the user's render currency
-        $userCurrency = $this->shop_currency_model->getByCode($currencyCode);
+        $userCurrency = $this->oCurrency->getByCode($currencyCode);
 
         if (!$userCurrency) {
 
@@ -202,7 +204,7 @@ class NAILS_Shop_model extends Base
      */
     public function getBaseCurrency()
     {
-        $cache = $this->_get_cache('base_currency');
+        $cache = $this->getCache('base_currency');
 
         if ($cache) {
 
@@ -211,18 +213,13 @@ class NAILS_Shop_model extends Base
 
         // --------------------------------------------------------------------------
 
-        //  Load the currency model
-        $this->load->model('shop/shop_currency_model');
-
-        // --------------------------------------------------------------------------
-
         //  Fetch base currency
-        $base = $this->shop_currency_model->getByCode(app_setting('base_currency', 'shop'));
+        $base = $this->oCurrency->getByCode(appSetting('base_currency', 'shop'));
 
         //  If no base currency is found, default to GBP
         if (!$base) {
 
-            $base = $this->shop_currency_model->getByCode('GBP');
+            $base = $this->oCurrency->getByCode('GBP');
 
             if (!$base) {
 
@@ -232,12 +229,12 @@ class NAILS_Shop_model extends Base
 
             } else {
 
-                set_app_setting('base_currency', 'shop', 'GBP');
+                setAppSetting('base_currency', 'shop', 'GBP');
             }
         }
 
         //  Cache
-        $this->_set_cache('base_currency', $base);
+        $this->setCache('base_currency', $base);
 
         return $base;
     }
@@ -250,7 +247,7 @@ class NAILS_Shop_model extends Base
      */
     public function getShopUrl()
     {
-        return app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
+        return appSetting('url', 'shop') ? appSetting('url', 'shop') : 'shop/';
     }
 
     // --------------------------------------------------------------------------
@@ -261,7 +258,7 @@ class NAILS_Shop_model extends Base
      */
     public function getShopName()
     {
-        return app_setting('name', 'shop') ? app_setting('name', 'shop') : 'Shop';
+        return appSetting('name', 'shop') ? appSetting('name', 'shop') : 'Shop';
     }
 }
 

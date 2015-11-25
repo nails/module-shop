@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Shop;
 
+use Nails\Factory;
 use Nails\Admin\Helper;
 use Nails\Shop\Controller\BaseAdmin;
 
@@ -26,22 +27,30 @@ class Availability extends BaseAdmin
         if (userHasPermission('admin:shop:availability:manage')) {
 
             //  Alerts
-            $alerts = array();
-            $ci     =& get_instance();
+            $ci =& get_instance();
 
             //  Get all notifications, show as an info count
             $numAlertsAll = $ci->db->count_all_results(NAILS_DB_PREFIX . 'shop_inform_product_available');
-            $alerts[]  = \Nails\Admin\Nav::alertObject($numAlertsAll, 'info', 'All notifications');
+
+            $oAlertAll = Factory::factory('NavAlert', 'nailsapp/module-admin');
+            $oAlertAll->setValue($numAlertsAll);
+            $oAlertAll->setLabel('All Notifications');
 
             //  Get notifications in the last week, add an alert count
             $ci->db->where('created >', 'ADDDATE(NOW(), INTERVAL -1 WEEK)', false);
             $numAlertsNew = $ci->db->count_all_results(NAILS_DB_PREFIX . 'shop_inform_product_available');
-            $alerts[]  = \Nails\Admin\Nav::alertObject($numAlertsNew, 'alert', 'Added within the last week');
 
-            $navGroup = new \Nails\Admin\Nav('Shop', 'fa-shopping-cart');
-            $navGroup->addAction('Product Availability Alerts', 'index', $alerts);
+            $oAlertNew = Factory::factory('NavAlert', 'nailsapp/module-admin');
+            $oAlertNew->setValue($numAlertsNew);
+            $oAlertNew->setSeverity('danger');
+            $oAlertNew->setLabel('Added within the last week');
 
-            return $navGroup;
+            $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+            $oNavGroup->setLabel('Shop');
+            $oNavGroup->setIcon('fa-shopping-cart');
+            $oNavGroup->addAction('Product Availability Alerts', 'index', array($oAlertAll, $oAlertNew));
+
+            return $oNavGroup;
         }
     }
 
@@ -51,7 +60,7 @@ class Availability extends BaseAdmin
      * Returns an array of extra permissions for this controller
      * @return array
      */
-    static function permissions()
+    public static function permissions()
     {
         $permissions = parent::permissions();
 
@@ -98,7 +107,7 @@ class Availability extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['notifications'] = $this->shop_inform_product_available_model->get_all();
+        $this->data['notifications'] = $this->shop_inform_product_available_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -135,15 +144,14 @@ class Availability extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $oFormValidation = Factory::service('FormValidation');
+            $oFormValidation->set_rules('email', '', 'xss_clean|required|valid_email');
+            $oFormValidation->set_rules('item', '', 'xss_clean|required');
 
-            $this->form_validation->set_rules('email', '', 'xss_clean|required|valid_email');
-            $this->form_validation->set_rules('item', '', 'xss_clean|required');
+            $oFormValidation->set_message('required', lang('fv_required'));
+            $oFormValidation->set_message('valid_email', lang('fv_valid_email'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('valid_email',  lang('fv_valid_email'));
-
-            if ($this->form_validation->run()) {
+            if ($oFormValidation->run()) {
 
                 $item = explode(':', $this->input->post('item'));
 
@@ -161,7 +169,7 @@ class Availability extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Product Availability Notification. ';
-                    $this->data['error'] .= $this->shop_inform_product_available_model->last_error();
+                    $this->data['error'] .= $this->shop_inform_product_available_model->lastError();
                 }
 
             } else {
@@ -199,7 +207,7 @@ class Availability extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['notification'] = $this->shop_inform_product_available_model->get_by_id($this->uri->segment(5));
+        $this->data['notification'] = $this->shop_inform_product_available_model->getById($this->uri->segment(5));
 
         if (!$this->data['notification']) {
 
@@ -210,15 +218,14 @@ class Availability extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $oFormValidation = Factory::service('FormValidation');
+            $oFormValidation->set_rules('email', '', 'xss_clean|required|valid_email');
+            $oFormValidation->set_rules('item', '', 'xss_clean|required');
 
-            $this->form_validation->set_rules('email', '', 'xss_clean|required|valid_email');
-            $this->form_validation->set_rules('item', '', 'xss_clean|required');
+            $oFormValidation->set_message('required', lang('fv_required'));
+            $oFormValidation->set_message('valid_email', lang('fv_valid_email'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('valid_email',  lang('fv_valid_email'));
-
-            if ($this->form_validation->run()) {
+            if ($oFormValidation->run()) {
 
                 $item = explode(':', $this->input->post('item'));
 
@@ -235,7 +242,8 @@ class Availability extends BaseAdmin
 
                 } else {
 
-                    $this->data['error'] = 'There was a problem updated the Product Availability Notification. ' . $this->shop_inform_product_available_model->last_error();
+                    $this->data['error']  = 'There was a problem updated the Product Availability Notification. ';
+                    $this->data['error'] .= $this->shop_inform_product_available_model->lastError();
 
                 }
 
@@ -282,7 +290,7 @@ class Availability extends BaseAdmin
 
         } else {
 
-            $this->session->set_flashdata('error', 'There was a problem deleting the Product availability Notification. ' . $this->shop_inform_product_available_model->last_error());
+            $this->session->set_flashdata('error', 'There was a problem deleting the Product availability Notification. ' . $this->shop_inform_product_available_model->lastError());
         }
 
         redirect('admin/shop/availability');

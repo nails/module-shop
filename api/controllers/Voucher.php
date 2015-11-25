@@ -12,10 +12,13 @@
 
 namespace Nails\Api\Shop;
 
+use Nails\Factory;
+
 class Voucher extends \Nails\Api\Controller\Base
 {
     public static $requiresAuthentication = true;
     protected $maintenance;
+    protected $oVoucherModel;
 
     // --------------------------------------------------------------------------
 
@@ -25,10 +28,9 @@ class Voucher extends \Nails\Api\Controller\Base
     public function __construct($oApiRouter)
     {
         parent::__construct($oApiRouter);
-        $this->load->model('shop/shop_voucher_model');
 
         $this->maintenance = new \stdClass();
-        $this->maintenance->enabled = (bool) app_setting('maintenance_enabled', 'shop');
+        $this->maintenance->enabled = (bool) appSetting('maintenance_enabled', 'shop');
         if ($this->maintenance->enabled) {
 
             //  Allow shop admins access
@@ -36,6 +38,8 @@ class Voucher extends \Nails\Api\Controller\Base
                 $this->maintenance->enabled = false;
             }
         }
+
+        $this->oVoucherModel = Factory::model('Voucher', 'nailsapp/module-shop');
     }
 
     // --------------------------------------------------------------------------
@@ -80,13 +84,9 @@ class Voucher extends \Nails\Api\Controller\Base
 
         } else {
 
-            $out = array();
-
-            $this->load->model('shop/shop_voucher_model');
-
-            $out['code'] = $this->shop_voucher_model->generateValidCode();
-
-            return $out;
+            return array(
+                'code' => $this->oVoucherModel->generateValidCode()
+            );
         }
     }
 }

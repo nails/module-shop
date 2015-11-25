@@ -28,11 +28,10 @@ class NAILS_Shop_attribute_model extends NAILS_Model
     /**
      * This method applies the conditionals which are common across the get_*()
      * methods and the count() method.
-     * @param array  $data    Data passed from the calling method
-     * @param string $_caller The name of the calling method
+     * @param  array $data Data passed from the calling method
      * @return void
      **/
-    protected function _getcount_common($data = array(), $_caller = null)
+    protected function getCountCommon($data = array())
     {
         //  Default sort
         if (empty($data['sort'])) {
@@ -83,7 +82,7 @@ class NAILS_Shop_attribute_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        parent::_getcount_common($data, $_caller);
+        parent::getCountCommon($data);
     }
 }
 

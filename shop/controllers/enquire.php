@@ -13,6 +13,8 @@ require_once '_shop.php';
  * @link
  */
 
+use Nails\Factory;
+
 class NAILS_Enquire extends NAILS_Shop_Controller
 {
     /**
@@ -45,7 +47,7 @@ class NAILS_Enquire extends NAILS_Shop_Controller
         $productId = $this->uri->rsegment('3');
         $variantId = $this->uri->rsegment('4');
 
-        $this->data['product'] = $this->shop_product_model->get_by_id($productId);
+        $this->data['product'] = $this->shop_product_model->getById($productId);
         $this->data['variant'] = null;
 
         if (!$this->data['product']) {
@@ -106,19 +108,19 @@ class NAILS_Enquire extends NAILS_Shop_Controller
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $oFormValidation = Factory::service('FormValidation');
 
-            $this->form_validation->set_rules('name', '', 'xss_clean|required');
-            $this->form_validation->set_rules('email', '', 'xss_clean|required|valid_email');
-            $this->form_validation->set_rules('telephone', '', 'xss_clean');
-            $this->form_validation->set_rules('address', '', 'xss_clean|required');
-            $this->form_validation->set_rules('notes', '', 'xss_clean');
+            $oFormValidation->set_rules('name', '', 'xss_clean|required');
+            $oFormValidation->set_rules('email', '', 'xss_clean|required|valid_email');
+            $oFormValidation->set_rules('telephone', '', 'xss_clean');
+            $oFormValidation->set_rules('address', '', 'xss_clean|required');
+            $oFormValidation->set_rules('notes', '', 'xss_clean');
 
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('valid_email', lang('fv_valid_email'));
+            $oFormValidation->set_message('required', lang('fv_required'));
+            $oFormValidation->set_message('valid_email', lang('fv_valid_email'));
 
-            if ($this->form_validation->run()) {
+            if ($oFormValidation->run()) {
 
                 $_data                        = array();
                 $_data['customer']            = new \stdClass();

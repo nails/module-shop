@@ -30,9 +30,9 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 
     // --------------------------------------------------------------------------
 
-    protected function _getcount_common($data = array(), $_caller = null)
+    protected function getCountCommon($data = array())
     {
-        parent::_getcount_common($data, $_caller);
+        parent::getCountCommon($data);
 
         if (empty($data['sort'])) {
 
@@ -59,7 +59,7 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 
         if (!valid_email($email)) {
 
-            $this->_set_error('"' . $email . '" is not a valid email address.');
+            $this->setError('"' . $email . '" is not a valid email address.');
             return false;
         }
 
@@ -67,7 +67,7 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 
         if (!$product) {
 
-            $this->_set_error('Invalid Variant ID.');
+            $this->setError('Invalid Variant ID.');
             return false;
         }
 
@@ -93,7 +93,7 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
 
         if ($variationIds) {
 
-            $product = $this->shop_product_model->get_by_id($productId);
+            $product = $this->shop_product_model->getById($productId);
 
             if ($product && $product->is_active && !$product->is_deleted) {
 
@@ -147,9 +147,9 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
      * @param  array  $bools    Fields which should be cast as booleans
      * @return void
      */
-    protected function _format_object(&$obj, $data = array(), $integers = array(), $bools = array())
+    protected function formatObject(&$obj, $data = array(), $integers = array(), $bools = array())
     {
-        parent::_format_object($obj, $data, $integers, $bools);
+        parent::formatObject($obj, $data, $integers, $bools);
 
         $obj->product        = new \stdClass();
         $obj->product->id    = (int) $obj->product_id;

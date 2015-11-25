@@ -35,9 +35,11 @@ class Reports extends BaseAdmin
     {
         if (userHasPermission('admin:shop:reports:generate')) {
 
-            $navGroup = new \Nails\Admin\Nav('Shop', 'fa-shopping-cart');
-            $navGroup->addAction('Generate Reports');
-            return $navGroup;
+            $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+            $oNavGroup->setLabel('Shop');
+            $oNavGroup->setIcon('fa-shopping-cart');
+            $oNavGroup->addAction('Generate Reports');
+            return $oNavGroup;
         }
     }
 
@@ -47,7 +49,7 @@ class Reports extends BaseAdmin
      * Returns an array of extra permissions for this controller
      * @return array
      */
-    static function permissions()
+    public static function permissions()
     {
         $permissions = parent::permissions();
 
@@ -74,7 +76,7 @@ class Reports extends BaseAdmin
          */
 
         $oDate                     = Factory::factory('DateTime');
-        $firstFinancialYearEndDate = app_setting('firstFinancialYearEndDate', 'shop');
+        $firstFinancialYearEndDate = appSetting('firstFinancialYearEndDate', 'shop');
 
         if (!empty($firstFinancialYearEndDate)) {
 
@@ -300,15 +302,15 @@ class Reports extends BaseAdmin
         if ($this->input->post()) {
 
             //  Form validation and update
-            $this->load->library('form_validation');
+            $oFormValidation = Factory::service('FormValidation');
 
             //  Define rules
-            $this->form_validation->set_rules('report', '', 'xss_clean|required');
-            $this->form_validation->set_rules('period', '', 'xss_clean');
-            $this->form_validation->set_rules('format', '', 'xss_clean|required');
+            $oFormValidation->set_rules('report', '', 'xss_clean|required');
+            $oFormValidation->set_rules('period', '', 'xss_clean');
+            $oFormValidation->set_rules('format', '', 'xss_clean|required');
 
             //  Set Messages
-            $this->form_validation->set_message('required', lang('fv_required'));
+            $oFormValidation->set_message('required', lang('fv_required'));
 
             //  Execute
             $source = $this->input->post('report');
@@ -322,7 +324,7 @@ class Reports extends BaseAdmin
             $format = $this->input->post('format');
             $formatExists = isset($this->formats[$format]);
 
-            if ($this->form_validation->run() && $sourceExists && $periodExists && $formatExists) {
+            if ($oFormValidation->run() && $sourceExists && $periodExists && $formatExists) {
 
                 $source = $this->sources[$source];
                 $format = $this->formats[$format];
@@ -757,7 +759,7 @@ class Reports extends BaseAdmin
 
                 $status  = 'error';
                 $message = 'Failed to render PDF. ';
-                $message .= $this->pdf->last_error() ? 'DOMPDF gave the following error: ' . $this->pdf->last_error() : '';
+                $message .= $this->pdf->lastError() ? 'DOMPDF gave the following error: ' . $this->pdf->lastError() : '';
 
                 $this->session->set_flashdata($status, $message);
                 redirect('admin/shop/reports');

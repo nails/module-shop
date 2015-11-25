@@ -4,8 +4,8 @@
     </p>
     <?php
 
-        echo \Nails\Admin\Helper::loadSearch($search);
-        echo \Nails\Admin\Helper::loadPagination($pagination);
+        echo adminHelper('loadSearch', $search);
+        echo adminHelper('loadPagination', $pagination);
 
     ?>
     <div class="table-responsive">
@@ -29,6 +29,7 @@
                     <th class="value">Tax</th>
                     <th class="value">Shipping</th>
                     <th class="value">Total</th>
+                    <th class="value">Discount</th>
                     <th class="status">Status</th>
                     <th class="fulfilment">Fulfilled</th>
                     <th class="actions">Actions</th>
@@ -49,8 +50,8 @@
                                 <td class="ref"><?=$order->ref?></td>
                                 <?php
 
-                                    echo \Nails\Admin\Helper::loadDatetimeCell($order->created);
-                                    echo \Nails\Admin\Helper::loadUserCell($order->user);
+                                    echo adminHelper('loadDatetimeCell', $order->created);
+                                    echo adminHelper('loadUserCell', $order->user);
 
                                 ?>
                                 <td class="value">
@@ -101,6 +102,18 @@
 
                                 ?>
                                 </td>
+                                <td class="value">
+                                <?php
+
+                                    echo $order->totals->base_formatted->grand_discount;
+
+                                    if ($order->currency !== $order->base_currency) {
+
+                                        echo '<small>' . $order->totals->user_formatted->grand_discount . '</small>';
+                                    }
+
+                                ?>
+                                </td>
                                 <?php
 
                                     switch ($order->status) {
@@ -139,7 +152,7 @@
                                     echo '</td>';
 
                                     $boolValue = $order->fulfilment_status == 'FULFILLED';
-                                    echo \Nails\Admin\Helper::loadBoolCell($boolValue, $order->fulfilled);
+                                    echo adminHelper('loadBoolCell', $boolValue, $order->fulfilled);
 
                                 ?>
                                 <td class="actions">
@@ -234,7 +247,7 @@
     </div>
     <?php
 
-        echo \Nails\Admin\Helper::loadPagination($pagination);
+        echo adminHelper('loadPagination', $pagination);
 
     ?>
 </div>

@@ -223,7 +223,7 @@ class NAILS_Shop_skin_front_model extends NAILS_Model
 
         }
 
-        $this->_set_error('"' . $slug . '" was not found.');
+        $this->setError('"' . $slug . '" was not found.');
         return false;
     }
 }

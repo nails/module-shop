@@ -40,7 +40,7 @@
     </fieldset>
     <fieldset>
         <legend>Advanced Configurations</legend>
-        <p class="system-alert message">
+        <p class="alert alert-warning">
             These fields provide granular control over the product type's behaviour. Setting or changing
             these values will alter the way the shop behaves.
             <br /><strong>Use with extreme caution</strong>.
@@ -91,19 +91,15 @@
         ?>
     </fieldset>
     <p style="margin-top:1em;">
-    <?php
-
-        echo form_submit('submit', 'Save', 'class="awesome"');
-        echo anchor(
-            'admin/shop/manage/product_type' . $isModal,
-            'Cancel',
-            'class="awesome red confirm" data-body="All unsaved changes will be lost."'
-        );
-
-    ?>
+    <?=form_submit('submit', 'Save', 'class="btn btn-primary"')?>
+    <?=anchor(
+        'admin/shop/manage/product_type' . $isModal,
+        'Cancel',
+        'class="btn btn-danger confirm" data-body="All unsaved changes will be lost."'
+    )?>
     </p>
     <?=form_close();?>
 </div>
 <?php
 
-    echo \Nails\Admin\Helper::loadInlineView('utilities/footer', array('items' => $productTypes));
+    echo adminHelper('loadInlineView', 'utilities/footer', array('items' => $productTypes));

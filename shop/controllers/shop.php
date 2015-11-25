@@ -39,7 +39,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         //  Defaults
         $this->_product_sort       = new \stdClass();
-        $this->_product_sort->sort = app_setting('default_product_sort', 'shop');
+        $this->_product_sort->sort = appSetting('default_product_sort', 'shop');
         $this->_product_sort->sort = $this->_product_sort->sort ? $this->_product_sort->sort : 'recent';
 
         //  Actual Values
@@ -84,7 +84,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->_product_pagination->page     = 0;
         $this->_product_pagination->rsegment = 2;
         $this->_product_pagination->total    = 0;
-        $this->_product_pagination->per_page = app_setting('default_product_per_page', 'shop');
+        $this->_product_pagination->per_page = appSetting('default_product_per_page', 'shop');
         $this->_product_pagination->per_page = $this->_product_pagination->per_page ? $this->_product_pagination->per_page : 25;
 
         //  Actual Values
@@ -151,9 +151,9 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->data['categories'] = $this->shop_category_model->getTopLevel();
 
         $data = array('include_count' => true);
-        $this->data['brands']      = $this->shop_brand_model->get_all(null, null, $data);
-        $this->data['collections'] = $this->shop_collection_model->get_all(null, null, $data);
-        $this->data['ranges']      = $this->shop_range_model->get_all(null, null, $data);
+        $this->data['brands']      = $this->shop_brand_model->getAll(null, null, $data);
+        $this->data['collections'] = $this->shop_collection_model->getAll(null, null, $data);
+        $this->data['ranges']      = $this->shop_range_model->getAll(null, null, $data);
 
         // --------------------------------------------------------------------------
 
@@ -178,18 +178,18 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->_product_pagination->rsegment = 2;
         $this->_product_pagination->page     = (int) $this->uri->rsegment($this->_product_pagination->rsegment);
 
-        $this->configurePagination($this->shop_product_model->count_all($data));
+        $this->configurePagination($this->shop_product_model->countAll($data));
 
         // --------------------------------------------------------------------------
 
         //  Products
         //  ========
 
-        $this->data['products'] = $this->shop_product_model->get_all(
+        $this->data['products'] = $this->shop_product_model->getAll(
             $this->_product_pagination->page,
             $this->_product_pagination->per_page,
             $data
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -240,7 +240,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function brandIndex()
     {
-        if (!app_setting('page_brand_listing', 'shop')) {
+        if (!appSetting('page_brand_listing', 'shop')) {
 
             show_404();
         }
@@ -257,7 +257,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Brands
         //  ======
 
-        $this->data['brands'] = $this->shop_brand_model->get_all();
+        $this->data['brands'] = $this->shop_brand_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -275,7 +275,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function brandSingle($slug)
     {
-        $this->data['brand'] = $this->shop_brand_model->get_by_slug($slug);
+        $this->data['brand'] = $this->shop_brand_model->getBySlug($slug);
 
         if (!$this->data['brand' ]) {
 
@@ -327,7 +327,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
             $this->_product_pagination->page,
             $this->_product_pagination->per_page,
             $data
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -337,7 +337,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->data['sidebar_filters'] = $this->shop_product_model->getFiltersForProductsInBrand(
             $this->data['brand']->id,
             $data
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -388,7 +388,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function categoryIndex()
     {
-        if (!app_setting('page_category_listing', 'shop')) {
+        if (!appSetting('page_category_listing', 'shop')) {
 
             show_404();
         }
@@ -413,7 +413,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  ==========
 
         $data = array('include_count' => true);
-        $this->data['categories']        = $this->shop_category_model->get_all(null, null, $data);
+        $this->data['categories']        = $this->shop_category_model->getAll(null, null, $data);
         $this->data['categories_nested'] = $this->shop_category_model->getAllNested($data);
 
         // --------------------------------------------------------------------------
@@ -433,7 +433,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
     protected function categorySingle($slug)
     {
         $data = array('include_count' => true);
-        $this->data['category'] = $this->shop_category_model->get_by_slug($slug, $data);
+        $this->data['category'] = $this->shop_category_model->getBySlug($slug, $data);
 
         if (!$this->data['category' ]) {
 
@@ -462,7 +462,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
             $this->data['category']->id,
             true,
             $data
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -472,7 +472,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->data['category_siblings'] = $this->shop_category_model->getSiblings(
             $this->data['category']->id,
             $data
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -501,7 +501,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->_product_pagination->total    = $this->shop_product_model->countForCategory(
             $this->data['category']->id,
             $data
-       );
+        );
 
         $this->configurePagination($this->_product_pagination->total, 'category/' . $this->data['category']->slug);
 
@@ -515,7 +515,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
             $this->_product_pagination->page,
             $this->_product_pagination->per_page,
             $data
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -525,7 +525,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->data['sidebar_filters'] = $this->shop_product_model->getFiltersForProductsInCategory(
             $this->data['category']->id,
             $data
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -576,7 +576,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function collectionIndex()
     {
-        if (!app_setting('page_collection_listing', 'shop')) {
+        if (!appSetting('page_collection_listing', 'shop')) {
 
             show_404();
         }
@@ -593,7 +593,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Collections
         //  ===========
 
-        $this->data['collections'] = $this->shop_collection_model->get_all();
+        $this->data['collections'] = $this->shop_collection_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -611,7 +611,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function collectionSingle($slug)
     {
-        $this->data['collection'] = $this->shop_collection_model->get_by_slug($slug);
+        $this->data['collection'] = $this->shop_collection_model->getBySlug($slug);
 
         if (!$this->data['collection' ]) {
 
@@ -652,7 +652,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->_product_pagination->total    = $this->shop_product_model->countForCollection(
             $this->data['collection']->id,
             $data
-       );
+        );
 
         $this->configurePagination($this->_product_pagination->total, 'collection/' . $this->data['collection']->slug);
 
@@ -666,7 +666,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
             $this->_product_pagination->page,
             $this->_product_pagination->per_page,
             $data
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -676,7 +676,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->data['sidebar_filters'] = $this->shop_product_model->getFiltersForProductsInCollection(
             $this->data['collection']->id,
             $data
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -724,7 +724,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function productSingle($slug)
     {
-        $this->data['product'] = $this->shop_product_model->get_by_slug($slug);
+        $this->data['product'] = $this->shop_product_model->getBySlug($slug);
 
         if (!$this->data['product']) {
 
@@ -825,7 +825,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function rangeIndex()
     {
-        if (!app_setting('page_range_listing', 'shop')) {
+        if (!appSetting('page_range_listing', 'shop')) {
 
             show_404();
         }
@@ -842,7 +842,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Ranges
         //  ======
 
-        $this->data['ranges'] = $this->shop_range_model->get_all();
+        $this->data['ranges'] = $this->shop_range_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -860,7 +860,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function rangeSingle($slug)
     {
-        $this->data['range'] = $this->shop_range_model->get_by_slug($slug);
+        $this->data['range'] = $this->shop_range_model->getBySlug($slug);
 
         if (!$this->data['range' ]) {
 
@@ -912,7 +912,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
             $this->_product_pagination->page,
             $this->_product_pagination->per_page,
             $data
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -922,7 +922,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->data['sidebar_filters'] = $this->shop_product_model->getFiltersForProductsInRange(
             $this->data['range']->id,
             $data
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -973,7 +973,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function saleIndex()
     {
-        if (!app_setting('page_sale_listing', 'shop')) {
+        if (!appSetting('page_sale_listing', 'shop')) {
 
             show_404();
         }
@@ -990,7 +990,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Sales
         //  =====
 
-        $this->data['sales'] = $this->shop_sale_model->get_all();
+        $this->data['sales'] = $this->shop_sale_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -1008,7 +1008,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function saleSingle($slug)
     {
-        $this->data['sale'] = $this->shop_sale_model->get_by_slug($slug);
+        $this->data['sale'] = $this->shop_sale_model->getBySlug($slug);
 
         if (!$this->data['sale' ]) {
 
@@ -1060,7 +1060,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
             $this->_product_pagination->page,
             $this->_product_pagination->per_page,
             $data
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -1070,7 +1070,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->data['sidebar_filters'] = $this->shop_product_model->getFiltersForProductsInSale(
             $this->data['sale']->id,
             $data
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -1120,7 +1120,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function tagIndex()
     {
-        if (!app_setting('page_tag_listing', 'shop')) {
+        if (!appSetting('page_tag_listing', 'shop')) {
 
             show_404();
         }
@@ -1137,7 +1137,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Tags
         //  ====
 
-        $this->data['tags'] = $this->shop_tag_model->get_all();
+        $this->data['tags'] = $this->shop_tag_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -1155,7 +1155,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function tagSingle($slug)
     {
-        $this->data['tag'] = $this->shop_tag_model->get_by_slug($slug);
+        $this->data['tag'] = $this->shop_tag_model->getBySlug($slug);
 
         if (!$this->data['tag' ]) {
 
@@ -1207,7 +1207,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
             $this->_product_pagination->page,
             $this->_product_pagination->per_page,
             $data
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -1217,7 +1217,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->data['sidebar_filters'] = $this->shop_product_model->getFiltersForProductsInTag(
             $this->data['tag']->id,
             $data
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -1275,18 +1275,18 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->_product_pagination->rsegment = 3;
         $this->_product_pagination->page     = (int) $this->uri->rsegment($this->_product_pagination->rsegment);
 
-        $this->configurePagination($this->shop_product_model->count_all($data), 'search', '?s=' . $this->input->get('s'));
+        $this->configurePagination($this->shop_product_model->countAll($data), 'search', '?s=' . $this->input->get('s'));
 
         // --------------------------------------------------------------------------
 
         //  Products
         //  ========
 
-        $this->data['products'] = $this->shop_product_model->get_all(
+        $this->data['products'] = $this->shop_product_model->getAll(
             $this->_product_pagination->page,
             $this->_product_pagination->per_page,
             $data
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -1296,7 +1296,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->data['sidebar_filters'] = $this->shop_product_model->getFiltersForProductsInSearch(
             $data['keywords'],
             $data
-       );
+        );
 
         // --------------------------------------------------------------------------
 

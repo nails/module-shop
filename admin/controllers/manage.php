@@ -12,12 +12,14 @@
 
 namespace Nails\Admin\Shop;
 
+use Nails\Factory;
 use Nails\Admin\Helper;
 use Nails\Shop\Controller\BaseAdmin;
 
 class Manage extends BaseAdmin
 {
     protected $isModal;
+    protected $oFormValidation;
 
     // --------------------------------------------------------------------------
 
@@ -29,9 +31,11 @@ class Manage extends BaseAdmin
     {
         if (userHasPermission('admin:shop:manage:.*')) {
 
-            $navGroup = new \Nails\Admin\Nav('Shop', 'fa-shopping-cart');
-            $navGroup->addAction('Other Managers');
-            return $navGroup;
+            $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+            $oNavGroup->setLabel('Shop');
+            $oNavGroup->setIcon('fa-shopping-cart');
+            $oNavGroup->addAction('Other Managers');
+            return $oNavGroup;
         }
     }
 
@@ -41,7 +45,7 @@ class Manage extends BaseAdmin
      * Returns an array of extra permissions for this controller
      * @return array
      */
-    static function permissions()
+    public static function permissions()
     {
         $permissions = parent::permissions();
 
@@ -117,6 +121,7 @@ class Manage extends BaseAdmin
     {
         parent::__construct();
         $this->load->model('shop/shop_model');
+        $this->oFormValidation = Factory::service('FormValidation');
 
         // --------------------------------------------------------------------------
 
@@ -197,7 +202,7 @@ class Manage extends BaseAdmin
             $tablePrefix . '.label'   => 'Label',
             $tablePrefix . '.created' => 'Created',
             $tablePrefix . '.modified' => 'Modified'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -213,8 +218,8 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows                = $this->shop_attribute_model->count_all($data);
-        $this->data['attributes'] = $this->shop_attribute_model->get_all($page, $perPage, $data);
+        $totalRows                = $this->shop_attribute_model->countAll($data);
+        $this->data['attributes'] = $this->shop_attribute_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
@@ -254,14 +259,12 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
+            $this->oFormValidation->set_rules('description', '', 'xss_clean');
 
-            $this->form_validation->set_rules('label', '', 'xss_clean|required');
-            $this->form_validation->set_rules('description', '', 'xss_clean');
+            $this->oFormValidation->set_message('required', lang('fv_required'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-
-            if ($this->form_validation->run()) {
+            if ($this->oFormValidation->run()) {
 
                 $data                = array();
                 $data['label']       = $this->input->post('label');
@@ -275,7 +278,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Attribute. ';
-                    $this->data['error'] .= $this->shop_category_model->last_error();
+                    $this->data['error'] .= $this->shop_category_model->lastError();
                 }
 
             } else {
@@ -292,7 +295,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['attributes'] = $this->shop_attribute_model->get_all();
+        $this->data['attributes'] = $this->shop_attribute_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -315,7 +318,7 @@ class Manage extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['attribute'] = $this->shop_attribute_model->get_by_id($this->uri->segment(6));
+        $this->data['attribute'] = $this->shop_attribute_model->getById($this->uri->segment(6));
 
         if (empty($this->data['attribute'])) {
 
@@ -326,14 +329,12 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
+            $this->oFormValidation->set_rules('description', '', 'xss_clean');
 
-            $this->form_validation->set_rules('label', '', 'xss_clean|required');
-            $this->form_validation->set_rules('description', '', 'xss_clean');
+            $this->oFormValidation->set_message('required', lang('fv_required'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-
-            if ($this->form_validation->run()) {
+            if ($this->oFormValidation->run()) {
 
                 $aUpdateData                = array();
                 $aUpdateData['label']       = $this->input->post('label');
@@ -347,7 +348,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem saving the Attribute. ';
-                    $this->data['error'] .= $this->shop_attribute_model->last_error();
+                    $this->data['error'] .= $this->shop_attribute_model->lastError();
                 }
 
             } else {
@@ -364,7 +365,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['attributes'] = $this->shop_attribute_model->get_all();
+        $this->data['attributes'] = $this->shop_attribute_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -397,7 +398,7 @@ class Manage extends BaseAdmin
         } else {
 
             $status  = 'error';
-            $message = 'There was a problem deleting the attribute. ' . $this->shop_attribute_model->last_error();
+            $message = 'There was a problem deleting the attribute. ' . $this->shop_attribute_model->lastError();
         }
 
         $this->session->set_flashdata($status, $message);
@@ -455,7 +456,7 @@ class Manage extends BaseAdmin
             $tablePrefix . '.label'   => 'Label',
             $tablePrefix . '.created' => 'Created',
             $tablePrefix . '.modified' => 'Modified'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -467,13 +468,13 @@ class Manage extends BaseAdmin
                 array($sortOn, $sortOrder)
             ),
             'keywords' => $keywords
-       );
+        );
 
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows            = $this->shop_brand_model->count_all($data);
-        $this->data['brands'] = $this->shop_brand_model->get_all($page, $perPage, $data);
+        $totalRows            = $this->shop_brand_model->countAll($data);
+        $this->data['brands'] = $this->shop_brand_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
@@ -513,21 +514,19 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
+            $this->oFormValidation->set_rules('logo_id', '', 'xss_clean');
+            $this->oFormValidation->set_rules('cover_id', '', 'xss_clean');
+            $this->oFormValidation->set_rules('description', '', 'xss_clean');
+            $this->oFormValidation->set_rules('is_active', '', 'xss_clean');
+            $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
+            $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
 
-            $this->form_validation->set_rules('label', '', 'xss_clean|required');
-            $this->form_validation->set_rules('logo_id', '', 'xss_clean');
-            $this->form_validation->set_rules('cover_id', '', 'xss_clean');
-            $this->form_validation->set_rules('description', '', 'xss_clean');
-            $this->form_validation->set_rules('is_active', '', 'xss_clean');
-            $this->form_validation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-            $this->form_validation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-            $this->form_validation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_message('required', lang('fv_required'));
+            $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length', lang('fv_max_length'));
-
-            if ($this->form_validation->run()) {
+            if ($this->oFormValidation->run()) {
 
                 $data                    = array();
                 $data['label']           = $this->input->post('label');
@@ -548,7 +547,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Brand. ';
-                    $this->data['error'] .= $this->shop_brand_model->last_error();
+                    $this->data['error'] .= $this->shop_brand_model->lastError();
                 }
 
             } else {
@@ -565,7 +564,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['brands'] = $this->shop_brand_model->get_all();
+        $this->data['brands'] = $this->shop_brand_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -588,7 +587,7 @@ class Manage extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['brand'] = $this->shop_brand_model->get_by_id($this->uri->segment(6));
+        $this->data['brand'] = $this->shop_brand_model->getById($this->uri->segment(6));
 
         if (empty($this->data['brand'])) {
 
@@ -599,21 +598,19 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
+            $this->oFormValidation->set_rules('logo_id', '', 'xss_clean');
+            $this->oFormValidation->set_rules('cover_id', '', 'xss_clean');
+            $this->oFormValidation->set_rules('description', '', 'xss_clean');
+            $this->oFormValidation->set_rules('is_active', '', 'xss_clean');
+            $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
+            $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
 
-            $this->form_validation->set_rules('label', '', 'xss_clean|required');
-            $this->form_validation->set_rules('logo_id', '', 'xss_clean');
-            $this->form_validation->set_rules('cover_id', '', 'xss_clean');
-            $this->form_validation->set_rules('description', '', 'xss_clean');
-            $this->form_validation->set_rules('is_active', '', 'xss_clean');
-            $this->form_validation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-            $this->form_validation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-            $this->form_validation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_message('required', lang('fv_required'));
+            $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length', lang('fv_max_length'));
-
-            if ($this->form_validation->run()) {
+            if ($this->oFormValidation->run()) {
 
                 $data                    = array();
                 $data['label']           = $this->input->post('label');
@@ -633,7 +630,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem saving the Brand. ';
-                    $this->data['error'] .= $this->shop_brand_model->last_error();
+                    $this->data['error'] .= $this->shop_brand_model->lastError();
                 }
 
             } else {
@@ -650,7 +647,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['brands'] = $this->shop_brand_model->get_all();
+        $this->data['brands'] = $this->shop_brand_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -683,7 +680,7 @@ class Manage extends BaseAdmin
         } else {
 
             $status  = 'error';
-            $message = 'There was a problem deleting the Brand. ' . $this->shop_brand_model->last_error();
+            $message = 'There was a problem deleting the Brand. ' . $this->shop_brand_model->lastError();
         }
 
         $this->session->set_flashdata($status, $message);
@@ -741,7 +738,7 @@ class Manage extends BaseAdmin
             $tablePrefix . '.label'   => 'Label',
             $tablePrefix . '.created' => 'Created',
             $tablePrefix . '.modified' => 'Modified'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -753,13 +750,13 @@ class Manage extends BaseAdmin
                 array($sortOn, $sortOrder)
             ),
             'keywords' => $keywords
-       );
+        );
 
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows            = $this->shop_supplier_model->count_all($data);
-        $this->data['suppliers'] = $this->shop_supplier_model->get_all($page, $perPage, $data);
+        $totalRows            = $this->shop_supplier_model->countAll($data);
+        $this->data['suppliers'] = $this->shop_supplier_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
@@ -799,15 +796,13 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
+            $this->oFormValidation->set_rules('is_active', '', 'xss_clean');
 
-            $this->form_validation->set_rules('label', '', 'xss_clean|required');
-            $this->form_validation->set_rules('is_active', '', 'xss_clean');
+            $this->oFormValidation->set_message('required', lang('fv_required'));
+            $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length', lang('fv_max_length'));
-
-            if ($this->form_validation->run()) {
+            if ($this->oFormValidation->run()) {
 
                 $data              = array();
                 $data['label']     = $this->input->post('label');
@@ -822,7 +817,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Supplier. ';
-                    $this->data['error'] .= $this->shop_supplier_model->last_error();
+                    $this->data['error'] .= $this->shop_supplier_model->lastError();
                 }
 
             } else {
@@ -839,7 +834,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['suppliers'] = $this->shop_supplier_model->get_all();
+        $this->data['suppliers'] = $this->shop_supplier_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -862,7 +857,7 @@ class Manage extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['supplier'] = $this->shop_supplier_model->get_by_id($this->uri->segment(6));
+        $this->data['supplier'] = $this->shop_supplier_model->getById($this->uri->segment(6));
 
         if (empty($this->data['supplier'])) {
 
@@ -873,15 +868,13 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
+            $this->oFormValidation->set_rules('is_active', '', 'xss_clean');
 
-            $this->form_validation->set_rules('label', '', 'xss_clean|required');
-            $this->form_validation->set_rules('is_active', '', 'xss_clean');
+            $this->oFormValidation->set_message('required', lang('fv_required'));
+            $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length', lang('fv_max_length'));
-
-            if ($this->form_validation->run()) {
+            if ($this->oFormValidation->run()) {
 
                 $data              = array();
                 $data['label']     = $this->input->post('label');
@@ -895,7 +888,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem saving the Supplier. ';
-                    $this->data['error'] .= $this->shop_supplier_model->last_error();
+                    $this->data['error'] .= $this->shop_supplier_model->lastError();
                 }
 
             } else {
@@ -912,7 +905,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['suppliers'] = $this->shop_supplier_model->get_all();
+        $this->data['suppliers'] = $this->shop_supplier_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -945,7 +938,7 @@ class Manage extends BaseAdmin
         } else {
 
             $status  = 'error';
-            $message = 'There was a problem deleting the Supplier. ' . $this->shop_supplier_model->last_error();
+            $message = 'There was a problem deleting the Supplier. ' . $this->shop_supplier_model->lastError();
         }
 
         $this->session->set_flashdata($status, $message);
@@ -1004,7 +997,7 @@ class Manage extends BaseAdmin
             $tablePrefix . '.label'    => 'Label',
             $tablePrefix . '.created'  => 'Created',
             $tablePrefix . '.modified' => 'Modified'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -1015,13 +1008,13 @@ class Manage extends BaseAdmin
                 array($sortOn, $sortOrder)
             ),
             'keywords' => $keywords
-       );
+        );
 
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows                = $this->shop_category_model->count_all($data);
-        $this->data['categories'] = $this->shop_category_model->get_all($page, $perPage, $data);
+        $totalRows                = $this->shop_category_model->countAll($data);
+        $this->data['categories'] = $this->shop_category_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
@@ -1061,20 +1054,18 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
+            $this->oFormValidation->set_rules('parent_id', '', 'xss_clean');
+            $this->oFormValidation->set_rules('cover_id', '', 'xss_clean');
+            $this->oFormValidation->set_rules('description', '', 'xss_clean');
+            $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
+            $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
 
-            $this->form_validation->set_rules('label', '', 'xss_clean|required');
-            $this->form_validation->set_rules('parent_id', '', 'xss_clean');
-            $this->form_validation->set_rules('cover_id', '', 'xss_clean');
-            $this->form_validation->set_rules('description', '', 'xss_clean');
-            $this->form_validation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-            $this->form_validation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-            $this->form_validation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_message('required', lang('fv_required'));
+            $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length', lang('fv_max_length'));
-
-            if ($this->form_validation->run()) {
+            if ($this->oFormValidation->run()) {
 
                 $data                    = array();
                 $data['label']           = $this->input->post('label');
@@ -1093,7 +1084,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Category. ';
-                    $this->data['error'] .= $this->shop_category_model->last_error();
+                    $this->data['error'] .= $this->shop_category_model->lastError();
                 }
 
             } else {
@@ -1110,7 +1101,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['categories'] = $this->shop_category_model->get_all();
+        $this->data['categories'] = $this->shop_category_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -1133,7 +1124,7 @@ class Manage extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['category'] = $this->shop_category_model->get_by_id($this->uri->segment(6));
+        $this->data['category'] = $this->shop_category_model->getById($this->uri->segment(6));
 
         if (empty($this->data['category'])) {
 
@@ -1144,20 +1135,18 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
+            $this->oFormValidation->set_rules('parent_id', '', 'xss_clean');
+            $this->oFormValidation->set_rules('cover_id', '', 'xss_clean');
+            $this->oFormValidation->set_rules('description', '', 'xss_clean');
+            $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
+            $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
 
-            $this->form_validation->set_rules('label', '', 'xss_clean|required');
-            $this->form_validation->set_rules('parent_id', '', 'xss_clean');
-            $this->form_validation->set_rules('cover_id', '', 'xss_clean');
-            $this->form_validation->set_rules('description', '', 'xss_clean');
-            $this->form_validation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-            $this->form_validation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-            $this->form_validation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_message('required', lang('fv_required'));
+            $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length', lang('fv_max_length'));
-
-            if ($this->form_validation->run()) {
+            if ($this->oFormValidation->run()) {
 
                 $data                    = array();
                 $data['label']           = $this->input->post('label');
@@ -1176,7 +1165,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem saving the Category. ';
-                    $this->data['error'] .= $this->shop_category_model->last_error();
+                    $this->data['error'] .= $this->shop_category_model->lastError();
                 }
 
             } else {
@@ -1193,7 +1182,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['categories'] = $this->shop_category_model->get_all();
+        $this->data['categories'] = $this->shop_category_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -1226,7 +1215,7 @@ class Manage extends BaseAdmin
         } else {
 
             $status  = 'error';
-            $message = 'There was a problem deleting the Category. ' . $this->shop_category_model->last_error();
+            $message = 'There was a problem deleting the Category. ' . $this->shop_category_model->lastError();
         }
 
         $this->session->set_flashdata($status, $message);
@@ -1284,7 +1273,7 @@ class Manage extends BaseAdmin
             $tablePrefix . '.label'   => 'Label',
             $tablePrefix . '.created' => 'Created',
             $tablePrefix . '.modified' => 'Modified'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -1296,13 +1285,13 @@ class Manage extends BaseAdmin
                 array($sortOn, $sortOrder)
             ),
             'keywords' => $keywords
-       );
+        );
 
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows                 = $this->shop_collection_model->count_all($data);
-        $this->data['collections'] = $this->shop_collection_model->get_all($page, $perPage, $data);
+        $totalRows                 = $this->shop_collection_model->countAll($data);
+        $this->data['collections'] = $this->shop_collection_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
@@ -1342,20 +1331,18 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
+            $this->oFormValidation->set_rules('cover_id', '', 'xss_clean');
+            $this->oFormValidation->set_rules('description', '', 'xss_clean');
+            $this->oFormValidation->set_rules('is_active', '', 'xss_clean');
+            $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
+            $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
 
-            $this->form_validation->set_rules('label', '', 'xss_clean|required');
-            $this->form_validation->set_rules('cover_id', '', 'xss_clean');
-            $this->form_validation->set_rules('description', '', 'xss_clean');
-            $this->form_validation->set_rules('is_active', '', 'xss_clean');
-            $this->form_validation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-            $this->form_validation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-            $this->form_validation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_message('required', lang('fv_required'));
+            $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length', lang('fv_max_length'));
-
-            if ($this->form_validation->run()) {
+            if ($this->oFormValidation->run()) {
 
                 $data                    = array();
                 $data['label']           = $this->input->post('label');
@@ -1374,7 +1361,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Collection. ';
-                    $this->data['error'] .= $this->shop_collection_model->last_error();
+                    $this->data['error'] .= $this->shop_collection_model->lastError();
                 }
 
             } else {
@@ -1391,7 +1378,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['collections'] = $this->shop_collection_model->get_all();
+        $this->data['collections'] = $this->shop_collection_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -1414,7 +1401,7 @@ class Manage extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['collection'] = $this->shop_collection_model->get_by_id($this->uri->segment(6));
+        $this->data['collection'] = $this->shop_collection_model->getById($this->uri->segment(6));
 
         if (empty($this->data['collection'])) {
 
@@ -1425,20 +1412,18 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
+            $this->oFormValidation->set_rules('cover_id', '', 'xss_clean');
+            $this->oFormValidation->set_rules('description', '', 'xss_clean');
+            $this->oFormValidation->set_rules('is_active', '', 'xss_clean');
+            $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
+            $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
 
-            $this->form_validation->set_rules('label', '', 'xss_clean|required');
-            $this->form_validation->set_rules('cover_id', '', 'xss_clean');
-            $this->form_validation->set_rules('description', '', 'xss_clean');
-            $this->form_validation->set_rules('is_active', '', 'xss_clean');
-            $this->form_validation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-            $this->form_validation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-            $this->form_validation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_message('required', lang('fv_required'));
+            $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length', lang('fv_max_length'));
-
-            if ($this->form_validation->run()) {
+            if ($this->oFormValidation->run()) {
 
                 $data                    = array();
                 $data['label']           = $this->input->post('label');
@@ -1457,7 +1442,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem saving the Collection. ';
-                    $this->data['error'] .= $this->shop_collection_model->last_error();
+                    $this->data['error'] .= $this->shop_collection_model->lastError();
                 }
 
             } else {
@@ -1474,7 +1459,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['collections'] = $this->shop_collection_model->get_all();
+        $this->data['collections'] = $this->shop_collection_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -1507,7 +1492,7 @@ class Manage extends BaseAdmin
         } else {
 
             $status  = 'error';
-            $message = 'There was a problem deleting the Collection. ' . $this->shop_collection_model->last_error();
+            $message = 'There was a problem deleting the Collection. ' . $this->shop_collection_model->lastError();
         }
 
         $this->session->set_flashdata($status, $message);
@@ -1565,7 +1550,7 @@ class Manage extends BaseAdmin
             $tablePrefix . '.label'   => 'Label',
             $tablePrefix . '.created' => 'Created',
             $tablePrefix . '.modified' => 'Modified'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -1576,13 +1561,13 @@ class Manage extends BaseAdmin
                 array($sortOn, $sortOrder)
             ),
             'keywords' => $keywords
-       );
+        );
 
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows            = $this->shop_range_model->count_all($data);
-        $this->data['ranges'] = $this->shop_range_model->get_all($page, $perPage, $data);
+        $totalRows            = $this->shop_range_model->countAll($data);
+        $this->data['ranges'] = $this->shop_range_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
@@ -1622,20 +1607,18 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
+            $this->oFormValidation->set_rules('cover_id', '', 'xss_clean');
+            $this->oFormValidation->set_rules('description', '', 'xss_clean');
+            $this->oFormValidation->set_rules('is_active', '', 'xss_clean');
+            $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
+            $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
 
-            $this->form_validation->set_rules('label', '', 'xss_clean|required');
-            $this->form_validation->set_rules('cover_id', '', 'xss_clean');
-            $this->form_validation->set_rules('description', '', 'xss_clean');
-            $this->form_validation->set_rules('is_active', '', 'xss_clean');
-            $this->form_validation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-            $this->form_validation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-            $this->form_validation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_message('required', lang('fv_required'));
+            $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length', lang('fv_max_length'));
-
-            if ($this->form_validation->run()) {
+            if ($this->oFormValidation->run()) {
 
                 $data                    = array();
                 $data['label']           = $this->input->post('label');
@@ -1654,7 +1637,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Range. ';
-                    $this->data['error'] .= $this->shop_range_model->last_error();
+                    $this->data['error'] .= $this->shop_range_model->lastError();
                 }
 
             } else {
@@ -1671,7 +1654,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['ranges'] = $this->shop_range_model->get_all();
+        $this->data['ranges'] = $this->shop_range_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -1694,7 +1677,7 @@ class Manage extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['range'] = $this->shop_range_model->get_by_id($this->uri->segment(6));
+        $this->data['range'] = $this->shop_range_model->getById($this->uri->segment(6));
 
         if (empty($this->data['range'])) {
 
@@ -1705,20 +1688,18 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
+            $this->oFormValidation->set_rules('cover_id', '', 'xss_clean');
+            $this->oFormValidation->set_rules('description', '', 'xss_clean');
+            $this->oFormValidation->set_rules('is_active', '', 'xss_clean');
+            $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
+            $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
 
-            $this->form_validation->set_rules('label', '', 'xss_clean|required');
-            $this->form_validation->set_rules('cover_id', '', 'xss_clean');
-            $this->form_validation->set_rules('description', '', 'xss_clean');
-            $this->form_validation->set_rules('is_active', '', 'xss_clean');
-            $this->form_validation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-            $this->form_validation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-            $this->form_validation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_message('required', lang('fv_required'));
+            $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length', lang('fv_max_length'));
-
-            if ($this->form_validation->run()) {
+            if ($this->oFormValidation->run()) {
 
                 $data                    = array();
                 $data['label']           = $this->input->post('label');
@@ -1737,7 +1718,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem saving the Range. ';
-                    $this->data['error'] .= $this->shop_range_model->last_error();
+                    $this->data['error'] .= $this->shop_range_model->lastError();
                 }
 
             } else {
@@ -1754,7 +1735,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['ranges'] = $this->shop_range_model->get_all();
+        $this->data['ranges'] = $this->shop_range_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -1787,7 +1768,7 @@ class Manage extends BaseAdmin
         } else {
 
             $status  = 'error';
-            $message = 'There was a problem deleting the Range. ' . $this->shop_range_model->last_error();
+            $message = 'There was a problem deleting the Range. ' . $this->shop_range_model->lastError();
         }
 
         $this->session->set_flashdata($status, $message);
@@ -1845,7 +1826,7 @@ class Manage extends BaseAdmin
             $tablePrefix . '.label'   => 'Label',
             $tablePrefix . '.created' => 'Created',
             $tablePrefix . '.modified' => 'Modified'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -1856,13 +1837,13 @@ class Manage extends BaseAdmin
                 array($sortOn, $sortOrder)
             ),
             'keywords' => $keywords
-       );
+        );
 
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows          = $this->shop_tag_model->count_all($data);
-        $this->data['tags'] = $this->shop_tag_model->get_all($page, $perPage, $data);
+        $totalRows          = $this->shop_tag_model->countAll($data);
+        $this->data['tags'] = $this->shop_tag_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
@@ -1902,19 +1883,17 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
+            $this->oFormValidation->set_rules('cover_id', '', 'xss_clean');
+            $this->oFormValidation->set_rules('description', '', 'xss_clean');
+            $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
+            $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
 
-            $this->form_validation->set_rules('label', '', 'xss_clean|required');
-            $this->form_validation->set_rules('cover_id', '', 'xss_clean');
-            $this->form_validation->set_rules('description', '', 'xss_clean');
-            $this->form_validation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-            $this->form_validation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-            $this->form_validation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_message('required', lang('fv_required'));
+            $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length', lang('fv_max_length'));
-
-            if ($this->form_validation->run()) {
+            if ($this->oFormValidation->run()) {
 
                 $data                    = array();
                 $data['label']           = $this->input->post('label');
@@ -1932,7 +1911,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Tag. ';
-                    $this->data['error'] .= $this->shop_tag_model->last_error();
+                    $this->data['error'] .= $this->shop_tag_model->lastError();
                 }
 
             } else {
@@ -1949,7 +1928,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['tags'] = $this->shop_tag_model->get_all();
+        $this->data['tags'] = $this->shop_tag_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -1972,7 +1951,7 @@ class Manage extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['tag'] = $this->shop_tag_model->get_by_id($this->uri->segment(6));
+        $this->data['tag'] = $this->shop_tag_model->getById($this->uri->segment(6));
 
         if (empty($this->data['tag'])) {
 
@@ -1983,19 +1962,17 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
+            $this->oFormValidation->set_rules('cover_id', '', 'xss_clean');
+            $this->oFormValidation->set_rules('description', '', 'xss_clean');
+            $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
+            $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
 
-            $this->form_validation->set_rules('label', '', 'xss_clean|required');
-            $this->form_validation->set_rules('cover_id', '', 'xss_clean');
-            $this->form_validation->set_rules('description', '', 'xss_clean');
-            $this->form_validation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-            $this->form_validation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-            $this->form_validation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_message('required', lang('fv_required'));
+            $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('max_length', lang('fv_max_length'));
-
-            if ($this->form_validation->run()) {
+            if ($this->oFormValidation->run()) {
 
                 $data                    = array();
                 $data['label']           = $this->input->post('label');
@@ -2013,7 +1990,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem saving the Tag. ';
-                    $this->data['error'] .= $this->shop_tag_model->last_error();
+                    $this->data['error'] .= $this->shop_tag_model->lastError();
                 }
 
             } else {
@@ -2030,7 +2007,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['tags'] = $this->shop_tag_model->get_all();
+        $this->data['tags'] = $this->shop_tag_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -2063,7 +2040,7 @@ class Manage extends BaseAdmin
         } else {
 
             $status  = 'error';
-            $message = 'There was a problem deleting the Tag. ' . $this->shop_tag_model->last_error();
+            $message = 'There was a problem deleting the Tag. ' . $this->shop_tag_model->lastError();
         }
 
         $this->session->set_flashdata($status, $message);
@@ -2121,7 +2098,7 @@ class Manage extends BaseAdmin
             $tablePrefix . '.label'   => 'Label',
             $tablePrefix . '.created' => 'Created',
             $tablePrefix . '.modified' => 'Modified'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -2132,13 +2109,13 @@ class Manage extends BaseAdmin
                 array($sortOn, $sortOrder)
             ),
             'keywords' => $keywords
-       );
+        );
 
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows              = $this->shop_tax_rate_model->count_all($data);
-        $this->data['taxRates'] = $this->shop_tax_rate_model->get_all($page, $perPage, $data);
+        $totalRows              = $this->shop_tax_rate_model->countAll($data);
+        $this->data['taxRates'] = $this->shop_tax_rate_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
@@ -2178,21 +2155,20 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
+            $this->oFormValidation->set_rules('rate', '', 'xss_clean|required|in_range[0-1]');
 
-            $this->form_validation->set_rules('label', '', 'xss_clean|required');
-            $this->form_validation->set_rules('rate', '', 'xss_clean|required|in_range[0-1]');
+            $this->oFormValidation->set_message('required', lang('fv_required'));
+            $this->oFormValidation->set_message('in_range', lang('fv_in_range'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('in_range', lang('fv_in_range'));
+            if ($this->oFormValidation->run()) {
 
-            if ($this->form_validation->run()) {
+                $aCreateData = array(
+                    'label' => $this->input->post('label'),
+                    'rate'  => $this->input->post('rate')
+                );
 
-                $data        = new \stdClass();
-                $data->label = $this->input->post('label');
-                $data->rate  = $this->input->post('rate');
-
-                if ($this->shop_tax_rate_model->create($data)) {
+                if ($this->shop_tax_rate_model->create($aCreateData)) {
 
                     $this->session->set_flashdata('success', 'Tax Rate created successfully.');
                     redirect('admin/shop/manage/taxRate' . $this->isModal);
@@ -2200,7 +2176,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Tax Rate. ';
-                    $this->data['error'] .= $this->shop_tax_rate_model->last_error();
+                    $this->data['error'] .= $this->shop_tax_rate_model->lastError();
                 }
 
             } else {
@@ -2217,7 +2193,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['taxRates'] = $this->shop_tax_rate_model->get_all();
+        $this->data['taxRates'] = $this->shop_tax_rate_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -2240,7 +2216,7 @@ class Manage extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['tax_rate'] = $this->shop_tax_rate_model->get_by_id($this->uri->segment(6));
+        $this->data['tax_rate'] = $this->shop_tax_rate_model->getById($this->uri->segment(6));
 
         if (empty($this->data['tax_rate'])) {
 
@@ -2251,15 +2227,13 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
+            $this->oFormValidation->set_rules('rate', '', 'xss_clean|required|in_range[0-1]');
 
-            $this->form_validation->set_rules('label', '', 'xss_clean|required');
-            $this->form_validation->set_rules('rate', '', 'xss_clean|required|in_range[0-1]');
+            $this->oFormValidation->set_message('required', lang('fv_required'));
+            $this->oFormValidation->set_message('in_range', lang('fv_in_range'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('in_range', lang('fv_in_range'));
-
-            if ($this->form_validation->run()) {
+            if ($this->oFormValidation->run()) {
 
                 $aUpdateData          = array();
                 $aUpdateData['label'] = $this->input->post('label');
@@ -2273,7 +2247,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem saving the Tax Rate. ';
-                    $this->data['error'] .= $this->shop_tax_rate_model->last_error();
+                    $this->data['error'] .= $this->shop_tax_rate_model->lastError();
                 }
 
             } else {
@@ -2290,7 +2264,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['taxRates'] = $this->shop_tax_rate_model->get_all();
+        $this->data['taxRates'] = $this->shop_tax_rate_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -2323,7 +2297,7 @@ class Manage extends BaseAdmin
         } else {
 
             $status  = 'error';
-            $message = 'There was a problem deleting the Tax Rate. ' . $this->shop_tax_rate_model->last_error();
+            $message = 'There was a problem deleting the Tax Rate. ' . $this->shop_tax_rate_model->lastError();
         }
 
         $this->session->set_flashdata($status, $message);
@@ -2381,7 +2355,7 @@ class Manage extends BaseAdmin
             $tablePrefix . '.label'   => 'Label',
             $tablePrefix . '.created' => 'Created',
             $tablePrefix . '.modified' => 'Modified'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -2392,13 +2366,13 @@ class Manage extends BaseAdmin
                 array($sortOn, $sortOrder)
             ),
             'keywords' => $keywords
-       );
+        );
 
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows                 = $this->shop_product_type_model->count_all($data);
-        $this->data['productTypes'] = $this->shop_product_type_model->get_all($page, $perPage, $data);
+        $totalRows                 = $this->shop_product_type_model->countAll($data);
+        $this->data['productTypes'] = $this->shop_product_type_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
@@ -2438,19 +2412,17 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $this->oFormValidation->set_rules('label', '', 'xss_clean|required|is_unique[' . NAILS_DB_PREFIX . 'shop_product_type.label]');
+            $this->oFormValidation->set_rules('description', '', 'xss_clean');
+            $this->oFormValidation->set_rules('is_physical', '', 'xss_clean');
+            $this->oFormValidation->set_rules('ipn_method', '', 'xss_clean');
+            $this->oFormValidation->set_rules('max_per_order', '', 'xss_clean');
+            $this->oFormValidation->set_rules('max_variations', '', 'xss_clean');
 
-            $this->form_validation->set_rules('label', '', 'xss_clean|required|is_unique[' . NAILS_DB_PREFIX . 'shop_product_type.label]');
-            $this->form_validation->set_rules('description', '', 'xss_clean');
-            $this->form_validation->set_rules('is_physical', '', 'xss_clean');
-            $this->form_validation->set_rules('ipn_method', '', 'xss_clean');
-            $this->form_validation->set_rules('max_per_order', '', 'xss_clean');
-            $this->form_validation->set_rules('max_variations', '', 'xss_clean');
+            $this->oFormValidation->set_message('required', lang('fv_required'));
+            $this->oFormValidation->set_message('is_unique', lang('fv_is_unique'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('is_unique', lang('fv_is_unique'));
-
-            if ($this->form_validation->run()) {
+            if ($this->oFormValidation->run()) {
 
                 $aCreateData = array(
                     'label'          => $this->input->post('label'),
@@ -2470,7 +2442,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Product Type. ';
-                    $this->data['error'] .= $this->shop_product_model->last_error();
+                    $this->data['error'] .= $this->shop_product_model->lastError();
                 }
 
             } else {
@@ -2487,7 +2459,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['productTypes'] = $this->shop_product_type_model->get_all();
+        $this->data['productTypes'] = $this->shop_product_type_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -2510,7 +2482,7 @@ class Manage extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['product_type'] = $this->shop_product_type_model->get_by_id($this->uri->segment(6));
+        $this->data['product_type'] = $this->shop_product_type_model->getById($this->uri->segment(6));
 
         if (empty($this->data['product_type'])) {
 
@@ -2521,18 +2493,16 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $this->oFormValidation->set_rules('label', '', 'xss_clean|required|unique_if_diff[' . NAILS_DB_PREFIX . 'shop_product_type.label.' . $this->data['product_type']->label . ']');
+            $this->oFormValidation->set_rules('description', '', 'xss_clean');
+            $this->oFormValidation->set_rules('is_physical', '', 'xss_clean');
+            $this->oFormValidation->set_rules('ipn_method', '', 'xss_clean');
+            $this->oFormValidation->set_rules('max_per_order', '', 'xss_clean');
+            $this->oFormValidation->set_rules('max_variations', '', 'xss_clean');
 
-            $this->form_validation->set_rules('label', '', 'xss_clean|required|unique_if_diff[' . NAILS_DB_PREFIX . 'shop_product_type.label.' . $this->data['product_type']->label . ']');
-            $this->form_validation->set_rules('description', '', 'xss_clean');
-            $this->form_validation->set_rules('is_physical', '', 'xss_clean');
-            $this->form_validation->set_rules('ipn_method', '', 'xss_clean');
-            $this->form_validation->set_rules('max_per_order', '', 'xss_clean');
-            $this->form_validation->set_rules('max_variations', '', 'xss_clean');
+            $this->oFormValidation->set_message('required', lang('fv_required'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-
-            if ($this->form_validation->run()) {
+            if ($this->oFormValidation->run()) {
 
                 $aUpdateData = array(
                     'label'          => $this->input->post('label'),
@@ -2551,7 +2521,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem saving the Product Type. ';
-                    $this->data['error'] .= $this->shop_product_type_model->last_error();
+                    $this->data['error'] .= $this->shop_product_type_model->lastError();
                 }
 
             } else {
@@ -2568,7 +2538,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['productTypes'] = $this->shop_product_type_model->get_all();
+        $this->data['productTypes'] = $this->shop_product_type_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -2644,7 +2614,7 @@ class Manage extends BaseAdmin
             $tablePrefix . '.label'   => 'Label',
             $tablePrefix . '.created' => 'Created',
             $tablePrefix . '.modified' => 'Modified'
-       );
+        );
 
         // --------------------------------------------------------------------------
 
@@ -2655,13 +2625,13 @@ class Manage extends BaseAdmin
                 array($sortOn, $sortOrder)
             ),
             'keywords' => $keywords
-       );
+        );
 
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows                = $this->shop_product_type_meta_model->count_all($data);
-        $this->data['metaFields'] = $this->shop_product_type_meta_model->get_all($page, $perPage, $data);
+        $totalRows                = $this->shop_product_type_meta_model->countAll($data);
+        $this->data['metaFields'] = $this->shop_product_type_meta_model->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords);
@@ -2701,19 +2671,17 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
+            $this->oFormValidation->set_rules('admin_form_sub_label', '', 'xss_clean');
+            $this->oFormValidation->set_rules('admin_form_placeholder', '', 'xss_clean');
+            $this->oFormValidation->set_rules('admin_form_tip', '', 'xss_clean');
+            $this->oFormValidation->set_rules('associated_product_types', '', 'xss_clean');
+            $this->oFormValidation->set_rules('allow_multiple', '', 'xss_clean');
+            $this->oFormValidation->set_rules('is_filter', '', 'xss_clean');
 
-            $this->form_validation->set_rules('label', '', 'xss_clean|required');
-            $this->form_validation->set_rules('admin_form_sub_label', '', 'xss_clean');
-            $this->form_validation->set_rules('admin_form_placeholder', '', 'xss_clean');
-            $this->form_validation->set_rules('admin_form_tip', '', 'xss_clean');
-            $this->form_validation->set_rules('associated_product_types', '', 'xss_clean');
-            $this->form_validation->set_rules('allow_multiple', '', 'xss_clean');
-            $this->form_validation->set_rules('is_filter', '', 'xss_clean');
+            $this->oFormValidation->set_message('required', lang('fv_required'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-
-            if ($this->form_validation->run()) {
+            if ($this->oFormValidation->run()) {
 
                 $data                             = array();
                 $data['label']                    = $this->input->post('label');
@@ -2732,7 +2700,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the Product Type Meta Field. ';
-                    $this->data['error'] .= $this->shop_product_type_meta_model->last_error();
+                    $this->data['error'] .= $this->shop_product_type_meta_model->lastError();
                 }
 
             } else {
@@ -2749,7 +2717,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['productTypes'] = $this->shop_product_type_model->get_all();
+        $this->data['productTypes'] = $this->shop_product_type_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -2773,7 +2741,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         $data = array('includeAssociatedProductTypes' => true);
-        $this->data['meta_field'] = $this->shop_product_type_meta_model->get_by_id($this->uri->segment(6), $data);
+        $this->data['meta_field'] = $this->shop_product_type_meta_model->getById($this->uri->segment(6), $data);
 
         if (empty($this->data['meta_field'])) {
 
@@ -2784,19 +2752,17 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
+            $this->oFormValidation->set_rules('admin_form_sub_label', '', 'xss_clean');
+            $this->oFormValidation->set_rules('admin_form_placeholder', '', 'xss_clean');
+            $this->oFormValidation->set_rules('admin_form_tip', '', 'xss_clean');
+            $this->oFormValidation->set_rules('associated_product_types', '', 'xss_clean');
+            $this->oFormValidation->set_rules('allow_multiple', '', 'xss_clean');
+            $this->oFormValidation->set_rules('is_filter', '', 'xss_clean');
 
-            $this->form_validation->set_rules('label', '', 'xss_clean|required');
-            $this->form_validation->set_rules('admin_form_sub_label', '', 'xss_clean');
-            $this->form_validation->set_rules('admin_form_placeholder', '', 'xss_clean');
-            $this->form_validation->set_rules('admin_form_tip', '', 'xss_clean');
-            $this->form_validation->set_rules('associated_product_types', '', 'xss_clean');
-            $this->form_validation->set_rules('allow_multiple', '', 'xss_clean');
-            $this->form_validation->set_rules('is_filter', '', 'xss_clean');
+            $this->oFormValidation->set_message('required', lang('fv_required'));
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-
-            if ($this->form_validation->run()) {
+            if ($this->oFormValidation->run()) {
 
                 $data                             = array();
                 $data['label']                    = $this->input->post('label');
@@ -2815,7 +2781,7 @@ class Manage extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem saving the Product Type Meta Field. ';
-                    $this->data['error'] .= $this->shop_product_type_meta_model->last_error();
+                    $this->data['error'] .= $this->shop_product_type_meta_model->lastError();
                 }
 
             } else {
@@ -2832,7 +2798,7 @@ class Manage extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->data['productTypes'] = $this->shop_product_type_model->get_all();
+        $this->data['productTypes'] = $this->shop_product_type_model->getAll();
 
         // --------------------------------------------------------------------------
 
@@ -2865,7 +2831,7 @@ class Manage extends BaseAdmin
         } else {
 
             $status  = 'error';
-            $message = 'There was a problem deleting the Product Type. ' . $this->shop_product_type_model->last_error();
+            $message = 'There was a problem deleting the Product Type. ' . $this->shop_product_type_model->lastError();
         }
 
         $this->session->set_flashdata($status, $message);

@@ -42,4 +42,4 @@
 </div>
 <?php
 
-    echo \Nails\Admin\Helper::loadInlineView('utilities/footer', array('items' => $attributes));
+    echo adminHelper('loadInlineView', 'utilities/footer', array('items' => $attributes));

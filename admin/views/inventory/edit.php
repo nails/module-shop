@@ -94,7 +94,7 @@
             $field['required'] = true;
             $field['class']    = 'type_id select2';
             $field['id']       = 'type_id';
-            $field['info']     = '<a href="#" class="manage-types awesome orange small">Manage Product Types</a>';
+            $field['info']     = '<a href="#" class="manage-types btn btn-xs btn-default">Manage Product Types</a>';
             $field['default']  = !empty($item->type->id) ? $item->type->id : null;
 
             if (count($product_types_flat) == 1) {
@@ -140,7 +140,7 @@
             $field['key']   = 'brands[]';
             $field['label'] = 'Brands';
             $field['class'] = 'brands select2';
-            $field['info']  = '<a href="#" class="manage-brands awesome orange small">Manage Brands</a>';
+            $field['info']  = '<a href="#" class="manage-brands btn btn-xs btn-default">Manage Brands</a>';
             $field['tip']   = 'If this product contains multiple brands (e.g a hamper) specify them all here.';
 
             //  Defaults
@@ -167,7 +167,7 @@
             $field['key']   = 'suppliers[]';
             $field['label'] = 'Suppliers';
             $field['class'] = 'suppliers select2';
-            $field['info']  = '<a href="#" class="manage-suppliers awesome orange small">Manage Suppliers</a>';
+            $field['info']  = '<a href="#" class="manage-suppliers btn btn-xs btn-default">Manage Suppliers</a>';
             $field['tip']   = 'If required, specify the supplier of this product.';
 
             //  Defaults
@@ -194,7 +194,7 @@
             $field['key']   = 'categories[]';
             $field['label'] = 'Categories';
             $field['class'] = 'categories select2';
-            $field['info']  = '<a href="#" class="manage-categories awesome orange small">Manage Categories</a>';
+            $field['info']  = '<a href="#" class="manage-categories btn btn-xs btn-default">Manage Categories</a>';
             $field['tip']   = 'Specify which categories this product falls into.';
 
             //  Defaults
@@ -232,7 +232,7 @@
             $field['key']   = 'tags[]';
             $field['label'] = 'Tags';
             $field['class'] = 'tags select2';
-            $field['info']  = '<a href="#" class="manage-tags awesome orange small">Manage Tags</a>';
+            $field['info']  = '<a href="#" class="manage-tags btn btn-xs btn-default">Manage Tags</a>';
             $field['tip']   = 'Use tags to associate products together, e.g. events.';
 
             //  Defaults
@@ -260,7 +260,7 @@
             $field['label']    = 'Tax Rate';
             $field['class']    = 'tax_rate_id select2';
             $field['required'] = true;
-            $field['info']     = '<a href="#" class="manage-tax-rates awesome orange small">Manage Tax Rates</a>';
+            $field['info']     = '<a href="#" class="manage-tax-rates btn btn-xs btn-default">Manage Tax Rates</a>';
             $field['default']  = !empty($item->tax_rate->id) ? $item->tax_rate->id : null;
 
             echo form_field_dropdown($field, $tax_rates);
@@ -299,7 +299,7 @@
 
                 ?>
             </fieldset>
-            <?php if (app_setting('enable_external_products', 'shop')) { ?>
+            <?php if (appSetting('enable_external_products', 'shop')) { ?>
             <fieldset>
                 <legend>External Product</legend>
                 <p>
@@ -414,7 +414,7 @@
                         $_variations = array();
                     }
 
-                    $oMustache = \Nails\Factory::service('Mustache');
+                    $oMustache = nailsFactory('service', 'Mustache');
 
                     if (!empty($_variations)) {
 
@@ -423,7 +423,8 @@
                             $viewData['variation']    = $variation;
                             $viewData['numVariants'] = count($_variations);
 
-                            $template = \Nails\Admin\Helper::loadInlineView(
+                            $template = adminHelper(
+                                'loadInlineView',
                                 'utilities/template-mustache-inventory-variant',
                                 $viewData,
                                 true
@@ -437,7 +438,8 @@
 
                     } else {
 
-                        $template = \Nails\Admin\Helper::loadInlineView(
+                        $template = adminHelper(
+                            'loadInlineView',
                             'utilities/template-mustache-inventory-variant',
                             $viewData,
                             true
@@ -450,10 +452,10 @@
             </div>
             <div class="add-variation-button enabled">
                 <p class="enabled">
-                    <a href="#" id="product-variation-add" class="awesome green small">Add Variation</a>
+                    <a href="#" id="product-variation-add" class="btn btn-xs btn-success">Add Variation</a>
                 </p>
                 <p class="disabled">
-                    <a class="awesome grey small">Add Variation</a>
+                    <a class="btn btn-xs btn-default">Add Variation</a>
                     <span class="no-more-variations">
                         The specified product type does not allow for any more variationsto be added.
                     </span>
@@ -531,7 +533,8 @@
                                 'objectId' => $image
                             );
 
-                            echo \Nails\Admin\Helper::loadInlineView(
+                            echo adminHelper(
+                                'loadInlineView',
                                 'utilities/template-mustache-gallery-item',
                                 $viewData,
                                 true
@@ -598,7 +601,8 @@
 
                                 $viewData = array('attribute' => $attribute, 'counter' => $counter);
 
-                                echo \Nails\Admin\Helper::loadInlineView(
+                                echo adminHelper(
+                                    'loadInlineView',
                                     'utilities/template-mustache-attribute',
                                     $viewData,
                                     true
@@ -612,8 +616,8 @@
                 </tbody>
             </table>
             <p>
-                <a href="#" id="product-attribute-add" class="awesome small green">Add Attribute</a>
-                <a href="#" class="awesome small orange manage-attributes">Manage Attributes</a>
+                <a href="#" id="product-attribute-add" class="btn btn-xs btn-success">Add Attribute</a>
+                <a href="#" class="btn btn-xs btn-default manage-attributes">Manage Attributes</a>
             </p>
         </div>
         <?php
@@ -680,7 +684,7 @@
                 </select>
             </p>
             <p>
-                <a href="#" class="awesome small orange manage-ranges">Manage Ranges</a>
+                <a href="#" class="btn btn-xs btn-default manage-ranges">Manage Ranges</a>
             </p>
             <hr />
             <p>
@@ -727,7 +731,7 @@
                 </select>
             </p>
             <p>
-                <a href="#" class="awesome small orange manage-collections">Manage Collections</a>
+                <a href="#" class="btn btn-xs btn-default manage-collections">Manage Collections</a>
             </p>
         </div>
         <?php
@@ -821,7 +825,7 @@
     <?php
 
         $_action = empty($item->id) ? lang('action_create') : lang('action_save_changes');
-        echo form_submit('submit', $_action, 'class="awesome"');
+        echo form_submit('submit', $_action, 'class="btn btn-primary"');
 
     ?>
     </p>
@@ -837,7 +841,8 @@
     $viewData['variation']    = null;
     $viewData['numVariants'] = null;
 
-    echo \Nails\Admin\Helper::loadInlineView(
+    echo adminHelper(
+        'loadInlineView',
         'utilities/template-mustache-inventory-variant',
         $viewData,
         true
@@ -871,7 +876,8 @@
     $viewData             = array();
     $viewData['objectId'] = false;
 
-    echo \Nails\Admin\Helper::loadInlineView(
+    echo adminHelper(
+        'loadInlineView',
         'utilities/template-mustache-gallery-item',
         $viewData,
         true
@@ -883,7 +889,8 @@
 <?php
 
     $viewData = array('attribute' => null);
-    echo \Nails\Admin\Helper::loadInlineView(
+    echo adminHelper(
+        'loadInlineView',
         'utilities/template-mustache-attribute',
         $viewData,
         true

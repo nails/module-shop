@@ -95,44 +95,44 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
             } else {
 
-                $this->load->library('form_validation');
+                $oFormValidation = Factory::service('FormValidation');
 
-                $this->form_validation->set_rules('delivery_address_line_1', '', 'xss_clean|trim|required');
-                $this->form_validation->set_rules('delivery_address_line_2', '', 'xss_clean|trim');
-                $this->form_validation->set_rules('delivery_address_town', '', 'xss_clean|trim|required');
-                $this->form_validation->set_rules('delivery_address_state', '', 'xss_clean|trim');
-                $this->form_validation->set_rules('delivery_address_postcode', '', 'xss_clean|trim|required');
-                $this->form_validation->set_rules('delivery_address_country', '', 'xss_clean|required');
+                $oFormValidation->set_rules('delivery_address_line_1', '', 'xss_clean|trim|required');
+                $oFormValidation->set_rules('delivery_address_line_2', '', 'xss_clean|trim');
+                $oFormValidation->set_rules('delivery_address_town', '', 'xss_clean|trim|required');
+                $oFormValidation->set_rules('delivery_address_state', '', 'xss_clean|trim');
+                $oFormValidation->set_rules('delivery_address_postcode', '', 'xss_clean|trim|required');
+                $oFormValidation->set_rules('delivery_address_country', '', 'xss_clean|required');
 
-                $this->form_validation->set_rules('first_name', '', 'xss_clean|trim|required');
-                $this->form_validation->set_rules('last_name', '', 'xss_clean|trim|required');
-                $this->form_validation->set_rules('email', '', 'xss_clean|trim|required');
-                $this->form_validation->set_rules('telephone', '', 'xss_clean|trim|required');
+                $oFormValidation->set_rules('first_name', '', 'xss_clean|trim|required');
+                $oFormValidation->set_rules('last_name', '', 'xss_clean|trim|required');
+                $oFormValidation->set_rules('email', '', 'xss_clean|trim|required');
+                $oFormValidation->set_rules('telephone', '', 'xss_clean|trim|required');
 
                 if (!$this->input->post('same_billing_address')) {
 
-                    $this->form_validation->set_rules('billing_address_line_1', '', 'xss_clean|trim|required');
-                    $this->form_validation->set_rules('billing_address_line_2', '', 'xss_clean|trim');
-                    $this->form_validation->set_rules('billing_address_town', '', 'xss_clean|trim|required');
-                    $this->form_validation->set_rules('billing_address_state', '', 'xss_clean|trim');
-                    $this->form_validation->set_rules('billing_address_postcode', '', 'xss_clean|trim|required');
-                    $this->form_validation->set_rules('billing_address_country', '', 'xss_clean|trim|required');
+                    $oFormValidation->set_rules('billing_address_line_1', '', 'xss_clean|trim|required');
+                    $oFormValidation->set_rules('billing_address_line_2', '', 'xss_clean|trim');
+                    $oFormValidation->set_rules('billing_address_town', '', 'xss_clean|trim|required');
+                    $oFormValidation->set_rules('billing_address_state', '', 'xss_clean|trim');
+                    $oFormValidation->set_rules('billing_address_postcode', '', 'xss_clean|trim|required');
+                    $oFormValidation->set_rules('billing_address_country', '', 'xss_clean|trim|required');
 
                 } else {
 
-                    $this->form_validation->set_rules('billing_address_line_1', '', 'xss_clean|trim');
-                    $this->form_validation->set_rules('billing_address_line_2', '', 'xss_clean|trim');
-                    $this->form_validation->set_rules('billing_address_town', '', 'xss_clean|trim');
-                    $this->form_validation->set_rules('billing_address_state', '', 'xss_clean|trim');
-                    $this->form_validation->set_rules('billing_address_postcode', '', 'xss_clean|trim');
-                    $this->form_validation->set_rules('billing_address_country', '', 'xss_clean|trim');
+                    $oFormValidation->set_rules('billing_address_line_1', '', 'xss_clean|trim');
+                    $oFormValidation->set_rules('billing_address_line_2', '', 'xss_clean|trim');
+                    $oFormValidation->set_rules('billing_address_town', '', 'xss_clean|trim');
+                    $oFormValidation->set_rules('billing_address_state', '', 'xss_clean|trim');
+                    $oFormValidation->set_rules('billing_address_postcode', '', 'xss_clean|trim');
+                    $oFormValidation->set_rules('billing_address_country', '', 'xss_clean|trim');
                 }
 
-                $this->form_validation->set_rules('payment_gateway', '', 'xss_clean|trim|required');
+                $oFormValidation->set_rules('payment_gateway', '', 'xss_clean|trim|required');
 
-                $this->form_validation->set_message('required', lang('fv_required'));
+                $oFormValidation->set_message('required', lang('fv_required'));
 
-                if ($this->form_validation->run()) {
+                if ($oFormValidation->run()) {
 
                     //  Prepare data
                     $aInsertData = array();
@@ -205,17 +205,17 @@ class NAILS_Checkout extends NAILS_Shop_Controller
                             $this->shop_order_model->paid($order->id);
                             $this->shop_order_model->process($order->id);
 
-                            $shopUrl = app_setting('url', 'shop') ? app_setting('url', 'shop') : 'shop/';
+                            $shopUrl = appSetting('url', 'shop') ? appSetting('url', 'shop') : 'shop/';
                             redirect($shopUrl . 'checkout/processing?ref=' . $order->ref);
 
                         } else {
 
                             //  Payment failed, mark this order as a failure too.
-                            $this->shop_order_model->fail($order->id, $this->shop_payment_gateway_model->last_error());
+                            $this->shop_order_model->fail($order->id, $this->shop_payment_gateway_model->lastError());
 
                             $this->data['error']  = '<strong>Sorry,</strong> something went wrong during checkout. ';
-                            $this->data['error'] .= $this->shop_payment_gateway_model->last_error();
-                            $this->data['payment_error'] = $this->shop_payment_gateway_model->last_error();
+                            $this->data['error'] .= $this->shop_payment_gateway_model->lastError();
+                            $this->data['payment_error'] = $this->shop_payment_gateway_model->lastError();
 
                             $this->shop_payment_gateway_model->checkoutSessionClear();
                         }
@@ -223,7 +223,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
                     } else {
 
                         $this->data['error']  = '<strong>Sorry,</strong> there was a problem processing your order. ';
-                        $this->data['error'] .= $this->shop_order_model->last_error();
+                        $this->data['error'] .= $this->shop_order_model->lastError();
                     }
 
                 } else {
@@ -294,7 +294,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
             //  Fetch the product/variants associated with each order item
             foreach ($this->data['order']->items as $item) {
 
-                $item->product = $this->shop_product_model->get_by_id($item->product_id);
+                $item->product = $this->shop_product_model->getById($item->product_id);
 
                 if (!empty($item->product)) {
 
@@ -585,7 +585,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
             $status   = 'error';
             $message  = 'An error occurred during checkout, you may have been charged. ';
-            $message .= $this->shop_payment_gateway_model->last_error();
+            $message .= $this->shop_payment_gateway_model->lastError();
 
             $this->session->set_flashdata($status, $message);
             redirect($this->shopUrl . 'checkout');
@@ -620,7 +620,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Load up the shop's skin
-        $skin = app_setting('skin_checkout', 'shop');
+        $skin = appSetting('skin_checkout', 'shop');
         $skin = empty($skin) ? 'shop-skin-checkout-classic' : $skin;
 
         $this->load->model('shop/shop_skin_checkout_model');
@@ -630,7 +630,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
             $subject  = 'Failed to load shop skin "' . $skin . '"';
             $message  = 'Shop skin "' . $skin . '" failed to load at ' . APP_NAME . ', for the following reason: ';
-            $message .= $this->shop_skin_checkout_model->last_error();
+            $message .= $this->shop_skin_checkout_model->lastError();
 
             showFatalError($subject, $message);
         }
@@ -668,7 +668,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
             if ($orderId) {
 
-                $order = $this->shop_order_model->get_by_id($orderId);
+                $order = $this->shop_order_model->getById($orderId);
 
                 if ($order) {
 

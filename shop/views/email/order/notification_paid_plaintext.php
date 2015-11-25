@@ -4,13 +4,13 @@ Full payment has been received and the order should be processed.
 <?php
 
     $address   = array();
-    $address[] = app_setting('warehouse_addr_addressee', 'shop');
-    $address[] = app_setting('warehouse_addr_line1', 'shop');
-    $address[] = app_setting('warehouse_addr_line2', 'shop');
-    $address[] = app_setting('warehouse_addr_town', 'shop');
-    $address[] = app_setting('warehouse_addr_postcode', 'shop');
-    $address[] = app_setting('warehouse_addr_state', 'shop');
-    $address[] = app_setting('warehouse_addr_country', 'shop');
+    $address[] = appSetting('warehouse_addr_addressee', 'shop');
+    $address[] = appSetting('warehouse_addr_line1', 'shop');
+    $address[] = appSetting('warehouse_addr_line2', 'shop');
+    $address[] = appSetting('warehouse_addr_town', 'shop');
+    $address[] = appSetting('warehouse_addr_postcode', 'shop');
+    $address[] = appSetting('warehouse_addr_state', 'shop');
+    $address[] = appSetting('warehouse_addr_country', 'shop');
     $address   = array_filter($address);
 
     if ($order->delivery_type === 'COLLECT') {

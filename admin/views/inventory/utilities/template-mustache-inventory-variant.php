@@ -226,7 +226,6 @@
                     <tr>
                         <th>Currency</th>
                         <th>Price</th>
-                        <th>Sale Price</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -234,15 +233,15 @@
                     <?php
 
                         //  Prep the prices into an easy to access array
-                        $price     = array();
-                        $salePrice = array();
+                        $price = array();
 
                         if (!empty($variation->price_raw)) {
 
+                            $oCurrencyModel = nailsFactory('model', 'Currency', 'nailsapp/module-shop');
+
                             foreach ($variation->price_raw as $priceRaw) {
 
-                                $price[$priceRaw->currency->code]     = $this->shop_currency_model->intToFloat($priceRaw->price, $priceRaw->currency->code);
-                                $salePrice[$priceRaw->currency->code] = $this->shop_currency_model->intToFloat($priceRaw->sale_price, $priceRaw->currency->code);
+                                $price[$priceRaw->currency->code] = $oCurrencyModel->intToFloat($priceRaw->price, $priceRaw->currency->code);
                             }
                         }
 
@@ -278,31 +277,6 @@
                                 'data-code="' . SHOP_BASE_CURRENCY_CODE . '" ' .
                                 'class="' . implode(' ', $class) . '" ' .
                                 'placeholder="Price"'
-                            );
-                            echo $error;
-
-                        ?>
-                        </td>
-                        <td class="price-sale">
-                        <?php
-
-                            $key     = 'variation[' . $_counter . '][pricing][0][sale_price]';
-                            $error   = form_error($key, '<span class="error show-in-tabs">', '</span>');
-                            $class   = array('variation-price-sale', SHOP_BASE_CURRENCY_CODE);
-                            $default = !empty($salePrice[SHOP_BASE_CURRENCY_CODE]) ? $salePrice[SHOP_BASE_CURRENCY_CODE] : '';
-
-                            if ($error) {
-
-                                $class[] = 'error';
-                            }
-
-                            echo form_input(
-                                $key,
-                                set_value($key, $default),
-                                'data-prefix="' . SHOP_BASE_CURRENCY_SYMBOL . '" ' .
-                                'data-code="' . SHOP_BASE_CURRENCY_CODE . '" ' .
-                                'class="' . implode(' ', $class) . '" ' .
-                                'placeholder="Sale Price"'
                             );
                             echo $error;
 
@@ -354,31 +328,6 @@
 
                                         ?>
                                     </td>
-                                    <td class="price-sale">
-                                        <?php
-
-                                            $key     = 'variation[' . $_counter . '][pricing][' . $counterInside . '][sale_price]';
-                                            $error   = form_error($key, '<span class="error show-in-tabs">', '</span>');
-                                            $class   = array('variation-price-sale', $currency->code);
-                                            $default = !empty($salePrice[$currency->code]) ? $salePrice[$currency->code] : '';
-
-                                            if ($error) {
-
-                                                $class[] = 'error';
-                                            }
-
-                                            echo form_input(
-                                                $key,
-                                                set_value($key, $default),
-                                                'data-prefix="' . $currency->symbol . '" ' .
-                                                'data-code="' . $currency->code . '" ' .
-                                                'class="' . implode(' ', $class) . '"' .
-                                                'placeholder="Calculate automatically from ' . SHOP_BASE_CURRENCY_CODE . '"'
-                                            );
-                                            echo $error;
-
-                                        ?>
-                                    </td>
                                 </tr>
                                 <?php
 
@@ -386,17 +335,17 @@
                             }
                         }
 
+
+                        $display = empty($isFirst) || empty($numVariants) || $numVariants == 1 ? 'none' : 'block';
+                        echo '<tr class="variation-sync-prices" style="display:' . $display . '">';
+                            echo '<td colspan="3">';
+                                echo '<a href="#" class="btn btn-xs btn-warning">Sync Prices</a>';
+                            echo '</td>';
+                        echo '</tr>';
+
                     ?>
                 </tbody>
             </table>
-            <?php
-
-                $display = empty($isFirst) || empty($numVariants) || $numVariants == 1 ? 'none' : 'block';
-                echo '<p class="variation-sync-prices" style="display:' . $display . '">';
-                    echo '<a href="#" class="awesome small orange">Sync Prices</a>';
-                echo '</p>';
-
-            ?>
         </div>
         <div class="tab-page tab-variation-gallery">
             <p>
@@ -464,9 +413,9 @@
                         $field['key']      = 'variation[' . $_counter . '][shipping][collection_only]';
                         $field['class']    = 'field-collection-only';
                         $field['label']    = 'Collection Only';
-                        $field['readonly'] = !app_setting('warehouse_collection_enabled', 'shop');
-                        $field['info']     = !app_setting('warehouse_collection_enabled', 'shop') ? '<strong>Warehouse Collection is disabled</strong>' : '';
-                        $field['info']    .= !app_setting('warehouse_collection_enabled', 'shop') && userHasPermission('admin:shop:settings:update') ? '<br />if you wish to allow customers to collect from your warehouse you must enable it in ' . anchor('admin/shop/settings', 'settings', 'class="confirm" data-title="Stop Editing?" data-body="Any unsaved changes will be lost."') . '.' : '';
+                        $field['readonly'] = !appSetting('warehouse_collection_enabled', 'shop');
+                        $field['info']     = !appSetting('warehouse_collection_enabled', 'shop') ? '<strong>Warehouse Collection is disabled</strong>' : '';
+                        $field['info']    .= !appSetting('warehouse_collection_enabled', 'shop') && userHasPermission('admin:shop:settings:update') ? '<br />if you wish to allow customers to collect from your warehouse you must enable it in ' . anchor('admin/shop/settings', 'settings', 'class="confirm" data-title="Stop Editing?" data-body="Any unsaved changes will be lost."') . '.' : '';
                         $field['default']  = isset($variation->shipping->collection_only) ? (bool) $variation->shipping->collection_only : false;
                         $tip               = 'Items marked as collection only will be handled differently in checkout and reporting.';
 

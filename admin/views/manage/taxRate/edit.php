@@ -2,9 +2,6 @@
 <?=form_open(uri_string() . $isModal)?>
     <fieldset>
         <legend>Basic Details</legend>
-        <p>
-            These fields describe the tax rate.
-        </p>
         <?php
 
             $field                = array();
@@ -31,19 +28,15 @@
         ?>
     </fieldset>
     <p style="margin-top:1em;">
-    <?php
-
-        echo form_submit('submit', 'Save', 'class="awesome"');
-        echo anchor(
-            'admin/shop/manage/tax_rate' . $isModal,
+        <?=form_submit('submit', 'Save', 'class="btn btn-primary"')?>
+        <?=anchor(
+            'admin/shop/manage/taxRate' . $isModal,
             'Cancel',
-            'class="awesome red confirm" data-body="All unsaved changes will be lost."'
-        );
-
-    ?>
+            'class="btn btn-danger confirm" data-body="All unsaved changes will be lost."'
+        )?>
     </p>
     <?=form_close();?>
 </div>
 <?php
 
-    echo \Nails\Admin\Helper::loadInlineView('utilities/footer', array('items' => $taxRates));
+    echo adminHelper('loadInlineView', 'utilities/footer', array('items' => $taxRates));

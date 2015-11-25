@@ -21,7 +21,7 @@ class Routes
     public function getRoutes()
     {
         $routes   = array();
-        $settings = app_setting(null, 'shop', true);
+        $settings = appSetting(null, 'shop', true);
 
         //  Shop front page route
         $shopUrl = isset($settings['url']) ? substr($settings['url'], 0, -1) : 'shop';

@@ -26,7 +26,7 @@ class Webhook extends \Nails\Api\Controller\Base
         parent::__construct($oApiRouter);
 
         $this->maintenance = new \stdClass();
-        $this->maintenance->enabled = (bool) app_setting('maintenance_enabled', 'shop');
+        $this->maintenance->enabled = (bool) appSetting('maintenance_enabled', 'shop');
         if ($this->maintenance->enabled) {
 
             //  Allow shop admins access
@@ -95,7 +95,7 @@ class Webhook extends \Nails\Api\Controller\Base
         if (!$result) {
 
             $out['status'] = 500;
-            $out['error']  = $this->shop_payment_gateway_model->last_error();
+            $out['error']  = $this->shop_payment_gateway_model->lastError();
         }
 
         // --------------------------------------------------------------------------

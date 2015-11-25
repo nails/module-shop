@@ -17,6 +17,7 @@ class NAILS_Shop_product_model extends Base
 {
     protected $oUser;
     protected $oUserMeta;
+    protected $oCurrencyModel;
 
     // --------------------------------------------------------------------------
 
@@ -29,8 +30,9 @@ class NAILS_Shop_product_model extends Base
 
         // --------------------------------------------------------------------------
 
-        $this->oUser     = Factory::model('User', 'nailsapp/module-auth');
-        $this->oUserMeta = Factory::model('UserMeta', 'nailsapp/module-auth');
+        $this->oUser          = Factory::model('User', 'nailsapp/module-auth');
+        $this->oUserMeta      = Factory::model('UserMeta', 'nailsapp/module-auth');
+        $this->oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
 
         // --------------------------------------------------------------------------
 
@@ -91,7 +93,7 @@ class NAILS_Shop_product_model extends Base
 
             if ($returnObj) {
 
-                return $this->get_by_id($id);
+                return $this->getById($id);
 
             } else {
 
@@ -110,11 +112,11 @@ class NAILS_Shop_product_model extends Base
      */
     public function update($id, $data = array())
     {
-        $current = $this->get_by_id($id);
+        $current = $this->getById($id);
 
         if (!$current) {
 
-            $this->_set_error('Invalid product ID');
+            $this->setError('Invalid product ID');
             return false;
         }
 
@@ -161,7 +163,7 @@ class NAILS_Shop_product_model extends Base
 
         if (empty($data['label'])) {
 
-            $this->_set_error('Label is a required field.');
+            $this->setError('Label is a required field.');
             return false;
         }
 
@@ -170,7 +172,7 @@ class NAILS_Shop_product_model extends Base
         //  Slug
         //  ====
 
-        $_data->slug = $this->_generate_slug($data['label'], '', '', $this->table, null, $id);
+        $_data->slug = $this->generateSlug($data['label'], '', '', $this->table, null, $id);
 
         //  Product Info
         //  ============
@@ -179,7 +181,7 @@ class NAILS_Shop_product_model extends Base
 
         if (!$_data->type_id) {
 
-            $this->_set_error('Product type must be defined.');
+            $this->setError('Product type must be defined.');
             return false;
         }
 
@@ -192,7 +194,7 @@ class NAILS_Shop_product_model extends Base
         $_data->tags            = isset($data['tags']) ? $data['tags'] : array();
         $_data->google_category = !empty($data['google_category']) ? trim($data['google_category']) : null;
 
-        if (app_setting('enable_external_products', 'shop')) {
+        if (appSetting('enable_external_products', 'shop')) {
 
             $_data->is_external           = isset($data['is_external']) ? (bool) $data['is_external'] : false;
             $_data->external_vendor_label = isset($data['external_vendor_label']) ? $data['external_vendor_label'] : '';
@@ -214,16 +216,16 @@ class NAILS_Shop_product_model extends Base
 
         if (!isset($data['variation']) || !$data['variation']) {
 
-            $this->_set_error('At least one variation is required.');
+            $this->setError('At least one variation is required.');
             return false;
         }
 
         $_data->variation = array();
-        $productType      = $this->shop_product_type_model->get_by_id($_data->type_id);
+        $productType      = $this->shop_product_type_model->getById($_data->type_id);
 
         if (!$productType) {
 
-            $this->_set_error('Invalid Product Type');
+            $this->setError('Invalid Product Type');
             return false;
 
         } else {
@@ -380,14 +382,13 @@ class NAILS_Shop_product_model extends Base
 
                     if (empty($price['currency'])) {
 
-                        $this->_set_error('"Currency" field is required for all variant prices.');
+                        $this->setError('"Currency" field is required for all variant prices.');
                         return false;
                     }
 
                     $_data->variation[$index]->pricing[$priceIndex]             = new \stdClass();
                     $_data->variation[$index]->pricing[$priceIndex]->currency   = $price['currency'];
                     $_data->variation[$index]->pricing[$priceIndex]->price      = (float) $price['price'];
-                    $_data->variation[$index]->pricing[$priceIndex]->sale_price = (float) $price['sale_price'];
 
                     if ($price['currency'] == SHOP_BASE_CURRENCY_CODE) {
 
@@ -395,19 +396,15 @@ class NAILS_Shop_product_model extends Base
                     }
 
                     //  Convert the prices into the correct format for the database
-                    $_data->variation[$index]->pricing[$priceIndex]->price = $this->shop_currency_model->floatToInt(
+                    $_data->variation[$index]->pricing[$priceIndex]->price = $this->oCurrencyModel->floatToInt(
                         $_data->variation[$index]->pricing[$priceIndex]->price,
-                        $_data->variation[$index]->pricing[$priceIndex]->currency
-                    );
-                    $_data->variation[$index]->pricing[$priceIndex]->sale_price = $this->shop_currency_model->floatToInt(
-                        $_data->variation[$index]->pricing[$priceIndex]->sale_price,
                         $_data->variation[$index]->pricing[$priceIndex]->currency
                     );
                 }
 
                 if (!$basePriceSet) {
 
-                    $this->_set_error('The ' . SHOP_BASE_CURRENCY_CODE . ' price must be set for all variants.');
+                    $this->setError('The ' . SHOP_BASE_CURRENCY_CODE . ' price must be set for all variants.');
                     return false;
                 }
             }
@@ -455,7 +452,7 @@ class NAILS_Shop_product_model extends Base
              * the same, if not then it'll vary.
              */
 
-            $this->_set_error('All variations which have defined SKUs must be unique.');
+            $this->setError('All variations which have defined SKUs must be unique.');
             return false;
         }
 
@@ -481,7 +478,7 @@ class NAILS_Shop_product_model extends Base
         $_data->related = isset($data['related']) ? explode(',', $data['related']) : array();
         $_data->related = array_filter($_data->related);
         $_data->related = array_unique($_data->related);
-        $_data->related = array_map(function($val) {
+        $_data->related = array_map(function ($val) {
             return (int) $val;
         }, $_data->related);
 
@@ -518,7 +515,7 @@ class NAILS_Shop_product_model extends Base
 
         if (!empty($data->id)) {
 
-            $current = $this->get_by_id($data->id);
+            $current = $this->getById($data->id);
 
         } else {
 
@@ -550,7 +547,7 @@ class NAILS_Shop_product_model extends Base
         $this->db->set('published', $data->published);
         $this->db->set('google_category', $data->google_category);
 
-        if (app_setting('enable_external_products', 'shop')) {
+        if (appSetting('enable_external_products', 'shop')) {
 
             $this->db->set('is_external', $data->is_external);
             $this->db->set('external_vendor_label', $data->external_vendor_label);
@@ -615,7 +612,7 @@ class NAILS_Shop_product_model extends Base
                 $this->db->where('product_id', $data->id);
                 if (!$this->db->delete($table)) {
 
-                    $this->_set_error('Failed to clear old product ' . $human . '.');
+                    $this->setError('Failed to clear old product ' . $human . '.');
                     $rollback = true;
                     break;
                 }
@@ -666,7 +663,7 @@ class NAILS_Shop_product_model extends Base
 
                     if (!$this->db->insert_batch($table, $temp)) {
 
-                        $this->_set_error('Failed to add product ' . $human . '.');
+                        $this->setError('Failed to add product ' . $human . '.');
                         $rollback = true;
                     }
                 }
@@ -781,11 +778,11 @@ class NAILS_Shop_product_model extends Base
                         $this->db->where('variation_id', $v->id);
                         if (!$this->db->delete($this->table_variation_gallery)) {
 
-                            $this->_set_error('Failed to clear gallery items for variant with label "' . $v->label . '"');
+                            $this->setError('Failed to clear gallery items for variant with label "' . $v->label . '"');
                             $rollback = true;
                         }
 
-                        if  (!$rollback) {
+                        if (!$rollback) {
 
                             $temp = array();
                             foreach ($v->gallery as $objectId) {
@@ -800,7 +797,7 @@ class NAILS_Shop_product_model extends Base
 
                                 if (!$this->db->insert_batch($this->table_variation_gallery, $temp)) {
 
-                                    $this->_set_error('Failed to update gallery items variant with label "' . $v->label . '"');
+                                    $this->setError('Failed to update gallery items variant with label "' . $v->label . '"');
                                     $rollback = true;
                                 }
                             }
@@ -821,7 +818,7 @@ class NAILS_Shop_product_model extends Base
 
                             if (!$this->db->delete($this->table_variation_product_type_meta)) {
 
-                                $this->_set_error('Failed to clear meta data for variant with label "' . $v->label . '"');
+                                $this->setError('Failed to clear meta data for variant with label "' . $v->label . '"');
                                 $rollback = true;
                             }
 
@@ -829,7 +826,7 @@ class NAILS_Shop_product_model extends Base
 
                                 if (!$this->db->insert_batch($this->table_variation_product_type_meta, $v->meta)) {
 
-                                    $this->_set_error('Failed to update meta data for variant with label "' . $v->label . '"');
+                                    $this->setError('Failed to update meta data for variant with label "' . $v->label . '"');
                                     $rollback = true;
                                 }
                             }
@@ -844,7 +841,7 @@ class NAILS_Shop_product_model extends Base
                             $this->db->where('variation_id', $v->id);
                             if (!$this->db->delete($this->table_variation_price)) {
 
-                                $this->_set_error('Failed to clear price data for variant with label "' . $v->label . '"');
+                                $this->setError('Failed to clear price data for variant with label "' . $v->label . '"');
                                 $rollback = true;
                             }
 
@@ -862,7 +859,7 @@ class NAILS_Shop_product_model extends Base
 
                                     if (!$this->db->insert_batch($this->table_variation_price, $v->pricing)) {
 
-                                        $this->_set_error('Failed to update price data for variant with label "' . $v->label . '"');
+                                        $this->setError('Failed to update price data for variant with label "' . $v->label . '"');
                                         $rollback = true;
                                     }
                                 }
@@ -871,7 +868,7 @@ class NAILS_Shop_product_model extends Base
 
                     } else {
 
-                        $this->_set_error('Unable to ' . $action . ' variation with label "' . $v->label . '".');
+                        $this->setError('Unable to ' . $action . ' variation with label "' . $v->label . '".');
                         $rollback = true;
                         break;
                     }
@@ -888,7 +885,7 @@ class NAILS_Shop_product_model extends Base
 
                     if (!$this->db->update($this->table_variation)) {
 
-                        $this->_set_error('Unable to delete old variations.');
+                        $this->setError('Unable to delete old variations.');
                         $rollback = true;
                     }
                 }
@@ -896,7 +893,7 @@ class NAILS_Shop_product_model extends Base
 
         } else {
 
-            $this->_set_error('Failed to ' . $action . ' base product.');
+            $this->setError('Failed to ' . $action . ' base product.');
             $rollback = true;
         }
 
@@ -923,7 +920,7 @@ class NAILS_Shop_product_model extends Base
             $this->db->where('is_deleted', false);
             $this->db->where('stock_status', 'IN_STOCK');
             $this->db->where('(quantity_available IS null OR quantity_available > 0)');
-            $variantsAvailable_raw = $this->db->get($this->table_variation   )->result();
+            $variantsAvailable_raw = $this->db->get($this->table_variation)->result();
             $variantsAvailable = array();
 
             foreach ($variantsAvailable_raw as $v) {
@@ -977,16 +974,15 @@ class NAILS_Shop_product_model extends Base
      * Fetches all products
      * @param  integer $page           The page number of the results, if null then no pagination
      * @param  integer $perPage        How many items per page of paginated results
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
-     * @param  string  $_caller        Internal flag to pass to _getcount_common(), contains the calling method
      * @return array
      */
-    public function get_all($page = null, $perPage = null, $data = array(), $includeDeleted = false, $_caller = 'GET_ALL')
+    public function getAll($page = null, $perPage = null, $data = array(), $includeDeleted = false)
     {
         $this->load->model('shop/shop_category_model');
 
-        $products = parent::get_all($page, $perPage, $data, $includeDeleted, $_caller);
+        $products = parent::getAll($page, $perPage, $data, $includeDeleted);
 
         //  Handle requests for the raw query object
         if (!empty($data['RETURN_QUERY_OBJECT'])) {
@@ -1001,7 +997,7 @@ class NAILS_Shop_product_model extends Base
          * where everything is 0. the code below can fill in the gaps where appropriate
          */
 
-        $supportedCurrency     = $this->shop_currency_model->getAllSupported();
+        $supportedCurrency     = $this->oCurrencyModel->getAllSupported();
         $supportedCurrencyFlat = array();
         $basePriceRaw          = new \stdClass();
 
@@ -1009,10 +1005,9 @@ class NAILS_Shop_product_model extends Base
 
             $supportedCurrencyFlat[] = $currency->code;
 
-            $basePriceRaw->{$currency->code}             = new \stdClass();
-            $basePriceRaw->{$currency->code}->price      = 0;
-            $basePriceRaw->{$currency->code}->sale_price = 0;
-            $basePriceRaw->{$currency->code}->currency   = $currency;
+            $basePriceRaw->{$currency->code}           = new \stdClass();
+            $basePriceRaw->{$currency->code}->price    = 0;
+            $basePriceRaw->{$currency->code}->currency = $currency;
         }
 
         // --------------------------------------------------------------------------
@@ -1057,7 +1052,7 @@ class NAILS_Shop_product_model extends Base
 
                 $category->id          = (int) $category->id;
                 $category->breadcrumbs = json_decode($category->breadcrumbs);
-                $category->url         = $this->shop_category_model->format_url($category->slug);
+                $category->url         = $this->shop_category_model->formatUrl($category->slug);
             }
 
             //  Collections
@@ -1119,6 +1114,9 @@ class NAILS_Shop_product_model extends Base
             }
             $this->db->order_by('pv.order');
             $product->variations = $this->db->get($this->table_variation . ' pv')->result();
+
+            $aVariationPricesIncTax = array();
+            $aVariationPricesExTax  = array();
 
             foreach ($product->variations as &$v) {
 
@@ -1184,7 +1182,7 @@ class NAILS_Shop_product_model extends Base
                 //  Raw Price
                 //  =========
 
-                $this->db->select('pvp.price, pvp.sale_price, pvp.currency');
+                $this->db->select('pvp.price, pvp.currency');
                 $this->db->where('pvp.variation_id', $v->id);
                 $this->db->where_in('pvp.currency', $supportedCurrencyFlat);
                 $_price = $this->db->get($this->table_variation_price . ' pvp')->result();
@@ -1199,8 +1197,7 @@ class NAILS_Shop_product_model extends Base
                     $currencyCode = $price->currency;
 
                     //  Cast as integer
-                    $v->price_raw->{$currencyCode}->price      = (int) $price->price;
-                    $v->price_raw->{$currencyCode}->sale_price = (int) $price->sale_price;
+                    $v->price_raw->{$currencyCode}->price = (int) $price->price;
                 }
 
                 $this->formatVariationObject($v);
@@ -1210,7 +1207,6 @@ class NAILS_Shop_product_model extends Base
 
                 //  Fields
                 $prototypeFields                = new \stdClass();
-                $prototypeFields->value         = 0;
                 $prototypeFields->value_inc_tax = 0;
                 $prototypeFields->value_ex_tax  = 0;
                 $prototypeFields->value_tax     = 0;
@@ -1222,357 +1218,109 @@ class NAILS_Shop_product_model extends Base
                 $v->price->price->user           = unserialize(serialize($prototypeFields));
                 $v->price->price->user_formatted = unserialize(serialize($prototypeFields));
 
-                //  And an exact clone for the sale price
-                $v->price->sale_price = unserialize(serialize($v->price->price));
+                $basePrice = isset($v->price_raw->{SHOP_BASE_CURRENCY_CODE}) ? $v->price_raw->{SHOP_BASE_CURRENCY_CODE}->price : null;
 
-                $basePrice = isset($v->price_raw->{SHOP_BASE_CURRENCY_CODE}) ? $v->price_raw->{SHOP_BASE_CURRENCY_CODE} : null;
-                $userPrice = isset($v->price_raw->{SHOP_USER_CURRENCY_CODE}) ? $v->price_raw->{SHOP_USER_CURRENCY_CODE} : null;
+                if (is_null($basePrice)) {
 
-                if (empty($basePrice)) {
-
-                    /**
-                     * Not having the base currency is an actual error. Fall over. Not having
-                     * the user's currency is fine, we fall back to a conversion from the base
-                     * currency.
-                     */
                     $subject = 'Product missing price for base currency (' . SHOP_BASE_CURRENCY_CODE . ')';
                     $message = 'Product #' . $product->id . ' does not contain a price for the shop\'s base currency, ' . SHOP_BASE_CURRENCY_CODE . '.';
                     showFatalError($subject, $message);
                 }
 
-                //  Define the base prices first
-                $v->price->price->base->value      = $basePrice->price;
-                $v->price->sale_price->base->value = $basePrice->sale_price;
-
-                // --------------------------------------------------------------------------
-
-                /**
-                 * If the user's currency preferences aren't the same as the
-                 * base currency then we need to do some conversions
-                 */
-
-                if (SHOP_USER_CURRENCY_CODE != SHOP_BASE_CURRENCY_CODE) {
-
-                    //  Price, first
-                    if (empty($userPrice->price)) {
-
-                        //  The user's price is empty() so we should automatically calculate it from the base price
-                        $_price = $this->shop_currency_model->convertBaseToUser($basePrice->price);
-
-                        if ($_price === false) {
-
-                            showFatalError('Failed to convert currency', 'Could not convert from ' . SHOP_BASE_CURRENCY_CODE . ' to ' . SHOP_USER_CURRENCY_CODE . '. ' . $this->shop_currency_model->last_error());
-                        }
-
-                    } else {
-
-                        //  A price has been explicitly set for this currency, so render it as is this
-                        $_price = $userPrice->price;
-                    }
-
-                    //  Formatting not for visual purposes but to get value into the proper format
-                    $v->price->price->user->value = number_format($_price, SHOP_USER_CURRENCY_PRECISION, '.', '');
-
-                    // --------------------------------------------------------------------------
-
-                    //  Sale price, second
-                    if (empty($userPrice->sale_price)) {
-
-                        //  The user's sale_price is empty() so we should automatically calculate it from the base price
-                        $salePrice = $this->shop_currency_model->convertBaseToUser($basePrice->sale_price);
-
-                        if ($_price === false) {
-
-                            showFatalError('Failed to convert currency', 'Could not convert from ' . SHOP_BASE_CURRENCY_CODE . ' to ' . SHOP_USER_CURRENCY_CODE . '. ' . $this->shop_currency_model->last_error());
-                        }
-
-                    } else {
-
-                        //  A sale_price has been explicitly set for this currency, so render it as is
-                        $salePrice = $userPrice->sale_price;
-                    }
-
-                    //  Formatting not for visual purposes but to get value into the proper format
-                    $v->price->sale_price->user->value = number_format($salePrice, SHOP_USER_CURRENCY_PRECISION, '.', '');
-
-                } else {
-
-                    //  Formatting not for visual purposes but to get value into the proper format
-                    $v->price->price->user->value      = $v->price->price->base->value;
-                    $v->price->sale_price->user->value = $v->price->sale_price->base->value;
-                }
-
                 // --------------------------------------------------------------------------
 
                 //  Tax pricing
-                if (app_setting('price_exclude_tax', 'shop')) {
+                if (appSetting('price_exclude_tax', 'shop')) {
 
                     //  Prices do not include any applicable taxes
-                    $v->price->price->base->value_ex_tax = $v->price->price->base->value;
-                    $v->price->price->user->value_ex_tax = $v->price->price->user->value;
+                    $v->price->price->base->value_ex_tax = $basePrice;
 
                     //  Work out the ex-tax price by working out the tax and adding
                     if (!empty($product->tax_rate->rate)) {
 
-                        $v->price->price->base->value_tax = $product->tax_rate->rate * $v->price->price->base->value_ex_tax;
-                        $v->price->price->base->value_tax = round($v->price->price->base->value_tax, 0, PHP_ROUND_HALF_UP);
-                        $v->price->price->user->value_tax = $product->tax_rate->rate * $v->price->price->user->value_ex_tax;
-                        $v->price->price->user->value_tax = round($v->price->price->user->value_tax, 0, PHP_ROUND_HALF_UP);
-
+                        $v->price->price->base->value_tax     = $product->tax_rate->rate * $v->price->price->base->value_ex_tax;
+                        $v->price->price->base->value_tax     = round($v->price->price->base->value_tax, 0, PHP_ROUND_HALF_UP);
                         $v->price->price->base->value_inc_tax = $v->price->price->base->value_ex_tax + $v->price->price->base->value_tax;
-                        $v->price->price->user->value_inc_tax = $v->price->price->user->value_ex_tax + $v->price->price->user->value_tax;
 
                     } else {
 
-                        $v->price->price->base->value_tax = 0;
-                        $v->price->price->user->value_tax = 0;
-
+                        $v->price->price->base->value_tax     = 0;
                         $v->price->price->base->value_inc_tax = $v->price->price->base->value_ex_tax;
-                        $v->price->price->user->value_inc_tax = $v->price->price->user->value_ex_tax;
-                    }
-
-                    // --------------------------------------------------------------------------
-
-                    //  Sale price next...
-                    $v->price->sale_price->base->value_ex_tax = $v->price->sale_price->base->value;
-                    $v->price->sale_price->user->value_ex_tax = $v->price->sale_price->user->value;
-
-                    //  Work out the ex-tax price by working out the tax and subtracting
-                    if (!empty($product->tax_rate->rate)) {
-
-                        $v->price->sale_price->base->value_tax = $product->tax_rate->rate * $v->price->sale_price->base->value_ex_tax;
-                        $v->price->sale_price->base->value_tax = round($v->price->sale_price->base->value_tax, 0, PHP_ROUND_HALF_UP);
-                        $v->price->sale_price->user->value_tax = $product->tax_rate->rate * $v->price->sale_price->user->value_ex_tax;
-                        $v->price->sale_price->user->value_tax = round($v->price->sale_price->user->value_tax, 0, PHP_ROUND_HALF_UP);
-
-                        $v->price->sale_price->base->value_inc_tax = $v->price->sale_price->base->value_ex_tax + $v->price->sale_price->base->value_tax;
-                        $v->price->sale_price->user->value_inc_tax = $v->price->sale_price->user->value_ex_tax + $v->price->sale_price->user->value_tax;
-
-                    } else {
-
-                        $v->price->sale_price->base->value_tax = 0;
-                        $v->price->sale_price->user->value_tax = 0;
-
-                        $v->price->sale_price->base->value_inc_tax = $v->price->sale_price->base->value_ex_tax;
-                        $v->price->sale_price->user->value_inc_tax = $v->price->sale_price->user->value_ex_tax;
                     }
 
                 } else {
 
                     //  Prices are inclusive of any applicable taxes
-                    $v->price->price->base->value_inc_tax = $v->price->price->base->value;
-                    $v->price->price->user->value_inc_tax = $v->price->price->user->value;
+                    $v->price->price->base->value_inc_tax = $basePrice;
 
                     //  Work out the ex-tax price by working out the tax and subtracting
                     if (!empty($product->tax_rate->rate)) {
 
-                        $v->price->price->base->value_tax = ($product->tax_rate->rate * $v->price->price->base->value_inc_tax) / (1 + $product->tax_rate->rate);
-                        $v->price->price->base->value_tax = round($v->price->price->base->value_tax, 0, PHP_ROUND_HALF_UP);
-                        $v->price->price->user->value_tax = ($product->tax_rate->rate * $v->price->price->user->value_inc_tax) / (1 + $product->tax_rate->rate);
-                        $v->price->price->user->value_tax = round($v->price->price->user->value_tax, 0, PHP_ROUND_HALF_UP);
-
+                        $v->price->price->base->value_tax    = ($product->tax_rate->rate * $v->price->price->base->value_inc_tax) / (1 + $product->tax_rate->rate);
+                        $v->price->price->base->value_tax    = round($v->price->price->base->value_tax, 0, PHP_ROUND_HALF_UP);
                         $v->price->price->base->value_ex_tax = $v->price->price->base->value_inc_tax - $v->price->price->base->value_tax;
-                        $v->price->price->user->value_ex_tax = $v->price->price->user->value_inc_tax - $v->price->price->user->value_tax;
 
                     } else {
 
-                        $v->price->price->base->value_tax = 0;
-                        $v->price->price->user->value_tax = 0;
-
+                        $v->price->price->base->value_tax   = 0;
                         $v->price->price->base->value_ex_tax = $v->price->price->base->value_inc_tax;
-                        $v->price->price->user->value_ex_tax = $v->price->price->user->value_inc_tax;
-                    }
-
-                    // --------------------------------------------------------------------------
-
-                    //  Sale price next...
-                    $v->price->sale_price->base->value_inc_tax = $v->price->sale_price->base->value;
-                    $v->price->sale_price->user->value_inc_tax = $v->price->sale_price->user->value;
-
-                    //  Work out the ex-tax price by working out the tax and subtracting
-                    if (!empty($product->tax_rate->rate)) {
-
-                        $v->price->sale_price->base->value_tax = ($product->tax_rate->rate * $v->price->sale_price->base->value_inc_tax) / (1 + $product->tax_rate->rate);
-                        $v->price->sale_price->base->value_tax = round($v->price->sale_price->base->value_tax, 0, PHP_ROUND_HALF_UP);
-                        $v->price->sale_price->user->value_tax = ($product->tax_rate->rate * $v->price->sale_price->user->value_inc_tax) / (1 + $product->tax_rate->rate);
-                        $v->price->sale_price->user->value_tax = round($v->price->sale_price->user->value_tax, 0, PHP_ROUND_HALF_UP);
-
-                        $v->price->sale_price->base->value_ex_tax = $v->price->sale_price->base->value_inc_tax - $v->price->sale_price->base->value_tax;
-                        $v->price->sale_price->user->value_ex_tax = $v->price->sale_price->user->value_inc_tax - $v->price->sale_price->user->value_tax;
-
-                    } else {
-
-                        $v->price->sale_price->base->value_tax = 0;
-                        $v->price->sale_price->user->value_tax = 0;
-
-                        $v->price->sale_price->base->value_ex_tax = $v->price->sale_price->base->value_inc_tax;
-                        $v->price->sale_price->user->value_ex_tax = $v->price->sale_price->user->value_inc_tax;
                     }
                 }
 
                 // --------------------------------------------------------------------------
 
                 //  Price Formatting and type casting
-                $v->price->price->base->value         = (int) $v->price->price->base->value;
                 $v->price->price->base->value_inc_tax = (int) $v->price->price->base->value_inc_tax;
                 $v->price->price->base->value_ex_tax  = (int) $v->price->price->base->value_ex_tax;
                 $v->price->price->base->value_tax     = (int) $v->price->price->base->value_tax;
 
-                $v->price->price->base_formatted->value         = $this->shop_currency_model->formatBase($v->price->price->base->value);
-                $v->price->price->base_formatted->value_inc_tax = $this->shop_currency_model->formatBase($v->price->price->base->value_inc_tax);
-                $v->price->price->base_formatted->value_ex_tax  = $this->shop_currency_model->formatBase($v->price->price->base->value_ex_tax);
-                $v->price->price->base_formatted->value_tax     = $this->shop_currency_model->formatBase($v->price->price->base->value_tax);
+                //  Convert user prices
+                $v->price->price->user->value_inc_tax = $this->oCurrencyModel->convertBaseToUser($v->price->price->base->value_inc_tax);
+                $v->price->price->user->value_ex_tax  = $this->oCurrencyModel->convertBaseToUser($v->price->price->base->value_ex_tax);
+                $v->price->price->user->value_tax     = $this->oCurrencyModel->convertBaseToUser($v->price->price->base->value_tax);
 
-                $v->price->price->user->value         = (int) $v->price->price->user->value;
-                $v->price->price->user->value_inc_tax = (int) $v->price->price->user->value_inc_tax;
-                $v->price->price->user->value_ex_tax  = (int) $v->price->price->user->value_ex_tax;
-                $v->price->price->user->value_tax     = (int) $v->price->price->user->value_tax;
+                //  Format all the things
+                $v->price->price->base_formatted->value_inc_tax = $this->oCurrencyModel->formatBase($v->price->price->base->value_inc_tax);
+                $v->price->price->base_formatted->value_ex_tax  = $this->oCurrencyModel->formatBase($v->price->price->base->value_ex_tax);
+                $v->price->price->base_formatted->value_tax     = $this->oCurrencyModel->formatBase($v->price->price->base->value_tax);
 
-                $v->price->price->user_formatted->value         = $this->shop_currency_model->formatUser($v->price->price->user->value);
-                $v->price->price->user_formatted->value_inc_tax = $this->shop_currency_model->formatUser($v->price->price->user->value_inc_tax);
-                $v->price->price->user_formatted->value_ex_tax  = $this->shop_currency_model->formatUser($v->price->price->user->value_ex_tax);
-                $v->price->price->user_formatted->value_tax     = $this->shop_currency_model->formatUser($v->price->price->user->value_tax);
-
-
-                $v->price->sale_price->base->value         = (int) $v->price->sale_price->base->value;
-                $v->price->sale_price->base->value_inc_tax = (int) $v->price->sale_price->base->value_inc_tax;
-                $v->price->sale_price->base->value_ex_tax  = (int) $v->price->sale_price->base->value_ex_tax;
-                $v->price->sale_price->base->value_tax     = (int) $v->price->sale_price->base->value_tax;
-
-                $v->price->sale_price->base_formatted->value         = $this->shop_currency_model->formatBase($v->price->sale_price->base->value);
-                $v->price->sale_price->base_formatted->value_inc_tax = $this->shop_currency_model->formatBase($v->price->sale_price->base->value_inc_tax);
-                $v->price->sale_price->base_formatted->value_ex_tax  = $this->shop_currency_model->formatBase($v->price->sale_price->base->value_ex_tax);
-                $v->price->sale_price->base_formatted->value_tax     = $this->shop_currency_model->formatBase($v->price->sale_price->base->value_tax);
-
-                $v->price->sale_price->user->value         = (int) $v->price->sale_price->user->value;
-                $v->price->sale_price->user->value_inc_tax = (int) $v->price->sale_price->user->value_inc_tax;
-                $v->price->sale_price->user->value_ex_tax  = (int) $v->price->sale_price->user->value_ex_tax;
-                $v->price->sale_price->user->value_tax     = (int) $v->price->sale_price->user->value_tax;
-
-                $v->price->sale_price->user_formatted->value         = $this->shop_currency_model->formatUser($v->price->sale_price->user->value);
-                $v->price->sale_price->user_formatted->value_inc_tax = $this->shop_currency_model->formatUser($v->price->sale_price->user->value_inc_tax);
-                $v->price->sale_price->user_formatted->value_ex_tax  = $this->shop_currency_model->formatUser($v->price->sale_price->user->value_ex_tax);
-                $v->price->sale_price->user_formatted->value_tax     = $this->shop_currency_model->formatUser($v->price->sale_price->user->value_tax);
+                $v->price->price->user_formatted->value_inc_tax = $this->oCurrencyModel->formatUser($v->price->price->user->value_inc_tax);
+                $v->price->price->user_formatted->value_ex_tax  = $this->oCurrencyModel->formatUser($v->price->price->user->value_ex_tax);
+                $v->price->price->user_formatted->value_tax     = $this->oCurrencyModel->formatUser($v->price->price->user->value_tax);
 
                 // --------------------------------------------------------------------------
 
-                //  Product User Price ranges
-                if (empty($product->price)) {
-
-                    $product->price = new \stdClass();
-                }
-
-                if (empty($product->price->user)) {
-
-                    $product->price->user = new \stdClass();
-
-                    $product->price->user->max_price         = null;
-                    $product->price->user->max_price_inc_tax = null;
-                    $product->price->user->max_price_ex_tax  = null;
-
-                    $product->price->user->min_price         = null;
-                    $product->price->user->min_price_inc_tax = null;
-                    $product->price->user->min_price_ex_tax  = null;
-
-                    $product->price->user->max_sale_price         = null;
-                    $product->price->user->max_sale_price_inc_tax = null;
-                    $product->price->user->max_sale_price_ex_tax  = null;
-
-                    $product->price->user->min_sale_price         = null;
-                    $product->price->user->min_sale_price_inc_tax = null;
-                    $product->price->user->min_sale_price_ex_tax  = null;
-                }
-
-                if (empty($product->price->user_formatted)) {
-
-                    $product->price->user_formatted = new \stdClass();
-
-                    $product->price->user_formatted->max_price         = null;
-                    $product->price->user_formatted->max_price_inc_tax = null;
-                    $product->price->user_formatted->max_price_ex_tax  = null;
-
-                    $product->price->user_formatted->min_price         = null;
-                    $product->price->user_formatted->min_price_inc_tax = null;
-                    $product->price->user_formatted->min_price_ex_tax  = null;
-
-                    $product->price->user_formatted->max_sale_price         = null;
-                    $product->price->user_formatted->max_sale_price_inc_tax = null;
-                    $product->price->user_formatted->max_sale_price_ex_tax  = null;
-
-                    $product->price->user_formatted->min_sale_price         = null;
-                    $product->price->user_formatted->min_sale_price_inc_tax = null;
-                    $product->price->user_formatted->min_sale_price_ex_tax  = null;
-                }
-
-                if (is_null($product->price->user->max_price) || $v->price->price->user->value > $product->price->user->max_price) {
-
-                    $product->price->user->max_price         = $v->price->price->user->value;
-                    $product->price->user->max_price_inc_tax = $v->price->price->user->value_inc_tax;
-                    $product->price->user->max_price_ex_tax  = $v->price->price->user->value_ex_tax;
-
-                    $product->price->user_formatted->max_price         = $v->price->price->user_formatted->value;
-                    $product->price->user_formatted->max_price_inc_tax = $v->price->price->user_formatted->value_inc_tax;
-                    $product->price->user_formatted->max_price_ex_tax  = $v->price->price->user_formatted->value_ex_tax;
-                }
-
-                if (is_null($product->price->user->min_price) || $v->price->price->user->value < $product->price->user->min_price) {
-
-                    $product->price->user->min_price         = $v->price->price->user->value;
-                    $product->price->user->min_price_inc_tax = $v->price->price->user->value_inc_tax;
-                    $product->price->user->min_price_ex_tax  = $v->price->price->user->value_ex_tax;
-
-                    $product->price->user_formatted->min_price         = $v->price->price->user_formatted->value;
-                    $product->price->user_formatted->min_price_inc_tax = $v->price->price->user_formatted->value_inc_tax;
-                    $product->price->user_formatted->min_price_ex_tax  = $v->price->price->user_formatted->value_ex_tax;
-                }
-
-                if (is_null($product->price->user->max_sale_price) || $v->price->sale_price->user->value > $product->price->user->max_sale_price) {
-
-                    $product->price->user->max_sale_price         = $v->price->sale_price->user->value;
-                    $product->price->user->max_sale_price_inc_tax = $v->price->sale_price->user->value_inc_tax;
-                    $product->price->user->max_sale_price_ex_tax  = $v->price->sale_price->user->value_ex_tax;
-
-                    $product->price->user_formatted->max_sale_price         = $v->price->sale_price->user_formatted->value;
-                    $product->price->user_formatted->max_sale_price_inc_tax = $v->price->sale_price->user_formatted->value_inc_tax;
-                    $product->price->user_formatted->max_sale_price_ex_tax  = $v->price->sale_price->user_formatted->value_ex_tax;
-                }
-
-                if (is_null($product->price->user->min_sale_price) || $v->price->sale_price->user->value < $product->price->user->min_sale_price) {
-
-                    $product->price->user->min_sale_price         = $v->price->sale_price->user->value;
-                    $product->price->user->min_sale_price_inc_tax = $v->price->sale_price->user->value_inc_tax;
-                    $product->price->user->min_sale_price_ex_tax  = $v->price->sale_price->user->value_ex_tax;
-
-                    $product->price->user_formatted->min_sale_price         = $v->price->sale_price->user_formatted->value;
-                    $product->price->user_formatted->min_sale_price_inc_tax = $v->price->sale_price->user_formatted->value_inc_tax;
-                    $product->price->user_formatted->min_sale_price_ex_tax  = $v->price->sale_price->user_formatted->value_ex_tax;
-                }
+                //  Take note of the final values so we can easily extract the higest and lowest variation price
+                $aVariationPricesIncTax[] = $v->price->price->user->value_inc_tax;
+                $aVariationPricesExTax[]  = $v->price->price->user->value_ex_tax;
             }
 
-            //  Range strings
-            if (!empty($product->price)) {
+            //  Work out the min and max prices
+            $product->price                          = new \stdClass();
+            $product->price->user                    = new \stdClass();
+            $product->price->user_formatted          = new \stdClass();
 
-                if ($product->price->user->max_price == $product->price->user->min_price) {
+            $iMaxPriceIncTax = max($aVariationPricesIncTax);
+            $iMaxPriceExTax  = max($aVariationPricesExTax);
+            $iMinPriceIncTax = min($aVariationPricesIncTax);
+            $iMinPriceExTax  = min($aVariationPricesExTax);
 
-                    $product->price->user_formatted->price_string = $product->price->user_formatted->min_price;
+            $product->price->user_formatted->max_price_inc_tax = $this->oCurrencyModel->formatUser($iMaxPriceExTax);
+            $product->price->user_formatted->max_price_ex_tax  = $this->oCurrencyModel->formatUser($iMaxPriceIncTax);
+            $product->price->user_formatted->min_price_inc_tax = $this->oCurrencyModel->formatUser($iMinPriceExTax);
+            $product->price->user_formatted->min_price_ex_tax  = $this->oCurrencyModel->formatUser($iMinPriceIncTax);
 
-                } else {
+            if ($iMaxPriceExTax == $iMinPriceExTax) {
 
-                    $product->price->user_formatted->price_string = 'From ' . $product->price->user_formatted->min_price;
-                }
+                $product->price->user_formatted->price_string_inc_tax = $this->oCurrencyModel->formatUser($iMinPriceIncTax);
+                $product->price->user_formatted->price_string_ex_tax  = $this->oCurrencyModel->formatUser($iMinPriceExTax);
 
-                if ($product->price->user->max_sale_price == $product->price->user->min_sale_price) {
+            } else {
 
-                    $product->price->user_formatted->sale_price_string = $product->price->user_formatted->min_sale_price;
-
-                } else {
-
-                    $product->price->user_formatted->sale_price_string = 'From ' . $product->price->user_formatted->min_sale_price;
-                }
+                $product->price->user_formatted->price_string_inc_tax = 'From ' . $this->oCurrencyModel->formatUser($iMinPriceIncTax);
+                $product->price->user_formatted->price_string_ex_tax  = 'From ' . $this->oCurrencyModel->formatUser($iMinPriceExTax);
             }
         }
-
-        // --------------------------------------------------------------------------
 
         return $products;
     }
@@ -1614,14 +1362,14 @@ class NAILS_Shop_product_model extends Base
      * @param  array $data An array of mutation options
      * @return mixed       false on failre, stdClass on success
      */
-    public function get_by_id($id, $data = array())
+    public function getById($id, $data = array())
     {
         if (!isset($data['include_inactive'])) {
 
             $data['include_inactive'] = true;
         }
 
-        return parent::get_by_id($id, $data);
+        return parent::getById($id, $data);
     }
 
     // --------------------------------------------------------------------------
@@ -1632,14 +1380,14 @@ class NAILS_Shop_product_model extends Base
      * @param  array $data An array of mutation options
      * @return array
      */
-    public function get_by_ids($ids, $data = array())
+    public function getByIds($ids, $data = array())
     {
         if (!isset($data['include_inactive'])) {
 
             $data['include_inactive'] = true;
         }
 
-        return parent::get_by_ids($ids, $data);
+        return parent::getByIds($ids, $data);
     }
 
     // --------------------------------------------------------------------------
@@ -1650,14 +1398,14 @@ class NAILS_Shop_product_model extends Base
      * @param  array  $data An array of mutation options
      * @return mixed        false on failre, stdClass on success
      */
-    public function get_by_slug($slug, $data = array())
+    public function getBySlug($slug, $data = array())
     {
         if (!isset($data['include_inactive'])) {
 
             $data['include_inactive'] = true;
         }
 
-        return parent::get_by_slug($slug, $data);
+        return parent::getBySlug($slug, $data);
     }
 
     // --------------------------------------------------------------------------
@@ -1668,14 +1416,14 @@ class NAILS_Shop_product_model extends Base
      * @param  array $data An array of mutation options
      * @return array
      */
-    public function get_by_slugs($slugs, $data = array())
+    public function getBySlugs($slugs, $data = array())
     {
         if (!isset($data['include_inactive'])) {
 
             $data['include_inactive'] = true;
         }
 
-        return parent::get_by_slugs($slugs, $data);
+        return parent::getBySlugs($slugs, $data);
     }
 
     // --------------------------------------------------------------------------
@@ -1694,7 +1442,7 @@ class NAILS_Shop_product_model extends Base
 
         if ($variant) {
 
-            return $this->get_by_id($variant->product_id);
+            return $this->getById($variant->product_id);
 
         } else {
 
@@ -1721,7 +1469,7 @@ class NAILS_Shop_product_model extends Base
                 $ids[] = $item->related_id;
             }
 
-            return $this->get_by_ids($ids);
+            return $this->getByIds($ids);
         }
     }
 
@@ -1731,14 +1479,13 @@ class NAILS_Shop_product_model extends Base
      * This method applies the conditionals which are common across the get_*()
      * methods and the count() method.
      * @param  string $data    Data passed from the calling method
-     * @param  string $_caller The name of the calling method
      * @return void
      */
-    protected function _getcount_common($data = array(), $_caller = null)
+    protected function getCountCommon($data = array())
     {
         /**
          * If we're sorting on price or recently added then some magic needs to happen ahead
-         * of calling _getcount_common();
+         * of calling getCountCommon();
          */
 
         $customSortStrings   = array();
@@ -1754,19 +1501,7 @@ class NAILS_Shop_product_model extends Base
 
         // --------------------------------------------------------------------------
 
-        parent::_getcount_common($data, $_caller);
-
-        // --------------------------------------------------------------------------
-
-        /**
-         * Don't do anything if the caller is getAllProductVariationFlat(), it
-         * will handle everything itself
-         */
-
-        if ($_caller == 'GET_ALL_PRODUCT_VARIATION_FLAT') {
-
-            return;
-        }
+        parent::getCountCommon($data);
 
         // --------------------------------------------------------------------------
 
@@ -2085,7 +1820,10 @@ class NAILS_Shop_product_model extends Base
                 $valuesClean = array_map(array($this->db, 'escape'), $valuesClean);
                 $valuesClean = implode(',', $valuesClean);
 
-                $this->db->join($this->table_variation_product_type_meta . ' spvptm' . $meta_field_id , 'spvptm' . $meta_field_id . '.variation_id = spv.id AND spvptm' . $meta_field_id . '.meta_field_id = \'' . $meta_field_id . '\' AND spvptm' . $meta_field_id . '.value IN (' . $valuesClean . ')');
+                $this->db->join(
+                    $this->table_variation_product_type_meta . ' spvptm' . $meta_field_id,
+                    'spvptm' . $meta_field_id . '.variation_id = spv.id AND spvptm' . $meta_field_id . '.meta_field_id = \'' . $meta_field_id . '\' AND spvptm' . $meta_field_id . '.value IN (' . $valuesClean . ')'
+                );
             }
 
             $this->db->group_by($this->tablePrefix . '.id');
@@ -2099,14 +1837,14 @@ class NAILS_Shop_product_model extends Base
      * @param  integer $brandId        The ID of the brand
      * @param  integer $page           The page number of the results, if null then no pagination
      * @param  integer $perPage        How many items per page of paginated results
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return array
      */
     public function getForBrand($brandId, $page = null, $perPage = null, $data = array(), $includeDeleted = false)
     {
         $data['brand_id'] = $brandId;
-        return $this->get_all($page, $perPage, $data, $includeDeleted, 'GET_FOR_BRAND');
+        return $this->getAll($page, $perPage, $data, $includeDeleted, 'GET_FOR_BRAND');
     }
 
     // --------------------------------------------------------------------------
@@ -2114,14 +1852,14 @@ class NAILS_Shop_product_model extends Base
     /**
      * Counts all products which feature a particular brand
      * @param  integer $brandId        The ID of the brand
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return integer
      */
     public function countForBrand($brandId, $data = array(), $includeDeleted = false)
     {
         $data['brand_id'] = $brandId;
-        return $this->count_all($data, $includeDeleted, 'COUNT_FOR_BRAND');
+        return $this->countAll($data, $includeDeleted, 'COUNT_FOR_BRAND');
     }
 
     // --------------------------------------------------------------------------
@@ -2131,14 +1869,14 @@ class NAILS_Shop_product_model extends Base
      * @param  integer $supplierId     The ID of the supplier
      * @param  integer $page           The page number of the results, if null then no pagination
      * @param  integer $perPage        How many items per page of paginated results
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return array
      */
     public function getForSupplier($supplierId, $page = null, $perPage = null, $data = array(), $includeDeleted = false)
     {
         $data['supplier_id'] = $supplierId;
-        return $this->get_all($page, $perPage, $data, $includeDeleted, 'GET_FOR_SUPPLIER');
+        return $this->getAll($page, $perPage, $data, $includeDeleted, 'GET_FOR_SUPPLIER');
     }
 
     // --------------------------------------------------------------------------
@@ -2146,14 +1884,14 @@ class NAILS_Shop_product_model extends Base
     /**
      * Counts all products which feature a particular supplier
      * @param  integer $supplierId     The ID of the supplier
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return integer
      */
     public function countForSupplier($supplierId, $data = array(), $includeDeleted = false)
     {
         $data['supplier_id'] = $supplierId;
-        return $this->count_all($data, $includeDeleted, 'COUNT_FOR_SUPPLIER');
+        return $this->countAll($data, $includeDeleted, 'COUNT_FOR_SUPPLIER');
     }
 
     // --------------------------------------------------------------------------
@@ -2163,7 +1901,7 @@ class NAILS_Shop_product_model extends Base
      * @param  integer $categoryId     The ID of the category
      * @param  integer $page           The page number of the results, if null then no pagination
      * @param  integer $perPage        How many items per page of paginated results
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return array
      */
@@ -2172,7 +1910,7 @@ class NAILS_Shop_product_model extends Base
         //  Fetch this category's children also
         $this->load->model('shop/shop_category_model');
         $data['category_id'] = array_merge(array($categoryId), $this->shop_category_model->getIdsOfChildren($categoryId));
-        return $this->get_all($page, $perPage, $data, $includeDeleted, 'GET_FOR_CATEGORY');
+        return $this->getAll($page, $perPage, $data, $includeDeleted, 'GET_FOR_CATEGORY');
     }
 
     // --------------------------------------------------------------------------
@@ -2180,7 +1918,7 @@ class NAILS_Shop_product_model extends Base
     /**
      * Counts all products which feature a particular category
      * @param  integer $categoryId     The ID of the category
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return integer
      */
@@ -2189,7 +1927,7 @@ class NAILS_Shop_product_model extends Base
         //  Fetch this category's children also
         $this->load->model('shop/shop_category_model');
         $data['category_id'] = array_merge(array($categoryId), $this->shop_category_model->getIdsOfChildren($categoryId));
-        return $this->count_all($data, $includeDeleted, 'COUNT_FOR_CATEGORY');
+        return $this->countAll($data, $includeDeleted, 'COUNT_FOR_CATEGORY');
     }
 
     // --------------------------------------------------------------------------
@@ -2199,14 +1937,14 @@ class NAILS_Shop_product_model extends Base
      * @param  integer $collectionId   The ID of the collection
      * @param  integer $page           The page number of the results, if null then no pagination
      * @param  integer $perPage        How many items per page of paginated results
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return array
      */
     public function getForCollection($collectionId, $page = null, $perPage = null, $data = array(), $includeDeleted = false)
     {
         $data['collection_id'] = $collectionId;
-        return $this->get_all($page, $perPage, $data, $includeDeleted, 'GET_FOR_COLLECTION');
+        return $this->getAll($page, $perPage, $data, $includeDeleted, 'GET_FOR_COLLECTION');
     }
 
     // --------------------------------------------------------------------------
@@ -2214,14 +1952,14 @@ class NAILS_Shop_product_model extends Base
     /**
      * Counts all products which feature a particular collection
      * @param  integer  $collectionId   The ID of the collection
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return integer
      */
     public function countForCollection($collectionId, $data = array(), $includeDeleted = false)
     {
         $data['collection_id'] = $collectionId;
-        return $this->count_all($data, $includeDeleted, 'COUNT_FOR_COLLECTION');
+        return $this->countAll($data, $includeDeleted, 'COUNT_FOR_COLLECTION');
     }
 
     // --------------------------------------------------------------------------
@@ -2231,14 +1969,14 @@ class NAILS_Shop_product_model extends Base
      * @param  integer $rangeId        The ID of the range
      * @param  integer $page           The page number of the results, if null then no pagination
      * @param  integer $perPage        How many items per page of paginated results
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return array
      */
     public function getForRange($rangeId, $page = null, $perPage = null, $data = array(), $includeDeleted = false)
     {
         $data['range_id'] = $rangeId;
-        return $this->get_all($page, $perPage, $data, $includeDeleted, 'GET_FOR_RANGE');
+        return $this->getAll($page, $perPage, $data, $includeDeleted, 'GET_FOR_RANGE');
     }
 
     // --------------------------------------------------------------------------
@@ -2246,14 +1984,14 @@ class NAILS_Shop_product_model extends Base
     /**
      * Counts all products which feature a particular range
      * @param  integer $rangeId        The ID of the range
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return integer
      */
     public function countForRange($rangeId, $data = array(), $includeDeleted = false)
     {
         $data['range_id'] = $rangeId;
-        return $this->count_all($data, $includeDeleted, 'COUNT_FOR_RANGE');
+        return $this->countAll($data, $includeDeleted, 'COUNT_FOR_RANGE');
     }
 
     // --------------------------------------------------------------------------
@@ -2263,14 +2001,14 @@ class NAILS_Shop_product_model extends Base
      * @param  integer $saleId         The ID of the sale
      * @param  integer $page           The page number of the results, if null then no pagination
      * @param  integer $perPage        How many items per page of paginated results
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return array
      */
     public function getForSale($saleId, $page = null, $perPage = null, $data = array(), $includeDeleted = false)
     {
         $data['sale_id'] = $saleId;
-        return $this->get_all($page, $perPage, $data, $includeDeleted, 'GET_FOR_SALE');
+        return $this->getAll($page, $perPage, $data, $includeDeleted, 'GET_FOR_SALE');
     }
 
     // --------------------------------------------------------------------------
@@ -2278,14 +2016,14 @@ class NAILS_Shop_product_model extends Base
     /**
      * Counts all products which feature a particular sale
      * @param  integer $saleId         The ID of the sale
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return integer
      */
     public function countForSale($saleId, $data = array(), $includeDeleted = false)
     {
         $data['sale_id'] = $saleId;
-        return $this->count_all($data, $includeDeleted, 'COUNT_FOR_SALE');
+        return $this->countAll($data, $includeDeleted, 'COUNT_FOR_SALE');
     }
 
     // --------------------------------------------------------------------------
@@ -2295,14 +2033,14 @@ class NAILS_Shop_product_model extends Base
      * @param  integer $tagId          The ID of the tag
      * @param  integer $page           The page number of the results, if null then no pagination
      * @param  integer $perPage        How many items per page of paginated results
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return array
      */
     public function getForTag($tagId, $page = null, $perPage = null, $data = array(), $includeDeleted = false)
     {
         $data['tag_id'] = $tagId;
-        return $this->get_all($page, $perPage, $data, $includeDeleted, 'GET_FOR_TAG');
+        return $this->getAll($page, $perPage, $data, $includeDeleted, 'GET_FOR_TAG');
     }
 
     // --------------------------------------------------------------------------
@@ -2310,14 +2048,14 @@ class NAILS_Shop_product_model extends Base
     /**
      * Counts all products which feature a particular tag
      * @param  integer $tagId          The ID of the tag
-     * @param  array   $data           Any data to pass to _getcount_common()
+     * @param  array   $data           Any data to pass to getCountCommon()
      * @param  boolean $includeDeleted If non-destructive delete is enabled then this flag allows you to include deleted items
      * @return integer
      */
     public function countForTag($tagId, $data = array(), $includeDeleted = false)
     {
         $data['tag_id'] = $tagId;
-        return $this->count_all($data, $includeDeleted, 'COUNT_FOR_TAG');
+        return $this->countAll($data, $includeDeleted, 'COUNT_FOR_TAG');
     }
 
     // --------------------------------------------------------------------------
@@ -2327,7 +2065,7 @@ class NAILS_Shop_product_model extends Base
      * @param  string $slug The product's slug
      * @return string       The product's URL
      */
-    public function format_url($slug)
+    public function formatUrl($slug)
     {
         return site_url($this->shopUrl . 'product/' . $slug);
     }
@@ -2369,7 +2107,7 @@ class NAILS_Shop_product_model extends Base
         unset($product->tax_rate_rate);
 
         //  URL
-        $product->url = $this->format_url($product->slug);
+        $product->url = $this->formatUrl($product->slug);
     }
 
     // --------------------------------------------------------------------------
@@ -2513,7 +2251,7 @@ class NAILS_Shop_product_model extends Base
     public function getRecentlyViewed()
     {
         //  Session
-        $recentlyViewed = $this->session->userdata('shop_recently_viewed');
+        $recentlyViewed = $this->session->userdata('shop_recently_viewed') ?: array();
 
         // --------------------------------------------------------------------------
 
@@ -2546,7 +2284,7 @@ class NAILS_Shop_product_model extends Base
     {
         if (!$this->table) {
 
-            show_error(get_called_class() . '::count_all() Table variable not set');
+            show_error(get_called_class() . '::countAll() Table variable not set');
 
         } else {
 
@@ -2569,7 +2307,7 @@ class NAILS_Shop_product_model extends Base
         //  Fetch the products in the result set
         $data['_do_not_select']  = true;
         $data['_ignore_filters'] = true;
-        $this->_getcount_common($data, 'GET_FILTERS_FOR_PRODUCTS');
+        $this->getCountCommon($data, 'GET_FILTERS_FOR_PRODUCTS');
         $this->db->select('p.id, p.type_id');
         $productIdsRaw  = $this->db->get($table)->result();
         $productIds     = array();
@@ -2836,8 +2574,7 @@ class NAILS_Shop_product_model extends Base
 
             foreach ($variation->price_raw as $price) {
 
-                $price->price      = (int) $price->price;
-                $price->sale_price = (int) $price->sale_price;
+                $price->price = (int) $price->price;
             }
         }
 

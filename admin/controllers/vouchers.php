@@ -12,11 +12,17 @@
 
 namespace Nails\Admin\Shop;
 
+use Nails\Factory;
 use Nails\Admin\Helper;
 use Nails\Shop\Controller\BaseAdmin;
 
 class Vouchers extends BaseAdmin
 {
+    protected $oVoucherModel;
+    protected $aVoucherTypes;
+
+    // --------------------------------------------------------------------------
+
     /**
      * Announces this controller's navGroups
      * @return stdClass
@@ -25,9 +31,11 @@ class Vouchers extends BaseAdmin
     {
         if (userHasPermission('admin:shop:vouchers:manage')) {
 
-            $navGroup = new \Nails\Admin\Nav('Shop', 'fa-shopping-cart');
-            $navGroup->addAction('Manage Vouchers');
-            return $navGroup;
+            $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
+            $oNavGroup->setLabel('Shop');
+            $oNavGroup->setIcon('fa-shopping-cart');
+            $oNavGroup->addAction('Manage Vouchers');
+            return $oNavGroup;
         }
     }
 
@@ -37,7 +45,7 @@ class Vouchers extends BaseAdmin
      * Returns an array of extra permissions for this controller
      * @return array
      */
-    static function permissions()
+    public static function permissions()
     {
         $permissions = parent::permissions();
 
@@ -58,7 +66,8 @@ class Vouchers extends BaseAdmin
     {
         parent::__construct();
         $this->load->model('shop/shop_model');
-        $this->load->model('shop/shop_voucher_model');
+        $this->oVoucherModel = Factory::model('Voucher', 'nailsapp/module-shop');
+        $this->aVoucherTypes = $this->oVoucherModel->getTypes();
 
         // --------------------------------------------------------------------------
 
@@ -87,11 +96,12 @@ class Vouchers extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Set method info
-        $this->data['page']->title = 'Manage Vouchers';
+        $this->data['page']->title  = 'Manage Vouchers';
+        $this->data['voucherTypes'] = $this->aVoucherTypes;
 
         // --------------------------------------------------------------------------
 
-        $tablePrefix = $this->shop_voucher_model->getTablePrefix();
+        $tablePrefix = $this->oVoucherModel->getTablePrefix();
 
         // --------------------------------------------------------------------------
 
@@ -115,15 +125,15 @@ class Vouchers extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Filter columns
+        $aTypeFilter = array();
+        foreach ($this->data['voucherTypes'] as $sValue => $sLabel) {
+            $aTypeFilter[] = array($sLabel, $sValue);
+        }
         $filters   = array();
         $filters[] = Helper::searchFilterObject(
             $tablePrefix . '.type',
             'View only',
-            array(
-                array('Normal', 'NORMAL'),
-                array('Limited Use', 'LIMITED_USE'),
-                array('Gift Card', 'GIFT_CARD')
-           )
+            $aTypeFilter
         );
 
         // --------------------------------------------------------------------------
@@ -140,8 +150,8 @@ class Vouchers extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Get the items for the page
-        $totalRows              = $this->shop_voucher_model->count_all($data);
-        $this->data['vouchers'] = $this->shop_voucher_model->get_all($page, $perPage, $data);
+        $totalRows              = $this->oVoucherModel->countAll($data);
+        $this->data['vouchers'] = $this->oVoucherModel->getAll($page, $perPage, $data);
 
         //  Set Search and Pagination objects for the view
         $this->data['search']     = Helper::searchObject(true, $sortColumns, $sortOn, $sortOrder, $perPage, $keywords, $filters);
@@ -153,6 +163,13 @@ class Vouchers extends BaseAdmin
 
             Helper::addHeaderButton('admin/shop/vouchers/create', 'Create Voucher');
         }
+
+        // --------------------------------------------------------------------------
+
+        //  Load assets
+        $this->asset->library('ZEROCLIPBOARD');
+        $this->asset->load('nails.admin.shop.vouchers.min.js', 'NAILS');
+        $this->asset->inline('voucher = new NAILS_Admin_Shop_Vouchers();', 'JS');
 
         // --------------------------------------------------------------------------
 
@@ -175,34 +192,39 @@ class Vouchers extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
+        $this->load->model('shop/shop_product_model');
+        $this->load->model('shop/shop_product_type_model');
+
+        // --------------------------------------------------------------------------
+
         if ($this->input->post()) {
 
-            $this->load->library('form_validation');
+            $oFormValidation = Factory::service('FormValidation');
 
             //  Common
-            $this->form_validation->set_rules('type', '', 'required|callback__callback_voucher_valid_type');
-            $this->form_validation->set_rules('code', '', 'required|is_unique[' . NAILS_DB_PREFIX . 'shop_voucher.code]|callback__callback_voucher_valid_code');
-            $this->form_validation->set_rules('label', '', 'required');
-            $this->form_validation->set_rules('valid_from', '', 'required|callback__callback_voucher_valid_from');
-            $this->form_validation->set_rules('valid_to', '', 'callback__callback_voucher_valid_to');
+            $oFormValidation->set_rules('type', '', 'required|callback_callbackVoucherValidType');
+            $oFormValidation->set_rules('code', '', 'required|is_unique[' . NAILS_DB_PREFIX . 'shop_voucher.code]|callback_callbackVoucherValidCode');
+            $oFormValidation->set_rules('label', '', 'required');
+            $oFormValidation->set_rules('valid_from', '', 'required|callback_callbackVoucherValidFrom');
+            $oFormValidation->set_rules('valid_to', '', 'callback_callbackVoucherValidTo');
 
             //  Voucher Type specific rules
             switch ($this->input->post('type')) {
 
                 case 'LIMITED_USE':
 
-                    $this->form_validation->set_rules('limited_use_limit', '', 'required|is_natural_no_zero');
-                    $this->form_validation->set_rules('discount_type', '', 'required|callback__callback_voucher_valid_discount_type');
-                    $this->form_validation->set_rules('discount_application', '', 'required|callback__callback_voucher_valid_discount_application');
+                    $oFormValidation->set_rules('limited_use_limit', '', 'required|is_natural_no_zero');
+                    $oFormValidation->set_rules('discount_type', '', 'required|callback_callbackVoucherValidDiscountType');
+                    $oFormValidation->set_rules('discount_application', '', 'required|callback_callbackVoucherValidDiscountApplication');
 
-                    $this->form_validation->set_message('is_natural_no_zero', 'Only positive integers are valid.');
+                    $oFormValidation->set_message('is_natural_no_zero', 'Only positive integers are valid.');
                     break;
 
                 case 'NORMAL':
                 default:
 
-                    $this->form_validation->set_rules('discount_type', '', 'required|callback__callback_voucher_valid_discount_type');
-                    $this->form_validation->set_rules('discount_application', '', 'required|callback__callback_voucher_valid_discount_application');
+                    $oFormValidation->set_rules('discount_type', '', 'required|callback_callbackVoucherValidDiscountType');
+                    $oFormValidation->set_rules('discount_application', '', 'required|callback_callbackVoucherValidDiscountApplication');
                     break;
 
                 case 'GIFT_CARD':
@@ -218,18 +240,16 @@ class Vouchers extends BaseAdmin
 
                 case 'PERCENTAGE':
 
-                    $this->form_validation->set_rules('discount_value', '', 'required|is_natural_no_zero|greater_than[0]|less_than[101]');
-
-                    $this->form_validation->set_message('is_natural_no_zero', 'Only positive integers are valid.');
-                    $this->form_validation->set_message('greater_than', 'Must be in the range 1-100');
-                    $this->form_validation->set_message('less_than', 'Must be in the range 1-100');
+                    $oFormValidation->set_rules('discount_value', '', 'required|is_natural_no_zero|greater_than[0]|less_than[101]');
+                    $oFormValidation->set_message('is_natural_no_zero', 'Only positive integers are valid.');
+                    $oFormValidation->set_message('greater_than', 'Must be in the range 1-100');
+                    $oFormValidation->set_message('less_than', 'Must be in the range 1-100');
                     break;
 
                 case 'AMOUNT':
 
-                    $this->form_validation->set_rules('discount_value', '', 'required|numeric|greater_than[0]');
-
-                    $this->form_validation->set_message('greater_than', 'Must be greater than 0');
+                    $oFormValidation->set_rules('discount_value', '', 'required|numeric|greater_than[0]');
+                    $oFormValidation->set_message('greater_than', 'Must be greater than 0');
                     break;
 
                 default:
@@ -243,9 +263,12 @@ class Vouchers extends BaseAdmin
 
                 case 'PRODUCT_TYPES':
 
-                    $this->form_validation->set_rules('product_type_id', '', 'required|callback__callback_voucher_valid_product_type');
+                    $oFormValidation->set_rules('product_type_id', '', 'required|callback_callbackVoucherValidProductType');
+                    break;
 
-                    $this->form_validation->set_message('greater_than', 'Must be greater than 0');
+                case 'PRODUCT':
+
+                    $oFormValidation->set_rules('product_id', '', 'required|callback_callbackVoucherValidProduct');
                     break;
 
                 case 'PRODUCTS':
@@ -257,10 +280,10 @@ class Vouchers extends BaseAdmin
                     break;
             }
 
-            $this->form_validation->set_message('required', lang('fv_required'));
-            $this->form_validation->set_message('is_unique', 'Code already in use.');
+            $oFormValidation->set_message('required', lang('fv_required'));
+            $oFormValidation->set_message('is_unique', 'Code already in use.');
 
-            if ($this->form_validation->run($this)) {
+            if ($oFormValidation->run($this)) {
 
                 //  Prepare the $data variable
                 $data = array();
@@ -292,6 +315,11 @@ class Vouchers extends BaseAdmin
                     $data['limited_use_limit'] = $this->input->post('limited_use_limit');
                 }
 
+                if ($this->input->post('discount_application') == 'PRODUCT') {
+
+                    $data['product_id'] = $this->input->post('product_id');
+                }
+
                 if ($this->input->post('discount_application') == 'PRODUCT_TYPES') {
 
                     $data['product_type_id'] = $this->input->post('product_type_id');
@@ -300,7 +328,7 @@ class Vouchers extends BaseAdmin
                 // --------------------------------------------------------------------------
 
                 //  Attempt to create
-                if ($this->shop_voucher_model->create($data)) {
+                if ($this->oVoucherModel->create($data)) {
 
                     $this->session->set_flashdata('success', 'Voucher "' . $data['code'] . '" was created successfully.');
                     redirect('admin/shop/vouchers');
@@ -308,7 +336,7 @@ class Vouchers extends BaseAdmin
                 } else {
 
                     $this->data['error']  = 'There was a problem creating the voucher. ';
-                    $this->Data['error'] .= $this->shop_voucher_model->last_error();
+                    $this->Data['error'] .= $this->oVoucherModel->lastError();
                 }
 
             } else {
@@ -319,19 +347,19 @@ class Vouchers extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->data['page']->title = 'Create Voucher';
+        $this->data['page']->title  = 'Create Voucher';
+        $this->data['voucherTypes'] = $this->aVoucherTypes;
 
         // --------------------------------------------------------------------------
 
         //  Fetch data
-        $this->load->model('shop/shop_product_type_model');
-        $this->data['product_types'] = $this->shop_product_type_model->get_all_flat();
+        $this->data['product_types'] = $this->shop_product_type_model->getAllFlat();
 
         // --------------------------------------------------------------------------
 
         //  Load assets
-        $this->asset->load('nails.admin.shop.vouchers.min.js', 'NAILS');
-        $this->asset->inline('voucher = new NAILS_Admin_Shop_Vouchers_Edit();', 'JS');
+        $this->asset->load('nails.admin.shop.vouchers.createEdit.min.js', 'NAILS');
+        $this->asset->inline('voucher = new NAILS_Admin_Shop_Vouchers_CreateEdit();', 'JS');
 
         // --------------------------------------------------------------------------
 
@@ -356,7 +384,7 @@ class Vouchers extends BaseAdmin
 
             $id = $this->uri->segment(5);
 
-            if ($this->shop_voucher_model->activate($id)) {
+            if ($this->oVoucherModel->activate($id)) {
 
                 $status  = 'success';
                 $message = 'Voucher was activated successfully.';
@@ -365,7 +393,7 @@ class Vouchers extends BaseAdmin
 
                 $status   = 'error';
                 $message  = 'There was a problem activating the voucher. ';
-                $message .= $this->shop_voucher_model->last_error();
+                $message .= $this->oVoucherModel->lastError();
             }
         }
 
@@ -391,7 +419,7 @@ class Vouchers extends BaseAdmin
 
             $id = $this->uri->segment(5);
 
-            if ($this->shop_voucher_model->suspend($id)) {
+            if ($this->oVoucherModel->suspend($id)) {
 
                 $status  = 'success';
                 $message = 'Voucher was suspended successfully.';
@@ -400,7 +428,7 @@ class Vouchers extends BaseAdmin
 
                 $status   = 'error';
                 $message  = 'There was a problem suspending the voucher. ';
-                $message .= $this->shop_voucher_model->last_error();
+                $message .= $this->oVoucherModel->lastError();
             }
         }
 
@@ -416,13 +444,14 @@ class Vouchers extends BaseAdmin
      * @param  string &$str The voucher code
      * @return boolean
      */
-    public function _callback_voucher_valid_code(&$str)
+    public function callbackVoucherValidCode(&$str)
     {
         $str = strtoupper($str);
 
-        if  (preg_match('/[^a-zA-Z0-9]/', $str)) {
+        if (preg_match('/[^a-zA-Z0-9]/', $str)) {
 
-            $this->form_validation->set_message('_callback_voucher_valid_code', 'Invalid characters.');
+            $oFormValidation = Factory::service('FormValidation');
+            $oFormValidation->set_message('callbackVoucherValidCode', 'Invalid characters.');
             return false;
 
         } else {
@@ -438,11 +467,11 @@ class Vouchers extends BaseAdmin
      * @param  string $str The voucher type
      * @return boolean
      */
-    public function _callback_voucher_valid_type($str)
+    public function callbackVoucherValidType($str)
     {
-        $valid_types = array('NORMAL', 'LIMITED_USE', 'GIFT_CARD');
-        $this->form_validation->set_message('_callback_voucher_valid_type', 'Invalid voucher type.');
-        return array_search($str, $valid_types) !== false;
+        $oFormValidation = Factory::service('FormValidation');
+        $oFormValidation->set_message('callbackVoucherValidType', 'Invalid voucher type.');
+        return !empty($this->aVoucherTypes[$str]);
     }
 
     // --------------------------------------------------------------------------
@@ -452,11 +481,25 @@ class Vouchers extends BaseAdmin
      * @param  string $str The voucher discount type
      * @return boolean
      */
-    public function _callback_voucher_valid_discount_type($str)
+    public function callbackVoucherValidDiscountType($str)
     {
-        $valid_types = array('PERCENTAGE', 'AMOUNT');
-        $this->form_validation->set_message('_callback_voucher_valid_discount_type', 'Invalid discount type.');
+        $valid_types     = array('PERCENTAGE', 'AMOUNT');
+        $oFormValidation = Factory::service('FormValidation');
+        $oFormValidation->set_message('callbackVoucherValidDiscountType', 'Invalid discount type.');
         return array_search($str, $valid_types) !== false;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Form Validation: Validate a voucher's discount application
+     * @todo: complete this, I'm sure it used to be here
+     * @param  string $str The voucher discount type
+     * @return boolean
+     */
+    public function callbackVoucherValidDiscountApplication($str)
+    {
+        return true;
     }
 
     // --------------------------------------------------------------------------
@@ -466,10 +509,25 @@ class Vouchers extends BaseAdmin
      * @param  string $str The voucher product type
      * @return boolean
      */
-    public function _callback_voucher_valid_product_type($str)
+    public function callbackVoucherValidProductType($str)
     {
-        $this->form_validation->set_message('_callback_voucher_valid_product_type', 'Invalid product type.');
-        return (bool) $this->shop_product_type_model->get_by_id($str);
+        $oFormValidation = Factory::service('FormValidation');
+        $oFormValidation->set_message('callbackVoucherValidProductType', 'Invalid product type.');
+        return (bool) $this->shop_product_type_model->getById($str);
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Form Validation: Validate a voucher's product ID
+     * @param  string $str The voucher product ID
+     * @return boolean
+     */
+    public function callbackVoucherValidProduct($str)
+    {
+        $oFormValidation = Factory::service('FormValidation');
+        $oFormValidation->set_message('callbackVoucherValidProduct', 'Invalid product.');
+        return (bool) $this->shop_product_model->getById($str);
     }
 
     // --------------------------------------------------------------------------
@@ -479,8 +537,10 @@ class Vouchers extends BaseAdmin
      * @param  string $str The voucher from date
      * @return boolean
      */
-    public function _callback_voucher_valid_from(&$str)
+    public function callbackVoucherValidFrom(&$str)
     {
+        $oFormValidation = Factory::service('FormValidation');
+
         //  Check $str is a valid date
         $date = date('Y-m-d H:i:s', strtotime($str));
 
@@ -493,7 +553,7 @@ class Vouchers extends BaseAdmin
 
         if ($date != $str) {
 
-            $this->form_validation->set_message('_callback_voucher_valid_from', 'Invalid date.');
+            $oFormValidation->set_message('callbackVoucherValidFrom', 'Invalid date.');
             return false;
         }
 
@@ -504,7 +564,7 @@ class Vouchers extends BaseAdmin
 
             if (strtotime($str) >= $date) {
 
-                $this->form_validation->set_message('_callback_voucher_valid_from', 'Valid From date cannot be after Valid To date.');
+                $oFormValidation->set_message('callbackVoucherValidFrom', 'Valid From date cannot be after Valid To date.');
                 return false;
             }
         }
@@ -519,13 +579,16 @@ class Vouchers extends BaseAdmin
      * @param  string $str The voucher to date
      * @return boolean
      */
-    public function _callback_voucher_valid_to(&$str)
+    public function callbackVoucherValidTo(&$str)
     {
         //  If empty ignore
-        if (!$str)
+        if (!$str) {
             return true;
+        }
 
         // --------------------------------------------------------------------------
+
+        $oFormValidation = Factory::service('FormValidation');
 
         //  Check $str is a valid date
         $date = date('Y-m-d H:i:s', strtotime($str));
@@ -539,7 +602,7 @@ class Vouchers extends BaseAdmin
 
         if ($date != $str) {
 
-            $this->form_validation->set_message('_callback_voucher_valid_to', 'Invalid date.');
+            $oFormValidation->set_message('callbackVoucherValidTo', 'Invalid date.');
             return false;
         }
 
@@ -548,7 +611,7 @@ class Vouchers extends BaseAdmin
 
         if (strtotime($str) <= $date) {
 
-            $this->form_validation->set_message('_callback_voucher_valid_to', 'Valid To date cannot be before Valid To date.');
+            $oFormValidation->set_message('callbackVoucherValidTo', 'Valid To date cannot be before Valid To date.');
             return false;
         }
 

@@ -6,8 +6,8 @@
     </p>
     <?php
 
-        echo \Nails\Admin\Helper::loadSearch($search);
-        echo \Nails\Admin\Helper::loadPagination($pagination);
+        echo adminHelper('loadSearch', $search);
+        echo adminHelper('loadPagination', $pagination);
 
     ?>
     <div class="table-responsive">
@@ -42,7 +42,7 @@
                                     echo '</span>';
                                 }
                             echo '</td>';
-                            echo \Nails\Admin\Helper::loadDatetimeCell($field->modified);
+                            echo adminHelper('loadDatetimeCell', $field->modified);
                             echo '<td class="actions">';
 
                                 if (userHasPermission('admin:shop:manage:productTypeMeta:edit')) {
@@ -83,7 +83,7 @@
     </div>
     <?php
 
-        echo \Nails\Admin\Helper::loadPagination($pagination);
+        echo adminHelper('loadPagination', $pagination);
 
     ?>
 </div>

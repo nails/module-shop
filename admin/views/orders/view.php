@@ -16,8 +16,8 @@
     data-delivery-type="<?=$order->delivery_type?>"
     data-num-collect-items="<?=$numCollectItems?>"
 >
-    <div class="col-3-container">
-        <div class="col-3">
+    <div class="row col-3-container">
+        <div class="col-md-4">
             <fieldset>
                 <legend>Order Details</legend>
                 <div class="table-responsive">
@@ -33,11 +33,11 @@
                             </tr>
                             <tr>
                                 <td class="label">Created</td>
-                                <?php echo \Nails\Admin\Helper::loadDatetimeCell($order->created); ?>
+                                <?php echo adminHelper('loadDatetimeCell', $order->created); ?>
                             </tr>
                             <tr>
                                 <td class="label">Modified</td>
-                                <?php echo \Nails\Admin\Helper::loadDatetimeCell($order->modified); ?>
+                                <?php echo adminHelper('loadDatetimeCell', $order->modified); ?>
                             </tr>
                             <tr>
                                 <td class="label">Voucher</td>
@@ -50,8 +50,9 @@
 
                                     } else {
 
-                                        //  @todo: Show voucher details
-                                        echo 'TODO: voucher display';
+
+                                        echo $order->voucher->label;
+                                        echo '<small>' . $order->voucher->code . '</small>';
                                     }
 
                                 ?>
@@ -109,6 +110,92 @@
                                 </td>
                             </tr>
                             <tr>
+                                <td class="label">Discounts</td>
+                                <td class="value" style="padding: 0;">
+                                    <table>
+                                        <tr>
+                                            <td style="width: 80px;">Items</td>
+                                            <td>
+                                                <?php
+
+                                                echo $order->totals->base_formatted->item_discount;
+
+                                                if ($order->currency != $order->base_currency) {
+                                                    echo '<small>';
+                                                    echo 'User checked out in ' . $order->currency . ': ';
+                                                    echo $order->totals->user_formatted->item_discount;
+                                                    echo '</small>';
+                                                }
+
+                                                ?>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width: 80px;">Tax</td>
+                                            <td>
+                                                <?php
+
+                                                echo $order->totals->base_formatted->tax_discount;
+
+                                                if ($order->currency != $order->base_currency) {
+                                                    echo '<small>';
+                                                    echo 'User checked out in ' . $order->currency . ': ';
+                                                    echo $order->totals->user_formatted->tax_discount;
+                                                    echo '</small>';
+                                                }
+
+                                                ?>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width: 80px;">Shipping</td>
+                                            <td>
+                                                <?php
+
+                                                echo $order->totals->base_formatted->shipping_discount;
+
+                                                if ($order->currency != $order->base_currency) {
+                                                    echo '<small>';
+                                                    echo 'User checked out in ' . $order->currency . ': ';
+                                                    echo $order->totals->user_formatted->shipping_discount;
+                                                    echo '</small>';
+                                                }
+
+                                                ?>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width: 80px;">Total</td>
+                                            <td>
+                                                <?php
+
+                                                echo $order->totals->base_formatted->grand_discount;
+
+                                                if ($order->currency != $order->base_currency) {
+                                                    echo '<small>';
+                                                    echo 'User checked out in ' . $order->currency . ': ';
+                                                    echo $order->totals->user_formatted->grand_discount;
+                                                    echo '</small>';
+                                                }
+
+                                                ?>
+                                            </td>
+                                        </tr>
+
+                                    <?php
+
+                                        // if ($order->currency != $order->base_currency) {
+
+                                        //     echo '<small>';
+                                        //         echo 'User checked out in ' . $order->currency . ': ' . $order->totals->user_formatted->grand_discount;
+                                        //     echo '</small>';
+                                        // }
+
+                                    ?>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
                                 <td class="label">Total</td>
                                 <td class="value">
                                 <?php
@@ -148,7 +235,7 @@
                 </div>
             </fieldset>
         </div>
-        <div class="col-3">
+        <div class="col-md-4">
             <fieldset>
                 <legend>Customer Details</legend>
                 <div class="table-responsive">
@@ -156,7 +243,7 @@
                         <tbody>
                             <tr>
                                 <td class="label">Name &amp; Email</td>
-                                <?php echo \Nails\Admin\Helper::loadUserCell($order->user); ?>
+                                <?php echo adminHelper('loadUserCell', $order->user); ?>
                             </tr>
                             <tr>
                                 <td class="label">Telephone</td>
@@ -229,7 +316,7 @@
                 </div>
             </fieldset>
         </div>
-        <div class="col-3">
+        <div class="col-md-4">
             <fieldset>
                 <legend>Order Status</legend>
                 <div class="order-status-container">
@@ -454,6 +541,8 @@
 
                     if (!empty($payments)) {
 
+                        $oCurrencyModel = nailsFactory('model', 'Currency', 'nailsapp/module-shop');
+
                         foreach ($payments as $payment) {
 
                             echo '<tr>';
@@ -464,10 +553,10 @@
                                     echo $payment->transaction_id;
                                 echo '</td>';
                                 echo '<td>';
-                                    echo $this->shop_currency_model->formatBase($payment->amount_base);
+                                    echo $oCurrencyModel->formatBase($payment->amount_base);
                                 echo '</td>';
 
-                                echo \Nails\Admin\Helper::loadDatetimeCell($payment->created);
+                                echo adminHelper('loadDatetimeCell', $payment->created);
 
                             echo '</tr>';
 

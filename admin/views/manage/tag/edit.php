@@ -95,4 +95,4 @@
 </div>
 <?php
 
-    echo \Nails\Admin\Helper::loadInlineView('utilities/footer', array('items' => $tags));
+    echo adminHelper('loadInlineView', 'utilities/footer', array('items' => $tags));

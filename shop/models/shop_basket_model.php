@@ -20,6 +20,10 @@ class NAILS_Shop_basket_model extends Base
     protected $cacheKey;
     protected $basket;
     protected $sessVar;
+    protected $iTotalItemDiscount;
+    protected $iTotalShipDiscount;
+    protected $iTotalTaxDiscount;
+    protected $iTotalDiscount;
 
     // --------------------------------------------------------------------------
 
@@ -47,7 +51,7 @@ class NAILS_Shop_basket_model extends Base
         $this->basket = $this->defaultBasket();
 
         //  Populate basket from session data?
-        $savedBasket = @unserialize($this->session->userdata($this->sessVar));
+        $savedBasket = json_decode($this->session->userdata($this->sessVar));
 
         if (empty($savedBasket) && $this->oUser->isLoggedIn()) {
 
@@ -57,45 +61,38 @@ class NAILS_Shop_basket_model extends Base
                 activeUser('id'),
                 array('basket')
             );
-            $savedBasket = @unserialize($oUserMeta->basket);
+            $savedBasket = json_decode($oUserMeta->basket);
         }
 
         if (!empty($savedBasket)) {
 
             $this->basket->items = $savedBasket->items;
 
-            if (isset($savedBasket->order)) {
-
+            if (!empty($savedBasket->order)) {
                 $this->addOrder($savedBasket->order);
             }
 
-            if (isset($savedBasket->customer_details)) {
-
+            if (!empty($savedBasket->customer_details)) {
                 $this->addCustomerDetails($savedBasket->customer_details);
             }
 
-            if (isset($savedBasket->shipping_type)) {
-
+            if (!empty($savedBasket->shipping_type)) {
                 $this->addShippingType($savedBasket->shipping_type);
             }
 
-            if (isset($savedBasket->shipping_details)) {
-
+            if (!empty($savedBasket->shipping_details)) {
                 $this->addShippingDetails($savedBasket->shipping_details);
             }
 
-            if (isset($savedBasket->payment_gateway)) {
-
+            if (!empty($savedBasket->payment_gateway)) {
                 $this->addPaymentGateway($savedBasket->payment_gateway);
             }
 
-            if (isset($savedBasket->voucher)) {
-
-                $this->addVoucher($savedBasket->voucher);
+            if (!empty($savedBasket->voucher->code)) {
+                $this->addVoucher($savedBasket->voucher->code);
             }
 
-            if (isset($savedBasket->note)) {
-
+            if (!empty($savedBasket->note)) {
                 $this->addNote($savedBasket->note);
             }
         }
@@ -103,7 +100,7 @@ class NAILS_Shop_basket_model extends Base
         // --------------------------------------------------------------------------
 
         //  Clear any startup errors
-        $this->clear_errors();
+        $this->clearErrors();
     }
 
     // --------------------------------------------------------------------------
@@ -116,11 +113,8 @@ class NAILS_Shop_basket_model extends Base
     public function get($skipCache = false)
     {
         if (!empty($skipCache)) {
-
-            $cache = $this->_get_cache($this->cacheKey);
-
+            $cache = $this->getCache($this->cacheKey);
             if (!empty($cache)) {
-
                 return $cache;
             }
         }
@@ -134,6 +128,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  First loop through all the items and fetch product information
         $this->load->model('shop/shop_product_model');
+        $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
 
         //  This variable will hold any keys which need to be unset
         $unset = array();
@@ -158,7 +153,7 @@ class NAILS_Shop_basket_model extends Base
             }
 
             //  Now get the product
-            $item->product = $this->shop_product_model->get_by_id($item->product_id);
+            $item->product = $this->shop_product_model->getById($item->product_id);
 
             if (!empty($item->product)) {
 
@@ -264,15 +259,23 @@ class NAILS_Shop_basket_model extends Base
          * doubling up
          */
 
-        $basket->totals->base->item     = 0;
-        $basket->totals->base->shipping = 0;
-        $basket->totals->base->tax      = 0;
-        $basket->totals->base->grand    = 0;
+        $basket->totals->base->item              = 0;
+        $basket->totals->base->item_discount     = 0;
+        $basket->totals->base->shipping          = 0;
+        $basket->totals->base->shipping_discount = 0;
+        $basket->totals->base->tax               = 0;
+        $basket->totals->base->tax_discount      = 0;
+        $basket->totals->base->grand             = 0;
+        $basket->totals->base->grand_discount    = 0;
 
-        $basket->totals->user->item     = 0;
-        $basket->totals->user->shipping = 0;
-        $basket->totals->user->tax      = 0;
-        $basket->totals->user->grand    = 0;
+        $basket->totals->user->item              = 0;
+        $basket->totals->user->item_discount     = 0;
+        $basket->totals->user->shipping          = 0;
+        $basket->totals->user->shipping_discount = 0;
+        $basket->totals->user->tax               = 0;
+        $basket->totals->user->tax_discount      = 0;
+        $basket->totals->user->grand             = 0;
+        $basket->totals->user->grand_discount    = 0;
 
         // --------------------------------------------------------------------------
 
@@ -305,10 +308,10 @@ class NAILS_Shop_basket_model extends Base
         if ($basket->shipping->type === 'DELIVER' || $basket->shipping->type === 'DELIVER_COLLECT') {
 
             $this->load->model('shop/shop_shipping_driver_model');
-            $_shipping_costs = $this->shop_shipping_driver_model->calculate($basket);
+            $oShippingCosts = $this->shop_shipping_driver_model->calculate($basket);
 
-            $basket->totals->base->shipping = $_shipping_costs->base;
-            $basket->totals->user->shipping = $_shipping_costs->user;
+            $basket->totals->base->shipping = $oShippingCosts->base;
+            $basket->totals->user->shipping = $oShippingCosts->user;
 
         } else {
 
@@ -318,19 +321,165 @@ class NAILS_Shop_basket_model extends Base
 
         // --------------------------------------------------------------------------
 
-        //  Apply any discounts
-        //  @todo
+        /**
+         * Apply discounts. Track the totals in a class variable so that in the case
+         * of a specific voucher the calculate methods can bail out when the voucher
+         * is maxed.
+         */
+
+        /**
+         * For each item, define a discount_item, discount_tax property, discounted_item,
+         * discounted_tax on it's base price.
+         */
+        foreach ($basket->items as $oItem) {
+
+            $oItemPrice = $oItem->variant->price->price->base;
+
+            $oItemPrice->discount_item          = 0;
+            $oItemPrice->discount_tax           = 0;
+            $oItemPrice->discount_value_inc_tax = $oItemPrice->value_inc_tax;
+            $oItemPrice->discount_value_ex_tax  = $oItemPrice->value_ex_tax;
+            $oItemPrice->discount_value_tax     = $oItemPrice->value_tax;
+        }
+
+        if (!empty($basket->voucher->id)) {
+
+            $this->iTotalItemDiscount = 0;
+            $this->iTotalShipDiscount = 0;
+            $this->iTotalTaxDiscount  = 0;
+            $this->iTotalDiscount     = 0;
+
+            //  Voucher applies to products onlt
+            if ($basket->voucher->discount_application == 'PRODUCTS') {
+
+                foreach ($basket->items as $oItem) {
+                    $this->applyDiscountToItem($oItem, $basket->voucher);
+                }
+
+            //  Voucher applies to specific item in the basket
+            } elseif ($basket->voucher->discount_application == 'PRODUCT') {
+
+                foreach ($basket->items as $oItem) {
+                    if ($oItem->product->id == $basket->voucher->product_id) {
+                        $this->applyDiscountToItem($oItem, $basket->voucher);
+                        break;
+                    }
+                }
+
+            //  Voucher applies to specific item types in the basket
+            } elseif ($basket->voucher->discount_application == 'PRODUCT_TYPES') {
+
+                foreach ($basket->items as $oItem) {
+                    if ($oItem->product->type->id == $basket->voucher->product_type_id) {
+                        $this->applyDiscountToItem($oItem, $basket->voucher);
+                    }
+                }
+
+            //  Voucher applies to shipping costs
+            } elseif ($basket->voucher->discount_application == 'SHIPPING') {
+
+                $iDiscount = $this->calculateShippingDiscount($basket->voucher, $basket);
+                $this->iTotalShipDiscount += $iDiscount;
+                $this->iTotalDiscount     += $iDiscount;
+
+            //  Voucher applies to everything, all products and shipping
+            } elseif ($basket->voucher->discount_application == 'ALL') {
+
+                foreach ($basket->items as $oItem) {
+                    $this->applyDiscountToItem($oItem, $basket->voucher);
+                }
+
+                /**
+                 * If the voucher is an AMOUNT voucher then we need to do some edits here
+                 * to avoid the entire voucher value being applied to the shipping cost
+                 * (as the two totals are tracked independently).
+                 */
+
+                if ($basket->voucher->discount_type == 'AMOUNT' && $this->iTotalDiscount < $basket->voucher->discount_value) {
+
+                    //  Store the existing value
+                    $iVoucherValue = $basket->voucher->discount_value;
+
+                    //  Temporarily reduce the voucher's worth (for the following calculation
+                    $basket->voucher->discount_value = $basket->voucher->discount_value - $this->iTotalDiscount;
+
+                    //  Perform the calculation
+                    $iDiscount = $this->calculateShippingDiscount($basket->voucher, $basket);
+                    $this->iTotalShipDiscount += $iDiscount;
+                    $this->iTotalDiscount     += $iDiscount;
+
+                    //  And reset it back to it's previous value
+                    $basket->voucher->discount_value = $iVoucherValue;
+
+                } else {
+
+                    $iDiscount = $this->calculateShippingDiscount($basket->voucher, $basket);
+                    $this->iTotalShipDiscount += $iDiscount;
+                    $this->iTotalDiscount     += $iDiscount;
+                }
+            }
+
+            //  Apply the new values
+            $basket->totals->base->item_discount     = $this->iTotalItemDiscount;
+            $basket->totals->base->shipping_discount = $this->iTotalShipDiscount;
+            $basket->totals->base->tax_discount      = $this->iTotalTaxDiscount;
+            $basket->totals->base->grand_discount    = $this->iTotalDiscount;
+
+            $basket->totals->user->item_discount     = $oCurrencyModel->convertBaseToUser($basket->totals->base->item_discount);
+            $basket->totals->user->shipping_discount = $oCurrencyModel->convertBaseToUser($basket->totals->base->shipping_discount);
+            $basket->totals->user->tax_discount      = $oCurrencyModel->convertBaseToUser($basket->totals->base->tax_discount);
+            $basket->totals->user->grand_discount    = $oCurrencyModel->convertBaseToUser($basket->totals->base->grand_discount);
+        }
+
+        /**
+         * For each item, format it's discount_item and discount_tax property and
+         * calculate the user's version
+         */
+        foreach ($basket->items as $oItem) {
+
+            $oItemPrice = $oItem->variant->price->price;
+
+            //  Convert user prices
+            $oItemPrice->user->discount_item          = $oCurrencyModel->convertBaseToUser($oItemPrice->base->discount_item);
+            $oItemPrice->user->discount_tax           = $oCurrencyModel->convertBaseToUser($oItemPrice->base->discount_tax);
+            $oItemPrice->user->discount_value_inc_tax = $oCurrencyModel->convertBaseToUser($oItemPrice->base->discount_value_inc_tax);
+            $oItemPrice->user->discount_value_ex_tax  = $oCurrencyModel->convertBaseToUser($oItemPrice->base->discount_value_ex_tax);
+            $oItemPrice->user->discount_value_tax     = $oCurrencyModel->convertBaseToUser($oItemPrice->base->discount_value_tax);
+
+            // Formatted strings
+            $oItemPrice->base_formatted->discount_item          = $oCurrencyModel->formatBase($oItemPrice->base->discount_item);
+            $oItemPrice->base_formatted->discount_tax           = $oCurrencyModel->formatBase($oItemPrice->base->discount_tax);
+            $oItemPrice->base_formatted->discount_value_inc_tax = $oCurrencyModel->formatBase($oItemPrice->base->discount_value_inc_tax);
+            $oItemPrice->base_formatted->discount_value_ex_tax  = $oCurrencyModel->formatBase($oItemPrice->base->discount_value_ex_tax);
+            $oItemPrice->base_formatted->discount_value_tax     = $oCurrencyModel->formatBase($oItemPrice->base->discount_value_tax);
+
+            $oItemPrice->user_formatted->discount_item          = $oCurrencyModel->formatUser($oItemPrice->user->discount_item);
+            $oItemPrice->user_formatted->discount_tax           = $oCurrencyModel->formatUser($oItemPrice->user->discount_tax);
+            $oItemPrice->user_formatted->discount_value_inc_tax = $oCurrencyModel->formatUser($oItemPrice->user->discount_value_inc_tax);
+            $oItemPrice->user_formatted->discount_value_ex_tax  = $oCurrencyModel->formatUser($oItemPrice->user->discount_value_ex_tax);
+            $oItemPrice->user_formatted->discount_value_tax     = $oCurrencyModel->formatUser($oItemPrice->user->discount_value_tax);
+
+            //  Place this at the top level of the ite, too
+            $oItem->price = $oItemPrice;
+        }
 
         // --------------------------------------------------------------------------
 
-        //  Calculate grand total
-        $basket->totals->base->grand = $basket->totals->base->item + $basket->totals->base->shipping + $basket->totals->base->tax;
-        $basket->totals->user->grand = $basket->totals->user->item + $basket->totals->user->shipping + $basket->totals->user->tax;
+        //  Calculate grand totals
+        $basket->totals->base->grand  = $basket->totals->base->item;
+        $basket->totals->base->grand += $basket->totals->base->shipping;
+        $basket->totals->base->grand += $basket->totals->base->tax;
+        $basket->totals->base->grand -= $basket->totals->base->grand_discount;
+
+        $basket->totals->user->grand  = $basket->totals->user->item;
+        $basket->totals->user->grand += $basket->totals->user->shipping;
+        $basket->totals->user->grand += $basket->totals->user->tax;
+        $basket->totals->user->grand -= $basket->totals->user->grand_discount;
 
         // --------------------------------------------------------------------------
 
         //  If item prices are inclusive of tax then show the items total + tax
-        if (!app_setting('price_exclude_tax', 'shop')) {
+        if (!appSetting('price_exclude_tax', 'shop')) {
 
             $basket->totals->base->item += $basket->totals->base->tax;
             $basket->totals->user->item += $basket->totals->user->tax;
@@ -339,22 +488,136 @@ class NAILS_Shop_basket_model extends Base
         // --------------------------------------------------------------------------
 
         //  Format totals
-        $basket->totals->base_formatted->item     = $this->shop_currency_model->formatBase($basket->totals->base->item);
-        $basket->totals->base_formatted->shipping = $this->shop_currency_model->formatBase($basket->totals->base->shipping);
-        $basket->totals->base_formatted->tax      = $this->shop_currency_model->formatBase($basket->totals->base->tax);
-        $basket->totals->base_formatted->grand    = $this->shop_currency_model->formatBase($basket->totals->base->grand);
+        $basket->totals->base_formatted->item              = $oCurrencyModel->formatBase($basket->totals->base->item);
+        $basket->totals->base_formatted->item_discount     = $oCurrencyModel->formatBase($basket->totals->base->item_discount);
+        $basket->totals->base_formatted->shipping          = $oCurrencyModel->formatBase($basket->totals->base->shipping);
+        $basket->totals->base_formatted->shipping_discount = $oCurrencyModel->formatBase($basket->totals->base->shipping_discount);
+        $basket->totals->base_formatted->tax               = $oCurrencyModel->formatBase($basket->totals->base->tax);
+        $basket->totals->base_formatted->tax_discount      = $oCurrencyModel->formatBase($basket->totals->base->tax_discount);
+        $basket->totals->base_formatted->grand             = $oCurrencyModel->formatBase($basket->totals->base->grand);
+        $basket->totals->base_formatted->grand_discount    = $oCurrencyModel->formatBase($basket->totals->base->grand_discount);
 
-        $basket->totals->user_formatted->item     = $this->shop_currency_model->formatUser($basket->totals->user->item);
-        $basket->totals->user_formatted->shipping = $this->shop_currency_model->formatUser($basket->totals->user->shipping);
-        $basket->totals->user_formatted->tax      = $this->shop_currency_model->formatUser($basket->totals->user->tax);
-        $basket->totals->user_formatted->grand    = $this->shop_currency_model->formatUser($basket->totals->user->grand);
+        $basket->totals->user_formatted->item              = $oCurrencyModel->formatUser($basket->totals->user->item);
+        $basket->totals->user_formatted->item_discount     = $oCurrencyModel->formatUser($basket->totals->user->item_discount);
+        $basket->totals->user_formatted->shipping          = $oCurrencyModel->formatUser($basket->totals->user->shipping);
+        $basket->totals->user_formatted->shipping_discount = $oCurrencyModel->formatUser($basket->totals->user->shipping_discount);
+        $basket->totals->user_formatted->tax               = $oCurrencyModel->formatUser($basket->totals->user->tax);
+        $basket->totals->user_formatted->tax_discount      = $oCurrencyModel->formatUser($basket->totals->user->tax_discount);
+        $basket->totals->user_formatted->grand             = $oCurrencyModel->formatUser($basket->totals->user->grand);
+        $basket->totals->user_formatted->grand_discount    = $oCurrencyModel->formatUser($basket->totals->user->grand_discount);
 
         // --------------------------------------------------------------------------
 
         //  Save to cache and spit it back
-        $this->_set_cache($this->cacheKey, $basket);
+        $this->setCache($this->cacheKey, $basket);
 
         return $basket;
+    }
+
+    // --------------------------------------------------------------------------
+
+    protected function applyDiscountToItem($oItem, $oVoucher)
+    {
+        //  Shortcut
+        $oItemPrice = $oItem->variant->price->price;
+
+        //  Item discount (pre-tax)
+        $iItemDiscount = $this->calculateItemDiscount($oVoucher, $oItem);
+        $this->iTotalItemDiscount += $iItemDiscount;
+        $this->iTotalDiscount     += $iItemDiscount;
+
+        //  Tax Discount
+        $iTaxDiscount = $this->calculateTaxDiscount($oVoucher, $oItem);
+        $this->iTotalTaxDiscount += $iTaxDiscount;
+        $this->iTotalDiscount    += $iTaxDiscount;
+
+        //  Update values
+        $oItemPrice->base->discount_item           = $iItemDiscount;
+        $oItemPrice->base->discount_tax            = $iTaxDiscount;
+        $oItemPrice->base->discount_value_inc_tax -= $iItemDiscount;
+        $oItemPrice->base->discount_value_inc_tax -= $iTaxDiscount;
+        $oItemPrice->base->discount_value_ex_tax  -= $iItemDiscount;
+        $oItemPrice->base->discount_value_tax     -= $iTaxDiscount;
+    }
+
+    // --------------------------------------------------------------------------
+
+    protected function calculateItemDiscount($oVoucher, $oItem)
+    {
+        $iItemPrice = $oItem->variant->price->price->base->value_ex_tax;
+        $iDiscount  = 0;
+        if ($oVoucher->discount_type == 'PERCENTAGE') {
+
+            $iDiscount = (int) round($iItemPrice * $oItem->quantity * ($oVoucher->discount_value/100));
+
+        } else if ($oVoucher->discount_type == 'AMOUNT') {
+
+            //  Ensure we've not maxed the discount
+            if ($this->iTotalItemDiscount < $oVoucher->discount_value) {
+                if ($oVoucher->discount_value < $iItemPrice) {
+                    $iDiscount = $oVoucher->discount_value;
+                } else {
+                    $iDiscount = $iItemPrice;
+                }
+            }
+        }
+
+        return $iDiscount;
+    }
+
+    // --------------------------------------------------------------------------
+
+    protected function calculateTaxDiscount($oVoucher, $oItem)
+    {
+        $iItemPrice = $oItem->variant->price->price->base->value_tax;
+        $iDiscount  = 0;
+        if ($oVoucher->discount_type == 'PERCENTAGE') {
+
+            $iDiscount = (int) round($iItemPrice * $oItem->quantity * ($oVoucher->discount_value/100));
+
+        } else if ($oVoucher->discount_type == 'AMOUNT') {
+
+            //  Ensure we've not maxed the discount
+            if ($this->iTotalItemDiscount < $oVoucher->discount_value) {
+                if ($oVoucher->discount_value < $iItemPrice) {
+                    $iDiscount = $oVoucher->discount_value;
+                } else {
+                    $iDiscount = $iItemPrice;
+                }
+            }
+        }
+
+        return $iDiscount;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Calculate the discount to apply to the basket's shipping costs
+     * @param  object $oVoucher The voucher object
+     * @param  object $oBasket  The basket object
+     * @return int
+     */
+    protected function calculateShippingDiscount($oVoucher, $oBasket)
+    {
+        $iDiscount = 0;
+        if ($oVoucher->discount_type == 'PERCENTAGE') {
+
+            $iDiscount = (int) round($oBasket->totals->base->shipping * ($oVoucher->discount_value/100));
+
+        } else if ($oVoucher->discount_type == 'AMOUNT') {
+
+            //  Ensure we've not maxed the discount
+            if ($this->iTotalShipDiscount < $oVoucher->discount_value) {
+                if ($oVoucher->discount_value < $oBasket->totals->base->shipping) {
+                    $iDiscount = $oVoucher->discount_value;
+                } else {
+                    $iDiscount = $oBasket->totals->base->shipping;
+                }
+            }
+        }
+
+        return $iDiscount;
     }
 
     // --------------------------------------------------------------------------
@@ -388,7 +651,7 @@ class NAILS_Shop_basket_model extends Base
     /**
      * Returns the total value of the basket, in the user's currency, optionally
      * formatted
-     * @param  boolean $formatted Whether to return the fromatted value or not
+     * @param  boolean $formatted Whether to return the formatted value or not
      * @return string
      */
     public function getTotal($formatted = true)
@@ -426,7 +689,7 @@ class NAILS_Shop_basket_model extends Base
 
         if ($quantity < 1) {
 
-            $this->_set_error('Quantity must be greater than 0.');
+            $this->setError('Quantity must be greater than 0.');
             return false;
         }
 
@@ -452,7 +715,7 @@ class NAILS_Shop_basket_model extends Base
 
         if (!$_product) {
 
-            $this->_set_error('No Product for that Variant ID.');
+            $this->setError('No Product for that Variant ID.');
             return false;
         }
 
@@ -468,7 +731,7 @@ class NAILS_Shop_basket_model extends Base
 
         if (!$_variant) {
 
-            $this->_set_error('Invalid Variant ID.');
+            $this->setError('Invalid Variant ID.');
             return false;
         }
 
@@ -477,7 +740,7 @@ class NAILS_Shop_basket_model extends Base
         //  Check product is active
         if (!$_product->is_active) {
 
-            $this->_set_error('Product is not available.');
+            $this->setError('Product is not available.');
             return false;
         }
 
@@ -491,7 +754,7 @@ class NAILS_Shop_basket_model extends Base
 
         if (!is_null($_variant->quantity_available) && $_variant->quantity_available == 0) {
 
-            $this->_set_error('Product is not available.');
+            $this->setError('Product is not available.');
             return false;
 
         } else if (!is_null($_variant->quantity_available) && $quantity > $_variant->quantity_available) {
@@ -521,7 +784,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         // --------------------------------------------------------------------------
 
@@ -547,7 +810,7 @@ class NAILS_Shop_basket_model extends Base
 
         } else {
 
-            $this->_set_error('This item is not in your basket.');
+            $this->setError('This item is not in your basket.');
             return false;
         }
     }
@@ -568,7 +831,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         // --------------------------------------------------------------------------
 
@@ -654,25 +917,25 @@ class NAILS_Shop_basket_model extends Base
 
                     //  Invalidate the basket cache
                     $this->saveSession();
-                    $this->_unset_cache($this->cacheKey);
+                    $this->unsetCache($this->cacheKey);
 
                     return true;
 
                 } else {
 
-                    $this->_set_error('You cannot increment this item that many times.');
+                    $this->setError('You cannot increment this item that many times.');
                     return false;
                 }
 
             } else {
 
-                $this->_set_error('Could not find product.');
+                $this->setError('Could not find product.');
                 return false;
             }
 
         } else {
 
-            $this->_set_error('This item is not in your basket.');
+            $this->setError('This item is not in your basket.');
             return false;
         }
     }
@@ -710,7 +973,7 @@ class NAILS_Shop_basket_model extends Base
 
                     //  Invalidate the basket cache
                     $this->saveSession();
-                    $this->_unset_cache($this->cacheKey);
+                    $this->unsetCache($this->cacheKey);
                 }
 
             } else {
@@ -722,7 +985,7 @@ class NAILS_Shop_basket_model extends Base
 
         } else {
 
-            $this->_set_error('This item is not in your basket.');
+            $this->setError('This item is not in your basket.');
             return false;
         }
     }
@@ -751,7 +1014,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -768,7 +1031,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -797,7 +1060,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -814,7 +1077,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -875,13 +1138,13 @@ class NAILS_Shop_basket_model extends Base
 
             //  Invalidate the basket cache
             $this->saveSession();
-            $this->_unset_cache($this->cacheKey);
+            $this->unsetCache($this->cacheKey);
 
             return true;
 
         } else {
 
-            $this->_set_error('"' . $deliveryType . '" is not a valid delivery type.');
+            $this->setError('"' . $deliveryType . '" is not a valid delivery type.');
             return false;
         }
     }
@@ -898,7 +1161,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -945,7 +1208,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -962,7 +1225,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -991,7 +1254,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -1008,7 +1271,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -1034,27 +1297,27 @@ class NAILS_Shop_basket_model extends Base
     {
         if (empty($voucher_code)) {
 
-            $this->_set_error('No voucher code supplied.');
+            $this->setError('No voucher code supplied.');
             return false;
         }
 
-        $this->load->model('shop/shop_voucher_model');
-        $voucher = $this->shop_voucher_model->validate($voucher_code, $this->get());
+        $oVoucherModel = Factory::model('Voucher', 'nailsapp/module-shop');
+        $oVoucher      = $oVoucherModel->validate($voucher_code, $this->get());
 
-        if ($voucher) {
+        if ($oVoucher) {
 
-            $this->basket->voucher = $voucher;
+            $this->basket->voucher = $oVoucher;
 
             //  Invalidate the basket cache
             $this->saveSession();
-            $this->_unset_cache($this->cacheKey);
+            $this->unsetCache($this->cacheKey);
 
             return true;
 
         } else {
 
             $this->removeVoucher();
-            $this->_set_error($this->shop_voucher_model->last_error());
+            $this->setError($oVoucherModel->lastError());
 
             return false;
 
@@ -1073,7 +1336,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -1101,7 +1364,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -1118,7 +1381,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
 
         return true;
     }
@@ -1132,14 +1395,7 @@ class NAILS_Shop_basket_model extends Base
      */
     public function isInBasket($variant_id)
     {
-        if ($this->getBasketKeyByVariantId($variant_id) !== false) {
-
-            return true;
-
-        } else {
-
-            return false;
-        }
+        return $this->getBasketKeyByVariantId($variant_id) !== false;
     }
 
     // --------------------------------------------------------------------------
@@ -1186,10 +1442,11 @@ class NAILS_Shop_basket_model extends Base
         $_save->shipping_type    = $this->basket->shipping->user;
         $_save->shipping_details = $this->basket->shipping->details;
         $_save->payment_gateway  = $this->basket->payment_gateway;
-        $_save->voucher          = $this->basket->voucher->id;
+        $_save->voucher          = new \stdClass();
+        $_save->voucher->code    = $this->basket->voucher->code;
         $_save->note             = $this->basket->note;
 
-        return serialize($_save);
+        return json_encode($_save);
     }
 
     // --------------------------------------------------------------------------
@@ -1241,7 +1498,7 @@ class NAILS_Shop_basket_model extends Base
 
         //  Invalidate the basket cache
         $this->saveSession();
-        $this->_unset_cache($this->cacheKey);
+        $this->unsetCache($this->cacheKey);
     }
 
     // --------------------------------------------------------------------------
@@ -1293,25 +1550,41 @@ class NAILS_Shop_basket_model extends Base
         $out->totals->user           = new \stdClass();
         $out->totals->user_formatted = new \stdClass();
 
-        $out->totals->base->item     = 0;
-        $out->totals->base->shipping = 0;
-        $out->totals->base->tax      = 0;
-        $out->totals->base->grand    = 0;
+        $out->totals->base->item              = 0;
+        $out->totals->base->item_discount     = 0;
+        $out->totals->base->shipping          = 0;
+        $out->totals->base->shipping_discount = 0;
+        $out->totals->base->tax               = 0;
+        $out->totals->base->tax_discount      = 0;
+        $out->totals->base->grand             = 0;
+        $out->totals->base->grand_discount    = 0;
 
-        $out->totals->base_formatted->item     = '';
-        $out->totals->base_formatted->shipping = '';
-        $out->totals->base_formatted->tax      = '';
-        $out->totals->base_formatted->grand    = '';
+        $out->totals->base_formatted->item              = '';
+        $out->totals->base_formatted->item_discount     = '';
+        $out->totals->base_formatted->shipping          = '';
+        $out->totals->base_formatted->shipping_discount = '';
+        $out->totals->base_formatted->tax               = '';
+        $out->totals->base_formatted->tax_discount      = '';
+        $out->totals->base_formatted->grand             = '';
+        $out->totals->base_formatted->grand_discount    = '';
 
-        $out->totals->user->item     = 0;
-        $out->totals->user->shipping = 0;
-        $out->totals->user->tax      = 0;
-        $out->totals->user->grand    = 0;
+        $out->totals->user->item              = 0;
+        $out->totals->user->item_discount     = 0;
+        $out->totals->user->shipping          = 0;
+        $out->totals->user->shipping_discount = 0;
+        $out->totals->user->tax               = 0;
+        $out->totals->user->tax_discount      = 0;
+        $out->totals->user->grand             = 0;
+        $out->totals->user->grand_discount    = 0;
 
-        $out->totals->user_formatted->item     = '';
-        $out->totals->user_formatted->shipping = '';
-        $out->totals->user_formatted->tax      = '';
-        $out->totals->user_formatted->grand    = '';
+        $out->totals->user_formatted->item              = '';
+        $out->totals->user_formatted->item_discount     = '';
+        $out->totals->user_formatted->shipping          = '';
+        $out->totals->user_formatted->shipping_discount = '';
+        $out->totals->user_formatted->tax               = '';
+        $out->totals->user_formatted->tax_discount      = '';
+        $out->totals->user_formatted->grand             = '';
+        $out->totals->user_formatted->grand_discount    = '';
 
         return $out;
     }

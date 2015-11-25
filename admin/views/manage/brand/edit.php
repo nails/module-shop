@@ -116,4 +116,4 @@
 </div>
 <?php
 
-    echo \Nails\Admin\Helper::loadInlineView('utilities/footer', array('items' => $brands));
+    echo adminHelper('loadInlineView', 'utilities/footer', array('items' => $brands));

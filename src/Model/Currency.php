@@ -10,9 +10,12 @@
  * @link
  */
 
-use Nails\Factory;
+namespace Nails\Shop\Model;
 
-class NAILS_Shop_currency_model extends NAILS_Model
+use Nails\Factory;
+use Nails\Common\Model\Base;
+
+class Currency extends Base
 {
     protected $oerUrl;
     protected $rates;
@@ -78,8 +81,8 @@ class NAILS_Shop_currency_model extends NAILS_Model
     public function getAllSupported()
     {
         $currencies = $this->getAll();
-        $additional = app_setting('additional_currencies', 'shop');
-        $base       = app_setting('base_currency', 'shop');
+        $additional = appSetting('additional_currencies', 'shop');
+        $base       = appSetting('base_currency', 'shop');
         $supported  = array();
 
         if (isset($currencies[$base])) {
@@ -144,16 +147,16 @@ class NAILS_Shop_currency_model extends NAILS_Model
      */
     public function sync($muteLog = true)
     {
-        $oerAppId             = app_setting('openexchangerates_app_id', 'shop');
-        $oerEtag              = app_setting('openexchangerates_etag', 'shop');
-        $oerLastModified      = app_setting('openexchangerates_last_modified', 'shop');
-        $additionalCurrencies = app_setting('additional_currencies', 'shop');
+        $oerAppId             = appSetting('openexchangerates_app_id', 'shop');
+        $oerEtag              = appSetting('openexchangerates_etag', 'shop');
+        $oerLastModified      = appSetting('openexchangerates_last_modified', 'shop');
+        $additionalCurrencies = appSetting('additional_currencies', 'shop');
         $oLogger              = Factory::service('Logger');
 
         if (empty($additionalCurrencies)) {
 
             $message = 'No additional currencies are supported, aborting sync.';
-            $this->_set_error($message);
+            $this->setError($message);
 
             if (empty($muteLog)) {
 
@@ -282,13 +285,13 @@ class NAILS_Shop_currency_model extends NAILS_Model
             if ($oResponse->hasHeader('ETag')) {
 
                 $aHeaders = $oResponse->getHeader('ETag');
-                set_app_setting('openexchangerates_etag', 'shop', $aHeaders[0]);
+                setAppSetting('openexchangerates_etag', 'shop', $aHeaders[0]);
             }
 
             if ($oResponse->hasHeader('Last-Modified')) {
 
                 $aHeaders = $oResponse->getHeader('Last-Modified');
-                set_app_setting('openexchangerates_last_modified', 'shop', $aHeaders[0]);
+                setAppSetting('openexchangerates_last_modified', 'shop', $aHeaders[0]);
             }
 
             $toSave = array();
@@ -401,7 +404,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
                     } else {
 
                         $message = 'Failed to insert new currency data.';
-                        $this->_set_error($message);
+                        $this->setError($message);
 
                         if (empty($muteLog)) {
 
@@ -419,7 +422,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
             } else {
 
                 $message = 'Failed to truncate currency table.';
-                $this->_set_error($message);
+                $this->setError($message);
 
                 if (empty($muteLog)) {
 
@@ -432,7 +435,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
         } else {
 
             $message = '`openexchangerates_app_id` setting is not set. Sync aborted.';
-            $this->_set_error($message);
+            $this->setError($message);
 
             if (empty($muteLog)) {
 
@@ -469,7 +472,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
         if (!$currencyFrom) {
 
-            $this->_set_error('Invalid `from` currency code.');
+            $this->setError('Invalid `from` currency code.');
             return false;
         }
 
@@ -477,7 +480,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
         if (!$currencyTo) {
 
-            $this->_set_error('Invalid `to` currency code.');
+            $this->setError('Invalid `to` currency code.');
             return false;
         }
 
@@ -512,7 +515,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
         } else {
 
-            $this->_set_error('No exchange rate available for those currencies; does the system need to sync?');
+            $this->setError('No exchange rate available for those currencies; does the system need to sync?');
             return false;
         }
     }
@@ -556,7 +559,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
         if (!$currency) {
 
-            $this->_set_error('Invalid currency code.');
+            $this->setError('Invalid currency code.');
             return false;
         }
 
@@ -624,7 +627,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
         if (!$currency) {
 
-            $this->_set_error('Invalid currency code.');
+            $this->setError('Invalid currency code.');
             return false;
         }
 
@@ -647,7 +650,7 @@ class NAILS_Shop_currency_model extends NAILS_Model
 
         if (!$currency) {
 
-            $this->_set_error('Invalid currency code.');
+            $this->setError('Invalid currency code.');
             return false;
         }
 
@@ -688,38 +691,5 @@ class NAILS_Shop_currency_model extends NAILS_Model
         }
 
         return (float) $rate->rate;
-    }
-}
-
-// --------------------------------------------------------------------------
-
-/**
- * OVERLOADING NAILS' MODELS
- *
- * The following block of code makes it simple to extend one of the core shop
- * models. Some might argue it's a little hacky but it's a simple 'fix'
- * which negates the need to massively extend the CodeIgniter Loader class
- * even further (in all honesty I just can't face understanding the whole
- * Loader class well enough to change it 'properly').
- *
- * Here's how it works:
- *
- * CodeIgniter instantiate a class with the same name as the file, therefore
- * when we try to extend the parent class we get 'cannot redeclare class X' errors
- * and if we call our overloading class something else it will never get instantiated.
- *
- * We solve this by prefixing the main class with NAILS_ and then conditionally
- * declaring this helper class below; the helper gets instantiated et voila.
- *
- * If/when we want to extend the main class we simply define NAILS_ALLOW_EXTENSION
- * before including this PHP file and extend as normal (i.e in the same way as below);
- * the helper won't be declared so we can declare our own one, app specific.
- *
- **/
-
-if (!defined('NAILS_ALLOW_EXTENSION_SHOP_CURRENCY_MODEL')) {
-
-    class Shop_currency_model extends NAILS_Shop_currency_model
-    {
     }
 }
