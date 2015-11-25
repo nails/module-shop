@@ -1,5 +1,5 @@
 <div class="group-settings shop-pg">
-    <p <?=!empty($isModal) ? 'class="system-alert"' : ''?>>
+    <p>
         Configure the <?=$gateway_name?> payment gateway.
     </p>
     <hr />

@@ -396,9 +396,9 @@
 
                 ?>
                 <li class="actions">
-                    <a href="#" data-function="all" class="action awesome small orange">Select All</a>
-                    <a href="#" data-function="none" class="action awesome small orange">Select None</a>
-                    <a href="#" data-function="toggle" class="action awesome small orange">Toggle</a>
+                    <a href="#" data-function="all" class="action btn btn-xs btn-warning">Select All</a>
+                    <a href="#" data-function="none" class="action btn btn-xs btn-warning">Select None</a>
+                    <a href="#" data-function="toggle" class="action btn btn-xs btn-warning">Toggle</a>
                 </li>
             </ul>
         </div>
@@ -473,7 +473,7 @@
                         echo '</div>';
 
                         echo '<div class="shipping-driver-options-hidden" style="display:' . $optionsHidden . '">';
-                            echo '<p class="system-alert notice" style="margin-top:1em;">';
+                            echo '<p class="alert alert-info" style="margin-top:1em;">';
                                 echo 'Further shipping options have been hidden because the item is set as ';
                                 echo '"collection only" and will not be included while calculating shipping costs.';
                             echo '</p>';
@@ -484,12 +484,12 @@
 
                     $display = empty($isFirst) || empty($numVariants) || $numVariants == 1 ? 'none' : 'block';
                     echo '<p class="variation-sync-shipping" style="display:' . $display . '">';
-                        echo '<a href="#" class="awesome small orange">Sync Shipping</a>';
+                        echo '<a href="#" class="btn btn-xs btn-warning">Sync Shipping</a>';
                     echo '</p>';
 
                 } else {
 
-                    echo '<p class="system-alert message">';
+                    echo '<p class="alert alert-warning">';
                         echo '<strong>No Shipping Drivers Enabled.</strong>';
                         echo userHasPermission('admin:shop:settings:update') ? '<br />You can enable and configure shipping drivers in ' . anchor('admin/shop/settings', 'settings', 'class="confirm" data-title="Stop Editing?" data-body="Any unsaved changes will be lost."') . '.' : '';
                     echo '</p>';

@@ -363,7 +363,7 @@
             $field['default'] = !empty($item->description) ? $item->description : '';
 
 
-            echo form_error($field['key'], '<p class="system-alert error">', '</p>');
+            echo form_error($field['key'], '<p class="alert alert-danger">', '</p>');
             echo form_textarea($field['key'], set_value($field['key'], $field['default']), 'class="wysiwyg" id="productDescription"');
 
             ?>
@@ -494,7 +494,7 @@
             <p>
                 <input type="file" id="file_upload" />
             </p>
-            <p class="system-alert notice" id="upload-message" style="display:none">
+            <p class="alert alert-info" id="upload-message" style="display:none">
                 <strong>Please be patient while files upload.</strong>
                 <br />Tabs have been disabled until uploads are complete.
             </p>

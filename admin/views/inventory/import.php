@@ -1,4 +1,4 @@
-<p class="system-alert message">
+<p class="alert alert-warning">
     <strong>TODO:</strong> Allow inventory items to be completed on a spreadsheet and imported.
 </p>
 <div class="group-shop inventory import">
@@ -14,7 +14,7 @@
             <?=form_upload('dataimport')?>
         </p>
         <p>
-            <?=form_submit('submit', lang('action_continue'), 'class="awesome"')?>
+            <?=form_submit('submit', lang('action_continue'), 'class="btn btn-primary"')?>
         </p>
     <?=form_close()?>
 </div>

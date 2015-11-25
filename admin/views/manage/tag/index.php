@@ -43,7 +43,7 @@
                                     echo anchor(
                                         'admin/shop/manage/tag/edit/' . $tag->id . $isModal,
                                         lang('action_edit'),
-                                        'class="awesome small"'
+                                        'class="btn btn-xs btn-primary"'
                                     );
                                 }
 
@@ -52,14 +52,14 @@
                                     echo anchor(
                                         'admin/shop/manage/tag/delete/' . $tag->id . $isModal,
                                         lang('action_delete'),
-                                        'class="awesome small red confirm" data-body="This action cannot be undone."'
+                                        'class="btn btn-xs btn-danger confirm" data-body="This action cannot be undone."'
                                     );
                                 }
 
                                 echo anchor(
                                     $shopUrl . 'tag/' . $tag->slug,
                                     lang('action_view'),
-                                    'class="awesome small orange" target="_blank"'
+                                    'class="btn btn-xs btn-default" target="_blank"'
                                 );
 
                             echo '</td>';

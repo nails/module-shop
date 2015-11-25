@@ -58,15 +58,23 @@
 
                                 if (userHasPermission('admin:shop:manage:category:edit')) {
 
-                                    echo anchor('admin/shop/manage/category/edit/' . $category->id . $isModal, lang('action_edit'), 'class="awesome small"');
+                                    echo anchor(
+                                        'admin/shop/manage/category/edit/' . $category->id . $isModal,
+                                        lang('action_edit'),
+                                        'class="btn btn-xs btn-primary"'
+                                    );
                                 }
 
                                 if (userHasPermission('admin:shop:manage:category:delete')) {
 
-                                    echo anchor('admin/shop/manage/category/delete/' . $category->id . $isModal, lang('action_delete'), 'class="awesome small red confirm" data-body="This action cannot be undone, any child categories will also be deleted."');
+                                    echo anchor(
+                                        'admin/shop/manage/category/delete/' . $category->id . $isModal,
+                                        lang('action_delete'),
+                                        'class="btn btn-xs btn-danger confirm" data-body="This action cannot be undone, any child categories will also be deleted."'
+                                    );
                                 }
 
-                                echo anchor($shopUrl . 'category/' . $category->slug, lang('action_view'), 'class="awesome small orange" target="_blank"');
+                                echo anchor($shopUrl . 'category/' . $category->slug, lang('action_view'), 'class="btn btn-xs btn-default" target="_blank"');
 
                             echo '</td>';
                         echo '</tr>';

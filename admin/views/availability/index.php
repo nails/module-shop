@@ -68,7 +68,7 @@
 
                                         if (userHasPermission('admin:shop:availability:edit')) {
 
-                                            $_buttons[] = anchor('admin/shop/availability/edit/' . $item->id, lang('action_edit'), 'class="awesome small"');
+                                            $_buttons[] = anchor('admin/shop/availability/edit/' . $item->id, lang('action_edit'), 'class="btn btn-xs btn-primary"');
 
                                         }
 
@@ -76,7 +76,7 @@
 
                                         if (userHasPermission('admin:shop:availability:delete')) {
 
-                                            $_buttons[] = anchor('admin/shop/availability/delete/' . $item->id, lang('action_delete'), 'class="awesome small red confirm" data-body="This action cannot be undone."');
+                                            $_buttons[] = anchor('admin/shop/availability/delete/' . $item->id, lang('action_delete'), 'class="btn btn-xs btn-danger confirm" data-body="This action cannot be undone."');
 
                                         }
 
@@ -129,7 +129,7 @@
                     <div class="panel-body">
                         With checked:
                         <?=form_dropdown('', $_options, null)?>
-                        <a href="#" class="awesome small">Go</a>
+                        <a href="#" class="btn btn-xs btn-primary">Go</a>
                     </div>
                 </div>
                 <?php

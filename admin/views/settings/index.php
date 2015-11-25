@@ -477,7 +477,7 @@
             </ul>
             <section class="tabs" data-tabgroup="skins">
                 <div class="tab-page tab-skin-foh active clearfix">
-                    <p class="system-alert notice">
+                    <p class="alert alert-info">
                         The "Front of House" skin is responsible for the user's experience whilst browsing your store.
                     </p>
                     <?php
@@ -524,7 +524,7 @@
 
                         } else {
 
-                            echo '<p class="system-alert error">';
+                            echo '<p class="alert alert-danger">';
                                 echo '<strong>Error:</strong> ';
                                 echo 'I\'m sorry, but I couldn\'t find any front of house skins to use. This is a configuration error and should be raised with the developer.';
                             echo '</p>';
@@ -533,7 +533,7 @@
                     ?>
                 </div>
                 <div class="tab-page tab-skin-checkout clearfix">
-                    <p class="system-alert notice">
+                    <p class="alert alert-info">
                         The "Checkout" Skin is responsible for the user's basket and checkout experience.
                     </p>
                     <?php
@@ -579,7 +579,7 @@
 
                         } else {
 
-                            echo '<p class="system-alert error">';
+                            echo '<p class="alert alert-danger">';
                                 echo '<strong>Error:</strong> ';
                                 echo 'I\'m sorry, but I couldn\'t find any checkout skins to use. This is a configuration error and should be raised with the developer.';
                             echo '</p>';
@@ -612,7 +612,7 @@
 
                     if (!empty($skin_front_current->settings)) {
 
-                        echo '<p class="system-alert notice">';
+                        echo '<p class="alert alert-info">';
                             echo 'You are configuring settings for the <strong>' . $skin_front_current->name . '</strong> "Front of House" skin.';
                         echo '</p>';
 
@@ -695,14 +695,14 @@
 
                     } else {
 
-                        echo '<p class="system-alert message">';
+                        echo '<p class="alert alert-warning">';
                             echo 'No configurable settings for the <strong>' . $skin_front_current->name . '</strong> "Front of House" skin.';
                         echo '</p>';
                     }
 
                 } else {
 
-                    echo '<p class="system-alert message">';
+                    echo '<p class="alert alert-warning">';
                         echo 'No configurable settings for this skin.';
                     echo '</p>';
                 }
@@ -713,7 +713,7 @@
 
                     if (!empty($skin_checkout_current->settings)) {
 
-                        echo '<p class="system-alert notice">';
+                        echo '<p class="alert alert-info">';
                             echo 'You are configuring settings for the <strong>' . $skin_checkout_current->name . '</strong> "Checkout" skin.';
                         echo '</p>';
 
@@ -796,14 +796,14 @@
 
                     } else {
 
-                        echo '<p class="system-alert message">';
+                        echo '<p class="alert alert-warning">';
                             echo 'No configurable settings for the <Strong>' . $skin_checkout_current->name . '</strong> "Checkout" skin.';
                         echo '</p>';
                     }
 
                 } else {
 
-                    echo '<p class="system-alert message">';
+                    echo '<p class="alert alert-warning">';
                         echo 'No configurable settings for this skin.';
                     echo '</p>';
                 }
@@ -860,7 +860,7 @@
 
                 } else {
 
-                    echo '<p class="system-alert error">';
+                    echo '<p class="alert alert-danger">';
                         echo '<strong>No payment gateways are available.</strong>';
                         echo '<br />I could not find any payment gateways. Please contact the developers on ' . mailto(APP_DEVELOPER_EMAIL) . ' for assistance.';
                     echo '</p>';
@@ -881,7 +881,7 @@
 
                     if ($productCount) {
 
-                        echo '<p class="system-alert message">';
+                        echo '<p class="alert alert-warning">';
                             echo '<strong>Important:</strong> The base currency cannot be changed once a product has been created.';
                         echo '</p>';
                     }
@@ -914,7 +914,7 @@
                 <p>
                     Define which currencies you wish to support in your store in addition to the base currency.
                 </p>
-                <p class="system-alert message">
+                <p class="alert alert-warning">
                     <strong>Important:</strong> Not all payment gateways support all currencies and some must be configured to
                     support a particular currency. Additional costs may apply, please choose additional currencies carefully.
                 </p>
@@ -936,7 +936,7 @@
 
                 ?>
                 </p>
-                <p class="system-alert message">
+                <p class="alert alert-warning">
                     <strong>Important:</strong> If you wish to support multiple currencies you must also provide an
                     App ID for the <a href="https://openexchangerates.org" target="_blank">Open Exchange Rates</a>
                     service. The system uses this service to calculate exchange rates for all supported currencies.
@@ -1004,7 +1004,7 @@
 
             } else {
 
-                echo '<p class="system-alert error">';
+                echo '<p class="alert alert-danger">';
                     echo '<strong>No shipping drivers are available.</strong>';
                     echo '<br />I could not find any shipping drivers. Please contact the developers on ' . mailto(APP_DEVELOPER_EMAIL) . ' for assistance.';
                 echo '</p>';

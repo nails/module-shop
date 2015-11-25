@@ -78,18 +78,30 @@
                                         //  Render buttons
                                         $_buttons = array();
 
-                                        $_buttons[] = anchor($item->url, lang('action_view'), 'class="awesome small orange" target="_blank"');
+                                        $_buttons[] = anchor(
+                                            $item->url,
+                                            lang('action_view'),
+                                            'class="btn btn-xs btn-default" target="_blank"'
+                                        );
 
                                         if (userHasPermission('admin:shop:inventory:edit')) {
 
-                                            $_buttons[] = anchor('admin/shop/inventory/edit/' . $item->id, lang('action_edit'), 'class="awesome small"');
+                                            $_buttons[] = anchor(
+                                                'admin/shop/inventory/edit/' . $item->id,
+                                                lang('action_edit'),
+                                                'class="btn btn-xs btn-primary"'
+                                            );
                                         }
 
                                         // --------------------------------------------------------------------------
 
                                         if (userHasPermission('admin:shop:inventory:delete')) {
 
-                                            $_buttons[] = anchor('admin/shop/inventory/delete/' . $item->id, lang('action_delete'), 'class="awesome small red confirm" data-body="You can undo this action."');
+                                            $_buttons[] = anchor('
+                                                admin/shop/inventory/delete/' . $item->id,
+                                                lang('action_delete'),
+                                                'class="btn btn-xs btn-danger confirm" data-body="You can undo this action."'
+                                            );
                                         }
 
                                         // --------------------------------------------------------------------------
@@ -103,7 +115,11 @@
 
                                         } else {
 
-                                            echo '<span class="blank">There are no actions you can perform on this item.</span>';
+                                            ?>
+                                            <span class="blank">
+                                                There are no actions you can perform on this item.
+                                            </span>
+                                            <?php
                                         }
 
                                     ?>

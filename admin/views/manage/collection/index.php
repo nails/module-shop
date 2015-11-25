@@ -45,15 +45,23 @@
 
                                 if (userHasPermission('admin:shop:manage:collection:edit')) {
 
-                                    echo anchor('admin/shop/manage/collection/edit/' . $collection->id . $isModal, lang('action_edit'), 'class="awesome small"');
+                                    echo anchor(
+                                        'admin/shop/manage/collection/edit/' . $collection->id . $isModal,
+                                        lang('action_edit'),
+                                        'class="btn btn-xs btn-primary"'
+                                    );
                                 }
 
                                 if (userHasPermission('admin:shop:manage:collection:delete')) {
 
-                                    echo anchor('admin/shop/manage/collection/delete/' . $collection->id . $isModal, lang('action_delete'), 'class="awesome small red confirm" data-body="This action cannot be undone."');
+                                    echo anchor(
+                                        'admin/shop/manage/collection/delete/' . $collection->id . $isModal,
+                                        lang('action_delete'),
+                                        'class="btn btn-xs btn-danger confirm" data-body="This action cannot be undone."'
+                                    );
                                 }
 
-                                echo anchor($shopUrl . 'collection/' . $collection->slug, lang('action_view'), 'class="awesome small orange" target="_blank"');
+                                echo anchor($shopUrl . 'collection/' . $collection->slug, lang('action_view'), 'class="btn btn-xs btn-default" target="_blank"');
 
                             echo '</td>';
                         echo '</tr>';

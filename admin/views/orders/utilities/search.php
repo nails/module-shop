@@ -86,8 +86,8 @@
         echo '</label>';
 
 
-        echo anchor(uri_string() . '?reset=true', lang('action_reset'), 'class="awesome small right"');
-        echo form_submit('submit', lang('action_search'), 'class="awesome small right"');
+        echo anchor(uri_string() . '?reset=true', lang('action_reset'), 'class="btn btn-xs btn-default right"');
+        echo form_submit('submit', lang('action_search'), 'class="btn btn-xs btn-primary right"');
 
 
         // --------------------------------------------------------------------------

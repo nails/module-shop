@@ -111,11 +111,11 @@
     <p style="margin-top:1em;">
     <?php
 
-        echo form_submit('submit', 'Save', 'class="awesome"');
+        echo form_submit('submit', 'Save', 'class="btn btn-primary"');
         anchor(
             'admin/shop/manage/product_type_meta' . $isModal,
             'Cancel',
-            'class="awesome red confirm" data-body="All unsaved changes will be lost."'
+            'class="btn btn-danger confirm" data-body="All unsaved changes will be lost."'
         );
 
     ?>

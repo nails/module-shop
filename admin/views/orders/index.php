@@ -168,12 +168,12 @@
                                             $_buttons[] = anchor(
                                                 'admin/shop/orders/view/' . $order->id,
                                                 lang('action_view'),
-                                                'class="awesome green small"'
+                                                'class="btn btn-xs btn-default"'
                                             );
                                             $_buttons[] = anchor(
                                                 'admin/shop/orders/download_invoice/' . $order->id,
                                                 'Download',
-                                                'class="awesome small"'
+                                                'class="btn btn-xs btn-primary"'
                                             );
                                         }
 
@@ -184,7 +184,7 @@
                                              $_buttons[] = anchor(
                                                 'admin/shop/orders/reprocess/' . $order->id,
                                                 'Process',
-                                                'class="awesome small orange confirm" data-body="Processing the order again may result in multiple dispatch of items, or dispatch of unpaid items."'
+                                                'class="btn btn-xs btn-warning confirm" data-body="Processing the order again may result in multiple dispatch of items, or dispatch of unpaid items."'
                                             );
                                         }
 
@@ -238,7 +238,7 @@
                     echo '<div class="panel-body">';
                         echo 'With checked: ';
                         echo form_dropdown('', $_options, null);
-                        echo ' <a href="#" class="awesome small">Go</a>';
+                        echo ' <a href="#" class="btn btn-xs btn-primary">Go</a>';
                     echo '</div>';
                 echo '</div>';
             }

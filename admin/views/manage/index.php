@@ -1,5 +1,5 @@
 <div class="group-shop manage index">
-    <p class="<?=$isModal ? 'system-alert' : ''?>">
+    <p>
         Choose which Manager you'd like to utilise.
     </p>
     <?=$isModal ? '' : '<hr />'?>
@@ -75,7 +75,7 @@
 
         } else {
 
-            echo '<p class="system-alert message">';
+            echo '<p class="alert alert-warning">';
                 echo 'It looks as if there are no manager options available for you to use. If you ';
                 echo 'were expecting to see options here then please contact the shop manager.';
             echo '</p>';

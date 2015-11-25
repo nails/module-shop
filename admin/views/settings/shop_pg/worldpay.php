@@ -1,5 +1,5 @@
 <div class="group-settings shop-pg">
-    <p <?=!empty($isModal) ? 'class="system-alert"' : ''?>>
+    <p>
         Configure the <?=$gateway_name?> payment gateway. The following fields can be either found or
         set within the "Installation Administration" area of <?=$gateway_name?>'s Merchant interface.
     </p>
@@ -342,7 +342,7 @@
     <?=form_close()?>
 </div>
 <div type="text/template" id="template-resultY" style="display:none">
-<p style="max-width:100%;box-sizing:border-box;" class="system-alert message">
+<p style="max-width:100%;box-sizing:border-box;" class="alert alert-warning">
     Use the HTML code below to create a file called <code>resultY.html</code> and upload it into the
     file management area of <?=$gateway_name?>.
     <br />
@@ -405,7 +405,7 @@ EOT;
 </textarea>
 </div>
 <div type="text/template" id="template-resultC" style="display:none">
-<p style="width:100%;box-sizing:border-box;" class="system-alert message">
+<p style="width:100%;box-sizing:border-box;" class="alert alert-warning">
     Use the HTML code below to create a file called <code>resultC.html</code> and upload it into the
     file management area of <?=$gateway_name?>.
     <br />
