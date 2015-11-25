@@ -31,6 +31,9 @@
         <li class="tab">
             <a href="#" data-tab="tab-shipping">Shipping</a>
         </li>
+        <li class="tab">
+            <a href="#" data-tab="tab-pages">Pages</a>
+        </li>
     </ul>
     <section class="tabs" data-tabgroup="main-tabs">
         <div class="tab-page tab-general">
@@ -1008,6 +1011,146 @@
                     echo '<strong>No shipping drivers are available.</strong>';
                     echo '<br />I could not find any shipping drivers. Please contact the developers on ' . mailto(APP_DEVELOPER_EMAIL) . ' for assistance.';
                 echo '</p>';
+            }
+
+            ?>
+        </div>
+        <div class="tab-page tab-pages">
+            <?php
+
+            $aPages = appSetting('pages', 'shop');
+
+            if (isModuleEnabled('nailsapp/module-cms')) {
+
+                ?>
+                <p>
+                    Use the CMS to define the content for the following pages.
+                </p>
+                <?php
+
+                if (empty($cmsPages)) {
+
+                    ?>
+                    <div class="alert alert-danger">
+                        <p>
+                            <strong>No CMS Pages have been defined</strong>
+                        </p>
+                        <p>
+                            Create some pages in the CMS and come back here to select them for use with the shop.
+                        </p>
+                    </div>
+                    <?php
+
+                } else {
+
+                    ?>
+                    <div class="table-responsive">
+                        <table class="table-pages">
+                            <thead>
+                                <tr>
+                                    <th class="label">Page</th>
+                                    <th>CMS Page</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+
+                                foreach ($pages as $sSlug => $sLabel) {
+
+                                    if (!$this->input->post()) {
+
+                                        $iCmsId = !empty($aPages->{$sSlug}->cmsPageId) ? $aPages->{$sSlug}->cmsPageId : '';
+
+                                    } else {
+
+                                        $iCmsId = $_POST['pages'][$sSlug]['cmsPageId'];
+                                    }
+
+                                    ?>
+                                    <tr>
+                                        <td><?=$sLabel?></td>
+                                        <td>
+                                            <select class="selectt2" name="pages[<?=$sSlug?>][cmsPageId]">
+                                                <option value="">
+                                                    Disable this page
+                                                </option>
+                                                <?php
+
+                                                foreach ($cmsPages as $iId => $sTitle) {
+
+                                                    $sSelected = $iId == $iCmsId ? 'selected' : '';
+
+                                                    ?>
+                                                    <option value="<?=$iId?>" <?=$sSelected?>>
+                                                        <?=$sTitle?>
+                                                    </option>
+                                                    <?php
+                                                }
+
+                                                ?>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <?php
+                                }
+
+                                ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <?php
+                }
+
+            } else {
+
+                ?>
+                <p>
+                    Specify the content for the following pages which are of interest to shoppers.
+                    Leave blank to disable.
+                </p>
+                <div class="table-responsive">
+                    <table class="table-pages">
+                        <thead>
+                            <tr>
+                                <th class="label">Page</th>
+                                <th>Page Body</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+
+                            foreach ($pages as $sSlug => $sLabel) {
+
+                                ?>
+                                <tr>
+                                    <td><?=$sLabel?></td>
+                                    <td>
+                                        <?php
+
+                                        if (!$this->input->post()) {
+
+                                            $sBody = !empty($aPages->{$sSlug}->body) ? $aPages->{$sSlug}->body : '';
+
+                                        } else {
+
+                                            $sBody = $_POST['pages'][$sSlug]['body'];
+                                        }
+
+                                        echo '<textarea class="wysiwyg" name="pages[' . $sSlug . '][body]">';
+                                        echo $sBody;
+                                        echo '</textarea>';
+
+                                        ?>
+                                    </td>
+                                </tr>
+                                <?php
+                            }
+
+                            ?>
+                        </tbody>
+                    </table>
+                </div>
+                <?php
             }
 
             ?>

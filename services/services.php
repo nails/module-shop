@@ -15,6 +15,13 @@ return array(
             } else {
                 return new \Nails\Shop\Model\Currency();
             }
+        },
+        'Page' => function () {
+            if (class_exists('\App\Shop\Model\Page')) {
+                return new \App\Shop\Model\Page();
+            } else {
+                return new \Nails\Shop\Model\Page();
+            }
         }
     )
 );

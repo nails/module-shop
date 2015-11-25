@@ -1308,6 +1308,47 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
     // --------------------------------------------------------------------------
 
+    public function page()
+    {
+        if (empty($this->data['shop_pages']) || isModuleEnabled('nailsapp/module-cms')) {
+            show_404();
+        }
+
+        //  Test to see if we're on a valid page
+        $bIsValid  = false;
+        $sPageSlug = '';
+        foreach ($this->data['shop_pages'] as $sSlug => $aDetails) {
+
+            if ($aDetails['url'] == uri_string()) {
+                $bIsValid  = true;
+                $sPageSlug = $sSlug;
+                break;
+            }
+        }
+
+        if (!$bIsValid) {
+            show_404();
+        }
+
+        $oPageData = appSetting('pages', 'shop');
+
+        if (empty($oPageData->{$sPageSlug}->body)) {
+            show_404();
+        }
+
+        $this->data['shopPageData'] = array(
+            'title' => $this->data['shop_pages'][$sPageSlug]['title'],
+            'body' => $oPageData->{$sPageSlug}->body
+        );
+
+        //  Load views
+        $this->load->view('structure/header', $this->data);
+        $this->load->view($this->skin->path . 'views/front/page', $this->data);
+        $this->load->view('structure/footer', $this->data);
+    }
+
+    // --------------------------------------------------------------------------
+
     /**
      * Common pagination configurations
      * @param  integer $total_rows The total number of rows to paginate for

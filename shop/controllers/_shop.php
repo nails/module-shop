@@ -10,12 +10,16 @@
  * @link
  */
 
+use Nails\Factory;
+
 class NAILS_Shop_Controller extends NAILS_Controller
 {
     protected $shopName;
     protected $shopUrl;
     protected $skin;
     protected $maintenance;
+
+    protected $oPageModel;
 
     // --------------------------------------------------------------------------
 
@@ -44,11 +48,54 @@ class NAILS_Shop_Controller extends NAILS_Controller
         $this->load->model('shop/shop_skin_front_model');
         $this->load->model('shop/shop_skin_checkout_model');
 
+        $this->oPageModel = Factory::model('Page', 'nailsapp/module-shop');
+
+        if (isModuleEnabled('nailsapp/module-cms')) {
+            $oCmsPageModel = Factory::model('Page', 'nailsapp/module-cms');
+        }
+
         // --------------------------------------------------------------------------
 
         //  Shop's name and URL
         $this->shopName = $this->shopUrl = $this->shop_model->getShopName();
         $this->shopUrl  = $this->shopUrl = $this->shop_model->getShopUrl();
+
+        //  Shop Pages
+        $aPages    = $this->oPageModel->getAll();
+        $oPageData = appSetting('pages', 'shop');
+
+        $this->data['shop_pages'] = array();
+
+        //  Filter out anywithout content
+        if (!empty($oPageData)) {
+
+            foreach ($aPages as $sSlug => $sTitle) {
+
+                if (isModuleEnabled('nailsapp/module-cms')) {
+
+                    if (!empty($oPageData->{$sSlug}->cmsPageId)) {
+                        $oCmsPage = $oCmsPageModel->getById($oPageData->{$sSlug}->cmsPageId);
+                        if (!empty($oCmsPage)) {
+                            $this->data['shop_pages'][$sSlug] = array(
+                                'slug' => $sSlug,
+                                'url' => $oCmsPage->published->url,
+                                'title' => $oCmsPage->published->title
+                            );
+                        }
+                    }
+
+                } else {
+
+                    if (!empty($oPageData->{$sSlug}->body)) {
+                        $this->data['shop_pages'][$sSlug] = array(
+                            'slug' => $sSlug,
+                            'url' => $this->shopUrl . 'page/' . $sSlug,
+                            'title' => $sTitle
+                        );
+                    }
+                }
+            }
+        }
 
         //  Pass data to the views
         $this->data['shop_name'] = $this->shopName;

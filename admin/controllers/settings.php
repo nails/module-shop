@@ -99,6 +99,16 @@ class Settings extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
+        $oShopPageModel = Factory::model('Page', 'nailsapp/module-shop');
+        $this->data['pages'] = $oShopPageModel->getAll();
+        if (isModuleEnabled('nailsapp/module-cms')) {
+
+            $oPageModel = Factory::model('Page', 'nailsapp/module-cms');
+            $this->data['cmsPages'] = $oPageModel->getAllFlat();
+        }
+
+        // --------------------------------------------------------------------------
+
         //  Process POST
         if ($this->input->post()) {
 
@@ -151,12 +161,28 @@ class Settings extends BaseAdmin
                 'enabled_shipping_driver' => $this->input->post('enabled_shipping_driver'),
 
                 //  Currency Settings
-                'additional_currencies' => $this->input->post('additional_currencies')
+                'additional_currencies' => $this->input->post('additional_currencies'),
+
+                //  Pages
+                'pages' => array()
             );
 
             if ($this->input->post('base_currency')) {
 
                 $aSettings['base_currency'] = $this->input->post('base_currency');
+            }
+
+            if ($this->input->post('pages')) {
+
+                $aPages = $this->input->post('pages');
+
+                foreach ($this->data['pages'] as $sSlug => $sLabel) {
+
+                    $aSettings['pages'][$sSlug] = array(
+                        'cmsPageId' => !empty($aPages[$sSlug]['cmsPageId']) ? $aPages[$sSlug]['cmsPageId'] : null,
+                        'body' => !empty($aPages[$sSlug]['body']) ? $aPages[$sSlug]['body'] : null
+                    );
+                }
             }
 
             $aSettingsEncrypted = array(
