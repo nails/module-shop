@@ -327,7 +327,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         $data['card']          = $creditCard;
         $data['transactionId'] = $order->id;
         $data['description']   = 'Payment for Order: ' . $order->ref;
-        $data['clientIp']      = $this->input->ip_address();
+        $data['clientIp']      = $this->input->ipAddress();
 
         //  Set the relevant URLs
         $shopUrl = appSetting('url', 'shop') ? appSetting('url', 'shop') : 'shop/';

@@ -79,12 +79,12 @@ class NAILS_Shop_order_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  User's IP address
-        $order->ip_address = $this->input->ip_address();
+        $order->ip_address = $this->input->ipAddress();
 
         // --------------------------------------------------------------------------
 
         //  Generate a code(used as a secondary verification method)
-        $order->code = md5($this->input->ip_address() . '|'. time() . '|' . random_string('alnum', 15));
+        $order->code = md5($this->input->ipAddress() . '|'. time() . '|' . random_string('alnum', 15));
 
         // --------------------------------------------------------------------------
 
