@@ -321,7 +321,7 @@ class Voucher extends Base
 
     /**
      * Get a voucher by its code
-     * @todo Update once get_all is updated
+     * @todo Update once getAll is updated
      * @param  string $code The voucher's code
      * @param  mixed  $data Any data to pass to getCountCommon()
      * @return mixed        stdClass on success, false on failure
@@ -335,7 +335,7 @@ class Voucher extends Base
 
         $data['where'][] = array($this->tablePrefix . '.code', $code);
 
-        $result = $this->getAll(null, null, $data, 'GET_BY_CODE');
+        $result = $this->getAll(null, null, $data);
 
         // --------------------------------------------------------------------------
 

@@ -2277,7 +2277,7 @@ class NAILS_Shop_product_model extends Base
 
     /**
      * Gets filters for products in a particular result set
-     * @param  array $data A data array to pass to get_all
+     * @param  array $data A data array to pass to getAll
      * @return array
      */
     public function getFiltersForProducts($data)
@@ -2431,7 +2431,7 @@ class NAILS_Shop_product_model extends Base
     /**
      * Shortcut to get filters for brands
      * @param  integer $brandId The ID of the brand
-     * @param  array   $data    A data array to pass to get_all
+     * @param  array   $data    A data array to pass to getAll
      * @return array
      */
     public function getFiltersForProductsInBrand($brandId, $data = array())
@@ -2445,7 +2445,7 @@ class NAILS_Shop_product_model extends Base
     /**
      * Shortcut to get filters for suppliers
      * @param  integer $supplierId The ID of the supplier
-     * @param  array   $data       A data array to pass to get_all
+     * @param  array   $data       A data array to pass to getAll
      * @return array
      */
     public function getFiltersForProductsInSupplier($supplierId, $data = array())
@@ -2459,7 +2459,7 @@ class NAILS_Shop_product_model extends Base
     /**
      * Shortcut to get filters for category
      * @param  integer $categoryId The ID of the category
-     * @param  array   $data       A data array to pass to get_all
+     * @param  array   $data       A data array to pass to getAll
      * @return array
      */
     public function getFiltersForProductsInCategory($categoryId, $data = array())
@@ -2475,7 +2475,7 @@ class NAILS_Shop_product_model extends Base
     /**
      * Shortcut to get filters for collections
      * @param  integer $collectionId The ID of the collection
-     * @param  array   $data         A data array to pass to get_all
+     * @param  array   $data         A data array to pass to getAll
      * @return array
      */
     public function getFiltersForProductsInCollection($collectionId, $data = array())
@@ -2489,7 +2489,7 @@ class NAILS_Shop_product_model extends Base
     /**
      * Shortcut to get filters for ranges
      * @param  integer $rangeId The ID of the range
-     * @param  array   $data    A data array to pass to get_all
+     * @param  array   $data    A data array to pass to getAll
      * @return array
      */
     public function getFiltersForProductsInRange($rangeId, $data = array())
@@ -2503,7 +2503,7 @@ class NAILS_Shop_product_model extends Base
     /**
      * Shortcut to get filters for sales
      * @param  integer sale_id The ID of the sale
-     * @param  array   $data   A data array to pass to get_all
+     * @param  array   $data   A data array to pass to getAll
      * @return array
      */
     public function getFiltersForProductsInSale($saleId, $data = array())
@@ -2517,7 +2517,7 @@ class NAILS_Shop_product_model extends Base
     /**
      * Shortcut to get filters for tags
      * @param  integer $tagId The ID of the tag
-     * @param  array   $data  A data array to pass to get_all
+     * @param  array   $data  A data array to pass to getAll
      * @return array
      */
     public function getFiltersForProductsInTag($tagId, $data = array())
