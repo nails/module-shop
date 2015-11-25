@@ -72,7 +72,7 @@ class NAILS_Shop_skin_checkout_model extends NAILS_Model
      * @param  boolean $refresh Fetch from refresh - skip the cache
      * @return array
      */
-    public function get_available($refresh = false)
+    public function getAvailable($refresh = false)
     {
         if (!is_null($this->_available) && !$refresh) {
 
@@ -211,7 +211,7 @@ class NAILS_Shop_skin_checkout_model extends NAILS_Model
      */
     public function get($slug, $refresh = false)
     {
-        $_skins = $this->get_available($refresh);
+        $_skins = $this->getAvailable($refresh);
 
         foreach ($_skins as $skin) {
 

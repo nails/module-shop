@@ -297,12 +297,12 @@ class Settings extends BaseAdmin
         array_unshift($this->data['tax_rates_flat'], 'No Tax');
 
         //  "Front of house" skins
-        $this->data['skins_front']         = $this->shop_skin_front_model->get_available();
+        $this->data['skins_front']         = $this->shop_skin_front_model->getAvailable();
         $this->data['skin_front_selected'] = appSetting('skin_front', 'shop') ? appSetting('skin_front', 'shop') : 'shop-skin-front-classic';
         $this->data['skin_front_current']  = $this->shop_skin_front_model->get($this->data['skin_front_selected']);
 
         //  "Checkout" skins
-        $this->data['skins_checkout']         = $this->shop_skin_checkout_model->get_available();
+        $this->data['skins_checkout']         = $this->shop_skin_checkout_model->getAvailable();
         $this->data['skin_checkout_selected'] = appSetting('skin_checkout', 'shop') ? appSetting('skin_checkout', 'shop') : 'shop-skin-checkout-classic';
         $this->data['skin_checkout_current']  = $this->shop_skin_checkout_model->get($this->data['skin_checkout_selected']);
 
