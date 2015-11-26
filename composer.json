@@ -34,9 +34,9 @@
         "nailsapp/module-email": "dev-develop",
         "nailsapp/module-geo-ip": "dev-develop",
         "nailsapp/module-pdf": "dev-develop",
-        "nailsapp/shop-skin-front-classic": "dev-develop",
-        "nailsapp/shop-skin-checkout-classic": "dev-develop",
-        "nailsapp/shop-shipping-driver-flatrate": "dev-develop",
+        "nailsapp/skin-shop-front-classic": "dev-develop",
+        "nailsapp/skin-shop-checkout-classic": "dev-develop",
+        "nailsapp/driver-shop-shipping-flatrate": "dev-develop",
         "omnipay/omnipay": "~2.0"
     },
     "require-dev":
