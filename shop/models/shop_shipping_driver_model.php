@@ -27,7 +27,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
     public function __construct()
     {
         parent::__construct();
-        $this->aAvailable = _NAILS_GET_DRIVERS('ShopShipping');
+        $this->aAvailable = _NAILS_GET_DRIVERS('nailsapp/module-shop', 'shipping');
     }
 
     // --------------------------------------------------------------------------
@@ -106,14 +106,13 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
         $this->unload();
 
-        $sClassName = $oDriver->name;
-
-        dumpanddie($sClassName);
-
-        require_once $oDriver->path . 'Driver.php';
+        dumpanddie($oDriver);
 
 
-        dumpanddie($sClassName);
+        require_once $oDriver->path . '/driver.php';
+
+
+
         $this->oDriver = new $sClassName();
 
         return true;

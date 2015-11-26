@@ -10,6 +10,8 @@
  * @link
  */
 
+namespace Nails\Shop\Interfaces;
+
 interface ShippingDriver
 {
     /**
