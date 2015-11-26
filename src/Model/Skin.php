@@ -52,15 +52,15 @@ class Skin
     /**
      * Gets a single skin
      * @param  string  $sType The skin's type
-     * @param  string  $sSlug The skin's name
+     * @param  string  $sSlug The skin's slug
      * @return stdClass
      */
-    public function get($sType, $sName)
+    public function get($sType, $sSlug)
     {
         $aSkins = $this->getAvailable($sType);
 
         foreach ($aSkins as $oSkin) {
-            if ($oSkin->name == $sName) {
+            if ($oSkin->slug == $sSlug) {
                 return $oSkin;
             }
         }

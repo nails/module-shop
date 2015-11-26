@@ -189,20 +189,6 @@ class Settings extends BaseAdmin
                 'openexchangerates_app_id' => $this->input->post('openexchangerates_app_id')
             );
 
-            //  Skin configs
-            $aSettingsSkins = array();
-
-            $aConfigs = (array) $this->input->post('skin_config');
-            $aConfigs = array_filter($aConfigs);
-
-            foreach ($aConfigs as $sSlug => $aSkinConfig) {
-
-                $aSettingsSkins[$sSlug] = array();
-                foreach ($aSkinConfig as $sKey => $sValue) {
-                    $aSettingsSkins[$sSlug][$sKey] = $sValue;
-                }
-            }
-
             // --------------------------------------------------------------------------
 
             //  Sanitize shop url
@@ -237,24 +223,6 @@ class Settings extends BaseAdmin
 
                     $sError    = $this->app_setting_model->lastError();
                     $bRollback = true;
-                }
-
-                //  Skin configs
-                foreach ($aSettingsSkins as $sSkinSlug => $aSkinConfig) {
-
-                    //  Clear out the grouping; booleans not specified should be assumed false
-                    $this->app_setting_model->deleteGroup('shop-' . $sSkinSlug);
-
-                    if (!empty($aSkinConfig)) {
-
-                        if (!$this->app_setting_model->set($aSkinConfig, 'shop-' . $sSkinSlug)) {
-
-                            $sError    = 'Failed to update skin settings for skin "' . $sSkinSlug . '". ';
-                            $sError   .= $this->app_setting_model->lastError();
-                            $bRollback = true;
-                            break;
-                        }
-                    }
                 }
 
                 if (empty($bRollback)) {
@@ -351,6 +319,29 @@ class Settings extends BaseAdmin
 
         //  Load views
         Helper::loadView('index');
+    }
+
+    // --------------------------------------------------------------------------
+
+    public function shop_skin()
+    {
+        $oSkinModel = Factory::model('Skin', 'nailsapp/module-shop');
+        $sType      = $this->input->get('type');
+        $sSlug      = $this->input->get('slug');
+
+        $this->data['skin'] = $oSkinModel->get($sType, $sSlug);
+        if (empty($this->data['skin']) || empty($this->data['skin']->data->settings)) {
+            show_404();
+        }
+
+        // --------------------------------------------------------------------------
+
+        $this->data['page']->title = 'Shop Skin Configuration &rsaquo; ' . $this->data['skin']->name;
+        $this->data['isModal']     = $this->input->get('isModal');
+
+        // --------------------------------------------------------------------------
+
+        Helper::loadView('shop_skin');
     }
 
     // --------------------------------------------------------------------------

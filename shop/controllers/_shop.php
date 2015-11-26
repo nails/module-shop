@@ -155,7 +155,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
             case 'checkout':
 
                 //  Determine the name of the skin
-                $skinName = appSetting('skin_front', 'shop') ?: 'nailsapp/skin-shop-checkout-classic';
+                $skinName = appSetting('skin_checkout', 'shop') ?: 'nailsapp/skin-shop-checkout-classic';
 
                 //  Load it
                 $skin               = $this->oSkinModel->get('checkout', $skinName);
@@ -187,11 +187,11 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
         } else {
 
-            $assets    = !empty($skin->assets)     ? $skin->assets     : array();
-            $cssInline = !empty($skin->css_inline) ? $skin->css_inline : array();
-            $jsInline  = !empty($skin->js_inline)  ? $skin->js_inline  : array();
+            $assets    = !empty($skin->data->assets)     ? $skin->data->assets     : array();
+            $cssInline = !empty($skin->data->css_inline) ? $skin->data->css_inline : array();
+            $jsInline  = !empty($skin->data->js_inline)  ? $skin->data->js_inline  : array();
 
-            $this->loadSkinAssets($assets, $cssInline, $jsInline, site_url($skin->relativePath));
+            $this->loadSkinAssets($assets, $cssInline, $jsInline, site_url($skin->relativePath) . '/');
         }
     }
 

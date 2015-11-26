@@ -498,12 +498,12 @@
 
                                 foreach ($skins_front as $skin) {
 
-                                    $bSelected = $skin->name == $skin_front_selected ? true : false;
+                                    $bSelected = $skin->slug == $skin_front_selected ? true : false;
 
                                     ?>
                                     <tr>
                                         <td class="selected">
-                                            <?=form_radio('skin_front', $skin->name, $bSelected)?>
+                                            <?=form_radio('skin_front', $skin->slug, $bSelected)?>
                                         </td>
                                         <td class="label">
                                             <?php
@@ -519,7 +519,18 @@
                                             ?>
                                         </td>
                                         <td class="configure">
+                                            <?php
 
+                                            if (!empty($skin->data->settings)) {
+
+                                                echo anchor(
+                                                    'admin/shop/settings/shop_skin?type=front&slug=' . $skin->slug,
+                                                    'Configure',
+                                                    'data-fancybox-type="iframe" class="fancybox btn btn-xs btn-primary"'
+                                                );
+                                            }
+
+                                            ?>
                                         </td>
                                     </tr>
                                     <?php
@@ -564,12 +575,12 @@
 
                                 foreach ($skins_checkout as $skin) {
 
-                                    $bSelected = $skin->name == $skin_checkout_selected ? true : false;
+                                    $bSelected = $skin->slug == $skin_checkout_selected ? true : false;
 
                                     ?>
                                     <tr>
                                         <td class="selected">
-                                            <?=form_radio('skin_front', $skin->name, $bSelected)?>
+                                            <?=form_radio('skin_checkout', $skin->slug, $bSelected)?>
                                         </td>
                                         <td class="label">
                                             <?php
@@ -585,7 +596,18 @@
                                             ?>
                                         </td>
                                         <td class="configure">
+                                            <?php
 
+                                            if (!empty($skin->data->settings)) {
+
+                                                echo anchor(
+                                                    'admin/shop/settings/shop_skin?type=checkout&slug=' . $skin->slug,
+                                                    'Configure',
+                                                    'data-fancybox-type="iframe" class="fancybox btn btn-xs btn-primary"'
+                                                );
+                                            }
+
+                                            ?>
                                         </td>
                                     </tr>
                                     <?php
@@ -618,50 +640,63 @@
 
                 if (!empty($payment_gateways)) {
 
-                    echo '<table id="payment-gateways">';
-                        echo '<thead class="payment-gateways">';
-                            echo '<tr>';
-                                echo '<th class="enabled">Enabled</th>';
-                                echo '<th class="label">Label</th>';
-                                echo '<th class="configure">Configure</th>';
-                            echo '</tr>';
-                        echo '</thead>';
-                        echo '<tbody>';
+                    ?>
+                    <table id="payment-gateways">
+                        <thead class="payment-gateways">
+                            <tr>
+                                <th class="enabled">Enabled</th>
+                                <th class="label">Label</th>
+                                <th class="configure">Configure</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
 
-                        $enabledPaymentGateways = set_value('enabled_payment_gateways', appSetting('enabled_payment_gateways', 'shop'));
-                        $enabledPaymentGateways = array_filter((array) $enabledPaymentGateways);
+                            $enabledPaymentGateways = set_value('enabled_payment_gateways', appSetting('enabled_payment_gateways', 'shop'));
+                            $enabledPaymentGateways = array_filter((array) $enabledPaymentGateways);
 
-                        foreach ($payment_gateways as $slug) {
+                            foreach ($payment_gateways as $slug) {
 
-                            $_enabled = array_search($slug, $enabledPaymentGateways) !== false ? true : false;
+                                $_enabled = array_search($slug, $enabledPaymentGateways) !== false ? true : false;
 
-                            echo '<tr>';
-                                echo '<td class="enabled">';
-                                    echo '<div class="toggle toggle-modern"></div>';
-                                    echo form_checkbox('enabled_payment_gateways[]', $slug, $_enabled);
-                                echo '</td>';
-                                echo '<td class="label">';
-                                    echo str_replace('_', ' ', $slug);
-                                echo '</td>';
-                                echo '<td class="configure">';
-                                    echo anchor(
-                                        'admin/shop/settings/shop_pg?gateway=' . $slug,
-                                        'Configure',
-                                        'data-fancybox-type="iframe" class="fancybox btn btn-xs btn-primary"'
-                                    );
-                                echo '</td>';
-                            echo '</tr>';
-                        }
+                                ?>
+                                <tr>
+                                    <td class="enabled">
+                                        <div class="toggle toggle-modern"></div>
+                                        <?=form_checkbox('enabled_payment_gateways[]', $slug, $_enabled)?>
+                                    </td>
+                                    <td class="label">
+                                        <?=str_replace('_', ' ', $slug)?>
+                                    </td>
+                                    <td class="configure">
+                                        <?php
 
-                        echo '<tbody>';
-                    echo '</table>';
+                                        echo anchor(
+                                            'admin/shop/settings/shop_pg?gateway=' . $slug,
+                                            'Configure',
+                                            'data-fancybox-type="iframe" class="fancybox btn btn-xs btn-primary"'
+                                        );
+
+                                        ?>
+                                    </td>
+                                </tr>
+                                <?php
+                            }
+
+                            ?>
+                        <tbody>
+                    </table>
+                    <?php
 
                 } else {
 
-                    echo '<p class="alert alert-danger">';
-                        echo '<strong>No payment gateways are available.</strong>';
-                        echo '<br />I could not find any payment gateways. Please contact the developers on ' . mailto(APP_DEVELOPER_EMAIL) . ' for assistance.';
-                    echo '</p>';
+                    ?>
+                    <p class="alert alert-danger">
+                        <strong>No payment gateways are available.</strong>
+                        <br />I could not find any payment gateways. Please contact the developers
+                        on <?=mailto(APP_DEVELOPER_EMAIL)?> for assistance.
+                    </p>
+                    <?php
                 }
 
             ?>
@@ -679,9 +714,12 @@
 
                     if ($productCount) {
 
-                        echo '<p class="alert alert-warning">';
-                            echo '<strong>Important:</strong> The base currency cannot be changed once a product has been created.';
-                        echo '</p>';
+                        ?>
+                        <p class="alert alert-warning">
+                            <strong>Important:</strong> The base currency cannot be changed once a
+                            product has been created.
+                        </p>
+                        <?php
                     }
 
                 ?>
@@ -702,7 +740,12 @@
                         $_currencies[$c->code] = $c->code . ' - ' . $c->label;
                     }
 
-                    echo form_dropdown($field['key'], $_currencies, set_value($field['key'], $field['default']), 'class="select2" ' . $field['readonly']);
+                    echo form_dropdown(
+                        $field['key'],
+                        $_currencies,
+                        set_value($field['key'], $field['default']),
+                        'class="select2" ' . $field['readonly']
+                    );
 
                 ?>
                 </p>
@@ -759,53 +802,70 @@
 
             if (!empty($shipping_drivers)) {
 
-                echo '<table id="shipping-modules">';
-                    echo '<thead class="shipping-modules">';
-                        echo '<tr>';
-                            echo '<th class="selected">Selected</th>';
-                            echo '<th class="label">Label</th>';
-                            echo '<th class="configure">Configure</th>';
-                        echo '</tr>';
-                    echo '</thead>';
-                    echo '<tbody>';
+                ?>
+                <table id="shipping-modules">
+                    <thead class="shipping-modules">
+                        <tr>
+                            <th class="selected">Selected</th>
+                            <th class="label">Label</th>
+                            <th class="configure">Configure</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
 
-                    $enabledShippingDriver = set_value('enabled_shipping_driver', appSetting('enabled_shipping_driver', 'shop'));
+                        $enabledShippingDriver = set_value('enabled_shipping_driver', appSetting('enabled_shipping_driver', 'shop'));
 
-                    foreach ($shipping_drivers as $driver) {
+                        foreach ($shipping_drivers as $driver) {
 
-                        $_name        = !empty($driver->name) ? $driver->name : 'Untitled';
-                        $_description = !empty($driver->description) ? $driver->description : '';
-                        $_enabled     = $driver->name == $enabledShippingDriver ? true : false;
+                            $_name        = !empty($driver->name) ? $driver->name : 'Untitled';
+                            $_description = !empty($driver->description) ? $driver->description : '';
+                            $_enabled     = $driver->name == $enabledShippingDriver ? true : false;
 
-                        echo '<tr>';
-                            echo '<td class="selected">';
-                                echo form_radio('enabled_shipping_driver', $driver->name, $_enabled);
-                            echo '</td>';
-                            echo '<td class="label">';
-                                echo $_name;
-                                echo $_description ? '<small>' . $_description . '</small>' : '';
-                            echo '</td>';
-                            echo '<td class="configure">';
-                                if (!empty($driver->configurable)) {
-                                    echo anchor(
-                                        'admin/shop/settings/shop_sd?driver=' . $driver->name,
-                                        'Configure',
-                                        'data-fancybox-type="iframe" class="fancybox btn btn-xs btn-primary"'
-                                    );
-                                }
-                            echo '</td>';
-                        echo '</tr>';
-                    }
+                            ?>
+                            <tr>
+                                <td class="selected">
+                                    <?=form_radio('enabled_shipping_driver', $driver->name, $_enabled)?>
+                                </td>
+                                <td class="label">
+                                    <?php
 
-                    echo '<tbody>';
-                echo '</table>';
+                                    echo $_name;
+                                    echo $_description ? '<small>' . $_description . '</small>' : '';
+
+                                    ?>
+                                </td>
+                                <td class="configure">
+                                    <?php
+
+                                    if (!empty($driver->configurable)) {
+                                        echo anchor(
+                                            'admin/shop/settings/shop_sd?driver=' . $driver->name,
+                                            'Configure',
+                                            'data-fancybox-type="iframe" class="fancybox btn btn-xs btn-primary"'
+                                        );
+                                    }
+
+                                    ?>
+                                </td>
+                            </tr>
+                            <?php
+                        }
+
+                        ?>
+                    <tbody>
+                </table>
+                <?php
 
             } else {
 
-                echo '<p class="alert alert-danger">';
-                    echo '<strong>No shipping drivers are available.</strong>';
-                    echo '<br />I could not find any shipping drivers. Please contact the developers on ' . mailto(APP_DEVELOPER_EMAIL) . ' for assistance.';
-                echo '</p>';
+                ?>
+                <p class="alert alert-danger">
+                    <strong>No shipping drivers are available.</strong>
+                    <br />I could not find any shipping drivers. Please contact the developers on
+                    <?=mailto(APP_DEVELOPER_EMAIL)?> for assistance.
+                </p>
+                <?php
             }
 
             ?>
