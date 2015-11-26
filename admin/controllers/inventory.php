@@ -181,6 +181,7 @@ class Inventory extends BaseAdmin
         //  Define the $data variable for the queries
         $data = array(
             'include_inactive' => true,
+            'include_inactive_variants' => true,
             'where' => array(),
             'sort'  => array(
                 array($sortOn, $sortOrder)
@@ -279,6 +280,69 @@ class Inventory extends BaseAdmin
 
         //  Fetch other required bits of data
         $this->data['productTypes']   = $this->shop_product_type_model->getAll();
+
+        // --------------------------------------------------------------------------
+
+        //  Finally, a bit of a database integrity check.
+
+        //  Undeleted products which have only deleted variants
+        $this->db->select('p.id');
+        $this->db->select('(SELECT COUNT(*) FROM ' . $this->shop_product_model->getMetaTable('variation') . ' v WHERE v.product_id = p.id) variantCount');
+        $this->db->select('(SELECT COUNT(*) FROM ' . $this->shop_product_model->getMetaTable('variation') . ' v WHERE v.product_id = p.id AND v.is_deleted=1) variantCountDeleted');
+        $this->db->where('p.is_deleted', false);
+        $this->db->having('variantCount = variantCountDeleted');
+        $this->db->group_by('p.id');
+        $aResultInactive = $this->db->get($this->shop_product_model->getTableName() . ' p')->result();
+
+        //  Undeleted and active products which only have inactive variants
+        $this->db->select('p.id');
+        $this->db->select('(SELECT COUNT(*) FROM ' . $this->shop_product_model->getMetaTable('variation') . ' v WHERE v.product_id = p.id) variantCount');
+        $this->db->select('(SELECT COUNT(*) FROM ' . $this->shop_product_model->getMetaTable('variation') . ' v WHERE v.product_id = p.id AND v.is_active=0 AND v.is_deleted=0) variantCountInactive');
+        $this->db->where('p.is_deleted', false);
+        $this->db->where('p.is_active', true);
+        $this->db->having('variantCount = variantCountInactive');
+        $this->db->group_by('p.id');
+        $aResultDeleted = $this->db->get($this->shop_product_model->getTableName() . ' p')->result();
+
+        if (!empty($aResultInactive) || !empty($aResultInactive)) {
+
+            $this->data['warning']  = '<strong>There are discrepancies in the database.</strong>';
+            $this->data['warning'] .= '<br />The following issues were detected and should be addressed or reported:';
+
+            if (!empty($aResultInactive)) {
+                $this->data['warning'] .= '<br />&rsaquo; ' . count($aResultInactive) . ' products which do not ';
+                $this->data['warning'] .= 'have any variants. ';
+                $this->data['warning'] .= '<a href="#inactive-ids" class="fancybox">Click for Details</a>';
+                $this->data['warning'] .= '<div id="inactive-ids" style="display: none; width: 400px;">';
+                $this->data['warning'] .= 'The following product IDs are affected:<br />';
+                $aAffected = array();
+                foreach ($aResultInactive as $oResult) {
+                    $aAffected[] = $oResult->id;
+                }
+                $this->data['warning'] .= '<textarea style="border: 1px solid #CCC;width:100%;height: 100px;margin: 1em 0 0 0">';
+                $this->data['warning'] .= implode(', ', $aAffected);
+                $this->data['warning'] .= '</textarea>';
+                $this->data['warning'] .= '</div>';
+            }
+
+            if (!empty($aResultDeleted)) {
+                $this->data['warning'] .= '<br />&rsaquo; ' . count($aResultDeleted) . ' active products which do not ';
+                $this->data['warning'] .= 'have any active variants. ';
+                $this->data['warning'] .= '<a href="#deleted-ids" class="fancybox">Click for Details</a>';
+                $this->data['warning'] .= '<div id="inactive-ids" style="display: none; width: 400px;">';
+                $this->data['warning'] .= 'The following product IDs are affected:<br />';
+                $aAffected = array();
+                foreach ($aResultDeleted as $oResult) {
+                    $aAffected[] = $oResult->id;
+                }
+                $this->data['warning'] .= '<textarea style="border: 1px solid #CCC;width:100%;height: 100px;margin: 1em 0 0 0">';
+                $this->data['warning'] .= implode(', ', $aAffected);
+                $this->data['warning'] .= '</textarea>';
+                $this->data['warning'] .= '</div>';
+            }
+
+            $this->data['warning'] .= $aResultDeleted ? '<br />&rsaquo; ' . count($aResultDeleted) . ' ' : '';
+        }
 
         // --------------------------------------------------------------------------
 
@@ -528,11 +592,20 @@ class Inventory extends BaseAdmin
              * If not active then allow the request through, otherwise, run the
              * validation rules.
              */
-            if ($this->input->post('is_active')) {
+
+            $bPassedValidation = true;
+
+            if (!$this->input->post('variants')) {
+
+                $this->data['error'] = 'At least one variation is required.';
+                $bPassedValidation   = false;
+            }
+
+            if ($bPassedValidation && $this->input->post('is_active')) {
 
                 $this->inventoryCreateEditValidationRules();
                 $bAdditionalValidationError = false;
-                $aVariations = $this->input->post('variation');
+                $aVariations     = $this->input->post('variation');
                 $iActiveVariants = 0;
 
                 /**
@@ -549,15 +622,11 @@ class Inventory extends BaseAdmin
 
                 if (!$iActiveVariants) {
 
-                    $this->data['error'] = 'A product marked as active must have at least one active variation.';
+                    $this->data['error']        = 'A product marked as active must have at least one active variation.';
                     $bAdditionalValidationError = true;
                 }
 
                 $bPassedValidation = $this->oFormValidation->run($this) && !$bAdditionalValidationError;
-
-            } else {
-
-                $bPassedValidation = true;
             }
 
             // --------------------------------------------------------------------------
@@ -569,7 +638,7 @@ class Inventory extends BaseAdmin
 
                 //  Validated! Create the product
                 $aUpdateData = (array) $this->input->post();
-                $product = $this->shop_product_model->update($this->data['item']->id, $aUpdateData);
+                $product     = $this->shop_product_model->update($this->data['item']->id, $aUpdateData);
 
                 if ($product) {
 

@@ -21,6 +21,25 @@ class NAILS_Shop_product_model extends Base
 
     // --------------------------------------------------------------------------
 
+    protected $table_attribute;
+    protected $table_brand;
+    protected $table_supplier;
+    protected $table_category;
+    protected $table_collection;
+    protected $table_gallery;
+    protected $table_range;
+    protected $table_sale;
+    protected $table_tag;
+    protected $table_related;
+    protected $table_variation;
+    protected $table_variation_gallery;
+    protected $table_variation_product_type_meta;
+    protected $table_variation_price;
+    protected $table_type;
+    protected $table_tax_rate;
+
+    // --------------------------------------------------------------------------
+
     /**
      * Construct the model
      */
@@ -1104,6 +1123,7 @@ class NAILS_Shop_product_model extends Base
             //  ==========
             $this->db->select('pv.*');
             $this->db->where('pv.product_id', $product->id);
+
             if (empty($data['include_inactive_variants'])) {
 
                 $this->db->where('pv.is_active', true);
@@ -1296,14 +1316,14 @@ class NAILS_Shop_product_model extends Base
             }
 
             //  Work out the min and max prices
-            $product->price                          = new \stdClass();
-            $product->price->user                    = new \stdClass();
-            $product->price->user_formatted          = new \stdClass();
+            $product->price                 = new \stdClass();
+            $product->price->user           = new \stdClass();
+            $product->price->user_formatted = new \stdClass();
 
-            $iMaxPriceIncTax = max($aVariationPricesIncTax);
-            $iMaxPriceExTax  = max($aVariationPricesExTax);
-            $iMinPriceIncTax = min($aVariationPricesIncTax);
-            $iMinPriceExTax  = min($aVariationPricesExTax);
+            $iMaxPriceIncTax = !empty($aVariationPricesIncTax) ? max($aVariationPricesIncTax) : 0;
+            $iMaxPriceExTax  = !empty($aVariationPricesExTax) ? max($aVariationPricesExTax) : 0;
+            $iMinPriceIncTax = !empty($aVariationPricesIncTax) ? min($aVariationPricesIncTax) : 0;
+            $iMinPriceExTax  = !empty($aVariationPricesExTax) ? min($aVariationPricesExTax) : 0;
 
             $product->price->user_formatted->max_price_inc_tax = $this->oCurrencyModel->formatUser($iMaxPriceExTax);
             $product->price->user_formatted->max_price_ex_tax  = $this->oCurrencyModel->formatUser($iMaxPriceIncTax);
@@ -2538,6 +2558,26 @@ class NAILS_Shop_product_model extends Base
     {
         $data['keywords'] = $keywords;
         return $this->getFiltersForProducts($data);
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * A method for getting meta table names
+     * @param  string $sTable The table to fetch (minus the table_ prefix)
+     * @return string
+     */
+    public function getMetaTable($sTable)
+    {
+        $sPropertyName = 'table_' . $sTable;
+        if (property_exists($this, $sPropertyName)) {
+
+            return $this->{$sPropertyName};
+
+        } else {
+
+            return null;
+        }
     }
 
     // --------------------------------------------------------------------------
