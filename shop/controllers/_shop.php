@@ -20,6 +20,8 @@ class NAILS_Shop_Controller extends NAILS_Controller
     protected $maintenance;
 
     protected $oPageModel;
+    protected $oSkinFrontModel;
+    protected $oSkinCheckoutModel;
 
     // --------------------------------------------------------------------------
 
@@ -45,10 +47,9 @@ class NAILS_Shop_Controller extends NAILS_Controller
         $this->load->model('shop/shop_shipping_driver_model');
         $this->load->model('shop/shop_sale_model');
         $this->load->model('shop/shop_tag_model');
-        $this->load->model('shop/shop_skin_front_model');
-        $this->load->model('shop/shop_skin_checkout_model');
 
         $this->oPageModel = Factory::model('Page', 'nailsapp/module-shop');
+        $this->oSkinModel = Factory::model('Skin', 'nailsapp/module-shop');
 
         if (isModuleEnabled('nailsapp/module-cms')) {
             $oCmsPageModel = Factory::model('Page', 'nailsapp/module-cms');
@@ -137,11 +138,10 @@ class NAILS_Shop_Controller extends NAILS_Controller
             case 'front':
 
                 //  Determine the name of the skin
-                $skinName = appSetting('skin_front', 'shop');
-                $skinName = !empty($skinName) ? $skinName : 'shop-skin-front-classic';
+                $skinName = appSetting('skin_front', 'shop') ?: 'nailsapp/skin-shop-front-classic';
 
                 //  Load it
-                $skin               = $this->shop_skin_front_model->get($skinName);
+                $skin               = $this->oSkinModel->get('front', $skinName);
                 $this->skin         =& $skin;
                 $this->data['skin'] =& $skin;
 
@@ -149,20 +149,16 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
                     $errorSubject  = 'Failed to load shop front skin "' . $skinName . '"';
                     $errorMessage  = 'Shop front skin "' . $skinName . '" failed to load at ' . APP_NAME;
-                    $errorMessage .= ', the following reason was given: ';
-                    $errorMessage .= $this->shop_skin_front_model->lastError();
-
                 }
                 break;
 
             case 'checkout':
 
                 //  Determine the name of the skin
-                $skinName = appSetting('skin_checkout', 'shop');
-                $skinName = !empty($skinName) ? $skinName : 'shop-skin-checkout-classic';
+                $skinName = appSetting('skin_front', 'shop') ?: 'nailsapp/skin-shop-checkout-classic';
 
                 //  Load it
-                $skin               = $this->shop_skin_checkout_model->get($skinName);
+                $skin               = $this->oSkinModel->get('checkout', $skinName);
                 $this->skin         =& $skin;
                 $this->data['skin'] =& $skin;
 
@@ -170,9 +166,6 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
                     $errorSubject  = 'Failed to load shop checkout skin "' . $skin . '"';
                     $errorMessage  = 'Shop checkout skin "' . $skin . '" failed to load at ' . APP_NAME;
-                    $errorMessage .= ', the following reason was given: ';
-                    $errorMessage .= $this->shop_skin_checkout_model->lastError();
-
                 }
                 break;
 
@@ -198,7 +191,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
             $cssInline = !empty($skin->css_inline) ? $skin->css_inline : array();
             $jsInline  = !empty($skin->js_inline)  ? $skin->js_inline  : array();
 
-            $this->loadSkinAssets($assets, $cssInline, $jsInline, $skin->url);
+            $this->loadSkinAssets($assets, $cssInline, $jsInline, site_url($skin->relativePath));
         }
     }
 

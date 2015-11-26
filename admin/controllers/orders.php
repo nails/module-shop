@@ -412,14 +412,16 @@ class Orders extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load up the shop's skin
-        $skin = appSetting('skin_checkout', 'shop') ? appSetting('skin_checkout', 'shop') : 'shop-skin-checkout-classic';
+        $sSkin      = appSetting('skin_checkout', 'shop') ?: 'skin-shop-checkout-classic';
+        $oSkinModel = Factory::model('Skin', 'nailsapp/module-shop');
+        $oSkin      = $oSkinModel->get('checkout', $sSkin);
 
-        $this->load->model('shop/shop_skin_checkout_model');
-        $skin = $this->shop_skin_checkout_model->get($skin);
-
-        if (!$skin) {
-
-            showFatalError('Failed to load shop skin "' . $skin . '"', 'Shop skin "' . $skin . '" failed to load at ' . APP_NAME . ', the following reason was given: ' . $this->shop_skin_checkout_model->lastError());
+        if (!$oSkin) {
+            showFatalError(
+                'Failed to load shop skin "' . $sSkin . '"',
+                'Shop skin "' . $sSkin . '" failed to load at ' . APP_NAME . ', the following reason was given: ' .
+                $this->shop_skin_checkout_model->lastError()
+            );
         }
 
         // --------------------------------------------------------------------------
@@ -428,7 +430,7 @@ class Orders extends BaseAdmin
         $this->data['for_user'] = 'ADMIN';
         $this->load->library('pdf/pdf');
         $this->pdf->setPaperSize('A4', 'landscape');
-        $this->pdf->loadView($skin->path . 'views/order/invoice', $this->data);
+        $this->pdf->loadView($oSkin->path . 'views/order/invoice', $this->data);
         $this->pdf->download('INVOICE-' . $this->data['order']->ref . '.pdf');
     }
 

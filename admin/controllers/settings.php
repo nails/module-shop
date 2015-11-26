@@ -90,8 +90,6 @@ class Settings extends BaseAdmin
         $this->load->model('shop/shop_shipping_driver_model');
         $this->load->model('shop/shop_payment_gateway_model');
         $this->load->model('shop/shop_tax_rate_model');
-        $this->load->model('shop/shop_skin_front_model');
-        $this->load->model('shop/shop_skin_checkout_model');
         $this->load->model('shop/shop_product_model');
 
         $oCountryModel  = Factory::model('Country');
@@ -322,15 +320,17 @@ class Settings extends BaseAdmin
         $this->data['continents_flat']  = $oCountryModel->getAllContinentsFlat();
         array_unshift($this->data['tax_rates_flat'], 'No Tax');
 
+        $oSkinModel = Factory::model('Skin', 'nailsapp/module-shop');
+
         //  "Front of house" skins
-        $this->data['skins_front']         = $this->shop_skin_front_model->getAvailable();
-        $this->data['skin_front_selected'] = appSetting('skin_front', 'shop') ? appSetting('skin_front', 'shop') : 'shop-skin-front-classic';
-        $this->data['skin_front_current']  = $this->shop_skin_front_model->get($this->data['skin_front_selected']);
+        $this->data['skins_front']         = $oSkinModel->getAvailable('front');
+        $this->data['skin_front_selected'] = appSetting('skin_front', 'shop') ?: 'skin-shop-front-classic';
+        $this->data['skin_front_current']  = $oSkinModel->get('front', $this->data['skin_front_selected']);
 
         //  "Checkout" skins
-        $this->data['skins_checkout']         = $this->shop_skin_checkout_model->getAvailable();
-        $this->data['skin_checkout_selected'] = appSetting('skin_checkout', 'shop') ? appSetting('skin_checkout', 'shop') : 'shop-skin-checkout-classic';
-        $this->data['skin_checkout_current']  = $this->shop_skin_checkout_model->get($this->data['skin_checkout_selected']);
+        $this->data['skins_checkout']         = $oSkinModel->getAvailable('checkout');
+        $this->data['skin_checkout_selected'] = appSetting('skin_checkout', 'shop') ?: 'skin-shop-checkout-classic';
+        $this->data['skin_checkout_current']  = $oSkinModel->get('checkout', $this->data['skin_checkout_selected']);
 
         //  Count the number of products (including deleted) - base currency is locked if > 1
         $this->data['productCount'] = $this->shop_product_model->countAll(null, true);

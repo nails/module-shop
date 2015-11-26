@@ -16,8 +16,7 @@ use Nails\Shop\Exception\ShippingDriverException;
 class NAILS_Shop_shipping_driver_model extends NAILS_Model
 {
     protected $aAvailable;
-    protected $driver;
-    protected $driverConfig;
+    protected $oDriver;
 
     // --------------------------------------------------------------------------
 
@@ -57,8 +56,6 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
                 return $oDriver;
             }
         }
-
-        $this->setError('"' . $sSlug . '" was not found.');
         return false;
     }
 
@@ -100,20 +97,21 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
         $oDriver = $this->get($sSlug);
 
         if (!$oDriver) {
-
             return false;
         }
 
         $this->unload();
 
-        dumpanddie($oDriver);
+        // --------------------------------------------------------------------------
 
+        $this->oDriver = _NAILS_GET_DRIVER_INSTANCE($oDriver);
 
-        require_once $oDriver->path . '/driver.php';
-
-
-
-        $this->oDriver = new $sClassName();
+        if (!($this->oDriver instanceof \Nails\Shop\Driver\ShippingBase)) {
+            throw new DriverException(
+                'Driver "' . $oDriver->name . '" must extend \Nails\Shop\Driver\ShippingBase',
+                3
+            );
+        }
 
         return true;
     }
@@ -126,8 +124,8 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
      */
     public function unload()
     {
-        unset($this->driver);
-        $this->driver = null;
+        unset($this->oDriver);
+        $this->oDriver = null;
     }
 
     // --------------------------------------------------------------------------
@@ -138,7 +136,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
      */
     protected function isDriverLoaded()
     {
-        return !is_null($this->driver);
+        return !is_null($this->oDriver);
     }
 
     // --------------------------------------------------------------------------
@@ -185,7 +183,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
          */
 
         $aShippableItems = $this->getShippableItemsFromBasket($oBasket);
-        $aOptions = $this->driver->options($aShippableItems, $oBasket);
+        $aOptions = $this->oDriver->options($aShippableItems, $oBasket);
 
         $aSlugs      = array();
         $bHasDefault = false;
@@ -298,7 +296,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
          */
 
         $shippableItems = $this->getShippableItemsFromBasket($basket);
-        $cost = $this->driver->calculate($shippableItems, $basket->shipping->option, $basket);
+        $cost = $this->oDriver->calculate($shippableItems, $basket->shipping->option, $basket);
 
         if (is_int($cost) || is_numeric($cost)) {
 
@@ -389,7 +387,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
          * which is in the base currency. Similar to the calculate() method
          */
 
-        $cost = $this->driver->calculateVariant($variant);
+        $cost = $this->oDriver->calculateVariant($variant);
 
         if (is_int($cost) || is_numeric($cost)) {
 
@@ -427,7 +425,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
             }
         }
 
-        return $this->driver->fieldsBasket();
+        return $this->oDriver->fieldsBasket();
     }
 
     // --------------------------------------------------------------------------
@@ -446,7 +444,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
             }
         }
 
-        return $this->driver->fieldsVariant();
+        return $this->oDriver->fieldsVariant();
     }
 
     // --------------------------------------------------------------------------
@@ -465,7 +463,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
             }
         }
 
-        return $this->driver->fieldsProduct();
+        return $this->oDriver->fieldsProduct();
     }
 
     // --------------------------------------------------------------------------
@@ -491,10 +489,10 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
             }
         }
 
-        if (method_exists($this->driver, 'getPromotion')) {
+        if (method_exists($this->oDriver, 'getPromotion')) {
 
             $shippableItems = $this->getShippableItemsFromBasket($basket);
-            return $this->driver->getPromotion($shippableItems, $basket);
+            return $this->oDriver->getPromotion($shippableItems, $basket);
 
         } else {
 
@@ -521,8 +519,8 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Unload any previously loaded driver for configuration
-        unset($this->driverconfig);
-        $this->driverconfig = null;
+        unset($this->oDriverconfig);
+        $this->oDriverconfig = null;
 
         // --------------------------------------------------------------------------
 
@@ -531,10 +529,10 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
         require_once $driver->path . 'driver.php';
 
         $class = ucfirst(strtolower(str_replace('-', '_', $driver->slug)));
-        $this->driverconfig = new $class();
+        $this->oDriverconfig = new $class();
 
         //  Spit back whatever the driver desires
-        return $this->driverconfig->configure();
+        return $this->oDriverconfig->configure();
     }
 }
 

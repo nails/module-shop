@@ -22,6 +22,13 @@ return array(
             } else {
                 return new \Nails\Shop\Model\Page();
             }
+        },
+        'Skin' => function () {
+            if (class_exists('\App\Shop\Model\Skin')) {
+                return new \App\Shop\Model\Skin();
+            } else {
+                return new \Nails\Shop\Model\Skin();
+            }
         }
     )
 );

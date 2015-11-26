@@ -621,16 +621,13 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
         //  Load up the shop's skin
         $skin = appSetting('skin_checkout', 'shop');
-        $skin = empty($skin) ? 'shop-skin-checkout-classic' : $skin;
-
-        $this->load->model('shop/shop_skin_checkout_model');
-        $skin = $this->shop_skin_checkout_model->get($skin);
+        $skin = empty($skin) ? 'skin-shop-checkout-classic' : $skin;
+        $skin = $this->oSkinModel->get('checkout', $skin);
 
         if (!$skin) {
 
             $subject  = 'Failed to load shop skin "' . $skin . '"';
-            $message  = 'Shop skin "' . $skin . '" failed to load at ' . APP_NAME . ', for the following reason: ';
-            $message .= $this->shop_skin_checkout_model->lastError();
+            $message  = 'Shop skin "' . $skin . '" failed to load at ' . APP_NAME;
 
             showFatalError($subject, $message);
         }

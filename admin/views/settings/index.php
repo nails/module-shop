@@ -20,9 +20,6 @@
             <a href="#" data-tab="tab-skin">Skin</a>
         </li>
         <li class="tab">
-            <a href="#" data-tab="tab-skin-config">Skin - Configure</a>
-        </li>
-        <li class="tab">
             <a href="#" data-tab="tab-payment-gateway">Payment Gateways</a>
         </li>
         <li class="tab">
@@ -479,340 +476,138 @@
                 </li>
             </ul>
             <section class="tabs" data-tabgroup="skins">
-                <div class="tab-page tab-skin-foh active clearfix">
-                    <p class="alert alert-info">
+                <div class="tab-page tab-skin-foh active">
+                    <p>
                         The "Front of House" skin is responsible for the user's experience whilst browsing your store.
                     </p>
                     <?php
 
-                        if ($skins_front) {
+                    if ($skins_front) {
 
-                            echo '<ul class="skins">';
-                            foreach ($skins_front as $skin) {
+                        ?>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="selected">Selected</th>
+                                    <th class="label">Label</th>
+                                    <th class="configure">Configure</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
 
-                                $_name        = !empty($skin->name) ? $skin->name : 'Untitled';
-                                $_description = !empty($skin->description) ? $skin->description : '';
+                                foreach ($skins_front as $skin) {
 
-                                if (file_exists($skin->path . 'icon.png')) {
+                                    $bSelected = $skin->name == $skin_front_selected ? true : false;
 
-                                    $_icon = $skin->url . 'icon.png';
+                                    ?>
+                                    <tr>
+                                        <td class="selected">
+                                            <?=form_radio('skin_front', $skin->name, $bSelected)?>
+                                        </td>
+                                        <td class="label">
+                                            <?php
 
-                                } elseif (file_exists($skin->path . 'icon.jpg')) {
+                                            echo $skin->name;
+                                            if (!empty($skin->description)) {
 
-                                    $_icon = $skin->url . 'icon.jpg';
+                                                echo '<small>';
+                                                echo $skin->description;
+                                                echo '</small>';
+                                            }
 
-                                } elseif (file_exists($skin->path . 'icon.gif')) {
+                                            ?>
+                                        </td>
+                                        <td class="configure">
 
-                                    $_icon = $skin->url . 'icon.gif';
-
-                                } else {
-
-                                    $_icon = NAILS_ASSETS_URL . 'img/admin/modules/settings/shop-skin-no-icon.png';
+                                        </td>
+                                    </tr>
+                                    <?php
                                 }
 
-                                $_selected = $skin->slug == $skin_front_selected ? true : false;
-                                $_class    = $_selected ? 'selected' : '';
+                                ?>
+                            </tbody>
+                        </table>
+                        <?php
 
-                                echo '<li class="skin ' . $_class . '" rel="tipsy" title="' . htmlentities($_description, ENT_QUOTES) . '">';
-                                    echo '<div class="icon">' . img($_icon) . '</div>';
-                                    echo '<div class="name">';
-                                        echo $_name;
-                                        echo '<span class="fa fa-check-circle"></span>';
-                                    echo '</div>';
-                                    echo form_radio('skin_front', $skin->slug, $_selected);
-                                echo '</li>';
+                    } else {
 
-                            }
-                            echo '</ul>';
-
-                        } else {
-
-                            echo '<p class="alert alert-danger">';
-                                echo '<strong>Error:</strong> ';
-                                echo 'I\'m sorry, but I couldn\'t find any front of house skins to use. This is a configuration error and should be raised with the developer.';
-                            echo '</p>';
-                        }
+                        ?>
+                        <p class="alert alert-danger">
+                            <strong>Error:</strong> I'm sorry, but I couldn't find any front of house skins to use.
+                            This is a configuration error and should be raised with the developer.
+                        </p>
+                        <?php
+                    }
 
                     ?>
                 </div>
-                <div class="tab-page tab-skin-checkout clearfix">
-                    <p class="alert alert-info">
+                <div class="tab-page tab-skin-checkout">
+                    <p>
                         The "Checkout" Skin is responsible for the user's basket and checkout experience.
                     </p>
                     <?php
 
-                        if ($skins_checkout) {
+                    if ($skins_checkout) {
 
-                            echo '<ul class="skins">';
-                            foreach ($skins_checkout as $skin) {
+                        ?>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="selected">Selected</th>
+                                    <th class="label">Label</th>
+                                    <th class="configure">Configure</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
 
-                                $_name        = !empty($skin->name) ? $skin->name : 'Untitled';
-                                $_description = !empty($skin->description) ? $skin->description : '';
+                                foreach ($skins_checkout as $skin) {
 
-                                if (file_exists($skin->path . 'icon.png')) {
+                                    $bSelected = $skin->name == $skin_checkout_selected ? true : false;
 
-                                    $_icon = $skin->url . 'icon.png';
+                                    ?>
+                                    <tr>
+                                        <td class="selected">
+                                            <?=form_radio('skin_front', $skin->name, $bSelected)?>
+                                        </td>
+                                        <td class="label">
+                                            <?php
 
-                                } elseif (file_exists($skin->path . 'icon.jpg')) {
+                                            echo $skin->name;
+                                            if (!empty($skin->description)) {
 
-                                    $_icon = $skin->url . 'icon.jpg';
+                                                echo '<small>';
+                                                echo $skin->description;
+                                                echo '</small>';
+                                            }
 
-                                } elseif (file_exists($skin->path . 'icon.gif')) {
+                                            ?>
+                                        </td>
+                                        <td class="configure">
 
-                                    $_icon = $skin->url . 'icon.gif';
-
-                                } else {
-
-                                    $_icon = NAILS_ASSETS_URL . 'img/admin/modules/settings/shop-skin-no-icon.png';
+                                        </td>
+                                    </tr>
+                                    <?php
                                 }
 
-                                $_selected = $skin->slug == $skin_checkout_selected ? true : false;
-                                $_class    = $_selected ? 'selected' : '';
+                                ?>
+                            </tbody>
+                        </table>
+                        <?php
 
-                                echo '<li class="skin ' . $_class . '" rel="tipsy" title="' . htmlentities($_description, ENT_QUOTES) . '">';
-                                    echo '<div class="icon">' . img($_icon) . '</div>';
-                                    echo '<div class="name">';
-                                        echo $_name;
-                                        echo '<span class="fa fa-check-circle"></span>';
-                                    echo '</div>';
-                                    echo form_radio('skin_checkout', $skin->slug, $_selected);
-                                echo '</li>';
-                            }
-                            echo '</ul>';
+                    } else {
 
-                        } else {
-
-                            echo '<p class="alert alert-danger">';
-                                echo '<strong>Error:</strong> ';
-                                echo 'I\'m sorry, but I couldn\'t find any checkout skins to use. This is a configuration error and should be raised with the developer.';
-                            echo '</p>';
-                        }
+                        ?>
+                        <p class="alert alert-danger">
+                            <strong>Error:</strong> I'm sorry, but I couldn't find any checkout skins to use.
+                            This is a configuration error and should be raised with the developer.
+                        </p>
+                        <?php
+                    }
 
                     ?>
                 </div>
-            </section>
-        </div>
-        <div class="tab-page tab-skin-config">
-            <?php
-
-                $sActiveTab = $this->input->post('active_tab_skins_config') ?: 'tab-skin-config-foh';
-                echo '<input type="hidden" name="active_tab_skins_config" value="' . $sActiveTab . '" id="active-tab-skins-config">';
-
-            ?>
-            <ul class="tabs" data-tabgroup="skins-config" data-active-tab-input="#active-tab-skins-config">
-                <li class="tab active">
-                    <a href="#" data-tab="tab-skin-config-foh">Front of House</a>
-                </li>
-                <li class="tab">
-                    <a href="#" data-tab="tab-skin-config-checkout">Checkout</a>
-                </li>
-            </ul>
-            <section class="tabs" data-tabgroup="skins-config">
-            <?php
-
-                echo '<div class="tab-page tab-skin-config-foh active">';
-                if (!empty($skin_front_current)) {
-
-                    if (!empty($skin_front_current->settings)) {
-
-                        echo '<p class="alert alert-info">';
-                            echo 'You are configuring settings for the <strong>' . $skin_front_current->name . '</strong> "Front of House" skin.';
-                        echo '</p>';
-
-                        echo '<div class="fieldset">';
-
-                        foreach ($skin_front_current->settings as $setting) {
-
-                            $field                = array();
-                            $field['key']         = !empty($setting->key) ? 'skin_config[' . $skin_front_current->slug . '][' . $setting->key . ']' : '';
-                            $field['label']       = !empty($setting->label) ? $setting->label : '';
-                            $field['placeholder'] = !empty($setting->placeholder) ? $setting->placeholder : '';
-                            $field['tip']         = !empty($setting->tip) ? $setting->tip : '';
-                            $field['type']        = !empty($setting->type) ? $setting->type : '';
-                            $field['class']       = !empty($setting->class) ? $setting->class : '';
-
-                            if (empty($field['key'])) {
-
-                                continue;
-
-                            } else {
-
-                                $field['default']  = appSetting($setting->key, 'shop-' . $skin_front_current->slug);
-                            }
-
-                            switch ($field['type']) {
-
-                                case 'bool' :
-                                case 'boolean' :
-
-                                    echo form_field_boolean($field);
-                                    break;
-
-                                case 'dropdown' :
-
-                                    if (!empty($setting->options) && is_array($setting->options)) {
-
-                                        $options = array();
-                                        $field['class'] = 'select2';
-
-                                        foreach ($setting->options as $option) {
-
-                                            if (isset($option->value)) {
-
-                                                $_value = $option->value;
-
-                                            } else {
-
-                                                $_value = null;
-                                            }
-
-                                            if (isset($option->label)) {
-
-                                                $_label = $option->label;
-
-                                            } else {
-
-                                                $_label = null;
-                                            }
-
-                                            $options[$_value] = $_label;
-                                        }
-
-                                        echo form_field_dropdown($field, $options);
-                                    }
-                                    break;
-
-                                case 'wysiwyg' :
-
-                                    echo form_field_wysiwyg($field);
-                                    break;
-
-                                default :
-
-                                    echo form_field($field);
-                                    break;
-                            }
-                        }
-
-                        echo '</div>';
-
-                    } else {
-
-                        echo '<p class="alert alert-warning">';
-                            echo 'No configurable settings for the <strong>' . $skin_front_current->name . '</strong> "Front of House" skin.';
-                        echo '</p>';
-                    }
-
-                } else {
-
-                    echo '<p class="alert alert-warning">';
-                        echo 'No configurable settings for this skin.';
-                    echo '</p>';
-                }
-                echo '</div>';
-
-                echo '<div class="tab-page tab-skin-config-checkout">';
-                if (!empty($skin_checkout_current)) {
-
-                    if (!empty($skin_checkout_current->settings)) {
-
-                        echo '<p class="alert alert-info">';
-                            echo 'You are configuring settings for the <strong>' . $skin_checkout_current->name . '</strong> "Checkout" skin.';
-                        echo '</p>';
-
-                        echo '<div class="fieldset">';
-
-                        foreach ($skin_checkout_current->settings as $setting) {
-
-                            $field                = array();
-                            $field['key']         = !empty($setting->key) ? 'skin_config[' . $skin_checkout_current->slug . '][' . $setting->key . ']' : '';
-                            $field['label']       = !empty($setting->label) ? $setting->label : '';
-                            $field['placeholder'] = !empty($setting->placeholder) ? $setting->placeholder : '';
-                            $field['tip']         = !empty($setting->tip) ? $setting->tip : '';
-                            $field['type']        = !empty($setting->type) ? $setting->type : '';
-                            $field['class']       = !empty($setting->class) ? $setting->class : '';
-
-                            if (empty($field['key'])) {
-
-                                continue;
-
-                            } else {
-
-                                $field['default']  = appSetting($setting->key, 'shop-' . $skin_checkout_current->slug);
-                            }
-
-                            switch ($field['type']) {
-
-                                case 'bool' :
-                                case 'boolean' :
-
-                                    echo form_field_boolean($field);
-                                    break;
-
-                                case 'dropdown' :
-
-                                    if (!empty($setting->options) && is_array($setting->options)) {
-
-                                        $options = array();
-                                        $field['class'] = 'select2';
-
-                                        foreach ($setting->options as $option) {
-
-                                            if (isset($option->value)) {
-
-                                                $_value = $option->value;
-
-                                            } else {
-
-                                                $_value = null;
-                                            }
-
-                                            if (isset($option->label)) {
-
-                                                $_label = $option->label;
-
-                                            } else {
-
-                                                $_label = null;
-                                            }
-
-                                            $options[$_value] = $_label;
-                                        }
-
-                                        echo form_field_dropdown($field, $options);
-                                    }
-                                    break;
-
-                                case 'wysiwyg' :
-
-                                    echo form_field_wysiwyg($field);
-                                    break;
-
-                                default :
-
-                                    echo form_field($field);
-                                    break;
-                            }
-                        }
-
-                        echo '</div>';
-
-                    } else {
-
-                        echo '<p class="alert alert-warning">';
-                            echo 'No configurable settings for the <Strong>' . $skin_checkout_current->name . '</strong> "Checkout" skin.';
-                        echo '</p>';
-                    }
-
-                } else {
-
-                    echo '<p class="alert alert-warning">';
-                        echo 'No configurable settings for this skin.';
-                    echo '</p>';
-                }
-                echo '</div>';
-
-            ?>
             </section>
         </div>
         <div class="tab-page tab-payment-gateway">
