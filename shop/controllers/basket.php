@@ -55,7 +55,8 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        $this->data['basket'] = $this->shop_basket_model->get();
+        $this->data['basket']          = $this->shop_basket_model->get();
+        $this->data['shippingOptions'] = $this->shop_shipping_driver_model->options($this->data['basket']);
 
         // --------------------------------------------------------------------------
 
@@ -308,7 +309,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
             return;
         }
 
-        if ($this->shop_basket_model->addVoucher($this->input->post('voucher'))) {
+        if ($this->shop_basket_model->setVoucher($this->input->post('voucher'))) {
 
             $status  = 'success';
             $message = '<strong>Success!</strong> Voucher has been applied to your basket.';
@@ -341,7 +342,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        if ($this->shop_basket_model->removeVoucher()) {
+        if ($this->shop_basket_model->unsetVoucher()) {
 
             $status  = 'success';
             $message = '<strong>Success!</strong> Your voucher was removed.';
@@ -375,7 +376,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        if ($this->shop_basket_model->addNote($this->input->get_post('note'))) {
+        if ($this->shop_basket_model->setNote($this->input->get_post('note'))) {
 
             $status  = 'success';
             $message = '<strong>Success!</strong> Note was added to your basket.';
@@ -405,7 +406,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        if ($this->shop_basket_model->removeNote()) {
+        if ($this->shop_basket_model->unsetNote()) {
 
             $status  = 'success';
             $message = '<strong>Success!</strong> Note was removed from your basket.';
@@ -479,88 +480,26 @@ class NAILS_Basket extends NAILS_Shop_Controller
     // --------------------------------------------------------------------------
 
     /**
-     * Set a basket as a "for collection" order
-     * @return void
+     * Set the shipping option to use for shipping
      */
-    public function set_as_collection()
+    public function set_shipping()
     {
         if ($this->maintenance->enabled) {
-
             $this->renderMaintenancePage();
             return;
         }
 
         // --------------------------------------------------------------------------
 
-        if ($this->shop_basket_model->addShippingType('COLLECT')) {
+        if ($this->shop_basket_model->setShippingOption($this->input->post('shipping_option'))) {
 
             $status  = 'success';
-            $message = '<strong>Success!</strong> Your basket was set as a "Collection" order.';
+            $message = '<strong>Success!</strong> Your shipping preference was updated.';
 
         } else {
 
             $status   = 'error';
-            $message  = '<strong>Sorry,</strong> failed to set your basket as a "Collection" order. ';
-            $message .= $this->shop_basket_model->lastError();
-        }
-
-        // --------------------------------------------------------------------------
-
-        $this->session->set_flashdata($status, $message);
-        redirect($this->data['return']);
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Set a basket as a "for delivery" order
-     * @return void
-     */
-    public function set_as_delivery()
-    {
-        if ($this->maintenance->enabled) {
-
-            $this->renderMaintenancePage();
-            return;
-        }
-
-        // --------------------------------------------------------------------------
-
-        //  Check that the basket can in fact be set as delivery
-        $numCollectOnlyItems = 0;
-        $basket              = $this->shop_basket_model->get();
-
-        if (!$basket->shipping->isDeliverable) {
-
-            $status   = 'error';
-            $message  = '<strong>Sorry,</strong> failed to set your basket as a "delivery" order. ';
-            $message .= 'Your order does not contain any deliverable items.';
-
-        } elseif ($this->shop_basket_model->addShippingType('DELIVER')) {
-
-            $status  = 'success';
-            $message = '<strong>Success!</strong> Your basket was set as a "Delivery" order.';
-
-            /**
-             * Refresh the basket, we need to check if this is a DELIVER_COLLECT order now,
-             * if it is, we should give the user a heads-up.
-             */
-
-            $basket = $this->shop_basket_model->get(true);
-
-            if ($basket->shipping->type == 'DELIVER_COLLECT') {
-
-                $this->session->set_flashdata(
-                    'message',
-                    '<strong>We will only partially deliver this order</strong>' .
-                    '<br />Your order contains items which are collect only.'
-                );
-            }
-
-        } else {
-
-            $status   = 'error';
-            $message  = '<strong>Sorry,</strong> failed to set your basket as a "Delivery" order. ';
+            $message  = '<strong>Sorry,</strong> failed to update your shipping preference. ';
             $message .= $this->shop_basket_model->lastError();
         }
 

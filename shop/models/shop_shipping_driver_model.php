@@ -11,11 +11,11 @@
  */
 
 use Nails\Factory;
+use Nails\Shop\Exception\ShippingDriverException;
 
 class NAILS_Shop_shipping_driver_model extends NAILS_Model
 {
-    protected $available;
-    protected $shippingDriverLocations;
+    protected $aAvailable;
     protected $driver;
     protected $driverConfig;
 
@@ -27,37 +27,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
     public function __construct()
     {
         parent::__construct();
-
-        // --------------------------------------------------------------------------
-
-        $this->available = null;
-
-        /**
-         * Shipping driver locations
-         * The model will search these directories for shipping drivers; to add more directories extend this
-         * This must be an array with 2 indexes:
-         * `path`   => The absolute path to the directory containing the shipping drivers (required)
-         * `url`    => The URL to access the shipping drivers (required)
-         * `regex`  => If the directory doesn't only contain shipping drivers then specify a regex to filter by
-         */
-
-        if (empty($this->shippingDriverLocations)) {
-
-            $this->shippingDriverLocations = array();
-        }
-
-        //  'Official' Shipping Drivers
-        $this->shippingDriverLocations[] = array(
-            'path'  => NAILS_PATH,
-            'url'   => NAILS_URL,
-            'regex' => '/^shop-shipping-driver-(.*)$/'
-       );
-
-        //  App Shipping Drivers
-        $this->shippingDriverLocations[] = array(
-            'path' => FCPATH . APPPATH . 'modules/shop/shipping_drivers',
-            'url' => site_url(APPPATH . 'modules/shop/shipping_drivers', isPageSecure())
-       );
+        $this->aAvailable = _NAILS_GET_DRIVERS('ShopShipping');
     }
 
     // --------------------------------------------------------------------------
@@ -69,145 +39,26 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
      */
     public function getAvailable($refresh = false)
     {
-        if (!is_null($this->available) && !$refresh) {
-
-            return $this->available;
-        }
-
-        //  Reset
-        $this->available = array();
-
-        // --------------------------------------------------------------------------
-
-        /**
-         * Look for shipping_drivers, where a shipping_driver has the same name, the
-         * last one found is the one which is used
-         */
-
-        Factory::helper('directory');
-
-        //  Take a fresh copy
-        $shippingDriverLocations = $this->shippingDriverLocations;
-
-        //  Sanitise
-        for ($i = 0; $i < count($shippingDriverLocations); $i++) {
-
-            //  Ensure path is present and has a trailing slash
-            if (isset($shippingDriverLocations[$i]['path'])) {
-
-                $shippingDriverLocations[$i]['path'] = substr($shippingDriverLocations[$i]['path'], -1, 1) == '/' ? $shippingDriverLocations[$i]['path'] : $shippingDriverLocations[$i]['path'] . '/';
-
-            } else {
-
-                unset($shippingDriverLocations[$i]);
-            }
-
-            //  Ensure URL is present and has a trailing slash
-            if (isset($shippingDriverLocations[$i]['url'])) {
-
-                $shippingDriverLocations[$i]['url'] = substr($shippingDriverLocations[$i]['url'], -1, 1) == '/' ? $shippingDriverLocations[$i]['url'] : $shippingDriverLocations[$i]['url'] . '/';
-
-            } else {
-
-                unset($shippingDriverLocations[$i]);
-
-            }
-        }
-
-        //  Reset array keys, possible that some may have been removed
-        $shippingDriverLocations = array_values($shippingDriverLocations);
-
-        foreach ($shippingDriverLocations as $shippingDriver_location) {
-
-            $path = $shippingDriver_location['path'];
-            $shippingDrivers = is_dir($path) ? directory_map($path, 1) : array();
-
-            if (is_array($shippingDrivers)) {
-
-                foreach ($shippingDrivers as $shippingDriver) {
-
-                    //  do we need to filter out non shipping_drivers?
-                    if (!empty($shippingDriver_location['regex'])) {
-
-                        if (!preg_match($shippingDriver_location['regex'], $shippingDriver)) {
-
-                            log_message('debug', '"' . $shippingDriver . '" is not a shop shipping_driver.');
-                            continue;
-                        }
-                    }
-
-                    // --------------------------------------------------------------------------
-
-                    //  Exists?
-                    if (file_exists($path . $shippingDriver . '/config.json')) {
-
-                        $config = @json_decode(file_get_contents($path . $shippingDriver . '/config.json'));
-
-                    } else {
-
-                        $msg = 'Could not find configuration file for shipping_driver "' . $path . $shippingDriver. '".';
-                        log_message('error', $msg);
-                        continue;
-                    }
-
-                    //  Valid?
-                    if (empty($config)) {
-
-                        $msg = 'Configuration file for shipping_driver "' . $path . $shippingDriver. '" contains invalid JSON.';
-                        log_message('error', $msg);
-                        continue;
-
-                    } elseif (!is_object($config)) {
-
-                        $msg = 'Configuration file for shipping_driver "' . $path . $shippingDriver. '" contains invalid data.';
-                        log_message('error', $msg);
-                        continue;
-                    }
-
-                    // --------------------------------------------------------------------------
-
-                    //  All good!
-
-                    //  Set the slug
-                    $config->slug = strtolower($shippingDriver);
-
-                    //  Set the path
-                    $config->path = $path . $shippingDriver . '/';
-
-                    //  Set the URL
-                    $config->url = $shippingDriver_location['url'] . $shippingDriver . '/';
-
-                    $this->available[$shippingDriver] = $config;
-                }
-            }
-        }
-
-        $this->available = array_values($this->available);
-
-        return $this->available;
+        return $this->aAvailable;
     }
 
     // --------------------------------------------------------------------------
 
     /**
      * Gets a single driver
-     * @param  string  $slug    the driver's slug
-     * @param  boolean $refresh Skip the cache
+     * @param  string   $sSlug The driver's slug
      * @return stdClass
      */
-    public function get($slug, $refresh = false)
+    public function get($sSlug)
     {
-        $shippingDrivers = $this->getAvailable($refresh);
-
-        foreach ($shippingDrivers as $shippingDriver) {
-
-            if ($shippingDriver->slug == $slug) {
-
-                return $shippingDriver;
+        $aShippingDrivers = $this->getAvailable();
+        foreach ($aShippingDrivers as $oDriver) {
+            if ($oDriver->name == $sSlug) {
+                return $oDriver;
             }
         }
 
-        $this->setError('"' . $slug . '" was not found.');
+        $this->setError('"' . $sSlug . '" was not found.');
         return false;
     }
 
@@ -219,14 +70,13 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
      */
     public function getEnabled()
     {
-        $slug = appSetting('enabled_shipping_driver', 'shop');
+        $sSlug = appSetting('enabled_shipping_driver', 'shop');
 
-        if (!$slug) {
-
+        if (!$sSlug) {
             return false;
         }
 
-        return $this->get($slug);
+        return $this->get($sSlug);
     }
 
     // --------------------------------------------------------------------------
@@ -236,32 +86,35 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
      * @param  string $slug The driver to load
      * @return boolean
      */
-    public function load($slug = null)
+    public function load($sSlug = null)
     {
-        if (is_null($slug)) {
+        if (is_null($sSlug)) {
 
-            $slug = appSetting('enabled_shipping_driver', 'shop');
+            $sSlug = appSetting('enabled_shipping_driver', 'shop');
 
-            if (!$slug) {
-
+            if (!$sSlug) {
                 return false;
             }
         }
 
-        $driver = $this->get($slug);
+        $oDriver = $this->get($sSlug);
 
-        if (!$driver) {
+        if (!$oDriver) {
 
             return false;
         }
 
         $this->unload();
 
-        require_once NAILS_PATH . 'module-shop/shop/interfaces/shippingDriver.php';
-        require_once $driver->path . 'driver.php';
+        $sClassName = $oDriver->name;
 
-        $class = ucfirst(str_replace('-', '_', $driver->slug));
-        $this->driver = new $class();
+        dumpanddie($sClassName);
+
+        require_once $oDriver->path . 'Driver.php';
+
+
+        dumpanddie($sClassName);
+        $this->oDriver = new $sClassName();
 
         return true;
     }
@@ -292,6 +145,118 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
+     * Returns an array of the shippable items from the basket object
+     * @param  object $basket The basket object
+     * @return array
+     */
+    private function getShippableItemsFromBasket($basket)
+    {
+        $shippableItems = array();
+
+        foreach ($basket->items as $item) {
+
+            if (!empty($item->product->type->is_physical) && empty($item->variant->shipping->collection_only)) {
+
+                $shippableItems[] = $item;
+            }
+        }
+
+        return $shippableItems;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns an array of the available shipping options
+     * @return array
+     */
+    public function options($oBasket)
+    {
+        if (!$this->isDriverLoaded()) {
+
+            if (!$this->load()) {
+
+                return array();
+            }
+        }
+
+        /**
+         * Ask the driver what the available options are, pass it the shippable items so it can
+         * amend it's responses as nessecary and work out the cost
+         */
+
+        $aShippableItems = $this->getShippableItemsFromBasket($oBasket);
+        $aOptions = $this->driver->options($aShippableItems, $oBasket);
+
+        $aSlugs      = array();
+        $bHasDefault = false;
+        $aOut        = array();
+
+        //  If warehouse collection is enabled then add it as an option
+        if (appSetting('warehouse_collection_enabled', 'shop')) {
+
+            $oTemp                 = new \stdClass();
+            $oTemp->slug           = 'COLLECTION';
+            $oTemp->label          = 'Collection';
+            $oTemp->cost           = 0;
+            $oTemp->cost_formatted = 'FREE';
+            $oTemp->default        = false;
+
+            $aOut[] = $oTemp;
+        }
+
+        //  Test options
+        foreach ($aOptions as &$aOption) {
+
+            if (empty($aOption['slug'])) {
+                throw new ShippingDriverException('Each shipping option must provide a unique slug', 1);
+            }
+
+            if (in_array($aOption['slug'], $aSlugs)) {
+                throw new ShippingDriverException('"' . $aOption['slug'] . '" is not a unique shipping option slug', 1);
+            }
+
+            //  Can only have one default value, the first defined.
+            if (!empty($aOption['default']) && $bHasDefault) {
+                $aOption['default'] = false;
+            } elseif (!empty($aOption['default'])) {
+                $bHasDefault = true;
+            }
+
+            $aSlugs[] = $aOption['slug'];
+        }
+
+        //  Prepare each item
+        foreach ($aOptions as &$aOption) {
+
+            if (is_int($aOption['cost']) || is_numeric($aOption['cost'])) {
+
+                $aOption['cost'] = (float) $aOption['cost'];
+
+            } elseif (!is_float($aOption['cost'])) {
+
+                $aOption['cost'] = 0;
+            }
+
+            //  Convert the base price to the user's currency
+            $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
+
+            $oTemp                 = new \stdClass();
+            $oTemp->slug           = $aOption['slug'];
+            $oTemp->label          = $aOption['label'];
+            $oTemp->cost           = $oCurrencyModel->convertBaseToUser($aOption['cost']);
+            $oTemp->cost_formatted = $oCurrencyModel->formatUser($aOption['cost']);
+            $oTemp->default        = (bool) $aOption['default'];
+
+            $aOut[] = $oTemp;
+        }
+
+        return $aOut;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Takes a basket object and calculates the cost of shipping
      * @param  stdClass $basket A basket object
      * @return stdClass
@@ -301,6 +266,13 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
         $free       = new \stdClass();
         $free->base = (float) 0;
         $free->user = (float) 0;
+
+        // --------------------------------------------------------------------------
+
+        //  If the shipping type is COLLECTION (a special type) then shipping is FREE
+        if ($basket->shipping->option == 'COLLECTION') {
+            return $free;
+        }
 
         // --------------------------------------------------------------------------
 
@@ -327,7 +299,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
          */
 
         $shippableItems = $this->getShippableItemsFromBasket($basket);
-        $cost = $this->driver->calculate($shippableItems, $basket);
+        $cost = $this->driver->calculate($shippableItems, $basket->shipping->option, $basket);
 
         if (is_int($cost) || is_numeric($cost)) {
 
@@ -346,28 +318,6 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
         $out->user = $oCurrencyModel->convertBaseToUser($cost);
 
         return $out;
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Returns an array of the shippable items from the basket object
-     * @param  object $basket The basket object
-     * @return array
-     */
-    private function getShippableItemsFromBasket($basket)
-    {
-        $shippableItems = array();
-
-        foreach ($basket->items as $item) {
-
-            if (!empty($item->product->type->is_physical) && empty($item->variant->shipping->collection_only)) {
-
-                $shippableItems[] = $item;
-            }
-        }
-
-        return $shippableItems;
     }
 
     // --------------------------------------------------------------------------
@@ -468,7 +418,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
      * These might include priority shipping or recorded delivery for example.
      * @return array
      */
-    public function optionsBasket()
+    public function fieldsBasket()
     {
         if (!$this->isDriverLoaded()) {
 
@@ -478,7 +428,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
             }
         }
 
-        return $this->driver->optionsBasket();
+        return $this->driver->fieldsBasket();
     }
 
     // --------------------------------------------------------------------------
@@ -487,7 +437,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
      * Returns an array of additional options for variants which can be set by admin
      * @return array
      */
-    public function optionsVariant()
+    public function fieldsVariant()
     {
         if (!$this->isDriverLoaded()) {
 
@@ -497,7 +447,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
             }
         }
 
-        return $this->driver->optionsVariant();
+        return $this->driver->fieldsVariant();
     }
 
     // --------------------------------------------------------------------------
@@ -506,7 +456,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
      * Returns an array of additional options for products  which can be set by admin
      * @return array
      */
-    public function optionsProduct()
+    public function fieldsProduct()
     {
         if (!$this->isDriverLoaded()) {
 
@@ -516,7 +466,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
             }
         }
 
-        return $this->driver->optionsProduct();
+        return $this->driver->fieldsProduct();
     }
 
     // --------------------------------------------------------------------------
@@ -589,9 +539,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
     }
 }
 
-
 // --------------------------------------------------------------------------
-
 
 /**
  * OVERLOADING NAILS' MODELS

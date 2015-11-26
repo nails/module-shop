@@ -980,11 +980,11 @@
 
                         $_name        = !empty($driver->name) ? $driver->name : 'Untitled';
                         $_description = !empty($driver->description) ? $driver->description : '';
-                        $_enabled     = $driver->slug == $enabledShippingDriver ? true : false;
+                        $_enabled     = $driver->name == $enabledShippingDriver ? true : false;
 
                         echo '<tr>';
                             echo '<td class="selected">';
-                                echo form_radio('enabled_shipping_driver', $driver->slug, $_enabled);
+                                echo form_radio('enabled_shipping_driver', $driver->name, $_enabled);
                             echo '</td>';
                             echo '<td class="label">';
                                 echo $_name;
@@ -993,7 +993,7 @@
                             echo '<td class="configure">';
                                 if (!empty($driver->configurable)) {
                                     echo anchor(
-                                        'admin/shop/settings/shop_sd?driver=' . $driver->slug,
+                                        'admin/shop/settings/shop_sd?driver=' . $driver->name,
                                         'Configure',
                                         'data-fancybox-type="iframe" class="fancybox btn btn-xs btn-primary"'
                                     );

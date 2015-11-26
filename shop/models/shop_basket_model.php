@@ -69,31 +69,31 @@ class NAILS_Shop_basket_model extends Base
             $this->basket->items = $savedBasket->items;
 
             if (!empty($savedBasket->order)) {
-                $this->addOrder($savedBasket->order);
+                $this->setOrder($savedBasket->order);
             }
 
             if (!empty($savedBasket->customer_details)) {
-                $this->addCustomerDetails($savedBasket->customer_details);
+                $this->setCustomerDetails($savedBasket->customer_details);
             }
 
-            if (!empty($savedBasket->shipping_type)) {
-                $this->addShippingType($savedBasket->shipping_type);
+            if (!empty($savedBasket->shipping_option)) {
+                $this->setShippingOption($savedBasket->shipping_option);
             }
 
             if (!empty($savedBasket->shipping_details)) {
-                $this->addShippingDetails($savedBasket->shipping_details);
+                $this->setShippingDetails($savedBasket->shipping_details);
             }
 
             if (!empty($savedBasket->payment_gateway)) {
-                $this->addPaymentGateway($savedBasket->payment_gateway);
+                $this->setPaymentGateway($savedBasket->payment_gateway);
             }
 
             if (!empty($savedBasket->voucher->code)) {
-                $this->addVoucher($savedBasket->voucher->code);
+                $this->setVoucher($savedBasket->voucher->code);
             }
 
             if (!empty($savedBasket->note)) {
-                $this->addNote($savedBasket->note);
+                $this->setNote($savedBasket->note);
             }
         }
 
@@ -297,27 +297,18 @@ class NAILS_Shop_basket_model extends Base
 
         // --------------------------------------------------------------------------
 
-        //  Determine the shipping Type
-        $basket->shipping->user          = $this->basket->shipping->user;
-        $basket->shipping->type          = $this->getShippingType();
+        //  Determine the shipping option
+        $basket->shipping->option        = $this->getShippingOption();
         $basket->shipping->isDeliverable = $this->isDeliverable();
 
         // --------------------------------------------------------------------------
 
         //  Calculate shipping costs
-        if ($basket->shipping->type === 'DELIVER' || $basket->shipping->type === 'DELIVER_COLLECT') {
+        $this->load->model('shop/shop_shipping_driver_model');
+        $oShippingCosts = $this->shop_shipping_driver_model->calculate($basket);
 
-            $this->load->model('shop/shop_shipping_driver_model');
-            $oShippingCosts = $this->shop_shipping_driver_model->calculate($basket);
-
-            $basket->totals->base->shipping = $oShippingCosts->base;
-            $basket->totals->user->shipping = $oShippingCosts->user;
-
-        } else {
-
-            $basket->totals->base->shipping = 0;
-            $basket->totals->user->shipping = 0;
-        }
+        $basket->totals->base->shipping = $oShippingCosts->base;
+        $basket->totals->user->shipping = $oShippingCosts->user;
 
         // --------------------------------------------------------------------------
 
@@ -1007,7 +998,7 @@ class NAILS_Shop_basket_model extends Base
      * Sets the basket's "customer details" object.
      * @return boolean
      */
-    public function addCustomerDetails($details)
+    public function setCustomerDetails($details)
     {
         //  @todo: verify?
         $this->basket->customer->details = $details;
@@ -1025,9 +1016,55 @@ class NAILS_Shop_basket_model extends Base
      * Resets the basket's "customer details" object.
      * @return boolean
      */
-    public function removeCustomerDetails()
+    public function unsetCustomerDetails()
     {
         $this->basket->customer->details = $this->defaultCustomerDetails();
+
+        //  Invalidate the basket cache
+        $this->saveSession();
+        $this->unsetCache($this->cacheKey);
+
+        return true;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns the basket's "shipping option" value.
+     * @return stdClass
+     */
+    public function getShippingOption()
+    {
+        return $this->basket->shipping->option;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Sets the basket's "shipping option" value.
+     * @return boolean
+     */
+    public function setShippingOption($sOptionSlug)
+    {
+        //  @todo: verify?
+        $this->basket->shipping->option = $sOptionSlug;
+
+        //  Invalidate the basket cache
+        $this->saveSession();
+        $this->unsetCache($this->cacheKey);
+
+        return true;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Resets the basket's "shipping option" value.
+     * @return boolean
+     */
+    public function unsetShippingOption()
+    {
+        $this->basket->shipping->option = $this->defaultShippingOption();
 
         //  Invalidate the basket cache
         $this->saveSession();
@@ -1053,7 +1090,7 @@ class NAILS_Shop_basket_model extends Base
      * Sets the basket's "shipping details" object.
      * @return boolean
      */
-    public function addShippingDetails($details)
+    public function setShippingDetails($details)
     {
         //  @todo: verify?
         $this->basket->shipping->details = $details;
@@ -1071,93 +1108,9 @@ class NAILS_Shop_basket_model extends Base
      * Resets the basket's "shipping details" object.
      * @return boolean
      */
-    public function removeShippingDetails()
+    public function unsetShippingDetails()
     {
         $this->basket->shipping->details = $this->defaultShippingDetails();
-
-        //  Invalidate the basket cache
-        $this->saveSession();
-        $this->unsetCache($this->cacheKey);
-
-        return true;
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Returns the basket's "shipping type" object.
-     * @return stdClass
-     */
-    public function getShippingType()
-    {
-        /**
-         * If the basket is a DELIVER basket then check if there are any collect only
-         * items. If we find a collect only item then mark as DELIVER_COLLECT, unless
-         * ALL the items are for colelct in which case it's a COLLECT order.
-         */
-
-        if ($this->basket->shipping->user === 'DELIVER') {
-
-            $numCollectOnlyItems = 0;
-            foreach ($this->basket->items as $item) {
-                if ($item->variant->ship_collection_only) {
-                    $numCollectOnlyItems++;
-                }
-            }
-
-            if ($numCollectOnlyItems > 0 && $numCollectOnlyItems < count($this->basket->items)) {
-
-                return 'DELIVER_COLLECT';
-
-            } elseif ($numCollectOnlyItems > 0 && $numCollectOnlyItems === count($this->basket->items)) {
-
-                return 'COLLECT';
-
-            } else {
-
-                return 'DELIVER';
-            }
-
-        } else {
-
-            return $this->basket->shipping->user;
-        }
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Sets the basket's "shipping type" object.
-     * @return boolean
-     */
-    public function addShippingType($deliveryType)
-    {
-        if ($deliveryType == 'COLLECT' || $deliveryType == 'DELIVER') {
-
-            $this->basket->shipping->user = $deliveryType;
-
-            //  Invalidate the basket cache
-            $this->saveSession();
-            $this->unsetCache($this->cacheKey);
-
-            return true;
-
-        } else {
-
-            $this->setError('"' . $deliveryType . '" is not a valid delivery type.');
-            return false;
-        }
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Resets the basket's "shipping details" object.
-     * @return boolean
-     */
-    public function removeShippingType()
-    {
-        $this->basket->shipping->user = $this->defaultShippingType();
 
         //  Invalidate the basket cache
         $this->saveSession();
@@ -1201,7 +1154,7 @@ class NAILS_Shop_basket_model extends Base
      * Sets the basket's "payment gateway" object.
      * @return boolean
      */
-    public function addPaymentGateway($payment_gateway)
+    public function setPaymentGateway($payment_gateway)
     {
         //  @todo: verify?
         $this->basket->payment_gateway = $payment_gateway;
@@ -1219,7 +1172,7 @@ class NAILS_Shop_basket_model extends Base
      * Resets the basket's "payment gateway" object.
      * @return boolean
      */
-    public function removePaymentGateway()
+    public function unsetPaymentGateway()
     {
         $this->basket->payment_gateway = $this->defaultPaymentGateway();
 
@@ -1247,7 +1200,7 @@ class NAILS_Shop_basket_model extends Base
      * Sets the basket's "order" object.
      * @return boolean
      */
-    public function addOrder($order)
+    public function setOrder($order)
     {
         //  @todo: verify?
         $this->basket->order = $order;
@@ -1265,7 +1218,7 @@ class NAILS_Shop_basket_model extends Base
      * Resets the basket's "order" object.
      * @return boolean
      */
-    public function removeOrder()
+    public function unsetOrder()
     {
         $this->basket->order = $this->defaultOrder();
 
@@ -1293,7 +1246,7 @@ class NAILS_Shop_basket_model extends Base
      * Adds a voucher to a basket.
      * @param string $voucher_code The voucher's code
      */
-    public function addVoucher($voucher_code)
+    public function setVoucher($voucher_code)
     {
         if (empty($voucher_code)) {
 
@@ -1316,7 +1269,7 @@ class NAILS_Shop_basket_model extends Base
 
         } else {
 
-            $this->removeVoucher();
+            $this->unsetVoucher();
             $this->setError($oVoucherModel->lastError());
 
             return false;
@@ -1330,7 +1283,7 @@ class NAILS_Shop_basket_model extends Base
      * Resets the basket's "voucher" object.
      * @return void
      */
-    public function removeVoucher()
+    public function unsetVoucher()
     {
         $this->basket->voucher = $this->defaultVoucher();
 
@@ -1358,7 +1311,7 @@ class NAILS_Shop_basket_model extends Base
      * Adds a note to the basket
      * @param string $note The note to add
      */
-    public function addNote($note)
+    public function setNote($note)
     {
         $this->basket->note = $note;
 
@@ -1375,7 +1328,7 @@ class NAILS_Shop_basket_model extends Base
      * Resets the basket's "note" object
      * @return void
      */
-    public function removeNote()
+    public function unsetNote()
     {
         $this->basket->note = $this->defaultNote();
 
@@ -1439,7 +1392,7 @@ class NAILS_Shop_basket_model extends Base
         $_save->items            = $this->basket->items;
         $_save->order            = $this->basket->order;
         $_save->customer_details = $this->basket->customer->details;
-        $_save->shipping_type    = $this->basket->shipping->user;
+        $_save->shipping_option  = $this->basket->shipping->option;
         $_save->shipping_details = $this->basket->shipping->details;
         $_save->payment_gateway  = $this->basket->payment_gateway;
         $_save->voucher          = new \stdClass();
@@ -1538,7 +1491,7 @@ class NAILS_Shop_basket_model extends Base
         $out->customer          = new \stdClass();
         $out->customer->details = $this->defaultCustomerDetails();
         $out->shipping          = new \stdClass();
-        $out->shipping->user    = $this->defaultShippingType();
+        $out->shipping->option  = $this->defaultShippingOption();
         $out->shipping->details = $this->defaultShippingDetails();
         $out->payment_gateway   = $this->defaultPaymentGateway();
         $out->voucher           = $this->defaultVoucher();
@@ -1662,9 +1615,13 @@ class NAILS_Shop_basket_model extends Base
 
     // --------------------------------------------------------------------------
 
-    protected function defaultShippingType()
+    /**
+     * Returns a default, empty, basket "shipping option" slug
+     * @return string
+     */
+    protected function defaultShippingOption()
     {
-        return 'DELIVER';
+        return '';
     }
 
     // --------------------------------------------------------------------------
@@ -1703,9 +1660,7 @@ class NAILS_Shop_basket_model extends Base
     }
 }
 
-
 // --------------------------------------------------------------------------
-
 
 /**
  * OVERLOADING NAILS' MODELS

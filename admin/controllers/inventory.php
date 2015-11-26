@@ -400,7 +400,7 @@ class Inventory extends BaseAdmin
         //  Fetch shipping data, used in form validation
         $this->load->model('shop/shop_shipping_driver_model');
         $this->data['shipping_driver']          = $this->shop_shipping_driver_model->getEnabled();
-        $this->data['shipping_options_variant'] = $this->shop_shipping_driver_model->optionsVariant();
+        $this->data['shipping_options_variant'] = $this->shop_shipping_driver_model->fieldsVariant();
 
         // --------------------------------------------------------------------------
 
@@ -581,7 +581,7 @@ class Inventory extends BaseAdmin
         //  Fetch shipping data, used in form validation
         $this->load->model('shop/shop_shipping_driver_model');
         $this->data['shipping_driver']          = $this->shop_shipping_driver_model->getEnabled();
-        $this->data['shipping_options_variant'] = $this->shop_shipping_driver_model->optionsVariant();
+        $this->data['shipping_options_variant'] = $this->shop_shipping_driver_model->fieldsVariant();
 
         // --------------------------------------------------------------------------
 
@@ -821,7 +821,7 @@ class Inventory extends BaseAdmin
                 $this->oFormValidation->set_rules('variation[' . $index . '][shipping][collection_only]', '', 'xss_clean');
 
                 //  Foreach of the driver's settings and apply any rules, but if collect only is on then don't bother
-                $shipping_options = $this->shop_shipping_driver_model->optionsVariant();
+                $shipping_options = $this->shop_shipping_driver_model->fieldsVariant();
                 foreach ($shipping_options as $option) {
 
                     $rules      = array();

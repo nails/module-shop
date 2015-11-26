@@ -185,7 +185,7 @@ class Basket extends \Nails\Api\Controller\Base
 
         if ($oVoucher) {
 
-            if (!$this->shop_basket_model->addVoucher($oVoucher->code)) {
+            if (!$this->shop_basket_model->setVoucher($oVoucher->code)) {
 
                 $aOut['status'] = 400;
                 $aOut['error']  = $this->shop_basket_model->lastError();
@@ -217,7 +217,7 @@ class Basket extends \Nails\Api\Controller\Base
 
         $out = array();
 
-        if (!$this->shop_basket_model->removeVoucher()) {
+        if (!$this->shop_basket_model->unsetVoucher()) {
 
             $out['status'] = 400;
             $out['error']  = $this->shop_basket_model->lastError();
@@ -244,7 +244,7 @@ class Basket extends \Nails\Api\Controller\Base
         $out  = array();
         $note = $this->input->post('note');
 
-        if (!$this->shop_basket_model->addNote($note)) {
+        if (!$this->shop_basket_model->setNote($note)) {
 
             $out['status'] = 400;
             $out['error']  = $this->shop_basket_model->lastError();
