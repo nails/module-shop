@@ -8,6 +8,7 @@
  * @category    Model
  * @author      Nails Dev Team
  * @link
+* @todo consider consolidating this into a single, Nails-wide, skin model
  */
 
 namespace Nails\Shop\Model;

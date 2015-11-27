@@ -818,27 +818,30 @@
 
                         foreach ($shipping_drivers as $driver) {
 
-                            $_name        = !empty($driver->name) ? $driver->name : 'Untitled';
-                            $_description = !empty($driver->description) ? $driver->description : '';
-                            $_enabled     = $driver->name == $enabledShippingDriver ? true : false;
+                            $bSelected = $driver->slug == $enabledShippingDriver ? true : false;
 
                             ?>
                             <tr>
                                 <td class="selected">
-                                    <?=form_radio('enabled_shipping_driver', $driver->name, $_enabled)?>
+                                    <?=form_radio('enabled_shipping_driver', $driver->slug, $bSelected)?>
                                 </td>
                                 <td class="label">
                                     <?php
 
-                                    echo $_name;
-                                    echo $_description ? '<small>' . $_description . '</small>' : '';
+                                    echo $driver->name;
+                                    if (!empty($sdriverkin->description)) {
+
+                                        echo '<small>';
+                                        echo $driver->description;
+                                        echo '</small>';
+                                    }
 
                                     ?>
                                 </td>
                                 <td class="configure">
                                     <?php
 
-                                    if (!empty($driver->configurable)) {
+                                    if (!empty($driver->data->settings)) {
                                         echo anchor(
                                             'admin/shop/settings/shop_sd?driver=' . $driver->name,
                                             'Configure',
