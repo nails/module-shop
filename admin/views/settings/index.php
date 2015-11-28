@@ -498,7 +498,14 @@
 
                                 foreach ($skins_front as $skin) {
 
-                                    $bSelected = $skin->slug == $skin_front_selected ? true : false;
+                                    if ($this->input->post()) {
+
+                                        $bSelected = $skin->slug == $this->input->post('skin_front') ? true : false;
+
+                                    } else {
+
+                                        $bSelected = $skin->slug == $skin_front_selected->slug ? true : false;
+                                    }
 
                                     ?>
                                     <tr>
@@ -575,7 +582,14 @@
 
                                 foreach ($skins_checkout as $skin) {
 
-                                    $bSelected = $skin->slug == $skin_checkout_selected ? true : false;
+                                    if ($this->input->post()) {
+
+                                        $bSelected = $skin->slug == $this->input->post('skin_front') ? true : false;
+
+                                    } else {
+
+                                        $bSelected = $skin->slug == $skin_checkout_selected->slug ? true : false;
+                                    }
 
                                     ?>
                                     <tr>
@@ -803,8 +817,8 @@
             if (!empty($shipping_drivers)) {
 
                 ?>
-                <table id="shipping-modules">
-                    <thead class="shipping-modules">
+                <table id="shipping-drivers">
+                    <thead class="shipping-drivers">
                         <tr>
                             <th class="selected">Selected</th>
                             <th class="label">Label</th>
@@ -814,11 +828,17 @@
                     <tbody>
                         <?php
 
-                        $enabledShippingDriver = set_value('enabled_shipping_driver', appSetting('enabled_shipping_driver', 'shop'));
 
                         foreach ($shipping_drivers as $driver) {
 
-                            $bSelected = $driver->slug == $enabledShippingDriver ? true : false;
+                            if ($this->input->post()) {
+
+                                $bSelected = $driver->slug == $this->input->post('enabled_shipping_driver') ? true : false;
+
+                            } else {
+
+                                $bSelected = $driver->slug == $shipping_driver->slug ? true : false;
+                            }
 
                             ?>
                             <tr>
@@ -843,7 +863,7 @@
 
                                     if (!empty($driver->data->settings)) {
                                         echo anchor(
-                                            'admin/shop/settings/shop_sd?driver=' . $driver->name,
+                                            'admin/shop/settings/shop_sd?driver=' . $driver->slug,
                                             'Configure',
                                             'data-fancybox-type="iframe" class="fancybox btn btn-xs btn-primary"'
                                         );

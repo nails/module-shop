@@ -16,7 +16,12 @@ use Nails\Shop\Exception\ShippingDriverException;
 class NAILS_Shop_shipping_driver_model extends NAILS_Model
 {
     protected $aAvailable;
+    protected $oDriverConfig;
     protected $oDriver;
+
+    // --------------------------------------------------------------------------
+
+    const DEFAULT_DRIVER = 'nailsapp/driver-shop-shipping-flatrate';
 
     // --------------------------------------------------------------------------
 
@@ -27,6 +32,47 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
     {
         parent::__construct();
         $this->aAvailable = _NAILS_GET_DRIVERS('nailsapp/module-shop', 'shipping');
+
+        //  Load the active shipping driver
+        $sDriverSlug         = appSetting('enabled_shipping_driver', 'shop') ?: self::DEFAULT_DRIVER;
+        $this->oDriverConfig = $this->get($sDriverSlug);
+
+        if (empty($this->oDriverConfig)) {
+            throw new ShippingDriverException(
+                'Could not find driver "' . $sDriverSlug . '".',
+                1
+            );
+        }
+
+        $this->oDriver = _NAILS_GET_DRIVER_INSTANCE($this->oDriverConfig);
+
+        if (empty($this->oDriver)) {
+            throw new ShippingDriverException(
+                'Failed to load shipping driver "' . $sDriverSlug . '".',
+                2
+            );
+        }
+
+        if (!($this->oDriver instanceof \Nails\Shop\Driver\ShippingBase)) {
+            throw new DriverException(
+                'Driver "' . $sDriverSlug . '" must extend \Nails\Shop\Driver\ShippingBase',
+                3
+            );
+        }
+
+        //  Apply driver configurations
+        $aSettings = array();
+        if (!empty($this->oDriverConfig->data->settings)) {
+            foreach ($this->oDriverConfig->data->settings as $oSetting) {
+                $sValue = appSetting($oSetting->key, 'shop-driver-' . $this->oDriverConfig->slug);
+                if(is_null($sValue) && isset($oSetting->default)) {
+                    $sValue = $oSetting->default;
+                }
+                $aSettings[$oSetting->key] = $sValue;
+            }
+        }
+
+        $this->oDriver->setConfig($aSettings);
     }
 
     // --------------------------------------------------------------------------
@@ -52,7 +98,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
     {
         $aShippingDrivers = $this->getAvailable();
         foreach ($aShippingDrivers as $oDriver) {
-            if ($oDriver->name == $sSlug) {
+            if ($oDriver->slug == $sSlug) {
                 return $oDriver;
             }
         }
@@ -62,81 +108,12 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
-     * Returns the enabled driver.
-     * @return mixed stdClass on success, false on failure
+     * Returns the config for the enabled driver
+     * @return sdClass
      */
     public function getEnabled()
     {
-        $sSlug = appSetting('enabled_shipping_driver', 'shop');
-
-        if (!$sSlug) {
-            return false;
-        }
-
-        return $this->get($sSlug);
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Loads a driver
-     * @param  string $slug The driver to load
-     * @return boolean
-     */
-    public function load($sSlug = null)
-    {
-        if (is_null($sSlug)) {
-
-            $sSlug = appSetting('enabled_shipping_driver', 'shop');
-
-            if (!$sSlug) {
-                return false;
-            }
-        }
-
-        $oDriver = $this->get($sSlug);
-
-        if (!$oDriver) {
-            return false;
-        }
-
-        $this->unload();
-
-        // --------------------------------------------------------------------------
-
-        $this->oDriver = _NAILS_GET_DRIVER_INSTANCE($oDriver);
-
-        if (!($this->oDriver instanceof \Nails\Shop\Driver\ShippingBase)) {
-            throw new DriverException(
-                'Driver "' . $oDriver->name . '" must extend \Nails\Shop\Driver\ShippingBase',
-                3
-            );
-        }
-
-        return true;
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Unloads a driver
-     * @return void
-     */
-    public function unload()
-    {
-        unset($this->oDriver);
-        $this->oDriver = null;
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Determines whether a driver is loaded or not
-     * @return boolean
-     */
-    protected function isDriverLoaded()
-    {
-        return !is_null($this->oDriver);
+        return $this->oDriverConfig;
     }
 
     // --------------------------------------------------------------------------
@@ -148,17 +125,17 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
      */
     private function getShippableItemsFromBasket($basket)
     {
-        $shippableItems = array();
+        $aShippableItems = array();
 
         foreach ($basket->items as $item) {
 
             if (!empty($item->product->type->is_physical) && empty($item->variant->shipping->collection_only)) {
 
-                $shippableItems[] = $item;
+                $aShippableItems[] = $item;
             }
         }
 
-        return $shippableItems;
+        return $aShippableItems;
     }
 
     // --------------------------------------------------------------------------
@@ -169,21 +146,13 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
      */
     public function options($oBasket)
     {
-        if (!$this->isDriverLoaded()) {
-
-            if (!$this->load()) {
-
-                return array();
-            }
-        }
-
         /**
          * Ask the driver what the available options are, pass it the shippable items so it can
          * amend it's responses as nessecary and work out the cost
          */
 
         $aShippableItems = $this->getShippableItemsFromBasket($oBasket);
-        $aOptions = $this->oDriver->options($aShippableItems, $oBasket);
+        $aOptions        = $this->oDriver->options($aShippableItems, $oBasket);
 
         $aSlugs      = array();
         $bHasDefault = false;
@@ -210,7 +179,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
             }
 
             if (in_array($aOption['slug'], $aSlugs)) {
-                throw new ShippingDriverException('"' . $aOption['slug'] . '" is not a unique shipping option slug', 1);
+                throw new ShippingDriverException('"' . $aOption['slug'] . '" is not a unique shipping option slug', 2);
             }
 
             //  Can only have one default value, the first defined.
@@ -228,7 +197,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
             if (is_int($aOption['cost']) || is_numeric($aOption['cost'])) {
 
-                $aOption['cost'] = (float) $aOption['cost'];
+                $aOption['cost'] = (int) $aOption['cost'];
 
             } elseif (!is_float($aOption['cost'])) {
 
@@ -242,7 +211,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
             $oTemp->slug           = $aOption['slug'];
             $oTemp->label          = $aOption['label'];
             $oTemp->cost           = $oCurrencyModel->convertBaseToUser($aOption['cost']);
-            $oTemp->cost_formatted = $oCurrencyModel->formatUser($aOption['cost']);
+            $oTemp->cost_formatted = $aOption['cost'] > 0 ? $oCurrencyModel->formatUser($aOption['cost']) : 'FREE';
             $oTemp->default        = (bool) $aOption['default'];
 
             $aOut[] = $oTemp;
@@ -260,59 +229,43 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
      */
     public function calculate($basket)
     {
-        $free       = new \stdClass();
-        $free->base = (float) 0;
-        $free->user = (float) 0;
+        $oFree       = new \stdClass();
+        $oFree->base = (int) 0;
+        $oFree->user = (int) 0;
 
         // --------------------------------------------------------------------------
 
         //  If the shipping type is COLLECTION (a special type) then shipping is FREE
         if ($basket->shipping->option == 'COLLECTION') {
-            return $free;
-        }
-
-        // --------------------------------------------------------------------------
-
-        if (!$this->isDriverLoaded()) {
-
-            //  No driver loaded, detect enabled driver and attempt to load
-            $enabledDriver = appSetting('enabled_shipping_driver', 'shop');
-
-            if (empty($enabledDriver) || !$this->load($enabledDriver)) {
-
-                //  Free shipping, I guess?
-                return $free;
-            }
+            return $oFree;
         }
 
         // --------------------------------------------------------------------------
 
         /**
-         * Have the driver calculate the cost of shipping, this should return a float
+         * Have the driver calculate the cost of shipping, this should return an integer
          * which is in the base currency. It is passed an array of all shippable items
-         * (i.e., items who's type markes them as `is_physical` and is not set to
+         * (i.e., items who's type marks them as `is_physical` and is not set to
          * `collect only`), as well as a reference to the basket, shold the driver need
          * to know anything else about the order.
          */
 
-        $shippableItems = $this->getShippableItemsFromBasket($basket);
-        $cost = $this->oDriver->calculate($shippableItems, $basket->shipping->option, $basket);
+        $aShippableItems = $this->getShippableItemsFromBasket($basket);
+        $iCost           = $this->oDriver->calculate($aShippableItems, $basket->shipping->option, $basket);
 
-        if (is_int($cost) || is_numeric($cost)) {
-
-            $cost = (float) $cost;
-
-        } elseif (!is_float($cost)) {
-
-            $cost = 0;
+        if (!is_integer($iCost) || $iCost < 0) {
+            throw new ShippingDriverException(
+                'The value returned by the shipping driver must be a positive integer or zero.',
+                5
+            );
         }
 
         $out       = new \stdClass();
-        $out->base = $cost;
+        $out->base = $iCost;
 
         //  Convert the base price to the user's currency
         $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
-        $out->user = $oCurrencyModel->convertBaseToUser($cost);
+        $out->user = $oCurrencyModel->convertBaseToUser($iCost);
 
         return $out;
     }
@@ -321,61 +274,44 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
     /**
      * Takes a product variant ID and works out what the shipping would be on it
-     * @param  stdClass $variantId ID of the variant in question
+     * @param  integer  $iVariantId ID of the variant in question
      * @return stdClass
      */
-    public function calculateVariant($variantId)
+    public function calculateVariant($iVariantId)
     {
-        $free       = new \stdClass();
-        $free->base = (float) 0;
-        $free->user = (float) 0;
+        $oFree       = new \stdClass();
+        $oFree->base = (int) 0;
+        $oFree->user = (int) 0;
 
         // --------------------------------------------------------------------------
 
         //  Check that we have a valid item
-        $item = $this->shop_product_model->getByVariantId($variantId);
+        //  @todo make this model a non-CI one when this line is replaced with a fatory call
+        $otItem = $this->shop_product_model->getByVariantId($iVariantId);
 
-        //  If for whatever reason we can't find the product, return free (no charge)
-        if (!$item) {
+        /**
+         * If for whatever reason we can't find the product, or it isn't physcal return
+         * free (no charge)
+         */
 
-            return $free;
+        if (!$otItem || empty($otItem->type->is_physical)) {
+            return $oFree;
         }
 
         // --------------------------------------------------------------------------
 
-        if (!$this->isDriverLoaded()) {
+        $oVariant = null;
+        foreach ($otItem->variations as $oVariation) {
 
-            //  No driver loaded, detect enabled driver and attempt to load
-            $enabledDriver = appSetting('enabled_shipping_driver', 'shop');
-
-            if (empty($enabledDriver) || !$this->load($enabledDriver)) {
-
-                //  No driver loaded, assume no charge for delivery
-                return $free;
-            }
-        }
-
-        // --------------------------------------------------------------------------
-
-        if (empty($item->type->is_physical)) {
-
-            //  Item is not physical, assume no charge for delivery
-            return $free;
-        }
-
-        // --------------------------------------------------------------------------
-
-        $variant = null;
-        foreach ($item->variations as $v) {
-
-            if ($v->id = $variantId) {
-                if (!empty($v->ship_collection_only)) {
+            if ($oVariation->id = $oVariationariantId) {
+                if (!empty($oVariation->ship_collection_only)) {
 
                     //  Item is collect only, assume no charge for delivery
-                    return $free;
+                    return $oFree;
+
                 } else {
 
-                    $variant = $v;
+                    $oVariant = $oVariation;
                 }
             }
         }
@@ -387,45 +323,45 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
          * which is in the base currency. Similar to the calculate() method
          */
 
-        $cost = $this->oDriver->calculateVariant($variant);
+        $iCost = $this->oDriver->calculateVariant($oVariant);
 
-        if (is_int($cost) || is_numeric($cost)) {
-
-            $cost = (float) $cost;
-
-        } elseif (!is_float($cost)) {
-
-            $cost = 0;
+        if (!is_integer($iCost) || $iCost < 0) {
+            throw new ShippingDriverException(
+                'The value returned by the shipping driver must be a positive integer or zero.',
+                6
+            );
         }
 
-        $out       = new \stdClass();
-        $out->base = $cost;
+        $oOut       = new \stdClass();
+        $oOut->base = $iCost;
 
         //  Convert the base price to the user's currency
         $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
-        $out->user = $oCurrencyModel->convertBaseToUser($cost);
+        $oOut->user     = $oCurrencyModel->convertBaseToUser($iCost);
 
-        return $out;
+        return $oOut;
     }
 
     // --------------------------------------------------------------------------
 
     /**
-     * Returns an array of possible shipping methods which the user can select from.
-     * These might include priority shipping or recorded delivery for example.
+     * Specifies the driver's configurable options
      * @return array
      */
-    public function fieldsBasket()
+    public function fieldsConfigure()
     {
-        if (!$this->isDriverLoaded()) {
+        return $this->oDriver->fieldsConfigure();
+    }
 
-            if (!$this->load()) {
+    // --------------------------------------------------------------------------
 
-                return array();
-            }
-        }
-
-        return $this->oDriver->fieldsBasket();
+    /**
+     * Returns an array of additional options for products which can be set by admin
+     * @return array
+     */
+    public function fieldsProduct()
+    {
+        return $this->oDriver->fieldsProduct();
     }
 
     // --------------------------------------------------------------------------
@@ -436,34 +372,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
      */
     public function fieldsVariant()
     {
-        if (!$this->isDriverLoaded()) {
-
-            if (!$this->load()) {
-
-                return array();
-            }
-        }
-
         return $this->oDriver->fieldsVariant();
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Returns an array of additional options for products  which can be set by admin
-     * @return array
-     */
-    public function fieldsProduct()
-    {
-        if (!$this->isDriverLoaded()) {
-
-            if (!$this->load()) {
-
-                return array();
-            }
-        }
-
-        return $this->oDriver->fieldsProduct();
     }
 
     // --------------------------------------------------------------------------
@@ -481,58 +390,15 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
         $oEmptyPromo->body = '';
         $oEmptyPromo->applied = false;
 
-        if (!$this->isDriverLoaded()) {
-
-            if (!$this->load()) {
-
-                return $oEmptyPromo;
-            }
-        }
-
         if (method_exists($this->oDriver, 'getPromotion')) {
 
-            $shippableItems = $this->getShippableItemsFromBasket($basket);
-            return $this->oDriver->getPromotion($shippableItems, $basket);
+            $aShippableItems = $this->getShippableItemsFromBasket($basket);
+            return $this->oDriver->getPromotion($aShippableItems, $basket);
 
         } else {
 
             return $oEmptyPromo;
         }
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Handles the configuration of the driver in admin
-     * @return array
-     */
-    public function configure($slug)
-    {
-        //  Fetch the driver in question
-        $driver = $this->get($slug);
-
-        if (!$driver) {
-
-            return false;
-        }
-
-        // --------------------------------------------------------------------------
-
-        //  Unload any previously loaded driver for configuration
-        unset($this->oDriverconfig);
-        $this->oDriverconfig = null;
-
-        // --------------------------------------------------------------------------
-
-        //  Load the driver
-        require_once NAILS_PATH . 'module-shop/shop/interfaces/shippingDriver.php';
-        require_once $driver->path . 'driver.php';
-
-        $class = ucfirst(strtolower(str_replace('-', '_', $driver->slug)));
-        $this->oDriverconfig = new $class();
-
-        //  Spit back whatever the driver desires
-        return $this->oDriverconfig->configure();
     }
 }
 

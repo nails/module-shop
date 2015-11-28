@@ -67,7 +67,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
         $this->data['shop_pages'] = array();
 
-        //  Filter out anywithout content
+        //  Filter out any  without content
         if (!empty($oPageData)) {
 
             foreach ($aPages as $sSlug => $sTitle) {
@@ -133,66 +133,15 @@ class NAILS_Shop_Controller extends NAILS_Controller
         $jsInline  = array();
 
         //  Sanity test; make sure we're loading a skin type which is supported
-        switch ($skinType) {
+        $oSkin              = $this->oSkinModel->getEnabled($skinType);
+        $this->skin         = $oSkin;
+        $this->data['skin'] = $oSkin;
 
-            case 'front':
+        $assets    = !empty($oSkin->data->assets)     ? $oSkin->data->assets     : array();
+        $cssInline = !empty($oSkin->data->css_inline) ? $oSkin->data->css_inline : array();
+        $jsInline  = !empty($oSkin->data->js_inline)  ? $oSkin->data->js_inline  : array();
 
-                //  Determine the name of the skin
-                $skinName = appSetting('skin_front', 'shop') ?: 'nailsapp/skin-shop-front-classic';
-
-                //  Load it
-                $skin               = $this->oSkinModel->get('front', $skinName);
-                $this->skin         =& $skin;
-                $this->data['skin'] =& $skin;
-
-                if (!$skin) {
-
-                    $errorSubject  = 'Failed to load shop front skin "' . $skinName . '"';
-                    $errorMessage  = 'Shop front skin "' . $skinName . '" failed to load at ' . APP_NAME;
-                }
-                break;
-
-            case 'checkout':
-
-                //  Determine the name of the skin
-                $skinName = appSetting('skin_checkout', 'shop') ?: 'nailsapp/skin-shop-checkout-classic';
-
-                //  Load it
-                $skin               = $this->oSkinModel->get('checkout', $skinName);
-                $this->skin         =& $skin;
-                $this->data['skin'] =& $skin;
-
-                if (!$skin) {
-
-                    $errorSubject  = 'Failed to load shop checkout skin "' . $skin . '"';
-                    $errorMessage  = 'Shop checkout skin "' . $skin . '" failed to load at ' . APP_NAME;
-                }
-                break;
-
-            default:
-
-                $errorSubject = '"' . $skinType . '" is not a valid skin type';
-                $errorMessage = 'An invalid skin type was attempted on ' . APP_NAME;
-                break;
-        }
-
-        /**
-         * If we encountered any errors loading the skin, fall over. If everything
-         * was buttery smooth then load any assets that the skin needs.
-         */
-
-        if (!empty($errorSubject) || !empty($errorMessage)) {
-
-            showFatalError($errorSubject, $errorMessage);
-
-        } else {
-
-            $assets    = !empty($skin->data->assets)     ? $skin->data->assets     : array();
-            $cssInline = !empty($skin->data->css_inline) ? $skin->data->css_inline : array();
-            $jsInline  = !empty($skin->data->js_inline)  ? $skin->data->js_inline  : array();
-
-            $this->loadSkinAssets($assets, $cssInline, $jsInline, site_url($skin->relativePath) . '/');
-        }
+        $this->loadSkinAssets($assets, $cssInline, $jsInline, site_url($oSkin->relativePath) . '/');
     }
 
     // --------------------------------------------------------------------------

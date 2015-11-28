@@ -405,9 +405,9 @@ class NAILS_Shop_product_model extends Base
                         return false;
                     }
 
-                    $_data->variation[$index]->pricing[$priceIndex]             = new \stdClass();
-                    $_data->variation[$index]->pricing[$priceIndex]->currency   = $price['currency'];
-                    $_data->variation[$index]->pricing[$priceIndex]->price      = (float) $price['price'];
+                    $_data->variation[$index]->pricing[$priceIndex]           = new \stdClass();
+                    $_data->variation[$index]->pricing[$priceIndex]->currency = $price['currency'];
+                    $_data->variation[$index]->pricing[$priceIndex]->price    = (int) $price['price'];
 
                     if ($price['currency'] == SHOP_BASE_CURRENCY_CODE) {
 

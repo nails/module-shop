@@ -29,11 +29,10 @@ class ShippingBase
 
     /**
      * Calculates the cost of shipping, in the shop's base currency.
-     * It is important that this return a float.
      * @param  array    $aShippableItems An array of all shippable items
      * @param string    $sOptionSlug     The chosen shipping option's slug
      * @param  stdClass $oBasket         The entire basket object
-     * @return float
+     * @return integer
      */
     public function calculate($aShippableItems, $sOptionSlug, $oBasket)
     {
@@ -44,36 +43,14 @@ class ShippingBase
 
     /**
      * Calculates the cost of shipping an individual variant, in the shop's
-     * base currency. It is important that this return a float.
+     * base currency.
      * @param  object   $oVariant An array of all shippable items
      * @param  stdClass $oBasket  The entire basket object
-     * @return float
+     * @return integer
      */
     public function calculateVariant($oVariant, $oBasket = null)
     {
         return 0;
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Specifies any configurable fields
-     * @return array
-     */
-    public function configure()
-    {
-        return array();
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Specifies any basket-wide shipping options
-     * @return array
-     */
-    public function fieldsBasket()
-    {
-        return array();
     }
 
     // --------------------------------------------------------------------------
@@ -97,6 +74,4 @@ class ShippingBase
     {
         return array();
     }
-
-    // --------------------------------------------------------------------------
 }

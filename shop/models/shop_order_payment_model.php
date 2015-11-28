@@ -86,13 +86,11 @@ class NAILS_Shop_order_payment_model extends NAILS_Model
         $this->db->where('order_id', $_order->id);
         $_result = $this->db->get($this->table)->row();
 
-        return (float) $_result->total_paid >= $_order->totals->base->grand;
+        return (int) $_result->total_paid >= $_order->totals->base->grand;
     }
 }
 
-
 // --------------------------------------------------------------------------
-
 
 /**
  * OVERLOADING NAILS' MODELS

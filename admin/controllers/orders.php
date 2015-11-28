@@ -412,19 +412,7 @@ class Orders extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load up the shop's skin
-        $sSkin      = appSetting('skin_checkout', 'shop') ?: 'skin-shop-checkout-classic';
-        $oSkinModel = Factory::model('Skin', 'nailsapp/module-shop');
-        $oSkin      = $oSkinModel->get('checkout', $sSkin);
-
-        if (!$oSkin) {
-            showFatalError(
-                'Failed to load shop skin "' . $sSkin . '"',
-                'Shop skin "' . $sSkin . '" failed to load at ' . APP_NAME . ', the following reason was given: ' .
-                $this->shop_skin_checkout_model->lastError()
-            );
-        }
-
-        // --------------------------------------------------------------------------
+        $sSkin = $oSkinModel->getEnabled('checkout');
 
         //  Views
         $this->data['for_user'] = 'ADMIN';

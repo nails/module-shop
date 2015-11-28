@@ -1392,7 +1392,7 @@ class NAILS_Shop_order_model extends NAILS_Model
             $obj->voucher->label                = $obj->v_label;
             $obj->voucher->type                 = $obj->v_type;
             $obj->voucher->discount_type        = $obj->v_discount_type;
-            $obj->voucher->discount_value       = (float) $obj->v_discount_value;
+            $obj->voucher->discount_value       = (int) $obj->v_discount_value;
             $obj->voucher->discount_application = $obj->v_discount_application;
             $obj->voucher->product_type_id      = (int) $obj->v_product_type_id;
             $obj->voucher->valid_from           = $obj->v_valid_from;
