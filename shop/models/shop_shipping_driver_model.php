@@ -223,6 +223,17 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
+     * Retursn the default option string
+     * @return string
+     */
+    public function defaultOption()
+    {
+        return $this->oDriver->defaultOption();
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Takes a basket object and calculates the cost of shipping
      * @param  stdClass $basket A basket object
      * @return stdClass
@@ -265,7 +276,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
         //  Convert the base price to the user's currency
         $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
-        $out->user = $oCurrencyModel->convertBaseToUser($iCost);
+        $out->user      = $oCurrencyModel->convertBaseToUser($iCost);
 
         return $out;
     }

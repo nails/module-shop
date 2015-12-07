@@ -1621,7 +1621,8 @@ class NAILS_Shop_basket_model extends Base
      */
     protected function defaultShippingOption()
     {
-        return '';
+        $this->load->model('shop_shipping_driver_model');
+        return $this->shop_shipping_driver_model->defaultOption();
     }
 
     // --------------------------------------------------------------------------

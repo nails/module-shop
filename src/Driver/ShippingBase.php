@@ -22,7 +22,18 @@ class ShippingBase
      */
     public function options($aShippableItems, $oBasket)
     {
-        return array();
+        throw new ShippingDriverException('Driver must define options()', 0);
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns the slug of the desired default shipping option
+     * @return string
+     */
+    public function defaultOption()
+    {
+        throw new ShippingDriverException('Driver must define defaultOption()', 0);
     }
 
     // --------------------------------------------------------------------------
@@ -30,13 +41,13 @@ class ShippingBase
     /**
      * Calculates the cost of shipping, in the shop's base currency.
      * @param  array    $aShippableItems An array of all shippable items
-     * @param string    $sOptionSlug     The chosen shipping option's slug
+     * @param  string   $sOptionSlug     The chosen shipping option's slug
      * @param  stdClass $oBasket         The entire basket object
      * @return integer
      */
     public function calculate($aShippableItems, $sOptionSlug, $oBasket)
     {
-        return 0;
+        throw new ShippingDriverException('Driver must define calculate()', 0);
     }
 
     // --------------------------------------------------------------------------
@@ -50,7 +61,7 @@ class ShippingBase
      */
     public function calculateVariant($oVariant, $oBasket = null)
     {
-        return 0;
+        throw new ShippingDriverException('Driver must define calculateVariant()', 0);
     }
 
     // --------------------------------------------------------------------------
