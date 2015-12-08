@@ -48,24 +48,6 @@ $countriesFlat = $oCountryModel->getAllFlat();
             <td>
             <?php
 
-            echo '<strong>Delivery</strong><br />';
-            $address = array(
-                $order->shipping_address->line_1,
-                $order->shipping_address->line_2,
-                $order->shipping_address->town,
-                $order->shipping_address->state,
-                $order->shipping_address->postcode,
-                $order->shipping_address->country->label
-            );
-
-            $address = array_filter($address);
-            echo implode('<br />', $address);
-
-            ?>
-            </td>
-            <td>
-            <?php
-
             echo '<strong>Billing</strong><br />';
             $address = array(
                 $order->billing_address->line_1,
@@ -78,6 +60,23 @@ $countriesFlat = $oCountryModel->getAllFlat();
 
             $address = array_filter($address);
             echo implode('<br />', $address);
+
+            if ($order->requires_shipping) {
+                echo '</td><td>';
+                echo '<strong>Delivery</strong><br />';
+                $address = array(
+                    $order->shipping_address->line_1,
+                    $order->shipping_address->line_2,
+                    $order->shipping_address->town,
+                    $order->shipping_address->state,
+                    $order->shipping_address->postcode,
+                    $order->shipping_address->country->label
+                );
+
+                $address = array_filter($address);
+                echo implode('<br />', $address);
+
+            }
 
             ?>
             </td>

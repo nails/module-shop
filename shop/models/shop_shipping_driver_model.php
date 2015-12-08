@@ -61,18 +61,41 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
         }
 
         //  Apply driver configurations
-        $aSettings = array();
         if (!empty($this->oDriverConfig->data->settings)) {
-            foreach ($this->oDriverConfig->data->settings as $oSetting) {
+            $aSettings = $this->extractDriverSettings($this->oDriverConfig->data->settings);
+            $this->oDriver->setConfig($aSettings);
+        }
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Recursively gets all the settings from the settings array
+     * @param  array $aSettings The array of fieldsets and/or settings
+     * @return array
+     */
+    protected function extractDriverSettings($aSettings)
+    {
+        $aOut = array();
+
+        foreach ($aSettings as $oSetting) {
+
+            //  If the object contains a `fields` property then consider this a fieldset and inception
+            if (isset($oSetting->fields)) {
+
+                $aOut = array_merge($aOut, $this->extractDriverSettings($oSetting->fields));
+
+            } else {
+
                 $sValue = appSetting($oSetting->key, 'shop-driver-' . $this->oDriverConfig->slug);
                 if(is_null($sValue) && isset($oSetting->default)) {
                     $sValue = $oSetting->default;
                 }
-                $aSettings[$oSetting->key] = $sValue;
+                $aOut[$oSetting->key] = $sValue;
             }
         }
 
-        $this->oDriver->setConfig($aSettings);
+        return $aOut;
     }
 
     // --------------------------------------------------------------------------
@@ -396,17 +419,6 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
         $oOut->user     = $oCurrencyModel->convertBaseToUser($iCost);
 
         return $oOut;
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Specifies the driver's configurable options
-     * @return array
-     */
-    public function fieldsConfigure()
-    {
-        return $this->oDriver->fieldsConfigure();
     }
 
     // --------------------------------------------------------------------------

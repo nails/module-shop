@@ -757,12 +757,12 @@ class NAILS_Shop_product_model extends Base
 
                             //  Data exists, only update the specific bitty.
                             $currentDriverData[$enabledDriver->slug] = $v->shipping->driver_data[$enabledDriver->slug];
-                            $this->db->set('ship_driver_data', serialize($currentDriverData));
+                            $this->db->set('ship_driver_data', json_encode($currentDriverData));
 
                         } else {
 
                             //  Nothing exists, use whatever's been passed
-                            $this->db->set('ship_driver_data', serialize($v->shipping->driver_data));
+                            $this->db->set('ship_driver_data', json_encode($v->shipping->driver_data));
                         }
                     }
 
@@ -2621,7 +2621,7 @@ class NAILS_Shop_product_model extends Base
         //  Shipping data
         $variation->shipping                  = new \stdClass();
         $variation->shipping->collection_only = (bool) $variation->ship_collection_only;
-        $variation->shipping->driver_data     = @unserialize($variation->ship_driver_data);
+        $variation->shipping->driver_data     = json_decode($variation->ship_driver_data);
 
         //  Stock status
         $stockStatus = $variation->stock_status;

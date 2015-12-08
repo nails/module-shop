@@ -61,6 +61,7 @@ class Migration5 extends Base
         $this->query("UPDATE `{{NAILS_DB_PREFIX}}shop_order_product` SET `price_base_discount_value_inc_tax` = `price_base_value_inc_tax`, `price_base_discount_value_ex_tax` = `price_base_value_ex_tax`, `price_base_discount_value_tax` = `price_base_value_tax`, `price_user_discount_value_inc_tax` = `price_user_value_inc_tax`, `price_user_discount_value_ex_tax` = `price_user_value_ex_tax`, `price_user_discount_value_tax` = `price_user_value_tax`;");
         $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_order` ADD `shipping_driver` VARCHAR(150)  NULL  DEFAULT NULL  AFTER `shipping_country`;");
         $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_order` ADD `shipping_option` VARCHAR(150)  NULL  DEFAULT NULL  AFTER `shipping_driver`;");
+        $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_order` ADD `delivery_option` VARCHAR(150)  NULL  DEFAULT ''  AFTER `delivery_type`;");
 
 
         //  @todo: update the way shipping driver data is stored! -might need done in the app migration

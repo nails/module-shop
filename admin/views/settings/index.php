@@ -531,7 +531,7 @@
                                             if (!empty($skin->data->settings)) {
 
                                                 echo anchor(
-                                                    'admin/shop/settings/shop_skin?type=front&slug=' . $skin->slug,
+                                                    'admin/admin/settings/skin?slug=' . $skin->slug,
                                                     'Configure',
                                                     'data-fancybox-type="iframe" class="fancybox btn btn-xs btn-primary"'
                                                 );
@@ -615,7 +615,7 @@
                                             if (!empty($skin->data->settings)) {
 
                                                 echo anchor(
-                                                    'admin/shop/settings/shop_skin?type=checkout&slug=' . $skin->slug,
+                                                    'admin/admin/settings/skin?slug=' . $skin->slug,
                                                     'Configure',
                                                     'data-fancybox-type="iframe" class="fancybox btn btn-xs btn-primary"'
                                                 );
@@ -685,6 +685,7 @@
                                     <td class="configure">
                                         <?php
 
+                                        //  @todo use 'admin/admin/settings/driver?slug=' . $skin->slug,
                                         echo anchor(
                                             'admin/shop/settings/shop_pg?gateway=' . $slug,
                                             'Configure',
@@ -862,8 +863,9 @@
                                     <?php
 
                                     if (!empty($driver->data->settings)) {
+
                                         echo anchor(
-                                            'admin/shop/settings/shop_sd?driver=' . $driver->slug,
+                                            'admin/admin/settings/driver?slug=' . $driver->slug,
                                             'Configure',
                                             'data-fancybox-type="iframe" class="fancybox btn btn-xs btn-primary"'
                                         );

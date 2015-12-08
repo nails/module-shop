@@ -315,7 +315,7 @@ class NAILS_Shop_order_model extends NAILS_Model
                 //  Extra data
                 if (isset($item->extra_data) && $item->extra_data) {
 
-                    $temp['extra_data'] = serialize((array) $item->extra_data);
+                    $temp['extra_data'] = json_encode((array) $item->extra_data);
                 }
 
                 $items[] = $temp;
@@ -1531,7 +1531,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Extra data
-        $item->extra_data = $item->extra_data ? @unserialize($item->extra_data) : null;
+        $item->extra_data = $item->extra_data ? json_decode($item->extra_data) : null;
     }
 }
 
