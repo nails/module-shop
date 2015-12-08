@@ -13,7 +13,7 @@ Full payment has been received and the order should be processed.
     $address[] = appSetting('warehouse_addr_country', 'shop');
     $address   = array_filter($address);
 
-    if ($order->delivery_type === 'COLLECT') {
+    if ($order->delivery_option === 'COLLECTION') {
 
         if ($address) {
 
@@ -52,45 +52,6 @@ Full payment has been received and the order should be processed.
             echo "\n" . '+-------------------------------------------------------------+';
         }
 
-    } else if ($order->delivery_type === 'DELIVER_COLLECT') {
-
-        if ($address) {
-
-            $box   = array();
-            $box[] = 'IMPORTANT: THIS ORDER WILL ONLY BE PARTIALLY SHIPPED.';
-            $box[] = 'COLLECT ONLY ITEMS SHOULD BE COLLECTED FROM:';
-            $box[] = '';
-
-            $box = array_merge($box, $address);
-
-            $box = array_map(function($val) {
-
-                return str_pad($val, 60, ' ');
-
-            }, $box);
-
-            echo "\n" . '+-------------------------------------------------------------+';
-            echo "\n| " . implode("|\n| ", $box) . '|';
-            echo "\n" . '+-------------------------------------------------------------+';
-
-        } else {
-
-            $box   = array();
-            $box[] = 'IMPORTANT: THIS ORDER WILL ONLY BE PARTIALLY SHIPPED.';
-            $box[] = '';
-
-            $box = array_merge($box, $address);
-
-            $box = array_map(function($val) {
-
-                return str_pad($val, 55, ' ');
-
-            }, $box);
-
-            echo "\n" . '+-------------------------------------------------------------+';
-            echo "\n| " . implode("|\n| ", $box) . '|';
-            echo "\n" . '+-------------------------------------------------------------+';
-        }
     }
 
 ?>

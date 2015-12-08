@@ -15,25 +15,12 @@ namespace Nails\Shop\Driver;
 class ShippingBase
 {
     /**
-     * Returns available shipping options for the items in the basket
-     * @param  array    $aShippableItems An array of all shippable items
-     * @param  stdClass $oBasket         The entire basket object
+     * Returns available shipping options.
      * @return array
      */
-    public function options($aShippableItems, $oBasket)
+    public function options()
     {
         throw new ShippingDriverException('Driver must define options()', 0);
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Returns the slug of the desired default shipping option
-     * @return string
-     */
-    public function defaultOption()
-    {
-        throw new ShippingDriverException('Driver must define defaultOption()', 0);
     }
 
     // --------------------------------------------------------------------------

@@ -56,14 +56,19 @@ class NAILS_Basket extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         $this->data['basket']          = $this->shop_basket_model->get();
-        $this->data['shippingOptions'] = $this->shop_shipping_driver_model->options($this->data['basket']);
+        $this->data['shippingOptions'] = $this->shop_shipping_driver_model->optionsWithCost($this->data['basket']);
 
         // --------------------------------------------------------------------------
 
-        if (count($this->data['basket']->items) && !$this->data['basket']->shipping->isDeliverable) {
+        if (count($this->data['basket']->items) && $this->data['basket']->shipping->type == 'COLLECT') {
 
             $this->data['message']  = '<strong>We won\'t deliver this order</strong>';
             $this->data['message'] .= '<br />All items in your order must be collected.';
+
+        } elseif (count($this->data['basket']->items) && $this->data['basket']->shipping->type == 'DELIVER_COLLECT') {
+
+            $this->data['message']  = '<strong>We will only partially deliver this order</strong>';
+            $this->data['message'] .= '<br />Some items in your order must be collected.';
         }
 
         // --------------------------------------------------------------------------

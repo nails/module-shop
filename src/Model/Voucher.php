@@ -177,7 +177,7 @@ class Voucher extends Base
      */
     protected function redeemGiftCard($voucher, $order)
     {
-        if ($order->shipping->isDeliverable) {
+        if ($order->shipping->isRequired) {
 
             if (appSetting('free_shipping_threshold', 'shop') <= $order->totals->sub) {
 
@@ -430,7 +430,7 @@ class Voucher extends Base
 
             //  Is this a shipping voucher being applied to an order with no shippable items?
             $bIsShippingVoucher = $voucher->discount_application == self::DISCOUNT_APPLICATION_SHIPPING;
-            if ($bIsShippingVoucher && !$basket->shipping->isDeliverable) {
+            if ($bIsShippingVoucher && !$basket->shipping->isRequired) {
 
                 $this->setError('Your order does not contian any items which require shipping, voucher not needed!');
                 return false;

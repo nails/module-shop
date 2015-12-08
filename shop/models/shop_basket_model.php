@@ -297,9 +297,69 @@ class NAILS_Shop_basket_model extends Base
 
         // --------------------------------------------------------------------------
 
-        //  Determine the shipping option
-        $basket->shipping->option        = $this->getShippingOption();
-        $basket->shipping->isDeliverable = $this->isDeliverable();
+        /**
+         * Determine the shipping option and delivery types.
+         *
+         * If a basket is set to COLLECTION then we don't need to worry about delivery
+         * at all. If the basket is not for collection but contains only collect only
+         * items, then treat as a collection order. If the basket contains a mixture of
+         * shippable and collect items then we need to let the user know that the order
+         * will only be partially shipped and that they must collect the rest.
+         */
+
+        $basket->shipping->option = $this->getShippingOption();
+
+        /**
+         * Does the basket require shipping? It requires shipping if the option is not
+         * COLLECTION and at least one of the items is not collect_only.
+         */
+
+        //  Work out some figures about the items in the basket
+        $iNumItems       = count($basket->items);
+        $iNumShippable   = 0;
+        $iNumCollectOnly = 0;
+
+        foreach ($basket->items as $item) {
+
+            if ($item->product->type->is_physical && empty($item->variant->ship_collection_only)) {
+
+                $iNumShippable++;
+
+            } elseif ($item->product->type->is_physical && !empty($item->variant->ship_collection_only)) {
+
+                $iNumCollectOnly++;
+            }
+        }
+
+        $basket->shipping->isPossible = $iNumShippable > 0;
+
+        if ($basket->shipping->option === 'COLLECTION') {
+
+            //  Basket is collect only, no need for any shipping
+            $basket->shipping->type       = 'COLLECT';
+            $basket->shipping->isRequired = false;
+
+        } elseif ($iNumItems === $iNumCollectOnly) {
+
+            //  All items must be collected
+            $basket->shipping->type       = 'COLLECT';
+            $basket->shipping->isRequired = false;
+
+            //  We must also ensure the shipping option to be collection
+            $basket->shipping->option = 'COLLECTION';
+
+        } elseif ($iNumShippable >= $iNumCollectOnly && $iNumCollectOnly > 0) {
+
+            //  Order will be partially shipped
+            $basket->shipping->type       = 'DELIVER_COLLECT';
+            $basket->shipping->isRequired = true;
+
+        } else {
+
+            //  All items are deliverable
+            $basket->shipping->type       = 'DELIVER';
+            $basket->shipping->isRequired = true;
+        }
 
         // --------------------------------------------------------------------------
 
@@ -1122,24 +1182,6 @@ class NAILS_Shop_basket_model extends Base
     // --------------------------------------------------------------------------
 
     /**
-     * Returns whether the basket is deliverable or not
-     * @return boolean
-     */
-    public function isDeliverable()
-    {
-        $numCollectOnlyItems = 0;
-        foreach ($this->basket->items as $item) {
-            if ($item->variant->ship_collection_only) {
-                $numCollectOnlyItems++;
-            }
-        }
-
-        return $numCollectOnlyItems !== count($this->basket->items);
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
      * Returns the basket's "payment gatway" object.
      * @return stdClass
      */
@@ -1621,7 +1663,7 @@ class NAILS_Shop_basket_model extends Base
      */
     protected function defaultShippingOption()
     {
-        $this->load->model('shop_shipping_driver_model');
+        $this->load->model('shop/shop_shipping_driver_model');
         return $this->shop_shipping_driver_model->defaultOption();
     }
 

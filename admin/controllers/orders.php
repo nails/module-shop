@@ -154,14 +154,24 @@ class Orders extends BaseAdmin
                 array('No', 'UNFULFILLED')
             )
         );
+
+        $this->load->model('shop/shop_shipping_driver_model');
+
+        $aOptions       = $this->shop_shipping_driver_model->options();
+        $aFilterOptions = array();
+
+        foreach ($aOptions as $aOption) {
+            $aFilterOptions[] = array($aOption['label'], $aOption['slug']);
+        }
+
+
         $cbFilters[] = Helper::searchFilterObject(
-            $tablePrefix . '.delivery_type',
+            $tablePrefix . '.delivery_option',
             'Delivery Type',
-            array(
-                array('Delivery', 'DELIVER'),
-                array('Collection', 'COLLECT')
-            )
+            $aFilterOptions
         );
+
+        //  @todo get all the shipping options from the driver
 
         // --------------------------------------------------------------------------
 
@@ -216,9 +226,7 @@ class Orders extends BaseAdmin
         $this->data['order'] = $this->shop_order_model->getById($this->uri->segment(5));
 
         if (!$this->data['order']) {
-
-            $this->session->set_flashdata('error', 'No order exists by that ID.');
-            redirect('admin/shop/orders');
+            show_404();
         }
 
         // --------------------------------------------------------------------------
@@ -239,17 +247,22 @@ class Orders extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        if ($this->data['order']->fulfilment_status != 'FULFILLED' && !$this->data['order']->requires_shipping) {
+        if ($this->data['order']->status !== 'PAID') {
 
-            $this->data['error']  = '<strong>Do not ship this order!</strong>';
+            $this->data['negative']  = '<strong>Do not process this order!</strong>';
+            $this->data['negative'] .= '<br />The customer has not completed payment.';
+
+        } elseif ($this->data['order']->fulfilment_status != 'FULFILLED') {
 
             if ($this->data['order']->delivery_type == 'COLLECT') {
 
-                $this->data['error'] .= '<br />This order will be collected by the customer.';
+                $this->data['negative']  = '<strong>Do not ship this order!</strong>';
+                $this->data['negative'] .= '<br />This order will be collected by the customer.';
 
-            } else {
+            } elseif ($this->data['order']->delivery_type == 'DELIVER_COLLECT') {
 
-                $this->data['error'] .= '<br />This order does not require shipping.';
+                $this->data['warning']  = '<strong>Only ship part of this order!</strong>';
+                $this->data['warning'] .= '<br />This order contains collect only items.';
             }
         }
 
@@ -412,7 +425,8 @@ class Orders extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load up the shop's skin
-        $sSkin = $oSkinModel->getEnabled('checkout');
+        $oSkinModel = Factory::model('Skin', 'nailsapp/module-shop');
+        $oSkin      = $oSkinModel->getEnabled('checkout');
 
         //  Views
         $this->data['for_user'] = 'ADMIN';

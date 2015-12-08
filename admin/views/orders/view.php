@@ -13,7 +13,7 @@
     id="order"
     class="group-shop orders single"
     data-fulfilment-status="<?=$order->fulfilment_status?>"
-    data-delivery-type="<?=$order->delivery_type?>"
+    data-delivery-type="<?=$order->delivery_option?>"
     data-num-collect-items="<?=$numCollectItems?>"
 >
     <div class="row col-3-container">
@@ -249,7 +249,7 @@
         </div>
         <div class="col-md-4">
             <fieldset>
-                <legend>Customer Details</legend>
+                <legend>Customer &amp; Delivery Details</legend>
                 <div class="table-responsive">
                     <table>
                         <tbody>
@@ -275,7 +275,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td class="label">Billing Address</td>
+                                <td class="label">Billing<br />Address</td>
                                 <td class="value">
                                     <?php
 
@@ -307,7 +307,24 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td class="label">Shipping Address</td>
+                                <td class="label">Shipping<br />Option</td>
+                                <td class="value">
+                                    <?php
+
+                                    if (!empty($order->shipping_option['label'])) {
+
+                                        echo $order->shipping_option['label'];
+
+                                    } else {
+
+                                        echo $order->delivery_option;
+                                    }
+
+                                    ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">Shipping<br />Address</td>
                                 <td class="value">
                                     <?php
 
@@ -466,8 +483,8 @@
                     <div class="order-status <?=strtolower($order->fulfilment_status)?>">
                     <?php
 
-                        $verbFulfilled   = $order->delivery_type == 'DELIVER' ? 'fulfilled' : 'collected';
-                        $verbUnfulfilled = $order->delivery_type == 'DELIVER' ? 'unfulfilled' : 'uncollected';
+                        $verbFulfilled   = $order->delivery_option !== 'COLLECTION' ? 'fulfilled' : 'collected';
+                        $verbUnfulfilled = $order->delivery_option !== 'COLLECTION' ? 'unfulfilled' : 'uncollected';
 
                         switch ($order->fulfilment_status) {
 
@@ -482,7 +499,7 @@
                                     <?=strtoupper($verbFulfilled)?>
                                 </h1>
                                 <p>
-                                    echo 'This order has been <?=$verbFulfilled?>, no further action is nessecary.
+                                    This order has been <?=$verbFulfilled?>, no further action is nessecary.
                                 </p>
                                 <p>
                                     <?=anchor($buttonUrl, $buttonLabel, 'class="btn btn-danger"')?>

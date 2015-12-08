@@ -27,7 +27,7 @@ $countriesFlat = $oCountryModel->getAllFlat();
     $address[] = appSetting('warehouse_addr_country', 'shop');
     $address   = array_filter($address);
 
-    if ($order->delivery_type === 'COLLECT') {
+    if ($order->delivery_option === 'COLLECTION') {
 
         if ($address) {
 
@@ -43,21 +43,6 @@ $countriesFlat = $oCountryModel->getAllFlat();
             echo '</p>';
         }
 
-    } else if ($order->delivery_type === 'DELIVER_COLLECT') {
-
-        if ($address) {
-
-            echo '<div class="heads-up warning">';
-                echo '<strong>Important:</strong> This order will only be partially shipped. Collect only items should be collected from:';
-                echo '<hr>' . implode('<br />', $address) . '<br />';
-            echo '</div>';
-
-        } else {
-
-            echo '<p class="heads-up warning">';
-                echo '<strong>Important:</strong> This order will only be partially shipped.';
-            echo '</p>';
-        }
     }
 
 ?>

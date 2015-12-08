@@ -491,7 +491,7 @@ class Reports extends BaseAdmin
             'o.ip_address',
             'o.status',
             'o.requires_shipping',
-            'o.delivery_type',
+            'o.delivery_option',
             'o.fulfilment_status',
             'o.note',
             'o.created',

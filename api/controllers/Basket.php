@@ -63,7 +63,6 @@ class Basket extends \Nails\Api\Controller\Base
     public function postAdd()
     {
         if ($this->maintenance->enabled) {
-
             return $this->renderMaintenance();
         }
 
@@ -91,7 +90,6 @@ class Basket extends \Nails\Api\Controller\Base
     public function postRemove()
     {
         if ($this->maintenance->enabled) {
-
             return $this->renderMaintenance();
         }
 
@@ -118,7 +116,6 @@ class Basket extends \Nails\Api\Controller\Base
     public function postIncrement()
     {
         if ($this->maintenance->enabled) {
-
             return $this->renderMaintenance();
         }
 
@@ -146,7 +143,6 @@ class Basket extends \Nails\Api\Controller\Base
     public function postDecrement()
     {
         if ($this->maintenance->enabled) {
-
             return $this->renderMaintenance();
         }
 
@@ -173,7 +169,6 @@ class Basket extends \Nails\Api\Controller\Base
     public function postAddVoucher()
     {
         if ($this->maintenance->enabled) {
-
             return $this->renderMaintenance();
         }
 
@@ -209,7 +204,6 @@ class Basket extends \Nails\Api\Controller\Base
     public function postRemoveVoucher()
     {
         if ($this->maintenance->enabled) {
-
             return $this->renderMaintenance();
         }
 
@@ -232,10 +226,9 @@ class Basket extends \Nails\Api\Controller\Base
      * Adds a note to the basket
      * @return array
      */
-    public function add_note()
+    public function postAddNote()
     {
         if ($this->maintenance->enabled) {
-
             return $this->renderMaintenance();
         }
 
@@ -256,13 +249,36 @@ class Basket extends \Nails\Api\Controller\Base
     // --------------------------------------------------------------------------
 
     /**
+     * Removes a note from the basket
+     * @return array
+     */
+    public function postRemoveNote()
+    {
+        if ($this->maintenance->enabled) {
+            return $this->renderMaintenance();
+        }
+
+        // --------------------------------------------------------------------------
+
+        $out = array();
+        if (!$this->shop_basket_model->unsetNote()) {
+
+            $out['status'] = 400;
+            $out['error']  = $this->shop_basket_model->lastError();
+        }
+
+        return $out;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Sets the basket's currency
      * @return array
      */
     public function postSetCurrency()
     {
         if ($this->maintenance->enabled) {
-
             return $this->renderMaintenance();
         }
 
@@ -301,47 +317,21 @@ class Basket extends \Nails\Api\Controller\Base
     // --------------------------------------------------------------------------
 
     /**
-     * Marks a basket as a collection order
+     * Set the shipping option to use for shipping
      * @return array
      */
-    public function postSetAsCollection()
+    public function postSetAsShipping()
     {
         if ($this->maintenance->enabled) {
-
             return $this->renderMaintenance();
         }
 
         // --------------------------------------------------------------------------
 
-        $out = array();
+        $out     = array();
+        $sOption = $this->input->post('shipping_option');
 
-        if (!$this->shop_basket_model->setDeliveryType('COLLECT')) {
-
-            $out['status'] = 400;
-            $out['error']  = $this->shop_basket_model->lastError();
-        }
-
-        return $out;
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Marks a basket as a delivery order
-     * @return array
-     */
-    public function postSetAsDelivery()
-    {
-        if ($this->maintenance->enabled) {
-
-            return $this->renderMaintenance();
-        }
-
-        // --------------------------------------------------------------------------
-
-        $out = array();
-
-        if (!$this->shop_basket_model->setDeliveryType('DELIVER')) {
+        if (!$this->shop_basket_model->setShippingOption($sOption)) {
 
             $out['status'] = 400;
             $out['error']  = $this->shop_basket_model->lastError();

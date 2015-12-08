@@ -97,12 +97,14 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
                 $oFormValidation = Factory::service('FormValidation');
 
-                $oFormValidation->set_rules('delivery_address_line_1', '', 'xss_clean|trim|required');
-                $oFormValidation->set_rules('delivery_address_line_2', '', 'xss_clean|trim');
-                $oFormValidation->set_rules('delivery_address_town', '', 'xss_clean|trim|required');
-                $oFormValidation->set_rules('delivery_address_state', '', 'xss_clean|trim');
-                $oFormValidation->set_rules('delivery_address_postcode', '', 'xss_clean|trim|required');
-                $oFormValidation->set_rules('delivery_address_country', '', 'xss_clean|required');
+                if ($basket->shipping->isRequired) {
+                    $oFormValidation->set_rules('delivery_address_line_1', '', 'xss_clean|trim|required');
+                    $oFormValidation->set_rules('delivery_address_line_2', '', 'xss_clean|trim');
+                    $oFormValidation->set_rules('delivery_address_town', '', 'xss_clean|trim|required');
+                    $oFormValidation->set_rules('delivery_address_state', '', 'xss_clean|trim');
+                    $oFormValidation->set_rules('delivery_address_postcode', '', 'xss_clean|trim|required');
+                    $oFormValidation->set_rules('delivery_address_country', '', 'xss_clean|required');
+                }
 
                 $oFormValidation->set_rules('first_name', '', 'xss_clean|trim|required');
                 $oFormValidation->set_rules('last_name', '', 'xss_clean|trim|required');

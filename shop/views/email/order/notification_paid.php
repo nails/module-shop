@@ -13,17 +13,12 @@ $countriesFlat = $oCountryModel->getAllFlat();
 </p>
 <?php
 
-    if ($order->delivery_type === 'COLLECT') {
+    if ($order->delivery_option === 'COLLECTION') {
 
         echo '<p class="heads-up warning">';
             echo '<strong>Important:</strong> All items in this order will be collected.';
         echo '</p>';
 
-    } else if ($order->delivery_type === 'DELIVER_COLLECT') {
-
-        echo '<p class="heads-up warning">';
-            echo '<strong>Important:</strong> This order will only be partially shipped.';
-        echo '</p>';
     }
 
 ?>

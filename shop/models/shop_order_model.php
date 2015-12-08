@@ -186,27 +186,14 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        //  Does the order require shipping?
-        $order->delivery_type = $data['basket']->shipping->type;
-        if ($data['basket']->shipping->type == 'DELIVER') {
+        /**
+         * Does the order require shipping? It requires shipping if the option is not
+         * COLLECTION and at least one of the items is not collect_only.
+         */
 
-            //  Delivery order, check basket for physical items
-            $order->requires_shipping = false;
-
-            foreach ($data['basket']->items as $item) {
-
-                if ($item->product->type->is_physical && !$item->variant->ship_collection_only) {
-
-                    $order->requires_shipping = true;
-                    break;
-                }
-            }
-
-        } else {
-
-            //  It's a collection order, do not ship
-            $order->requires_shipping = false;
-        }
+        $order->delivery_option   = $data['basket']->shipping->option;
+        $order->delivery_type     = $data['basket']->shipping->type;
+        $order->requires_shipping = $data['basket']->shipping->isRequired;
 
         // --------------------------------------------------------------------------
 
@@ -1231,7 +1218,11 @@ class NAILS_Shop_order_model extends NAILS_Model
     {
         parent::formatObject($obj, $data, $integers, $bools);
 
+        //  Shipping
         $obj->requires_shipping = (bool) $obj->requires_shipping;
+
+        $this->load->model('shop/shop_shipping_driver_model');
+        $obj->shipping_option = $this->shop_shipping_driver_model->getOption($obj->delivery_option);
 
         //  User
         $obj->user     = new \stdClass();

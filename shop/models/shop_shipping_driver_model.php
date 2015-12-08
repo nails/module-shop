@@ -141,10 +141,34 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
-     * Returns an array of the available shipping options
+     * Get the available shipping options from the driver
+     * @return [type] [description]
+     */
+    public function options()
+    {
+        $aOut = array();
+
+        //  If warehouse collection is enabled then add it as an option
+        if (appSetting('warehouse_collection_enabled', 'shop')) {
+
+            $aOut[] = array(
+                'slug'    => 'COLLECTION',
+                'label'   => 'Collection',
+                'default' => false
+            );
+        }
+
+        return array_merge($aOut, $this->oDriver->options());
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Returns an array of the available shipping options, including the cost of
+     * shipping the supplied basket
      * @return array
      */
-    public function options($oBasket)
+    public function optionsWithCost($oBasket)
     {
         /**
          * Ask the driver what the available options are, pass it the shippable items so it can
@@ -152,69 +176,65 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
          */
 
         $aShippableItems = $this->getShippableItemsFromBasket($oBasket);
-        $aOptions        = $this->oDriver->options($aShippableItems, $oBasket);
+        $aOptions        = $this->options();
+        $oCurrencyModel  = Factory::model('Currency', 'nailsapp/module-shop');
 
         $aSlugs      = array();
         $bHasDefault = false;
         $aOut        = array();
 
-        //  If warehouse collection is enabled then add it as an option
-        if (appSetting('warehouse_collection_enabled', 'shop')) {
+        if ($oBasket->shipping->isPossible) {
 
-            $oTemp                 = new \stdClass();
-            $oTemp->slug           = 'COLLECTION';
-            $oTemp->label          = 'Collection';
-            $oTemp->cost           = 0;
-            $oTemp->cost_formatted = 'FREE';
-            $oTemp->default        = false;
+            //  Test options
+            foreach ($aOptions as &$aOption) {
 
-            $aOut[] = $oTemp;
-        }
+                if (empty($aOption['slug'])) {
+                    throw new ShippingDriverException('Each shipping option must provide a unique slug', 1);
+                }
 
-        //  Test options
-        foreach ($aOptions as &$aOption) {
+                if (in_array($aOption['slug'], $aSlugs)) {
+                    throw new ShippingDriverException('"' . $aOption['slug'] . '" is not a unique shipping option slug', 2);
+                }
 
-            if (empty($aOption['slug'])) {
-                throw new ShippingDriverException('Each shipping option must provide a unique slug', 1);
+                //  Can only have one default value, the first defined.
+                if (!empty($aOption['default']) && $bHasDefault) {
+                    $aOption['default'] = false;
+                } elseif (!empty($aOption['default'])) {
+                    $bHasDefault = true;
+                }
+
+                $aSlugs[] = $aOption['slug'];
             }
 
-            if (in_array($aOption['slug'], $aSlugs)) {
-                throw new ShippingDriverException('"' . $aOption['slug'] . '" is not a unique shipping option slug', 2);
+            //  Prepare each item
+            foreach ($aOptions as &$aOption) {
+
+                if ($aOption['slug'] !== 'COLLECTION') {
+
+                    $aOption['cost'] = $this->oDriver->calculate($aShippableItems, $aOption['slug'], $oBasket);
+
+                    if (is_int($aOption['cost']) || is_numeric($aOption['cost'])) {
+
+                        $aOption['cost'] = (int) $aOption['cost'];
+
+                    } else {
+
+                        $aOption['cost'] = 0;
+                    }
+                } else {
+
+                    $aOption['cost'] = 0;
+                }
+
+                $oTemp                 = new \stdClass();
+                $oTemp->slug           = $aOption['slug'];
+                $oTemp->label          = $aOption['label'];
+                $oTemp->cost           = $oCurrencyModel->convertBaseToUser($aOption['cost']);
+                $oTemp->cost_formatted = $aOption['cost'] > 0 ? $oCurrencyModel->formatUser($aOption['cost']) : 'FREE';
+                $oTemp->default        = (bool) $aOption['default'];
+
+                $aOut[] = $oTemp;
             }
-
-            //  Can only have one default value, the first defined.
-            if (!empty($aOption['default']) && $bHasDefault) {
-                $aOption['default'] = false;
-            } elseif (!empty($aOption['default'])) {
-                $bHasDefault = true;
-            }
-
-            $aSlugs[] = $aOption['slug'];
-        }
-
-        //  Prepare each item
-        foreach ($aOptions as &$aOption) {
-
-            if (is_int($aOption['cost']) || is_numeric($aOption['cost'])) {
-
-                $aOption['cost'] = (int) $aOption['cost'];
-
-            } elseif (!is_float($aOption['cost'])) {
-
-                $aOption['cost'] = 0;
-            }
-
-            //  Convert the base price to the user's currency
-            $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
-
-            $oTemp                 = new \stdClass();
-            $oTemp->slug           = $aOption['slug'];
-            $oTemp->label          = $aOption['label'];
-            $oTemp->cost           = $oCurrencyModel->convertBaseToUser($aOption['cost']);
-            $oTemp->cost_formatted = $aOption['cost'] > 0 ? $oCurrencyModel->formatUser($aOption['cost']) : 'FREE';
-            $oTemp->default        = (bool) $aOption['default'];
-
-            $aOut[] = $oTemp;
         }
 
         return $aOut;
@@ -223,12 +243,37 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
-     * Retursn the default option string
+     * Returns the desired option
+     * @param  string   $sOptionSlug The desired option
+     * @return stdClass
+     */
+    public function getOption($sOptionSlug) {
+        $aOptions = $this->options();
+        foreach ($aOptions as $aOption) {
+            if ($aOption['slug'] === $sOptionSlug) {
+                return $aOption;
+            }
+        }
+
+        return null;
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Retursn the default option slug
      * @return string
      */
     public function defaultOption()
     {
-        return $this->oDriver->defaultOption();
+        $aOptions = $this->options();
+        foreach ($aOptions as $aOption) {
+            if (!empty($aOption['default'])) {
+                return $aOption['slug'];
+            }
+        }
+
+        return null;
     }
 
     // --------------------------------------------------------------------------
