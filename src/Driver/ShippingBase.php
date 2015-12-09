@@ -14,6 +14,22 @@ namespace Nails\Shop\Driver;
 
 class ShippingBase
 {
+    protected $sDriverSlug;
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Accepts an array of config values from the main driver model
+     * @param array $aConfig The configs to set
+     * @return array
+     */
+    public function setConfig($aConfig)
+    {
+        $this->sDriverSlug = $aConfig['driver_slug'];
+    }
+
+    // --------------------------------------------------------------------------
+
     /**
      * Returns available shipping options.
      * @return array

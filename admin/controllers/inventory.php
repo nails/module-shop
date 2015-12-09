@@ -450,7 +450,8 @@ class Inventory extends BaseAdmin
                 //  Prep the fields
                 $this->inventoryCreateEditPrepFields();
 
-                //  Validated!Create the product
+                //  Validated! Create the product
+                //  @todo: don't do this. This is a bad Pablo.
                 $aInsertData = (array) $this->input->post();
                 $product = $this->shop_product_model->create($aInsertData);
 
@@ -595,7 +596,7 @@ class Inventory extends BaseAdmin
 
             $bPassedValidation = true;
 
-            if (!$this->input->post('variants')) {
+            if (!$this->input->post('variation')) {
 
                 $this->data['error'] = 'At least one variation is required.';
                 $bPassedValidation   = false;

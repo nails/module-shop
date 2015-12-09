@@ -39,7 +39,7 @@ class Webhook extends \Nails\Api\Controller\Base
     // --------------------------------------------------------------------------
 
     /**
-     * Sets the maintenance ehaders and returns the status/error message
+     * Sets the maintenance headers and returns the status/error message
      * @return array
      */
     protected function renderMaintenance()

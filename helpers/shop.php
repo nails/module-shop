@@ -1,5 +1,7 @@
 <?php
 
+use Nails\Factory;
+
 if (!function_exists('getBasket')) {
 
     /**
@@ -49,5 +51,22 @@ if (!function_exists('getBasketTotal')) {
         get_instance()->load->model('shop/shop_basket_model');
 
         return get_instance()->shop_basket_model->getTotal($includeSymbol, $includeThousands);
+    }
+}
+
+// --------------------------------------------------------------------------
+
+if (!function_exists('shopSkinSetting')) {
+
+    /**
+     * Retrives a skin setting
+     * @param  string $sKey  The key to retrieve
+     * @param  string $sType The skin's type
+     * @return mixed
+     */
+    function shopSkinSetting($sKey, $sType)
+    {
+        $oSkinModel = Factory::model('Skin', 'nailsapp/module-shop');
+        return $oSkinModel->getSetting($sKey, $sType);
     }
 }

@@ -64,6 +64,31 @@ class Migration5 extends Base
         $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_order` ADD `delivery_option` VARCHAR(150)  NULL  DEFAULT ''  AFTER `delivery_type`;");
 
 
-        //  @todo: update the way shipping driver data is stored! -might need done in the app migration
+        /**
+         * Convert ship driver settings into JSON strings rather than use serialize
+         */
+
+        $oResult = $this->query('SELECT id, ship_driver_data FROM {{NAILS_DB_PREFIX}}shop_product_variation');
+        while ($oRow = $oResult->fetch(\PDO::FETCH_OBJ)) {
+
+            $mOldValue = unserialize($oRow->ship_driver_data);
+            $sNewValue = json_encode($mOldValue);
+
+            //  Update the record
+            $sQuery = '
+                UPDATE `{{NAILS_DB_PREFIX}}shop_product_variation`
+                SET
+                    `ship_driver_data` = :newValue
+                WHERE
+                    `id` = :id
+            ';
+
+            $oSth = $this->prepare($sQuery);
+
+            $oSth->bindParam(':newValue', $sNewValue, \PDO::PARAM_STR);
+            $oSth->bindParam(':id', $oRow->id, \PDO::PARAM_INT);
+
+            $oSth->execute();
+        }
     }
 }

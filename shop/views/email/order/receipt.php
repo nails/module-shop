@@ -46,7 +46,37 @@ $countriesFlat = $oCountryModel->getAllFlat();
     }
 
 ?>
-<h2>Your Order</h2>
+<h2>Customer Details</h2>
+<h2>Voucher Details</h2>
+<?php
+
+if ($order->requires_shipping) {
+
+    ?>
+    <h2>Shipping details</h2>
+    <?php
+
+    if (!empty($order->shipping_option->label)) {
+        echo "SHIPPING OPTION\n";
+        echo $order->shipping_option->label . "\n\n";
+    }
+
+    $address = array(
+        $order->shipping_address->line_1,
+        $order->shipping_address->line_2,
+        $order->shipping_address->town,
+        $order->shipping_address->state,
+        $order->shipping_address->postcode,
+        $order->shipping_address->country->label
+    );
+
+    $address = array_filter($address);
+    echo implode('<br />', $address);
+
+}
+
+?>
+<h2>Order Items</h2>
 <p></p>
 <table class="default-style">
     <thead>
@@ -74,7 +104,7 @@ $countriesFlat = $oCountryModel->getAllFlat();
                 echo '<td class="text-center" style="' . $borderStyle . 'vertical-align: middle;">' . $item->quantity . '</td>';
                 echo '<td class="text-center" style="' . $borderStyle . 'vertical-align: middle;">' . $item->price->base_formatted->value_ex_tax . '</td>';
                 echo '<td class="text-center" style="' . $borderStyle . 'vertical-align: middle;">' . $item->price->base_formatted->value_tax . '</td>';
-                echo '<td class="text-center" style="' . $borderStyle . 'vertical-align: middle;">' . $item->price->base_formatted->value_total . '</td>';
+                echo '<td class="text-center" style="' . $borderStyle . 'vertical-align: middle;">' . $item->price->base_formatted->item_total . '</td>';
             echo '</tr>';
 
             if ($item->ship_collection_only) {
@@ -92,10 +122,15 @@ $countriesFlat = $oCountryModel->getAllFlat();
         ?>
         <tr>
             <td style="border-top:1px solid #CCCCCC; background: #EFEFEF" class="text-right" colspan="4">
-                Sub Total:<br />Shipping:<br />Tax:<br />Total:
+                Sub Total:
+                <?=$order->totals->base_formatted->grand_discount ? '<br />Discount:' : ''?>
+                <br />Shipping <?=!empty($order->shipping_option->label) ? ' (' . $order->shipping_option->label . ')' : ''?>:
+                <br />Tax:
+                <br />Total:
             </td>
             <td style="border-top:1px solid #CCCCCC; background: #EFEFEF" class="text-center">
                <?=$order->totals->base_formatted->item?>
+               <?=$order->totals->base->grand_discount ? '<br />-' . $order->totals->base_formatted->grand_discount : ''?>
                 <br /><?=$order->totals->base_formatted->shipping?>
                 <br /><?=$order->totals->base_formatted->tax?>
                 <br /><strong><?=$order->totals->base_formatted->grand?></strong>

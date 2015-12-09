@@ -314,15 +314,6 @@ class Orders extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        if ($order->voucher->id) {
-
-            //  Redeem the voucher, if it's there
-            $oVoucherModel = Factory::model('Voucher', 'nailsapp/module-shop');
-            $oVoucherModel->redeem($order->voucher->id, $order);
-        }
-
-        // --------------------------------------------------------------------------
-
         $this->session->set_flashdata('success', 'Order was processed succesfully. The user has been sent a receipt.');
         redirect('admin/shop/orders');
     }

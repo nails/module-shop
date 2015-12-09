@@ -61,10 +61,15 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
         }
 
         //  Apply driver configurations
+        $aSettings = array(
+            'driver_slug' => $this->oDriverConfig->slug
+        );
+
         if (!empty($this->oDriverConfig->data->settings)) {
-            $aSettings = $this->extractDriverSettings($this->oDriverConfig->data->settings);
-            $this->oDriver->setConfig($aSettings);
+            $aSettings = array_merge($aSettings, $this->extractDriverSettings($this->oDriverConfig->data->settings));
         }
+
+        $this->oDriver->setConfig($aSettings);
     }
 
     // --------------------------------------------------------------------------

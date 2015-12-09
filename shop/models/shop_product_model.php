@@ -755,8 +755,8 @@ class NAILS_Shop_product_model extends Base
 
                         if (!empty($currentDriverData)) {
 
-                            //  Data exists, only update the specific bitty.
-                            $currentDriverData[$enabledDriver->slug] = $v->shipping->driver_data[$enabledDriver->slug];
+                            //  Data exists, only update the detaisl for the specific driver
+                            $currentDriverData->{$enabledDriver->slug} = $v->shipping->driver_data[$enabledDriver->slug];
                             $this->db->set('ship_driver_data', json_encode($currentDriverData));
 
                         } else {

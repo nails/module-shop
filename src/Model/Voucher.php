@@ -124,13 +124,13 @@ class Voucher extends Base
 
             case self::TYPE_LIMITED_USE:
 
-                return $this->redeemLimitedUse($oVoucher, $oOrder);
+                return $this->redeemLimitedUse($oVoucher);
                 break;
 
             case self::TYPE_NORMAL:
             default:
 
-                return $this->redeemNormal($oVoucher, $oOrder);
+                return $this->redeemNormal($oVoucher);
                 break;
         }
     }
@@ -139,18 +139,17 @@ class Voucher extends Base
 
     /**
      * Sets the last_used and modified dates of the voucher and bumps the use_count column
-     * @param  stdClass $voucher The voucher object
-     * @param  stdClass $order   The order object
+     * @param  stdClass $oVoucher The voucher object
      * @return boolean
      */
-    protected function redeemNormal($voucher, $order)
+    protected function redeemNormal($oVoucher)
     {
         //  Bump the use count
         $this->db->set('last_used', 'NOW()', false);
         $this->db->set('modified', 'NOW()', false);
         $this->db->set('use_count', 'use_count+1', false);
 
-        $this->db->where('id', $voucher->id);
+        $this->db->where('id', $oVoucher->id);
         return $this->db->update($this->table);
     }
 
@@ -158,13 +157,12 @@ class Voucher extends Base
 
     /**
      * Calls redeemNormal();
-     * @param  stdClass $voucher The voucher object
-     * @param  stdClass $order   The order object
+     * @param  stdClass $oVoucher The voucher object
      * @return boolean
      */
-    protected function redeemLimitedUse($voucher, $order)
+    protected function redeemLimitedUse($oVoucher)
     {
-        return $this->redeemNormal($voucher, $order);
+        return $this->redeemNormal($oVoucher);
     }
 
     // --------------------------------------------------------------------------
@@ -177,6 +175,7 @@ class Voucher extends Base
      */
     protected function redeemGiftCard($voucher, $order)
     {
+        throw new \Exception('Gift Cards are @todo');
         if ($order->shipping->isRequired) {
 
             if (appSetting('free_shipping_threshold', 'shop') <= $order->totals->sub) {

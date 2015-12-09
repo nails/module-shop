@@ -878,28 +878,17 @@ class NAILS_Shop_order_model extends NAILS_Model
      */
     public function process($orderId)
     {
-        //  @todo: complete this
-        return true;
+        $this->oLogger->line('Processing order #' . $orderId);
+        $order = $this->getById($orderId);
 
-        // --------------------------------------------------------------------------
+        if (!$order) {
 
-        //  If an ID has been passed, look it up
-        if (is_numeric($order)) {
-
-            $this->oLogger->line('Looking up order #' . $order);
-            $order = $this->getById($order);
-
-            if (!$order) {
-
-                $this->oLogger->line('Invalid order ID');
-                $this->setError('Invalid order ID');
-                return false;
-            }
+            $this->oLogger->line('Invalid order ID');
+            $this->setError('Invalid order ID');
+            return false;
         }
 
         // --------------------------------------------------------------------------
-
-        $this->oLogger->line('Processing order #' . $order->id);
 
         /**
          * Loop through all the items in the order. If there's a proccessor method
@@ -912,7 +901,7 @@ class NAILS_Shop_order_model extends NAILS_Model
         foreach ($order->items as $item) {
 
             $this->oLogger->line(
-                'Processing item #' . $item->id . ': ' . $item->title . '(' . $item->type->label . ')'
+                'Processing item #' . $item->id . ': ' . $item->product_label . ': ' . $item->variant_label . ' (' . $item->type->label . ')'
             );
 
             $methodName = 'process' . $item->type->ipn_method;
@@ -960,74 +949,20 @@ class NAILS_Shop_order_model extends NAILS_Model
 
         // --------------------------------------------------------------------------
 
-        return true;
-    }
+        //  Handle any vouchers
+        if (!empty($order->voucher->id)) {
 
-    // --------------------------------------------------------------------------
+            $this->oLogger->line('Redeeming voucher: #' . $order->voucher->id . ': ' . $order->voucher->code . ': ' . $order->voucher->label);
 
-    /**
-     * Processes products of type "download"
-     * @param  array    &$items An array of all the products of type "download" in the order
-     * @param  stdClass &$order The complete order object
-     * @return void
-     */
-    protected function processDownload(&$items, &$order)
-    {
-        //  Generate links for all the items
-        $urls    = array();
-        $ids     = array();
-        $expires = 172800;  //  48 hours
-
-        foreach ($items as $item) {
-
-            $temp        = new \stdClass();
-            $temp->title = $item->title;
-            $temp->url   = cdnExpiringUrl($item->meta->download_id, $expires, true);
-
-            $urls[] = $temp;
-            $ids[]  = $item->id;
-
-            unset($temp);
+            $oVoucherModel = Factory::model('Voucher', 'nailsapp/module-shop');
+            if (!$oVoucherModel->redeem($order->voucher->id, $order)) {
+                $this->oLogger->line('... failed with error: ' . $oVoucherModel->lastError());
+            }
         }
 
         // --------------------------------------------------------------------------
 
-        //  Send the user an email with the links
-        $this->oLogger->line(
-            'Sending download email to ' . $order->user->email  . '; email contains ' . count($urls) . ' expiring URLs'
-        );
-
-        $email                         = new \stdClass();
-        $email->type                   = 'shop_product_type_download';
-        $email->to_email               = $order->user->email;
-        $email->data                   = array();
-        $email->data['order']          = new \stdClass();
-        $email->data['order']->id      = $order->id;
-        $email->data['order']->ref     = $order->ref;
-        $email->data['order']->created = $order->created;
-        $email->data['expires']        = $expires;
-        $email->data['urls']           = $urls;
-
-        if ($this->emailer->send($email, true)) {
-
-            //  Mark items as processed
-            $this->db->set('processed', true);
-            $this->db->where_in('id', $ids);
-            $this->db->update(NAILS_DB_PREFIX . 'shop_order_product');
-
-        } else {
-
-            //  Email failed to send, alert developers
-            $this->oLogger->line('!!Failed to send download links, alerting developers');
-            $this->oLogger->line(implode("\n", $this->emailer->getErrors()));
-
-            $subject  = 'Unable to send download email';
-            $message  = 'Unable to send the email with download links to ' . $email->to_email . '; ';
-            $message .= 'order #' . $order->id . "\n\nEmailer errors:\n\n";
-            $message .= print_r($this->emailer->getErrors(), true);
-
-            sendDeveloperMail($subject, $message);
-        }
+        return true;
     }
 
     // --------------------------------------------------------------------------

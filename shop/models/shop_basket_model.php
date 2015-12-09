@@ -61,7 +61,9 @@ class NAILS_Shop_basket_model extends Base
                 activeUser('id'),
                 array('basket')
             );
-            $savedBasket = json_decode($oUserMeta->basket);
+            if (!empty($oUserMeta->basket)) {
+                $savedBasket = json_decode($oUserMeta->basket);
+            }
         }
 
         if (!empty($savedBasket)) {

@@ -126,4 +126,23 @@ class Skin
 
         return false;
     }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Retrives a skin setting
+     * @param  string $sKey  The key to retrieve
+     * @param  string $sType The skin's type
+     * @return mixed
+     */
+    public function getSetting($sKey, $sType)
+    {
+        if (!isset($this->aEnabled[strtoupper($sType)])) {
+            throw new SkinException(
+                '"' . $sType . '" is not a valid skin type.'
+            );
+        }
+
+        return appSetting($sKey, $this->aEnabled[strtoupper($sType)]->slug);
+    }
 }
