@@ -3,7 +3,7 @@
 /**
  * Migration:   5
  * Started:     09/11/2015
- * Finalised:
+ * Finalised:   10/12/2015
  *
  * @package     Nails
  * @subpackage  module-shop
