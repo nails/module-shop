@@ -159,7 +159,7 @@ class Vouchers extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        if (userHasPermission('admin:shop:voucher:create')) {
+        if (userHasPermission('admin:shop:vouchers:create')) {
 
             Helper::addHeaderButton('admin/shop/vouchers/create', 'Create Voucher');
         }
