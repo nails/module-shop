@@ -826,6 +826,52 @@ class NAILS_Shop_order_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
+     * Marks an order as packed
+     * @param  mixed   $orderId The order's ID, or an array of order IDs
+     * @return boolean
+     */
+    public function pack($orderId)
+    {
+        if (is_array($orderId)) {
+
+            return $this->packBatch($orderId);
+
+        } else {
+
+            $data = array(
+                'fulfilment_status' => 'PACKED',
+                'fulfilled'         => null
+            );
+
+            return $this->update($orderId, $data);
+        }
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Batch mark orders as packed
+     * @param  array $orderIds An array of order IDs
+     * @return boolean
+     */
+    public function packBatch($orderIds)
+    {
+        if (empty($orderIds)) {
+
+            $this->setError('No IDs were supplied.');
+            return false;
+        }
+
+        $this->db->set('fulfilment_status', 'PACKED');
+        $this->db->set('fulfilled', null);
+        $this->db->where_in('id', $orderIds);
+        $this->db->set('modified', 'NOW()', false);
+        return $this->db->update(NAILS_DB_PREFIX . 'shop_order');
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
      * Marks an order as unfulfilled
      * @param  mixed   $orderId The order's ID, or an array of order IDs
      * @return boolean

@@ -1,12 +1,12 @@
 <?php
 
-    $numCollectItems = 0;
+$iNumCollectItems = 0;
 
-    foreach ($order->items as $item) {
-        if ($item->ship_collection_only) {
-            $numCollectItems++;
-        }
+foreach ($order->items as $oItem) {
+    if ($oItem->ship_collection_only) {
+        $iNumCollectItems++;
     }
+}
 
 ?>
 <div
@@ -14,7 +14,7 @@
     class="group-shop orders single"
     data-fulfilment-status="<?=$order->fulfilment_status?>"
     data-delivery-type="<?=$order->delivery_option?>"
-    data-num-collect-items="<?=$numCollectItems?>"
+    data-num-collect-items="<?=$iNumCollectItems?>"
 >
     <div class="row col-3-container">
         <div class="col-md-4">
@@ -44,16 +44,16 @@
                                 <td class="value">
                                 <?php
 
-                                    if (empty($order->voucher)) {
+                                if (empty($order->voucher)) {
 
-                                        echo '<span class="text-muted">No Voucher Used</span>';
+                                    echo '<span class="text-muted">No Voucher Used</span>';
 
-                                    } else {
+                                } else {
 
 
-                                        echo $order->voucher->label;
-                                        echo '<small>' . $order->voucher->code . '</small>';
-                                    }
+                                    echo $order->voucher->label;
+                                    echo '<small>' . $order->voucher->code . '</small>';
+                                }
 
                                 ?>
                                 </td>
@@ -63,17 +63,17 @@
                                 <td class="value">
                                 <?php
 
-                                    echo $order->totals->base_formatted->item;
+                                echo $order->totals->base_formatted->item;
 
-                                    if ($order->currency != $order->base_currency) {
+                                if ($order->currency != $order->base_currency) {
 
-                                        ?>
-                                        <small>
-                                            User checked out in <?=$order->currency?>:
-                                            <?=$order->totals->user_formatted->item?>
-                                        </small>
-                                        <?php
-                                    }
+                                    ?>
+                                    <small>
+                                        User checked out in <?=$order->currency?>:
+                                        <?=$order->totals->user_formatted->item?>
+                                    </small>
+                                    <?php
+                                }
 
                                 ?>
                                 </td>
@@ -83,17 +83,17 @@
                                 <td class="value">
                                 <?php
 
-                                    echo $order->totals->base_formatted->shipping;
+                                echo $order->totals->base_formatted->shipping;
 
-                                    if ($order->currency != $order->base_currency) {
+                                if ($order->currency != $order->base_currency) {
 
-                                        ?>
-                                        <small>
-                                            User checked out in <?=$order->currency?>:
-                                            <?=$order->totals->user_formatted->shipping?>
-                                        </small>
-                                        <?php
-                                    }
+                                    ?>
+                                    <small>
+                                        User checked out in <?=$order->currency?>:
+                                        <?=$order->totals->user_formatted->shipping?>
+                                    </small>
+                                    <?php
+                                }
 
                                 ?>
                                 </td>
@@ -103,17 +103,17 @@
                                 <td class="value">
                                 <?php
 
-                                    echo $order->totals->base_formatted->tax;
+                                echo $order->totals->base_formatted->tax;
 
-                                    if ($order->currency != $order->base_currency) {
+                                if ($order->currency != $order->base_currency) {
 
-                                        ?>
-                                        <small>
-                                            User checked out in <?=$order->currency?>:
-                                            <?=$order->totals->user_formatted->tax?>
-                                        </small>
-                                        <?php
-                                    }
+                                    ?>
+                                    <small>
+                                        User checked out in <?=$order->currency?>:
+                                        <?=$order->totals->user_formatted->tax?>
+                                    </small>
+                                    <?php
+                                }
 
                                 ?>
                                 </td>
@@ -210,17 +210,17 @@
                                 <td class="value">
                                 <?php
 
-                                    echo $order->totals->base_formatted->grand;
+                                echo $order->totals->base_formatted->grand;
 
-                                    if ($order->currency != $order->base_currency) {
+                                if ($order->currency != $order->base_currency) {
 
-                                        ?>
-                                        <small>
-                                            User checked out in <?=$order->currency?>:
-                                            <?=$order->totals->user_formatted->grand?>
-                                        </small>
-                                        <?php
-                                    }
+                                    ?>
+                                    <small>
+                                        User checked out in <?=$order->currency?>:
+                                        <?=$order->totals->user_formatted->grand?>
+                                    </small>
+                                    <?php
+                                }
 
                                 ?>
                                 </td>
@@ -230,14 +230,14 @@
                                 <td class="value">
                                 <?php
 
-                                    if (empty($order->note)) {
+                                if (empty($order->note)) {
 
-                                        echo '<span class="text-muted">No Note Specified</span>';
+                                    echo '<span class="text-muted">No Note Specified</span>';
 
-                                    } else {
+                                } else {
 
-                                        echo $order->note;
-                                    }
+                                    echo $order->note;
+                                }
 
                                 ?>
                                 </td>
@@ -279,7 +279,7 @@
                                 <td class="value">
                                     <?php
 
-                                    $address = array(
+                                    $aAddress = array(
                                         $order->billing_address->line_1,
                                         $order->billing_address->line_2,
                                         $order->billing_address->town,
@@ -288,16 +288,16 @@
                                         $order->billing_address->country->label
                                     );
 
-                                    $address = array_filter($address);
+                                    $aAddress = array_filter($aAddress);
 
-                                    echo implode('<br />', $address);
+                                    echo implode('<br />', $aAddress);
 
                                     ?>
                                     <small>
                                         <?php
 
                                         echo anchor(
-                                            'https://www.google.com/maps/?q=' . urlencode(implode(', ', $address)),
+                                            'https://www.google.com/maps/?q=' . urlencode(implode(', ', $aAddress)),
                                             '<b class="fa fa-map-marker"></b> Map',
                                             'target="_blank"'
                                         );
@@ -328,7 +328,7 @@
                                 <td class="value">
                                     <?php
 
-                                    $address = array(
+                                    $aAddress = array(
                                         $order->shipping_address->line_1,
                                         $order->shipping_address->line_2,
                                         $order->shipping_address->town,
@@ -337,16 +337,16 @@
                                         $order->shipping_address->country->label
                                     );
 
-                                    $address = array_filter($address);
+                                    $aAddress = array_filter($aAddress);
 
-                                    echo implode('<br />', $address);
+                                    echo implode('<br />', $aAddress);
 
                                     ?>
                                     <small>
                                         <?php
 
                                         echo anchor(
-                                            'https://www.google.com/maps/?q=' . urlencode(implode(', ', $address)),
+                                            'https://www.google.com/maps/?q=' . urlencode(implode(', ', $aAddress)),
                                             '<b class="fa fa-map-marker"></b> Map',
                                             'target="_blank"'
                                         );
@@ -367,114 +367,107 @@
                     <div class="order-status <?=strtolower($order->status)?>">
                     <?php
 
-                        switch ($order->status) {
+                    switch ($order->status) {
 
-                            case 'UNPAID' :
+                        case 'UNPAID' :
+                            ?>
+                            <h1>
+                                <b class="fa fa-exclamation-triangle"></b>
+                                Unpaid
+                            </h1>
+                            <p>
+                                The user was sent to the payment gateway but has not yet completed payment.
+                            </p>
+                            <?php
 
-                                ?>
-                                <h1>
-                                    <b class="fa fa-exclamation-triangle"></b>
-                                    Unpaid
-                                </h1>
-                                <p>
-                                    The user was sent to the payment gateway but has not yet completed payment.
-                                </p>
-                                <?php
-
-                                if (time() - strtotime($order->created) > 3600) {
-
-                                    ?>
-                                    <p>
-                                        <small>
-                                            This order looks to be quite old now, it's likely the
-                                            user abandoned checkout.
-                                        </small>
-                                    </p>
-                                    <?php
-                                }
-                                break;
-
-                            case 'PAID':
+                            if (time() - strtotime($order->created) > 3600) {
 
                                 ?>
-                                <h1>
-                                    <b class="fa fa-check-circle-o"></b>
-                                    Paid
-                                </h1>
                                 <p>
-                                    This order has been fully paid.
+                                    <small>
+                                        This order looks to be quite old now, it's likely the
+                                        user abandoned checkout.
+                                    </small>
                                 </p>
                                 <?php
-                                break;
+                            }
+                            break;
 
-                            case 'ABANDONED':
+                        case 'PAID':
+                            ?>
+                            <h1>
+                                <b class="fa fa-check-circle-o"></b>
+                                Paid
+                            </h1>
+                            <p>
+                                This order has been fully paid.
+                            </p>
+                            <?php
+                            break;
 
-                                ?>
-                                <h1>
-                                    <b class="fa fa-times-circle"></b>
-                                    Abandoned
-                                </h1>
-                                <p>
-                                    This order was abandoned by the user prior to reaching checkout.
-                                </p>
-                                <?php
-                                break;
+                        case 'ABANDONED':
+                            ?>
+                            <h1>
+                                <b class="fa fa-times-circle"></b>
+                                Abandoned
+                            </h1>
+                            <p>
+                                This order was abandoned by the user prior to reaching checkout.
+                            </p>
+                            <?php
+                            break;
 
-                            case 'CANCELLED':
+                        case 'CANCELLED':
+                            ?>
+                            <h1>
+                                <b class="fa fa-times-circle"></b>
+                                Cancelled
+                            </h1>
+                            <p>
+                                This order has been marked as cancelled.
+                            </p>
+                            <?php
+                            break;
 
-                                ?>
-                                <h1>
-                                    <b class="fa fa-times-circle"></b>
-                                    Cancelled
-                                </h1>
-                                <p>
-                                    This order has been marked as cancelled.
-                                </p>
-                                <?php
-                                break;
+                        case 'FAILED':
+                            ?>
+                            <h1>
+                                <b class="fa fa-exclamation-triangle"></b>
+                                Failed
+                            </h1>
+                            <p>
+                                There was an issue processing this order. Failure details of the failure may
+                                have been provided from the payment gateway, if so these will be shown below.
+                            </p>
+                            <?php
+                            // @todo: Show failure details
+                            break;
 
-                            case 'FAILED':
+                        case 'PENDING':
+                            ?>
+                            <h1>
+                                <b class="fa fa-clock-o fa-spin"></b>
+                                Pending
+                            </h1>
+                            <p>
+                                This order is pending action, details and further options may be shown below.
+                            </p>
+                            <?php
+                            // @todo: Show pending reasons/actions
+                            break;
 
-                                ?>
-                                <h1>
-                                    <b class="fa fa-exclamation-triangle"></b>
-                                    Failed
-                                </h1>
-                                <p>
-                                    There was an issue processing this order. Failure details of the failure may
-                                    have been provided from the payment gateway, if so these will be shown below.
-                                </p>
-                                <?php
-                                // @todo: Show failure details
-                                break;
-
-                            case 'PENDING':
-
-                                ?>
-                                <h1>
-                                    <b class="fa fa-clock-o fa-spin"></b>
-                                    Pending
-                                </h1>
-                                <p>
-                                    This order is pending action, details and further options may be shown below.
-                                </p>
-                                <?php
-                                // @todo: Show pending reasons/actions
-                                break;
-
-                            default:
-
-                                $status = ucwords(strtolower($order->status));
-                                ?>
-                                <h1>
-                                    <?=$status?>
-                                </h1>
-                                <p>
-                                    "<?=$status?>" is not an order status I understand, there may be a problem.
-                                </p>
-                                <?php
-                                break;
-                        }
+                        default:
+                            $sStatus = ucwords(strtolower($order->status));
+                            ?>
+                            <h1>
+                                <?=$sStatus?>
+                            </h1>
+                            <p>
+                                "<?=$sStatus?>" is not an order status I understand, there may be a problem.
+                            </p>
+                            <?php
+                            break;
+                    }
 
                     ?>
                     </div>
@@ -483,62 +476,78 @@
                     <div class="order-status <?=strtolower($order->fulfilment_status)?>">
                     <?php
 
-                        $verbFulfilled   = $order->delivery_option !== 'COLLECTION' ? 'fulfilled' : 'collected';
-                        $verbUnfulfilled = $order->delivery_option !== 'COLLECTION' ? 'unfulfilled' : 'uncollected';
+                    $sVerbFulfilled   = $order->delivery_option !== 'COLLECTION' ? 'fulfilled' : 'collected';
+                    $sVerbUnfulfilled = $order->delivery_option !== 'COLLECTION' ? 'unfulfilled' : 'uncollected';
 
-                        switch ($order->fulfilment_status) {
+                    $sButtonUrlUnfulfill   = 'admin/shop/orders/unfulfil/' . $order->id;
+                    $sButtonLabelUnfulfill = 'Mark ' . ucfirst($sVerbUnfulfilled);
+                    $sButtonUrlPack        = 'admin/shop/orders/pack/' . $order->id;
+                    $sButtonLabelPack      = 'Mark Packed';
+                    $sButtonUrlFulfill     = 'admin/shop/orders/fulfil/' . $order->id;
+                    $sButtonLabelFulfill   = 'Mark ' . ucfirst($sVerbFulfilled);
 
-                            case 'FULFILLED':
+                    switch ($order->fulfilment_status) {
 
-                                $buttonUrl   = 'admin/shop/orders/unfulfil/' . $order->id;
-                                $buttonLabel = 'Mark ' . ucfirst($verbUnfulfilled);
+                        case 'FULFILLED':
+                            ?>
+                            <h1>
+                                <b class="fa fa-truck"></b>
+                                <?=strtoupper($sVerbFulfilled)?>
+                            </h1>
+                            <p>
+                                This order has been <?=$sVerbFulfilled?>, no further action is nessecary.
+                            </p>
+                            <p>
+                                <?=anchor($sButtonUrlUnfulfill, $sButtonLabelUnfulfill, 'class="btn btn-warning"')?>
+                                <?=anchor($sButtonUrlPack, $sButtonLabelPack, 'class="btn btn-info"')?>
+                            </p>
+                            <?php
+                            break;
 
-                                ?>
-                                <h1>
-                                    <b class="fa fa-truck"></b>
-                                    <?=strtoupper($verbFulfilled)?>
-                                </h1>
-                                <p>
-                                    This order has been <?=$verbFulfilled?>, no further action is nessecary.
-                                </p>
-                                <p>
-                                    <?=anchor($buttonUrl, $buttonLabel, 'class="btn btn-danger"')?>
-                                </p>
-                                <?php
-                                break;
+                        case 'PACKED':
+                            ?>
+                            <h1>
+                                <b class="fa fa-cube"></b>
+                                PACKED
+                            </h1>
+                            <p>
+                                This order has <strong>not</strong> been <?=$sVerbFulfilled?>.
+                            </p>
+                            <p>
+                                <?=anchor($sButtonUrlUnfulfill, $sButtonLabelUnfulfill, 'class="btn btn-warning"')?>
+                                <?=anchor($sButtonUrlFulfill, $sButtonLabelFulfill, 'class="btn btn-success"')?>
+                            </p>
+                            <?php
+                            break;
 
-                            case 'UNFULFILLED':
+                        case 'UNFULFILLED':
+                            ?>
+                            <h1>
+                                <b class="fa fa-clock-o"></b>
+                                <?=strtoupper($sVerbUnfulfilled)?>
+                            </h1>
+                            <p>
+                                This order has <strong>not</strong> been <?=$sVerbFulfilled?>.
+                            </p>
+                            <p>
+                                <?=anchor($sButtonUrlPack, $sButtonLabelPack, 'class="btn btn-info"')?>
+                                <?=anchor($sButtonUrlFulfill, $sButtonLabelFulfill, 'class="btn btn-success"')?>
+                            </p>
+                            <?php
+                            break;
 
-                                $buttonUrl   = 'admin/shop/orders/fulfil/' . $order->id;
-                                $buttonLabel = 'Mark ' . ucfirst($verbFulfilled);
-
-                                ?>
-                                <h1>
-                                    <?=strtoupper($verbUnfulfilled)?>
-                                </h1>
-                                <p>
-                                    This order has <strong>not</strong> been <?=$verbFulfilled?>.
-                                </p>
-                                <p>
-                                    <?=anchor($buttonUrl, $buttonLabel, 'class="btn btn-success"')?>
-                                </p>
-                                <?php
-                                break;
-
-                            default:
-
-                                $status = ucwords(strtolower($order->fulfilment_status));
-
-                                ?>
-                                <h1>
-                                    <?=$status?>
-                                </h1>
-                                <p>
-                                    "<?=$status?>" is not a fulfilment status I understand, there may be a problem.
-                                </p>
-                                <?php
-                                break;
-                        }
+                        default:
+                            $sStatus = ucwords(strtolower($order->fulfilment_status));
+                            ?>
+                            <h1>
+                                <?=$sStatus?>
+                            </h1>
+                            <p>
+                                "<?=$sStatus?>" is not a fulfilment status I understand, there may be a problem.
+                            </p>
+                            <?php
+                            break;
+                    }
 
                     ?>
                     </div>
@@ -566,67 +575,67 @@
                 <tbody>
                 <?php
 
-                    if (!empty($order->items)) {
+                if (!empty($order->items)) {
 
-                        foreach ($order->items as $item) {
-
-                            ?>
-                            <tr>
-                                <td>
-                                    <?=$item->sku?>
-                                </td>
-                                <td>
-                                    <?php
-
-                                    echo $item->product_label;
-                                    echo $item->variant_label != $item->product_label ? '<br /><small>' . $item->variant_label . '</small>' : '';
-
-                                    if ($item->ship_collection_only) {
-
-                                        ?>
-                                        <p class="alert alert-warning skinny">
-                                            <strong>Note:</strong> This item is for collection only.
-                                        </p>
-                                        <?php
-                                    }
-
-                                    ?>
-                                </td>
-                                <td>
-                                    <?=$item->type->label?>
-                                </td>
-                                <td class="text-center">
-                                    <?=$item->quantity?>
-                                </td>
-                                <td class="text-center">
-                                    <?=$item->price->base_formatted->value_ex_tax?>
-                                </td>
-                                <td class="text-center">
-                                    <?=$item->price->base_formatted->value_tax?>
-                                </td>
-                                <td class="text-center">
-                                    <?=$item->price->base_formatted->item_total?>
-                                </td>
-                                <td class="text-center">
-                                    <?=$item->refunded ? 'Refunded ' . $item->refunded_date : 'No'?>
-                                </td>
-                                <td class="text-center">
-                                    <?=anchor('', 'Refund', 'class="btn btn-xs btn-primary todo"')?>
-                                </td>
-                            </tr>
-                            <?php
-                        }
-
-                    } else {
+                    foreach ($order->items as $item) {
 
                         ?>
                         <tr>
-                            <td colspan="9" class="no-data">
-                                No Items
+                            <td>
+                                <?=$item->sku?>
+                            </td>
+                            <td>
+                                <?php
+
+                                echo $item->product_label;
+                                echo $item->variant_label != $item->product_label ? '<br /><small>' . $item->variant_label . '</small>' : '';
+
+                                if ($item->ship_collection_only) {
+
+                                    ?>
+                                    <p class="alert alert-warning skinny">
+                                        <strong>Note:</strong> This item is for collection only.
+                                    </p>
+                                    <?php
+                                }
+
+                                ?>
+                            </td>
+                            <td>
+                                <?=$item->type->label?>
+                            </td>
+                            <td class="text-center">
+                                <?=$item->quantity?>
+                            </td>
+                            <td class="text-center">
+                                <?=$item->price->base_formatted->value_ex_tax?>
+                            </td>
+                            <td class="text-center">
+                                <?=$item->price->base_formatted->value_tax?>
+                            </td>
+                            <td class="text-center">
+                                <?=$item->price->base_formatted->item_total?>
+                            </td>
+                            <td class="text-center">
+                                <?=$item->refunded ? 'Refunded ' . $item->refunded_date : 'No'?>
+                            </td>
+                            <td class="text-center">
+                                <?=anchor('', 'Refund', 'class="btn btn-xs btn-primary todo"')?>
                             </td>
                         </tr>
                         <?php
                     }
+
+                } else {
+
+                    ?>
+                    <tr>
+                        <td colspan="9" class="no-data">
+                            No Items
+                        </td>
+                    </tr>
+                    <?php
+                }
 
                 ?>
                 </tbody>
@@ -648,40 +657,40 @@
                 <tbody>
                 <?php
 
-                    if (!empty($payments)) {
+                if (!empty($payments)) {
 
-                        $oCurrencyModel = nailsFactory('model', 'Currency', 'nailsapp/module-shop');
+                    $oCurrencyModel = nailsFactory('model', 'Currency', 'nailsapp/module-shop');
 
-                        foreach ($payments as $payment) {
-
-                            ?>
-                            <tr>
-                                <td>
-                                    <?=$payment->payment_gateway?>
-                                </td>
-                                <td>
-                                    <?=$payment->transaction_id?>
-                                </td>
-                                <td>
-                                    <?=$oCurrencyModel->formatBase($payment->amount_base)?>
-                                </td>
-                                <?=adminHelper('loadDatetimeCell', $payment->created)?>
-                            </tr>
-                            <?php
-
-                        }
-
-                    } else {
+                    foreach ($payments as $payment) {
 
                         ?>
                         <tr>
-                            <td colspan="4" class="no-data">
-                                No Payments
+                            <td>
+                                <?=$payment->payment_gateway?>
                             </td>
+                            <td>
+                                <?=$payment->transaction_id?>
+                            </td>
+                            <td>
+                                <?=$oCurrencyModel->formatBase($payment->amount_base)?>
+                            </td>
+                            <?=adminHelper('loadDatetimeCell', $payment->created)?>
                         </tr>
                         <?php
 
                     }
+
+                } else {
+
+                    ?>
+                    <tr>
+                        <td colspan="4" class="no-data">
+                            No Payments
+                        </td>
+                    </tr>
+                    <?php
+
+                }
 
                 ?>
                 </tbody>

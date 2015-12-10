@@ -62,7 +62,7 @@ class Migration5 extends Base
         $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_order` ADD `shipping_driver` VARCHAR(150)  NULL  DEFAULT NULL  AFTER `shipping_country`;");
         $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_order` ADD `shipping_option` VARCHAR(150)  NULL  DEFAULT NULL  AFTER `shipping_driver`;");
         $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_order` ADD `delivery_option` VARCHAR(150)  NULL  DEFAULT ''  AFTER `delivery_type`;");
-
+        $this->query("ALTER TABLE `{{NAILS_DB_PREFIX}}shop_order` CHANGE `fulfilment_status` `fulfilment_status` ENUM('UNFULFILLED','PACKED','FULFILLED')  CHARACTER SET utf8  COLLATE utf8_general_ci  NOT NULL  DEFAULT 'UNFULFILLED';");
 
         /**
          * Convert ship driver settings into JSON strings rather than use serialize

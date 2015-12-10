@@ -32,12 +32,21 @@ class Orders extends BaseAdmin
             //  Unfulfilled orders
             $ci->db->where('fulfilment_status', 'UNFULFILLED');
             $ci->db->where('status', 'PAID');
-            $numUnfulfilled = $ci->db->count_all_results(NAILS_DB_PREFIX . 'shop_order');
+            $iNumUnfulfilled = $ci->db->count_all_results(NAILS_DB_PREFIX . 'shop_order');
 
             $oAlert = Factory::factory('NavAlert', 'nailsapp/module-admin');
-            $oAlert->setValue($numUnfulfilled);
+            $oAlert->setValue($iNumUnfulfilled);
             $oAlert->setSeverity('danger');
             $oAlert->setLabel('Unfulfilled Orders');
+
+            //  Packed Orders
+            $ci->db->where('fulfilment_status', 'PACKED');
+            $iNumPacked = $ci->db->count_all_results(NAILS_DB_PREFIX . 'shop_order');
+
+            $oAlert = Factory::factory('NavAlert', 'nailsapp/module-admin');
+            $oAlert->setValue($iNumPacked);
+            $oAlert->setSeverity('info');
+            $oAlert->setLabel('Packed Orders');
 
             $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
             $oNavGroup->setLabel('Shop');
@@ -124,10 +133,8 @@ class Orders extends BaseAdmin
 
         //  Define the sortable columns and the filters
         $sortColumns = array(
-            $tablePrefix . '.created'    => 'Created',
-            $tablePrefix . '.code'       => 'Code',
-            $tablePrefix . '.type'       => 'Type',
-            $tablePrefix . '.valid_from' => 'Valid From Date'
+            $tablePrefix . '.created'          => 'Order Placed',
+            $tablePrefix . '.total_base_grand' => 'Order Value'
         );
 
         // --------------------------------------------------------------------------
@@ -148,10 +155,11 @@ class Orders extends BaseAdmin
         );
         $cbFilters[] = Helper::searchFilterObject(
             $tablePrefix . '.fulfilment_status',
-            'Fulfilled',
+            'Ship Status',
             array(
-                array('Yes', 'FULFILLED'),
-                array('No', 'UNFULFILLED')
+                array('Unfulfilled', 'UNFULFILLED'),
+                array('Packed', 'PACKED'),
+                array('Fulfilled', 'FULFILLED')
             )
         );
 
@@ -389,47 +397,6 @@ class Orders extends BaseAdmin
     // --------------------------------------------------------------------------
 
     /**
-     * Download an order's invoice
-     * @return void
-     */
-    public function download_invoice()
-    {
-        if (!userHasPermission('admin:shop:orders:view')) {
-
-            $this->session->set_flashdata('error', 'You do not have permission to download orders.');
-            redirect('admin/shop/orders');
-        }
-
-        // --------------------------------------------------------------------------
-
-        //  Fetch and check order
-        $this->load->model('shop/shop_order_model');
-
-        $this->data['order'] = $this->shop_order_model->getById($this->uri->segment(5));
-
-        if (!$this->data['order']) {
-
-            $this->session->set_flashdata('error', 'No order exists by that ID.');
-            redirect('admin/shop/orders');
-        }
-
-        // --------------------------------------------------------------------------
-
-        //  Load up the shop's skin
-        $oSkinModel = Factory::model('Skin', 'nailsapp/module-shop');
-        $oSkin      = $oSkinModel->getEnabled('checkout');
-
-        //  Views
-        $this->data['for_user'] = 'ADMIN';
-        $this->load->library('pdf/pdf');
-        $this->pdf->setPaperSize('A4', 'landscape');
-        $this->pdf->loadView($oSkin->path . 'views/order/invoice', $this->data);
-        $this->pdf->download('INVOICE-' . $this->data['order']->ref . '.pdf');
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
      * Mark an order as fulfilled
      * @return void
      */
@@ -504,6 +471,92 @@ class Orders extends BaseAdmin
         } else {
 
             $msg     = 'Failed to mark orders as fulfilled. ';
+            $msg    .= $this->shop_order_model->lastError();
+            $status  = 'error';
+        }
+
+        $this->session->set_flashdata($status, $msg);
+        redirect('admin/shop/orders');
+    }
+
+    // --------------------------------------------------------------------------
+
+
+    /**
+     * Mark an order as fulfilled
+     * @return void
+     */
+    public function pack()
+    {
+        if (!userHasPermission('admin:shop:orders:edit')) {
+
+            $msg    = 'You do not have permission to edit orders.';
+            $status = 'error';
+            $this->session->set_flashdata($status, $msg);
+            redirect('admin/shop/orders');
+        }
+
+        // --------------------------------------------------------------------------
+
+        //    Fetch and check order
+        $this->load->model('shop/shop_order_model');
+
+        $order = $this->shop_order_model->getById($this->uri->segment(5));
+
+        if (!$order) {
+
+            $msg    = 'No order exists by that ID.';
+            $status = 'error';
+            $this->session->set_flashdata($status, $msg);
+            redirect('admin/shop/orders');
+        }
+
+        // --------------------------------------------------------------------------
+
+        if ($this->shop_order_model->pack($order->id)) {
+
+            $msg    = 'Order ' . $order->ref . ' was marked as packed.';
+            $status = 'success';
+
+        } else {
+
+            $msg    = 'Failed to mark order ' . $order->ref . ' as packed.';
+            $status = 'error';
+        }
+
+        $this->session->set_flashdata($status, $msg);
+        redirect('admin/shop/orders/view/' . $order->id);
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Batch fulfil orders
+     * @return void
+     */
+    public function pack_batch()
+    {
+        if (!userHasPermission('admin:shop:orders:edit')) {
+
+            $msg    = 'You do not have permission to edit orders.';
+            $status = 'error';
+            $this->session->set_flashdata($status, $msg);
+            redirect('admin/shop/orders');
+        }
+
+        // --------------------------------------------------------------------------
+
+        //    Fetch and check orders
+        $this->load->model('shop/shop_order_model');
+
+        if ($this->shop_order_model->packBatch($this->input->get('ids'))) {
+
+            $msg    = 'Orders were marked as packed.';
+            $status = 'success';
+
+        } else {
+
+            $msg     = 'Failed to mark orders as packed. ';
             $msg    .= $this->shop_order_model->lastError();
             $status  = 'error';
         }

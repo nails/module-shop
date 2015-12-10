@@ -1,172 +1,44 @@
-<?php
-
-//  Country
-$oCountryModel = nailsFactory('model', 'Country');
-$countriesFlat = $oCountryModel->getAllFlat();
-
-?>
 Thank you very much for your order with <?=APP_NAME?>.
 
 We have now received full payment for your order, please don't hesitate to contact us if you have any questions or concerns.
 
-
-YOUR ORDER
-----------
-
-REFERENCE
-<?=$order->ref?>
-
-
-PLACED
-<?=toUserDatetime($order->created)?>
-
-
-CUSTOMER
 <?php
 
-echo $order->user->first_name . ' ' . $order->user->last_name;
-echo "\n" . $order->user->email;
-echo "\n" . $order->user->telephone;
+$sWord = $order->delivery_type === 'COLLECT' ? 'ALL' : 'SOME';
 
-?>
+if (in_array($order->delivery_type, array('COLLECT', 'DELIVER_COLLECT', 'DELIVER'))) {
 
+    $aBox   = array();
+    $aBox[] = 'IMPORTANT: ' . $sWord . ' ITEMS IN THIS ORDER SHOULD BE COLLECTED FROM:';
+    $aBox[] = '';
 
-<?php
+    $aAddress   = array();
+    $aAddress[] = appSetting('warehouse_addr_addressee', 'shop');
+    $aAddress[] = appSetting('warehouse_addr_line1', 'shop');
+    $aAddress[] = appSetting('warehouse_addr_line2', 'shop');
+    $aAddress[] = appSetting('warehouse_addr_town', 'shop');
+    $aAddress[] = appSetting('warehouse_addr_postcode', 'shop');
+    $aAddress[] = appSetting('warehouse_addr_state', 'shop');
+    $aAddress[] = appSetting('warehouse_addr_country', 'shop');
+    $aAddress   = array_filter($aAddress);
 
-if ($order->requires_shipping) {
-
-    if (!empty($order->shipping_option->label)) {
-        echo "SHIPPING OPTION\n";
-        echo $order->shipping_option->label . "\n\n";
+    if (!empty($aAddress)) {
+        $aBox = array_merge($aBox, $aAddress);
     }
 
-    $address = array(
-        $order->shipping_address->line_1,
-        $order->shipping_address->line_2,
-        $order->shipping_address->town,
-        $order->shipping_address->state,
-        $order->shipping_address->postcode,
-        $order->shipping_address->country->label
-    );
+    $aBox = array_map(function($val) {
 
-    $address = array_filter($address);
-    echo "SHIPPING ADDRESS\n";
-    echo implode("\n", $address);
+        return str_pad($val, 61, ' ');
 
+    }, $aBox);
+
+    echo "\n" . '+--------------------------------------------------------------+';
+    echo "\n| " . implode("|\n| ", $aBox) . '|';
+    echo "\n" . '+--------------------------------------------------------------+';
+    echo "\n\n\n";
 }
 
-?>
+// --------------------------------------------------------------------------
 
-
-BILLING ADDRESS
-<?php
-
-$address = array(
-    $order->billing_address->line_1,
-    $order->billing_address->line_2,
-    $order->billing_address->town,
-    $order->billing_address->state,
-    $order->billing_address->postcode,
-    $order->billing_address->country->label
-);
-
-$address = array_filter($address);
-echo implode("\n", $address);
-
-?>
-
-<?php
-
-if (!empty($order->note)) {
-
-    echo 'NOTE' . "\n";
-    echo $order->note . "\n";
-}
-
-?>
-
-<?php
-
-if (!empty($order->voucher->id)) {
-
-    echo 'VOUCHER' . "\n";
-    echo $order->voucher->code . ' - ' . $order->voucher->label . "\n";
-}
-
-?>
-
-
-YOUR ITEMS
-----------
-
-<?php
-
-foreach ($order->items as $item) {
-
-    echo strtoupper($item->product_label) . "\n";
-    echo $item->product_label != $item->variant_label ? strtoupper($item->variant_label) : '';
-    echo $item->sku ? "\nSKU:       " . $item->sku : '';
-
-    echo "\nQuantity:  " . $item->quantity;
-    echo "\nUnit Cost: " . $item->price->user_formatted->value_inc_tax;
-    echo "\n\n";
-
-    echo strtoupper($item->product_label) . "\n";
-    echo $item->product_label != $item->variant_label ? strtoupper($item->variant_label) : '';
-    echo $item->sku ? "\nSKU:       " . $item->sku : '';
-
-    echo "\nQuantity:  " . $item->quantity;
-    echo "\nUnit Cost: " . $item->price->user_formatted->value_inc_tax;
-    echo "\n\n";
-
-}
-
-?>
----
-
-Sub Total: <?=$order->totals->user_formatted->item . "\n"?>
-<?=$order->totals->base->grand_discount ? 'Discount: -' . $order->totals->base_formatted->grand_discount . "\n" : ''?>
-Shipping:  <?=$order->totals->user_formatted->shipping . "\n"?>
-Tax:       <?=$order->totals->user_formatted->tax . "\n"?>
-Total:     <?=$order->totals->user_formatted->grand . "\n"?>
-<?php
-
-$invoiceCompany   = appSetting('invoice_company', 'shop');
-$invoiceAddress   = appSetting('invoice_address', 'shop');
-$invoiceVatNo     = appSetting('invoice_vat_no', 'shop');
-$invoiceCompanyNo = appSetting('invoice_company_no', 'shop');
-$invoiceFooter    = appSetting('invoice_footer', 'shop');
-
-if (empty($invoiceCompany)||!empty($invoiceAddress)||!empty($invoiceVatNo)||!empty($invoiceCompanyNo)) {
-
-    echo "\n\n" . 'OTHER DETAILS' . "\n";
-    echo '-------------' . "\n\n";
-
-    if (!empty($invoiceCompany)||!empty($invoiceAddress)) {
-
-        echo 'MERCHANT' . "\n";
-        echo $invoiceCompany  ? $invoiceCompany : APP_NAME;
-        echo $invoiceAddress  ? "\n" . $invoiceAddress : '';
-        echo "\n\n";
-    }
-
-    if (!empty($invoiceVatNo)) {
-
-        echo 'VAT NUMBER' . "\n";
-        echo $invoiceVatNo ? $invoiceVatNo : '';
-        echo "\n\n";
-
-    }
-
-    if (!empty($invoiceCompanyNo)) {
-
-        echo 'COMPANY NUMBER' . "\n";
-        echo $invoiceCompanyNo ? $invoiceCompanyNo : '';
-        echo "\n\n";
-    }
-}
-
-if (!empty($invoiceFooter)) {
-
-    echo "\n\n" . $invoiceFooter;
-}
+$this->load->view('shop/email/order/_component/order_details_plaintext', array('order' => $order));
+$this->load->view('shop/email/order/_component/other_details_plaintext');
