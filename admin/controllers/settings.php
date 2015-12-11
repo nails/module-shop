@@ -308,7 +308,7 @@ class Settings extends BaseAdmin
 
         //  Load assets
         $this->asset->load('nails.admin.shop.settings.min.js', 'NAILS');
-        $this->asset->load('mustache.js/mustache.js', 'NAILS-BOWER');
+        $this->asset->library('MUSTACHE');
         $this->asset->inline('<script>_nails_settings = new NAILS_Admin_Shop_Settings();</script>');
 
         // --------------------------------------------------------------------------
