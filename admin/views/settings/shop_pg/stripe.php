@@ -58,7 +58,7 @@
                 $field['default'] = appSetting($field['key'], 'shop');
                 $field['tip']     = 'No image is shown by default, but you can choose to show one, perhaps a logo, or an image showing which cards are accepted.';
 
-                echo form_field_mm_image($field);
+                echo form_field_cdn_object_picker($field);
 
             ?>
         </div>

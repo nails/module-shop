@@ -24,7 +24,7 @@
             $field['default'] = isset($tag->cover_id) ? $tag->cover_id : '';
             $field['bucket']  = 'shop-tag-cover';
 
-            echo form_field_mm_image($field);
+            echo form_field_cdn_object_picker($field);
 
             // --------------------------------------------------------------------------
 

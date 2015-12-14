@@ -26,7 +26,7 @@
             $field['default'] = isset($brand->logo_id) ? $brand->logo_id : '';
             $field['bucket']  = 'shop-brand-logo';
 
-            echo form_field_mm_image($field);
+            echo form_field_cdn_object_picker($field);
 
             // --------------------------------------------------------------------------
 
@@ -36,7 +36,7 @@
             $field['default'] = isset($brand->cover_id) ? $brand->cover_id : '';
             $field['bucket']  = 'shop-brand-cover';
 
-            echo form_field_mm_image($field);
+            echo form_field_cdn_object_picker($field);
 
             // --------------------------------------------------------------------------
 

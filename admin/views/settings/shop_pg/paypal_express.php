@@ -58,7 +58,7 @@
                     $field['default'] = appSetting($field['key'], 'shop');
                     $field['tip']     = 'No image is shown by default, but you can choose to show one, perhaps a logo, or an image showing which cards are accepted.';
 
-                    echo form_field_mm_image($field);
+                    echo form_field_cdn_object_picker($field);
 
                 echo '</fieldset>';
 
@@ -86,7 +86,7 @@
                     $field['bucket']  = 'shop-pg-img-' . strtolower($gateway_slug) . '-header';
                     $field['tip']     = 'Ideal dimensions are 750x90px';
 
-                    echo form_field_mm_image($field);
+                    echo form_field_cdn_object_picker($field);
 
                     // --------------------------------------------------------------------------
 
@@ -98,7 +98,7 @@
                     $field['bucket']   = 'shop-pg-img-' . strtolower($gateway_slug) . '-logo';
                     $field['tip']      = 'Ideal dimensions are 190x60px';
 
-                    echo form_field_mm_image($field);
+                    echo form_field_cdn_object_picker($field);
 
                     // --------------------------------------------------------------------------
 

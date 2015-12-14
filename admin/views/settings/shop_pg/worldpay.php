@@ -73,7 +73,7 @@
                     $field['bucket']  = 'shop-pg-img-' . $gateway_slug;
                     $field['default'] = appSetting($field['key'], 'shop');
 
-                    echo form_field_mm_image($field);
+                    echo form_field_cdn_object_picker($field);
 
                 ?>
             </fieldset>

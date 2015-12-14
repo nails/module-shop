@@ -24,7 +24,7 @@
             $field['default'] = isset($collection->cover_id) ? $collection->cover_id : '';
             $field['bucket']  = 'shop-collection-cover';
 
-            echo form_field_mm_image($field);
+            echo form_field_cdn_object_picker($field);
 
             // --------------------------------------------------------------------------
 

@@ -24,7 +24,7 @@
             $field['default'] = isset($range->cover_id) ? $range->cover_id : '';
             $field['bucket']  = 'shop-range-cover';
 
-            echo form_field_mm_image($field);
+            echo form_field_cdn_object_picker($field);
 
             // --------------------------------------------------------------------------
 

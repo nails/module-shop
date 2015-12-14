@@ -55,7 +55,7 @@
             $field['default'] = isset($category->cover_id) ? $category->cover_id : '';
             $field['bucket']  = 'shop-category-cover';
 
-            echo form_field_mm_image($field);
+            echo form_field_cdn_object_picker($field);
 
             // --------------------------------------------------------------------------
 
