@@ -290,7 +290,7 @@ class Voucher extends Base
     /**
      * Applies common conditionals
      * @param  mixed  $where  A conditional to pass to $this->db->where()
-     * @param  string $search Keywords to restrict the query by
+     * @param  array $search Keywords to restrict the query by
      * @return void
      */
     protected function getCountCommon($data = array())
