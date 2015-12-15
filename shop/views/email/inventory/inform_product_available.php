@@ -1,22 +1,19 @@
 <p>
     You have received this email because you asked us to inform you
-    when <strong><?=$product->label?></strong> was back in stock.
+    when <strong>{{product.label}}</strong> was back in stock.
 </p>
 <p class="text-center">
-    <?=anchor($product->url, 'Click here to view this item at ' . APP_NAME, 'class="button"')?>
+    <a href="{{product.url}}" class="btn">
+        Click here to view this item at <?=APP_NAME?>
+    </a>
 </p>
 <hr />
-<?php
-
-    if ($product->featured_img) {
-
-        echo '<p class="text-center">';
-            echo img(array('src' => cdnScale($product->featured_img, 250, 250 ), 'class' => 'thumbnail'));
-        echo '</p>';
-    }
-
-    echo '<p class="text-center">';
-        echo '<strong>' . $product->label . '</strong>';
-    echo '</p>';
-
-    echo $product->description;
+{{#product.img}}
+    <p class="text-center">
+        <img src="{{product.img}}" />
+    </p>
+{{/product.img}}
+<p class="text-center">
+    <strong>{{product.label}}</strong>
+</p>
+{{product.description}}

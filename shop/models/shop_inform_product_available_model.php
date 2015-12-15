@@ -114,13 +114,15 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
                             continue;
                         }
 
-                        $_email                        = new \stdClass();
-                        $_email->to_email              = $result->email;
-                        $_email->type                  = 'shop_inform_product_available';
-                        $_email->data                  = array();
-                        $_email->data['product']       = $product;
-                        $_email->data['variation']     = $variationId;
-                        $_email->data['email_subject'] = $product->label . ' is back in stock.';
+                        $_email                             = new \stdClass();
+                        $_email->to_email                   = $result->email;
+                        $_email->type                       = 'shop_inform_product_available';
+                        $_email->data                       = new \stdClass();
+                        $_email->data->product              = new \stdClass();
+                        $_email->data->product->label       = $product->label;
+                        $_email->data->product->description = $product->description;
+                        $_email->data->product->url         = $product->url;
+                        $_email->data->product->img         = cdnScale($product->featured_img, 250, 250);
 
                         $this->emailer->send($_email);
 

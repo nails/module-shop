@@ -1,12 +1,20 @@
+<?php
+
+/**
+ * We're rendering this template using PHP as it's a bit more complex than Mustache
+ * allows, specifically the order_details sub-view.
+ */
+
+?>
 Thank you very much for your order with <?=APP_NAME?>.
 
 We have now received full payment for your order, please don't hesitate to contact us if you have any questions or concerns.
 
 <?php
 
-$sWord = $order->delivery_type === 'COLLECT' ? 'ALL' : 'SOME';
+$sWord = $emailObject->data->order->delivery_type === 'COLLECT' ? 'ALL' : 'SOME';
 
-if (in_array($order->delivery_type, array('COLLECT', 'DELIVER_COLLECT', 'DELIVER'))) {
+if (in_array($emailObject->data->order->delivery_type, array('COLLECT', 'DELIVER_COLLECT', 'DELIVER'))) {
 
     $aBox   = array();
     $aBox[] = 'IMPORTANT: ' . $sWord . ' ITEMS IN THIS ORDER SHOULD BE COLLECTED FROM:';
@@ -40,5 +48,5 @@ if (in_array($order->delivery_type, array('COLLECT', 'DELIVER_COLLECT', 'DELIVER
 
 // --------------------------------------------------------------------------
 
-$this->load->view('shop/email/order/_component/order_details_plaintext', array('order' => $order));
+$this->load->view('shop/email/order/_component/order_details_plaintext', array('order' => $emailObject->data->order));
 $this->load->view('shop/email/order/_component/other_details_plaintext');

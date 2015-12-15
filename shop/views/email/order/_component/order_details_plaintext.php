@@ -28,7 +28,7 @@ if ($order->requires_shipping) {
         echo $order->shipping_option->label . "\n\n";
     }
 
-    $address = array(
+    $aAddress = array(
         $order->shipping_address->line_1,
         $order->shipping_address->line_2,
         $order->shipping_address->town,
@@ -37,9 +37,9 @@ if ($order->requires_shipping) {
         $order->shipping_address->country->label
     );
 
-    $address = array_filter($address);
+    $aAddress = array_filter($aAddress);
     echo "SHIPPING ADDRESS\n";
-    echo implode("\n", $address);
+    echo implode("\n", $aAddress);
 
 }
 
@@ -49,7 +49,7 @@ if ($order->requires_shipping) {
 BILLING ADDRESS
 <?php
 
-$address = array(
+$aAddress = array(
     $order->billing_address->line_1,
     $order->billing_address->line_2,
     $order->billing_address->town,
@@ -58,8 +58,8 @@ $address = array(
     $order->billing_address->country->label
 );
 
-$address = array_filter($address);
-echo implode("\n", $address);
+$aAddress = array_filter($aAddress);
+echo implode("\n", $aAddress);
 
 ?>
 
