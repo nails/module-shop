@@ -508,7 +508,7 @@ class Inventory extends BaseAdmin
         //  Assets
         $this->asset->library('uploadify');
         $this->asset->library('MUSTACHE');
-        $this->asset->load('nails.admin.shop.inventory.createEdit.min.js', 'NAILS');
+        $this->asset->load('admin.inventory.createEdit.min.js', 'nailsapp/module-shop');
 
         $uploadToken = $this->cdn->generateApiUploadToken(activeUser('id'));
 
@@ -695,7 +695,7 @@ class Inventory extends BaseAdmin
         //  Assets
         $this->asset->library('uploadify');
         $this->asset->library('MUSTACHE');
-        $this->asset->load('nails.admin.shop.inventory.createEdit.min.js', 'NAILS');
+        $this->asset->load('admin.inventory.createEdit.min.js', 'nailsapp/module-shop');
 
         $uploadToken = $this->cdn->generateApiUploadToken(activeUser('id'));
 

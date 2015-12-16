@@ -307,7 +307,7 @@ class Settings extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load assets
-        $this->asset->load('nails.admin.shop.settings.min.js', 'NAILS');
+        $this->asset->load('admin.settings.min.js', 'nailsapp/module-shop');
         $this->asset->library('MUSTACHE');
         $this->asset->inline('<script>_nails_settings = new NAILS_Admin_Shop_Settings();</script>');
 
@@ -518,7 +518,7 @@ class Settings extends BaseAdmin
      */
     protected function shopPgWorldpay()
     {
-        $this->asset->load('nails.admin.shop.settings.paymentgateway.worldpay.min.js', 'NAILS');
+        $this->asset->load('admin.settings.paymentgateway.worldpay.min.js', 'nailsapp/module-shop');
         $this->asset->inline('<script>_worldpay_config = new NAILS_Admin_Shop_Settings_PaymentGateway_WorldPay();</script>');
 
         // --------------------------------------------------------------------------

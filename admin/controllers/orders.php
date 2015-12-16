@@ -34,24 +34,24 @@ class Orders extends BaseAdmin
             $ci->db->where('status', 'PAID');
             $iNumUnfulfilled = $ci->db->count_all_results(NAILS_DB_PREFIX . 'shop_order');
 
-            $oAlert = Factory::factory('NavAlert', 'nailsapp/module-admin');
-            $oAlert->setValue($iNumUnfulfilled);
-            $oAlert->setSeverity('danger');
-            $oAlert->setLabel('Unfulfilled Orders');
+            $oAlertUnfulfilled = Factory::factory('NavAlert', 'nailsapp/module-admin');
+            $oAlertUnfulfilled->setValue($iNumUnfulfilled);
+            $oAlertUnfulfilled->setSeverity('warning');
+            $oAlertUnfulfilled->setLabel('Unfulfilled Orders');
 
             //  Packed Orders
             $ci->db->where('fulfilment_status', 'PACKED');
             $iNumPacked = $ci->db->count_all_results(NAILS_DB_PREFIX . 'shop_order');
 
-            $oAlert = Factory::factory('NavAlert', 'nailsapp/module-admin');
-            $oAlert->setValue($iNumPacked);
-            $oAlert->setSeverity('info');
-            $oAlert->setLabel('Packed Orders');
+            $oAlertPacked = Factory::factory('NavAlert', 'nailsapp/module-admin');
+            $oAlertPacked->setValue($iNumPacked);
+            $oAlertPacked->setSeverity('info');
+            $oAlertPacked->setLabel('Packed Orders');
 
             $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
             $oNavGroup->setLabel('Shop');
             $oNavGroup->setIcon('fa-shopping-cart');
-            $oNavGroup->addAction('Manage Orders', 'index', array($oAlert), 0);
+            $oNavGroup->addAction('Manage Orders', 'index', array($oAlertUnfulfilled, $oAlertPacked), 0);
 
             return $oNavGroup;
         }
@@ -204,7 +204,7 @@ class Orders extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->asset->load('nails.admin.shop.order.browse.min.js', 'NAILS');
+        $this->asset->load('admin.order.browse.min.js', 'nailsapp/module-shop');
         $this->asset->inline('var _orders = new NAILS_Admin_Shop_Order_Browse()', 'JS');
 
         // --------------------------------------------------------------------------
@@ -250,7 +250,7 @@ class Orders extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->asset->load('nails.admin.shop.order.view.min.js', true);
+        $this->asset->load('admin.order.view.min.js', 'nailsapp/module-shop');
         $this->asset->inline('var _SHOP_ORDER_VIEW = new NAILS_Admin_Shop_Order_View()', 'JS');
 
         // --------------------------------------------------------------------------

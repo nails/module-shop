@@ -391,7 +391,7 @@ class Reports extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->asset->load('nails.admin.shop.reports.min.js', 'NAILS');
+        $this->asset->load('admin.reports.min.js', 'nailsapp/module-shop');
         $this->asset->inline('<script>_nails_shop_reports = new NAILS_Admin_Shop_Reports();</script>');
 
         // --------------------------------------------------------------------------

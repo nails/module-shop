@@ -50,7 +50,9 @@
             <a href="#" class="tabber-variation-shipping" data-tab="tab-variation-shipping">Shipping</a>
         </li>
         <li class="action">
-            <a href="#" class="delete">Delete</a>
+            <a href="#" class="delete">
+                <b class="fa fa-times-circle fa-lg"></b>
+            </a>
         </li>
     </ul>
     <section class="tabs" data-tabgroup="variation">

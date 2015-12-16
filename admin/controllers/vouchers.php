@@ -168,7 +168,7 @@ class Vouchers extends BaseAdmin
 
         //  Load assets
         $this->asset->library('ZEROCLIPBOARD');
-        $this->asset->load('nails.admin.shop.vouchers.min.js', 'NAILS');
+        $this->asset->load('admin.vouchers.min.js', 'nailsapp/module-shop');
         $this->asset->inline('voucher = new NAILS_Admin_Shop_Vouchers();', 'JS');
 
         // --------------------------------------------------------------------------
@@ -358,7 +358,7 @@ class Vouchers extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load assets
-        $this->asset->load('nails.admin.shop.vouchers.createEdit.min.js', 'NAILS');
+        $this->asset->load('admin.vouchers.createEdit.min.js', 'nailsapp/module-shop');
         $this->asset->inline('voucher = new NAILS_Admin_Shop_Vouchers_CreateEdit();', 'JS');
 
         // --------------------------------------------------------------------------

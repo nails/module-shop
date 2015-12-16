@@ -81,10 +81,12 @@ $sShopUrl = appSetting('url', 'shop') ? appSetting('url', 'shop') : 'shop/';
             ?>
             </td>
         </tr>
+        <?php if (!empty($order->shipping_option->label)) { ?>}
         <tr>
             <td class="left-header-cell">Shipping Option</td>
             <td colspan="2"><?=$order->shipping_option->label?></td>
         </tr>
+        <?php } ?>
         <?php
 
         if (!empty($order->note)) {

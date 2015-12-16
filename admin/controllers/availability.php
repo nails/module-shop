@@ -111,7 +111,7 @@ class Availability extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->asset->load('nails.admin.shop.productavailabilitynotification.browse.min.js', 'NAILS');
+        $this->asset->load('admin.productAvailabilityNotification.min.js', 'nailsapp/module-shop');
         $this->asset->inline('var _availabilty = new NAILS_Admin_Shop_Product_Availability_Notification_Browse()', 'JS');
 
         // --------------------------------------------------------------------------
@@ -155,10 +155,10 @@ class Availability extends BaseAdmin
 
                 $item = explode(':', $this->input->post('item'));
 
-                $aInsertData               = array();
-                $aInsertData->email        = $this->input->post('email');
-                $aInsertData->product_id   = isset($item[0]) ? (int) $item[0] : null;
-                $aInsertData->variation_id = isset($item[1]) ? (int) $item[1] : null;
+                $aInsertData                 = array();
+                $aInsertData['email']        = $this->input->post('email');
+                $aInsertData['product_id']   = isset($item[0]) ? (int) $item[0] : null;
+                $aInsertData['variation_id'] = isset($item[1]) ? (int) $item[1] : null;
 
                 if ($this->shop_inform_product_available_model->create($aInsertData)) {
 

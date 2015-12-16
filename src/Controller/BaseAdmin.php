@@ -19,6 +19,6 @@ class BaseAdmin extends Base
     public function __construct()
     {
         parent::__construct();
-        $this->asset->load('nails.admin.module.shop.css', 'NAILS');
+        $this->asset->load('admin.styles.css', 'nailsapp/module-shop');
     }
 }
