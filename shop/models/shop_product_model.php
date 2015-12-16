@@ -1003,12 +1003,6 @@ class NAILS_Shop_product_model extends Base
 
         $products = parent::getAll($page, $perPage, $data, $includeDeleted);
 
-        //  Handle requests for the raw query object
-        if (!empty($data['RETURN_QUERY_OBJECT'])) {
-
-            return $products;
-        }
-
         // --------------------------------------------------------------------------
 
         /**

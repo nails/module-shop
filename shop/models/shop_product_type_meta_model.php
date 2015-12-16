@@ -40,12 +40,6 @@ class NAILS_Shop_product_type_meta_model extends NAILS_Model
     {
         $fields = parent::getAll($page, $per_page, $data, $include_deleted);
 
-        //  Handle requests for the raw query object
-        if (!empty($data['RETURN_QUERY_OBJECT'])) {
-
-            return $fields;
-        }
-
         foreach ($fields as $field) {
 
             if (isset($data['includeAssociatedProductTypes'])) {

@@ -230,12 +230,6 @@ class Voucher extends Base
     {
         $result = parent::getAll($page, $perPage, $data, false);
 
-        //  Handle requests for the raw query object
-        if (!empty($data['RETURN_QUERY_OBJECT'])) {
-
-            return $result;
-        }
-
         // --------------------------------------------------------------------------
 
         $this->load->model('shop/shop_product_model');
