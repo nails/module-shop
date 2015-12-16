@@ -111,7 +111,7 @@
                             switch ($order->status) {
 
                                 case 'UNPAID':
-                                    $status = 'error';
+                                    $status = 'danger';
                                     break;
 
                                 case 'PAID':
@@ -119,19 +119,19 @@
                                     break;
 
                                 case 'ABANDONED':
-                                    $status = 'message';
+                                    $status = 'warning';
                                     break;
 
                                 case 'CANCELLED':
-                                    $status = 'message';
+                                    $status = 'warning';
                                     break;
 
                                 case 'FAILED':
-                                    $status = 'error';
+                                    $status = 'danger';
                                     break;
 
                                 case 'PENDING':
-                                    $status = 'notice';
+                                    $status = 'info';
                                    break;
 
                                 default:
@@ -140,7 +140,7 @@
                             }
 
                             ?>
-                            <td class="status ' . $status . '">
+                            <td class="status text-center <?=$status?>">
                                 <?=$order->status?>
                             </td>
                             <?php
@@ -148,7 +148,7 @@
                             if ($order->fulfilment_status == 'UNFULFILLED') {
 
                                 ?>
-                                <td class="status message">
+                                <td class="status text-center warning">
                                     <i class="fa fa-clock-o"></i>
                                     <small>UNFULFILLED</small>
                                 </td>
@@ -157,7 +157,7 @@
                             } elseif ($order->fulfilment_status == 'PACKED') {
 
                                 ?>
-                                <td class="status notice">
+                                <td class="status text-center info">
                                     <i class="fa fa-cube"></i>
                                     <small>PACKED</small>
                                 </td>
@@ -166,7 +166,7 @@
                             } else {
 
                                 ?>
-                                <td class="status success">
+                                <td class="status text-center success">
                                     <i class="fa fa-truck"></i>
                                     <small>FULFILLED</small>
                                 </td>

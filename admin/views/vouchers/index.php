@@ -53,7 +53,7 @@
                                 case \Nails\Shop\Model\Voucher::STATUS_PENDING:
 
                                     ?>
-                                    <td class="boolean notice">
+                                    <td class="boolean info">
                                         <b class="fa fa-clock-o fa-lg"></b>
                                         <small>Pending</small>
                                     </td>
@@ -63,7 +63,7 @@
                                 case \Nails\Shop\Model\Voucher::STATUS_EXPIRED:
 
                                     ?>
-                                    <td class="boolean error">
+                                    <td class="boolean danger">
                                         <b class="fa fa-times-circle fa-lg"></b>
                                         <small>Expired</small>
                                     </td>
@@ -73,7 +73,7 @@
                                 case \Nails\Shop\Model\Voucher::STATUS_LIMIT_REACHED:
 
                                     ?>
-                                    <td class="boolean error">
+                                    <td class="boolean danger">
                                         <b class="fa fa-times-circle fa-lg"></b>
                                         <small>Limit Reached</small>
                                     </td>
@@ -83,7 +83,7 @@
                                 case \Nails\Shop\Model\Voucher::STATUS_ZERO_BALANCE:
 
                                     ?>
-                                    <td class="boolean error">
+                                    <td class="boolean danger">
                                         <b class="fa fa-times-circle fa-lg"></b>
                                         <small>Zero Balance</small>
                                     </td>
