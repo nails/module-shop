@@ -12,6 +12,7 @@
 
 use Nails\Factory;
 use Nails\Common\Model\Base;
+use Nails\Common\Exception\ModelException;
 
 class NAILS_Shop_product_model extends Base
 {
@@ -2298,7 +2299,7 @@ class NAILS_Shop_product_model extends Base
     {
         if (!$this->table) {
 
-            show_error(get_called_class() . '::countAll() Table variable not set');
+            throw new ModelException(get_called_class() . '::getFiltersForProducts() Table variable not set', 1);
 
         } else {
 
