@@ -16,7 +16,13 @@ use Nails\Factory;
 
 class Voucher extends \Nails\Api\Controller\Base
 {
-    public static $requiresAuthentication = true;
+    /**
+     * Require the user be authenticated to use any endpoint
+     */
+    const REQUIRE_AUTH = true;
+
+    // --------------------------------------------------------------------------
+
     protected $maintenance;
     protected $oVoucherModel;
 
