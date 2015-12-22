@@ -69,7 +69,7 @@ class NAILS_Shop_feed_model extends NAILS_Model
     // --------------------------------------------------------------------------
 
     /**
-     * Returns the contents of the appropriate feed file.
+     * Returns the path of the cache file for the appropriate feed file.
      * @param  string $provider The provider to serve
      * @param  string $format   The format to serve
      * @return string
@@ -79,18 +79,17 @@ class NAILS_Shop_feed_model extends NAILS_Model
         $cacheFile = $this->getCacheFile($provider, $format);
 
         if (is_file($cacheFile)) {
-
-            return file_get_contents($cacheFile);
+            return $cacheFile;
         }
 
         //  File doesn't exist, attempt to generate
         if ($this->generate($provider, $format)) {
 
-            return file_get_contents($cacheFile);
+            return $cacheFile;
 
         } else {
 
-            return '';
+            return null;
         }
     }
 
@@ -102,13 +101,13 @@ class NAILS_Shop_feed_model extends NAILS_Model
      */
     protected function getShopData()
     {
-        $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
-        $sBaseCurrency  = appSetting('base_currency', 'shop');
-        $oBaseCurrency  = $oCurrencyModel->getByCode($sBaseCurrency);
+        $oCurrencyModel    = Factory::model('Currency', 'nailsapp/module-shop');
+        $sBaseCurrency     = appSetting('base_currency', 'shop');
+        $oBaseCurrency     = $oCurrencyModel->getByCode($sBaseCurrency);
         $sWarehouseCountry = appSetting('warehouse_addr_country', 'shop');
-        $sInvoiceCompany = appSetting('invoice_company', 'shop');
-        $products = $this->shop_product_model->getAll();
-        $out = array();
+        $sInvoiceCompany   = appSetting('invoice_company', 'shop');
+        $products          = $this->shop_product_model->getAll();
+        $out               = array();
 
         foreach ($products as $p) {
             foreach ($p->variations as $v) {
@@ -192,10 +191,17 @@ class NAILS_Shop_feed_model extends NAILS_Model
                 $shippingData = $this->shop_shipping_driver_model->calculateVariant($v->id);
 
                 //  Calculate price and price of shipping
-                $sPrice         = $oCurrencyModel->formatBase($p->price->user->min_price, false);
+                /**
+                 * Tax/VAT should NOT be included:
+                 * https://support.google.com/merchants/answer/2704214
+                 */
+
+                $sPrice         = $oCurrencyModel->formatBase($p->price->user->min_price_ex_tax, false);
+                $sTax           = $oCurrencyModel->formatBase($p->price->user->min_price_tax, false);
                 $sShippingPrice = $oCurrencyModel->formatBase($shippingData->base, false);
 
                 $temp->price = $sPrice . ' ' . $oBaseCurrency->code;
+                $temp->tax   = $sTax . ' ' . $oBaseCurrency->code;
                 $temp->shipping_country = $sWarehouseCountry;
                 $temp->shipping_service = 'Standard';
                 $temp->shipping_price   = $sShippingPrice . ' ' . $oBaseCurrency->code;
@@ -238,6 +244,7 @@ class NAILS_Shop_feed_model extends NAILS_Model
                 $xml .= '<g:condition>' . $item->condition . '</g:condition>';
                 $xml .= '<g:availability>' . $item->availability . '</g:availability>';
                 $xml .= '<g:price>' . $item->price . '</g:price>';
+                $xml .= '<g:tax>' . $item->tax . '</g:tax>';
                 $xml .= '<g:brand><![CDATA[' . htmlentities($item->brand) . ']]></g:brand>';
                 $xml .= '<g:gtin>' . $item->sku . '</g:gtin>';
                 $xml .= '<g:shipping>';

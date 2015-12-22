@@ -1034,6 +1034,8 @@ class NAILS_Shop_product_model extends Base
             // --------------------------------------------------------------------------
 
             //  Fetch associated content
+            //  @todo use a more efficient method for fetching these items, modeled off getAssociatedForItems()
+            //  @todo improve the efficiency/memory usage of the feed generator using raw queries and iterating on those
 
             //  Attributes
             //  ==========
@@ -1132,6 +1134,7 @@ class NAILS_Shop_product_model extends Base
 
             $aVariationPricesIncTax = array();
             $aVariationPricesExTax  = array();
+            $aVariationPricesTax    = array();
 
             foreach ($product->variations as &$v) {
 
@@ -1308,6 +1311,7 @@ class NAILS_Shop_product_model extends Base
                 //  Take note of the final values so we can easily extract the higest and lowest variation price
                 $aVariationPricesIncTax[] = $v->price->price->user->value_inc_tax;
                 $aVariationPricesExTax[]  = $v->price->price->user->value_ex_tax;
+                $aVariationPricesTax[]    = $v->price->price->user->value_tax;
             }
 
             //  Work out the min and max prices
@@ -1317,13 +1321,27 @@ class NAILS_Shop_product_model extends Base
 
             $iMaxPriceIncTax = !empty($aVariationPricesIncTax) ? max($aVariationPricesIncTax) : 0;
             $iMaxPriceExTax  = !empty($aVariationPricesExTax) ? max($aVariationPricesExTax) : 0;
+            $iMaxPriceTax    = !empty($aVariationPricesTax) ? max($aVariationPricesTax) : 0;
+
             $iMinPriceIncTax = !empty($aVariationPricesIncTax) ? min($aVariationPricesIncTax) : 0;
             $iMinPriceExTax  = !empty($aVariationPricesExTax) ? min($aVariationPricesExTax) : 0;
+            $iMinPriceTax    = !empty($aVariationPricesTax) ? min($aVariationPricesTax) : 0;
 
-            $product->price->user_formatted->max_price_inc_tax = $this->oCurrencyModel->formatUser($iMaxPriceExTax);
-            $product->price->user_formatted->max_price_ex_tax  = $this->oCurrencyModel->formatUser($iMaxPriceIncTax);
-            $product->price->user_formatted->min_price_inc_tax = $this->oCurrencyModel->formatUser($iMinPriceExTax);
-            $product->price->user_formatted->min_price_ex_tax  = $this->oCurrencyModel->formatUser($iMinPriceIncTax);
+            $product->price->user->max_price_inc_tax = $iMaxPriceIncTax;
+            $product->price->user->max_price_ex_tax  = $iMaxPriceExTax;
+            $product->price->user->max_price_tax     = $iMaxPriceTax;
+
+            $product->price->user->min_price_inc_tax = $iMinPriceIncTax;
+            $product->price->user->min_price_ex_tax  = $iMinPriceExTax;
+            $product->price->user->min_price_tax     = $iMinPriceTax;
+
+            $product->price->user_formatted->max_price_inc_tax = $this->oCurrencyModel->formatUser($iMaxPriceIncTax);
+            $product->price->user_formatted->max_price_ex_tax  = $this->oCurrencyModel->formatUser($iMaxPriceExTax);
+            $product->price->user_formatted->max_price_tax     = $this->oCurrencyModel->formatUser($iMaxPriceTax);
+
+            $product->price->user_formatted->min_price_inc_tax = $this->oCurrencyModel->formatUser($iMinPriceIncTax);
+            $product->price->user_formatted->min_price_ex_tax  = $this->oCurrencyModel->formatUser($iMinPriceExTax);
+            $product->price->user_formatted->min_price_tax     = $this->oCurrencyModel->formatUser($iMinPriceTax);
 
             if ($iMaxPriceExTax == $iMinPriceExTax) {
 

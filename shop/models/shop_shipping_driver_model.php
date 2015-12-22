@@ -54,9 +54,16 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
         }
 
         if (!($this->oDriver instanceof \Nails\Shop\Driver\ShippingBase)) {
-            throw new DriverException(
+            throw new ShippingDriverException(
                 'Driver "' . $sDriverSlug . '" must extend \Nails\Shop\Driver\ShippingBase',
                 3
+            );
+        }
+
+        if (empty($this->defaultOption())) {
+            throw new ShippingDriverException(
+                'Driver "' . $sDriverSlug . '" must specify a default shipping option',
+                4
             );
         }
 
@@ -93,7 +100,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
             } else {
 
                 $sValue = appSetting($oSetting->key, 'shop-driver-' . $this->oDriverConfig->slug);
-                if(is_null($sValue) && isset($oSetting->default)) {
+                if (is_null($sValue) && isset($oSetting->default)) {
                     $sValue = $oSetting->default;
                 }
                 $aOut[$oSetting->key] = $sValue;
@@ -217,11 +224,11 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
             foreach ($aOptions as &$aOption) {
 
                 if (empty($aOption['slug'])) {
-                    throw new ShippingDriverException('Each shipping option must provide a unique slug', 1);
+                    throw new ShippingDriverException('Each shipping option must provide a unique slug', 5);
                 }
 
                 if (in_array($aOption['slug'], $aSlugs)) {
-                    throw new ShippingDriverException('"' . $aOption['slug'] . '" is not a unique shipping option slug', 2);
+                    throw new ShippingDriverException('"' . $aOption['slug'] . '" is not a unique shipping option slug', 6);
                 }
 
                 //  Can only have one default value, the first defined.
@@ -275,7 +282,8 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
      * @param  string   $sOptionSlug The desired option
      * @return stdClass
      */
-    public function getOption($sOptionSlug) {
+    public function getOption($sOptionSlug)
+    {
         $aOptions = $this->options();
         foreach ($aOptions as $aOption) {
             if ($aOption['slug'] === $sOptionSlug) {
@@ -338,9 +346,10 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
         $iCost           = $this->oDriver->calculate($aShippableItems, $basket->shipping->option, $basket);
 
         if (!is_integer($iCost) || $iCost < 0) {
+
             throw new ShippingDriverException(
                 'The value returned by the shipping driver must be a positive integer or zero.',
-                5
+                7
             );
         }
 
@@ -358,14 +367,29 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
     /**
      * Takes a product variant ID and works out what the shipping would be on it
-     * @param  integer  $iVariantId ID of the variant in question
+     * @param  integer  $iVariantId  ID of the variant in question
+     * @param  string   $sOptionSlug The slug for the shipping option to calculate for
      * @return stdClass
      */
-    public function calculateVariant($iVariantId)
+    public function calculateVariant($iVariantId, $sOptionSlug = null)
     {
         $oFree       = new \stdClass();
         $oFree->base = (int) 0;
         $oFree->user = (int) 0;
+
+        // --------------------------------------------------------------------------
+
+        //  Use the default option
+        if (is_null($sOptionSlug)) {
+            $sOptionSlug = $this->defaultOption();
+        }
+
+        // --------------------------------------------------------------------------
+
+        //  If the shipping type is COLLECTION (a special type) then shipping is FREE
+        if ($sOptionSlug == 'COLLECTION') {
+            return $oFree;
+        }
 
         // --------------------------------------------------------------------------
 
@@ -387,7 +411,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
         $oVariant = null;
         foreach ($otItem->variations as $oVariation) {
 
-            if ($oVariation->id = $oVariationariantId) {
+            if ($oVariation->id = $iVariantId) {
                 if (!empty($oVariation->ship_collection_only)) {
 
                     //  Item is collect only, assume no charge for delivery
@@ -403,16 +427,16 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         /**
-         * Have the driver calculate the cost of shipping, this should return a float
+         * Have the driver calculate the cost of shipping, this should return an integer
          * which is in the base currency. Similar to the calculate() method
          */
 
-        $iCost = $this->oDriver->calculateVariant($oVariant);
+        $iCost = $this->oDriver->calculateVariant($oVariant, $sOptionSlug);
 
         if (!is_integer($iCost) || $iCost < 0) {
             throw new ShippingDriverException(
                 'The value returned by the shipping driver must be a positive integer or zero.',
-                6
+                8
             );
         }
 

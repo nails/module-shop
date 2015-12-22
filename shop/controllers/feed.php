@@ -18,49 +18,47 @@ class NAILS_Feed extends NAILS_Shop_Controller
     public function index()
     {
         if ($this->maintenance->enabled) {
-
             $this->renderMaintenancePage();
             return;
         }
 
         // --------------------------------------------------------------------------
 
-        $method = $this->uri->rsegment(2);
+        $sMethod = $this->uri->rsegment(2);
 
-        preg_match('/^(.+?)(\.(xml|json))?$/', $method, $matches);
+        preg_match('/^(.+?)(\.(xml|json))?$/', $sMethod, $aMatches);
 
-        $provider = !empty($matches[1]) ? strtolower($matches[1]) : 'google';
-        $format   = !empty($matches[3]) ? strtolower($matches[3]) : 'xml';
-
-        $this->load->model('shop_feed_model');
-        $output = $this->shop_feed_model->serve($provider, $format);
-
-        if (empty($output)) {
-
-            show_404();
-        }
+        $sProvider = !empty($aMatches[1]) ? strtolower($aMatches[1]) : 'google';
+        $sFormat   = !empty($aMatches[3]) ? strtolower($aMatches[3]) : 'xml';
 
         //  Set cache headers
-        $this->output->set_header("Cache-Control: no-store, no-cache, must-revalidate");
-        $this->output->set_header("Cache-Control: post-check=0, pre-check=0");
-        $this->output->set_header("Pragma: no-cache");
+        header('Cache-Control: no-store, no-cache, must-revalidate');
+        header('Cache-Control: post-check=0, pre-check=0');
+        header('Pragma: no-cache');
 
         //  Set content-type
-        switch ($format) {
+        switch ($sFormat) {
 
             case 'xml':
-
-                $this->output->set_content_type('text/xml');
+                header('Content-Type: text/xml');
                 break;
 
             case 'json':
-
-                $this->output->set_content_type('text/json');
+                header('Content-Type: application/json');
                 break;
         }
 
-        //  Set data
-        $this->output->set_output($output);
+        $this->load->model('shop_feed_model');
+        $sCacheFile = $this->shop_feed_model->serve($sProvider, $sFormat);
+
+        if (empty($sCacheFile)) {
+
+            show_404();
+
+        } else {
+
+            readFileChunked($sCacheFile);
+        }
     }
 
     // --------------------------------------------------------------------------
