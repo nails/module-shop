@@ -24,7 +24,7 @@ $config['email_types'][0]->default_subject  = '{{product.label}} is back in stoc
 
 $config['email_types'][1]                   = new \stdClass();
 $config['email_types'][1]->slug             = 'shop_notification_paid';
-$config['email_types'][1]->name             = 'Shop Manager Order Notification';
+$config['email_types'][1]->name             = 'Shop: Manager Order Notification';
 $config['email_types'][1]->description      = 'Sent to the shop manager(s) when an order is completed.';
 $config['email_types'][1]->isUnsubscribable = false;
 $config['email_types'][1]->template_header  = '';
@@ -34,7 +34,7 @@ $config['email_types'][1]->default_subject  = 'An order has been completed';
 
 $config['email_types'][2]                   = new \stdClass();
 $config['email_types'][2]->slug             = 'shop_notification_partial_payment';
-$config['email_types'][2]->name             = 'Shop Manager Order Notification (partial payment)';
+$config['email_types'][2]->name             = 'Shop: Manager Order Notification (partial payment)';
 $config['email_types'][2]->description      = 'Sent to the shop manager(s) when an order receives a partial payment.';
 $config['email_types'][2]->isUnsubscribable = false;
 $config['email_types'][2]->template_header  = '';
@@ -44,7 +44,7 @@ $config['email_types'][2]->default_subject  = 'A payment was received';
 
 $config['email_types'][3]                   = new \stdClass();
 $config['email_types'][3]->slug             = 'shop_receipt';
-$config['email_types'][3]->name             = 'Customer Receipt';
+$config['email_types'][3]->name             = 'Shop: Customer Receipt';
 $config['email_types'][3]->description      = 'Sent to the customer when their order is fully paid.';
 $config['email_types'][3]->isUnsubscribable = false;
 $config['email_types'][3]->template_header  = '';
@@ -54,7 +54,7 @@ $config['email_types'][3]->default_subject  = 'Thanks for your order';
 
 $config['email_types'][4]                   = new \stdClass();
 $config['email_types'][4]->slug             = 'shop_receipt_partial_payment';
-$config['email_types'][4]->name             = 'Customer Receipt (partial payment)';
+$config['email_types'][4]->name             = 'Shop: Customer Receipt (partial payment)';
 $config['email_types'][4]->description      = 'Sent to the customer when a partial payment is received for an order';
 $config['email_types'][4]->isUnsubscribable = false;
 $config['email_types'][4]->template_header  = '';
@@ -64,7 +64,7 @@ $config['email_types'][4]->default_subject  = 'Thanks for your payment';
 
 $config['email_types'][5]                   = new \stdClass();
 $config['email_types'][5]->slug             = 'shop_order_fulfilled';
-$config['email_types'][5]->name             = 'Order Fulfilled';
+$config['email_types'][5]->name             = 'Shop: Order Fulfilled';
 $config['email_types'][5]->description      = 'Sent to the customer when order is marked as fulfilled';
 $config['email_types'][5]->isUnsubscribable = false;
 $config['email_types'][5]->template_header  = '';
