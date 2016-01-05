@@ -130,12 +130,11 @@ class NAILS_Shop_product_model extends Base
      * @param  array   $data The data to update the object with
      * @return bool
      */
-    public function update($id, $data = array())
+    public function update($iId, $data = array())
     {
-        $current = $this->getById($id);
+        $oCurrent = $this->getById($iId);
 
-        if (!$current) {
-
+        if (!$oCurrent) {
             $this->setError('Invalid product ID');
             return false;
         }
@@ -143,22 +142,21 @@ class NAILS_Shop_product_model extends Base
         // --------------------------------------------------------------------------
 
         //  Do all we need to do with the incoming data
-        $updateData = $this->createUpdatePrepData($data, $id);
+        $aUpdateData = $this->createUpdatePrepData($data, $iId);
 
-        if (!$updateData) {
-
+        if (!$aUpdateData) {
             return false;
         }
 
-        $updateData->id = $id;
+        $aUpdateData->id = $iId;
 
         // --------------------------------------------------------------------------
 
         //  Execute
-        $id = $this->createUpdateExecute($updateData);
+        $iId = $this->createUpdateExecute($aUpdateData);
 
         //  Wrap it all up
-        if ($id) {
+        if ($iId) {
 
             return true;
 
@@ -401,17 +399,15 @@ class NAILS_Shop_product_model extends Base
                 foreach ($v['pricing'] as $priceIndex => $price) {
 
                     if (empty($price['currency'])) {
-
                         $this->setError('"Currency" field is required for all variant prices.');
                         return false;
                     }
 
                     $_data->variation[$index]->pricing[$priceIndex]           = new \stdClass();
                     $_data->variation[$index]->pricing[$priceIndex]->currency = $price['currency'];
-                    $_data->variation[$index]->pricing[$priceIndex]->price    = (int) $price['price'];
+                    $_data->variation[$index]->pricing[$priceIndex]->price    = $price['price'];
 
                     if ($price['currency'] == SHOP_BASE_CURRENCY_CODE) {
-
                         $basePriceSet = true;
                     }
 
