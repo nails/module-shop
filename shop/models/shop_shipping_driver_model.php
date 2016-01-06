@@ -73,7 +73,13 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
         );
 
         if (!empty($this->oDriverConfig->data->settings)) {
-            $aSettings = array_merge($aSettings, $this->extractDriverSettings($this->oDriverConfig->data->settings));
+            $aSettings = array_merge(
+                $aSettings,
+                $this->extractDriverSettings(
+                    $this->oDriverConfig->data->settings,
+                    $this->oDriverConfig->slug
+                )
+            );
         }
 
         $this->oDriver->setConfig($aSettings);
@@ -83,10 +89,11 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
     /**
      * Recursively gets all the settings from the settings array
-     * @param  array $aSettings The array of fieldsets and/or settings
+     * @param  array  $aSettings The array of fieldsets and/or settings
+     * @param  string $sSlug     The driver's slug
      * @return array
      */
-    protected function extractDriverSettings($aSettings)
+    protected function extractDriverSettings($aSettings, $sSlug)
     {
         $aOut = array();
 
@@ -95,11 +102,11 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
             //  If the object contains a `fields` property then consider this a fieldset and inception
             if (isset($oSetting->fields)) {
 
-                $aOut = array_merge($aOut, $this->extractDriverSettings($oSetting->fields));
+                $aOut = array_merge($aOut, $this->extractDriverSettings($oSetting->fields, $sSlug));
 
             } else {
 
-                $sValue = appSetting($oSetting->key, 'shop-driver-' . $this->oDriverConfig->slug);
+                $sValue = appSetting($oSetting->key, 'shop-driver-' . $sSlug);
                 if (is_null($sValue) && isset($oSetting->default)) {
                     $sValue = $oSetting->default;
                 }

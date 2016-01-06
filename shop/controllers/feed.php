@@ -13,6 +13,10 @@ require_once '_shop.php';
  * @link
  */
 
+use Nails\Factory;
+
+use Nails\Shop\Exception\FeedException;
+
 class NAILS_Feed extends NAILS_Shop_Controller
 {
     public function index()
@@ -22,43 +26,65 @@ class NAILS_Feed extends NAILS_Shop_Controller
             return;
         }
 
+        $sDriver = $this->uri->rsegment(2) . '/' . $this->uri->rsegment(3);
+
+        //  Test for a cache file first, if it's there serve that
+        $oDate         = Factory::factory('DateTime');
+        $sDate         = $oDate->format('Y-m-d');
+        $sCacheHeaders = DEPLOY_CACHE_DIR . 'shop-feed-' . $sDate . '-' . str_replace(DIRECTORY_SEPARATOR, '-', $sDriver) . '-headers.txt';
+        $sCacheData    = DEPLOY_CACHE_DIR . 'shop-feed-' . $sDate . '-' . str_replace(DIRECTORY_SEPARATOR, '-', $sDriver) . '-data.txt';
+
+        if (!file_exists($sCacheData)) {
+
+            $oFeedModel      = Factory::model('Feed', 'nailsapp/module-shop');
+            $oDriverInstance = $oFeedModel->getInstance($sDriver);
+
+            if (empty($oDriverInstance)) {
+                show_404();
+            }
+
+            //  Create the cache files
+            $oHandleHeaders = fopen($sCacheHeaders, 'w+');
+            if (!$oHandleHeaders) {
+                throw new FeedException('Failed to create header cache file', 2);
+            }
+
+            $oHandleData = fopen($sCacheData, 'w+');
+            if (!$oHandleData) {
+                unlink($sCacheHeaders);
+                throw new FeedException('Failed to create data cache file', 1);
+            }
+
+            if (!$oDriverInstance->generate($oHandleHeaders, $oHandleData)) {
+                unlink($sCacheHeaders);
+                unlink($sCacheData);
+                throw new FeedException('Driver failed to generate feed', 3);
+            }
+
+            fclose($oHandleHeaders);
+            fclose($oHandleData);
+        }
+
         // --------------------------------------------------------------------------
 
-        $sMethod = $this->uri->rsegment(2);
-
-        preg_match('/^(.+?)(\.(xml|json))?$/', $sMethod, $aMatches);
-
-        $sProvider = !empty($aMatches[1]) ? strtolower($aMatches[1]) : 'google';
-        $sFormat   = !empty($aMatches[3]) ? strtolower($aMatches[3]) : 'xml';
-
-        //  Set cache headers
+        //  Send headers
         header('Cache-Control: no-store, no-cache, must-revalidate');
         header('Cache-Control: post-check=0, pre-check=0');
         header('Pragma: no-cache');
 
-        //  Set content-type
-        switch ($sFormat) {
-
-            case 'xml':
-                header('Content-Type: text/xml');
-                break;
-
-            case 'json':
-                header('Content-Type: application/json');
-                break;
+        //  Any additional headers
+        $oHandle = fopen($sCacheHeaders, 'r');
+        if ($oHandle) {
+            while (($sLine = fgets($oHandle)) !== false) {
+                if (!empty($sLine)) {
+                    header($sLine);
+                }
+            }
+            fclose($oHandle);
         }
 
-        $this->load->model('shop_feed_model');
-        $sCacheFile = $this->shop_feed_model->serve($sProvider, $sFormat);
-
-        if (empty($sCacheFile)) {
-
-            show_404();
-
-        } else {
-
-            readFileChunked($sCacheFile);
-        }
+        //  Send the data
+        readFileChunked($sCacheData);
     }
 
     // --------------------------------------------------------------------------

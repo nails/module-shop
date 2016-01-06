@@ -12,6 +12,8 @@
 
 namespace Nails\Api\Shop;
 
+use Nails\Factory;
+
 class Feed extends \Nails\Api\Controller\Base
 {
     /**
@@ -31,11 +33,10 @@ class Feed extends \Nails\Api\Controller\Base
     public function __construct($oApiRouter)
     {
         parent::__construct($oApiRouter);
-        $this->load->model('shop/shop_model');
-        $this->load->model('shop/shop_feed_model');
 
-        $this->maintenance = new \stdClass();
+        $this->maintenance          = new \stdClass();
         $this->maintenance->enabled = (bool) appSetting('maintenance_enabled', 'shop');
+
         if ($this->maintenance->enabled) {
 
             //  Allow shop admins access
@@ -88,8 +89,9 @@ class Feed extends \Nails\Api\Controller\Base
         } else {
 
             $aOut        = array();
+            $oFeedModel  = Factory::model('Feed', 'nailsapp/module-shop');
             $sKeywords   = $this->input->get('keywords');
-            $aCategories = $this->shop_feed_model->searchGoogleCategories($sKeywords);
+            $aCategories = $oFeedModel->searchGoogleCategories($sKeywords);
 
             if ($aCategories !== false) {
 
@@ -98,10 +100,11 @@ class Feed extends \Nails\Api\Controller\Base
             } else {
 
                 $aOut['status'] = 500;
-                $aOut['error']  = $this->shop_feed_model->lastError();
+                $aOut['error']  = $oFeedModel->lastError();
             }
 
             return $aOut;
         }
     }
+
 }

@@ -12,6 +12,8 @@
 
 namespace Nails\Shop\Driver;
 
+use Nails\Shop\Exception\ShippingDriverException;
+
 class ShippingBase
 {
     protected $sDriverSlug;

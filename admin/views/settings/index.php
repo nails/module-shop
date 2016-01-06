@@ -862,7 +862,7 @@
                                     <?php
 
                                     echo $driver->name;
-                                    if (!empty($sdriverkin->description)) {
+                                    if (!empty($driver->description)) {
 
                                         echo '<small>';
                                         echo $driver->description;
@@ -1067,21 +1067,35 @@
                         foreach ($feed_drivers as $driver) {
 
                             //  @todo handle selected state
-                            $bSelected = false;
+                            if ($this->input->post('enabled_feed_drivers')) {
+
+                                $bEnabled = in_array($driver->slug, $this->input->post('enabled_feed_drivers'));
+
+                            } else {
+
+                                $bEnabled = in_array($driver->slug, $feed_drivers_selected);
+                            }
 
                             ?>
                             <tr>
                                 <td class="selected">
-                                    <?=form_checkbox('enabled_feed_drivers[]', $driver->slug, $bSelected)?>
+                                    <?=form_checkbox('enabled_feed_drivers[]', $driver->slug, $bEnabled)?>
                                 </td>
                                 <td class="label">
                                     <?php
 
                                     echo $driver->name;
-                                    if (!empty($sdriverkin->description)) {
+                                    if (!empty($driver->description)) {
 
                                         echo '<small>';
                                         echo $driver->description;
+                                        echo '</small>';
+                                    }
+
+                                    if ($bEnabled) {
+
+                                        echo '<small>';
+                                        echo 'Feed URL: ' . site_url('shop/feed/' . $driver->slug);
                                         echo '</small>';
                                     }
 

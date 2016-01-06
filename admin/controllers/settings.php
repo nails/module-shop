@@ -166,6 +166,7 @@ class Settings extends BaseAdmin
                 'pages' => array(),
 
                 //  Feeds
+                'enabled_feed_drivers' => $this->input->post('enabled_feed_drivers') ?: array(),
             );
 
             if ($this->input->post('base_currency')) {
@@ -284,7 +285,6 @@ class Settings extends BaseAdmin
         $this->data['settings']         = appSetting(null, 'shop', true);
         $this->data['payment_gateways'] = $this->shop_payment_gateway_model->getAvailable();
         $this->data['shipping_drivers'] = $this->shop_shipping_driver_model->getAvailable();
-        $this->data['feed_drivers']     = $oFeedModel->getAll();
         $this->data['currencies']       = $oCurrencyModel->getAll();
         $this->data['tax_rates']        = $this->shop_tax_rate_model->getAll();
         $this->data['tax_rates_flat']   = $this->shop_tax_rate_model->getAllFlat();
@@ -307,6 +307,10 @@ class Settings extends BaseAdmin
 
         //  Count the number of products (including deleted) - base currency is locked if > 1
         $this->data['productCount'] = $this->shop_product_model->countAll(null, true);
+
+        //  Feed Drivers
+        $this->data['feed_drivers']          = $oFeedModel->getAll();
+        $this->data['feed_drivers_selected'] = appSetting('enabled_feed_drivers', 'shop') ?: array();
 
         // --------------------------------------------------------------------------
 
