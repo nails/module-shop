@@ -29,6 +29,13 @@ return array(
             } else {
                 return new \Nails\Shop\Model\Skin();
             }
+        },
+        'Feed' => function () {
+            if (class_exists('\App\Shop\Model\Feed')) {
+                return new \App\Shop\Model\Feed();
+            } else {
+                return new \Nails\Shop\Model\Feed();
+            }
         }
     )
 );

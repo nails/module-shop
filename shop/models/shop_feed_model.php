@@ -15,6 +15,67 @@ use Nails\Factory;
 class NAILS_Shop_feed_model extends NAILS_Model
 {
     protected $cacheFile;
+    protected $aAvailable;
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Construct the model.
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->aAvailable = _NAILS_GET_DRIVERS('nailsapp/module-shop', 'feed');
+
+        //  Test each driver
+        foreach ($this->aAvailable as $oDriver) {
+            if (!($this->oDriver instanceof \Nails\Shop\Driver\ShippingBase)) {
+                throw new ShippingDriverException(
+                    'Driver "' . $oDriver->slug . '" must extend \Nails\Shop\Driver\FeedBase',
+                    3
+                );
+            }
+        }
+
+
+        //  Load the active shipping driver
+        $sDriverSlug         = appSetting('enabled_shipping_driver', 'shop') ?: self::DEFAULT_DRIVER;
+        $this->oDriverConfig = $this->get($sDriverSlug);
+
+        if (empty($this->oDriverConfig)) {
+            throw new ShippingDriverException(
+                'Could not find driver "' . $sDriverSlug . '".',
+                1
+            );
+        }
+
+        $this->oDriver = _NAILS_GET_DRIVER_INSTANCE($this->oDriverConfig);
+
+        if (empty($this->oDriver)) {
+            throw new ShippingDriverException(
+                'Failed to load shipping driver "' . $sDriverSlug . '".',
+                2
+            );
+        }
+
+        if (!($this->oDriver instanceof \Nails\Shop\Driver\ShippingBase)) {
+            throw new ShippingDriverException(
+                'Driver "' . $sDriverSlug . '" must extend \Nails\Shop\Driver\ShippingBase',
+                3
+            );
+        }
+
+        //  Apply driver configurations
+        $aSettings = array(
+            'driver_slug' => $this->oDriverConfig->slug
+        );
+
+        if (!empty($this->oDriverConfig->data->settings)) {
+            $aSettings = array_merge($aSettings, $this->extractDriverSettings($this->oDriverConfig->data->settings));
+        }
+
+        $this->oDriver->setConfig($aSettings);
+    }
 
     // --------------------------------------------------------------------------
 

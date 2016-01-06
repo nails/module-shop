@@ -94,6 +94,7 @@ class Settings extends BaseAdmin
 
         $oCountryModel  = Factory::model('Country');
         $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
+        $oFeedModel     = Factory::model('Feed', 'nailsapp/module-shop');
 
         // --------------------------------------------------------------------------
 
@@ -162,7 +163,9 @@ class Settings extends BaseAdmin
                 'additional_currencies' => $this->input->post('additional_currencies'),
 
                 //  Pages
-                'pages' => array()
+                'pages' => array(),
+
+                //  Feeds
             );
 
             if ($this->input->post('base_currency')) {
@@ -281,6 +284,7 @@ class Settings extends BaseAdmin
         $this->data['settings']         = appSetting(null, 'shop', true);
         $this->data['payment_gateways'] = $this->shop_payment_gateway_model->getAvailable();
         $this->data['shipping_drivers'] = $this->shop_shipping_driver_model->getAvailable();
+        $this->data['feed_drivers']     = $oFeedModel->getAll();
         $this->data['currencies']       = $oCurrencyModel->getAll();
         $this->data['tax_rates']        = $this->shop_tax_rate_model->getAll();
         $this->data['tax_rates_flat']   = $this->shop_tax_rate_model->getAllFlat();

@@ -31,6 +31,18 @@
         <li class="tab">
             <a href="#" data-tab="tab-pages">Pages</a>
         </li>
+        <?php
+
+        if (!empty($feed_drivers)) {
+
+            ?>
+            <li class="tab">
+                <a href="#" data-tab="tab-feeds">Feeds</a>
+            </li>
+            <?php
+        }
+
+        ?>
     </ul>
     <section class="tabs" data-tabgroup="main-tabs">
         <div class="tab-page tab-general">
@@ -1035,6 +1047,71 @@
 
             ?>
         </div>
+        <?php
+
+        if (!empty($feed_drivers)) {
+
+            ?>
+            <div class="tab-page tab-feeds">
+                <table id="feed-drivers">
+                    <thead class="feed-drivers">
+                        <tr>
+                            <th class="selected">Enabled</th>
+                            <th class="label">Label</th>
+                            <th class="configure">Configure</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+
+                        foreach ($feed_drivers as $driver) {
+
+                            //  @todo handle selected state
+                            $bSelected = false;
+
+                            ?>
+                            <tr>
+                                <td class="selected">
+                                    <?=form_checkbox('enabled_feed_drivers[]', $driver->slug, $bSelected)?>
+                                </td>
+                                <td class="label">
+                                    <?php
+
+                                    echo $driver->name;
+                                    if (!empty($sdriverkin->description)) {
+
+                                        echo '<small>';
+                                        echo $driver->description;
+                                        echo '</small>';
+                                    }
+
+                                    ?>
+                                </td>
+                                <td class="configure">
+                                    <?php
+
+                                    if (!empty($driver->data->settings)) {
+
+                                        echo anchor(
+                                            'admin/admin/settings/driver?slug=' . $driver->slug,
+                                            'Configure',
+                                            'data-fancybox-type="iframe" class="fancybox btn btn-xs btn-primary"'
+                                        );
+                                    }
+
+                                    ?>
+                                </td>
+                            </tr>
+                            <?php
+                        }
+
+                        ?>
+                    <tbody>
+                </table>
+            </div>
+            <?php
+        }
+    ?>
     </section>
     <p>
         <?=form_submit('submit', lang('action_save_changes'), 'class="btn btn-primary"')?>
