@@ -283,8 +283,6 @@ class Settings extends BaseAdmin
 
         //  Get data
         $this->data['settings']         = appSetting(null, 'shop', true);
-        $this->data['payment_gateways'] = $this->shop_payment_gateway_model->getAvailable();
-        $this->data['shipping_drivers'] = $this->shop_shipping_driver_model->getAvailable();
         $this->data['currencies']       = $oCurrencyModel->getAll();
         $this->data['tax_rates']        = $this->shop_tax_rate_model->getAll();
         $this->data['tax_rates_flat']   = $this->shop_tax_rate_model->getAllFlat();
@@ -302,15 +300,20 @@ class Settings extends BaseAdmin
         $this->data['skins_checkout']         = $oSkinModel->getAvailable('checkout');
         $this->data['skin_checkout_selected'] = $oSkinModel->getEnabled('checkout');
 
-        //  Enabled Shipping Driver
-        $this->data['shipping_driver'] = $this->shop_shipping_driver_model->getEnabled();
-
         //  Count the number of products (including deleted) - base currency is locked if > 1
         $this->data['productCount'] = $this->shop_product_model->countAll(null, true);
 
+        //  Payment Drivers
+        $this->data['payment_gateways']         = $this->shop_payment_gateway_model->getAvailable();
+        $this->data['payment_gateways_enabled'] = $this->shop_payment_gateway_model->getEnabled();
+
+        //  Shipping Drivers
+        $this->data['shipping_drivers']         = $this->shop_shipping_driver_model->getAvailable();
+        $this->data['shipping_drivers_enabled'] = $this->shop_shipping_driver_model->getEnabled();
+
         //  Feed Drivers
-        $this->data['feed_drivers']          = $oFeedModel->getAll();
-        $this->data['feed_drivers_selected'] = appSetting('enabled_feed_drivers', 'shop') ?: array();
+        $this->data['feed_drivers']         = $oFeedModel->getAll();
+        $this->data['feed_drivers_enabled'] = $oFeedModel->getEnabledSlugs();
 
         // --------------------------------------------------------------------------
 

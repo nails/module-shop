@@ -102,7 +102,6 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         $available = $this->getAvailable();
         $enabled   = array_filter((array) appSetting('enabled_payment_gateways', 'shop'));
         $out       = array();
-
         foreach ($enabled as $gateway) {
 
             if (array_search($gateway, $available) !== false) {

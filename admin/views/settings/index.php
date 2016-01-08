@@ -659,13 +659,11 @@
             </section>
         </div>
         <div class="tab-page tab-payment-gateway">
-            <p>
-                Set Payment Gateway credentials.
-            </p>
             <?php
 
                 if (!empty($payment_gateways)) {
 
+                    //  @todo; use the common driver system
                     ?>
                     <table id="payment-gateways">
                         <thead class="payment-gateways">
@@ -829,70 +827,13 @@
 
             if (!empty($shipping_drivers)) {
 
-                ?>
-                <table id="shipping-drivers">
-                    <thead class="shipping-drivers">
-                        <tr>
-                            <th class="selected">Selected</th>
-                            <th class="label">Label</th>
-                            <th class="configure">Configure</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-
-
-                        foreach ($shipping_drivers as $driver) {
-
-                            if ($this->input->post()) {
-
-                                $bSelected = $driver->slug == $this->input->post('enabled_shipping_driver') ? true : false;
-
-                            } else {
-
-                                $bSelected = $driver->slug == $shipping_driver->slug ? true : false;
-                            }
-
-                            ?>
-                            <tr>
-                                <td class="selected">
-                                    <?=form_radio('enabled_shipping_driver', $driver->slug, $bSelected)?>
-                                </td>
-                                <td class="label">
-                                    <?php
-
-                                    echo $driver->name;
-                                    if (!empty($driver->description)) {
-
-                                        echo '<small>';
-                                        echo $driver->description;
-                                        echo '</small>';
-                                    }
-
-                                    ?>
-                                </td>
-                                <td class="configure">
-                                    <?php
-
-                                    if (!empty($driver->data->settings)) {
-
-                                        echo anchor(
-                                            'admin/admin/settings/driver?slug=' . $driver->slug,
-                                            'Configure',
-                                            'data-fancybox-type="iframe" class="fancybox btn btn-xs btn-primary"'
-                                        );
-                                    }
-
-                                    ?>
-                                </td>
-                            </tr>
-                            <?php
-                        }
-
-                        ?>
-                    <tbody>
-                </table>
-                <?php
+                echo adminHelper(
+                    'loadSettingsDriverTable',
+                    'enabled_shipping_driver',
+                    $shipping_drivers,
+                    array($shipping_drivers_enabled->slug),
+                    false
+                );
 
             } else {
 
@@ -1053,75 +994,12 @@
 
             ?>
             <div class="tab-page tab-feeds">
-                <table id="feed-drivers">
-                    <thead class="feed-drivers">
-                        <tr>
-                            <th class="selected">Enabled</th>
-                            <th class="label">Label</th>
-                            <th class="configure">Configure</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php
-
-                        foreach ($feed_drivers as $driver) {
-
-                            //  @todo handle selected state
-                            if ($this->input->post('enabled_feed_drivers')) {
-
-                                $bEnabled = in_array($driver->slug, $this->input->post('enabled_feed_drivers'));
-
-                            } else {
-
-                                $bEnabled = in_array($driver->slug, $feed_drivers_selected);
-                            }
-
-                            ?>
-                            <tr>
-                                <td class="selected">
-                                    <?=form_checkbox('enabled_feed_drivers[]', $driver->slug, $bEnabled)?>
-                                </td>
-                                <td class="label">
-                                    <?php
-
-                                    echo $driver->name;
-                                    if (!empty($driver->description)) {
-
-                                        echo '<small>';
-                                        echo $driver->description;
-                                        echo '</small>';
-                                    }
-
-                                    if ($bEnabled) {
-
-                                        echo '<small>';
-                                        echo 'Feed URL: ' . site_url('shop/feed/' . $driver->slug);
-                                        echo '</small>';
-                                    }
-
-                                    ?>
-                                </td>
-                                <td class="configure">
-                                    <?php
-
-                                    if (!empty($driver->data->settings)) {
-
-                                        echo anchor(
-                                            'admin/admin/settings/driver?slug=' . $driver->slug,
-                                            'Configure',
-                                            'data-fancybox-type="iframe" class="fancybox btn btn-xs btn-primary"'
-                                        );
-                                    }
-
-                                    ?>
-                                </td>
-                            </tr>
-                            <?php
-                        }
-
-                        ?>
-                    <tbody>
-                </table>
+                <?=adminHelper(
+                    'loadSettingsDriverTable',
+                    'enabled_feed_drivers',
+                    $feed_drivers,
+                    $feed_drivers_enabled
+                )?>
             </div>
             <?php
         }
