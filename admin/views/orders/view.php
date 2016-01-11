@@ -18,8 +18,10 @@ foreach ($order->items as $oItem) {
 >
     <div class="row col-3-container">
         <div class="col-md-4">
-            <fieldset>
-                <legend>Order Details</legend>
+            <div class="panel panel-default match-height">
+                <div class="panel-heading">
+                    <strong>Order Details</strong>
+                </div>
                 <div class="table-responsive">
                     <table>
                         <tbody>
@@ -245,11 +247,13 @@ foreach ($order->items as $oItem) {
                         </tbody>
                     </table>
                 </div>
-            </fieldset>
+            </div>
         </div>
         <div class="col-md-4">
-            <fieldset>
-                <legend>Customer &amp; Delivery Details</legend>
+            <div class="panel panel-default match-height">
+                <div class="panel-heading">
+                    <strong>Customer &amp; Delivery Details</strong>
+                </div>
                 <div class="table-responsive">
                     <table>
                         <tbody>
@@ -358,11 +362,10 @@ foreach ($order->items as $oItem) {
                         </tbody>
                     </table>
                 </div>
-            </fieldset>
+            </div>
         </div>
         <div class="col-md-4">
-            <fieldset>
-                <legend>Order Status</legend>
+            <div class="match-height">
                 <div class="order-status-container">
                     <div class="order-status <?=strtolower($order->status)?>">
                     <?php
@@ -552,7 +555,7 @@ foreach ($order->items as $oItem) {
                     ?>
                     </div>
                 </div>
-            </fieldset>
+            </div>
         </div>
     </div>
     <fieldset class="notcollapsable">

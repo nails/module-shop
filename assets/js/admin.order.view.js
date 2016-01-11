@@ -15,32 +15,8 @@ NAILS_Admin_Shop_Order_View = function()
      */
     base.__construct = function()
     {
-        $(window).resize(function() {
-            base.matchColHeights();
-        }).trigger('resize');
         base.alertCollection();
         base.todo();
-    };
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Matches the heights of the three status columns
-     * @return {Void}
-     */
-    base.matchColHeights = function()
-    {
-        var maxHeight = 0;
-        $('.col-3-container fieldset')
-            .removeAttr('style')
-            .each(function() {
-
-                if ($(this).outerHeight() > maxHeight) {
-                    maxHeight = $(this).outerHeight();
-                }
-            });
-
-        $('.col-3-container fieldset').css({'height' : maxHeight});
     };
 
     // --------------------------------------------------------------------------
