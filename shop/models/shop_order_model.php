@@ -30,6 +30,9 @@ class NAILS_Shop_order_model extends NAILS_Model
         $this->table       = NAILS_DB_PREFIX . 'shop_order';
         $this->tablePrefix = 'o';
 
+        $this->defaultSortColumn  = 'created';
+        $this->defaultSortOrder   = 'DESC';
+
         $this->oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
         $this->oCountryModel  = Factory::model('Country');
         $this->oLogger        = Factory::service('Logger');
