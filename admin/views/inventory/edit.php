@@ -475,16 +475,16 @@
                 <?php
 
                     $_max_upload   = ini_get('upload_max_filesize');
-                    $_max_upload   = return_bytes($_max_upload);
+                    $_max_upload   = returnBytes($_max_upload);
 
                     $_max_post     = ini_get('post_max_size');
-                    $_max_post     = return_bytes($_max_post);
+                    $_max_post     = returnBytes($_max_post);
 
                     $_memory_limit = ini_get('memory_limit');
-                    $_memory_limit = return_bytes($_memory_limit);
+                    $_memory_limit = returnBytes($_memory_limit);
 
                     $_upload_mb    = min($_max_upload, $_max_post, $_memory_limit);
-                    $_upload_mb    = format_bytes($_upload_mb);
+                    $_upload_mb    = formatBytes($_upload_mb);
 
                     echo 'Images only, max file size is ' . $_upload_mb . '.';
 
