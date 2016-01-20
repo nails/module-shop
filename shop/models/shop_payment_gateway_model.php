@@ -400,7 +400,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
                 // --------------------------------------------------------------------------
 
                 //  Update order
-                if ($this->shop_order_payment_model->order_is_paid($order->id)) {
+                if ($this->shop_order_payment_model->isOrderPaid($order->id)) {
 
                     if (!$this->shop_order_model->paid($order->id)) {
 
@@ -686,7 +686,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Update order
-        if ($this->shop_order_payment_model->order_is_paid($order->id)) {
+        if ($this->shop_order_payment_model->isOrderPaid($order->id)) {
 
             $this->oLogger->line('Order is completely paid.');
 

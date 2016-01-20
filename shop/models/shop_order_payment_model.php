@@ -14,79 +14,104 @@ use Nails\Factory;
 
 class NAILS_Shop_order_payment_model extends NAILS_Model
 {
+    /**
+     * Construct the model
+     */
     public function __construct()
     {
         parent::__construct();
-        $this->table            = NAILS_DB_PREFIX . 'shop_order_payment';
-        $this->tablePrefix    = 'sop';
+        $this->table             = NAILS_DB_PREFIX . 'shop_order_payment';
+        $this->tablePrefix       = 'sop';
+        $this->defaultSortColumn = 'created';
+        $this->defaultSortOrder  = 'desc';
     }
 
     // --------------------------------------------------------------------------
 
-    public function create($data)
+    /**
+     * Create a new payment
+     * @param  array   $aData         The data to create the payment with
+     * @param  boolean $bReturnObject Whether to return the object rather than the ID
+     * @return mixed
+     */
+    public function create($aData, $bReturnObject = false)
     {
         $this->load->model('shop/shop_model');
 
         $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
 
-        $data['amount_base']   = $oCurrencyModel->convert($data['amount'], $data['currency'], SHOP_BASE_CURRENCY_CODE);
-        $data['currency_base'] = SHOP_BASE_CURRENCY_CODE;
+        $aData['currency_base'] = SHOP_BASE_CURRENCY_CODE;
+        $aData['amount_base']   = $oCurrencyModel->convert(
+            $aData['amount'],
+            $aData['currency'],
+            SHOP_BASE_CURRENCY_CODE
+        );
 
-        return parent::create($data);
+        return parent::create($aData, $bReturnObject);
     }
 
     // --------------------------------------------------------------------------
 
-    public function getByTransactionId($transaction_id, $gateway)
+    /**
+     * Returns a payment by it's transaction ID
+     * @param  string $sTransactionId The transaction ID
+     * @param  string $sGateway       The gateway used to make the payment
+     * @return \stdClass
+     */
+    public function getByTransactionId($sTransactionId, $sGateway)
     {
-        $_data['where']        = array();
-        $_data['where'][]    = array('column' => $this->tablePrefix . '.transaction_id', 'value' => $transaction_id);
-        $_data['where'][]    = array('column' => $this->tablePrefix . '.payment_gateway', 'value' => $gateway);
+        $aData['where']   = array(
+            array('column' => $this->tablePrefix . '.transaction_id', 'value' => $sTransactionId),
+            array('column' => $this->tablePrefix . '.payment_gateway', 'value' => $sGateway)
+        );
 
-        $_result = $this->getAll(null, null, $_data);
+        $aResult = $this->getAll(null, null, $aData);
 
-        if (empty($_result)) {
-
+        if (empty($aResult)) {
             return false;
-
         }
 
-        return $_result[0];
+        return $aResult[0];
     }
-
 
     // --------------------------------------------------------------------------
 
-
-    public function getForOrder($order_id)
+    /**
+     * Returns payments for a particular order
+     * @param  integer $iOrderId The order ID
+     * @return array
+     */
+    public function getForOrder($iOrderId)
     {
-        $_data['where']        = array();
-        $_data['where'][]    = array('column' => $this->tablePrefix . '.order_id', 'value' => $order_id);
+        $aData['where'] = array(
+            array('column' => $this->tablePrefix . '.order_id', 'value' => $iOrderId)
+        );
 
-        return $this->getAll(null, null, $_data);
+        return $this->getAll(null, null, $aData);
     }
-
 
     // --------------------------------------------------------------------------
 
-
-    public function order_is_paid($order_id)
+    /**
+     * Determines whether an order is paid or not
+     * @param  integer $iOrderId The Order ID
+     * @return boolean
+     */
+    public function isOrderPaid($iOrderId)
     {
         $this->load->model('shop/shop_order_model');
-        $_order = $this->shop_order_model->getById($order_id);
+        $oOrder = $this->shop_order_model->getById($iOrderId);
 
-        if (!$_order) {
-
+        if (!$oOrder) {
             $this->setError('Invalid Order ID.');
             return false;
-
         }
 
         $this->db->select('SUM(amount_base) as total_paid');
-        $this->db->where('order_id', $_order->id);
-        $_result = $this->db->get($this->table)->row();
+        $this->db->where('order_id', $oOrder->id);
+        $oResult = $this->db->get($this->table)->row();
 
-        return (int) $_result->total_paid >= $_order->totals->base->grand;
+        return (int) $oResult->total_paid >= $oOrder->totals->base->grand;
     }
 }
 
@@ -121,5 +146,4 @@ if (!defined('NAILS_ALLOW_EXTENSION_SHOP_ORDER_PAYMENT_MODEL')) {
     class Shop_order_payment_model extends NAILS_Shop_order_payment_model
     {
     }
-
 }
