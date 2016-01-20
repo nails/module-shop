@@ -12,26 +12,11 @@
 
 namespace Nails\Shop\Driver;
 
+use \Nails\Common\Driver\Base;
 use Nails\Shop\Exception\FeedDriverException;
 
-class FeedBase
+class FeedBase extends Base
 {
-    protected $sDriverSlug;
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Accepts an array of config values from the main driver model
-     * @param array $aConfig The configs to set
-     * @return array
-     */
-    public function setConfig($aConfig)
-    {
-        $this->sDriverSlug = $aConfig['driver_slug'];
-    }
-
-    // --------------------------------------------------------------------------
-
     /**
      * Generate the feed data
      * @param  object $oHeader File handle to write headers to
