@@ -106,7 +106,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
             } else {
 
-                $sValue = appSetting($oSetting->key, 'shop-driver-' . $sSlug);
+                $sValue = appSetting($oSetting->key, $sSlug);
                 if (is_null($sValue) && isset($oSetting->default)) {
                     $sValue = $oSetting->default;
                 }
