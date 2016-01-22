@@ -13,6 +13,8 @@ require_once '_shop.php';
  * @link
  */
 
+use Nails\Factory;
+
 class NAILS_Orders extends NAILS_Shop_Controller
 {
     /**
@@ -70,9 +72,9 @@ class NAILS_Orders extends NAILS_Shop_Controller
 
         } else {
 
-            $this->load->library('pdf/pdf');
-            $this->pdf->loadView($this->skin->path . 'views/order/invoice', $this->data);
-            $this->pdf->stream('INVOICE-' . $this->data['order']->ref . '.pdf');
+            $oPdf = Factory::service('Pdf', 'nailsapp/module-pdf');
+            $oPdf->loadView($this->skin->path . 'views/order/invoice', $this->data);
+            $oPdf->stream('INVOICE-' . $this->data['order']->ref . '.pdf');
         }
     }
 

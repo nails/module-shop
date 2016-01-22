@@ -626,10 +626,10 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
         //  Views
         $this->data['for_user'] = 'CUSTOMER';
-        $this->load->library('pdf/pdf');
-        $this->pdf->setPaperSize('A4', 'landscape');
-        $this->pdf->loadView($skin->path . 'views/order/invoice', $this->data);
-        $this->pdf->download('INVOICE-' . $this->data['order']->ref . '.pdf');
+        $oPdf = Factory::service('Pdf', 'nailsapp/module-pdf');
+        $oPdf->setPaperSize('A4', 'landscape');
+        $oPdf->loadView($skin->path . 'views/order/invoice', $this->data);
+        $oPdf->download('INVOICE-' . $this->data['order']->ref . '.pdf');
     }
 
     // --------------------------------------------------------------------------

@@ -748,18 +748,18 @@ class Reports extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->load->library('pdf/pdf');
-        $this->pdf->setPaperSize('A4', 'landscape');
-        $this->pdf->load_html($html[1]);
+        $oPdf = Factory::service('Pdf', 'nailsapp/module-pdf');
+        $oPdf->setPaperSize('A4', 'landscape');
+        $oPdf->load_html($html[1]);
 
         //  Load view
         if (!$returnData) {
 
-            if (!$this->pdf->download($data->filename . '.pdf')) {
+            if (!$oPdf->download($data->filename . '.pdf')) {
 
                 $status  = 'error';
                 $message = 'Failed to render PDF. ';
-                $message .= $this->pdf->lastError() ? 'DOMPDF gave the following error: ' . $this->pdf->lastError() : '';
+                $message .= $oPdf->lastError() ? 'DOMPDF gave the following error: ' . $oPdf->lastError() : '';
 
                 $this->session->set_flashdata($status, $message);
                 redirect('admin/shop/reports');
@@ -769,13 +769,13 @@ class Reports extends BaseAdmin
 
             try {
 
-                $this->pdf->render();
+                $oPdf->render();
 
                 $out   = array();
                 $out[] = $data->filename . '.pdf';
-                $out[] = $this->pdf->output();
+                $out[] = $oPdf->output();
 
-                $this->pdf->reset();
+                $oPdf->reset();
 
                 return $out;
 
