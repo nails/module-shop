@@ -11,6 +11,7 @@
  */
 
 use Nails\Factory;
+use Nails\Environment;
 use Omnipay\Common;
 use Omnipay\Common\CreditCard;
 use Omnipay\Omnipay;
@@ -765,7 +766,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         }
 
         //  Testing, or no?
-        $testMode = ENVIRONMENT == 'PRODUCTION' ? false : true;
+        $testMode = Environment::is('PRODUCTION') ? false : true;
         $gateway->setTestMode($testMode);
 
         if ($testMode) {
