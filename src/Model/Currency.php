@@ -13,12 +13,16 @@
 namespace Nails\Shop\Model;
 
 use Nails\Factory;
-use Nails\Common\Model\Base;
 
-class Currency extends Base
+class Currency
 {
+    use \Nails\Common\Traits\ErrorHandling;
+
+    // --------------------------------------------------------------------------
+
     protected $oerUrl;
     protected $rates;
+    protected $aCurrency;
 
     // --------------------------------------------------------------------------
 
@@ -27,12 +31,10 @@ class Currency extends Base
      */
     public function __construct()
     {
-        parent::__construct();
-
-        // --------------------------------------------------------------------------
-
         //  Load required config file
-        $this->config->load('shop/currency');
+        $oConfig = Factory::service('Config');
+        $oConfig->load('shop/currency');
+        $this->aCurrency = $oConfig->item('currency');
 
         // --------------------------------------------------------------------------
 
@@ -49,7 +51,7 @@ class Currency extends Base
      */
     public function getAll()
     {
-        return $this->config->item('currency');
+        return $this->aCurrency;
     }
 
     // --------------------------------------------------------------------------
