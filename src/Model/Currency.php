@@ -23,6 +23,7 @@ class Currency
     protected $oerUrl;
     protected $rates;
     protected $aCurrency;
+    protected $oDb;
 
     // --------------------------------------------------------------------------
 
@@ -35,6 +36,10 @@ class Currency
         $oConfig = Factory::service('Config');
         $oConfig->load('shop/currency');
         $this->aCurrency = $oConfig->item('currency');
+
+        // --------------------------------------------------------------------------
+
+        $this->oDb = Factory::service('Database');
 
         // --------------------------------------------------------------------------
 
@@ -171,9 +176,8 @@ class Currency
         if ($oerAppId) {
 
             //  Make sure we know what the base currency is
-            if (defined('SHOP_BASE_CURRENCY_CODE')) {
-
-                $this->load->model('shop/shop_model');
+            if (!defined('SHOP_BASE_CURRENCY_CODE')) {
+                get_instance()->load->model('shop/shop_model');
             }
 
             if (empty($muteLog)) {
@@ -395,11 +399,11 @@ class Currency
 
             // --------------------------------------------------------------------------
 
-            if ($this->db->truncate(NAILS_DB_PREFIX . 'shop_currency_exchange')) {
+            if ($this->oDb->truncate(NAILS_DB_PREFIX . 'shop_currency_exchange')) {
 
                 if (!empty($toSave)) {
 
-                    if ($this->db->insert_batch(NAILS_DB_PREFIX . 'shop_currency_exchange', $toSave)) {
+                    if ($this->oDb->insert_batch(NAILS_DB_PREFIX . 'shop_currency_exchange', $toSave)) {
 
                         return true;
 
@@ -491,7 +495,7 @@ class Currency
         if (is_null($this->rates)) {
 
             $this->rates = array();
-            $rates       = $this->db->get(NAILS_DB_PREFIX . 'shop_currency_exchange')->result();
+            $rates       = $this->oDb->get(NAILS_DB_PREFIX . 'shop_currency_exchange')->result();
 
             foreach ($rates as $rate) {
 
@@ -681,11 +685,11 @@ class Currency
      */
     public function getExchangeRate($from, $to)
     {
-        $this->db->select('rate');
-        $this->db->where('from', $from);
-        $this->db->where('to', $to);
+        $this->oDb->select('rate');
+        $this->oDb->where('from', $from);
+        $this->oDb->where('to', $to);
 
-        $rate = $this->db->get(NAILS_DB_PREFIX . 'shop_currency_exchange')->row();
+        $rate = $this->oDb->get(NAILS_DB_PREFIX . 'shop_currency_exchange')->row();
 
         if (!$rate) {
 
