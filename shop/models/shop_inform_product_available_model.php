@@ -143,41 +143,51 @@ class NAILS_Shop_inform_product_available_model extends NAILS_Model
     /**
      * Formats a single object
      *
-     * @param  object $obj      A reference to the object being formatted.
-     * @param  array  $data     The same data array which is passed to _getcount_common, for reference if needed
-     * @param  array  $integers Fields which should be cast as integers if numerical
-     * @param  array  $bools    Fields which should be cast as booleans
+     * The getAll() method iterates over each returned item with this method so as to
+     * correctly format the output. Use this to cast integers and booleans and/or organise data into objects.
+     *
+     * @param  object $oObj      A reference to the object being formatted.
+     * @param  array  $aData     The same data array which is passed to _getcount_common, for reference if needed
+     * @param  array  $aIntegers Fields which should be cast as integers if numerical and not null
+     * @param  array  $aBools    Fields which should be cast as booleans if not null
+     * @param  array  $aFloats   Fields which should be cast as floats if not null
      * @return void
      */
-    protected function formatObject(&$obj, $data = array(), $integers = array(), $bools = array())
-    {
-        parent::formatObject($obj, $data, $integers, $bools);
+    protected function formatObject(
+        &$oObj,
+        $aData = array(),
+        $aIntegers = array(),
+        $aBools = array(),
+        $aFloats = array()
+    ) {
 
-        $obj->product        = new \stdClass();
-        $obj->product->id    = (int) $obj->product_id;
-        $obj->product->label = $obj->product_label;
-        unset($obj->product_id);
-        unset($obj->product_label);
+        parent::formatObject($oObj, $aData, $aIntegers, $aBools, $aFloats);
 
-        $obj->variation        = new \stdClass();
-        $obj->variation->id    = (int) $obj->variation_id;
-        $obj->variation->label = $obj->variation_label;
-        unset($obj->variation_id);
-        unset($obj->variation_label);
+        $oObj->product        = new \stdClass();
+        $oObj->product->id    = (int) $oObj->product_id;
+        $oObj->product->label = $oObj->product_label;
+        unset($oObj->product_id);
+        unset($oObj->product_label);
 
-        $obj->user              = new \stdClass();
-        $obj->user->id          = $obj->user_id;
-        $obj->user->email       = $obj->email;
-        $obj->user->first_name  = $obj->first_name;
-        $obj->user->last_name   = $obj->last_name;
-        $obj->user->profile_img = $obj->profile_img;
-        $obj->user->gender      = $obj->gender;
-        unset($obj->user_id);
-        unset($obj->email);
-        unset($obj->first_name);
-        unset($obj->last_name);
-        unset($obj->profile_img);
-        unset($obj->gender);
+        $oObj->variation        = new \stdClass();
+        $oObj->variation->id    = (int) $oObj->variation_id;
+        $oObj->variation->label = $oObj->variation_label;
+        unset($oObj->variation_id);
+        unset($oObj->variation_label);
+
+        $oObj->user              = new \stdClass();
+        $oObj->user->id          = $oObj->user_id;
+        $oObj->user->email       = $oObj->email;
+        $oObj->user->first_name  = $oObj->first_name;
+        $oObj->user->last_name   = $oObj->last_name;
+        $oObj->user->profile_img = $oObj->profile_img;
+        $oObj->user->gender      = $oObj->gender;
+        unset($oObj->user_id);
+        unset($oObj->email);
+        unset($oObj->first_name);
+        unset($oObj->last_name);
+        unset($oObj->profile_img);
+        unset($oObj->gender);
     }
 }
 

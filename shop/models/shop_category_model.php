@@ -737,20 +737,30 @@ class NAILS_Shop_category_model extends NAILS_Model
     /**
      * Formats a single object
      *
-     * @param  object $obj      A reference to the object being formatted.
-     * @param  array  $data     The same data array which is passed to _getcount_common, for reference if needed
-     * @param  array  $integers Fields which should be cast as integers if numerical
-     * @param  array  $bools    Fields which should be cast as booleans
+     * The getAll() method iterates over each returned item with this method so as to
+     * correctly format the output. Use this to cast integers and booleans and/or organise data into objects.
+     *
+     * @param  object $oObj      A reference to the object being formatted.
+     * @param  array  $aData     The same data array which is passed to _getcount_common, for reference if needed
+     * @param  array  $aIntegers Fields which should be cast as integers if numerical and not null
+     * @param  array  $aBools    Fields which should be cast as booleans if not null
+     * @param  array  $aFloats   Fields which should be cast as floats if not null
      * @return void
      */
-    protected function formatObject(&$obj, $data = array(), $integers = array(), $bools = array())
-    {
-        parent::formatObject($obj, $data, $integers, $bools);
+    protected function formatObject(
+        &$oObj,
+        $aData = array(),
+        $aIntegers = array(),
+        $aBools = array(),
+        $aFloats = array()
+    ) {
 
-        $obj->children    = array();
-        $obj->breadcrumbs = (array) @json_decode($obj->breadcrumbs);
-        $obj->depth       = count(explode('/', $obj->slug)) - 1;
-        $obj->url         = $this->formatUrl($obj->slug);
+        parent::formatObject($oObj, $aData, $aIntegers, $aBools, $aFloats);
+
+        $oObj->children    = array();
+        $oObj->breadcrumbs = (array) @json_decode($oObj->breadcrumbs);
+        $oObj->depth       = count(explode('/', $oObj->slug)) - 1;
+        $oObj->url         = $this->formatUrl($oObj->slug);
     }
 }
 

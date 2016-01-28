@@ -118,18 +118,15 @@ class Voucher extends Base
         switch ($oVoucher->type) {
 
             case self::TYPE_GIFT_CARD:
-
                 return $this->redeemGiftCard($oVoucher, $oOrder);
                 break;
 
             case self::TYPE_LIMITED_USE:
-
                 return $this->redeemLimitedUse($oVoucher);
                 break;
 
             case self::TYPE_NORMAL:
             default:
-
                 return $this->redeemNormal($oVoucher);
                 break;
         }
@@ -241,7 +238,6 @@ class Voucher extends Base
             switch ($voucher->discount_application) {
 
                 case self::DISCOUNT_APPLICATION_PRODUCT:
-
                     $cacheKey = 'voucher-product-type-' . $voucher->product_type_id;
                     $cache    = $this->getCache($cacheKey);
                     if ($cache) {
@@ -258,7 +254,6 @@ class Voucher extends Base
                     break;
 
                 case self::DISCOUNT_APPLICATION_PRODUCT_TYPE:
-
                     $cacheKey = 'voucher-product-type-' . $voucher->product_type_id;
                     $cache    = $this->getCache($cacheKey);
                     if ($cache) {
@@ -382,8 +377,7 @@ class Voucher extends Base
         //  Check voucher's status
         switch ($voucher->status) {
 
-            case \Nails\Shop\Model\Voucher::STATUS_PENDING:
-
+            case self::STATUS_PENDING:
                 // @todo: User user datetime functions
                 $bIsValid  = false;
                 $sMessage  = 'Voucher is not available yet. This voucher becomes available on the ';
@@ -392,16 +386,14 @@ class Voucher extends Base
                 $this->setError($sMessage);
                 break;
 
-            case \Nails\Shop\Model\Voucher::STATUS_EXPIRED:
-
+            case self::STATUS_EXPIRED:
                 $bIsValid = false;
                 $sMessage = 'Voucher has expired.';
 
                 $this->setError($sMessage);
                 break;
 
-            case \Nails\Shop\Model\Voucher::STATUS_INACTIVE:
-
+            case self::STATUS_INACTIVE:
                 $bIsValid = false;
                 $sMessage = 'Invalid voucher code.';
 
@@ -409,7 +401,6 @@ class Voucher extends Base
                 break;
 
             default:
-
                 $bIsValid = true;
                 break;
         }
@@ -681,7 +672,6 @@ class Voucher extends Base
         switch ($aData['discount_type']) {
 
             case self::DISCOUNT_TYPE_PERCENT:
-
                 if ($aData['discount_value'] < 0 || $aData['discount_value'] > 100) {
 
                     $this->setError('Discount value must be within the range 0-100.');
@@ -690,7 +680,6 @@ class Voucher extends Base
                 break;
 
             case self::DISCOUNT_TYPE_AMOUNT:
-
                 if ($aData['discount_value'] < 0) {
 
                     $this->setError('Discount value must be greater than 0.');
@@ -715,67 +704,77 @@ class Voucher extends Base
     /**
      * Formats a single object
      *
-     * @param  object $obj      A reference to the object being formatted.
-     * @param  array  $data     The same data array which is passed to _getcount_common, for reference if needed
-     * @param  array  $integers Fields which should be cast as integers if numerical
-     * @param  array  $bools    Fields which should be cast as booleans
+     * The getAll() method iterates over each returned item with this method so as to
+     * correctly format the output. Use this to cast integers and booleans and/or organise data into objects.
+     *
+     * @param  object $oObj      A reference to the object being formatted.
+     * @param  array  $aData     The same data array which is passed to _getcount_common, for reference if needed
+     * @param  array  $aIntegers Fields which should be cast as integers if numerical and not null
+     * @param  array  $aBools    Fields which should be cast as booleans if not null
+     * @param  array  $aFloats   Fields which should be cast as floats if not null
      * @return void
      */
-    protected function formatObject(&$obj, $data = array(), $integers = array(), $bools = array())
-    {
-        parent::formatObject($obj, $data, $integers, $bools);
+    protected function formatObject(
+        &$oObj,
+        $aData = array(),
+        $aIntegers = array(),
+        $aBools = array(),
+        $aFloats = array()
+    ) {
 
-        $obj->limited_use_limit           = (int) $obj->limited_use_limit;
-        $obj->discount_value              = (int) $obj->discount_value;
-        $obj->discount_value_formatted    = $this->oCurrencyModel->formatBase($obj->discount_value);
-        $obj->gift_card_balance           = (int) $obj->gift_card_balance;
-        $obj->gift_card_balance_formatted = $this->oCurrencyModel->formatBase($obj->gift_card_balance);
+        parent::formatObject($oObj, $aData, $aIntegers, $aBools, $aFloats);
+
+        $oObj->limited_use_limit           = (int) $oObj->limited_use_limit;
+        $oObj->discount_value              = (int) $oObj->discount_value;
+        $oObj->discount_value_formatted    = $this->oCurrencyModel->formatBase($oObj->discount_value);
+        $oObj->gift_card_balance           = (int) $oObj->gift_card_balance;
+        $oObj->gift_card_balance_formatted = $this->oCurrencyModel->formatBase($oObj->gift_card_balance);
 
         //  Creator
-        $obj->creator               = new \stdClass();
-        $obj->creator->id           = (int) $obj->created_by;
-        $obj->creator->email        = $obj->email;
-        $obj->creator->first_name   = $obj->first_name;
-        $obj->creator->last_name    = $obj->last_name;
-        $obj->creator->profile_img  = $obj->profile_img;
-        $obj->creator->gender       = $obj->gender;
+        $oObj->creator               = new \stdClass();
+        $oObj->creator->id           = (int) $oObj->created_by;
+        $oObj->creator->email        = $oObj->email;
+        $oObj->creator->first_name   = $oObj->first_name;
+        $oObj->creator->last_name    = $oObj->last_name;
+        $oObj->creator->profile_img  = $oObj->profile_img;
+        $oObj->creator->gender       = $oObj->gender;
 
-        unset($obj->created_by);
-        unset($obj->email);
-        unset($obj->first_name);
-        unset($obj->last_name);
-        unset($obj->profile_img);
-        unset($obj->gender);
+        unset($oObj->created_by);
+        unset($oObj->email);
+        unset($oObj->first_name);
+        unset($oObj->last_name);
+        unset($oObj->profile_img);
+        unset($oObj->gender);
 
         // --------------------------------------------------------------------------
 
         $oDate = Factory::factory('DateTime');
         $iNow  = $oDate->format('U');
 
-        if ($obj->is_active && strtotime($obj->valid_from) > $iNow) {
+        if ($oObj->is_active && strtotime($oObj->valid_from) > $iNow) {
 
-            $obj->status = self::STATUS_PENDING;
+            $oObj->status = self::STATUS_PENDING;
 
-        } elseif ($obj->is_active && !empty($obj->valid_to) && strtotime($obj->valid_to) < $iNow) {
+        } elseif ($oObj->is_active && !empty($oObj->valid_to) && strtotime($oObj->valid_to) < $iNow) {
 
-            $obj->status = self::STATUS_EXPIRED;
+            $oObj->status = self::STATUS_EXPIRED;
 
-        } elseif ($obj->is_active) {
+        } elseif ($oObj->is_active) {
 
-            $obj->status = self::STATUS_ACTIVE;
+            $oObj->status = self::STATUS_ACTIVE;
 
         } else {
 
-            $obj->status = self::STATUS_INACTIVE;
+            $oObj->status = self::STATUS_INACTIVE;
         }
 
         //  Has the voucher reached it's us limit
-        if ($obj->type === self::TYPE_LIMITED_USE && $obj->use_count >= $obj->limited_use_limit) {
-            $obj->status = self::STATUS_LIMIT_REACHED;
+        if ($oObj->type === self::TYPE_LIMITED_USE && $oObj->use_count >= $oObj->limited_use_limit) {
+            $oObj->status = self::STATUS_LIMIT_REACHED;
         }
 
-        if ($obj->type === self::TYPE_GIFT_CARD && $obj->gift_card_balance == 0) {
-            $obj->status = self::STATUS_ZERO_BALANCE;
+        if ($oObj->type === self::TYPE_GIFT_CARD && $oObj->gift_card_balance == 0) {
+            $oObj->status = self::STATUS_ZERO_BALANCE;
         }
     }
 }

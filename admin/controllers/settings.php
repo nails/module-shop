@@ -213,19 +213,21 @@ class Settings extends BaseAdmin
             if ($oFormValidation->run()) {
 
                 $this->db->trans_begin();
-                $bRollback = false;
+
+                $bRollback        = false;
+                $oAppSettingModel = Factory::model('AppSetting');
 
                 //  Normal settings
-                if (!$this->app_setting_model->set($aSettings, 'shop')) {
+                if (!$oAppSettingModel->set($aSettings, 'shop')) {
 
-                    $sError    = $this->app_setting_model->lastError();
+                    $sError    = $oAppSettingModel->lastError();
                     $bRollback = true;
                 }
 
                 //  Encrypted settings
-                if (!$this->app_setting_model->set($aSettingsEncrypted, 'shop', null, true)) {
+                if (!$oAppSettingModel->set($aSettingsEncrypted, 'shop', null, true)) {
 
-                    $sError    = $this->app_setting_model->lastError();
+                    $sError    = $oAppSettingModel->lastError();
                     $bRollback = true;
                 }
 
@@ -237,7 +239,8 @@ class Settings extends BaseAdmin
                     // --------------------------------------------------------------------------
 
                     //  Rewrite routes
-                    if (!$this->routes_model->update()) {
+                    $oRoutesModel = Factory::model('Routes');
+                    if (!$oRoutesModel->update()) {
 
                         $this->data['warning']  = '<strong>Warning:</strong> while the shop settings were updated, ';
                         $this->data['warning'] .= 'the routes file could not be updated. The shop may not behave ';
@@ -405,12 +408,10 @@ class Settings extends BaseAdmin
                 switch ($gateway) {
 
                     case 'stripe':
-
                         $aRules['omnipay_' . $this->data['gateway_slug'] . '_publishableKey'] = 'xss_clean';
                         break;
 
                     case 'paypal_express':
-
                         //  Defining these here despite being default parameters to make them not required.
                         $aRules['omnipay_' . $this->data['gateway_slug'] . '_brandName']      = 'xss_clean';
                         $aRules['omnipay_' . $this->data['gateway_slug'] . '_headerImageUrl'] = 'xss_clean';
@@ -453,17 +454,18 @@ class Settings extends BaseAdmin
                     switch ($gateway) {
 
                         case 'stripe':
-
                             $settings_encrypted['omnipay_' . $this->data['gateway_slug'] . '_publishableKey'] = $this->input->post('omnipay_' . $this->data['gateway_slug'] . '_publishableKey');
                             break;
                     }
 
                     $this->db->trans_begin();
 
-                    $result           = $this->app_setting_model->set($settings, 'shop', null, false);
-                    $result_encrypted = $this->app_setting_model->set($settings_encrypted, 'shop', null, true);
+                    $oAppSettingModel = Factory::model('AppSetting');
 
-                    if ($this->db->trans_status() !== false && $result && $result_encrypted) {
+                    $bResult          = $oAppSettingModel->set($settings, 'shop', null, false);
+                    $bResultEncrypted = $oAppSettingModel->set($settings_encrypted, 'shop', null, true);
+
+                    if ($this->db->trans_status() !== false && $bResult && $bResultEncrypted) {
 
                         $this->db->trans_commit();
                         $this->data['success'] = '' . $this->data['gateway_name'] . ' Payment Gateway settings have been saved.';

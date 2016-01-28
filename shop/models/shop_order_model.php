@@ -1192,211 +1192,221 @@ class NAILS_Shop_order_model extends NAILS_Model
     /**
      * Formats a single object
      *
-     * @param  object $obj      A reference to the object being formatted.
-     * @param  array  $data     The same data array which is passed to _getcount_common, for reference if needed
-     * @param  array  $integers Fields which should be cast as integers if numerical
-     * @param  array  $bools    Fields which should be cast as booleans
+     * The getAll() method iterates over each returned item with this method so as to
+     * correctly format the output. Use this to cast integers and booleans and/or organise data into objects.
+     *
+     * @param  object $oObj      A reference to the object being formatted.
+     * @param  array  $aData     The same data array which is passed to _getcount_common, for reference if needed
+     * @param  array  $aIntegers Fields which should be cast as integers if numerical and not null
+     * @param  array  $aBools    Fields which should be cast as booleans if not null
+     * @param  array  $aFloats   Fields which should be cast as floats if not null
      * @return void
      */
-    protected function formatObject(&$obj, $data = array(), $integers = array(), $bools = array())
-    {
-        parent::formatObject($obj, $data, $integers, $bools);
+    protected function formatObject(
+        &$oObj,
+        $aData = array(),
+        $aIntegers = array(),
+        $aBools = array(),
+        $aFloats = array()
+    ) {
+
+        parent::formatObject($oObj, $aData, $aIntegers, $aBools, $aFloats);
 
         //  Shipping
-        $obj->requires_shipping = (bool) $obj->requires_shipping;
+        $oObj->requires_shipping = (bool) $oObj->requires_shipping;
 
         $this->load->model('shop/shop_shipping_driver_model');
-        $obj->shipping_option = $this->shop_shipping_driver_model->getOption($obj->delivery_option);
+        $oObj->shipping_option = $this->shop_shipping_driver_model->getOption($oObj->delivery_option);
 
         //  User
-        $obj->user     = new \stdClass();
-        $obj->user->id = $obj->user_id;
+        $oObj->user     = new \stdClass();
+        $oObj->user->id = $oObj->user_id;
 
-        if ($obj->user_email) {
+        if ($oObj->user_email) {
 
-            $obj->user->email = $obj->user_email;
-
-        } else {
-
-            $obj->user->email = $obj->email;
-        }
-
-        if ($obj->user_first_name) {
-
-            $obj->user->first_name = $obj->user_first_name;
+            $oObj->user->email = $oObj->user_email;
 
         } else {
 
-            $obj->user->first_name = $obj->first_name;
-
+            $oObj->user->email = $oObj->email;
         }
 
-        if ($obj->user_last_name) {
+        if ($oObj->user_first_name) {
 
-            $obj->user->last_name = $obj->user_last_name;
+            $oObj->user->first_name = $oObj->user_first_name;
 
         } else {
 
-            $obj->user->last_name = $obj->last_name;
+            $oObj->user->first_name = $oObj->first_name;
+
         }
 
-        $obj->user->telephone   = $obj->user_telephone;
-        $obj->user->gender      = $obj->gender;
-        $obj->user->profile_img = $obj->profile_img;
+        if ($oObj->user_last_name) {
 
-        $obj->user->group        = new \stdClass();
-        $obj->user->group->id    = $obj->user_group_id;
-        $obj->user->group->label = $obj->user_group_label;
+            $oObj->user->last_name = $oObj->user_last_name;
 
-        unset($obj->user_id);
-        unset($obj->user_email);
-        unset($obj->user_first_name);
-        unset($obj->user_last_name);
-        unset($obj->user_telephone);
-        unset($obj->email);
-        unset($obj->first_name);
-        unset($obj->last_name);
-        unset($obj->gender);
-        unset($obj->profile_img);
-        unset($obj->user_group_id);
-        unset($obj->user_group_label);
+        } else {
+
+            $oObj->user->last_name = $oObj->last_name;
+        }
+
+        $oObj->user->telephone   = $oObj->user_telephone;
+        $oObj->user->gender      = $oObj->gender;
+        $oObj->user->profile_img = $oObj->profile_img;
+
+        $oObj->user->group        = new \stdClass();
+        $oObj->user->group->id    = $oObj->user_group_id;
+        $oObj->user->group->label = $oObj->user_group_label;
+
+        unset($oObj->user_id);
+        unset($oObj->user_email);
+        unset($oObj->user_first_name);
+        unset($oObj->user_last_name);
+        unset($oObj->user_telephone);
+        unset($oObj->email);
+        unset($oObj->first_name);
+        unset($oObj->last_name);
+        unset($oObj->gender);
+        unset($oObj->profile_img);
+        unset($oObj->user_group_id);
+        unset($oObj->user_group_label);
 
         // --------------------------------------------------------------------------
 
         //  Totals
-        $obj->totals = new \stdClass();
+        $oObj->totals = new \stdClass();
 
-        $obj->totals->base                    = new \stdClass();
-        $obj->totals->base->item              = (int) $obj->total_base_item;
-        $obj->totals->base->item_discount     = (int) $obj->total_base_item_discount;
-        $obj->totals->base->shipping          = (int) $obj->total_base_shipping;
-        $obj->totals->base->shipping_discount = (int) $obj->total_base_shipping_discount;
-        $obj->totals->base->tax               = (int) $obj->total_base_tax;
-        $obj->totals->base->tax_discount      = (int) $obj->total_base_tax_discount;
-        $obj->totals->base->grand             = (int) $obj->total_base_grand;
-        $obj->totals->base->grand_discount    = (int) $obj->total_base_grand_discount;
+        $oObj->totals->base                    = new \stdClass();
+        $oObj->totals->base->item              = (int) $oObj->total_base_item;
+        $oObj->totals->base->item_discount     = (int) $oObj->total_base_item_discount;
+        $oObj->totals->base->shipping          = (int) $oObj->total_base_shipping;
+        $oObj->totals->base->shipping_discount = (int) $oObj->total_base_shipping_discount;
+        $oObj->totals->base->tax               = (int) $oObj->total_base_tax;
+        $oObj->totals->base->tax_discount      = (int) $oObj->total_base_tax_discount;
+        $oObj->totals->base->grand             = (int) $oObj->total_base_grand;
+        $oObj->totals->base->grand_discount    = (int) $oObj->total_base_grand_discount;
 
-        $obj->totals->base_formatted                    = new \stdClass();
-        $obj->totals->base_formatted->item              = $this->oCurrencyModel->formatBase($obj->totals->base->item);
-        $obj->totals->base_formatted->item_discount     = $this->oCurrencyModel->formatBase($obj->totals->base->item_discount);
-        $obj->totals->base_formatted->shipping          = $this->oCurrencyModel->formatBase($obj->totals->base->shipping);
-        $obj->totals->base_formatted->shipping_discount = $this->oCurrencyModel->formatBase($obj->totals->base->shipping_discount);
-        $obj->totals->base_formatted->tax               = $this->oCurrencyModel->formatBase($obj->totals->base->tax);
-        $obj->totals->base_formatted->tax_discount      = $this->oCurrencyModel->formatBase($obj->totals->base->tax_discount);
-        $obj->totals->base_formatted->grand             = $this->oCurrencyModel->formatBase($obj->totals->base->grand);
-        $obj->totals->base_formatted->grand_discount    = $this->oCurrencyModel->formatBase($obj->totals->base->grand_discount);
+        $oObj->totals->base_formatted                    = new \stdClass();
+        $oObj->totals->base_formatted->item              = $this->oCurrencyModel->formatBase($oObj->totals->base->item);
+        $oObj->totals->base_formatted->item_discount     = $this->oCurrencyModel->formatBase($oObj->totals->base->item_discount);
+        $oObj->totals->base_formatted->shipping          = $this->oCurrencyModel->formatBase($oObj->totals->base->shipping);
+        $oObj->totals->base_formatted->shipping_discount = $this->oCurrencyModel->formatBase($oObj->totals->base->shipping_discount);
+        $oObj->totals->base_formatted->tax               = $this->oCurrencyModel->formatBase($oObj->totals->base->tax);
+        $oObj->totals->base_formatted->tax_discount      = $this->oCurrencyModel->formatBase($oObj->totals->base->tax_discount);
+        $oObj->totals->base_formatted->grand             = $this->oCurrencyModel->formatBase($oObj->totals->base->grand);
+        $oObj->totals->base_formatted->grand_discount    = $this->oCurrencyModel->formatBase($oObj->totals->base->grand_discount);
 
-        $obj->totals->user                    = new \stdClass();
-        $obj->totals->user->item              = (int) $obj->total_user_item;
-        $obj->totals->user->item_discount     = (int) $obj->total_user_item_discount;
-        $obj->totals->user->shipping          = (int) $obj->total_user_shipping;
-        $obj->totals->user->shipping_discount = (int) $obj->total_user_shipping_discount;
-        $obj->totals->user->tax               = (int) $obj->total_user_tax;
-        $obj->totals->user->tax_discount      = (int) $obj->total_user_tax_discount;
-        $obj->totals->user->grand             = (int) $obj->total_user_grand;
-        $obj->totals->user->grand_discount    = (int) $obj->total_user_grand_discount;
+        $oObj->totals->user                    = new \stdClass();
+        $oObj->totals->user->item              = (int) $oObj->total_user_item;
+        $oObj->totals->user->item_discount     = (int) $oObj->total_user_item_discount;
+        $oObj->totals->user->shipping          = (int) $oObj->total_user_shipping;
+        $oObj->totals->user->shipping_discount = (int) $oObj->total_user_shipping_discount;
+        $oObj->totals->user->tax               = (int) $oObj->total_user_tax;
+        $oObj->totals->user->tax_discount      = (int) $oObj->total_user_tax_discount;
+        $oObj->totals->user->grand             = (int) $oObj->total_user_grand;
+        $oObj->totals->user->grand_discount    = (int) $oObj->total_user_grand_discount;
 
-        $obj->totals->user_formatted                    = new \stdClass();
-        $obj->totals->user_formatted->item              = $this->oCurrencyModel->formatUSer($obj->totals->user->item);
-        $obj->totals->user_formatted->item_discount     = $this->oCurrencyModel->formatUSer($obj->totals->user->item_discount);
-        $obj->totals->user_formatted->shipping          = $this->oCurrencyModel->formatUSer($obj->totals->user->shipping);
-        $obj->totals->user_formatted->shipping_discount = $this->oCurrencyModel->formatUSer($obj->totals->user->shipping_discount);
-        $obj->totals->user_formatted->tax               = $this->oCurrencyModel->formatUSer($obj->totals->user->tax);
-        $obj->totals->user_formatted->tax_discount      = $this->oCurrencyModel->formatUSer($obj->totals->user->tax_discount);
-        $obj->totals->user_formatted->grand             = $this->oCurrencyModel->formatUSer($obj->totals->user->grand);
-        $obj->totals->user_formatted->grand_discount    = $this->oCurrencyModel->formatUSer($obj->totals->user->grand_discount);
+        $oObj->totals->user_formatted                    = new \stdClass();
+        $oObj->totals->user_formatted->item              = $this->oCurrencyModel->formatUser($oObj->totals->user->item);
+        $oObj->totals->user_formatted->item_discount     = $this->oCurrencyModel->formatUser($oObj->totals->user->item_discount);
+        $oObj->totals->user_formatted->shipping          = $this->oCurrencyModel->formatUser($oObj->totals->user->shipping);
+        $oObj->totals->user_formatted->shipping_discount = $this->oCurrencyModel->formatUser($oObj->totals->user->shipping_discount);
+        $oObj->totals->user_formatted->tax               = $this->oCurrencyModel->formatUser($oObj->totals->user->tax);
+        $oObj->totals->user_formatted->tax_discount      = $this->oCurrencyModel->formatUser($oObj->totals->user->tax_discount);
+        $oObj->totals->user_formatted->grand             = $this->oCurrencyModel->formatUser($oObj->totals->user->grand);
+        $oObj->totals->user_formatted->grand_discount    = $this->oCurrencyModel->formatUser($oObj->totals->user->grand_discount);
 
-        unset($obj->total_base_item);
-        unset($obj->total_base_item_discount);
-        unset($obj->total_base_shipping);
-        unset($obj->total_base_shipping_discount);
-        unset($obj->total_base_tax);
-        unset($obj->total_base_tax_discount);
-        unset($obj->total_base_grand);
-        unset($obj->total_base_grand_discount);
-        unset($obj->total_user_item);
-        unset($obj->total_user_item_discount);
-        unset($obj->total_user_shipping);
-        unset($obj->total_user_shipping_discount);
-        unset($obj->total_user_tax);
-        unset($obj->total_user_tax_discount);
-        unset($obj->total_user_grand);
-        unset($obj->total_user_grand_discount);
+        unset($oObj->total_base_item);
+        unset($oObj->total_base_item_discount);
+        unset($oObj->total_base_shipping);
+        unset($oObj->total_base_shipping_discount);
+        unset($oObj->total_base_tax);
+        unset($oObj->total_base_tax_discount);
+        unset($oObj->total_base_grand);
+        unset($oObj->total_base_grand_discount);
+        unset($oObj->total_user_item);
+        unset($oObj->total_user_item_discount);
+        unset($oObj->total_user_shipping);
+        unset($oObj->total_user_shipping_discount);
+        unset($oObj->total_user_tax);
+        unset($oObj->total_user_tax_discount);
+        unset($oObj->total_user_grand);
+        unset($oObj->total_user_grand_discount);
 
         // --------------------------------------------------------------------------
 
         //  Shipping details
-        $obj->shipping_address           = new \stdClass();
-        $obj->shipping_address->line_1   = $obj->shipping_line_1;
-        $obj->shipping_address->line_2   = $obj->shipping_line_2;
-        $obj->shipping_address->town     = $obj->shipping_town;
-        $obj->shipping_address->state    = $obj->shipping_state;
-        $obj->shipping_address->postcode = $obj->shipping_postcode;
-        $obj->shipping_address->country  = $this->oCountryModel->getByCode($obj->shipping_country);
+        $oObj->shipping_address           = new \stdClass();
+        $oObj->shipping_address->line_1   = $oObj->shipping_line_1;
+        $oObj->shipping_address->line_2   = $oObj->shipping_line_2;
+        $oObj->shipping_address->town     = $oObj->shipping_town;
+        $oObj->shipping_address->state    = $oObj->shipping_state;
+        $oObj->shipping_address->postcode = $oObj->shipping_postcode;
+        $oObj->shipping_address->country  = $this->oCountryModel->getByCode($oObj->shipping_country);
 
-        unset($obj->shipping_line_1);
-        unset($obj->shipping_line_2);
-        unset($obj->shipping_town);
-        unset($obj->shipping_state);
-        unset($obj->shipping_postcode);
-        unset($obj->shipping_country);
+        unset($oObj->shipping_line_1);
+        unset($oObj->shipping_line_2);
+        unset($oObj->shipping_town);
+        unset($oObj->shipping_state);
+        unset($oObj->shipping_postcode);
+        unset($oObj->shipping_country);
 
-        $obj->billing_address           = new \stdClass();
-        $obj->billing_address->line_1   = $obj->billing_line_1;
-        $obj->billing_address->line_2   = $obj->billing_line_2;
-        $obj->billing_address->town     = $obj->billing_town;
-        $obj->billing_address->state    = $obj->billing_state;
-        $obj->billing_address->postcode = $obj->billing_postcode;
-        $obj->billing_address->country  = $this->oCountryModel->getByCode($obj->billing_country);
+        $oObj->billing_address           = new \stdClass();
+        $oObj->billing_address->line_1   = $oObj->billing_line_1;
+        $oObj->billing_address->line_2   = $oObj->billing_line_2;
+        $oObj->billing_address->town     = $oObj->billing_town;
+        $oObj->billing_address->state    = $oObj->billing_state;
+        $oObj->billing_address->postcode = $oObj->billing_postcode;
+        $oObj->billing_address->country  = $this->oCountryModel->getByCode($oObj->billing_country);
 
-        unset($obj->billing_line_1);
-        unset($obj->billing_line_2);
-        unset($obj->billing_town);
-        unset($obj->billing_state);
-        unset($obj->billing_postcode);
-        unset($obj->billing_country);
+        unset($oObj->billing_line_1);
+        unset($oObj->billing_line_2);
+        unset($oObj->billing_town);
+        unset($oObj->billing_state);
+        unset($oObj->billing_postcode);
+        unset($oObj->billing_country);
 
         // --------------------------------------------------------------------------
 
         //  Vouchers
-        if ($obj->voucher_id) {
+        if ($oObj->voucher_id) {
 
-            $obj->voucher                       = new \stdClass();
-            $obj->voucher->id                   = (int) $obj->voucher_id;
-            $obj->voucher->code                 = $obj->v_code;
-            $obj->voucher->label                = $obj->v_label;
-            $obj->voucher->type                 = $obj->v_type;
-            $obj->voucher->discount_type        = $obj->v_discount_type;
-            $obj->voucher->discount_value       = (int) $obj->v_discount_value;
-            $obj->voucher->discount_application = $obj->v_discount_application;
-            $obj->voucher->product_type_id      = (int) $obj->v_product_type_id;
-            $obj->voucher->valid_from           = $obj->v_valid_from;
-            $obj->voucher->valid_to             = $obj->v_valid_to;
-            $obj->voucher->is_active            = (bool) $obj->v_is_active;
-            $obj->voucher->is_deleted           = (bool) $obj->v_is_deleted;
+            $oObj->voucher                       = new \stdClass();
+            $oObj->voucher->id                   = (int) $oObj->voucher_id;
+            $oObj->voucher->code                 = $oObj->v_code;
+            $oObj->voucher->label                = $oObj->v_label;
+            $oObj->voucher->type                 = $oObj->v_type;
+            $oObj->voucher->discount_type        = $oObj->v_discount_type;
+            $oObj->voucher->discount_value       = (int) $oObj->v_discount_value;
+            $oObj->voucher->discount_application = $oObj->v_discount_application;
+            $oObj->voucher->product_type_id      = (int) $oObj->v_product_type_id;
+            $oObj->voucher->valid_from           = $oObj->v_valid_from;
+            $oObj->voucher->valid_to             = $oObj->v_valid_to;
+            $oObj->voucher->is_active            = (bool) $oObj->v_is_active;
+            $oObj->voucher->is_deleted           = (bool) $oObj->v_is_deleted;
 
         } else {
 
-            $obj->voucher = false;
+            $oObj->voucher = false;
         }
 
-        unset($obj->voucher_id);
-        unset($obj->v_code);
-        unset($obj->v_label);
-        unset($obj->v_type);
-        unset($obj->v_discount_type);
-        unset($obj->v_discount_value);
-        unset($obj->v_discount_application);
-        unset($obj->v_product_type_id);
-        unset($obj->v_valid_from);
-        unset($obj->v_valid_to);
-        unset($obj->v_is_active);
-        unset($obj->v_is_deleted);
+        unset($oObj->voucher_id);
+        unset($oObj->v_code);
+        unset($oObj->v_label);
+        unset($oObj->v_type);
+        unset($oObj->v_discount_type);
+        unset($oObj->v_discount_value);
+        unset($oObj->v_discount_application);
+        unset($oObj->v_product_type_id);
+        unset($oObj->v_valid_from);
+        unset($oObj->v_valid_to);
+        unset($oObj->v_is_active);
+        unset($oObj->v_is_deleted);
 
         // --------------------------------------------------------------------------
 
         //  Items
-        $obj->items = $this->getItemsForOrder($obj->id);
+        $oObj->items = $this->getItemsForOrder($oObj->id);
     }
 
     // --------------------------------------------------------------------------
