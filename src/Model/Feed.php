@@ -16,6 +16,10 @@ use Nails\Common\Model\BaseDriver;
 
 class Feed extends BaseDriver
 {
+    use \Nails\Common\Traits\ErrorHandling;
+
+    // --------------------------------------------------------------------------
+
     protected $sModule         = 'nailsapp/module-shop';
     protected $sType           = 'feed';
     protected $sEnabledSetting = 'enabled_feed_drivers';
