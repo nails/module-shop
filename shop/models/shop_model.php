@@ -11,10 +11,13 @@
  */
 
 use Nails\Factory;
-use Nails\Common\Model\Base;
 
-class NAILS_Shop_model extends Base
+class Shop_model
 {
+    use \Nails\Common\Traits\Caching;
+
+    // --------------------------------------------------------------------------
+
     protected $oUser;
     protected $oUserMeta;
     protected $oCurrency;
@@ -29,10 +32,6 @@ class NAILS_Shop_model extends Base
      */
     public function __construct($config = array())
     {
-        parent::__construct();
-
-        // --------------------------------------------------------------------------
-
         $this->oUser     = Factory::model('User', 'nailsapp/module-auth');
         $this->oUserMeta = Factory::model('UserMeta', 'nailsapp/module-auth');
         $this->oCurrency = Factory::model('Currency', 'nailsapp/module-shop');
@@ -80,10 +79,10 @@ class NAILS_Shop_model extends Base
         }
 
         //  User's preferred currency
-        if ($this->session->userdata('shop_currency')) {
+        if (get_instance()->session->userdata('shop_currency')) {
 
             //  Use the currency defined in the session
-            $currencyCode = $this->session->userdata('shop_currency');
+            $currencyCode = get_instance()->session->userdata('shop_currency');
 
         } else {
 
@@ -134,7 +133,7 @@ class NAILS_Shop_model extends Base
             //  Save to session
             if (!headers_sent()) {
 
-                $this->session->set_userdata('shop_currency', $currencyCode);
+                get_instance()->session->set_userdata('shop_currency', $currencyCode);
             }
         }
 
@@ -148,7 +147,7 @@ class NAILS_Shop_model extends Base
 
             if (!headers_sent()) {
 
-                $this->session->unset_userdata('shop_currency', $currencyCode);
+                get_instance()->session->unset_userdata('shop_currency', $currencyCode);
             }
 
             if ($this->oUser->isLoggedIn()) {
@@ -259,38 +258,5 @@ class NAILS_Shop_model extends Base
     public function getShopName()
     {
         return appSetting('name', 'shop') ? appSetting('name', 'shop') : 'Shop';
-    }
-}
-
-// --------------------------------------------------------------------------
-
-/**
- * OVERLOADING NAILS' MODELS
- *
- * The following block of code makes it simple to extend one of the core shop
- * models. Some might argue it's a little hacky but it's a simple 'fix'
- * which negates the need to massively extend the CodeIgniter Loader class
- * even further (in all honesty I just can't face understanding the whole
- * Loader class well enough to change it 'properly').
- *
- * Here's how it works:
- *
- * CodeIgniter instantiate a class with the same name as the file, therefore
- * when we try to extend the parent class we get 'cannot redeclare class X' errors
- * and if we call our overloading class something else it will never get instantiated.
- *
- * We solve this by prefixing the main class with NAILS_ and then conditionally
- * declaring this helper class below; the helper gets instantiated et voila.
- *
- * If/when we want to extend the main class we simply define NAILS_ALLOW_EXTENSION
- * before including this PHP file and extend as normal (i.e in the same way as below);
- * the helper won't be declared so we can declare our own one, app specific.
- *
- **/
-
-if (!defined('NAILS_ALLOW_EXTENSION_SHOP_MODEL')) {
-
-    class Shop_model extends NAILS_Shop_model
-    {
     }
 }

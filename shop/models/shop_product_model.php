@@ -14,7 +14,7 @@ use Nails\Factory;
 use Nails\Common\Model\Base;
 use Nails\Common\Exception\ModelException;
 
-class NAILS_Shop_product_model extends Base
+class Shop_product_model extends Base
 {
     protected $oUser;
     protected $oUserMeta;
@@ -284,7 +284,6 @@ class NAILS_Shop_product_model extends Base
             switch ($stockStatus) {
 
                 case 'IN_STOCK' :
-
                     $available = trim($v['quantity_available']);
 
                     if ($v['quantity_available'] === '') {
@@ -300,7 +299,6 @@ class NAILS_Shop_product_model extends Base
                     break;
 
                 case 'OUT_OF_STOCK' :
-
                     //  Shhh, be vewy qwiet, we're huntin' wabbits.
                     $_data->variation[$index]->quantity_available = 0;
                     $_data->variation[$index]->lead_time          = null;
@@ -328,12 +326,10 @@ class NAILS_Shop_product_model extends Base
             switch ($_data->variation[$index]->out_of_stock_behaviour) {
 
                 case 'TO_ORDER' :
-
                     $_data->variation[$index]->out_of_stock_to_order_lead_time = isset($v['out_of_stock_to_order_lead_time']) ? $v['out_of_stock_to_order_lead_time'] : null;
                     break;
 
                 case 'OUT_OF_STOCK' :
-
                     //  Shhh, be vewy qwiet, we're huntin' wabbits.
                     $_data->variation[$index]->out_of_stock_to_order_lead_time = null;
                     break;
@@ -637,7 +633,6 @@ class NAILS_Shop_product_model extends Base
                 switch ($field) {
 
                     case 'attribute_id':
-
                         foreach ($items as $item) {
 
                             $temp[] = array(
@@ -649,7 +644,6 @@ class NAILS_Shop_product_model extends Base
                         break;
 
                     case 'object_id':
-
                         $counter = 0;
                         foreach ($items as $item_id) {
 
@@ -663,7 +657,6 @@ class NAILS_Shop_product_model extends Base
                         break;
 
                     default:
-
                         foreach ($items as $item_id) {
 
                             $temp[] = array(
@@ -2651,7 +2644,6 @@ class NAILS_Shop_product_model extends Base
             switch ($variation->out_of_stock_behaviour) {
 
                 case 'TO_ORDER':
-
                     //  Set the original values, in case they're needed
                     $variation->stock_status_original = $variation->stock_status;
                     $variation->lead_time_original    = $variation->lead_time;
@@ -2672,7 +2664,6 @@ class NAILS_Shop_product_model extends Base
 
                 case 'OUT_OF_STOCK':
                 default:
-
                     //  Nothing to do.
                     break;
             }
@@ -2680,38 +2671,5 @@ class NAILS_Shop_product_model extends Base
             unset($variation->out_of_stock_behaviour);
             unset($variation->out_of_stock_to_order_lead_time);
         }
-    }
-}
-
-// --------------------------------------------------------------------------
-
-/**
- * OVERLOADING NAILS' MODELS
- *
- * The following block of code makes it simple to extend one of the core shop
- * models. Some might argue it's a little hacky but it's a simple 'fix'
- * which negates the need to massively extend the CodeIgniter Loader class
- * even further (in all honesty I just can't face understanding the whole
- * Loader class well enough to change it 'properly').
- *
- * Here's how it works:
- *
- * CodeIgniter instantiate a class with the same name as the file, therefore
- * when we try to extend the parent class we get 'cannot redeclare class X' errors
- * and if we call our overloading class something else it will never get instantiated.
- *
- * We solve this by prefixing the main class with NAILS_ and then conditionally
- * declaring this helper class below; the helper gets instantiated et voila.
- *
- * If/when we want to extend the main class we simply define NAILS_ALLOW_EXTENSION
- * before including this PHP file and extend as normal (i.e in the same way as below);
- * the helper won't be declared so we can declare our own one, app specific.
- *
- **/
-
-if (!defined('NAILS_ALLOW_EXTENSION_SHOP_PRODUCT_MODEL')) {
-
-    class Shop_product_model extends NAILS_Shop_product_model
-    {
     }
 }

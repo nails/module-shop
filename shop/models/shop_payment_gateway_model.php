@@ -16,8 +16,12 @@ use Omnipay\Common;
 use Omnipay\Common\CreditCard;
 use Omnipay\Omnipay;
 
-class NAILS_Shop_payment_gateway_model extends NAILS_Model
+class Shop_payment_gateway_model
 {
+    use \Nails\Common\Traits\ErrorHandling;
+
+    // --------------------------------------------------------------------------
+
     protected $supported;
     protected $isRedirect;
     protected $checkoutSessionKey;
@@ -31,10 +35,6 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
      */
     public function __construct()
     {
-        parent::__construct();
-
-        // --------------------------------------------------------------------------
-
         /**
          * An array of gateways supported by Nails.
          * ========================================
@@ -128,7 +128,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         foreach ($enabledPaymentGateways as $pg) {
 
             $temp              = new \stdClass();
-            $temp->slug        = $this->shop_payment_gateway_model->getCorrectCasing($pg);
+            $temp->slug        = $this->getCorrectCasing($pg);
             $temp->label       = appSetting('omnipay_' . $temp->slug . '_customise_label', 'shop');
             $temp->img         = appSetting('omnipay_' . $temp->slug . '_customise_img', 'shop');
             $temp->is_redirect = $this->isRedirect($pg);
@@ -272,9 +272,9 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
             return false;
         }
 
-        $this->load->model('shop/shop_model');
-        $this->load->model('shop/shop_order_model');
-        $order = $this->shop_order_model->getById($orderId);
+        get_instance()->load->model('shop/shop_model');
+        get_instance()->load->model('shop/shop_order_model');
+        $order = get_instance()->shop_order_model->getById($orderId);
 
         if (!$order || $order->status != 'UNPAID') {
 
@@ -327,7 +327,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         $data['card']          = $creditCard;
         $data['transactionId'] = $order->id;
         $data['description']   = 'Payment for Order: ' . $order->ref;
-        $data['clientIp']      = $this->input->ipAddress();
+        $data['clientIp']      = get_instance()->input->ipAddress();
 
         //  Set the relevant URLs
         $shopUrl = appSetting('url', 'shop') ? appSetting('url', 'shop') : 'shop/';
@@ -353,12 +353,12 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
             if ($gatewayResponse->isSuccessful()) {
 
                 //  Payment was successful - add the payment to the order and process if required
-                $this->load->model('shop/shop_order_payment_model');
+                get_instance()->load->model('shop/shop_order_payment_model');
 
                 $transactionId = $gatewayResponse->getTransactionReference();
 
                 //  First, check we've not already handled this payment. This should NOT happen.
-                $payment = $this->shop_order_payment_model->getByTransactionId($transactionId, $gatewayName);
+                $payment = get_instance()->shop_order_payment_model->getByTransactionId($transactionId, $gatewayName);
 
                 if ($payment) {
 
@@ -384,14 +384,14 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
                 $data['transaction_id']  = $paymentData['transaction_id'];
                 $data['amount']          = $paymentData['amount'];
                 $data['currency']        = $paymentData['currency'];
-                $data['raw_get']         = $this->input->server('QUERY_STRING');
+                $data['raw_get']         = get_instance()->input->server('QUERY_STRING');
                 $data['raw_post']        = @file_get_contents('php://input');
 
-                if (!$this->shop_order_payment_model->create($data)) {
+                if (!get_instance()->shop_order_payment_model->create($data)) {
 
                     $subject  = 'Failed to create payment reference against order ' . $order->id;
                     $message  = 'The customer was charged but the payment failed to associate with the order. ';
-                    $message .= $this->shop_order_payment_model->lastError();
+                    $message .= get_instance()->shop_order_payment_model->lastError();
                     showFatalError(
                         $subject,
                         $message
@@ -401,9 +401,9 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
                 // --------------------------------------------------------------------------
 
                 //  Update order
-                if ($this->shop_order_payment_model->isOrderPaid($order->id)) {
+                if (get_instance()->shop_order_payment_model->isOrderPaid($order->id)) {
 
-                    if (!$this->shop_order_model->paid($order->id)) {
+                    if (!get_instance()->shop_order_model->paid($order->id)) {
 
                         $subject = 'Failed to mark order #' . $order->id . ' as paid';
                         $message = 'The transaction for this order was successfull, but I was unable to mark the order as paid.';
@@ -413,7 +413,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
                     // --------------------------------------------------------------------------
 
                     //  Process the order, i.e do any after sales stuff which needs done immediately
-                    if (!$this->shop_order_model->process($order->id)) {
+                    if (!get_instance()->shop_order_model->process($order->id)) {
 
                         $subject = 'Failed to process order #' . $order->id . ' as paid';
                         $message = 'The transaction for this order was successfull, but I was unable to process the order.';
@@ -423,16 +423,16 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
                     // --------------------------------------------------------------------------
 
                     //  Send notifications to manager(s) and customer
-                    $this->shop_order_model->sendOrderNotification($order->id, $paymentData, false);
-                    $this->shop_order_model->sendReceipt($order->id, $paymentData, false);
+                    get_instance()->shop_order_model->sendOrderNotification($order->id, $paymentData, false);
+                    get_instance()->shop_order_model->sendReceipt($order->id, $paymentData, false);
 
                 } else {
 
                     $this->oLogger->line('Order is partially paid.');
 
                     //  Send notifications to manager(s) and customer
-                    $this->shop_order_model->sendOrderNotification($order->id, $paymentData, true);
-                    $this->shop_order_model->sendReceipt($order->id, $paymentData, true);
+                    get_instance()->shop_order_model->sendOrderNotification($order->id, $paymentData, true);
+                    get_instance()->shop_order_model->sendReceipt($order->id, $paymentData, true);
                 }
 
                 return true;
@@ -586,9 +586,9 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Verify order exists
-        $this->load->model('shop/shop_model');
-        $this->load->model('shop/shop_order_model');
-        $order = $this->shop_order_model->getById($paymentData['order_id']);
+        get_instance()->load->model('shop/shop_model');
+        get_instance()->load->model('shop/shop_order_model');
+        $order = get_instance()->shop_order_model->getById($paymentData['order_id']);
 
         if (!$order) {
 
@@ -648,10 +648,10 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         $data['transaction_id']  = $gatewayResponse->getTransactionReference();
         $data['amount']          = $paymentData['amount'];
         $data['currency']        = $paymentData['currency'];
-        $data['raw_get']         = $this->input->server('QUERY_STRING');
+        $data['raw_get']         = get_instance()->input->server('QUERY_STRING');
         $data['raw_post']        = @file_get_contents('php://input');
 
-        $this->load->model('shop/shop_order_payment_model');
+        get_instance()->load->model('shop/shop_order_payment_model');
 
         //  First check if this transaction has been dealt with before
         if (empty($data['transaction_id'])) {
@@ -666,7 +666,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
             $this->oLogger->line('Payment Transaction ID: #' . $paymentData['transaction_id']);
         }
 
-        $payment = $this->shop_order_payment_model->getByTransactionId($data['transaction_id'], $gatewayName);
+        $payment = get_instance()->shop_order_payment_model->getByTransactionId($data['transaction_id'], $gatewayName);
 
         if ($payment) {
 
@@ -676,9 +676,9 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
             return false;
         }
 
-        if (!$this->shop_order_payment_model->create($data)) {
+        if (!get_instance()->shop_order_payment_model->create($data)) {
 
-            $error = 'Failed to create payment reference. ' . $this->shop_order_payment_model->lastError();
+            $error = 'Failed to create payment reference. ' . get_instance()->shop_order_payment_model->lastError();
             $this->oLogger->line($error);
             $this->setError($error);
             return false;
@@ -687,11 +687,11 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         //  Update order
-        if ($this->shop_order_payment_model->isOrderPaid($order->id)) {
+        if (get_instance()->shop_order_payment_model->isOrderPaid($order->id)) {
 
             $this->oLogger->line('Order is completely paid.');
 
-            if (!$this->shop_order_model->paid($order->id)) {
+            if (!get_instance()->shop_order_model->paid($order->id)) {
 
                 $error = 'Failed to mark order #' . $order->id . ' as PAID.';
                 $this->oLogger->line($error);
@@ -706,7 +706,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
             // --------------------------------------------------------------------------
 
             //  Process the order, i.e do any after sales stuff which needs done immediately
-            if (!$this->shop_order_model->process($order->id)) {
+            if (!get_instance()->shop_order_model->process($order->id)) {
 
                 $error = 'Failed to process order #' . $order->id . '.';
                 $this->oLogger->line($error);
@@ -721,16 +721,16 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
             // --------------------------------------------------------------------------
 
             //  Send notifications to manager(s) and customer
-            $this->shop_order_model->sendOrderNotification($order->id, $paymentData, false);
-            $this->shop_order_model->sendReceipt($order->id, $paymentData, false);
+            get_instance()->shop_order_model->sendOrderNotification($order->id, $paymentData, false);
+            get_instance()->shop_order_model->sendReceipt($order->id, $paymentData, false);
 
         } else {
 
             $this->oLogger->line('Order is partially paid.');
 
             //  Send notifications to manager(s) and customer
-            $this->shop_order_model->sendOrderNotification($order->id, $paymentData, true);
-            $this->shop_order_model->sendReceipt($order->id, $paymentData, true);
+            get_instance()->shop_order_model->sendOrderNotification($order->id, $paymentData, true);
+            get_instance()->shop_order_model->sendReceipt($order->id, $paymentData, true);
         }
 
         return true;
@@ -787,7 +787,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
      */
     protected function prepareRequestStripe(&$data, $order)
     {
-        $data['token'] = $this->input->post('stripe_token');
+        $data['token'] = get_instance()->input->post('stripe_token');
     }
 
     // --------------------------------------------------------------------------
@@ -842,10 +842,10 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
     protected function extractPaymentDataWorldpay()
     {
         $out                   = array();
-        $out['order_id']       = (int) $this->input->post('cartId');
-        $out['transaction_id'] = $this->input->post('transId');
-        $out['currency']       = $this->input->post('currency');
-        $out['amount']         = $this->oCurrencyModel->floatToInt($this->input->post('amount'), $out['currency']);
+        $out['order_id']       = (int) get_instance()->input->post('cartId');
+        $out['transaction_id'] = get_instance()->input->post('transId');
+        $out['currency']       = get_instance()->input->post('currency');
+        $out['amount']         = $this->oCurrencyModel->floatToInt(get_instance()->input->post('amount'), $out['currency']);
 
         return $out;
     }
@@ -887,13 +887,13 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
         // --------------------------------------------------------------------------
 
         $hash = $orderId . ':' . $orderRef . ':' . $orderCode;
-        $hash = $this->encrypt->encode($hash, APP_PRIVATE_KEY);
+        $hash = get_instance()->encrypt->encode($hash, APP_PRIVATE_KEY);
 
         $session              = array();
         $session['hash']      = $hash;
         $session['signature'] = md5($hash . APP_PRIVATE_KEY);
 
-        $this->session->set_userdata($this->checkoutSessionKey, $session);
+        get_instance()->session->set_userdata($this->checkoutSessionKey, $session);
     }
 
     // --------------------------------------------------------------------------
@@ -904,7 +904,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
      */
     public function checkoutSessionClear()
     {
-        $this->session->unset_userdata($this->checkoutSessionKey);
+        get_instance()->session->unset_userdata($this->checkoutSessionKey);
     }
 
     // --------------------------------------------------------------------------
@@ -915,7 +915,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
      */
     public function checkoutSessionGet()
     {
-        $hash = $this->session->userdata($this->checkoutSessionKey);
+        $hash = get_instance()->session->userdata($this->checkoutSessionKey);
 
         if (is_array($hash)) {
 
@@ -923,7 +923,7 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
 
                 if ($hash['signature'] == md5($hash['hash'] . APP_PRIVATE_KEY)) {
 
-                    $hash = $this->encrypt->decode($hash['hash'], APP_PRIVATE_KEY);
+                    $hash = get_instance()->encrypt->decode($hash['hash'], APP_PRIVATE_KEY);
 
                     if (!empty($hash)) {
 
@@ -963,38 +963,5 @@ class NAILS_Shop_payment_gateway_model extends NAILS_Model
             $this->setError('Invalid session data. Error #1');
             return false;
         }
-    }
-}
-
-// --------------------------------------------------------------------------
-
-/**
- * OVERLOADING NAILS' MODELS
- *
- * The following block of code makes it simple to extend one of the core shop
- * models. Some might argue it's a little hacky but it's a simple 'fix'
- * which negates the need to massively extend the CodeIgniter Loader class
- * even further (in all honesty I just can't face understanding the whole
- * Loader class well enough to change it 'properly').
- *
- * Here's how it works:
- *
- * CodeIgniter instantiate a class with the same name as the file, therefore
- * when we try to extend the parent class we get 'cannot redeclare class X' errors
- * and if we call our overloading class something else it will never get instantiated.
- *
- * We solve this by prefixing the main class with NAILS_ and then conditionally
- * declaring this helper class below; the helper gets instantiated et voila.
- *
- * If/when we want to extend the main class we simply define NAILS_ALLOW_EXTENSION
- * before including this PHP file and extend as normal (i.e in the same way as below);
- * the helper won't be declared so we can declare our own one, app specific.
- *
- **/
-
-if (!defined('NAILS_ALLOW_EXTENSION_SHOP_PAYMENT_GATEWAY_MODEL')) {
-
-    class Shop_payment_gateway_model extends NAILS_Shop_payment_gateway_model
-    {
     }
 }

@@ -11,10 +11,14 @@
  */
 
 use Nails\Factory;
-use Nails\Common\Model\Base;
 
-class NAILS_Shop_basket_model extends Base
+class Shop_basket_model
 {
+    use \Nails\Common\Traits\ErrorHandling;
+    use \Nails\Common\Traits\Caching;
+
+    // --------------------------------------------------------------------------
+
     protected $oUser;
     protected $oUserMeta;
     protected $cacheKey;
@@ -32,10 +36,6 @@ class NAILS_Shop_basket_model extends Base
      */
     public function __construct()
     {
-        parent::__construct();
-
-        // --------------------------------------------------------------------------
-
         $this->oUser     = Factory::model('User', 'nailsapp/module-auth');
         $this->oUserMeta = Factory::model('UserMeta', 'nailsapp/module-auth');
 
@@ -51,7 +51,7 @@ class NAILS_Shop_basket_model extends Base
         $this->basket = $this->defaultBasket();
 
         //  Populate basket from session data?
-        $savedBasket = json_decode($this->session->userdata($this->sessVar));
+        $savedBasket = json_decode(get_instance()->session->userdata($this->sessVar));
 
         if (empty($savedBasket) && $this->oUser->isLoggedIn()) {
 
@@ -129,7 +129,7 @@ class NAILS_Shop_basket_model extends Base
         // --------------------------------------------------------------------------
 
         //  First loop through all the items and fetch product information
-        $this->load->model('shop/shop_product_model');
+        get_instance()->load->model('shop/shop_product_model');
         $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
 
         //  This variable will hold any keys which need to be unset
@@ -155,7 +155,7 @@ class NAILS_Shop_basket_model extends Base
             }
 
             //  Now get the product
-            $item->product = $this->shop_product_model->getById($item->product_id);
+            $item->product = get_instance()->shop_product_model->getById($item->product_id);
 
             if (!empty($item->product)) {
 
@@ -366,8 +366,8 @@ class NAILS_Shop_basket_model extends Base
         // --------------------------------------------------------------------------
 
         //  Calculate shipping costs
-        $this->load->model('shop/shop_shipping_driver_model');
-        $oShippingCosts = $this->shop_shipping_driver_model->calculate($basket);
+        get_instance()->load->model('shop/shop_shipping_driver_model');
+        $oShippingCosts = get_instance()->shop_shipping_driver_model->calculate($basket);
 
         $basket->totals->base->shipping = $oShippingCosts->base;
         $basket->totals->user->shipping = $oShippingCosts->user;
@@ -748,7 +748,7 @@ class NAILS_Shop_basket_model extends Base
 
         // --------------------------------------------------------------------------
 
-        $this->load->model('shop/shop_product_model');
+        get_instance()->load->model('shop/shop_product_model');
 
         //  Check if item is already in the basket.
         $key = $this->getBasketKeyByVariantId($variantId);
@@ -764,7 +764,7 @@ class NAILS_Shop_basket_model extends Base
         // --------------------------------------------------------------------------
 
         //  Check the product ID is valid
-        $_product = $this->shop_product_model->getByVariantId($variantId);
+        $_product = get_instance()->shop_product_model->getByVariantId($variantId);
 
         if (!$_product) {
 
@@ -907,7 +907,7 @@ class NAILS_Shop_basket_model extends Base
 
         if ($key !== false) {
 
-            $item = $this->shop_product_model->getByVariantId($variantId);
+            $item = get_instance()->shop_product_model->getByVariantId($variantId);
 
             if ($item) {
 
@@ -1455,8 +1455,7 @@ class NAILS_Shop_basket_model extends Base
     protected function saveSession()
     {
         if (!headers_sent()) {
-
-            $this->session->set_userdata($this->sessVar, $this->saveObject());
+            get_instance()->session->set_userdata($this->sessVar, $this->saveObject());
         }
     }
 
@@ -1665,8 +1664,8 @@ class NAILS_Shop_basket_model extends Base
      */
     protected function defaultShippingOption()
     {
-        $this->load->model('shop/shop_shipping_driver_model');
-        return $this->shop_shipping_driver_model->defaultOption();
+        get_instance()->load->model('shop/shop_shipping_driver_model');
+        return get_instance()->shop_shipping_driver_model->defaultOption();
     }
 
     // --------------------------------------------------------------------------
@@ -1702,38 +1701,5 @@ class NAILS_Shop_basket_model extends Base
     public function __destruct()
     {
         $this->saveUser();
-    }
-}
-
-// --------------------------------------------------------------------------
-
-/**
- * OVERLOADING NAILS' MODELS
- *
- * The following block of code makes it simple to extend one of the core shop
- * models. Some might argue it's a little hacky but it's a simple 'fix'
- * which negates the need to massively extend the CodeIgniter Loader class
- * even further (in all honesty I just can't face understanding the whole
- * Loader class well enough to change it 'properly').
- *
- * Here's how it works:
- *
- * CodeIgniter instantiate a class with the same name as the file, therefore
- * when we try to extend the parent class we get 'cannot redeclare class X' errors
- * and if we call our overloading class something else it will never get instantiated.
- *
- * We solve this by prefixing the main class with NAILS_ and then conditionally
- * declaring this helper class below; the helper gets instantiated et voila.
- *
- * If/when we want to extend the main class we simply define NAILS_ALLOW_EXTENSION
- * before including this PHP file and extend as normal (i.e in the same way as below);
- * the helper won't be declared so we can declare our own one, app specific.
- *
- **/
-
-if (!defined('NAILS_ALLOW_EXTENSION_SHOP_BASKET_MODEL')) {
-
-    class Shop_basket_model extends NAILS_Shop_basket_model
-    {
     }
 }

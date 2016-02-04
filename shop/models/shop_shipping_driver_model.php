@@ -7,13 +7,13 @@
  * @subpackage  module-shop
  * @category    Model
  * @author      Nails Dev Team
- * @link
+ * @todo use base driver implementation
  */
 
 use Nails\Factory;
 use Nails\Shop\Exception\ShippingDriverException;
 
-class NAILS_Shop_shipping_driver_model extends NAILS_Model
+class Shop_shipping_driver_model
 {
     protected $aAvailable;
     protected $oDriverConfig;
@@ -30,7 +30,6 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
      */
     public function __construct()
     {
-        parent::__construct();
         $this->aAvailable = _NAILS_GET_DRIVERS('nailsapp/module-shop', 'shipping');
 
         //  Load the active shipping driver
@@ -401,7 +400,7 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
         //  Check that we have a valid item
         //  @todo make this model a non-CI one when this line is replaced with a fatory call
-        $otItem = $this->shop_product_model->getByVariantId($iVariantId);
+        $otItem = get_instance()->shop_product_model->getByVariantId($iVariantId);
 
         /**
          * If for whatever reason we can't find the product, or it isn't physcal return
@@ -502,38 +501,5 @@ class NAILS_Shop_shipping_driver_model extends NAILS_Model
 
             return $oEmptyPromo;
         }
-    }
-}
-
-// --------------------------------------------------------------------------
-
-/**
- * OVERLOADING NAILS' MODELS
- *
- * The following block of code makes it simple to extend one of the core shop
- * models. Some might argue it's a little hacky but it's a simple 'fix'
- * which negates the need to massively extend the CodeIgniter Loader class
- * even further (in all honesty I just can't face understanding the whole
- * Loader class well enough to change it 'properly').
- *
- * Here's how it works:
- *
- * CodeIgniter instantiate a class with the same name as the file, therefore
- * when we try to extend the parent class we get 'cannot redeclare class X' errors
- * and if we call our overloading class something else it will never get instantiated.
- *
- * We solve this by prefixing the main class with NAILS_ and then conditionally
- * declaring this helper class below; the helper gets instantiated et voila.
- *
- * If/when we want to extend the main class we simply define NAILS_ALLOW_EXTENSION
- * before including this PHP file and extend as normal (i.e in the same way as below);
- * the helper won't be declared so we can declare our own one, app specific.
- *
- **/
-
-if (!defined('NAILS_ALLOW_EXTENSION_SHOP_SHIPPING_DRIVER_MODEL')) {
-
-    class Shop_shipping_driver_model extends NAILS_Shop_shipping_driver_model
-    {
     }
 }
