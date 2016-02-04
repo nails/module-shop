@@ -14,6 +14,11 @@ use Nails\Common\Model\Base;
 
 class Shop_product_type_meta_model extends Base
 {
+    protected $tableTaxonomy;
+    protected $tableTaxonomyPrefix;
+
+    // --------------------------------------------------------------------------
+
     /**
      * construct the model
      */
@@ -21,10 +26,10 @@ class Shop_product_type_meta_model extends Base
     {
         parent::__construct();
 
-        $this->table                 = NAILS_DB_PREFIX . 'shop_product_type_meta_field';
-        $this->tablePrefix          = 'ptmf';
-        $this->table_taxonomy        = NAILS_DB_PREFIX . 'shop_product_type_meta_taxonomy';
-        $this->table_taxonomy_prefix = 'ptmt';
+        $this->table               = NAILS_DB_PREFIX . 'shop_product_type_meta_field';
+        $this->tablePrefix         = 'ptmf';
+        $this->tableTaxonomy       = NAILS_DB_PREFIX . 'shop_product_type_meta_taxonomy';
+        $this->tableTaxonomyPrefix = 'ptmt';
     }
 
     // --------------------------------------------------------------------------
@@ -47,11 +52,11 @@ class Shop_product_type_meta_model extends Base
             if (isset($data['includeAssociatedProductTypes'])) {
 
                 $this->db->select('pt.id,pt.label');
-                $this->db->join(NAILS_DB_PREFIX . 'shop_product_type pt', 'pt.id = ' . $this->table_taxonomy_prefix . '.product_type_id');
+                $this->db->join(NAILS_DB_PREFIX . 'shop_product_type pt', 'pt.id = ' . $this->tableTaxonomyPrefix . '.product_type_id');
                 $this->db->group_by('pt.id');
                 $this->db->order_by('pt.label');
-                $this->db->where($this->table_taxonomy_prefix . '.meta_field_id', $field->id);
-                $field->associated_product_types = $this->db->get($this->table_taxonomy . ' ' . $this->table_taxonomy_prefix)->result();
+                $this->db->where($this->tableTaxonomyPrefix . '.meta_field_id', $field->id);
+                $field->associated_product_types = $this->db->get($this->tableTaxonomy . ' ' . $this->tableTaxonomyPrefix)->result();
             }
         }
 
@@ -109,7 +114,7 @@ class Shop_product_type_meta_model extends Base
      */
     public function getByProductTypeId($typeId)
     {
-        $this->db->where($this->table_taxonomy_prefix . '.product_type_id', $typeId);
+        $this->db->where($this->tableTaxonomyPrefix . '.product_type_id', $typeId);
         return $this->getByProductType();
     }
 
@@ -122,7 +127,7 @@ class Shop_product_type_meta_model extends Base
      */
     public function getByProductTypeIds($typeIds)
     {
-        $this->db->where_in($this->table_taxonomy_prefix . '.product_type_id', $typeIds);
+        $this->db->where_in($this->tableTaxonomyPrefix . '.product_type_id', $typeIds);
         return $this->getByProductType();
     }
 
@@ -136,9 +141,9 @@ class Shop_product_type_meta_model extends Base
     protected function getByProductType()
     {
         $this->db->select($this->tablePrefix . '.*');
-        $this->db->join($this->table  . ' ' . $this->tablePrefix, $this->tablePrefix . '.id = ' . $this->table_taxonomy_prefix . '.meta_field_id');
+        $this->db->join($this->table  . ' ' . $this->tablePrefix, $this->tablePrefix . '.id = ' . $this->tableTaxonomyPrefix . '.meta_field_id');
         $this->db->group_by($this->tablePrefix . '.id');
-        $results = $this->db->get($this->table_taxonomy . ' ' . $this->table_taxonomy_prefix)->result();
+        $results = $this->db->get($this->tableTaxonomy . ' ' . $this->tableTaxonomyPrefix)->result();
 
         foreach ($results as $result) {
 
@@ -186,7 +191,7 @@ class Shop_product_type_meta_model extends Base
                 );
             }
 
-            if (!$this->db->insert_batch($this->table_taxonomy, $data)) {
+            if (!$this->db->insert_batch($this->tableTaxonomy, $data)) {
 
                 $this->setError('Failed to add new product type/meta field relationships.');
                 $this->db->trans_rollback();
@@ -223,7 +228,7 @@ class Shop_product_type_meta_model extends Base
         }
 
         $this->db->where('meta_field_id', $id);
-        if (!$this->db->delete($this->table_taxonomy)) {
+        if (!$this->db->delete($this->tableTaxonomy)) {
 
             $this->setError('Failed to remove existing product type/meta field relationships.');
             $this->db->trans_rollback();
@@ -242,7 +247,7 @@ class Shop_product_type_meta_model extends Base
                 );
             }
 
-            if (!$this->db->insert_batch($this->table_taxonomy, $data)) {
+            if (!$this->db->insert_batch($this->tableTaxonomy, $data)) {
 
                 $this->setError('Failed to add new product type/meta field relationships.');
                 $this->db->trans_rollback();

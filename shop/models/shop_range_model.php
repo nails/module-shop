@@ -14,6 +14,10 @@ use Nails\Common\Model\Base;
 
 class Shop_range_model extends Base
 {
+    protected $shopUrl;
+
+    // --------------------------------------------------------------------------
+
     public function __construct()
     {
         parent::__construct();

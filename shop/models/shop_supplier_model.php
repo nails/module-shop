@@ -14,6 +14,10 @@ use Nails\Common\Model\Base;
 
 class Shop_supplier_model extends Base
 {
+    protected $shopUrl;
+
+    // --------------------------------------------------------------------------
+
     /**
      * Construct the model
      */
