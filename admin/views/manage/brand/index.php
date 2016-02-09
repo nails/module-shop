@@ -36,8 +36,7 @@
 
                                 } else {
 
-                                    echo img(NAILS_ASSETS_URL . 'img/admin/modules/shop/manager/no-image.jpg');
-
+                                    echo img(NAILS_PATH . 'module-shop/assets/img/no-image.jpg');
                                 }
                                 echo '</div>';
 

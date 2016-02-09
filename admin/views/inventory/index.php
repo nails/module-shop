@@ -46,7 +46,7 @@
 
                                         } else {
 
-                                            echo img(NAILS_ASSETS_URL . 'img/admin/modules/shop/image-icon.png');
+                                            echo img(NAILS_PATH . 'module-shop/assets/img/image-icon.png');
                                         }
 
                                     ?>
