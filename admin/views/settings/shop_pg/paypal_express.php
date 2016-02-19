@@ -44,7 +44,7 @@
                     $field['key']         = 'omnipay_' . $gateway_slug . '_customise_label';
                     $field['label']       = 'Label';
                     $field['placeholder'] = 'Give this Payment Gateway a custom customer facing label';
-                    $field['default']     = appSetting($field['key'], 'shop');
+                    $field['default']     = appSetting($field['key'], 'nailsapp/module-shop');
                     $field['tip']         = 'Set this to override the default payment gateway name.';
 
                     echo form_field($field);
@@ -55,7 +55,7 @@
                     $field['key']     = 'omnipay_' . $gateway_slug . '_customise_img';
                     $field['label']   = 'Image';
                     $field['bucket']  = 'shop-pg-img-' . $gateway_slug;
-                    $field['default'] = appSetting($field['key'], 'shop');
+                    $field['default'] = appSetting($field['key'], 'nailsapp/module-shop');
                     $field['tip']     = 'No image is shown by default, but you can choose to show one, perhaps a logo, or an image showing which cards are accepted.';
 
                     echo form_field_cdn_object_picker($field);
@@ -71,7 +71,7 @@
                     $field                = array();
                     $field['key']         = 'omnipay_' . $gateway_slug . '_brandName';
                     $field['label']       = 'Brand Name';
-                    $field['default']     = appSetting($field['key'], 'shop');
+                    $field['default']     = appSetting($field['key'], 'nailsapp/module-shop');
                     $field['placeholder'] = 'Choose a name for your store, as seen on PayPal. Defaults to PayPal settings.';
                     $field['required']    = false;
 
@@ -82,7 +82,7 @@
                     $field            = array();
                     $field['key']     = 'omnipay_' . $gateway_slug . '_headerImageUrl';
                     $field['label']   = 'Header Image';
-                    $field['default'] = appSetting($field['key'], 'shop');
+                    $field['default'] = appSetting($field['key'], 'nailsapp/module-shop');
                     $field['bucket']  = 'shop-pg-img-' . strtolower($gateway_slug) . '-header';
                     $field['tip']     = 'Ideal dimensions are 750x90px';
 
@@ -93,7 +93,7 @@
                     $field             = array();
                     $field['key']      = 'omnipay_' . $gateway_slug . '_logoImageUrl';
                     $field['label']    = 'Logo';
-                    $field['default']  = appSetting($field['key'], 'shop');
+                    $field['default']  = appSetting($field['key'], 'nailsapp/module-shop');
                     $field['required'] = false;
                     $field['bucket']   = 'shop-pg-img-' . strtolower($gateway_slug) . '-logo';
                     $field['tip']      = 'Ideal dimensions are 190x60px';
@@ -105,7 +105,7 @@
                     $field                = array();
                     $field['key']         = 'omnipay_' . $gateway_slug . '_borderColor';
                     $field['label']       = 'Border Color';
-                    $field['default']     = appSetting($field['key'], 'shop');
+                    $field['default']     = appSetting($field['key'], 'nailsapp/module-shop');
                     $field['required']    = false;
                     $field['placeholder'] = 'e.g., CCCCCC';
                     $field['info']        = 'If supplied, this should be a 6 character hex code, without the # symbol, e.g. FFFFFF for white';
@@ -133,7 +133,7 @@
                     $field             = array();
                     $field['key']      = 'omnipay_' . $gateway_slug . '_username';
                     $field['label']    = 'API Username';
-                    $field['default']  = appSetting($field['key'], 'shop');
+                    $field['default']  = appSetting($field['key'], 'nailsapp/module-shop');
                     $field['required'] = true;
 
                     echo form_field($field);
@@ -143,7 +143,7 @@
                     $field             = array();
                     $field['key']      = 'omnipay_' . $gateway_slug . '_password';
                     $field['label']    = 'API Password';
-                    $field['default']  = appSetting($field['key'], 'shop');
+                    $field['default']  = appSetting($field['key'], 'nailsapp/module-shop');
                     $field['required'] = true;
 
                     echo form_field_password($field);
@@ -153,7 +153,7 @@
                     $field             = array();
                     $field['key']      = 'omnipay_' . $gateway_slug . '_signature';
                     $field['label']    = 'API Signature';
-                    $field['default']  = appSetting($field['key'], 'shop');
+                    $field['default']  = appSetting($field['key'], 'nailsapp/module-shop');
                     $field['required'] = true;
 
                     echo form_field($field);
@@ -167,7 +167,7 @@
                     $field             = array();
                     $field['key']      = 'omnipay_' . $gateway_slug . '_solutionType';
                     $field['label']    = 'Solution Type';
-                    $field['default']  = appSetting($field['key'], 'shop');
+                    $field['default']  = appSetting($field['key'], 'nailsapp/module-shop');
                     $field['required'] = true;
                     $field['class']    = 'select2';
 
@@ -182,7 +182,7 @@
                     $field             = array();
                     $field['key']      = 'omnipay_' . $gateway_slug . '_landingPage';
                     $field['label']    = 'Landing Page';
-                    $field['default']  = appSetting($field['key'], 'shop');
+                    $field['default']  = appSetting($field['key'], 'nailsapp/module-shop');
                     $field['required'] = true;
                     $field['class']    = 'select2';
 

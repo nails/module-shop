@@ -1,6 +1,6 @@
 <?php
 
-$sShopUrl = appSetting('url', 'shop') ? appSetting('url', 'shop') : 'shop/';
+$sShopUrl = appSetting('url', 'nailsapp/module-shop') ? appSetting('url', 'nailsapp/module-shop') : 'shop/';
 
 ?>
 <h2>Order Details</h2>

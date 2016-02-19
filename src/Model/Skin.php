@@ -52,7 +52,7 @@ class Skin
         }
 
         //  Get the front skin
-        $sSkinSlug               = appSetting('skin_front', 'shop') ?: self::DEFAULT_FRONT_SKIN;
+        $sSkinSlug               = appSetting('skin_front', 'nailsapp/module-shop') ?: self::DEFAULT_FRONT_SKIN;
         $this->aEnabled['FRONT'] = $this->get('front', $sSkinSlug);
         if (empty($this->aEnabled['FRONT'])) {
             throw new SkinException(
@@ -61,7 +61,7 @@ class Skin
         }
 
         //  Get the checkout skin
-        $sSkinSlug                  = appSetting('skin_checkout', 'shop') ?: self::DEFAULT_CHECKOUT_SKIN;
+        $sSkinSlug                  = appSetting('skin_checkout', 'nailsapp/module-shop') ?: self::DEFAULT_CHECKOUT_SKIN;
         $this->aEnabled['CHECKOUT'] = $this->get('checkout', $sSkinSlug);
         if (empty($this->aEnabled['CHECKOUT'])) {
             throw new SkinException(

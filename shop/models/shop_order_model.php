@@ -1107,7 +1107,7 @@ class Shop_order_model extends Base
 
         $oAppNotificationModel = Factory::model('AppNotification');
 
-        $notify = $oAppNotificationModel->get('orders', 'shop');
+        $notify = $oAppNotificationModel->get('orders', 'nailsapp/module-shop');
 
         foreach ($notify as $notifyEmail) {
 

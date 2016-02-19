@@ -39,7 +39,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         //  Defaults
         $this->_product_sort       = new \stdClass();
-        $this->_product_sort->sort = appSetting('default_product_sort', 'shop');
+        $this->_product_sort->sort = appSetting('default_product_sort', 'nailsapp/module-shop');
         $this->_product_sort->sort = $this->_product_sort->sort ? $this->_product_sort->sort : 'recent';
 
         //  Actual Values
@@ -84,7 +84,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         $this->_product_pagination->page     = 0;
         $this->_product_pagination->rsegment = 2;
         $this->_product_pagination->total    = 0;
-        $this->_product_pagination->per_page = appSetting('default_product_per_page', 'shop');
+        $this->_product_pagination->per_page = appSetting('default_product_per_page', 'nailsapp/module-shop');
         $this->_product_pagination->per_page = $this->_product_pagination->per_page ? $this->_product_pagination->per_page : 25;
 
         //  Actual Values
@@ -240,7 +240,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function brandIndex()
     {
-        if (!appSetting('page_brand_listing', 'shop')) {
+        if (!appSetting('page_brand_listing', 'nailsapp/module-shop')) {
 
             show_404();
         }
@@ -388,7 +388,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function categoryIndex()
     {
-        if (!appSetting('page_category_listing', 'shop')) {
+        if (!appSetting('page_category_listing', 'nailsapp/module-shop')) {
 
             show_404();
         }
@@ -576,7 +576,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function collectionIndex()
     {
-        if (!appSetting('page_collection_listing', 'shop')) {
+        if (!appSetting('page_collection_listing', 'nailsapp/module-shop')) {
 
             show_404();
         }
@@ -825,7 +825,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function rangeIndex()
     {
-        if (!appSetting('page_range_listing', 'shop')) {
+        if (!appSetting('page_range_listing', 'nailsapp/module-shop')) {
 
             show_404();
         }
@@ -973,7 +973,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function saleIndex()
     {
-        if (!appSetting('page_sale_listing', 'shop')) {
+        if (!appSetting('page_sale_listing', 'nailsapp/module-shop')) {
 
             show_404();
         }
@@ -1120,7 +1120,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function tagIndex()
     {
-        if (!appSetting('page_tag_listing', 'shop')) {
+        if (!appSetting('page_tag_listing', 'nailsapp/module-shop')) {
 
             show_404();
         }
@@ -1330,7 +1330,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
             show_404();
         }
 
-        $oPageData = appSetting('pages', 'shop');
+        $oPageData = appSetting('pages', 'nailsapp/module-shop');
 
         if (empty($oPageData->{$sPageSlug}->body)) {
             show_404();

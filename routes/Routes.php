@@ -21,7 +21,7 @@ class Routes
     public function getRoutes()
     {
         $routes   = array();
-        $settings = appSetting(null, 'shop', true);
+        $settings = appSetting(null, 'nailsapp/module-shop', true);
 
         //  Shop front page route
         $shopUrl = isset($settings['url']) ? substr($settings['url'], 0, -1) : 'shop';

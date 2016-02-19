@@ -76,7 +76,7 @@ class Reports extends BaseAdmin
          */
 
         $oDate                     = Factory::factory('DateTime');
-        $firstFinancialYearEndDate = appSetting('firstFinancialYearEndDate', 'shop');
+        $firstFinancialYearEndDate = appSetting('firstFinancialYearEndDate', 'nailsapp/module-shop');
 
         if (!empty($firstFinancialYearEndDate)) {
 

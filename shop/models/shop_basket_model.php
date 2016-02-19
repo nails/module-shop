@@ -532,7 +532,7 @@ class Shop_basket_model
         // --------------------------------------------------------------------------
 
         //  If item prices are inclusive of tax then show the items total + tax
-        if (!appSetting('price_exclude_tax', 'shop')) {
+        if (!appSetting('price_exclude_tax', 'nailsapp/module-shop')) {
 
             $basket->totals->base->item += $basket->totals->base->tax;
             $basket->totals->user->item += $basket->totals->user->tax;

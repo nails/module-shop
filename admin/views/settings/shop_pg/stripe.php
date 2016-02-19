@@ -44,7 +44,7 @@
                 $field['key']         = 'omnipay_' . $gateway_slug . '_customise_label';
                 $field['label']       = 'Label';
                 $field['placeholder'] = 'Give this Payment Gateway a custom customer facing label';
-                $field['default']     = appSetting($field['key'], 'shop');
+                $field['default']     = appSetting($field['key'], 'nailsapp/module-shop');
                 $field['tip']         = 'Set this to override the default payment gateway name.';
 
                 echo form_field($field);
@@ -55,7 +55,7 @@
                 $field['key']     = 'omnipay_' . $gateway_slug . '_customise_img';
                 $field['label']   = 'Image';
                 $field['bucket']  = 'shop-pg-img-' . $gateway_slug;
-                $field['default'] = appSetting($field['key'], 'shop');
+                $field['default'] = appSetting($field['key'], 'nailsapp/module-shop');
                 $field['tip']     = 'No image is shown by default, but you can choose to show one, perhaps a logo, or an image showing which cards are accepted.';
 
                 echo form_field_cdn_object_picker($field);
@@ -77,7 +77,7 @@
                 $field             = array();
                 $field['key']      = 'omnipay_' . $gateway_slug . '_apiKey';
                 $field['label']    = 'Secret Key';
-                $field['default']  = appSetting($field['key'], 'shop');
+                $field['default']  = appSetting($field['key'], 'nailsapp/module-shop');
                 $field['required'] = true;
 
                 echo form_field($field);
@@ -87,7 +87,7 @@
                 $field             = array();
                 $field['key']      = 'omnipay_' . $gateway_slug . '_publishableKey';
                 $field['label']    = 'Publishable Key';
-                $field['default']  = appSetting($field['key'], 'shop');
+                $field['default']  = appSetting($field['key'], 'nailsapp/module-shop');
                 $field['required'] = true;
 
                 echo form_field($field);

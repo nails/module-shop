@@ -35,7 +35,7 @@ class Feed extends \Nails\Api\Controller\Base
         parent::__construct($oApiRouter);
 
         $this->maintenance          = new \stdClass();
-        $this->maintenance->enabled = (bool) appSetting('maintenance_enabled', 'shop');
+        $this->maintenance->enabled = (bool) appSetting('maintenance_enabled', 'nailsapp/module-shop');
 
         if ($this->maintenance->enabled) {
 

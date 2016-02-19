@@ -207,7 +207,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
                             $this->shop_order_model->paid($order->id);
                             $this->shop_order_model->process($order->id);
 
-                            $shopUrl = appSetting('url', 'shop') ? appSetting('url', 'shop') : 'shop/';
+                            $shopUrl = appSetting('url', 'nailsapp/module-shop') ? appSetting('url', 'nailsapp/module-shop') : 'shop/';
                             redirect($shopUrl . 'checkout/processing?ref=' . $order->ref);
 
                         } else {

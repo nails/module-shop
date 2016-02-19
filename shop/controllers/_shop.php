@@ -63,7 +63,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
         //  Shop Pages
         $aPages    = $this->oPageModel->getAll();
-        $oPageData = appSetting('pages', 'shop');
+        $oPageData = appSetting('pages', 'nailsapp/module-shop');
 
         $this->data['shop_pages'] = array();
 
@@ -104,7 +104,7 @@ class NAILS_Shop_Controller extends NAILS_Controller
 
         //  Maintenance mode?
         $this->maintenance = new \stdClass();
-        $this->maintenance->enabled = (bool) appSetting('maintenance_enabled', 'shop');
+        $this->maintenance->enabled = (bool) appSetting('maintenance_enabled', 'nailsapp/module-shop');
 
         if ($this->maintenance->enabled) {
 

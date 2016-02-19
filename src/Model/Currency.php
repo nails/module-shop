@@ -88,8 +88,8 @@ class Currency
     public function getAllSupported()
     {
         $currencies = $this->getAll();
-        $additional = appSetting('additional_currencies', 'shop');
-        $base       = appSetting('base_currency', 'shop');
+        $additional = appSetting('additional_currencies', 'nailsapp/module-shop');
+        $base       = appSetting('base_currency', 'nailsapp/module-shop');
         $supported  = array();
 
         if (isset($currencies[$base])) {
@@ -154,10 +154,10 @@ class Currency
      */
     public function sync($muteLog = true)
     {
-        $oerAppId             = appSetting('openexchangerates_app_id', 'shop');
-        $oerEtag              = appSetting('openexchangerates_etag', 'shop');
-        $oerLastModified      = appSetting('openexchangerates_last_modified', 'shop');
-        $additionalCurrencies = appSetting('additional_currencies', 'shop');
+        $oerAppId             = appSetting('openexchangerates_app_id', 'nailsapp/module-shop');
+        $oerEtag              = appSetting('openexchangerates_etag', 'nailsapp/module-shop');
+        $oerLastModified      = appSetting('openexchangerates_last_modified', 'nailsapp/module-shop');
+        $additionalCurrencies = appSetting('additional_currencies', 'nailsapp/module-shop');
         $oLogger              = Factory::service('Logger');
 
         if (empty($additionalCurrencies)) {
@@ -291,13 +291,13 @@ class Currency
             if ($oResponse->hasHeader('ETag')) {
 
                 $aHeaders = $oResponse->getHeader('ETag');
-                setAppSetting('openexchangerates_etag', 'shop', $aHeaders[0]);
+                setAppSetting('openexchangerates_etag', 'nailsapp/module-shop', $aHeaders[0]);
             }
 
             if ($oResponse->hasHeader('Last-Modified')) {
 
                 $aHeaders = $oResponse->getHeader('Last-Modified');
-                setAppSetting('openexchangerates_last_modified', 'shop', $aHeaders[0]);
+                setAppSetting('openexchangerates_last_modified', 'nailsapp/module-shop', $aHeaders[0]);
             }
 
             $toSave = array();

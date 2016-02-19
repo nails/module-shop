@@ -299,7 +299,7 @@
 
                 ?>
             </fieldset>
-            <?php if (appSetting('enable_external_products', 'shop')) { ?>
+            <?php if (appSetting('enable_external_products', 'nailsapp/module-shop')) { ?>
             <fieldset>
                 <legend>External Product</legend>
                 <p>

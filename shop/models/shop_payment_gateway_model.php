@@ -101,7 +101,7 @@ class Shop_payment_gateway_model
     public function getEnabled()
     {
         $available = $this->getAvailable();
-        $enabled   = array_filter((array) appSetting('enabled_payment_gateways', 'shop'));
+        $enabled   = array_filter((array) appSetting('enabled_payment_gateways', 'nailsapp/module-shop'));
         $out       = array();
         foreach ($enabled as $gateway) {
 
@@ -129,8 +129,8 @@ class Shop_payment_gateway_model
 
             $temp              = new \stdClass();
             $temp->slug        = $this->getCorrectCasing($pg);
-            $temp->label       = appSetting('omnipay_' . $temp->slug . '_customise_label', 'shop');
-            $temp->img         = appSetting('omnipay_' . $temp->slug . '_customise_img', 'shop');
+            $temp->label       = appSetting('omnipay_' . $temp->slug . '_customise_label', 'nailsapp/module-shop');
+            $temp->img         = appSetting('omnipay_' . $temp->slug . '_customise_img', 'nailsapp/module-shop');
             $temp->is_redirect = $this->isRedirect($pg);
 
             if (empty($temp->label)) {
@@ -183,7 +183,7 @@ class Shop_payment_gateway_model
         $assets             = array();
         $assets['Stripe']   = array();
         $assets['Stripe'][] = array('https://js.stripe.com/v2/', 'APP', 'JS');
-        $assets['Stripe'][] = array('window.NAILS.SHOP_Checkout_Stripe_publishableKey = "' . appSetting('omnipay_Stripe_publishableKey', 'shop') . '";', 'APP', 'JS-INLINE');
+        $assets['Stripe'][] = array('window.NAILS.SHOP_Checkout_Stripe_publishableKey = "' . appSetting('omnipay_Stripe_publishableKey', 'nailsapp/module-shop') . '";', 'APP', 'JS-INLINE');
 
         return isset($assets[$gatewayName]) ? $assets[$gatewayName] : array();
     }
@@ -330,7 +330,7 @@ class Shop_payment_gateway_model
         $data['clientIp']      = get_instance()->input->ipAddress();
 
         //  Set the relevant URLs
-        $shopUrl = appSetting('url', 'shop') ? appSetting('url', 'shop') : 'shop/';
+        $shopUrl = appSetting('url', 'nailsapp/module-shop') ? appSetting('url', 'nailsapp/module-shop') : 'shop/';
         $data['returnUrl'] = site_url($shopUrl . 'checkout/processing?ref=' . $order->ref);
         $data['cancelUrl'] = site_url($shopUrl . 'checkout/cancel?ref=' . $order->ref);
         $data['notifyUrl'] = site_url('api/shop/webhook/' . strtolower($gatewayName) . '?ref=' . $order->ref);
@@ -761,7 +761,7 @@ class Shop_payment_gateway_model
         foreach ($params as $param => $default) {
 
             $this->oLogger->line('Setting value for "omnipay_' . $gatewayName . '_' . $param . '"');
-            $value = appSetting('omnipay_' . $gatewayName . '_' . $param, 'shop');
+            $value = appSetting('omnipay_' . $gatewayName . '_' . $param, 'nailsapp/module-shop');
             $gateway->{'set' . ucfirst($param)}($value);
         }
 
@@ -801,7 +801,7 @@ class Shop_payment_gateway_model
     protected function prepareRequestPaypalExpress(&$data, $order)
     {
         //  Alter the return URL so we go to an intermediary page
-        $shopUrl = appSetting('url', 'shop') ? appSetting('url', 'shop') : 'shop/';
+        $shopUrl = appSetting('url', 'nailsapp/module-shop') ? appSetting('url', 'nailsapp/module-shop') : 'shop/';
         $data['returnUrl'] = site_url($shopUrl . 'checkout/confirm/paypal_express?ref=' . $order->ref);
     }
 

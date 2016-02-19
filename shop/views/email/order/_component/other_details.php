@@ -1,10 +1,10 @@
 <?php
 
-$invoiceCompany   = appSetting('invoice_company', 'shop');
-$invoiceAddress   = appSetting('invoice_address', 'shop');
-$invoiceVatNo     = appSetting('invoice_vat_no', 'shop');
-$invoiceCompanyNo = appSetting('invoice_company_no', 'shop');
-$invoiceFooter    = appSetting('invoice_footer', 'shop');
+$invoiceCompany   = appSetting('invoice_company', 'nailsapp/module-shop');
+$invoiceAddress   = appSetting('invoice_address', 'nailsapp/module-shop');
+$invoiceVatNo     = appSetting('invoice_vat_no', 'nailsapp/module-shop');
+$invoiceCompanyNo = appSetting('invoice_company_no', 'nailsapp/module-shop');
+$invoiceFooter    = appSetting('invoice_footer', 'nailsapp/module-shop');
 
 if (!empty($invoiceCompany)||!empty($invoiceAddress)||!empty($invoiceVatNo)||!empty($invoiceCompanyNo)) {
 

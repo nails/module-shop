@@ -213,7 +213,7 @@ class Shop_model
         // --------------------------------------------------------------------------
 
         //  Fetch base currency
-        $base = $this->oCurrency->getByCode(appSetting('base_currency', 'shop'));
+        $base = $this->oCurrency->getByCode(appSetting('base_currency', 'nailsapp/module-shop'));
 
         //  If no base currency is found, default to GBP
         if (!$base) {
@@ -228,7 +228,7 @@ class Shop_model
 
             } else {
 
-                setAppSetting('base_currency', 'shop', 'GBP');
+                setAppSetting('base_currency', 'nailsapp/module-shop', 'GBP');
             }
         }
 
@@ -246,7 +246,7 @@ class Shop_model
      */
     public function getShopUrl()
     {
-        return appSetting('url', 'shop') ? appSetting('url', 'shop') : 'shop/';
+        return appSetting('url', 'nailsapp/module-shop') ? appSetting('url', 'nailsapp/module-shop') : 'shop/';
     }
 
     // --------------------------------------------------------------------------
@@ -257,6 +257,6 @@ class Shop_model
      */
     public function getShopName()
     {
-        return appSetting('name', 'shop') ? appSetting('name', 'shop') : 'Shop';
+        return appSetting('name', 'nailsapp/module-shop') ? appSetting('name', 'nailsapp/module-shop') : 'Shop';
     }
 }

@@ -33,7 +33,7 @@ class Shop_shipping_driver_model
         $this->aAvailable = _NAILS_GET_DRIVERS('nailsapp/module-shop', 'shipping');
 
         //  Load the active shipping driver
-        $sDriverSlug         = appSetting('enabled_shipping_driver', 'shop') ?: self::DEFAULT_DRIVER;
+        $sDriverSlug         = appSetting('enabled_shipping_driver', 'nailsapp/module-shop') ?: self::DEFAULT_DRIVER;
         $this->oDriverConfig = $this->get($sDriverSlug);
 
         if (empty($this->oDriverConfig)) {
@@ -189,7 +189,7 @@ class Shop_shipping_driver_model
         $aOut = array();
 
         //  If warehouse collection is enabled then add it as an option
-        if (appSetting('warehouse_collection_enabled', 'shop')) {
+        if (appSetting('warehouse_collection_enabled', 'nailsapp/module-shop')) {
 
             $aOut[] = array(
                 'slug'    => 'COLLECTION',

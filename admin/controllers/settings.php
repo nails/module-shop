@@ -218,14 +218,14 @@ class Settings extends BaseAdmin
                 $oAppSettingModel = Factory::model('AppSetting');
 
                 //  Normal settings
-                if (!$oAppSettingModel->set($aSettings, 'shop')) {
+                if (!$oAppSettingModel->set($aSettings, 'nailsapp/module-shop')) {
 
                     $sError    = $oAppSettingModel->lastError();
                     $bRollback = true;
                 }
 
                 //  Encrypted settings
-                if (!$oAppSettingModel->set($aSettingsEncrypted, 'shop', null, true)) {
+                if (!$oAppSettingModel->set($aSettingsEncrypted, 'nailsapp/module-shop', null, true)) {
 
                     $sError    = $oAppSettingModel->lastError();
                     $bRollback = true;
@@ -259,7 +259,7 @@ class Settings extends BaseAdmin
                     if ($bHasAdditionalCurrency && $bHasOpenExchangeRatesId) {
 
                         //  Force a refresh of the settings
-                        appSetting(null, 'shop', true);
+                        appSetting(null, 'nailsapp/module-shop', true);
 
                         if (!$oCurrencyModel->sync()) {
 
@@ -285,7 +285,7 @@ class Settings extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Get data
-        $this->data['settings']         = appSetting(null, 'shop', true);
+        $this->data['settings']         = appSetting(null, 'nailsapp/module-shop', true);
         $this->data['currencies']       = $oCurrencyModel->getAll();
         $this->data['tax_rates']        = $this->shop_tax_rate_model->getAll();
         $this->data['tax_rates_flat']   = $this->shop_tax_rate_model->getAllFlat();
@@ -462,8 +462,8 @@ class Settings extends BaseAdmin
 
                     $oAppSettingModel = Factory::model('AppSetting');
 
-                    $bResult          = $oAppSettingModel->set($settings, 'shop', null, false);
-                    $bResultEncrypted = $oAppSettingModel->set($settings_encrypted, 'shop', null, true);
+                    $bResult          = $oAppSettingModel->set($settings, 'nailsapp/module-shop', null, false);
+                    $bResultEncrypted = $oAppSettingModel->set($settings_encrypted, 'nailsapp/module-shop', null, true);
 
                     if ($this->db->trans_status() !== false && $bResult && $bResultEncrypted) {
 

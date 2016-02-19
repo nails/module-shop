@@ -28,7 +28,7 @@ class Order extends \Nails\Api\Controller\Base
         $this->load->model('shop/shop_order_model');
 
         $this->maintenance = new \stdClass();
-        $this->maintenance->enabled = (bool) appSetting('maintenance_enabled', 'shop');
+        $this->maintenance->enabled = (bool) appSetting('maintenance_enabled', 'nailsapp/module-shop');
         if ($this->maintenance->enabled) {
 
             //  Allow shop admins access

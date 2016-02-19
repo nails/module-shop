@@ -149,7 +149,7 @@ class NAILS_Enquire extends NAILS_Shop_Controller
                 $_override              = array();
                 $_override['email_tpl'] = $this->skin->path . 'views/email/delivery_enquiry';
 
-                if (app_notification_notify('delivery_enquiry', 'shop', $_data, $_override)) {
+                if (appNotificationNotify('delivery_enquiry', 'nailsapp/module-shop', $_data, $_override)) {
 
                     $this->data['success'] = '<strong>Success!</strong> Your enquiry was received successfully.';
 
