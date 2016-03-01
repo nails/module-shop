@@ -1122,7 +1122,7 @@ class Shop_order_model extends Base
                     $this->oLogger->line(
                         '!!Failed to send order notification(partially payment) to ' . $email . ', alerting developers.'
                     );
-                    $subject  = 'Unable to send order notification email(partial payment)';
+                    $subject  = 'Unable to send order notification email (partial payment)';
 
                 } else {
 
