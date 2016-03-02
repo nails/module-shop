@@ -53,6 +53,7 @@
         {
             "moduleName": "shop",
             "type": "module",
+            "namespace": "Nails\\Shop\\",
             "autoload": {
                 "helpers": ["shop"]
             }
