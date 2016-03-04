@@ -20,9 +20,8 @@ class Feed extends BaseDriver
 
     // --------------------------------------------------------------------------
 
-    protected $sModule         = 'nailsapp/module-shop';
-    protected $sType           = 'feed';
-    protected $sEnabledSetting = 'enabled_feed_drivers';
+    protected $sModule = 'nailsapp/module-shop';
+    protected $sType   = 'feed';
 
     // --------------------------------------------------------------------------
 

@@ -79,7 +79,6 @@ class Settings extends BaseAdmin
     public function index()
     {
         if (!userHasPermission('admin:shop:settings:update')) {
-
             unauthorised();
         }
 
@@ -92,9 +91,11 @@ class Settings extends BaseAdmin
         $this->load->model('shop/shop_tax_rate_model');
         $this->load->model('shop/shop_product_model');
 
-        $oCountryModel  = Factory::model('Country');
-        $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
-        $oFeedModel     = Factory::model('Feed', 'nailsapp/module-shop');
+        $oDb              = Factory::service('Database');
+        $oAppSettingModel = Factory::model('AppSetting');
+        $oCountryModel    = Factory::model('Country');
+        $oCurrencyModel   = Factory::model('Currency', 'nailsapp/module-shop');
+        $oFeedModel       = Factory::model('Feed', 'nailsapp/module-shop');
 
         // --------------------------------------------------------------------------
 
@@ -111,127 +112,123 @@ class Settings extends BaseAdmin
         //  Process POST
         if ($this->input->post()) {
 
-            $aSettings = array(
-
-                //  General Settings
-                'maintenance_enabled'                   => trim($this->input->post('maintenance_enabled')),
-                'maintenance_title'                     => trim($this->input->post('maintenance_title')),
-                'maintenance_body'                      => trim($this->input->post('maintenance_body')),
-                'name'                                  => $this->input->post('name'),
-                'url'                                   => $this->input->post('url'),
-                'price_exclude_tax'                     => $this->input->post('price_exclude_tax'),
-                'enable_external_products'              => (bool) $this->input->post('enable_external_products'),
-                'firstFinancialYearEndDate'             => $this->input->post('firstFinancialYearEndDate'),
-                'invoice_company'                       => $this->input->post('invoice_company'),
-                'invoice_company'                       => $this->input->post('invoice_company'),
-                'invoice_address'                       => $this->input->post('invoice_address'),
-                'invoice_vat_no'                        => $this->input->post('invoice_vat_no'),
-                'invoice_company_no'                    => $this->input->post('invoice_company_no'),
-                'invoice_footer'                        => $this->input->post('invoice_footer'),
-                'warehouse_collection_enabled'          => (bool) $this->input->post('warehouse_collection_enabled'),
-                'warehouse_addr_addressee'              => $this->input->post('warehouse_addr_addressee'),
-                'warehouse_addr_line1'                  => $this->input->post('warehouse_addr_line1'),
-                'warehouse_addr_line2'                  => $this->input->post('warehouse_addr_line2'),
-                'warehouse_addr_town'                   => $this->input->post('warehouse_addr_town'),
-                'warehouse_addr_postcode'               => $this->input->post('warehouse_addr_postcode'),
-                'warehouse_addr_state'                  => $this->input->post('warehouse_addr_state'),
-                'warehouse_addr_country'                => $this->input->post('warehouse_addr_country'),
-                'warehouse_collection_delivery_enquiry' => (bool) $this->input->post('warehouse_collection_delivery_enquiry'),
-                'page_brand_listing'                    => $this->input->post('page_brand_listing'),
-                'page_category_listing'                 => $this->input->post('page_category_listing'),
-                'page_collection_listing'               => $this->input->post('page_collection_listing'),
-                'page_range_listing'                    => $this->input->post('page_range_listing'),
-                'page_sale_listing'                     => $this->input->post('page_sale_listing'),
-                'page_tag_listing'                      => $this->input->post('page_tag_listing'),
-
-                //  Browse Settings
-                'expand_variants'          => (bool) $this->input->post('expand_variants'),
-                'default_product_per_page' => $this->input->post('default_product_per_page'),
-                'default_product_sort'     => $this->input->post('default_product_sort'),
-
-                //  Skin settings
-                'skin_front'    => $this->input->post('skin_front'),
-                'skin_checkout' => $this->input->post('skin_checkout'),
-
-                //  Payment gteway settings
-                'enabled_payment_gateways' => array_filter((array) $this->input->post('enabled_payment_gateways')),
-
-                //  Shipping driver settings
-                'enabled_shipping_driver' => $this->input->post('enabled_shipping_driver'),
-
-                //  Currency Settings
-                'additional_currencies' => $this->input->post('additional_currencies'),
-
-                //  Pages
-                'pages' => array(),
-
-                //  Feeds
-                'enabled_feed_drivers' => $this->input->post('enabled_feed_drivers') ?: array(),
-            );
-
-            if ($this->input->post('base_currency')) {
-
-                $aSettings['base_currency'] = $this->input->post('base_currency');
-            }
-
-            if ($this->input->post('pages')) {
-
-                $aPages = $this->input->post('pages');
-
-                foreach ($this->data['pages'] as $sSlug => $sLabel) {
-
-                    $aSettings['pages'][$sSlug] = array(
-                        'cmsPageId' => !empty($aPages[$sSlug]['cmsPageId']) ? $aPages[$sSlug]['cmsPageId'] : null,
-                        'body' => !empty($aPages[$sSlug]['body']) ? $aPages[$sSlug]['body'] : null
-                    );
-                }
-            }
-
-            $aSettingsEncrypted = array(
-
-                //  Currency settings
-                'openexchangerates_app_id' => $this->input->post('openexchangerates_app_id')
-            );
-
-            // --------------------------------------------------------------------------
-
-            //  Sanitize shop url
-            $aSettings['url'] .= substr($aSettings['url'], -1) != '/' ? '/' : '';
-
-            //  Sanitize default_product_per_page
-            if (is_numeric($aSettings['default_product_per_page'])) {
-                $aSettings['default_product_per_page'] = (int) $aSettings['default_product_per_page'];
-            }
-
-            // --------------------------------------------------------------------------
+            //  Settings keys
+            $sKeyFeedDriver = $oFeedModel->getSettingKey();
 
             //  Validation
             $oFormValidation = Factory::service('FormValidation');
             $oFormValidation->set_rules('firstFinancialYearEndDate', '', 'valid_date');
+            $oFormValidation->set_rules($sKeyFeedDriver, '', '');
             $oFormValidation->set_message('valid_date', lang('fv_valid_date'));
 
             if ($oFormValidation->run()) {
 
-                $this->db->trans_begin();
+                try {
 
-                $bRollback        = false;
-                $oAppSettingModel = Factory::model('AppSetting');
+                    $aSettings = array(
 
-                //  Normal settings
-                if (!$oAppSettingModel->set($aSettings, 'nailsapp/module-shop')) {
+                        //  General Settings
+                        'maintenance_enabled'                   => trim($this->input->post('maintenance_enabled')),
+                        'maintenance_title'                     => trim($this->input->post('maintenance_title')),
+                        'maintenance_body'                      => trim($this->input->post('maintenance_body')),
+                        'name'                                  => $this->input->post('name'),
+                        'url'                                   => $this->input->post('url'),
+                        'price_exclude_tax'                     => $this->input->post('price_exclude_tax'),
+                        'enable_external_products'              => (bool) $this->input->post('enable_external_products'),
+                        'firstFinancialYearEndDate'             => $this->input->post('firstFinancialYearEndDate'),
+                        'invoice_company'                       => $this->input->post('invoice_company'),
+                        'invoice_company'                       => $this->input->post('invoice_company'),
+                        'invoice_address'                       => $this->input->post('invoice_address'),
+                        'invoice_vat_no'                        => $this->input->post('invoice_vat_no'),
+                        'invoice_company_no'                    => $this->input->post('invoice_company_no'),
+                        'invoice_footer'                        => $this->input->post('invoice_footer'),
+                        'warehouse_collection_enabled'          => (bool) $this->input->post('warehouse_collection_enabled'),
+                        'warehouse_addr_addressee'              => $this->input->post('warehouse_addr_addressee'),
+                        'warehouse_addr_line1'                  => $this->input->post('warehouse_addr_line1'),
+                        'warehouse_addr_line2'                  => $this->input->post('warehouse_addr_line2'),
+                        'warehouse_addr_town'                   => $this->input->post('warehouse_addr_town'),
+                        'warehouse_addr_postcode'               => $this->input->post('warehouse_addr_postcode'),
+                        'warehouse_addr_state'                  => $this->input->post('warehouse_addr_state'),
+                        'warehouse_addr_country'                => $this->input->post('warehouse_addr_country'),
+                        'warehouse_collection_delivery_enquiry' => (bool) $this->input->post('warehouse_collection_delivery_enquiry'),
+                        'page_brand_listing'                    => $this->input->post('page_brand_listing'),
+                        'page_category_listing'                 => $this->input->post('page_category_listing'),
+                        'page_collection_listing'               => $this->input->post('page_collection_listing'),
+                        'page_range_listing'                    => $this->input->post('page_range_listing'),
+                        'page_sale_listing'                     => $this->input->post('page_sale_listing'),
+                        'page_tag_listing'                      => $this->input->post('page_tag_listing'),
 
-                    $sError    = $oAppSettingModel->lastError();
-                    $bRollback = true;
-                }
+                        //  Browse Settings
+                        'expand_variants'          => (bool) $this->input->post('expand_variants'),
+                        'default_product_per_page' => $this->input->post('default_product_per_page'),
+                        'default_product_sort'     => $this->input->post('default_product_sort'),
 
-                //  Encrypted settings
-                if (!$oAppSettingModel->set($aSettingsEncrypted, 'nailsapp/module-shop', null, true)) {
+                        //  Skin settings
+                        'skin_front'    => $this->input->post('skin_front'),
+                        'skin_checkout' => $this->input->post('skin_checkout'),
 
-                    $sError    = $oAppSettingModel->lastError();
-                    $bRollback = true;
-                }
+                        //  Payment gteway settings
+                        'enabled_payment_gateways' => array_filter((array) $this->input->post('enabled_payment_gateways')),
 
-                if (empty($bRollback)) {
+                        //  Shipping driver settings
+                        'enabled_shipping_driver' => $this->input->post('enabled_shipping_driver'),
+
+                        //  Currency Settings
+                        'additional_currencies' => $this->input->post('additional_currencies'),
+
+                        //  Pages
+                        'pages' => array(),
+                    );
+
+                    if ($this->input->post('base_currency')) {
+                        $aSettings['base_currency'] = $this->input->post('base_currency');
+                    }
+
+                    if ($this->input->post('pages')) {
+
+                        $aPages = $this->input->post('pages');
+
+                        foreach ($this->data['pages'] as $sSlug => $sLabel) {
+
+                            $aSettings['pages'][$sSlug] = array(
+                                'cmsPageId' => !empty($aPages[$sSlug]['cmsPageId']) ? $aPages[$sSlug]['cmsPageId'] : null,
+                                'body' => !empty($aPages[$sSlug]['body']) ? $aPages[$sSlug]['body'] : null
+                            );
+                        }
+                    }
+
+                    $aSettingsEncrypted = array(
+
+                        //  Currency settings
+                        'openexchangerates_app_id' => $this->input->post('openexchangerates_app_id')
+                    );
+
+                    // --------------------------------------------------------------------------
+
+                    //  Sanitize shop url
+                    $aSettings['url'] .= substr($aSettings['url'], -1) != '/' ? '/' : '';
+
+                    //  Sanitize default_product_per_page
+                    if (is_numeric($aSettings['default_product_per_page'])) {
+                        $aSettings['default_product_per_page'] = (int) $aSettings['default_product_per_page'];
+                    }
+
+                    // --------------------------------------------------------------------------
+
+                    $this->db->trans_begin();
+
+                    //  Normal settings
+                    if (!$oAppSettingModel->set($aSettings, 'nailsapp/module-shop')) {
+                        throw new NailsException($oAppSettingModel->lastError(), 1);
+                    }
+
+                    //  Encrypted settings
+                    if (!$oAppSettingModel->set($aSettingsEncrypted, 'nailsapp/module-shop', null, true)) {
+                        throw new NailsException($oAppSettingModel->lastError(), 1);
+                    }
+
+                    //  Drivers & Skins
+                    $oFeedModel->saveEnabled($this->input->post($sKeyFeedDriver));
 
                     $this->db->trans_commit();
                     $this->data['success'] = 'Shop settings were saved.';
@@ -241,7 +238,6 @@ class Settings extends BaseAdmin
                     //  Rewrite routes
                     $oRoutesModel = Factory::model('Routes');
                     if (!$oRoutesModel->update()) {
-
                         $this->data['warning']  = '<strong>Warning:</strong> while the shop settings were updated, ';
                         $this->data['warning'] .= 'the routes file could not be updated. The shop may not behave ';
                         $this->data['warning'] .= 'as expected.';
@@ -262,18 +258,16 @@ class Settings extends BaseAdmin
                         appSetting(null, 'nailsapp/module-shop', true);
 
                         if (!$oCurrencyModel->sync()) {
-
                             $this->data['message']  = '<strong>Warning:</strong> an attempted sync with Open Exchange ';
                             $this->data['message'] .= 'Rates service failed with the following reason: ';
                             $this->data['message'] .= $oCurrencyModel->lastError();
-
                         }
                     }
 
-                } else {
+                } catch (\Exception $e) {
 
-                    $this->db->trans_rollback();
-                    $this->data['error'] = 'There was a problem saving shop settings. ' . $sError;
+                    $oDb->trans_rollback();
+                    $this->data['error'] = 'There was a problem saving settings. ' . $e->getMessage();
                 }
 
             } else {
@@ -313,10 +307,6 @@ class Settings extends BaseAdmin
         //  Shipping Drivers
         $this->data['shipping_drivers']         = $this->shop_shipping_driver_model->getAvailable();
         $this->data['shipping_drivers_enabled'] = $this->shop_shipping_driver_model->getEnabled();
-
-        //  Feed Drivers
-        $this->data['feed_drivers']         = $oFeedModel->getAll();
-        $this->data['feed_drivers_enabled'] = $oFeedModel->getEnabledSlugs();
 
         // --------------------------------------------------------------------------
 

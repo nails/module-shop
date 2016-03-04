@@ -31,18 +31,9 @@
         <li class="tab">
             <a href="#" data-tab="tab-pages">Pages</a>
         </li>
-        <?php
-
-        if (!empty($feed_drivers)) {
-
-            ?>
-            <li class="tab">
-                <a href="#" data-tab="tab-feeds">Feeds</a>
-            </li>
-            <?php
-        }
-
-        ?>
+        <li class="tab">
+            <a href="#" data-tab="tab-feeds">Feeds</a>
+        </li>
     </ul>
     <section class="tabs" data-tabgroup="main-tabs">
         <div class="tab-page tab-general">
@@ -737,40 +728,40 @@
                 </p>
                 <?php
 
-                    if ($productCount) {
+                if ($productCount) {
 
-                        ?>
-                        <p class="alert alert-warning">
-                            <strong>Important:</strong> The base currency cannot be changed once a
-                            product has been created.
-                        </p>
-                        <?php
-                    }
+                    ?>
+                    <p class="alert alert-warning">
+                        <strong>Important:</strong> The base currency cannot be changed once a
+                        product has been created.
+                    </p>
+                    <?php
+                }
 
                 ?>
                 <p>
                 <?php
 
-                    //  Base Currency
-                    $field             = array();
-                    $field['key']      = 'base_currency';
-                    $field['label']    = 'Base Currency';
-                    $field['default']  = appSetting($field['key'], 'nailsapp/module-shop');
-                    $field['readonly'] = $productCount ? 'disabled="disabled"' : '';
+                //  Base Currency
+                $field             = array();
+                $field['key']      = 'base_currency';
+                $field['label']    = 'Base Currency';
+                $field['default']  = appSetting($field['key'], 'nailsapp/module-shop');
+                $field['readonly'] = $productCount ? 'disabled="disabled"' : '';
 
-                    $_currencies = array();
+                $_currencies = array();
 
-                    foreach ($currencies as $c) {
+                foreach ($currencies as $c) {
 
-                        $_currencies[$c->code] = $c->code . ' - ' . $c->label;
-                    }
+                    $_currencies[$c->code] = $c->code . ' - ' . $c->label;
+                }
 
-                    echo form_dropdown(
-                        $field['key'],
-                        $_currencies,
-                        set_value($field['key'], $field['default']),
-                        'class="select2" ' . $field['readonly']
-                    );
+                echo form_dropdown(
+                    $field['key'],
+                    $_currencies,
+                    set_value($field['key'], $field['default']),
+                    'class="select2" ' . $field['readonly']
+                );
 
                 ?>
                 </p>
@@ -827,13 +818,55 @@
 
             if (!empty($shipping_drivers)) {
 
-                echo adminHelper(
-                    'loadSettingsDriverTable',
-                    'enabled_shipping_driver',
-                    $shipping_drivers,
-                    array($shipping_drivers_enabled->slug),
-                    false
-                );
+                //  @todo; use the common driver system
+                ?>
+                <table id="shippiungshipping-drivers">
+                    <thead class="shipping-drivers">
+                        <tr>
+                            <th class="enabled">Enabled</th>
+                            <th class="label">Label</th>
+                            <th class="configure">Configure</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+
+                        $enabledShippingDriver = set_value('enabled_shipping_driver', appSetting('enabled_shipping_driver', 'nailsapp/module-shop'));
+                        $enabledShippingDriver = array_filter((array) $enabledShippingDriver);
+
+                        foreach ($shipping_drivers as $driver) {
+
+                            $_enabled = array_search($driver->slug, $enabledShippingDriver) !== false ? true : false;
+
+                            ?>
+                            <tr>
+                                <td class="enabled">
+                                    <div class="toggle toggle-modern"></div>
+                                    <?=form_radio('enabled_shipping_driver', $driver->slug, $_enabled)?>
+                                </td>
+                                <td class="label">
+                                    <?=$driver->name?>
+                                    <small><?=$driver->description?></small>
+                                </td>
+                                <td class="configure">
+                                    <?php
+
+                                    echo anchor(
+                                        'admin/admin/settings/driver?slug=' . $driver->slug,
+                                        'Configure',
+                                        'data-fancybox-type="iframe" class="fancybox btn btn-xs btn-primary"'
+                                    );
+
+                                    ?>
+                                </td>
+                            </tr>
+                            <?php
+                        }
+
+                        ?>
+                    <tbody>
+                </table>
+                <?php
 
             } else {
 
@@ -988,22 +1021,13 @@
 
             ?>
         </div>
-        <?php
-
-        if (!empty($feed_drivers)) {
-
-            ?>
-            <div class="tab-page tab-feeds">
-                <?=adminHelper(
+        <div class="tab-page tab-feeds">
+            <?=adminHelper(
                     'loadSettingsDriverTable',
-                    'enabled_feed_drivers',
-                    $feed_drivers,
-                    $feed_drivers_enabled
-                )?>
-            </div>
-            <?php
-        }
-    ?>
+                    'Feed',
+                    'nailsapp/module-shop'
+            )?>
+        </div>
     </section>
     <p>
         <?=form_submit('submit', lang('action_save_changes'), 'class="btn btn-primary"')?>
