@@ -14,7 +14,6 @@ require_once '_shop.php';
  */
 
 use Nails\Factory;
-
 use Nails\Shop\Exception\FeedException;
 
 class NAILS_Feed extends NAILS_Shop_Controller
@@ -84,6 +83,7 @@ class NAILS_Feed extends NAILS_Shop_Controller
         }
 
         //  Send the data
+        Factory::helper('file');
         readFileChunked($sCacheData);
     }
 
