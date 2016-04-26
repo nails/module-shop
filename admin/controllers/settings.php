@@ -151,6 +151,8 @@ class Settings extends BaseAdmin
                         'warehouse_addr_state'                  => $this->input->post('warehouse_addr_state'),
                         'warehouse_addr_country'                => $this->input->post('warehouse_addr_country'),
                         'warehouse_collection_delivery_enquiry' => (bool) $this->input->post('warehouse_collection_delivery_enquiry'),
+                        'delivery_url'                          => $this->input->post('delivery_url'),
+                        'delivery_text'                         => $this->input->post('delivery_text'),
                         'page_brand_listing'                    => $this->input->post('page_brand_listing'),
                         'page_category_listing'                 => $this->input->post('page_category_listing'),
                         'page_collection_listing'               => $this->input->post('page_collection_listing'),

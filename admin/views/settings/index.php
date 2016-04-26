@@ -401,6 +401,30 @@
 
                 ?>
             </fieldset>
+            <fieldset id="shop-settings-misc">
+                <legend>Checkout Customisation</legend>
+                <?php
+
+                    $field                = array();
+                    $field['key']         = 'delivery_url';
+                    $field['label']       = 'Delivery Info URL';
+                    $field['default']     = appSetting($field['key'], 'nailsapp/module-shop');
+                    $field['placeholder'] = 'i.e. /delivery-info';
+
+                    echo form_field($field);
+
+                    // --------------------------------------------------------------------------
+
+                    $field                = array();
+                    $field['key']         = 'delivery_text';
+                    $field['label']       = 'Delivery Link Text';
+                    $field['default']     = appSetting($field['key'], 'nailsapp/module-shop');
+                    $field['placeholder'] = 'i.e. Delivery Information';
+
+                    echo form_field($field);
+
+                ?>
+            </fieldset>
         </div>
         <div class="tab-page tab-browse">
             <p>
