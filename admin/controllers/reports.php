@@ -574,7 +574,6 @@ class Reports extends BaseAdmin
     protected function sourceProducts($period)
     {
         if (!userHasPermission('admin:shop:orders:manage')) {
-
             return false;
         }
 
@@ -592,8 +591,8 @@ class Reports extends BaseAdmin
         $this->db->select('o.id order_id, o.ref order_ref, o.created, op.quantity as quantity_sold, p.id product_id, p.label product_label, v.id variation_id, v.label variation_label, v.sku');
         $this->db->select('(SELECT GROUP_CONCAT(DISTINCT `b`.`label` ORDER BY `b`.`label` SEPARATOR \', \') FROM `' . NAILS_DB_PREFIX . 'shop_product_brand` pb JOIN `' . NAILS_DB_PREFIX . 'shop_brand` b ON `b`.`id` = `pb`.`brand_id` WHERE `pb`.`product_id` = `p`.`id` GROUP BY `pb`.`product_id`) brands', false);
         $this->db->join(NAILS_DB_PREFIX . 'shop_order o', 'o.id = op.order_id', 'LEFT');
-        $this->db->join(NAILS_DB_PREFIX . 'shop_product p', 'p.id = op.variant_id', 'LEFT');
-        $this->db->join(NAILS_DB_PREFIX . 'shop_product_variation v', 'v.product_id = p.id', 'LEFT');
+        $this->db->join(NAILS_DB_PREFIX . 'shop_product p', 'p.id = op.product_id', 'LEFT');
+        $this->db->join(NAILS_DB_PREFIX . 'shop_product_variation v', 'v.id = op.variant_id', 'LEFT');
         $this->db->where('o.status', 'PAID');
         $this->db->order_by('o.created');
 
@@ -628,12 +627,8 @@ class Reports extends BaseAdmin
         $out->data = $this->db->get(NAILS_DB_PREFIX . 'shop_order_product op')->result_array();
 
         if ($out->data) {
-
             $out->fields = array_keys($out->data[0]);
         }
-
-
-        // --------------------------------------------------------------------------
 
         return $out;
     }
