@@ -252,7 +252,7 @@ class Shop_shipping_driver_model
                 if ($aOption['slug'] !== 'COLLECTION') {
 
                     $oCost           = $this->oDriver->calculate($aShippableItems, $aOption['slug'], $oBasket);
-                    $aOption['cost'] = $oCost->items;
+                    $aOption['cost'] = $oCost->total;
 
                     if (is_int($aOption['cost']) || is_numeric($aOption['cost'])) {
 
@@ -328,9 +328,10 @@ class Shop_shipping_driver_model
      */
     public function calculate($basket)
     {
-        $oFree       = new \stdClass();
-        $oFree->base = (int) 0;
-        $oFree->user = (int) 0;
+        $oFree                = new \stdClass();
+        $oFree->total_inc_tax = 0;
+        $oFree->total_ex_tax  = 0;
+        $oFree->tax           = 0;
 
         // --------------------------------------------------------------------------
 
