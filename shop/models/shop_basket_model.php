@@ -484,12 +484,10 @@ class Shop_basket_model
             //  Apply the new values
             $basket->totals->base->item_discount     = $this->iTotalItemDiscount;
             $basket->totals->base->shipping_discount = $this->iTotalShipDiscount;
-            $basket->totals->base->tax_discount      = $this->iTotalTaxDiscount;
             $basket->totals->base->grand_discount    = $this->iTotalDiscount;
 
             $basket->totals->user->item_discount     = $oCurrencyModel->convertBaseToUser($basket->totals->base->item_discount);
             $basket->totals->user->shipping_discount = $oCurrencyModel->convertBaseToUser($basket->totals->base->shipping_discount);
-            $basket->totals->user->tax_discount      = $oCurrencyModel->convertBaseToUser($basket->totals->base->tax_discount);
             $basket->totals->user->grand_discount    = $oCurrencyModel->convertBaseToUser($basket->totals->base->grand_discount);
         }
 
@@ -572,8 +570,9 @@ class Shop_basket_model
         $basket->totals->base_formatted->shipping              = $oCurrencyModel->formatBase($basket->totals->base->shipping);
         $basket->totals->base_formatted->shipping_discount     = $oCurrencyModel->formatBase($basket->totals->base->shipping_discount);
         $basket->totals->base_formatted->tax_item              = $oCurrencyModel->formatBase($basket->totals->base->tax_item);
+        $basket->totals->base_formatted->tax_item_discount     = $oCurrencyModel->formatBase($basket->totals->base->tax_item_discount);
         $basket->totals->base_formatted->tax_shipping          = $oCurrencyModel->formatBase($basket->totals->base->tax_shipping);
-        $basket->totals->base_formatted->tax_discount          = $oCurrencyModel->formatBase($basket->totals->base->tax_discount);
+        $basket->totals->base_formatted->tax_shipping_discount = $oCurrencyModel->formatBase($basket->totals->base->tax_shipping_discount);
         $basket->totals->base_formatted->tax_combined          = $oCurrencyModel->formatBase($basket->totals->base->tax_combined);
         $basket->totals->base_formatted->tax_combined_discount = $oCurrencyModel->formatBase($basket->totals->base->tax_combined_discount);
         $basket->totals->base_formatted->grand                 = $oCurrencyModel->formatBase($basket->totals->base->grand);
@@ -584,10 +583,11 @@ class Shop_basket_model
         $basket->totals->user_formatted->shipping              = $oCurrencyModel->formatUser($basket->totals->user->shipping);
         $basket->totals->user_formatted->shipping_discount     = $oCurrencyModel->formatUser($basket->totals->user->shipping_discount);
         $basket->totals->user_formatted->tax_item              = $oCurrencyModel->formatUser($basket->totals->user->tax_item);
+        $basket->totals->user_formatted->tax_item_discount     = $oCurrencyModel->formatUser($basket->totals->user->tax_item_discount);
         $basket->totals->user_formatted->tax_shipping          = $oCurrencyModel->formatUser($basket->totals->user->tax_shipping);
-        $basket->totals->user_formatted->tax_discount          = $oCurrencyModel->formatUser($basket->totals->user->tax_discount);
-        $basket->totals->user_formatted->tax_combined          = $oCurrencyModel->formatBase($basket->totals->user->tax_combined);
-        $basket->totals->user_formatted->tax_combined_discount = $oCurrencyModel->formatBase($basket->totals->user->tax_combined_discount);
+        $basket->totals->user_formatted->tax_shipping_discount = $oCurrencyModel->formatUser($basket->totals->user->tax_shipping_discount);
+        $basket->totals->user_formatted->tax_combined          = $oCurrencyModel->formatUser($basket->totals->user->tax_combined);
+        $basket->totals->user_formatted->tax_combined_discount = $oCurrencyModel->formatUser($basket->totals->user->tax_combined_discount);
         $basket->totals->user_formatted->grand                 = $oCurrencyModel->formatUser($basket->totals->user->grand);
         $basket->totals->user_formatted->grand_discount        = $oCurrencyModel->formatUser($basket->totals->user->grand_discount);
 
@@ -1578,45 +1578,57 @@ class Shop_basket_model
         $out->totals->user           = new \stdClass();
         $out->totals->user_formatted = new \stdClass();
 
-        $out->totals->base->item              = 0;
-        $out->totals->base->item_discount     = 0;
-        $out->totals->base->shipping          = 0;
-        $out->totals->base->shipping_discount = 0;
-        $out->totals->base->tax_item          = 0;
-        $out->totals->base->tax_shipping      = 0;
-        $out->totals->base->tax_discount      = 0;
-        $out->totals->base->grand             = 0;
-        $out->totals->base->grand_discount    = 0;
+        $out->totals->base->item                  = 0;
+        $out->totals->base->item_discount         = 0;
+        $out->totals->base->shipping              = 0;
+        $out->totals->base->shipping_discount     = 0;
+        $out->totals->base->tax_item              = 0;
+        $out->totals->base->tax_item_discount     = 0;
+        $out->totals->base->tax_shipping          = 0;
+        $out->totals->base->tax_shipping_discount = 0;
+        $out->totals->base->tax_combined          = 0;
+        $out->totals->base->tax_combined_discount = 0;
+        $out->totals->base->grand                 = 0;
+        $out->totals->base->grand_discount        = 0;
 
-        $out->totals->base_formatted->item              = '';
-        $out->totals->base_formatted->item_discount     = '';
-        $out->totals->base_formatted->shipping          = '';
-        $out->totals->base_formatted->shipping_discount = '';
-        $out->totals->base_formatted->tax_item          = '';
-        $out->totals->base_formatted->tax_shipping      = '';
-        $out->totals->base_formatted->tax_discount      = '';
-        $out->totals->base_formatted->grand             = '';
-        $out->totals->base_formatted->grand_discount    = '';
+        $out->totals->base_formatted->item                  = '';
+        $out->totals->base_formatted->item_discount         = '';
+        $out->totals->base_formatted->shipping              = '';
+        $out->totals->base_formatted->shipping_discount     = '';
+        $out->totals->base_formatted->tax_item              = '';
+        $out->totals->base_formatted->tax_item_discount     = '';
+        $out->totals->base_formatted->tax_shipping          = '';
+        $out->totals->base_formatted->tax_shipping_discount = '';
+        $out->totals->base_formatted->tax_combined          = '';
+        $out->totals->base_formatted->tax_combined_discount = '';
+        $out->totals->base_formatted->grand                 = '';
+        $out->totals->base_formatted->grand_discount        = '';
 
-        $out->totals->user->item              = 0;
-        $out->totals->user->item_discount     = 0;
-        $out->totals->user->shipping          = 0;
-        $out->totals->user->shipping_discount = 0;
-        $out->totals->user->tax_item          = 0;
-        $out->totals->user->tax_shipping      = 0;
-        $out->totals->user->tax_discount      = 0;
-        $out->totals->user->grand             = 0;
-        $out->totals->user->grand_discount    = 0;
+        $out->totals->user->item                  = 0;
+        $out->totals->user->item_discount         = 0;
+        $out->totals->user->shipping              = 0;
+        $out->totals->user->shipping_discount     = 0;
+        $out->totals->user->tax_item              = 0;
+        $out->totals->user->tax_item_discount     = 0;
+        $out->totals->user->tax_shipping          = 0;
+        $out->totals->user->tax_shipping_discount = 0;
+        $out->totals->user->tax_combined          = 0;
+        $out->totals->user->tax_combined_discount = 0;
+        $out->totals->user->grand                 = 0;
+        $out->totals->user->grand_discount        = 0;
 
-        $out->totals->user_formatted->item              = '';
-        $out->totals->user_formatted->item_discount     = '';
-        $out->totals->user_formatted->shipping          = '';
-        $out->totals->user_formatted->shipping_discount = '';
-        $out->totals->user_formatted->tax_item          = '';
-        $out->totals->user_formatted->tax_shipping      = '';
-        $out->totals->user_formatted->tax_discount      = '';
-        $out->totals->user_formatted->grand             = '';
-        $out->totals->user_formatted->grand_discount    = '';
+        $out->totals->user_formatted->item                  = '';
+        $out->totals->user_formatted->item_discount         = '';
+        $out->totals->user_formatted->shipping              = '';
+        $out->totals->user_formatted->shipping_discount     = '';
+        $out->totals->user_formatted->tax_item              = '';
+        $out->totals->user_formatted->tax_item_discount     = '';
+        $out->totals->user_formatted->tax_shipping          = '';
+        $out->totals->user_formatted->tax_shipping_discount = '';
+        $out->totals->user_formatted->tax_combined          = '';
+        $out->totals->user_formatted->tax_combined_discount = '';
+        $out->totals->user_formatted->grand                 = '';
+        $out->totals->user_formatted->grand_discount        = '';
 
         return $out;
     }

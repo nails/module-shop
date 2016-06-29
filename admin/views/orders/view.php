@@ -44,86 +44,103 @@ foreach ($order->items as $oItem) {
                             <tr>
                                 <td class="label">Voucher</td>
                                 <td class="value">
-                                <?php
+                                    <?php
 
-                                if (empty($order->voucher)) {
+                                    if (empty($order->voucher)) {
 
-                                    echo '<span class="text-muted">No Voucher Used</span>';
+                                        echo '<span class="text-muted">No Voucher Used</span>';
 
-                                } else {
+                                    } else {
 
 
-                                    echo $order->voucher->label;
-                                    echo '<small>' . $order->voucher->code . '</small>';
-                                }
+                                        echo $order->voucher->label;
+                                        echo '<small>' . $order->voucher->code . '</small>';
+                                    }
 
-                                ?>
+                                    ?>
                                 </td>
                             </tr>
                             <tr>
                                 <td class="label">Sub Total</td>
                                 <td class="value">
-                                <?php
+                                    <?php
 
-                                echo $order->totals->base_formatted->item;
+                                    echo $order->totals->base_formatted->item;
 
-                                if ($order->currency != $order->base_currency) {
+                                    if ($order->currency != $order->base_currency) {
+
+                                        ?>
+                                        <small>
+                                            User checked out in <?=$order->currency?>:
+                                            <?=$order->totals->user_formatted->item?>
+                                        </small>
+                                        <?php
+                                    }
 
                                     ?>
-                                    <small>
-                                        User checked out in <?=$order->currency?>:
-                                        <?=$order->totals->user_formatted->item?>
-                                    </small>
-                                    <?php
-                                }
-
-                                ?>
                                 </td>
                             </tr>
                             <tr>
                                 <td class="label">Shipping</td>
                                 <td class="value">
-                                <?php
+                                    <?php
 
-                                echo $order->totals->base_formatted->shipping;
+                                    echo $order->totals->base_formatted->shipping;
 
-                                if ($order->currency != $order->base_currency) {
+                                    if ($order->currency != $order->base_currency) {
+
+                                        ?>
+                                        <small>
+                                            User checked out in <?=$order->currency?>:
+                                            <?=$order->totals->user_formatted->shipping?>
+                                        </small>
+                                        <?php
+                                    }
 
                                     ?>
-                                    <small>
-                                        User checked out in <?=$order->currency?>:
-                                        <?=$order->totals->user_formatted->shipping?>
-                                    </small>
-                                    <?php
-                                }
-
-                                ?>
                                 </td>
                             </tr>
                             <tr>
                                 <td class="label">Tax</td>
-                                <td class="value">
-                                <?php
+                                <td class="value" style="padding: 0;">
+                                    <table style="margin:0;border:0;">
+                                        <tr>
+                                            <td style="width: 80px;">Items</td>
+                                            <td>
+                                                <?php
 
-                                echo $order->totals->base_formatted->tax;
+                                                echo $order->totals->base_formatted->tax_item;
 
-                                if ($order->currency != $order->base_currency) {
+                                                ?>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width: 80px;">Shipping</td>
+                                            <td>
+                                                <?php
 
-                                    ?>
-                                    <small>
-                                        User checked out in <?=$order->currency?>:
-                                        <?=$order->totals->user_formatted->tax?>
-                                    </small>
-                                    <?php
-                                }
+                                                echo $order->totals->base_formatted->tax_shipping;
 
-                                ?>
+                                                ?>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width: 80px;">Total</td>
+                                            <td>
+                                                <?php
+
+                                                echo $order->totals->base_formatted->tax_combined;
+
+                                                ?>
+                                            </td>
+                                        </tr>
+                                    </table>
                                 </td>
                             </tr>
                             <tr>
                                 <td class="label">Discounts</td>
                                 <td class="value" style="padding: 0;">
-                                    <table>
+                                    <table style="margin:0;border:0;">
                                         <tr>
                                             <td style="width: 80px;">Items</td>
                                             <td>
@@ -145,26 +162,6 @@ foreach ($order->items as $oItem) {
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td style="width: 80px;">Tax</td>
-                                            <td>
-                                                <?php
-
-                                                echo $order->totals->base_formatted->tax_discount;
-
-                                                if ($order->currency != $order->base_currency) {
-
-                                                    ?>
-                                                    <small>
-                                                        User checked out in <?=$order->currency?>:
-                                                        <?=$order->totals->user_formatted->tax_discount?>
-                                                    </small>
-                                                    <?php
-                                                }
-
-                                                ?>
-                                            </td>
-                                        </tr>
-                                        <tr>
                                             <td style="width: 80px;">Shipping</td>
                                             <td>
                                                 <?php
@@ -177,6 +174,26 @@ foreach ($order->items as $oItem) {
                                                     <small>
                                                         User checked out in <?=$order->currency?>:
                                                         <?=$order->totals->user_formatted->shipping_discount?>
+                                                    </small>
+                                                    <?php
+                                                }
+
+                                                ?>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width: 80px;">Tax</td>
+                                            <td>
+                                                <?php
+
+                                                echo $order->totals->base_formatted->tax_combined_discount;
+
+                                                if ($order->currency != $order->base_currency) {
+
+                                                    ?>
+                                                    <small>
+                                                        User checked out in <?=$order->currency?>:
+                                                        <?=$order->totals->user_formatted->tax_combined_discount?>
                                                     </small>
                                                     <?php
                                                 }
@@ -210,38 +227,38 @@ foreach ($order->items as $oItem) {
                             <tr>
                                 <td class="label">Total</td>
                                 <td class="value">
-                                <?php
+                                    <?php
 
-                                echo $order->totals->base_formatted->grand;
+                                    echo $order->totals->base_formatted->grand;
 
-                                if ($order->currency != $order->base_currency) {
+                                    if ($order->currency != $order->base_currency) {
+
+                                        ?>
+                                        <small>
+                                            User checked out in <?=$order->currency?>:
+                                            <?=$order->totals->user_formatted->grand?>
+                                        </small>
+                                        <?php
+                                    }
 
                                     ?>
-                                    <small>
-                                        User checked out in <?=$order->currency?>:
-                                        <?=$order->totals->user_formatted->grand?>
-                                    </small>
-                                    <?php
-                                }
-
-                                ?>
                                 </td>
                             </tr>
                             <tr>
                                 <td class="label">Note</td>
                                 <td class="value">
-                                <?php
+                                    <?php
 
-                                if (empty($order->note)) {
+                                    if (empty($order->note)) {
 
-                                    echo '<span class="text-muted">No Note Specified</span>';
+                                        echo '<span class="text-muted">No Note Specified</span>';
 
-                                } else {
+                                    } else {
 
-                                    echo $order->note;
-                                }
+                                        echo $order->note;
+                                    }
 
-                                ?>
+                                    ?>
                                 </td>
                             </tr>
                         </tbody>
@@ -257,13 +274,13 @@ foreach ($order->items as $oItem) {
                 <div class="table-responsive">
                     <table>
                         <tbody>
-                            <tr>
-                                <td class="label">Name &amp; Email</td>
-                                <?php echo adminHelper('loadUserCell', $order->user); ?>
-                            </tr>
-                            <tr>
-                                <td class="label">Telephone</td>
-                                <td class="value">
+                        <tr>
+                            <td class="label">Name &amp; Email</td>
+                            <?php echo adminHelper('loadUserCell', $order->user); ?>
+                        </tr>
+                        <tr>
+                            <td class="label">Telephone</td>
+                            <td class="value">
                                 <?php
 
                                 if ($order->user->telephone) {
@@ -276,89 +293,89 @@ foreach ($order->items as $oItem) {
                                 }
 
                                 ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="label">Billing<br />Address</td>
-                                <td class="value">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="label">Billing<br />Address</td>
+                            <td class="value">
+                                <?php
+
+                                $aAddress = array(
+                                    $order->billing_address->line_1,
+                                    $order->billing_address->line_2,
+                                    $order->billing_address->town,
+                                    $order->billing_address->state,
+                                    $order->billing_address->postcode,
+                                    $order->billing_address->country->label
+                                );
+
+                                $aAddress = array_filter($aAddress);
+
+                                echo implode('<br />', $aAddress);
+
+                                ?>
+                                <small>
                                     <?php
 
-                                    $aAddress = array(
-                                        $order->billing_address->line_1,
-                                        $order->billing_address->line_2,
-                                        $order->billing_address->town,
-                                        $order->billing_address->state,
-                                        $order->billing_address->postcode,
-                                        $order->billing_address->country->label
+                                    echo anchor(
+                                        'https://www.google.com/maps/?q=' . urlencode(implode(', ', $aAddress)),
+                                        '<b class="fa fa-map-marker"></b> Map',
+                                        'target="_blank"'
                                     );
 
-                                    $aAddress = array_filter($aAddress);
-
-                                    echo implode('<br />', $aAddress);
-
                                     ?>
-                                    <small>
-                                        <?php
+                                </small>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="label">Shipping<br />Option</td>
+                            <td class="value">
+                                <?php
 
-                                        echo anchor(
-                                            'https://www.google.com/maps/?q=' . urlencode(implode(', ', $aAddress)),
-                                            '<b class="fa fa-map-marker"></b> Map',
-                                            'target="_blank"'
-                                        );
+                                if (!empty($order->shipping_option['label'])) {
 
-                                        ?>
-                                    </small>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="label">Shipping<br />Option</td>
-                                <td class="value">
+                                    echo $order->shipping_option['label'];
+
+                                } else {
+
+                                    echo $order->delivery_option;
+                                }
+
+                                ?>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="label">Shipping<br />Address</td>
+                            <td class="value">
+                                <?php
+
+                                $aAddress = array(
+                                    $order->shipping_address->line_1,
+                                    $order->shipping_address->line_2,
+                                    $order->shipping_address->town,
+                                    $order->shipping_address->state,
+                                    $order->shipping_address->postcode,
+                                    $order->shipping_address->country->label
+                                );
+
+                                $aAddress = array_filter($aAddress);
+
+                                echo implode('<br />', $aAddress);
+
+                                ?>
+                                <small>
                                     <?php
 
-                                    if (!empty($order->shipping_option['label'])) {
-
-                                        echo $order->shipping_option['label'];
-
-                                    } else {
-
-                                        echo $order->delivery_option;
-                                    }
-
-                                    ?>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="label">Shipping<br />Address</td>
-                                <td class="value">
-                                    <?php
-
-                                    $aAddress = array(
-                                        $order->shipping_address->line_1,
-                                        $order->shipping_address->line_2,
-                                        $order->shipping_address->town,
-                                        $order->shipping_address->state,
-                                        $order->shipping_address->postcode,
-                                        $order->shipping_address->country->label
+                                    echo anchor(
+                                        'https://www.google.com/maps/?q=' . urlencode(implode(', ', $aAddress)),
+                                        '<b class="fa fa-map-marker"></b> Map',
+                                        'target="_blank"'
                                     );
 
-                                    $aAddress = array_filter($aAddress);
-
-                                    echo implode('<br />', $aAddress);
-
                                     ?>
-                                    <small>
-                                        <?php
-
-                                        echo anchor(
-                                            'https://www.google.com/maps/?q=' . urlencode(implode(', ', $aAddress)),
-                                            '<b class="fa fa-map-marker"></b> Map',
-                                            'target="_blank"'
-                                        );
-
-                                        ?>
-                                    </small>
-                                </td>
-                            </tr>
+                                </small>
+                            </td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
@@ -368,191 +385,191 @@ foreach ($order->items as $oItem) {
             <div class="match-height">
                 <div class="order-status-container">
                     <div class="order-status <?=strtolower($order->status)?>">
-                    <?php
+                        <?php
 
-                    switch ($order->status) {
+                        switch ($order->status) {
 
-                        case 'UNPAID' :
-                            ?>
-                            <h1>
-                                <b class="fa fa-exclamation-triangle"></b>
-                                Unpaid
-                            </h1>
-                            <p>
-                                The user was sent to the payment gateway but has not yet completed payment.
-                            </p>
-                            <?php
-
-                            if (time() - strtotime($order->created) > 3600) {
-
+                            case 'UNPAID' :
                                 ?>
+                                <h1>
+                                    <b class="fa fa-exclamation-triangle"></b>
+                                    Unpaid
+                                </h1>
                                 <p>
-                                    <small>
-                                        This order looks to be quite old now, it's likely the
-                                        user abandoned checkout.
-                                    </small>
+                                    The user was sent to the payment gateway but has not yet completed payment.
                                 </p>
                                 <?php
-                            }
-                            break;
 
-                        case 'PAID':
-                            ?>
-                            <h1>
-                                <b class="fa fa-check-circle-o"></b>
-                                Paid
-                            </h1>
-                            <p>
-                                This order has been fully paid.
-                            </p>
-                            <?php
-                            break;
+                                if (time() - strtotime($order->created) > 3600) {
 
-                        case 'ABANDONED':
-                            ?>
-                            <h1>
-                                <b class="fa fa-times-circle"></b>
-                                Abandoned
-                            </h1>
-                            <p>
-                                This order was abandoned by the user prior to reaching checkout.
-                            </p>
-                            <?php
-                            break;
+                                    ?>
+                                    <p>
+                                        <small>
+                                            This order looks to be quite old now, it's likely the
+                                            user abandoned checkout.
+                                        </small>
+                                    </p>
+                                    <?php
+                                }
+                                break;
 
-                        case 'CANCELLED':
-                            ?>
-                            <h1>
-                                <b class="fa fa-times-circle"></b>
-                                Cancelled
-                            </h1>
-                            <p>
-                                This order has been marked as cancelled.
-                            </p>
-                            <?php
-                            break;
+                            case 'PAID':
+                                ?>
+                                <h1>
+                                    <b class="fa fa-check-circle-o"></b>
+                                    Paid
+                                </h1>
+                                <p>
+                                    This order has been fully paid.
+                                </p>
+                                <?php
+                                break;
 
-                        case 'FAILED':
-                            ?>
-                            <h1>
-                                <b class="fa fa-exclamation-triangle"></b>
-                                Failed
-                            </h1>
-                            <p>
-                                There was an issue processing this order. Failure details of the failure may
-                                have been provided from the payment gateway, if so these will be shown below.
-                            </p>
-                            <?php
-                            // @todo: Show failure details
-                            break;
+                            case 'ABANDONED':
+                                ?>
+                                <h1>
+                                    <b class="fa fa-times-circle"></b>
+                                    Abandoned
+                                </h1>
+                                <p>
+                                    This order was abandoned by the user prior to reaching checkout.
+                                </p>
+                                <?php
+                                break;
 
-                        case 'PENDING':
-                            ?>
-                            <h1>
-                                <b class="fa fa-clock-o fa-spin"></b>
-                                Pending
-                            </h1>
-                            <p>
-                                This order is pending action, details and further options may be shown below.
-                            </p>
-                            <?php
-                            // @todo: Show pending reasons/actions
-                            break;
+                            case 'CANCELLED':
+                                ?>
+                                <h1>
+                                    <b class="fa fa-times-circle"></b>
+                                    Cancelled
+                                </h1>
+                                <p>
+                                    This order has been marked as cancelled.
+                                </p>
+                                <?php
+                                break;
 
-                        default:
-                            $sStatus = ucwords(strtolower($order->status));
-                            ?>
-                            <h1>
-                                <?=$sStatus?>
-                            </h1>
-                            <p>
-                                "<?=$sStatus?>" is not an order status I understand, there may be a problem.
-                            </p>
-                            <?php
-                            break;
-                    }
+                            case 'FAILED':
+                                ?>
+                                <h1>
+                                    <b class="fa fa-exclamation-triangle"></b>
+                                    Failed
+                                </h1>
+                                <p>
+                                    There was an issue processing this order. Failure details of the failure may
+                                    have been provided from the payment gateway, if so these will be shown below.
+                                </p>
+                                <?php
+                                // @todo: Show failure details
+                                break;
 
-                    ?>
+                            case 'PENDING':
+                                ?>
+                                <h1>
+                                    <b class="fa fa-clock-o fa-spin"></b>
+                                    Pending
+                                </h1>
+                                <p>
+                                    This order is pending action, details and further options may be shown below.
+                                </p>
+                                <?php
+                                // @todo: Show pending reasons/actions
+                                break;
+
+                            default:
+                                $sStatus = ucwords(strtolower($order->status));
+                                ?>
+                                <h1>
+                                    <?=$sStatus?>
+                                </h1>
+                                <p>
+                                    "<?=$sStatus?>" is not an order status I understand, there may be a problem.
+                                </p>
+                                <?php
+                                break;
+                        }
+
+                        ?>
                     </div>
                 </div>
                 <div class="order-status-container">
                     <div class="order-status <?=strtolower($order->fulfilment_status)?>">
-                    <?php
+                        <?php
 
-                    $sVerbFulfilled   = $order->delivery_option !== 'COLLECTION' ? 'fulfilled' : 'collected';
-                    $sVerbUnfulfilled = $order->delivery_option !== 'COLLECTION' ? 'unfulfilled' : 'uncollected';
+                        $sVerbFulfilled   = $order->delivery_option !== 'COLLECTION' ? 'fulfilled' : 'collected';
+                        $sVerbUnfulfilled = $order->delivery_option !== 'COLLECTION' ? 'unfulfilled' : 'uncollected';
 
-                    $sButtonUrlUnfulfill   = 'admin/shop/orders/unfulfil/' . $order->id;
-                    $sButtonLabelUnfulfill = 'Mark ' . ucfirst($sVerbUnfulfilled);
-                    $sButtonUrlPack        = 'admin/shop/orders/pack/' . $order->id;
-                    $sButtonLabelPack      = 'Mark Packed';
-                    $sButtonUrlFulfill     = 'admin/shop/orders/fulfil/' . $order->id;
-                    $sButtonLabelFulfill   = 'Mark ' . ucfirst($sVerbFulfilled);
+                        $sButtonUrlUnfulfill   = 'admin/shop/orders/unfulfil/' . $order->id;
+                        $sButtonLabelUnfulfill = 'Mark ' . ucfirst($sVerbUnfulfilled);
+                        $sButtonUrlPack        = 'admin/shop/orders/pack/' . $order->id;
+                        $sButtonLabelPack      = 'Mark Packed';
+                        $sButtonUrlFulfill     = 'admin/shop/orders/fulfil/' . $order->id;
+                        $sButtonLabelFulfill   = 'Mark ' . ucfirst($sVerbFulfilled);
 
-                    switch ($order->fulfilment_status) {
+                        switch ($order->fulfilment_status) {
 
-                        case 'FULFILLED':
-                            ?>
-                            <h1>
-                                <b class="fa fa-truck"></b>
-                                <?=strtoupper($sVerbFulfilled)?>
-                            </h1>
-                            <p>
-                                This order has been <?=$sVerbFulfilled?>, no further action is nessecary.
-                            </p>
-                            <p>
-                                <?=anchor($sButtonUrlUnfulfill, $sButtonLabelUnfulfill, 'class="btn btn-warning"')?>
-                                <?=anchor($sButtonUrlPack, $sButtonLabelPack, 'class="btn btn-info"')?>
-                            </p>
-                            <?php
-                            break;
+                            case 'FULFILLED':
+                                ?>
+                                <h1>
+                                    <b class="fa fa-truck"></b>
+                                    <?=strtoupper($sVerbFulfilled)?>
+                                </h1>
+                                <p>
+                                    This order has been <?=$sVerbFulfilled?>, no further action is nessecary.
+                                </p>
+                                <p>
+                                    <?=anchor($sButtonUrlUnfulfill, $sButtonLabelUnfulfill, 'class="btn btn-warning"')?>
+                                    <?=anchor($sButtonUrlPack, $sButtonLabelPack, 'class="btn btn-info"')?>
+                                </p>
+                                <?php
+                                break;
 
-                        case 'PACKED':
-                            ?>
-                            <h1>
-                                <b class="fa fa-cube"></b>
-                                PACKED
-                            </h1>
-                            <p>
-                                This order has <strong>not</strong> been <?=$sVerbFulfilled?>.
-                            </p>
-                            <p>
-                                <?=anchor($sButtonUrlUnfulfill, $sButtonLabelUnfulfill, 'class="btn btn-warning"')?>
-                                <?=anchor($sButtonUrlFulfill, $sButtonLabelFulfill, 'class="btn btn-success"')?>
-                            </p>
-                            <?php
-                            break;
+                            case 'PACKED':
+                                ?>
+                                <h1>
+                                    <b class="fa fa-cube"></b>
+                                    PACKED
+                                </h1>
+                                <p>
+                                    This order has <strong>not</strong> been <?=$sVerbFulfilled?>.
+                                </p>
+                                <p>
+                                    <?=anchor($sButtonUrlUnfulfill, $sButtonLabelUnfulfill, 'class="btn btn-warning"')?>
+                                    <?=anchor($sButtonUrlFulfill, $sButtonLabelFulfill, 'class="btn btn-success"')?>
+                                </p>
+                                <?php
+                                break;
 
-                        case 'UNFULFILLED':
-                            ?>
-                            <h1>
-                                <b class="fa fa-clock-o"></b>
-                                <?=strtoupper($sVerbUnfulfilled)?>
-                            </h1>
-                            <p>
-                                This order has <strong>not</strong> been <?=$sVerbFulfilled?>.
-                            </p>
-                            <p>
-                                <?=anchor($sButtonUrlPack, $sButtonLabelPack, 'class="btn btn-info"')?>
-                                <?=anchor($sButtonUrlFulfill, $sButtonLabelFulfill, 'class="btn btn-success"')?>
-                            </p>
-                            <?php
-                            break;
+                            case 'UNFULFILLED':
+                                ?>
+                                <h1>
+                                    <b class="fa fa-clock-o"></b>
+                                    <?=strtoupper($sVerbUnfulfilled)?>
+                                </h1>
+                                <p>
+                                    This order has <strong>not</strong> been <?=$sVerbFulfilled?>.
+                                </p>
+                                <p>
+                                    <?=anchor($sButtonUrlPack, $sButtonLabelPack, 'class="btn btn-info"')?>
+                                    <?=anchor($sButtonUrlFulfill, $sButtonLabelFulfill, 'class="btn btn-success"')?>
+                                </p>
+                                <?php
+                                break;
 
-                        default:
-                            $sStatus = ucwords(strtolower($order->fulfilment_status));
-                            ?>
-                            <h1>
-                                <?=$sStatus?>
-                            </h1>
-                            <p>
-                                "<?=$sStatus?>" is not a fulfilment status I understand, there may be a problem.
-                            </p>
-                            <?php
-                            break;
-                    }
+                            default:
+                                $sStatus = ucwords(strtolower($order->fulfilment_status));
+                                ?>
+                                <h1>
+                                    <?=$sStatus?>
+                                </h1>
+                                <p>
+                                    "<?=$sStatus?>" is not a fulfilment status I understand, there may be a problem.
+                                </p>
+                                <?php
+                                break;
+                        }
 
-                    ?>
+                        ?>
                     </div>
                 </div>
             </div>
