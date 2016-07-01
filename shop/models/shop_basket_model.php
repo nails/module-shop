@@ -94,6 +94,8 @@ class Shop_basket_model
                 $this->setVoucher($savedBasket->voucher->code);
             }
 
+            $this->setVoucher('B0JRMUKT');
+
             if (!empty($savedBasket->note)) {
                 $this->setNote($savedBasket->note);
             }
@@ -141,7 +143,7 @@ class Shop_basket_model
         foreach ($basket->items as $basketKey => $item) {
 
             /**
-             * Set the item label, this is used to feedback to the suer should items
+             * Set the item label, this is used to feedback to the user should items
              * be removed or adjusted.
              */
 
@@ -180,7 +182,7 @@ class Shop_basket_model
                 } else {
 
                     /**
-                     * Found the item, do we still have enough of the stock? We have enoughs tock if:
+                     * Found the item, do we still have enough of the stock? We have enough stock if:
                      * - $available is null (unlimited)
                      * - $item->quantity is <= $available
                      */
@@ -406,12 +408,13 @@ class Shop_basket_model
 
         if (!empty($basket->voucher->id)) {
 
-            $this->iTotalItemDiscount = 0;
-            $this->iTotalShipDiscount = 0;
-            $this->iTotalTaxDiscount  = 0;
-            $this->iTotalDiscount     = 0;
+            $this->iTotalItemDiscount    = 0;
+            $this->iTotalShipDiscount    = 0;
+            $this->iTotalTaxItemDiscount = 0;
+            $this->iTotalTaxShipDiscount = 0;
+            $this->iTotalDiscount        = 0;
 
-            //  Voucher applies to products onlt
+            //  Voucher applies to products only
             if ($basket->voucher->discount_application == 'PRODUCTS') {
 
                 foreach ($basket->items as $oItem) {
@@ -439,14 +442,15 @@ class Shop_basket_model
 
             //  Voucher applies to shipping costs
             } elseif ($basket->voucher->discount_application == 'SHIPPING') {
-
+    die('@todo - work this out');
                 $iDiscount = $this->calculateShippingDiscount($basket->voucher, $basket);
-                $this->iTotalShipDiscount += $iDiscount;
-                $this->iTotalDiscount     += $iDiscount;
+                $this->iTotalShipDiscount    += $iDiscount;
+                $this->iTotalTaxShipDiscount += $iDiscount;
+                $this->iTotalDiscount        += $iDiscount;
 
             //  Voucher applies to everything, all products and shipping
             } elseif ($basket->voucher->discount_application == 'ALL') {
-
+die('here');
                 foreach ($basket->items as $oItem) {
                     $this->applyDiscountToItem($oItem, $basket->voucher);
                 }
@@ -491,10 +495,7 @@ class Shop_basket_model
             $basket->totals->user->grand_discount    = $oCurrencyModel->convertBaseToUser($basket->totals->base->grand_discount);
         }
 
-        /**
-         * For each item, format it's discount_item and discount_tax property and
-         * calculate the user's version
-         */
+        //  Convert and format prices
         foreach ($basket->items as $oItem) {
 
             $oItemPrice = $oItem->variant->price->price;
@@ -555,6 +556,7 @@ class Shop_basket_model
 
         //  If item prices are inclusive of tax then show the items total + tax
         if (!appSetting('price_exclude_tax', 'nailsapp/module-shop')) {
+
             $basket->totals->base->item += $basket->totals->base->tax_item;
             $basket->totals->user->item += $basket->totals->user->tax_item;
 
@@ -1325,7 +1327,6 @@ class Shop_basket_model
     public function setVoucher($voucher_code)
     {
         if (empty($voucher_code)) {
-
             $this->setError('No voucher code supplied.');
             return false;
         }

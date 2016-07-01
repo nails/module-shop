@@ -107,7 +107,6 @@ class Orders extends BaseAdmin
     public function index()
     {
         if (!userHasPermission('admin:shop:orders:manage')) {
-
             unauthorised();
         }
 

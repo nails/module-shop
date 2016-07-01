@@ -22,14 +22,22 @@ NAILS_Admin_Shop_Vouchers = function()
 
     base.initCopyButtons = function() {
         $('button.copy-code').each(function() {
-            var client = new ZeroClipboard(this);
+            var $button = $(this);
+            var client = new ZeroClipboard($button.get(0));
             client.on('ready', function() {
-                client.on('aftercopy', function(event) {
-                    $(event.target).removeClass('btn-info').addClass('success btn-success');
+                client.on('aftercopy', function() {
+                    $button
+                        .removeClass('btn-info')
+                        .addClass('success btn-success');
                     setTimeout(function() {
-                        $(event.target).removeClass('success btn-success').addClass('btn-info');
+                        $button
+                            .removeClass('success btn-success')
+                            .addClass('btn-info');
                     }, 1500);
                 });
+            });
+            client.on('error', function(event) {
+                $button.hide();
             });
         });
     };
