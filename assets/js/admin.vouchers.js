@@ -36,7 +36,7 @@ NAILS_Admin_Shop_Vouchers = function()
                     }, 1500);
                 });
             });
-            client.on('error', function(event) {
+            client.on('error', function() {
                 $button.hide();
             });
         });

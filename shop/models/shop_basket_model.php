@@ -25,7 +25,9 @@ class Shop_basket_model
     protected $basket;
     protected $sessVar;
     protected $iTotalItemDiscount;
+    protected $iTotalTaxItemDiscount;
     protected $iTotalShipDiscount;
+    protected $iTotalTaxShipDiscount;
     protected $iTotalTaxDiscount;
     protected $iTotalDiscount;
 
@@ -93,8 +95,6 @@ class Shop_basket_model
             if (!empty($savedBasket->voucher->code)) {
                 $this->setVoucher($savedBasket->voucher->code);
             }
-
-            $this->setVoucher('B0JRMUKT');
 
             if (!empty($savedBasket->note)) {
                 $this->setNote($savedBasket->note);
@@ -442,7 +442,7 @@ class Shop_basket_model
 
             //  Voucher applies to shipping costs
             } elseif ($basket->voucher->discount_application == 'SHIPPING') {
-    die('@todo - work this out');
+
                 $iDiscount = $this->calculateShippingDiscount($basket->voucher, $basket);
                 $this->iTotalShipDiscount    += $iDiscount;
                 $this->iTotalTaxShipDiscount += $iDiscount;
@@ -450,7 +450,7 @@ class Shop_basket_model
 
             //  Voucher applies to everything, all products and shipping
             } elseif ($basket->voucher->discount_application == 'ALL') {
-die('here');
+
                 foreach ($basket->items as $oItem) {
                     $this->applyDiscountToItem($oItem, $basket->voucher);
                 }
@@ -471,8 +471,9 @@ die('here');
 
                     //  Perform the calculation
                     $iDiscount = $this->calculateShippingDiscount($basket->voucher, $basket);
-                    $this->iTotalShipDiscount += $iDiscount;
-                    $this->iTotalDiscount     += $iDiscount;
+                    $this->iTotalShipDiscount    += $iDiscount;
+                    $this->iTotalTaxShipDiscount += $iDiscount;
+                    $this->iTotalDiscount        += $iDiscount;
 
                     //  And reset it back to it's previous value
                     $basket->voucher->discount_value = $iVoucherValue;
@@ -480,8 +481,9 @@ die('here');
                 } else {
 
                     $iDiscount = $this->calculateShippingDiscount($basket->voucher, $basket);
-                    $this->iTotalShipDiscount += $iDiscount;
-                    $this->iTotalDiscount     += $iDiscount;
+                    $this->iTotalShipDiscount    += $iDiscount;
+                    $this->iTotalTaxShipDiscount += $iDiscount;
+                    $this->iTotalDiscount        += $iDiscount;
                 }
             }
 
@@ -631,7 +633,7 @@ die('here');
 
     protected function calculateItemDiscount($oVoucher, $oItem)
     {
-        $iItemPrice = $oItem->variant->price->price->base->value_ex_tax;
+        $iItemPrice = $oItem->variant->price->price->base->value_ex_tax * $oItem->quantity;
         $iDiscount  = 0;
         if ($oVoucher->discount_type == 'PERCENTAGE') {
 
@@ -656,7 +658,7 @@ die('here');
 
     protected function calculateTaxDiscount($oVoucher, $oItem)
     {
-        $iItemPrice = $oItem->variant->price->price->base->value_tax;
+        $iItemPrice = $oItem->variant->price->price->base->value_tax * $oItem->quantity;
         $iDiscount  = 0;
         if ($oVoucher->discount_type == 'PERCENTAGE') {
 
@@ -684,27 +686,33 @@ die('here');
      * @param  object $oVoucher The voucher object
      * @param  object $oBasket  The basket object
      * @return int
+     * @throws \Exception
      */
     protected function calculateShippingDiscount($oVoucher, $oBasket)
     {
-        $iDiscount = 0;
+        $iDiscount    = 0;
+        $iDiscountTax = 0;
         if ($oVoucher->discount_type == 'PERCENTAGE') {
 
-            $iDiscount = (int) round($oBasket->totals->base->shipping * ($oVoucher->discount_value/100));
+            $iDiscount    = (int) round($oBasket->totals->base->shipping * ($oVoucher->discount_value/100));
+            $iDiscountTax = (int) round($oBasket->totals->base->tax_shipping * ($oVoucher->discount_value/100));
 
         } else if ($oVoucher->discount_type == 'AMOUNT') {
 
-            //  Ensure we've not maxed the discount
-            if ($this->iTotalShipDiscount < $oVoucher->discount_value) {
-                if ($oVoucher->discount_value < $oBasket->totals->base->shipping) {
-                    $iDiscount = $oVoucher->discount_value;
-                } else {
-                    $iDiscount = $oBasket->totals->base->shipping;
-                }
-            }
+            /**
+             * This scenario is one we won't handle at this point due to the complexities of working it out.
+             * If I have a voucher for £10, and shipping is £10 + VAt (i.e. £12) we can deduct the £10, but
+             * we're left with £2 (which is tax) if the value of shipping is now £0 then the tax should also
+             * be £0.
+             *
+             * This is mainly a flaw in the whole approach, but we feel that absolute amounts off shipping
+             * are rarely seen in the wild.
+             */
+
+            throw new \Exception('Cannot apply a value based voucher to shipping.');
         }
 
-        return $iDiscount;
+        return $iDiscount + $iDiscountTax;
     }
 
     // --------------------------------------------------------------------------
