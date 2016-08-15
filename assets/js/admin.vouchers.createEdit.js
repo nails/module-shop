@@ -170,7 +170,10 @@ NAILS_Admin_Shop_Vouchers_CreateEdit = function() {
      */
     base.handleApplicationChange = function() {
 
-        switch($('select[name=discount_application]').val()) {
+        var application = $('select[name=discount_application]').val();
+        //  Additional fields
+        switch(application) {
+
             case 'PRODUCTS':
             case 'SHIPPING':
             case 'ALL':
@@ -193,6 +196,23 @@ NAILS_Admin_Shop_Vouchers_CreateEdit = function() {
                 $('#application-product_types').hide();
                 $('#application-product').show();
                 break;
+        }
+
+        //  If selected value applies to shipping then restrict to percentage based discounts
+        if (application === 'SHIPPING' || application === 'ALL') {
+
+            $('select[name=discount_type]')
+                .val('PERCENTAGE')
+                .find('option[value=AMOUNT]')
+                .prop('disabled', true)
+                .text('Specific amount (cannot apply amount based discounts when voucher can apply to shipping cost)');
+
+        } else {
+
+            $('select[name=discount_type]')
+                .find('option[value=AMOUNT]')
+                .prop('disabled', false)
+                .text('Specific amount');
         }
 
         base.hideNoExtendedData();

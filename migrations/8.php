@@ -3,10 +3,10 @@
 /**
  * Migration:   8
  * Started:     04/03/2016
- * Finalised:
+ * Finalised:   29/06/2016
  *
  * @package     Nails
- * @subpackage  module-invoice
+ * @subpackage  module-shop
  * @category    Database Migration
  * @author      Nails Dev Team
  * @link

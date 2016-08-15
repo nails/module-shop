@@ -172,6 +172,8 @@ $sShopUrl = appSetting('url', 'nailsapp/module-shop') ? appSetting('url', 'nails
         <tr>
             <td style="border-top:1px solid #CCCCCC; background: #EFEFEF" class="text-right" colspan="4">
                 Sub Total:
+                <br />Shipping:
+                <br />Tax:
                 <?php
 
                 if (!empty($order->totals->base->grand_discount)) {
@@ -180,12 +182,12 @@ $sShopUrl = appSetting('url', 'nailsapp/module-shop') ? appSetting('url', 'nails
                 }
 
                 ?>
-                <br />Shipping:
-                <br />Tax:
                 <br />Total:
             </td>
             <td style="border-top:1px solid #CCCCCC; background: #EFEFEF" class="text-center">
                 <?=$order->totals->base_formatted->item?>
+                <br /><?=$order->totals->base_formatted->shipping?>
+                <br /><?=$order->totals->base_formatted->tax_combined?>
                 <?php
 
                 if (!empty($order->totals->base->grand_discount)) {
@@ -194,8 +196,6 @@ $sShopUrl = appSetting('url', 'nailsapp/module-shop') ? appSetting('url', 'nails
                 }
 
                 ?>
-                <br /><?=$order->totals->base_formatted->shipping?>
-                <br /><?=$order->totals->base_formatted->tax?>
                 <br /><strong><?=$order->totals->base_formatted->grand?></strong>
             </td>
         </tr>

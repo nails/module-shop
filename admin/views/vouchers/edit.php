@@ -7,110 +7,110 @@
         <legend>Basic Information</legend>
         <?php
 
-            //  Voucher type
-            $field             = array();
-            $field['key']      = 'type';
-            $field['label']    = 'Type';
-            $field['class']    = 'select2';
-            $field['required'] = true;
+        //  Voucher type
+        $field             = array();
+        $field['key']      = 'type';
+        $field['label']    = 'Type';
+        $field['class']    = 'select2';
+        $field['required'] = true;
 
-            echo form_field_dropdown($field, $voucherTypes);
+        echo form_field_dropdown($field, $voucherTypes);
 
-            // --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-            //  Code
-            $field                = array();
-            $field['key']         = 'code';
-            $field['label']       = 'Code';
-            $field['info']        = '<a href="#" id="generate-code" class="btn btn-xs btn-default">Generate Valid Code</a> ';
-            $field['info']       .= '<b id="generateCodeSpinner" class="fa fa-spin fa-spinner"></b>';
-            $field['placeholder'] = 'Define the code for this voucher or generate one using the link on the left.';
-            $field['required']    = true;
+        //  Code
+        $field                = array();
+        $field['key']         = 'code';
+        $field['label']       = 'Code';
+        $field['info']        = '<a href="#" id="generate-code" class="btn btn-xs btn-default">Generate Valid Code</a> ';
+        $field['info']       .= '<b id="generateCodeSpinner" class="fa fa-spin fa-spinner"></b>';
+        $field['placeholder'] = 'Define the code for this voucher or generate one using the link on the left.';
+        $field['required']    = true;
 
-            echo form_field($field);
+        echo form_field($field);
 
-            // --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-            //  Label
-            $field                = array();
-            $field['key']         = 'label';
-            $field['label']       = 'Label/Description';
-            $field['placeholder'] = 'The label is shown to the user when the voucher is applied.';
-            $field['required']    = true;
+        //  Label
+        $field                = array();
+        $field['key']         = 'label';
+        $field['label']       = 'Label/Description';
+        $field['placeholder'] = 'The label is shown to the user when the voucher is applied.';
+        $field['required']    = true;
 
-            echo form_field($field);
+        echo form_field($field);
 
-            // --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-            //  Discount type
-            $field             = array();
-            $field['key']      = 'discount_type';
-            $field['label']    = 'Discount Type';
-            $field['class']    = 'select2';
-            $field['required'] = true;
+        //  Discount application
+        $field             = array();
+        $field['key']      = 'discount_application';
+        $field['label']    = 'Applies to';
+        $field['class']    = 'select2';
+        $field['required'] = true;
 
-            $options = array(
-                'PERCENTAGE' => 'Percentage',
-                'AMOUNT'     => 'Specific amount'
-            );
+        $options = array(
+            'PRODUCTS'      => 'Products Only',
+            'PRODUCT_TYPES' => 'Certain Type of Product Only',
+            'PRODUCT'       => 'Certain Product Only',
+            'SHIPPING'     => 'Shipping Costs Only',
+            'ALL'           => 'Both Products and Shipping'
+        );
 
-            echo form_field_dropdown($field, $options);
+        echo form_field_dropdown($field, $options);
 
-            // --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-            //  Discount value
-            $field                = array();
-            $field['key']         = 'discount_value';
-            $field['label']       = 'Discount Value';
-            $field['placeholder'] = 'Define the value of the discount as appropriate (i.e percentage or amount)';
-            $field['required']    = true;
-            $field['tip']         = 'If Discount Type is Percentage then specify a number 1-100, if it\'s a Specific Amount then define the amount.';
+        //  Discount type
+        $field             = array();
+        $field['key']      = 'discount_type';
+        $field['label']    = 'Discount Type';
+        $field['class']    = 'select2';
+        $field['required'] = true;
 
-            echo form_field($field);
+        $options = array(
+            'PERCENTAGE' => 'Percentage',
+            'AMOUNT'     => 'Specific amount'
+        );
 
-            // --------------------------------------------------------------------------
+        echo form_field_dropdown($field, $options);
 
-            //  Discount application
-            $field             = array();
-            $field['key']      = 'discount_application';
-            $field['label']    = 'Applies to';
-            $field['class']    = 'select2';
-            $field['required'] = true;
+        // --------------------------------------------------------------------------
 
-            $options = array(
-                'PRODUCTS'      => 'Products Only',
-                'PRODUCT_TYPES' => 'Certain Type of Product Only',
-                'PRODUCT'       => 'Certain Product Only',
-                // 'SHIPPING'      => 'Shipping Costs Only',
-                'ALL'           => 'Both Products and Shipping'
-            );
+        //  Discount value
+        $field                = array();
+        $field['key']         = 'discount_value';
+        $field['label']       = 'Discount Value';
+        $field['placeholder'] = 'Define the value of the discount as appropriate (i.e percentage or amount)';
+        $field['required']    = true;
+        $field['tip']         = 'If Discount Type is Percentage then specify a number 1-100, if it\'s a Specific Amount then define the amount.';
 
-            echo form_field_dropdown($field, $options);
+        echo form_field($field);
 
-            // --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-            //  Valid from
-            $field                = array();
-            $field['key']         = 'valid_from';
-            $field['label']       = 'Valid From';
-            $field['default']     = date('Y-m-d H:i:s');
-            $field['placeholder'] = 'YYYY-MM-DD HH:MM:SS';
-            $field['class']       = 'datetime1';
-            $field['required']    = true;
+        //  Valid from
+        $field                = array();
+        $field['key']         = 'valid_from';
+        $field['label']       = 'Valid From';
+        $field['default']     = date('Y-m-d H:i:s');
+        $field['placeholder'] = 'YYYY-MM-DD HH:MM:SS';
+        $field['class']       = 'datetime1';
+        $field['required']    = true;
 
-            echo form_field($field);
+        echo form_field($field);
 
-            // --------------------------------------------------------------------------
+        // --------------------------------------------------------------------------
 
-            //  Valid To
-            $field                = array();
-            $field['key']         = 'valid_to';
-            $field['label']       = 'Expires';
-            $field['sub_label']   = 'Leave blank for no expiry date';
-            $field['placeholder'] = 'YYYY-MM-DD HH:MM:SS';
-            $field['class']       = 'datetime2';
+        //  Valid To
+        $field                = array();
+        $field['key']         = 'valid_to';
+        $field['label']       = 'Expires';
+        $field['sub_label']   = 'Leave blank for no expiry date';
+        $field['placeholder'] = 'YYYY-MM-DD HH:MM:SS';
+        $field['class']       = 'datetime2';
 
-            echo form_field($field, 'If left blank then the voucher will not expire (unless another expiring condition is met).');
+        echo form_field($field, 'If left blank then the voucher will not expire (unless another expiring condition is met).');
 
         ?>
     </fieldset>

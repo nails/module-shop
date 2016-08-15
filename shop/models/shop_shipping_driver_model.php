@@ -251,7 +251,8 @@ class Shop_shipping_driver_model
 
                 if ($aOption['slug'] !== 'COLLECTION') {
 
-                    $aOption['cost'] = $this->oDriver->calculate($aShippableItems, $aOption['slug'], $oBasket);
+                    $oCost           = $this->oDriver->calculate($aShippableItems, $aOption['slug'], $oBasket);
+                    $aOption['cost'] = $oCost->total;
 
                     if (is_int($aOption['cost']) || is_numeric($aOption['cost'])) {
 
@@ -261,6 +262,7 @@ class Shop_shipping_driver_model
 
                         $aOption['cost'] = 0;
                     }
+
                 } else {
 
                     $aOption['cost'] = 0;
@@ -326,9 +328,10 @@ class Shop_shipping_driver_model
      */
     public function calculate($basket)
     {
-        $oFree       = new \stdClass();
-        $oFree->base = (int) 0;
-        $oFree->user = (int) 0;
+        $oFree                = new \stdClass();
+        $oFree->total_inc_tax = 0;
+        $oFree->total_ex_tax  = 0;
+        $oFree->tax           = 0;
 
         // --------------------------------------------------------------------------
 
@@ -340,32 +343,60 @@ class Shop_shipping_driver_model
         // --------------------------------------------------------------------------
 
         /**
-         * Have the driver calculate the cost of shipping, this should return an integer
-         * which is in the base currency. It is passed an array of all shippable items
-         * (i.e., items who's type marks them as `is_physical` and is not set to
-         * `collect only`), as well as a reference to the basket, shold the driver need
-         * to know anything else about the order.
+         * Have the driver calculate the cost of shipping, this should return an object
+         * consisting of two properties: `total`, an integer of the cost of shipping
+         * which is in the base currency and `tax_rate`, a float descibing the percentage
+         * of tax to apply. It is passed an array of all shippable items (i.e., items who's
+         * type marks them as `is_physical` and is not set to collect only`), as well as a
+         * reference to the basket, shold the driver need to know anything else about the order.
          */
 
         $aShippableItems = $this->getShippableItemsFromBasket($basket);
-        $iCost           = $this->oDriver->calculate($aShippableItems, $basket->shipping->option, $basket);
+        $oCost           = $this->oDriver->calculate($aShippableItems, $basket->shipping->option, $basket);
 
-        if (!is_integer($iCost) || $iCost < 0) {
-
+        if (!property_exists($oCost, 'total') || $oCost->total < 0) {
             throw new ShippingDriverException(
-                'The value returned by the shipping driver must be a positive integer or zero.',
+                'The value returned from the shipping driver must specify an item cost greater than, or equal to 0.',
                 7
             );
         }
 
-        $out       = new \stdClass();
-        $out->base = $iCost;
+        if (!property_exists($oCost, 'tax_rate') || $oCost->tax_rate < 0) {
+            throw new ShippingDriverException(
+                'The value returned from the shipping driver must specify a tax rate greater than, or equal to 0.',
+                7
+            );
+        }
 
-        //  Convert the base price to the user's currency
-        $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
-        $out->user      = $oCurrencyModel->convertBaseToUser($iCost);
+        // --------------------------------------------------------------------------
 
-        return $out;
+        /**
+         * Calculate the shipping values, inclusive and exscusive of tax (respecting the
+         * `price_exclude_tax` setting).
+         */
+
+        $oOut                = new \stdClass();
+        $oOut->total_inc_tax = 0;
+        $oOut->total_ex_tax  = 0;
+        $oOut->tax           = 0;
+
+        if (appSetting('price_exclude_tax', 'nailsapp/module-shop')) {
+
+            //  Prices exclude tax, so bump it on top
+            $oOut->tax           = $oCost->total * $oCost->tax_rate;
+            $oOut->total_inc_tax = $oCost->total + $oOut->tax;
+            $oOut->total_ex_tax  = $oCost->total;
+
+        } else {
+
+            //  Prices include tax, so the tax value is what is removed from the total
+            $oOut->tax           = ($oCost->tax_rate * $oCost->total) / (1 + $oCost->tax_rate);
+            $oOut->tax           = round($oOut->tax, 0, PHP_ROUND_HALF_UP);
+            $oOut->total_inc_tax = $oCost->total;
+            $oOut->total_ex_tax  = $oCost->total - $oOut->tax;
+        }
+
+        return $oOut;
     }
 
     // --------------------------------------------------------------------------
@@ -378,6 +409,7 @@ class Shop_shipping_driver_model
      */
     public function calculateVariant($iVariantId, $sOptionSlug = null)
     {
+        die('@todo');
         $oFree       = new \stdClass();
         $oFree->base = (int) 0;
         $oFree->user = (int) 0;

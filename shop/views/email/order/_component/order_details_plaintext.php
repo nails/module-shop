@@ -113,7 +113,7 @@ foreach ($order->items as $item) {
 ---
 
 Sub Total: <?=$order->totals->user_formatted->item . "\n"?>
-<?=$order->totals->base->grand_discount ? 'Discount: -' . $order->totals->base_formatted->grand_discount . "\n" : ''?>
 Shipping:  <?=$order->totals->user_formatted->shipping . "\n"?>
-Tax:       <?=$order->totals->user_formatted->tax . "\n"?>
+Tax:       <?=$order->totals->user_formatted->tax_combined . "\n"?>
+<?=$order->totals->base->grand_discount ? 'Discount: -' . $order->totals->base_formatted->grand_discount . "\n" : ''?>
 Total:     <?=$order->totals->user_formatted->grand . "\n"?>

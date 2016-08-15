@@ -83,13 +83,12 @@ class Vouchers extends BaseAdmin
     // --------------------------------------------------------------------------
 
     /**
-     * Browse voucehrs
+     * Browse vouchers
      * @return void
      */
     public function index()
     {
         if (!userHasPermission('admin:shop:vouchers:manage')) {
-
             unauthorised();
         }
 
@@ -106,11 +105,12 @@ class Vouchers extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Get pagination and search/sort variables
-        $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
-        $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
-        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.created';
-        $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
-        $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
+        $oInput = Factory::service('Input');
+        $page      = $oInput->get('page')      ? $oInput->get('page')      : 0;
+        $perPage   = $oInput->get('perPage')   ? $oInput->get('perPage')   : 50;
+        $sortOn    = $oInput->get('sortOn')    ? $oInput->get('sortOn')    : $tablePrefix . '.created';
+        $sortOrder = $oInput->get('sortOrder') ? $oInput->get('sortOrder') : 'desc';
+        $keywords  = $oInput->get('keywords')  ? $oInput->get('keywords')  : '';
 
         // --------------------------------------------------------------------------
 
@@ -167,9 +167,10 @@ class Vouchers extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load assets
-        $this->asset->library('ZEROCLIPBOARD');
-        $this->asset->load('admin.vouchers.min.js', 'nailsapp/module-shop');
-        $this->asset->inline('voucher = new NAILS_Admin_Shop_Vouchers();', 'JS');
+        $oAsset = Factory::service('Asset');
+        $oAsset->library('ZEROCLIPBOARD');
+        $oAsset->load('admin.vouchers.min.js', 'nailsapp/module-shop');
+        $oAsset->inline('voucher = new NAILS_Admin_Shop_Vouchers();', 'JS');
 
         // --------------------------------------------------------------------------
 
@@ -185,8 +186,8 @@ class Vouchers extends BaseAdmin
     public function create()
     {
         if (!userHasPermission('admin:shop:vouchers:create')) {
-
-            $this->session->set_flashdata('error', 'You do not have permission to create vouchers.');
+            $oSession = Factory::service('Session', 'nailsapp/module-auth');
+            $oSession->set_flashdata('error', 'You do not have permission to create vouchers.');
             redirect('admin/shop/vouchers');
         }
 
@@ -197,151 +198,153 @@ class Vouchers extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        if ($this->input->post()) {
+        $oInput = Factory::service('Input');
 
-            $oFormValidation = Factory::service('FormValidation');
+        if ($oInput->post()) {
 
-            //  Common
-            $oFormValidation->set_rules('type', '', 'required|callback_callbackVoucherValidType');
-            $oFormValidation->set_rules('code', '', 'required|is_unique[' . NAILS_DB_PREFIX . 'shop_voucher.code]|callback_callbackVoucherValidCode');
-            $oFormValidation->set_rules('label', '', 'required');
-            $oFormValidation->set_rules('valid_from', '', 'required|callback_callbackVoucherValidFrom');
-            $oFormValidation->set_rules('valid_to', '', 'callback_callbackVoucherValidTo');
+            try {
 
-            //  Voucher Type specific rules
-            switch ($this->input->post('type')) {
+                $oFormValidation = Factory::service('FormValidation');
 
-                case 'LIMITED_USE':
+                //  Common
+                $oFormValidation->set_rules('type', '', 'required|callback_callbackVoucherValidType');
+                $oFormValidation->set_rules('code', '', 'required|is_unique[' . NAILS_DB_PREFIX . 'shop_voucher.code]|callback_callbackVoucherValidCode');
+                $oFormValidation->set_rules('label', '', 'required');
+                $oFormValidation->set_rules('valid_from', '', 'required|callback_callbackVoucherValidFrom');
+                $oFormValidation->set_rules('valid_to', '', 'callback_callbackVoucherValidTo');
 
-                    $oFormValidation->set_rules('limited_use_limit', '', 'required|is_natural_no_zero');
-                    $oFormValidation->set_rules('discount_type', '', 'required|callback_callbackVoucherValidDiscountType');
-                    $oFormValidation->set_rules('discount_application', '', 'required|callback_callbackVoucherValidDiscountApplication');
+                //  Voucher Type specific rules
+                switch ($oInput->post('type')) {
 
-                    $oFormValidation->set_message('is_natural_no_zero', 'Only positive integers are valid.');
-                    break;
+                    case 'LIMITED_USE':
 
-                case 'NORMAL':
-                default:
+                        $oFormValidation->set_rules('limited_use_limit', '', 'required|is_natural_no_zero');
+                        $oFormValidation->set_rules('discount_type', '', 'required|callback_callbackVoucherValidDiscountType');
+                        $oFormValidation->set_rules('discount_application', '', 'required');
 
-                    $oFormValidation->set_rules('discount_type', '', 'required|callback_callbackVoucherValidDiscountType');
-                    $oFormValidation->set_rules('discount_application', '', 'required|callback_callbackVoucherValidDiscountApplication');
-                    break;
+                        $oFormValidation->set_message('is_natural_no_zero', 'Only positive integers are valid.');
+                        break;
 
-                case 'GIFT_CARD':
+                    case 'NORMAL':
+                    default:
 
-                    //  Quick hack
-                    $POST['discount_type']        = 'AMOUNT';
-                    $POST['discount_application'] = 'ALL';
-                    break;
-            }
+                        $oFormValidation->set_rules('discount_type', '', 'required|callback_callbackVoucherValidDiscountType');
+                        $oFormValidation->set_rules('discount_application', '', 'required');
+                        break;
 
-            //  Discount Type specific rules
-            switch ($this->input->post('discount_type')) {
+                    case 'GIFT_CARD':
 
-                case 'PERCENTAGE':
+                        //  Quick hack
+                        $POST['discount_type'] = 'AMOUNT';
+                        $POST['discount_application'] = 'ALL';
+                        break;
+                }
 
-                    $oFormValidation->set_rules('discount_value', '', 'required|is_natural_no_zero|greater_than[0]|less_than[101]');
-                    $oFormValidation->set_message('is_natural_no_zero', 'Only positive integers are valid.');
-                    $oFormValidation->set_message('greater_than', 'Must be in the range 1-100');
-                    $oFormValidation->set_message('less_than', 'Must be in the range 1-100');
-                    break;
+                //  Discount Type specific rules
+                switch ($oInput->post('discount_type')) {
 
-                case 'AMOUNT':
+                    case 'PERCENTAGE':
 
-                    $oFormValidation->set_rules('discount_value', '', 'required|numeric|greater_than[0]');
-                    $oFormValidation->set_message('greater_than', 'Must be greater than 0');
-                    break;
+                        $oFormValidation->set_rules('discount_value', '', 'required|is_natural_no_zero|greater_than[0]|less_than[101]');
+                        $oFormValidation->set_message('is_natural_no_zero', 'Only positive integers are valid.');
+                        $oFormValidation->set_message('greater_than', 'Must be in the range 1-100');
+                        $oFormValidation->set_message('less_than', 'Must be in the range 1-100');
+                        break;
 
-                default:
+                    case 'AMOUNT':
 
-                    //  No specific rules
-                    break;
-            }
+                        $oFormValidation->set_rules('discount_value', '', 'required|numeric|greater_than[0]');
+                        $oFormValidation->set_message('greater_than', 'Must be greater than 0');
+                        break;
 
-            //  Discount application specific rules
-            switch ($this->input->post('discount_application')) {
+                    default:
 
-                case 'PRODUCT_TYPES':
+                        //  No specific rules
+                        break;
+                }
 
-                    $oFormValidation->set_rules('product_type_id', '', 'required|callback_callbackVoucherValidProductType');
-                    break;
+                //  Discount application specific rules
+                switch ($oInput->post('discount_application')) {
 
-                case 'PRODUCT':
+                    case 'PRODUCT_TYPES':
 
-                    $oFormValidation->set_rules('product_id', '', 'required|callback_callbackVoucherValidProduct');
-                    break;
+                        $oFormValidation->set_rules('product_type_id', '', 'required|callback_callbackVoucherValidProductType');
+                        break;
 
-                case 'PRODUCTS':
-                case 'SHIPPING':
-                case 'ALL':
-                default:
+                    case 'PRODUCT':
 
-                    //  No specific rules
-                    break;
-            }
+                        $oFormValidation->set_rules('product_id', '', 'required|callback_callbackVoucherValidProduct');
+                        break;
 
-            $oFormValidation->set_message('required', lang('fv_required'));
-            $oFormValidation->set_message('is_unique', 'Code already in use.');
+                    case 'PRODUCTS':
+                    case 'SHIPPING':
+                    case 'ALL':
+                    default:
 
-            if ($oFormValidation->run($this)) {
+                        //  No specific rules
+                        break;
+                }
+
+                $oFormValidation->set_message('required', lang('fv_required'));
+                $oFormValidation->set_message('is_unique', 'Code already in use.');
+
+                if (!$oFormValidation->run($this)) {
+                    throw new \Exception(lang('fv_there_were_errors'));
+                }
+
+                //  Test to ensure we're not applying an amount based voucher in a context which
+                //  could be applied to shipping costs
+                dumpanddie('ok');
 
                 //  Prepare the $data variable
-                $data = array();
+                $data = array(
+                    'type'                 => $oInput->post('type'),
+                    'code'                 => strtoupper($oInput->post('code')),
+                    'discount_type'        => $oInput->post('discount_type'),
+                    'discount_value'       => $oInput->post('discount_value'),
+                    'discount_application' => $oInput->post('discount_application'),
+                    'label'                => $oInput->post('label'),
+                    'valid_from'           => $oInput->post('valid_from'),
+                    'is_active'            => true
+                );
 
-                $data['type']                 = $this->input->post('type');
-                $data['code']                 = strtoupper($this->input->post('code'));
-                $data['discount_type']        = $this->input->post('discount_type');
-                $data['discount_value']       = $this->input->post('discount_value');
-                $data['discount_application'] = $this->input->post('discount_application');
-                $data['label']                = $this->input->post('label');
-                $data['valid_from']           = $this->input->post('valid_from');
-                $data['is_active']            = true;
-
-                if ($this->input->post('valid_to')) {
-
-                    $data['valid_to'] = $this->input->post('valid_to');
+                if ($oInput->post('valid_to')) {
+                    $data['valid_to'] = $oInput->post('valid_to');
                 }
 
                 //  Define specifics
-                if ($this->input->post('type') == 'GIFT_CARD') {
-
-                    $data['gift_card_balance']    = $this->input->post('discount_value');
+                if ($oInput->post('type') == 'GIFT_CARD') {
+                    $data['gift_card_balance']    = $oInput->post('discount_value');
                     $data['discount_type']        = 'AMOUNT';
                     $data['discount_application'] = 'ALL';
                 }
 
-                if ($this->input->post('type') == 'LIMITED_USE') {
-
-                    $data['limited_use_limit'] = $this->input->post('limited_use_limit');
+                if ($oInput->post('type') == 'LIMITED_USE') {
+                    $data['limited_use_limit'] = $oInput->post('limited_use_limit');
                 }
 
-                if ($this->input->post('discount_application') == 'PRODUCT') {
-
-                    $data['product_id'] = $this->input->post('product_id');
+                if ($oInput->post('discount_application') == 'PRODUCT') {
+                    $data['product_id'] = $oInput->post('product_id');
                 }
 
-                if ($this->input->post('discount_application') == 'PRODUCT_TYPES') {
-
-                    $data['product_type_id'] = $this->input->post('product_type_id');
+                if ($oInput->post('discount_application') == 'PRODUCT_TYPES') {
+                    $data['product_type_id'] = $oInput->post('product_type_id');
                 }
 
                 // --------------------------------------------------------------------------
 
                 //  Attempt to create
-                if ($this->oVoucherModel->create($data)) {
-
-                    $this->session->set_flashdata('success', 'Voucher "' . $data['code'] . '" was created successfully.');
-                    redirect('admin/shop/vouchers');
-
-                } else {
-
-                    $this->data['error']  = 'There was a problem creating the voucher. ';
-                    $this->Data['error'] .= $this->oVoucherModel->lastError();
+                if (!$this->oVoucherModel->create($data)) {
+                    $this->data['error'] = 'There was a problem creating the voucher. ';
+                    $this->data['error'] .= $this->oVoucherModel->lastError();
                 }
 
-            } else {
+                $oSession = Factory::service('Session', 'nailsapp/module-auth');
+                $oSession->set_flashdata('success', 'Voucher "' . $data['code'] . '" was created successfully.');
+                redirect('admin/shop/vouchers');
 
-                $this->data['error'] = lang('fv_there_were_errors');
+            } catch (\Exception $e) {
+                $this->data['error'] = $e->getMessage();
             }
         }
 
@@ -358,8 +361,9 @@ class Vouchers extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load assets
-        $this->asset->load('admin.vouchers.createEdit.min.js', 'nailsapp/module-shop');
-        $this->asset->inline('voucher = new NAILS_Admin_Shop_Vouchers_CreateEdit();', 'JS');
+        $oAsset = Factory::service('Asset');
+        $oAsset->load('admin.vouchers.createEdit.min.js', 'nailsapp/module-shop');
+        $oAsset->inline('voucher = new NAILS_Admin_Shop_Vouchers_CreateEdit();', 'JS');
 
         // --------------------------------------------------------------------------
 
@@ -382,7 +386,8 @@ class Vouchers extends BaseAdmin
 
         } else {
 
-            $id = $this->uri->segment(5);
+            $oUri = Factory::service('Uri');
+            $id   = $oUri->segment(5);
 
             if ($this->oVoucherModel->activate($id)) {
 
@@ -397,7 +402,8 @@ class Vouchers extends BaseAdmin
             }
         }
 
-        $this->session->set_flashdata($status, $message);
+        $oSession = Factory::service('Session', 'nailsapp/module-auth');
+        $oSession->set_flashdata($status, $message);
 
         redirect('admin/shop/vouchers');
     }
@@ -417,7 +423,8 @@ class Vouchers extends BaseAdmin
 
         } else {
 
-            $id = $this->uri->segment(5);
+            $oUri = Factory::service('Uri');
+            $id   = $oUri->segment(5);
 
             if ($this->oVoucherModel->suspend($id)) {
 
@@ -432,7 +439,8 @@ class Vouchers extends BaseAdmin
             }
         }
 
-        $this->session->set_flashdata($status, $message);
+        $oSession = Factory::service('Session', 'nailsapp/module-auth');
+        $oSession->set_flashdata($status, $message);
 
         redirect('admin/shop/vouchers');
     }
@@ -478,27 +486,30 @@ class Vouchers extends BaseAdmin
 
     /**
      * Form Validation: Validate a voucher's discount tye
-     * @param  string $str The voucher discount type
+     * @param  string $sStr The voucher discount type
      * @return boolean
      */
-    public function callbackVoucherValidDiscountType($str)
+    public function callbackVoucherValidDiscountType($sStr)
     {
-        $valid_types     = array('PERCENTAGE', 'AMOUNT');
+        $aValidTypes     = array('PERCENTAGE', 'AMOUNT');
         $oFormValidation = Factory::service('FormValidation');
-        $oFormValidation->set_message('callbackVoucherValidDiscountType', 'Invalid discount type.');
-        return array_search($str, $valid_types) !== false;
-    }
+        $oInput          = Factory::service('Input');
 
-    // --------------------------------------------------------------------------
+        if (!in_array($sStr, $aValidTypes)) {
+            $oFormValidation->set_message('callbackVoucherValidDiscountType', 'Invalid discount type.');
+            return false;
+        }
 
-    /**
-     * Form Validation: Validate a voucher's discount application
-     * @todo: complete this, I'm sure it used to be here
-     * @param  string $str The voucher discount type
-     * @return boolean
-     */
-    public function callbackVoucherValidDiscountApplication($str)
-    {
+        $sApplication = $oInput->post('discount_application');
+        if (($sApplication == 'SHIPPING' || $sApplication == 'ALL') && $sStr == 'AMOUNT') {
+            $oFormValidation = Factory::service('FormValidation');
+            $oFormValidation->set_message(
+                'callbackVoucherValidDiscountType',
+                'You cannot create an amount based voucher when the voucher can be applied in a shipping context.'
+            );
+            return false;
+        }
+
         return true;
     }
 
@@ -539,6 +550,7 @@ class Vouchers extends BaseAdmin
      */
     public function callbackVoucherValidFrom(&$str)
     {
+        $oInput          = Factory::service('Input');
         $oFormValidation = Factory::service('FormValidation');
 
         //  Check $str is a valid date
@@ -546,24 +558,21 @@ class Vouchers extends BaseAdmin
 
         //  Check format of str
         if (preg_match('/^\d\d\d\d\-\d\d-\d\d$/', trim($str))) {
-
             //in YYYY-MM-DD format, add the time
             $str = trim($str) . ' 00:00:00';
         }
 
         if ($date != $str) {
-
             $oFormValidation->set_message('callbackVoucherValidFrom', 'Invalid date.');
             return false;
         }
 
         //  If valid_to is defined make sure valid_from isn't before it
-        if ($this->input->post('valid_to')) {
+        if ($oInput->post('valid_to')) {
 
-            $date = strtotime($this->input->post('valid_to'));
+            $date = strtotime($oInput->post('valid_to'));
 
             if (strtotime($str) >= $date) {
-
                 $oFormValidation->set_message('callbackVoucherValidFrom', 'Valid From date cannot be after Valid To date.');
                 return false;
             }
@@ -588,6 +597,7 @@ class Vouchers extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
+        $oInput          = Factory::service('Input');
         $oFormValidation = Factory::service('FormValidation');
 
         //  Check $str is a valid date
@@ -595,22 +605,19 @@ class Vouchers extends BaseAdmin
 
         //  Check format of str
         if (preg_match('/^\d\d\d\d\-\d\d\-\d\d$/', trim($str))) {
-
             //in YYYY-MM-DD format, add the time
             $str = trim($str) . ' 00:00:00';
         }
 
         if ($date != $str) {
-
             $oFormValidation->set_message('callbackVoucherValidTo', 'Invalid date.');
             return false;
         }
 
         //  Make sure valid_from isn't before it
-        $date = strtotime($this->input->post('valid_from'));
+        $date = strtotime($oInput->post('valid_from'));
 
         if (strtotime($str) <= $date) {
-
             $oFormValidation->set_message('callbackVoucherValidTo', 'Valid To date cannot be before Valid To date.');
             return false;
         }

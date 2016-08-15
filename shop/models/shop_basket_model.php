@@ -24,8 +24,16 @@ class Shop_basket_model
     protected $cacheKey;
     protected $basket;
     protected $sessVar;
+
+    //  Item Discount
     protected $iTotalItemDiscount;
+    protected $iTotalItemTaxDiscount;
+
+    //  Shipping Discount
     protected $iTotalShipDiscount;
+    protected $iTotalShipTaxDiscount;
+
+    //  Combined Discount
     protected $iTotalTaxDiscount;
     protected $iTotalDiscount;
 
@@ -141,7 +149,7 @@ class Shop_basket_model
         foreach ($basket->items as $basketKey => $item) {
 
             /**
-             * Set the item label, this is used to feedback to the suer should items
+             * Set the item label, this is used to feedback to the user should items
              * be removed or adjusted.
              */
 
@@ -180,7 +188,7 @@ class Shop_basket_model
                 } else {
 
                     /**
-                     * Found the item, do we still have enough of the stock? We have enoughs tock if:
+                     * Found the item, do we still have enough of the stock? We have enough stock if:
                      * - $available is null (unlimited)
                      * - $item->quantity is <= $available
                      */
@@ -261,40 +269,42 @@ class Shop_basket_model
          * doubling up
          */
 
-        $basket->totals->base->item              = 0;
-        $basket->totals->base->item_discount     = 0;
-        $basket->totals->base->shipping          = 0;
-        $basket->totals->base->shipping_discount = 0;
-        $basket->totals->base->tax               = 0;
-        $basket->totals->base->tax_discount      = 0;
-        $basket->totals->base->grand             = 0;
-        $basket->totals->base->grand_discount    = 0;
+        $basket->totals->base->item                  = 0;
+        $basket->totals->base->item_discount         = 0;
+        $basket->totals->base->shipping              = 0;
+        $basket->totals->base->shipping_discount     = 0;
+        $basket->totals->base->tax_item              = 0;
+        $basket->totals->base->tax_item_discount     = 0;
+        $basket->totals->base->tax_shipping          = 0;
+        $basket->totals->base->tax_shipping_discount = 0;
+        $basket->totals->base->tax_combined          = 0;
+        $basket->totals->base->tax_combined_discount = 0;
+        $basket->totals->base->grand                 = 0;
 
-        $basket->totals->user->item              = 0;
-        $basket->totals->user->item_discount     = 0;
-        $basket->totals->user->shipping          = 0;
-        $basket->totals->user->shipping_discount = 0;
-        $basket->totals->user->tax               = 0;
-        $basket->totals->user->tax_discount      = 0;
-        $basket->totals->user->grand             = 0;
-        $basket->totals->user->grand_discount    = 0;
+        $basket->totals->user->item                  = 0;
+        $basket->totals->user->item_discount         = 0;
+        $basket->totals->user->shipping              = 0;
+        $basket->totals->user->shipping_discount     = 0;
+        $basket->totals->user->tax_item              = 0;
+        $basket->totals->user->tax_item_discount     = 0;
+        $basket->totals->user->tax_shipping          = 0;
+        $basket->totals->user->tax_shipping_discount = 0;
+        $basket->totals->user->tax_combined          = 0;
+        $basket->totals->user->tax_combined_discount = 0;
+        $basket->totals->user->grand                 = 0;
 
         // --------------------------------------------------------------------------
 
         //  Calculate basket item costs
         foreach ($basket->items as $item) {
-
             $basket->totals->base->item += $item->quantity * $item->variant->price->price->base->value_ex_tax;
-            $basket->totals->user->item += $item->quantity * $item->variant->price->price->user->value_ex_tax;
         }
 
         // --------------------------------------------------------------------------
 
-        //  Calculate Tax costs
+        //  Calculate basket item taxes
         foreach ($basket->items as $item) {
-
-            $basket->totals->base->tax += $item->quantity * $item->variant->price->price->base->value_tax;
-            $basket->totals->user->tax += $item->quantity * $item->variant->price->price->user->value_tax;
+            $basket->totals->base->tax_item += $item->quantity * $item->variant->price->price->base->value_tax;
         }
 
         // --------------------------------------------------------------------------
@@ -369,8 +379,8 @@ class Shop_basket_model
         get_instance()->load->model('shop/shop_shipping_driver_model');
         $oShippingCosts = get_instance()->shop_shipping_driver_model->calculate($basket);
 
-        $basket->totals->base->shipping = $oShippingCosts->base;
-        $basket->totals->user->shipping = $oShippingCosts->user;
+        $basket->totals->base->shipping      = $oShippingCosts->total_ex_tax;
+        $basket->totals->base->tax_shipping += $oShippingCosts->tax;
 
         // --------------------------------------------------------------------------
 
@@ -397,12 +407,16 @@ class Shop_basket_model
 
         if (!empty($basket->voucher->id)) {
 
-            $this->iTotalItemDiscount = 0;
-            $this->iTotalShipDiscount = 0;
-            $this->iTotalTaxDiscount  = 0;
-            $this->iTotalDiscount     = 0;
+            $this->iTotalItemDiscount    = 0;
+            $this->iTotalItemTaxDiscount = 0;
 
-            //  Voucher applies to products onlt
+            $this->iTotalShipDiscount    = 0;
+            $this->iTotalShipTaxDiscount = 0;
+
+            $this->iTotalDiscount        = 0;
+            $this->iTotalTaxDiscount     = 0;
+
+            //  Voucher applies to products only
             if ($basket->voucher->discount_application == 'PRODUCTS') {
 
                 foreach ($basket->items as $oItem) {
@@ -431,9 +445,7 @@ class Shop_basket_model
             //  Voucher applies to shipping costs
             } elseif ($basket->voucher->discount_application == 'SHIPPING') {
 
-                $iDiscount = $this->calculateShippingDiscount($basket->voucher, $basket);
-                $this->iTotalShipDiscount += $iDiscount;
-                $this->iTotalDiscount     += $iDiscount;
+                $this->applyDiscountToShipping($basket, $basket->voucher);
 
             //  Voucher applies to everything, all products and shipping
             } elseif ($basket->voucher->discount_application == 'ALL') {
@@ -442,62 +454,22 @@ class Shop_basket_model
                     $this->applyDiscountToItem($oItem, $basket->voucher);
                 }
 
-                /**
-                 * If the voucher is an AMOUNT voucher then we need to do some edits here
-                 * to avoid the entire voucher value being applied to the shipping cost
-                 * (as the two totals are tracked independently).
-                 */
-
-                if ($basket->voucher->discount_type == 'AMOUNT' && $this->iTotalDiscount < $basket->voucher->discount_value) {
-
-                    //  Store the existing value
-                    $iVoucherValue = $basket->voucher->discount_value;
-
-                    //  Temporarily reduce the voucher's worth (for the following calculation
-                    $basket->voucher->discount_value = $basket->voucher->discount_value - $this->iTotalDiscount;
-
-                    //  Perform the calculation
-                    $iDiscount = $this->calculateShippingDiscount($basket->voucher, $basket);
-                    $this->iTotalShipDiscount += $iDiscount;
-                    $this->iTotalDiscount     += $iDiscount;
-
-                    //  And reset it back to it's previous value
-                    $basket->voucher->discount_value = $iVoucherValue;
-
-                } else {
-
-                    $iDiscount = $this->calculateShippingDiscount($basket->voucher, $basket);
-                    $this->iTotalShipDiscount += $iDiscount;
-                    $this->iTotalDiscount     += $iDiscount;
-                }
+                $this->applyDiscountToShipping($basket, $basket->voucher);
             }
+
 
             //  Apply the new values
             $basket->totals->base->item_discount     = $this->iTotalItemDiscount;
-            $basket->totals->base->shipping_discount = $this->iTotalShipDiscount;
-            $basket->totals->base->tax_discount      = $this->iTotalTaxDiscount;
-            $basket->totals->base->grand_discount    = $this->iTotalDiscount;
+            $basket->totals->base->tax_item_discount = $this->iTotalItemTaxDiscount;
 
-            $basket->totals->user->item_discount     = $oCurrencyModel->convertBaseToUser($basket->totals->base->item_discount);
-            $basket->totals->user->shipping_discount = $oCurrencyModel->convertBaseToUser($basket->totals->base->shipping_discount);
-            $basket->totals->user->tax_discount      = $oCurrencyModel->convertBaseToUser($basket->totals->base->tax_discount);
-            $basket->totals->user->grand_discount    = $oCurrencyModel->convertBaseToUser($basket->totals->base->grand_discount);
+            $basket->totals->base->shipping_discount     = $this->iTotalShipDiscount;
+            $basket->totals->base->tax_shipping_discount = $this->iTotalShipTaxDiscount;
         }
 
-        /**
-         * For each item, format it's discount_item and discount_tax property and
-         * calculate the user's version
-         */
+        //  Convert and format prices for each item
         foreach ($basket->items as $oItem) {
 
             $oItemPrice = $oItem->variant->price->price;
-
-            //  Convert user prices
-            $oItemPrice->user->discount_item          = $oCurrencyModel->convertBaseToUser($oItemPrice->base->discount_item);
-            $oItemPrice->user->discount_tax           = $oCurrencyModel->convertBaseToUser($oItemPrice->base->discount_tax);
-            $oItemPrice->user->discount_value_inc_tax = $oCurrencyModel->convertBaseToUser($oItemPrice->base->discount_value_inc_tax);
-            $oItemPrice->user->discount_value_ex_tax  = $oCurrencyModel->convertBaseToUser($oItemPrice->base->discount_value_ex_tax);
-            $oItemPrice->user->discount_value_tax     = $oCurrencyModel->convertBaseToUser($oItemPrice->base->discount_value_tax);
 
             // Formatted strings
             $oItemPrice->base_formatted->discount_item          = $oCurrencyModel->formatBase($oItemPrice->base->discount_item);
@@ -506,58 +478,98 @@ class Shop_basket_model
             $oItemPrice->base_formatted->discount_value_ex_tax  = $oCurrencyModel->formatBase($oItemPrice->base->discount_value_ex_tax);
             $oItemPrice->base_formatted->discount_value_tax     = $oCurrencyModel->formatBase($oItemPrice->base->discount_value_tax);
 
-            $oItemPrice->user_formatted->discount_item          = $oCurrencyModel->formatUser($oItemPrice->user->discount_item);
-            $oItemPrice->user_formatted->discount_tax           = $oCurrencyModel->formatUser($oItemPrice->user->discount_tax);
-            $oItemPrice->user_formatted->discount_value_inc_tax = $oCurrencyModel->formatUser($oItemPrice->user->discount_value_inc_tax);
-            $oItemPrice->user_formatted->discount_value_ex_tax  = $oCurrencyModel->formatUser($oItemPrice->user->discount_value_ex_tax);
-            $oItemPrice->user_formatted->discount_value_tax     = $oCurrencyModel->formatUser($oItemPrice->user->discount_value_tax);
-
-            //  Place this at the top level of the ite, too
+            //  Place this at the top level of the item too
             $oItem->price = $oItemPrice;
         }
 
         // --------------------------------------------------------------------------
 
         //  Calculate grand totals
-        $basket->totals->base->grand  = $basket->totals->base->item;
-        $basket->totals->base->grand += $basket->totals->base->shipping;
-        $basket->totals->base->grand += $basket->totals->base->tax;
-        $basket->totals->base->grand -= $basket->totals->base->grand_discount;
+        $basket->totals->base->grand  = ($basket->totals->base->item - $basket->totals->base->item_discount);
+        $basket->totals->base->grand += ($basket->totals->base->shipping - $basket->totals->base->shipping_discount);
+        $basket->totals->base->grand += ($basket->totals->base->tax_item - $basket->totals->base->tax_item_discount);
+        $basket->totals->base->grand += ($basket->totals->base->tax_shipping - $basket->totals->base->tax_shipping_discount);
 
-        $basket->totals->user->grand  = $basket->totals->user->item;
-        $basket->totals->user->grand += $basket->totals->user->shipping;
-        $basket->totals->user->grand += $basket->totals->user->tax;
-        $basket->totals->user->grand -= $basket->totals->user->grand_discount;
+        $basket->totals->base->grand_discount  = $basket->totals->base->item_discount;
+        $basket->totals->base->grand_discount += $basket->totals->base->shipping_discount;
+        $basket->totals->base->grand_discount += $basket->totals->base->tax_item_discount;
+        $basket->totals->base->grand_discount += $basket->totals->base->tax_shipping_discount;
+
+        // --------------------------------------------------------------------------
+
+        //  Calculate combined tax totals
+        $basket->totals->base->tax_combined           = $basket->totals->base->tax_item;
+        $basket->totals->base->tax_combined          += $basket->totals->base->tax_shipping;
+        $basket->totals->base->tax_combined_discount  = $basket->totals->base->tax_item_discount;
+        $basket->totals->base->tax_combined_discount += $basket->totals->base->tax_shipping_discount;
 
         // --------------------------------------------------------------------------
 
         //  If item prices are inclusive of tax then show the items total + tax
         if (!appSetting('price_exclude_tax', 'nailsapp/module-shop')) {
-
-            $basket->totals->base->item += $basket->totals->base->tax;
-            $basket->totals->user->item += $basket->totals->user->tax;
+            $basket->totals->base->item     += $basket->totals->base->tax_item;
+            $basket->totals->base->shipping += $basket->totals->base->tax_shipping;
         }
 
         // --------------------------------------------------------------------------
 
         //  Format totals
-        $basket->totals->base_formatted->item              = $oCurrencyModel->formatBase($basket->totals->base->item);
-        $basket->totals->base_formatted->item_discount     = $oCurrencyModel->formatBase($basket->totals->base->item_discount);
-        $basket->totals->base_formatted->shipping          = $oCurrencyModel->formatBase($basket->totals->base->shipping);
-        $basket->totals->base_formatted->shipping_discount = $oCurrencyModel->formatBase($basket->totals->base->shipping_discount);
-        $basket->totals->base_formatted->tax               = $oCurrencyModel->formatBase($basket->totals->base->tax);
-        $basket->totals->base_formatted->tax_discount      = $oCurrencyModel->formatBase($basket->totals->base->tax_discount);
-        $basket->totals->base_formatted->grand             = $oCurrencyModel->formatBase($basket->totals->base->grand);
-        $basket->totals->base_formatted->grand_discount    = $oCurrencyModel->formatBase($basket->totals->base->grand_discount);
+        $basket->totals->base_formatted->item                  = $oCurrencyModel->formatBase($basket->totals->base->item);
+        $basket->totals->base_formatted->item_discount         = $oCurrencyModel->formatBase($basket->totals->base->item_discount);
+        $basket->totals->base_formatted->shipping              = $oCurrencyModel->formatBase($basket->totals->base->shipping);
+        $basket->totals->base_formatted->shipping_discount     = $oCurrencyModel->formatBase($basket->totals->base->shipping_discount);
+        $basket->totals->base_formatted->tax_item              = $oCurrencyModel->formatBase($basket->totals->base->tax_item);
+        $basket->totals->base_formatted->tax_item_discount     = $oCurrencyModel->formatBase($basket->totals->base->tax_item_discount);
+        $basket->totals->base_formatted->tax_shipping          = $oCurrencyModel->formatBase($basket->totals->base->tax_shipping);
+        $basket->totals->base_formatted->tax_shipping_discount = $oCurrencyModel->formatBase($basket->totals->base->tax_shipping_discount);
+        $basket->totals->base_formatted->tax_combined          = $oCurrencyModel->formatBase($basket->totals->base->tax_combined);
+        $basket->totals->base_formatted->tax_combined_discount = $oCurrencyModel->formatBase($basket->totals->base->tax_combined_discount);
+        $basket->totals->base_formatted->grand                 = $oCurrencyModel->formatBase($basket->totals->base->grand);
+        $basket->totals->base_formatted->grand_discount        = $oCurrencyModel->formatBase($basket->totals->base->grand_discount);
 
-        $basket->totals->user_formatted->item              = $oCurrencyModel->formatUser($basket->totals->user->item);
-        $basket->totals->user_formatted->item_discount     = $oCurrencyModel->formatUser($basket->totals->user->item_discount);
-        $basket->totals->user_formatted->shipping          = $oCurrencyModel->formatUser($basket->totals->user->shipping);
-        $basket->totals->user_formatted->shipping_discount = $oCurrencyModel->formatUser($basket->totals->user->shipping_discount);
-        $basket->totals->user_formatted->tax               = $oCurrencyModel->formatUser($basket->totals->user->tax);
-        $basket->totals->user_formatted->tax_discount      = $oCurrencyModel->formatUser($basket->totals->user->tax_discount);
-        $basket->totals->user_formatted->grand             = $oCurrencyModel->formatUser($basket->totals->user->grand);
-        $basket->totals->user_formatted->grand_discount    = $oCurrencyModel->formatUser($basket->totals->user->grand_discount);
+        foreach ($basket->items as $oItem) {
+
+            //  Only need to calculate the newly added items (i.e discounts etc)
+            $oItem->price->user->discount_item          = $oCurrencyModel->convertBaseToUser($oItem->price->base->discount_item);
+            $oItem->price->user->discount_tax           = $oCurrencyModel->convertBaseToUser($oItem->price->base->discount_tax);
+            $oItem->price->user->discount_value_inc_tax = $oCurrencyModel->convertBaseToUser($oItem->price->base->discount_value_inc_tax);
+            $oItem->price->user->discount_value_ex_tax  = $oCurrencyModel->convertBaseToUser($oItem->price->base->discount_value_ex_tax);
+            $oItem->price->user->discount_value_tax     = $oCurrencyModel->convertBaseToUser($oItem->price->base->discount_value_tax);
+
+            //  And format them
+            $oItem->price->user_formatted->discount_item          = $oCurrencyModel->formatUser($oItem->price->user->discount_item);
+            $oItem->price->user_formatted->discount_tax           = $oCurrencyModel->formatUser($oItem->price->user->discount_tax);
+            $oItem->price->user_formatted->discount_value_inc_tax = $oCurrencyModel->formatUser($oItem->price->user->discount_value_inc_tax);
+            $oItem->price->user_formatted->discount_value_ex_tax  = $oCurrencyModel->formatUser($oItem->price->user->discount_value_ex_tax);
+            $oItem->price->user_formatted->discount_value_tax     = $oCurrencyModel->formatUser($oItem->price->user->discount_value_tax);
+        }
+
+        //  And user totals
+        $basket->totals->user->item                  = $oCurrencyModel->convertBaseToUser($basket->totals->base->item);
+        $basket->totals->user->item_discount         = $oCurrencyModel->convertBaseToUser($basket->totals->base->item_discount);
+        $basket->totals->user->shipping              = $oCurrencyModel->convertBaseToUser($basket->totals->base->shipping);
+        $basket->totals->user->shipping_discount     = $oCurrencyModel->convertBaseToUser($basket->totals->base->shipping_discount);
+        $basket->totals->user->tax_item              = $oCurrencyModel->convertBaseToUser($basket->totals->base->tax_item);
+        $basket->totals->user->tax_item_discount     = $oCurrencyModel->convertBaseToUser($basket->totals->base->tax_item_discount);
+        $basket->totals->user->tax_shipping          = $oCurrencyModel->convertBaseToUser($basket->totals->base->tax_shipping);
+        $basket->totals->user->tax_shipping_discount = $oCurrencyModel->convertBaseToUser($basket->totals->base->tax_shipping_discount);
+        $basket->totals->user->tax_combined          = $oCurrencyModel->convertBaseToUser($basket->totals->base->tax_combined);
+        $basket->totals->user->tax_combined_discount = $oCurrencyModel->convertBaseToUser($basket->totals->base->tax_combined_discount);
+        $basket->totals->user->grand                 = $oCurrencyModel->convertBaseToUser($basket->totals->base->grand);
+        $basket->totals->user->grand_discount        = $oCurrencyModel->convertBaseToUser($basket->totals->base->grand_discount);
+
+        $basket->totals->user_formatted->item                  = $oCurrencyModel->formatUser($basket->totals->user->item);
+        $basket->totals->user_formatted->item_discount         = $oCurrencyModel->formatUser($basket->totals->user->item_discount);
+        $basket->totals->user_formatted->shipping              = $oCurrencyModel->formatUser($basket->totals->user->shipping);
+        $basket->totals->user_formatted->shipping_discount     = $oCurrencyModel->formatUser($basket->totals->user->shipping_discount);
+        $basket->totals->user_formatted->tax_item              = $oCurrencyModel->formatUser($basket->totals->user->tax_item);
+        $basket->totals->user_formatted->tax_item_discount     = $oCurrencyModel->formatUser($basket->totals->user->tax_item_discount);
+        $basket->totals->user_formatted->tax_shipping          = $oCurrencyModel->formatUser($basket->totals->user->tax_shipping);
+        $basket->totals->user_formatted->tax_shipping_discount = $oCurrencyModel->formatUser($basket->totals->user->tax_shipping_discount);
+        $basket->totals->user_formatted->tax_combined          = $oCurrencyModel->formatUser($basket->totals->user->tax_combined);
+        $basket->totals->user_formatted->tax_combined_discount = $oCurrencyModel->formatUser($basket->totals->user->tax_combined_discount);
+        $basket->totals->user_formatted->grand                 = $oCurrencyModel->formatUser($basket->totals->user->grand);
+        $basket->totals->user_formatted->grand_discount        = $oCurrencyModel->formatUser($basket->totals->user->grand_discount);
 
         // --------------------------------------------------------------------------
 
@@ -575,14 +587,14 @@ class Shop_basket_model
         $oItemPrice = $oItem->variant->price->price;
 
         //  Item discount (pre-tax)
-        $iItemDiscount = $this->calculateItemDiscount($oVoucher, $oItem);
+        $iItemDiscount             = $this->calculateItemDiscount($oVoucher, $oItem);
         $this->iTotalItemDiscount += $iItemDiscount;
         $this->iTotalDiscount     += $iItemDiscount;
 
         //  Tax Discount
-        $iTaxDiscount = $this->calculateTaxDiscount($oVoucher, $oItem);
-        $this->iTotalTaxDiscount += $iTaxDiscount;
-        $this->iTotalDiscount    += $iTaxDiscount;
+        $iTaxDiscount                 = $this->calculateItemTaxDiscount($oVoucher, $oItem);
+        $this->iTotalItemTaxDiscount += $iTaxDiscount;
+        $this->iTotalDiscount        += $iTaxDiscount;
 
         //  Update values
         $oItemPrice->base->discount_item           = $iItemDiscount;
@@ -597,7 +609,7 @@ class Shop_basket_model
 
     protected function calculateItemDiscount($oVoucher, $oItem)
     {
-        $iItemPrice = $oItem->variant->price->price->base->value_ex_tax;
+        $iItemPrice = $oItem->variant->price->price->base->value_ex_tax * $oItem->quantity;
         $iDiscount  = 0;
         if ($oVoucher->discount_type == 'PERCENTAGE') {
 
@@ -620,9 +632,9 @@ class Shop_basket_model
 
     // --------------------------------------------------------------------------
 
-    protected function calculateTaxDiscount($oVoucher, $oItem)
+    protected function calculateItemTaxDiscount($oVoucher, $oItem)
     {
-        $iItemPrice = $oItem->variant->price->price->base->value_tax;
+        $iItemPrice = $oItem->variant->price->price->base->value_tax * $oItem->quantity;
         $iDiscount  = 0;
         if ($oVoucher->discount_type == 'PERCENTAGE') {
 
@@ -641,6 +653,21 @@ class Shop_basket_model
         }
 
         return $iDiscount;
+    }
+
+    // --------------------------------------------------------------------------
+
+    protected function applyDiscountToShipping($oBasket, $oVoucher)
+    {
+        //  Item discount (pre-tax)
+        $iDiscount                 = $this->calculateShippingDiscount($oVoucher, $oBasket);
+        $this->iTotalShipDiscount += $iDiscount;
+        $this->iTotalDiscount     += $iDiscount;
+
+        //  Tax Discount
+        $iTaxDiscount                 = $this->calculateShippingTaxDiscount($oVoucher, $oBasket);
+        $this->iTotalShipTaxDiscount += $iTaxDiscount;
+        $this->iTotalDiscount        += $iTaxDiscount;
     }
 
     // --------------------------------------------------------------------------
@@ -650,24 +677,56 @@ class Shop_basket_model
      * @param  object $oVoucher The voucher object
      * @param  object $oBasket  The basket object
      * @return int
+     * @throws \Exception
      */
     protected function calculateShippingDiscount($oVoucher, $oBasket)
     {
         $iDiscount = 0;
         if ($oVoucher->discount_type == 'PERCENTAGE') {
 
-            $iDiscount = (int) round($oBasket->totals->base->shipping * ($oVoucher->discount_value/100));
+            $iDiscount  = (int) round($oBasket->totals->base->shipping * ($oVoucher->discount_value/100));
 
         } else if ($oVoucher->discount_type == 'AMOUNT') {
 
-            //  Ensure we've not maxed the discount
-            if ($this->iTotalShipDiscount < $oVoucher->discount_value) {
-                if ($oVoucher->discount_value < $oBasket->totals->base->shipping) {
-                    $iDiscount = $oVoucher->discount_value;
-                } else {
-                    $iDiscount = $oBasket->totals->base->shipping;
-                }
-            }
+            /**
+             * This scenario is one we won't handle at this point due to the complexities of working it out.
+             * If I have a voucher for £10, and shipping is £10 + VAt (i.e. £12) we can deduct the £10, but
+             * we're left with £2 (which is tax) if the value of shipping is now £0 then the tax should also
+             * be £0.
+             *
+             * This is mainly a flaw in the whole approach, but we feel that absolute amounts off shipping
+             * are rarely seen in the wild.
+             */
+
+            throw new \Exception('Cannot apply a value based voucher to shipping.');
+        }
+
+        return $iDiscount;
+    }
+
+    // --------------------------------------------------------------------------
+
+    protected function calculateShippingTaxDiscount($oVoucher, $oBasket)
+    {
+        $iDiscount = 0;
+        if ($oVoucher->discount_type == 'PERCENTAGE') {
+
+            $iDiscount = (int) round($oBasket->totals->base->tax_shipping * ($oVoucher->discount_value/100));
+
+
+        } else if ($oVoucher->discount_type == 'AMOUNT') {
+
+            /**
+             * This scenario is one we won't handle at this point due to the complexities of working it out.
+             * If I have a voucher for £10, and shipping is £10 + VAt (i.e. £12) we can deduct the £10, but
+             * we're left with £2 (which is tax) if the value of shipping is now £0 then the tax should also
+             * be £0.
+             *
+             * This is mainly a flaw in the whole approach, but we feel that absolute amounts off shipping
+             * are rarely seen in the wild.
+             */
+
+            throw new \Exception('Cannot apply a value based voucher to shipping.');
         }
 
         return $iDiscount;
@@ -1293,7 +1352,6 @@ class Shop_basket_model
     public function setVoucher($voucher_code)
     {
         if (empty($voucher_code)) {
-
             $this->setError('No voucher code supplied.');
             return false;
         }
@@ -1546,41 +1604,57 @@ class Shop_basket_model
         $out->totals->user           = new \stdClass();
         $out->totals->user_formatted = new \stdClass();
 
-        $out->totals->base->item              = 0;
-        $out->totals->base->item_discount     = 0;
-        $out->totals->base->shipping          = 0;
-        $out->totals->base->shipping_discount = 0;
-        $out->totals->base->tax               = 0;
-        $out->totals->base->tax_discount      = 0;
-        $out->totals->base->grand             = 0;
-        $out->totals->base->grand_discount    = 0;
+        $out->totals->base->item                  = 0;
+        $out->totals->base->item_discount         = 0;
+        $out->totals->base->shipping              = 0;
+        $out->totals->base->shipping_discount     = 0;
+        $out->totals->base->tax_item              = 0;
+        $out->totals->base->tax_item_discount     = 0;
+        $out->totals->base->tax_shipping          = 0;
+        $out->totals->base->tax_shipping_discount = 0;
+        $out->totals->base->tax_combined          = 0;
+        $out->totals->base->tax_combined_discount = 0;
+        $out->totals->base->grand                 = 0;
+        $out->totals->base->grand_discount        = 0;
 
-        $out->totals->base_formatted->item              = '';
-        $out->totals->base_formatted->item_discount     = '';
-        $out->totals->base_formatted->shipping          = '';
-        $out->totals->base_formatted->shipping_discount = '';
-        $out->totals->base_formatted->tax               = '';
-        $out->totals->base_formatted->tax_discount      = '';
-        $out->totals->base_formatted->grand             = '';
-        $out->totals->base_formatted->grand_discount    = '';
+        $out->totals->base_formatted->item                  = '';
+        $out->totals->base_formatted->item_discount         = '';
+        $out->totals->base_formatted->shipping              = '';
+        $out->totals->base_formatted->shipping_discount     = '';
+        $out->totals->base_formatted->tax_item              = '';
+        $out->totals->base_formatted->tax_item_discount     = '';
+        $out->totals->base_formatted->tax_shipping          = '';
+        $out->totals->base_formatted->tax_shipping_discount = '';
+        $out->totals->base_formatted->tax_combined          = '';
+        $out->totals->base_formatted->tax_combined_discount = '';
+        $out->totals->base_formatted->grand                 = '';
+        $out->totals->base_formatted->grand_discount        = '';
 
-        $out->totals->user->item              = 0;
-        $out->totals->user->item_discount     = 0;
-        $out->totals->user->shipping          = 0;
-        $out->totals->user->shipping_discount = 0;
-        $out->totals->user->tax               = 0;
-        $out->totals->user->tax_discount      = 0;
-        $out->totals->user->grand             = 0;
-        $out->totals->user->grand_discount    = 0;
+        $out->totals->user->item                  = 0;
+        $out->totals->user->item_discount         = 0;
+        $out->totals->user->shipping              = 0;
+        $out->totals->user->shipping_discount     = 0;
+        $out->totals->user->tax_item              = 0;
+        $out->totals->user->tax_item_discount     = 0;
+        $out->totals->user->tax_shipping          = 0;
+        $out->totals->user->tax_shipping_discount = 0;
+        $out->totals->user->tax_combined          = 0;
+        $out->totals->user->tax_combined_discount = 0;
+        $out->totals->user->grand                 = 0;
+        $out->totals->user->grand_discount        = 0;
 
-        $out->totals->user_formatted->item              = '';
-        $out->totals->user_formatted->item_discount     = '';
-        $out->totals->user_formatted->shipping          = '';
-        $out->totals->user_formatted->shipping_discount = '';
-        $out->totals->user_formatted->tax               = '';
-        $out->totals->user_formatted->tax_discount      = '';
-        $out->totals->user_formatted->grand             = '';
-        $out->totals->user_formatted->grand_discount    = '';
+        $out->totals->user_formatted->item                  = '';
+        $out->totals->user_formatted->item_discount         = '';
+        $out->totals->user_formatted->shipping              = '';
+        $out->totals->user_formatted->shipping_discount     = '';
+        $out->totals->user_formatted->tax_item              = '';
+        $out->totals->user_formatted->tax_item_discount     = '';
+        $out->totals->user_formatted->tax_shipping          = '';
+        $out->totals->user_formatted->tax_shipping_discount = '';
+        $out->totals->user_formatted->tax_combined          = '';
+        $out->totals->user_formatted->tax_combined_discount = '';
+        $out->totals->user_formatted->grand                 = '';
+        $out->totals->user_formatted->grand_discount        = '';
 
         return $out;
     }

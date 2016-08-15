@@ -52,7 +52,6 @@ class Shop_order_model extends Base
     {
         //  Basket has items?
         if (empty($data['basket']->items)) {
-
             $this->setError('Basket is empty.');
             return false;
         }
@@ -61,7 +60,6 @@ class Shop_order_model extends Base
 
         //  Is the basket already associated with an order?
         if (!empty($data['basket']->order->id)) {
-
             $this->abandon($data['basket']->order->id);
         }
 
@@ -88,7 +86,7 @@ class Shop_order_model extends Base
 
         // --------------------------------------------------------------------------
 
-        //  Generate a code(used as a secondary verification method)
+        //  Generate a code (used as a secondary verification method)
         $order->code = md5($this->input->ipAddress() . '|'. time() . '|' . random_string('alnum', 15));
 
         // --------------------------------------------------------------------------
@@ -177,7 +175,6 @@ class Shop_order_model extends Base
 
         //  Set voucher ID
         if (!empty($data['basket']->voucher->id)) {
-
             $order->voucher_id = $data['basket']->voucher->id;
         }
 
@@ -185,7 +182,6 @@ class Shop_order_model extends Base
 
         //  Order Note
         if (!empty($data['basket']->note)) {
-
             $order->note = $data['basket']->note;
         }
 
@@ -227,23 +223,31 @@ class Shop_order_model extends Base
         // --------------------------------------------------------------------------
 
         //  Set totals
-        $order->total_base_item              = $data['basket']->totals->base->item;
-        $order->total_base_item_discount     = $data['basket']->totals->base->item_discount;
-        $order->total_base_shipping          = $data['basket']->totals->base->shipping;
-        $order->total_base_shipping_discount = $data['basket']->totals->base->shipping_discount;
-        $order->total_base_tax               = $data['basket']->totals->base->tax;
-        $order->total_base_tax_discount      = $data['basket']->totals->base->tax_discount;
-        $order->total_base_grand             = $data['basket']->totals->base->grand;
-        $order->total_base_grand_discount    = $data['basket']->totals->base->grand_discount;
+        $order->total_base_item                  = $data['basket']->totals->base->item;
+        $order->total_base_item_discount         = $data['basket']->totals->base->item_discount;
+        $order->total_base_shipping              = $data['basket']->totals->base->shipping;
+        $order->total_base_shipping_discount     = $data['basket']->totals->base->shipping_discount;
+        $order->total_base_tax_item              = $data['basket']->totals->base->tax_item;
+        $order->total_base_tax_item_discount     = $data['basket']->totals->base->tax_item_discount;
+        $order->total_base_tax_shipping          = $data['basket']->totals->base->tax_shipping;
+        $order->total_base_tax_shipping_discount = $data['basket']->totals->base->tax_shipping_discount;
+        $order->total_base_tax_combined          = $data['basket']->totals->base->tax_combined;
+        $order->total_base_tax_combined_discount = $data['basket']->totals->base->tax_combined_discount;
+        $order->total_base_grand                 = $data['basket']->totals->base->grand;
+        $order->total_base_grand_discount        = $data['basket']->totals->base->grand_discount;
 
-        $order->total_user_item              = $data['basket']->totals->user->item;
-        $order->total_user_item_discount     = $data['basket']->totals->user->item_discount;
-        $order->total_user_shipping          = $data['basket']->totals->user->shipping;
-        $order->total_user_shipping_discount = $data['basket']->totals->user->shipping_discount;
-        $order->total_user_tax               = $data['basket']->totals->user->tax;
-        $order->total_user_tax_discount      = $data['basket']->totals->user->tax_discount;
-        $order->total_user_grand             = $data['basket']->totals->user->grand;
-        $order->total_user_grand_discount    = $data['basket']->totals->user->grand_discount;
+        $order->total_user_item                  = $data['basket']->totals->user->item;
+        $order->total_user_item_discount         = $data['basket']->totals->user->item_discount;
+        $order->total_user_shipping              = $data['basket']->totals->user->shipping;
+        $order->total_user_shipping_discount     = $data['basket']->totals->user->shipping_discount;
+        $order->total_user_tax_item              = $data['basket']->totals->user->tax_item;
+        $order->total_user_tax_item_discount     = $data['basket']->totals->user->tax_item_discount;
+        $order->total_user_tax_shipping          = $data['basket']->totals->user->tax_shipping;
+        $order->total_user_tax_shipping_discount = $data['basket']->totals->user->tax_shipping_discount;
+        $order->total_user_tax_combined          = $data['basket']->totals->user->tax_combined;
+        $order->total_user_tax_combined_discount = $data['basket']->totals->user->tax_combined_discount;
+        $order->total_user_grand                 = $data['basket']->totals->user->grand;
+        $order->total_user_grand_discount        = $data['basket']->totals->user->grand_discount;
 
         // --------------------------------------------------------------------------
 
@@ -1020,9 +1024,9 @@ class Shop_order_model extends Base
 
     /**
      * Send a receipt to the user
-     * @param  int     $orderId     The ordr's ID
+     * @param  int     $orderId     The order's ID
      * @param  array   $paymentData Payment data pertaining to the order
-     * @param  boolean $partial     Whether the order is aprtially paid, or completely paid
+     * @param  boolean $partial     Whether the order is partially paid, or completely paid
      * @return boolean
      */
     public function sendReceipt($orderId, $paymentData = array(), $partial = false)
@@ -1031,7 +1035,6 @@ class Shop_order_model extends Base
         $order = $this->getById($orderId);
 
         if (!$order) {
-
             $this->oLogger->line('Invalid order ID');
             $this->setError('Invalid order ID');
             return false;
@@ -1278,60 +1281,85 @@ class Shop_order_model extends Base
         //  Totals
         $oObj->totals = new \stdClass();
 
-        $oObj->totals->base                    = new \stdClass();
-        $oObj->totals->base->item              = (int) $oObj->total_base_item;
-        $oObj->totals->base->item_discount     = (int) $oObj->total_base_item_discount;
-        $oObj->totals->base->shipping          = (int) $oObj->total_base_shipping;
-        $oObj->totals->base->shipping_discount = (int) $oObj->total_base_shipping_discount;
-        $oObj->totals->base->tax               = (int) $oObj->total_base_tax;
-        $oObj->totals->base->tax_discount      = (int) $oObj->total_base_tax_discount;
-        $oObj->totals->base->grand             = (int) $oObj->total_base_grand;
-        $oObj->totals->base->grand_discount    = (int) $oObj->total_base_grand_discount;
+        $oObj->totals->base                        = new \stdClass();
+        $oObj->totals->base->item                  = (int) $oObj->total_base_item;
+        $oObj->totals->base->item_discount         = (int) $oObj->total_base_item_discount;
+        $oObj->totals->base->shipping              = (int) $oObj->total_base_shipping;
+        $oObj->totals->base->shipping_discount     = (int) $oObj->total_base_shipping_discount;
+        $oObj->totals->base->tax_item              = (int) $oObj->total_base_tax_item;
+        $oObj->totals->base->tax_item_discount     = (int) $oObj->total_base_tax_item_discount;
+        $oObj->totals->base->tax_shipping          = (int) $oObj->total_base_tax_shipping;
+        $oObj->totals->base->tax_shipping_discount = (int) $oObj->total_base_tax_shipping_discount;
+        $oObj->totals->base->tax_combined          = (int) $oObj->total_base_tax_combined;
+        $oObj->totals->base->tax_combined_discount = (int) $oObj->total_base_tax_combined_discount;
+        $oObj->totals->base->grand                 = (int) $oObj->total_base_grand;
+        $oObj->totals->base->grand_discount        = (int) $oObj->total_base_grand_discount;
 
-        $oObj->totals->base_formatted                    = new \stdClass();
-        $oObj->totals->base_formatted->item              = $this->oCurrencyModel->formatBase($oObj->totals->base->item);
-        $oObj->totals->base_formatted->item_discount     = $this->oCurrencyModel->formatBase($oObj->totals->base->item_discount);
-        $oObj->totals->base_formatted->shipping          = $this->oCurrencyModel->formatBase($oObj->totals->base->shipping);
-        $oObj->totals->base_formatted->shipping_discount = $this->oCurrencyModel->formatBase($oObj->totals->base->shipping_discount);
-        $oObj->totals->base_formatted->tax               = $this->oCurrencyModel->formatBase($oObj->totals->base->tax);
-        $oObj->totals->base_formatted->tax_discount      = $this->oCurrencyModel->formatBase($oObj->totals->base->tax_discount);
-        $oObj->totals->base_formatted->grand             = $this->oCurrencyModel->formatBase($oObj->totals->base->grand);
-        $oObj->totals->base_formatted->grand_discount    = $this->oCurrencyModel->formatBase($oObj->totals->base->grand_discount);
+        $oObj->totals->base_formatted                        = new \stdClass();
+        $oObj->totals->base_formatted->item                  = $this->oCurrencyModel->formatBase($oObj->totals->base->item);
+        $oObj->totals->base_formatted->item_discount         = $this->oCurrencyModel->formatBase($oObj->totals->base->item_discount);
+        $oObj->totals->base_formatted->shipping              = $this->oCurrencyModel->formatBase($oObj->totals->base->shipping);
+        $oObj->totals->base_formatted->shipping_discount     = $this->oCurrencyModel->formatBase($oObj->totals->base->shipping_discount);
+        $oObj->totals->base_formatted->tax_item              = $this->oCurrencyModel->formatBase($oObj->totals->base->tax_item);
+        $oObj->totals->base_formatted->tax_item_discount     = $this->oCurrencyModel->formatBase($oObj->totals->base->tax_item_discount);
+        $oObj->totals->base_formatted->tax_shipping          = $this->oCurrencyModel->formatBase($oObj->totals->base->tax_shipping);
+        $oObj->totals->base_formatted->tax_shipping_discount = $this->oCurrencyModel->formatBase($oObj->totals->base->tax_shipping_discount);
+        $oObj->totals->base_formatted->tax_combined          = $this->oCurrencyModel->formatBase($oObj->totals->base->tax_combined);
+        $oObj->totals->base_formatted->tax_combined_discount = $this->oCurrencyModel->formatBase($oObj->totals->base->tax_combined_discount);
+        $oObj->totals->base_formatted->grand                 = $this->oCurrencyModel->formatBase($oObj->totals->base->grand);
+        $oObj->totals->base_formatted->grand_discount        = $this->oCurrencyModel->formatBase($oObj->totals->base->grand_discount);
 
-        $oObj->totals->user                    = new \stdClass();
-        $oObj->totals->user->item              = (int) $oObj->total_user_item;
-        $oObj->totals->user->item_discount     = (int) $oObj->total_user_item_discount;
-        $oObj->totals->user->shipping          = (int) $oObj->total_user_shipping;
-        $oObj->totals->user->shipping_discount = (int) $oObj->total_user_shipping_discount;
-        $oObj->totals->user->tax               = (int) $oObj->total_user_tax;
-        $oObj->totals->user->tax_discount      = (int) $oObj->total_user_tax_discount;
-        $oObj->totals->user->grand             = (int) $oObj->total_user_grand;
-        $oObj->totals->user->grand_discount    = (int) $oObj->total_user_grand_discount;
+        $oObj->totals->user                        = new \stdClass();
+        $oObj->totals->user->item                  = (int) $oObj->total_user_item;
+        $oObj->totals->user->item_discount         = (int) $oObj->total_user_item_discount;
+        $oObj->totals->user->shipping              = (int) $oObj->total_user_shipping;
+        $oObj->totals->user->shipping_discount     = (int) $oObj->total_user_shipping_discount;
+        $oObj->totals->user->tax_item              = (int) $oObj->total_user_tax_item;
+        $oObj->totals->user->tax_item_discount     = (int) $oObj->total_user_tax_item_discount;
+        $oObj->totals->user->tax_shipping          = (int) $oObj->total_user_tax_shipping;
+        $oObj->totals->user->tax_shipping_discount = (int) $oObj->total_user_tax_shipping_discount;
+        $oObj->totals->user->tax_combined          = (int) $oObj->total_user_tax_combined;
+        $oObj->totals->user->tax_combined_discount = (int) $oObj->total_user_tax_combined_discount;
+        $oObj->totals->user->grand                 = (int) $oObj->total_user_grand;
+        $oObj->totals->user->grand_discount        = (int) $oObj->total_user_grand_discount;
 
-        $oObj->totals->user_formatted                    = new \stdClass();
-        $oObj->totals->user_formatted->item              = $this->oCurrencyModel->formatUser($oObj->totals->user->item);
-        $oObj->totals->user_formatted->item_discount     = $this->oCurrencyModel->formatUser($oObj->totals->user->item_discount);
-        $oObj->totals->user_formatted->shipping          = $this->oCurrencyModel->formatUser($oObj->totals->user->shipping);
-        $oObj->totals->user_formatted->shipping_discount = $this->oCurrencyModel->formatUser($oObj->totals->user->shipping_discount);
-        $oObj->totals->user_formatted->tax               = $this->oCurrencyModel->formatUser($oObj->totals->user->tax);
-        $oObj->totals->user_formatted->tax_discount      = $this->oCurrencyModel->formatUser($oObj->totals->user->tax_discount);
-        $oObj->totals->user_formatted->grand             = $this->oCurrencyModel->formatUser($oObj->totals->user->grand);
-        $oObj->totals->user_formatted->grand_discount    = $this->oCurrencyModel->formatUser($oObj->totals->user->grand_discount);
+        $oObj->totals->user_formatted                        = new \stdClass();
+        $oObj->totals->user_formatted->item                  = $this->oCurrencyModel->formatUser($oObj->totals->user->item);
+        $oObj->totals->user_formatted->item_discount         = $this->oCurrencyModel->formatUser($oObj->totals->user->item_discount);
+        $oObj->totals->user_formatted->shipping              = $this->oCurrencyModel->formatUser($oObj->totals->user->shipping);
+        $oObj->totals->user_formatted->shipping_discount     = $this->oCurrencyModel->formatUser($oObj->totals->user->shipping_discount);
+        $oObj->totals->user_formatted->tax_item              = $this->oCurrencyModel->formatUser($oObj->totals->user->tax_item);
+        $oObj->totals->user_formatted->tax_item_discount     = $this->oCurrencyModel->formatUser($oObj->totals->user->tax_item_discount);
+        $oObj->totals->user_formatted->tax_shipping          = $this->oCurrencyModel->formatUser($oObj->totals->user->tax_shipping);
+        $oObj->totals->user_formatted->tax_shipping_discount = $this->oCurrencyModel->formatUser($oObj->totals->user->tax_shipping_discount);
+        $oObj->totals->user_formatted->tax_combined          = $this->oCurrencyModel->formatUser($oObj->totals->user->tax_combined);
+        $oObj->totals->user_formatted->tax_combined_discount = $this->oCurrencyModel->formatUser($oObj->totals->user->tax_combined_discount);
+        $oObj->totals->user_formatted->grand                 = $this->oCurrencyModel->formatUser($oObj->totals->user->grand);
+        $oObj->totals->user_formatted->grand_discount        = $this->oCurrencyModel->formatUser($oObj->totals->user->grand_discount);
+
 
         unset($oObj->total_base_item);
         unset($oObj->total_base_item_discount);
         unset($oObj->total_base_shipping);
         unset($oObj->total_base_shipping_discount);
-        unset($oObj->total_base_tax);
-        unset($oObj->total_base_tax_discount);
+        unset($oObj->total_base_tax_item);
+        unset($oObj->total_base_tax_item_discount);
+        unset($oObj->total_base_tax_shipping);
+        unset($oObj->total_base_tax_shipping_discount);
+        unset($oObj->total_base_tax_combined);
+        unset($oObj->total_base_tax_combined_discount);
         unset($oObj->total_base_grand);
         unset($oObj->total_base_grand_discount);
         unset($oObj->total_user_item);
         unset($oObj->total_user_item_discount);
         unset($oObj->total_user_shipping);
         unset($oObj->total_user_shipping_discount);
-        unset($oObj->total_user_tax);
-        unset($oObj->total_user_tax_discount);
+        unset($oObj->total_user_tax_item);
+        unset($oObj->total_user_tax_item_discount);
+        unset($oObj->total_user_tax_shipping);
+        unset($oObj->total_user_tax_shipping_discount);
+        unset($oObj->total_user_tax_combined);
+        unset($oObj->total_user_tax_combined_discount);
         unset($oObj->total_user_grand);
         unset($oObj->total_user_grand_discount);
 

@@ -259,7 +259,7 @@ class Voucher extends Base
                     if ($cache) {
 
                         //  Exists in cache
-                        $voucher->product = $cache;
+                        $voucher->product_type = $cache;
 
                     } else {
 
