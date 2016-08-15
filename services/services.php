@@ -30,6 +30,18 @@ return array(
                 return new \Nails\Shop\Model\Skin();
             }
         },
+        'Order' => function () {
+            //  @todo - move away from CI loading
+            get_instance()->load->model('shop/shop_order_model');
+            return get_instance()->shop_order_model;
+        },
+        'OrderLifecycle' => function () {
+            if (class_exists('\App\Shop\Model\Order\Lifecycle')) {
+                return new \App\Shop\Model\Order\Lifecycle();
+            } else {
+                return new \Nails\Shop\Model\Order\Lifecycle();
+            }
+        },
         'Feed' => function () {
             if (class_exists('\App\Shop\Model\Feed')) {
                 return new \App\Shop\Model\Feed();

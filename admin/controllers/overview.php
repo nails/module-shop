@@ -53,7 +53,7 @@ class Overview extends BaseAdmin
     // --------------------------------------------------------------------------
 
     /**
-     * Shows top line stats and details of thigns like unfulfilled orders.
+     * Shows top line stats
      * @return void
      */
     public function index()

@@ -38,23 +38,8 @@ NAILS_Admin_Shop_Order_Browse = function()
 
         if (_orders.length) {
 
-            switch( _action )
+            switch(_action)
             {
-                case 'mark-fulfilled' :
-
-                    this._batch_action_fulfil(_orders);
-                    break;
-
-                case 'mark-packed' :
-
-                    this._batch_action_packed(_orders);
-                    break;
-
-                case 'mark-unfulfilled' :
-
-                    this._batch_action_unfulfil(_orders);
-                    break;
-
                 case 'mark-cancelled' :
 
                     this._batch_action_cancel(_orders);
@@ -64,7 +49,13 @@ NAILS_Admin_Shop_Order_Browse = function()
 
                     _title = 'Coming Soon!';
                     _body = 'Downloading multiple order invoices is in the pipeline and will be available soon.';
+                    this._show_dialog(_title, _body);
+                    break;
 
+                default:
+
+                    _title = 'Coming Soon!';
+                    _body = 'Setting the lifecycle of an order as a batch is in the pipeline and will be available soon.';
                     this._show_dialog(_title, _body);
                     break;
             }
@@ -79,30 +70,6 @@ NAILS_Admin_Shop_Order_Browse = function()
             this._show_dialog(_title, _body);
 
         }
-    };
-
-    // --------------------------------------------------------------------------
-
-    this._batch_action_fulfil = function(orders) {
-        //  Mark these orders as fulfilled!
-        var _url = window.SITE_URL + 'admin/shop/orders/fulfil_batch?' + $.param({ids:orders});
-        window.location = _url;
-    };
-
-    // --------------------------------------------------------------------------
-
-    this._batch_action_packed = function(orders) {
-        //  Mark these orders as fulfilled!
-        var _url = window.SITE_URL + 'admin/shop/orders/pack_batch?' + $.param({ids:orders});
-        window.location = _url;
-    };
-
-    // --------------------------------------------------------------------------
-
-    this._batch_action_unfulfil = function(orders) {
-        //  Mark these orders as unfulfilled!
-        var _url = window.SITE_URL + 'admin/shop/orders/unfulfil_batch?' + $.param({ids:orders});
-        window.location = _url;
     };
 
     // --------------------------------------------------------------------------

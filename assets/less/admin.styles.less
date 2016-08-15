@@ -488,8 +488,6 @@
                 td.value,
                 th.status,
                 td.status,
-                th.fulfilment,
-                td.fulfilment,
                 th.checkAll,
                 td.checkAll {
                     text-align: center;
@@ -509,9 +507,7 @@
                 th.value,
                 td.value,
                 th.status,
-                td.status,
-                th.fulfilment,
-                td.fulfilment {
+                td.status {
                     width: 60px;
                 }
                 th.actions,
@@ -527,13 +523,94 @@
             }
         }
         &.single {
+            .order-lifecycle {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 1.5em;
+                border: 1px solid #CCC;
+                border-radius: 3px;
+                &__step {
+                    display: inline-block;
+                    text-align: center;
+                    padding: 10px;
+                    color: #CCC;
+                    cursor: pointer;
+                    flex: 1;
+                    position: relative;
+                    &__line {
+                        &--left,
+                        &--right {
+                            z-index: 0;
+                            position: absolute;
+                            top: 35px;
+                            width: 50%;
+                            border-top: 2px solid #CCC;
+                        }
+                        &--left {
+                            left: 0;
+                        }
+                        &--right {
+                            right: 0;
+                        }
+                    }
+                    &__icon {
+                        z-index: 1;
+                        position: relative;
+                        border: 2px dashed #CCC;
+                        background: #FFF;
+                        border-radius: 50%;
+                        width: 50px;
+                        height: 50px;
+                        line-height: 45px;
+                        font-size: 2em;
+                        margin: auto;
+                    }
+                    &__label {
+                        font-weight: bold;
+                        padding-top: 5px;
+                    }
+                    &:first-child {
+                        .order-lifecycle__step__line--left {
+                            border-style: dashed;
+                        }
+                    }
+                    &:last-child {
+                        .order-lifecycle__step__line--right {
+                            border-style: dashed;
+                        }
+                    }
+                    &--complete,
+                    &--current,
+                    &:hover {
+                        text-decoration: none;
+                        color: #3C763D;
+                        .order-lifecycle__step__icon {
+                            border-color: #3C763D;
+                            background: #DFF0D8;
+                            border-style: solid;
+                        }
+                    }
+                    &--complete,
+                    &--current {
+                        .order-lifecycle__step__line--left {
+                            border-color: #3C763D;
+                        }
+                    }
+                    &--complete {
+                        .order-lifecycle__step__line--right {
+                            border-color: #3C763D;
+                        }
+                    }
+                }
+
+            }
             .col-3-container {
                 td.label {
                     font-weight: bold;
                     vertical-align: top;
                 }
                 .order-status-container {
-                    height: 50%;
+                    height: 100%;
                     box-sizing: border-box;
                     .order-status {
                         background-color: #EFEFEF;
@@ -559,8 +636,7 @@
                                 color: #FFFFFF;
                             }
                         }
-                        &.paid,
-                        &.fulfilled {
+                        &.paid {
                             color: #3C763D;
                             background: #DFF0D8;
                             h1 {
@@ -575,14 +651,6 @@
                             h1 {
                                 background: #31708F;
                                 color: #FFFFFF;
-                            }
-                        }
-                        &.unfulfilled {
-                            color: #8A6D3B;
-                            background: #FCF8E3;
-                            h1 {
-                                background: #FAEBCC;
-                                color: #8A6D3B;
                             }
                         }
                     }

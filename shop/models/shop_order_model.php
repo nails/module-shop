@@ -38,6 +38,19 @@ class Shop_order_model extends Base
         $this->oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
         $this->oCountryModel  = Factory::model('Country');
         $this->oLogger        = Factory::service('Logger');
+
+        // --------------------------------------------------------------------------
+
+        $this->addExpandableField(
+            array(
+                'trigger'     => 'lifecycle',
+                'type'        => self::EXPANDABLE_TYPE_SINGLE,
+                'property'    => 'lifecycle',
+                'model'       => 'OrderLifecycle',
+                'provider'    => 'nailsapp/module-shop',
+                'id_column'   => 'lifecycle_id'
+            )
+        );
     }
 
     // --------------------------------------------------------------------------
@@ -205,20 +218,20 @@ class Shop_order_model extends Base
         // --------------------------------------------------------------------------
 
         //  Delivery Address
-        $order->shipping_line_1   = $data['delivery']->line_1;
-        $order->shipping_line_2   = $data['delivery']->line_2;
-        $order->shipping_town     = $data['delivery']->town;
-        $order->shipping_state    = $data['delivery']->state;
-        $order->shipping_postcode = $data['delivery']->postcode;
-        $order->shipping_country  = $data['delivery']->country;
+        $order->shipping_line_1   = (string) $data['delivery']->line_1;
+        $order->shipping_line_2   = (string) $data['delivery']->line_2;
+        $order->shipping_town     = (string) $data['delivery']->town;
+        $order->shipping_state    = (string) $data['delivery']->state;
+        $order->shipping_postcode = (string) $data['delivery']->postcode;
+        $order->shipping_country  = (string) $data['delivery']->country;
 
         //  Billing Address
-        $order->billing_line_1   = $data['billing']->line_1;
-        $order->billing_line_2   = $data['billing']->line_2;
-        $order->billing_town     = $data['billing']->town;
-        $order->billing_state    = $data['billing']->state;
-        $order->billing_postcode = $data['billing']->postcode;
-        $order->billing_country  = $data['billing']->country;
+        $order->billing_line_1   = (string) $data['billing']->line_1;
+        $order->billing_line_2   = (string) $data['billing']->line_2;
+        $order->billing_town     = (string) $data['billing']->town;
+        $order->billing_state    = (string) $data['billing']->state;
+        $order->billing_postcode = (string) $data['billing']->postcode;
+        $order->billing_country  = (string) $data['billing']->country;
 
         // --------------------------------------------------------------------------
 
@@ -586,25 +599,6 @@ class Shop_order_model extends Base
     // --------------------------------------------------------------------------
 
     /**
-     * Counts the total amount of orders for a partricular query/search key. Essentially performs
-     * the same query as $this->getAll() but without limiting.
-     *
-     * @access  public
-     * @param   string  $where  An array of where conditions
-     * @param   mixed   $search A string containing the search terms
-     * @return  int
-     *
-     **/
-    public function countUnfulfilledOrders($where = null, $search = null)
-    {
-        $this->db->where('fulfilment_status', 'UNFULFILLED');
-        $this->db->where('status', 'PAID');
-        return $this->db->count_all_results(NAILS_DB_PREFIX . 'shop_order o');
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
      * Marks an order as abandoned
      * @param  int     $orderId The order's ID
      * @return boolean
@@ -689,7 +683,7 @@ class Shop_order_model extends Base
 
     /**
      * Batch cancel some orders
-     * @param  array   $orderIds An array of order IDs to fulfill
+     * @param  array   $orderIds An array of order IDs to cancel
      * @return boolean
      */
     public function cancelBatch($orderIds)
@@ -726,202 +720,6 @@ class Shop_order_model extends Base
     {
         $data = array('status' => 'PENDING');
         return $this->update($orderId, $data);
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Marks an order as fulfilled and optionally informs the customer
-     * @param  mixed   $orderId        The order's ID, or an array of order IDs
-     * @param  boolean $informCustomer Whether to inform the customer or not
-     * @return boolean
-     */
-    public function fulfil($orderId, $informCustomer = true)
-    {
-        if (is_array($orderId)) {
-
-            return $this->fulfilBatch($orderId, $informCustomer);
-
-        } else {
-
-            // Fetch order details
-            $order = $this->getById($orderId);
-
-            // --------------------------------------------------------------------------
-
-            //  Set fulfil data
-            $oDate = Factory::factory('DateTime');
-            $data  = array(
-                'fulfilment_status' => 'FULFILLED',
-                'fulfilled'         => $oDate->format('Y-m-d H:i:s')
-            );
-
-            // --------------------------------------------------------------------------
-
-            if ($this->update($orderId, $data)) {
-
-                if ($informCustomer) {
-
-                    $email                = new \stdClass();
-                    $email->type          = 'shop_order_fulfilled';
-                    $email->to_email      = $order->user->email;
-                    $email->data          = array();
-                    $email->data['order'] = $order;
-
-                    $this->emailer->send($email, true);
-                }
-
-                return true;
-
-            } else {
-
-                $this->setError('Failed to update fulfilment status on this order.');
-                return false;
-            }
-        }
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Batch fulfil some orders and optionally informs the customer
-     * @param  array   $orderIds An array of order IDs to fulfill
-     * @param  boolean $informCustomer Whether to inform the customer or not
-     * @return boolean
-     */
-    public function fulfilBatch($orderIds, $informCustomer = true)
-    {
-        if (empty($orderIds)) {
-
-            $this->setError('No IDs were supplied.');
-            return false;
-        }
-
-        $this->db->set('fulfilment_status', 'FULFILLED');
-        $this->db->set('fulfilled', 'NOW()', false);
-        $this->db->where_in('id', $orderIds);
-        $this->db->set('modified', 'NOW()', false);
-
-        if ($this->db->update(NAILS_DB_PREFIX . 'shop_order')) {
-
-            if ($informCustomer) {
-
-                foreach ($orderIds as $o) {
-
-                    // Fetch order details
-                    $order = $this->getById($o);
-
-                    // --------------------------------------------------------------------------
-
-                    $email                = new \stdClass();
-                    $email->type          = 'shop_order_fulfilled';
-                    $email->to_email      = $order->user->email;
-                    $email->data          = array();
-                    $email->data['order'] = $order;
-
-                    $this->emailer->send($email, true);
-                }
-            }
-
-            return true;
-
-        } else {
-
-            $this->setError('Failed to update fulfilment status on batch.');
-            return false;
-        }
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Marks an order as packed
-     * @param  mixed   $orderId The order's ID, or an array of order IDs
-     * @return boolean
-     */
-    public function pack($orderId)
-    {
-        if (is_array($orderId)) {
-
-            return $this->packBatch($orderId);
-
-        } else {
-
-            $data = array(
-                'fulfilment_status' => 'PACKED',
-                'fulfilled'         => null
-            );
-
-            return $this->update($orderId, $data);
-        }
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Batch mark orders as packed
-     * @param  array $orderIds An array of order IDs
-     * @return boolean
-     */
-    public function packBatch($orderIds)
-    {
-        if (empty($orderIds)) {
-
-            $this->setError('No IDs were supplied.');
-            return false;
-        }
-
-        $this->db->set('fulfilment_status', 'PACKED');
-        $this->db->set('fulfilled', null);
-        $this->db->where_in('id', $orderIds);
-        $this->db->set('modified', 'NOW()', false);
-        return $this->db->update(NAILS_DB_PREFIX . 'shop_order');
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Marks an order as unfulfilled
-     * @param  mixed   $orderId The order's ID, or an array of order IDs
-     * @return boolean
-     */
-    public function unfulfil($orderId)
-    {
-        if (is_array($orderId)) {
-
-            return $this->unfulfilBatch($orderId);
-
-        } else {
-
-            $data = array(
-                'fulfilment_status' => 'UNFULFILLED',
-                'fulfilled'         => null
-            );
-
-            return $this->update($orderId, $data);
-        }
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Batch mark orders as unfulfilled
-     * @param  array $orderIds An array of order IDs
-     * @return boolean
-     */
-    public function unfulfilBatch($orderIds)
-    {
-        if (empty($orderIds)) {
-
-            $this->setError('No IDs were supplied.');
-            return false;
-        }
-
-        $this->db->set('fulfilment_status', 'UNFULFILLED');
-        $this->db->set('fulfilled', null);
-        $this->db->where_in('id', $orderIds);
-        $this->db->set('modified', 'NOW()', false);
-        return $this->db->update(NAILS_DB_PREFIX . 'shop_order');
     }
 
     // --------------------------------------------------------------------------
@@ -984,22 +782,6 @@ class Shop_order_model extends Base
                 $this->oLogger->line('... ' . $method . '(); with ' . count($products) . ' items.');
                 call_user_func_array(array($this, $method), array(&$products, &$order));
             }
-        }
-
-        // --------------------------------------------------------------------------
-
-        /**
-         * Has the order been fulfilled? If all products in the order are processed
-         * then consider this order fulfilled.
-         */
-
-        $this->db->where('order_id', $order->id);
-        $this->db->where('processed', false);
-
-        if (!$this->db->count_all_results(NAILS_DB_PREFIX . 'shop_order_product')) {
-
-            //  No unprocessed items, consider order FULFILLED
-            $this->fulfil($order->id);
         }
 
         // --------------------------------------------------------------------------
