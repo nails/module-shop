@@ -44,7 +44,6 @@ class NAILS_Basket extends NAILS_Shop_Controller
     public function index()
     {
         if ($this->maintenance->enabled) {
-
             $this->renderMaintenancePage();
             return;
         }
@@ -57,7 +56,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         $this->data['basket']          = $this->shop_basket_model->get();
         $this->data['shippingOptions'] = $this->shop_shipping_driver_model->optionsWithCost($this->data['basket']);
-
+//        dumpanddie($this->data['basket']);
         // --------------------------------------------------------------------------
 
         if (count($this->data['basket']->items) && $this->data['basket']->shipping->type == 'COLLECT') {

@@ -105,7 +105,7 @@ foreach ($order->items as $oItem) {
                                 <td class="value" style="padding: 0;">
                                     <table style="margin:0;border:0;">
                                         <tr>
-                                            <td style="width: 80px;">Items</td>
+                                            <td style="width: 110px;">Items</td>
                                             <td>
                                                 <?php
 
@@ -115,7 +115,7 @@ foreach ($order->items as $oItem) {
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td style="width: 80px;">Shipping</td>
+                                            <td style="width: 110px;">Shipping</td>
                                             <td>
                                                 <?php
 
@@ -125,7 +125,7 @@ foreach ($order->items as $oItem) {
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td style="width: 80px;">Total</td>
+                                            <td style="width: 110px;">Total</td>
                                             <td>
                                                 <?php
 
@@ -142,7 +142,7 @@ foreach ($order->items as $oItem) {
                                 <td class="value" style="padding: 0;">
                                     <table style="margin:0;border:0;">
                                         <tr>
-                                            <td style="width: 80px;">Items</td>
+                                            <td style="width: 110px;">Items</td>
                                             <td>
                                                 <?php
 
@@ -162,7 +162,7 @@ foreach ($order->items as $oItem) {
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td style="width: 80px;">Shipping</td>
+                                            <td style="width: 110px;">Shipping</td>
                                             <td>
                                                 <?php
 
@@ -182,18 +182,18 @@ foreach ($order->items as $oItem) {
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td style="width: 80px;">Tax</td>
+                                            <td style="width: 110px;">Tax (Items)</td>
                                             <td>
                                                 <?php
 
-                                                echo $order->totals->base_formatted->tax_combined_discount;
+                                                echo $order->totals->base_formatted->tax_item_discount;
 
                                                 if ($order->currency != $order->base_currency) {
 
                                                     ?>
                                                     <small>
                                                         User checked out in <?=$order->currency?>:
-                                                        <?=$order->totals->user_formatted->tax_combined_discount?>
+                                                        <?=$order->totals->user_formatted->tax_item_discount?>
                                                     </small>
                                                     <?php
                                                 }
@@ -202,7 +202,27 @@ foreach ($order->items as $oItem) {
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td style="width: 80px;">Total</td>
+                                            <td style="width: 110px;">Tax (Shipping)</td>
+                                            <td>
+                                                <?php
+
+                                                echo $order->totals->base_formatted->tax_shipping_discount;
+
+                                                if ($order->currency != $order->base_currency) {
+
+                                                    ?>
+                                                    <small>
+                                                        User checked out in <?=$order->currency?>:
+                                                        <?=$order->totals->user_formatted->tax_shipping_discount?>
+                                                    </small>
+                                                    <?php
+                                                }
+
+                                                ?>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width: 110px;">Total</td>
                                             <td>
                                                 <?php
 

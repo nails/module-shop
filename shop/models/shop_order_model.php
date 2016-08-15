@@ -52,7 +52,6 @@ class Shop_order_model extends Base
     {
         //  Basket has items?
         if (empty($data['basket']->items)) {
-
             $this->setError('Basket is empty.');
             return false;
         }
@@ -61,7 +60,6 @@ class Shop_order_model extends Base
 
         //  Is the basket already associated with an order?
         if (!empty($data['basket']->order->id)) {
-
             $this->abandon($data['basket']->order->id);
         }
 
@@ -88,7 +86,7 @@ class Shop_order_model extends Base
 
         // --------------------------------------------------------------------------
 
-        //  Generate a code(used as a secondary verification method)
+        //  Generate a code (used as a secondary verification method)
         $order->code = md5($this->input->ipAddress() . '|'. time() . '|' . random_string('alnum', 15));
 
         // --------------------------------------------------------------------------
@@ -177,7 +175,6 @@ class Shop_order_model extends Base
 
         //  Set voucher ID
         if (!empty($data['basket']->voucher->id)) {
-
             $order->voucher_id = $data['basket']->voucher->id;
         }
 
@@ -185,7 +182,6 @@ class Shop_order_model extends Base
 
         //  Order Note
         if (!empty($data['basket']->note)) {
-
             $order->note = $data['basket']->note;
         }
 
@@ -1028,9 +1024,9 @@ class Shop_order_model extends Base
 
     /**
      * Send a receipt to the user
-     * @param  int     $orderId     The ordr's ID
+     * @param  int     $orderId     The order's ID
      * @param  array   $paymentData Payment data pertaining to the order
-     * @param  boolean $partial     Whether the order is aprtially paid, or completely paid
+     * @param  boolean $partial     Whether the order is partially paid, or completely paid
      * @return boolean
      */
     public function sendReceipt($orderId, $paymentData = array(), $partial = false)
@@ -1039,7 +1035,6 @@ class Shop_order_model extends Base
         $order = $this->getById($orderId);
 
         if (!$order) {
-
             $this->oLogger->line('Invalid order ID');
             $this->setError('Invalid order ID');
             return false;

@@ -12,9 +12,11 @@
 
 namespace Nails\Api\Shop;
 
+use Nails\Factory;
+
 class Webhook extends \Nails\Api\Controller\Base
 {
-    protected $maintenance;
+    protected $oMaintenance;
 
     // --------------------------------------------------------------------------
 
@@ -25,13 +27,12 @@ class Webhook extends \Nails\Api\Controller\Base
     {
         parent::__construct($oApiRouter);
 
-        $this->maintenance = new \stdClass();
-        $this->maintenance->enabled = (bool) appSetting('maintenance_enabled', 'nailsapp/module-shop');
-        if ($this->maintenance->enabled) {
-
+        $this->oMaintenance          = new \stdClass();
+        $this->oMaintenance->enabled = (bool) appSetting('maintenance_enabled', 'nailsapp/module-shop');
+        if ($this->oMaintenance->enabled) {
             //  Allow shop admins access
             if (userHasPermission('admin:shop:*')) {
-                $this->maintenance->enabled = false;
+                $this->oMaintenance->enabled = false;
             }
         }
     }
@@ -44,9 +45,12 @@ class Webhook extends \Nails\Api\Controller\Base
      */
     protected function renderMaintenance()
     {
-        $this->output->set_header($this->input->server('SERVER_PROTOCOL') . ' 503 Service Temporarily Unavailable');
-        $this->output->set_header('Status: 503 Service Temporarily Unavailable');
-        $this->output->set_header('Retry-After: 7200');
+        $oInput  = Factory::service('Input');
+        $oOutput = Factory::service('Output');
+
+        $oOutput->set_header($oInput->server('SERVER_PROTOCOL') . ' 503 Service Temporarily Unavailable');
+        $oOutput->set_header('Status: 503 Service Temporarily Unavailable');
+        $oOutput->set_header('Retry-After: 7200');
 
         return array(
             'status' => '503',
@@ -63,39 +67,38 @@ class Webhook extends \Nails\Api\Controller\Base
      */
     public function anyRemap($gatewayName)
     {
-
         /**
          * We'll do logging for this method as it's reasonably important that
          * we keep a history of the things which happen
          */
 
+        $oInput = Factory::service('Input');
+
         $this->writeLog('Webhook initialising');
         $this->writeLog('State:');
-        $this->writeLog('RAW GET Data: ' . $this->input->server('QUERY_STRING'));
+        $this->writeLog('RAW GET Data: ' . $oInput->server('QUERY_STRING'));
         $this->writeLog('RAW POST Data: ' . file_get_contents('php://input'));
 
         // --------------------------------------------------------------------------
 
         //  @todo consider not blocking this (in case a payment needs to come through)
-        if ($this->maintenance->enabled) {
-
+        if ($this->oMaintenance->enabled) {
             $this->writeLog('***MAINTENANCE MODE***');
             return $this->renderMaintenance();
         }
 
         // --------------------------------------------------------------------------
 
-        $out = array('status' => 200);
+        $aOut = array('status' => 200);
 
         // --------------------------------------------------------------------------
 
         $this->load->model('shop/shop_payment_gateway_model');
-        $result = $this->shop_payment_gateway_model->webhookCompletePayment($gatewayName, true);
+        $bResult = $this->shop_payment_gateway_model->webhookCompletePayment($gatewayName, true);
 
-        if (!$result) {
-
-            $out['status'] = 500;
-            $out['error']  = $this->shop_payment_gateway_model->lastError();
+        if (!$bResult) {
+            $aOut['status'] = 500;
+            $aOut['error']  = $this->shop_payment_gateway_model->lastError();
         }
 
         // --------------------------------------------------------------------------
@@ -109,6 +112,6 @@ class Webhook extends \Nails\Api\Controller\Base
 
         $this->oApiRouter->outputSendHeader(false);
 
-        return $out;
+        return $aOut;
     }
 }
