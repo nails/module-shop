@@ -26,16 +26,42 @@ class Orders extends BaseAdmin
     {
         if (userHasPermission('admin:shop:orders:manage')) {
 
-            //  Alerts
-            $ci =& get_instance();
-
             //  Show sidebar notifications for orders in a certain state
-            //  @todo
+            $aAlerts         = array();
+            $oLifecycleModel = Factory::model('OrderLifecycle', 'nailsapp/module-shop');
+            $oOrderModel     = Factory::model('Order', 'nailsapp/module-shop');
+            $aAllLifecycle   = $oLifecycleModel->getAll(
+                null,
+                null,
+                array(
+                    'where' => array(
+                        array('admin_sidebar_show', true)
+                    )
+                )
+            );
+
+            foreach ($aAllLifecycle as $oLifecycle) {
+                $iCount = $oOrderModel->countAll(
+                    array(
+                        'where' => array(
+                            array('lifecycle_id', $oLifecycle->id)
+                        )
+                    )
+                );
+
+                if ($iCount) {
+                    $oAlert = Factory::factory('NavAlert', 'nailsapp/module-admin');
+                    $oAlert->setValue($iCount);
+                    $oAlert->setLabel($oLifecycle->label . ' - ' . $oLifecycle->admin_note);
+                    $oAlert->setSeverity($oLifecycle->admin_sidebar_severity);
+                    $aAlerts[] = $oAlert;
+                }
+            }
 
             $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
             $oNavGroup->setLabel('Shop');
             $oNavGroup->setIcon('fa-shopping-cart');
-            $oNavGroup->addAction('Manage Orders', 'index', array(), 0);
+            $oNavGroup->addAction('Manage Orders', 'index', $aAlerts, 0);
 
             return $oNavGroup;
         }
