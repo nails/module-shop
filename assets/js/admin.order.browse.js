@@ -54,9 +54,16 @@ NAILS_Admin_Shop_Order_Browse = function()
 
                 default:
 
-                    _title = 'Coming Soon!';
-                    _body = 'Setting the lifecycle of an order as a batch is in the pipeline and will be available soon.';
-                    this._show_dialog(_title, _body);
+                    var regexp = /^mark\-lifecycle-\d$/;
+
+                    if (regexp.test(_action)) {
+                        var command = _action.split('-');
+                        this._batch_action_lifecycle(command[2], _orders);
+                    } else {
+                        _title = 'Unknown command';
+                        _body  = '"' + _action + '" is not a known batch command.';
+                        this._show_dialog(_title, _body);
+                    }
                     break;
             }
 
@@ -77,6 +84,14 @@ NAILS_Admin_Shop_Order_Browse = function()
     this._batch_action_cancel = function(orders) {
         //  Mark these orders as cancelled!
         var _url = window.SITE_URL + 'admin/shop/orders/cancel_batch?' + $.param({ids:orders});
+        window.location = _url;
+    };
+
+    // --------------------------------------------------------------------------
+
+    this._batch_action_lifecycle = function(lifecycleId, orders) {
+        //  Set lifecycle on these orders
+        var _url = window.SITE_URL + 'admin/shop/orders/lifecycle_batch?' + $.param({lifecycle: lifecycleId, ids:orders});
         window.location = _url;
     };
 

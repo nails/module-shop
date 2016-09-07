@@ -2,8 +2,9 @@
 
 namespace Nails\Shop\Model\Order;
 
-use Nails\Common\Model\Base;
 use Nails\Factory;
+use Nails\Common\Model\Base;
+use Nails\Common\Exception\NailsException;
 
 class Lifecycle extends Base
 {
@@ -12,7 +13,7 @@ class Lifecycle extends Base
      * but their IDs are defined as part of installation and cannot be adjusted.
      */
     const ORDER_PLACED     = 1;
-    const ORDER_CONFIRMED  = 2;
+    const ORDER_PAID       = 2;
     const ORDER_DISPATCHED = 3;
     const ORDER_COLLECTED  = 4;
 
@@ -35,9 +36,9 @@ class Lifecycle extends Base
 
     // --------------------------------------------------------------------------
 
-    public function setConfirmed($iOrderId)
+    public function setPaid($iOrderId)
     {
-        return $this->setLifecycle($iOrderId, static::ORDER_CONFIRMED);
+        return $this->setLifecycle($iOrderId, static::ORDER_PAID);
     }
 
     // --------------------------------------------------------------------------
@@ -60,22 +61,23 @@ class Lifecycle extends Base
     {
         $oLifeCycle = $this->getById($iLifecycleId);
         if (empty($oLifeCycle)) {
-            throw new \Exception('"' . $iLifecycleId . '" is not a valid lifecycle ID.');
+            throw new NailsException('"' . $iLifecycleId . '" is not a valid lifecycle ID.');
         }
 
         $oOrderModel = Factory::model('Order', 'nailsapp/module-shop');
         $oOrder      = $oOrderModel->getById($iOrderId);
 
         if (empty($oOrder)) {
-            throw new \Exception('"' . $iOrderId . '" is not a valid order ID.');
+            throw new NailsException('"' . $iOrderId . '" is not a valid order ID.');
         }
 
         $aData = array(
             'lifecycle_id' => $oLifeCycle->id
         );
 
+
         if (!$oOrderModel->update($oOrder->id, $aData)) {
-            throw new \Exception('Failed to update order. ' . $oOrderModel->lastError());
+            throw new NailsException('Failed to update order. ' . $oOrderModel->lastError());
         }
 
         //  Send email to customer, if required

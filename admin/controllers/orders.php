@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Shop;
 
+use Nails\Common\Exception\NailsException;
 use Nails\Factory;
 use Nails\Admin\Helper;
 use Nails\Shop\Controller\BaseAdmin;
@@ -491,6 +492,14 @@ class Orders extends BaseAdmin
      */
     public function lifecycle()
     {
+        if (!userHasPermission('admin:shop:orders:edit')) {
+
+            $msg    = 'You do not have permission to edit orders.';
+            $status = 'error';
+            $this->session->set_flashdata($status, $msg);
+            redirect('admin/shop/orders');
+        }
+
         $oUri            = Factory::service('Uri');
         $oSession        = Factory::service('Session', 'nailsapp/module-auth');
         $oLifecycleModel = Factory::model('OrderLifecycle', 'nailsapp/module-shop');
@@ -520,6 +529,46 @@ class Orders extends BaseAdmin
      */
     public function lifecycle_batch()
     {
-        dumpanddie('@todo');
+        if (!userHasPermission('admin:shop:orders:edit')) {
+
+            $msg    = 'You do not have permission to edit orders.';
+            $status = 'error';
+            $this->session->set_flashdata($status, $msg);
+            redirect('admin/shop/orders');
+        }
+
+        $oDb          = Factory::service('Database');
+        $oInput       = Factory::service('Input');
+        $iLifecycleId = (int) $oInput->get('lifecycle');
+        $aOrderIds    = $oInput->get('ids');
+
+        $oLifecycleModel = Factory::model('OrderLifecycle', 'nailsapp/module-shop');
+        $oLifecycle      = $oLifecycleModel->getById($iLifecycleId);
+
+        if (empty($oLifecycle)) {
+            throw new NailsException('Invalid Lifecycle ID.');
+        }
+
+        $oDb->trans_begin();
+
+        try {
+
+            foreach ($aOrderIds as $iOrderId) {
+                $oLifecycleModel->setLifecycle($iOrderId, $oLifecycle->id);
+            }
+
+            $oDb->trans_commit();
+            $sStatus  = 'success';
+            $sMessage = 'Orders were successfully marked as ' . $oLifecycle->label;
+
+        } catch (\Exception $e) {
+            $oDb->trans_rollback();
+            $sStatus  = 'error';
+            $sMessage = 'Failed ot mark orders as ' . $oLifecycle->label;
+        }
+
+        $oSession = Factory::service('Session', 'nailsapp/module-auth');
+        $oSession->set_flashdata($sStatus, $sMessage);
+        redirect('admin/shop/orders');
     }
 }

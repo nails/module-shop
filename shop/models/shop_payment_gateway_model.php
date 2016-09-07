@@ -406,7 +406,7 @@ class Shop_payment_gateway_model
                     if (!get_instance()->shop_order_model->paid($order->id)) {
 
                         $subject = 'Failed to mark order #' . $order->id . ' as paid';
-                        $message = 'The transaction for this order was successfull, but I was unable to mark the order as paid.';
+                        $message = 'The transaction for this order was successful, but I was unable to mark the order as paid.';
                         sendDeveloperMail($subject, $message);
                     }
 
@@ -415,8 +415,8 @@ class Shop_payment_gateway_model
                     //  Process the order, i.e do any after sales stuff which needs done immediately
                     if (!get_instance()->shop_order_model->process($order->id)) {
 
-                        $subject = 'Failed to process order #' . $order->id . ' as paid';
-                        $message = 'The transaction for this order was successfull, but I was unable to process the order.';
+                        $subject = 'Failed to process order #' . $order->id;
+                        $message = 'The transaction for this order was successful, but I was unable to process the order.';
                         sendDeveloperMail($subject, $message);
                     }
 
@@ -494,7 +494,7 @@ class Shop_payment_gateway_model
     // --------------------------------------------------------------------------
 
     /**
-     * Completes a payment, caled from the webhook/API
+     * Completes a payment, called from the webhook/API
      * @param  string  $gateway   The gateway name
      * @param  boolean $enableLog Whether or not to write to the log
      * @return boolean
@@ -693,7 +693,7 @@ class Shop_payment_gateway_model
 
             if (!get_instance()->shop_order_model->paid($order->id)) {
 
-                $error = 'Failed to mark order #' . $order->id . ' as PAID.';
+                $error = 'Failed to mark order #' . $order->id . ' as PAID. ' . get_instance()->shop_order_model->lastError();
                 $this->oLogger->line($error);
                 $this->setError($error);
                 return false;
@@ -708,7 +708,7 @@ class Shop_payment_gateway_model
             //  Process the order, i.e do any after sales stuff which needs done immediately
             if (!get_instance()->shop_order_model->process($order->id)) {
 
-                $error = 'Failed to process order #' . $order->id . '.';
+                $error = 'Failed to process order #' . $order->id . '. ' . get_instance()->shop_order_model->lastError();
                 $this->oLogger->line($error);
                 $this->setError($error);
                 return false;

@@ -11,8 +11,8 @@
  */
 
 use Nails\Factory;
-
 use Nails\Common\Model\Base;
+use Nails\Common\Exception\NailsException;
 
 class Shop_order_model extends Base
 {
@@ -63,324 +63,312 @@ class Shop_order_model extends Base
      */
     public function create($data, $returnObj = false)
     {
-        //  Basket has items?
-        if (empty($data['basket']->items)) {
-            $this->setError('Basket is empty.');
-            return false;
-        }
-
-        // --------------------------------------------------------------------------
-
-        //  Is the basket already associated with an order?
-        if (!empty($data['basket']->order->id)) {
-            $this->abandon($data['basket']->order->id);
-        }
-
-        // --------------------------------------------------------------------------
-
-        $oDate = Factory::factory('DateTime');
-        $order = new \stdClass();
-
-        //  Generate a reference
-        do {
-
-            //  Generate the string
-            $order->ref = $oDate->format('Ym') . '-' . strtoupper(random_string('alpha', 8)) . '-' . date('dH');
-
-            //  Test it
-            $this->db->where('ref', $order->ref);
-
-        } while ($this->db->count_all_results(NAILS_DB_PREFIX . 'shop_order'));
-
-        // --------------------------------------------------------------------------
-
-        //  User's IP address
-        $order->ip_address = $this->input->ipAddress();
-
-        // --------------------------------------------------------------------------
-
-        //  Generate a code (used as a secondary verification method)
-        $order->code = md5($this->input->ipAddress() . '|'. time() . '|' . random_string('alnum', 15));
-
-        // --------------------------------------------------------------------------
-
-        /**
-         * Set the user details. If defined in the order object use them, if not see
-         * if anyone's logged in, if not still then either bail out or leave blank.
-         */
-
-        //  Email
-        if (!empty($data['contact']->email)) {
-
-            $order->user_email = $data['contact']->email;
-
-        } elseif ($this->user_model->isLoggedIn()) {
-
-            $order->user_email = activeUser('email');
-
-        } else {
-
-            $this->setError('An email address must be supplied');
-            return false;
-        }
-
-        //  User ID
-        $user = $this->user_model->getByEmail($order->user_email);
-
-        if ($user) {
-
-            $order->user_id = $user->id;
-
-        } elseif ($this->user_model->isLoggedIn()) {
-
-            $order->user_id = activeUser('id');
-
-        } else {
-
-            $order->user_id = null;
-        }
-
-        unset($user);
-
-        //  First name
-        if (!empty($data['contact']->first_name)) {
-
-            $order->user_first_name = $data['contact']->first_name;
-
-        } elseif ($this->user_model->isLoggedIn()) {
-
-            $order->user_first_name = activeUser('first_name');
-
-        } else {
-
-            $order->user_first_name = null;
-        }
-
-        //  Last name
-        if (!empty($data['contact']->last_name)) {
-
-            $order->user_last_name = $data['contact']->last_name;
-
-        } elseif ($this->user_model->isLoggedIn()) {
-
-            $order->user_last_name = activeUser('last_name');
-
-        } else {
-
-            $order->user_last_name = null;
-        }
-
-        //  Telephone
-        if (!empty($data['contact']->telephone)) {
-
-            $order->user_telephone = $data['contact']->telephone;
-
-        } elseif ($this->user_model->isLoggedIn()) {
-
-            $order->user_telephone = activeUser('telephone');
-
-        } else {
-
-            $order->user_telephone = null;
-        }
-
-        // --------------------------------------------------------------------------
-
-        //  Set voucher ID
-        if (!empty($data['basket']->voucher->id)) {
-            $order->voucher_id = $data['basket']->voucher->id;
-        }
-
-        // --------------------------------------------------------------------------
-
-        //  Order Note
-        if (!empty($data['basket']->note)) {
-            $order->note = $data['basket']->note;
-        }
-
-        // --------------------------------------------------------------------------
-
-        /**
-         * Does the order require shipping? It requires shipping if the option is not
-         * COLLECTION and at least one of the items is not collect_only.
-         */
-
-        $order->delivery_option   = $data['basket']->shipping->option;
-        $order->delivery_type     = $data['basket']->shipping->type;
-        $order->requires_shipping = $data['basket']->shipping->isRequired;
-
-        // --------------------------------------------------------------------------
-
-        //  Set currency and exchange rates
-        $order->currency      = SHOP_USER_CURRENCY_CODE;
-        $order->base_currency = SHOP_BASE_CURRENCY_CODE;
-
-        // --------------------------------------------------------------------------
-
-        //  Delivery Address
-        $order->shipping_line_1   = (string) $data['delivery']->line_1;
-        $order->shipping_line_2   = (string) $data['delivery']->line_2;
-        $order->shipping_town     = (string) $data['delivery']->town;
-        $order->shipping_state    = (string) $data['delivery']->state;
-        $order->shipping_postcode = (string) $data['delivery']->postcode;
-        $order->shipping_country  = (string) $data['delivery']->country;
-
-        //  Billing Address
-        $order->billing_line_1   = (string) $data['billing']->line_1;
-        $order->billing_line_2   = (string) $data['billing']->line_2;
-        $order->billing_town     = (string) $data['billing']->town;
-        $order->billing_state    = (string) $data['billing']->state;
-        $order->billing_postcode = (string) $data['billing']->postcode;
-        $order->billing_country  = (string) $data['billing']->country;
-
-        // --------------------------------------------------------------------------
-
-        //  Set totals
-        $order->total_base_item                  = $data['basket']->totals->base->item;
-        $order->total_base_item_discount         = $data['basket']->totals->base->item_discount;
-        $order->total_base_shipping              = $data['basket']->totals->base->shipping;
-        $order->total_base_shipping_discount     = $data['basket']->totals->base->shipping_discount;
-        $order->total_base_tax_item              = $data['basket']->totals->base->tax_item;
-        $order->total_base_tax_item_discount     = $data['basket']->totals->base->tax_item_discount;
-        $order->total_base_tax_shipping          = $data['basket']->totals->base->tax_shipping;
-        $order->total_base_tax_shipping_discount = $data['basket']->totals->base->tax_shipping_discount;
-        $order->total_base_tax_combined          = $data['basket']->totals->base->tax_combined;
-        $order->total_base_tax_combined_discount = $data['basket']->totals->base->tax_combined_discount;
-        $order->total_base_grand                 = $data['basket']->totals->base->grand;
-        $order->total_base_grand_discount        = $data['basket']->totals->base->grand_discount;
-
-        $order->total_user_item                  = $data['basket']->totals->user->item;
-        $order->total_user_item_discount         = $data['basket']->totals->user->item_discount;
-        $order->total_user_shipping              = $data['basket']->totals->user->shipping;
-        $order->total_user_shipping_discount     = $data['basket']->totals->user->shipping_discount;
-        $order->total_user_tax_item              = $data['basket']->totals->user->tax_item;
-        $order->total_user_tax_item_discount     = $data['basket']->totals->user->tax_item_discount;
-        $order->total_user_tax_shipping          = $data['basket']->totals->user->tax_shipping;
-        $order->total_user_tax_shipping_discount = $data['basket']->totals->user->tax_shipping_discount;
-        $order->total_user_tax_combined          = $data['basket']->totals->user->tax_combined;
-        $order->total_user_tax_combined_discount = $data['basket']->totals->user->tax_combined_discount;
-        $order->total_user_grand                 = $data['basket']->totals->user->grand;
-        $order->total_user_grand_discount        = $data['basket']->totals->user->grand_discount;
-
-        // --------------------------------------------------------------------------
-
-        $order->created  = $oDate->format('Y-m-d H:i:s');
-        $order->modified = $oDate->format('Y-m-d H{i{s');
-
-        // --------------------------------------------------------------------------
+        $oDb    = Factory::service('Database');
+        $oInput = Factory::service('Input');
+        $oNow   = Factory::factory('DateTime');
 
         //  Start the transaction
-        $this->db->trans_begin();
-        $rollback = false;
+        $oDb->trans_begin();
 
-        // --------------------------------------------------------------------------
+        try {
 
-        $this->db->set($order);
-        $this->db->insert(NAILS_DB_PREFIX . 'shop_order');
-
-        $order->id = $this->db->insert_id();
-
-        if ($order->id) {
-
-            //  Add the items
-            $items = array();
-
-            foreach ($data['basket']->items as $item) {
-
-                $temp                         = array();
-                $temp['order_id']             = $order->id;
-                $temp['product_id']           = $item->product_id;
-                $temp['product_label']        = $item->product_label;
-                $temp['variant_id']           = $item->variant_id;
-                $temp['variant_label']        = $item->variant_label;
-                $temp['quantity']             = $item->quantity;
-                $temp['tax_rate_id']          = !empty($item->product->tax_rate->id) ? $item->product->tax_rate->id : null;
-                $temp['ship_collection_only'] = $item->variant->ship_collection_only;
-
-                //  Price
-                $temp['price_base_value_inc_tax']          = $item->price->base->value_inc_tax;
-                $temp['price_base_value_ex_tax']           = $item->price->base->value_ex_tax;
-                $temp['price_base_value_tax']              = $item->price->base->value_tax;
-                $temp['price_base_discount_value_inc_tax'] = $item->price->base->discount_value_inc_tax;
-                $temp['price_base_discount_value_ex_tax']  = $item->price->base->discount_value_ex_tax;
-                $temp['price_base_discount_value_tax']     = $item->price->base->discount_value_tax;
-                $temp['price_user_value_inc_tax']          = $item->price->user->value_inc_tax;
-                $temp['price_user_value_ex_tax']           = $item->price->user->value_ex_tax;
-                $temp['price_user_value_tax']              = $item->price->user->value_tax;
-                $temp['price_user_discount_value_inc_tax'] = $item->price->user->discount_value_inc_tax;
-                $temp['price_user_discount_value_ex_tax']  = $item->price->user->discount_value_ex_tax;
-                $temp['price_user_discount_value_tax']     = $item->price->user->discount_value_tax;
-
-                /**
-                 * To order?
-                 * If this item is to order then make a note in the `extra_data column so it can be
-                 * rendered on invoices etc.
-                 */
-
-                if ($item->variant->stock_status == 'TO_ORDER') {
-
-                    //  Save the lead_time
-                    if (!isset($item->extra_data)) {
-
-                        $item->extra_data = array();
-
-                    } elseif (isset($item->extra_data) && !is_array($item->extra_data)) {
-
-                        $item->extra_data = (array) $item->extra_data;
-                    }
-
-                    $item->extra_data['to_order']              = new \stdClass();
-                    $item->extra_data['to_order']->is_to_order = true;
-                    $item->extra_data['to_order']->lead_time   = $item->variant->lead_time;
-                }
-
-                //  Extra data
-                if (isset($item->extra_data) && $item->extra_data) {
-
-                    $temp['extra_data'] = json_encode((array) $item->extra_data);
-                }
-
-                $items[] = $temp;
-                unset($temp);
-
+            //  Basket has items?
+            if (empty($data['basket']->items)) {
+                throw new NailsException('Basket is empty.');
             }
 
-            $this->db->insert_batch(NAILS_DB_PREFIX . 'shop_order_product', $items);
+            // --------------------------------------------------------------------------
 
-            if (!$this->db->affected_rows()) {
-
-                //  Set error message
-                $rollback = true;
-                $this->setError('Unable to add products to order, aborting.');
+            //  Is the basket already associated with an order?
+            if (!empty($data['basket']->order->id)) {
+                $this->abandon($data['basket']->order->id);
             }
 
-        } else {
+            // --------------------------------------------------------------------------
 
-            //  Failed to create order
-            $rollback = true;
-            $this->setError('An error occurred while creating the order.');
-        }
+            $order = new \stdClass();
 
-        // --------------------------------------------------------------------------
+            //  Generate a reference
+            do {
 
-        //  Return
-        if ($rollback) {
+                //  Generate the string
+                $order->ref = $oNow->format('Ym') . '-' . strtoupper(random_string('alpha', 8)) . '-' . date('dH');
 
-            $this->db->trans_rollback();
-            return false;
+                //  Test it
+                $oDb->where('ref', $order->ref);
 
-        } else {
+            } while ($oDb->count_all_results(NAILS_DB_PREFIX . 'shop_order'));
 
-            $this->db->trans_commit();
+            // --------------------------------------------------------------------------
 
-            if ($returnObj) {
+            //  User's IP address
+            $order->ip_address = $oInput->ipAddress();
 
-                return $this->getById($order->id);
+            // --------------------------------------------------------------------------
+
+            //  Generate a code (used as a secondary verification method)
+            $order->code = md5($oInput->ipAddress() . '|' . time() . '|' . random_string('alnum', 15));
+
+            // --------------------------------------------------------------------------
+
+            /**
+             * Set the user details. If defined in the order object use them, if not see
+             * if anyone's logged in, if not still then either bail out or leave blank.
+             */
+
+            //  Email
+            if (!empty($data['contact']->email)) {
+
+                $order->user_email = $data['contact']->email;
+
+            } elseif (isLoggedIn()) {
+
+                $order->user_email = activeUser('email');
+
+            } else {
+                
+                throw new NailsException('An email address must be supplied.');
+            }
+
+            //  User ID
+            $user = $this->user_model->getByEmail($order->user_email);
+
+            if ($user) {
+
+                $order->user_id = $user->id;
+
+            } elseif (isLoggedIn()) {
+
+                $order->user_id = activeUser('id');
 
             } else {
 
-                return $order->id;
+                $order->user_id = null;
             }
+
+            unset($user);
+
+            //  First name
+            if (!empty($data['contact']->first_name)) {
+
+                $order->user_first_name = $data['contact']->first_name;
+
+            } elseif (isLoggedIn()) {
+
+                $order->user_first_name = activeUser('first_name');
+
+            } else {
+
+                $order->user_first_name = null;
+            }
+
+            //  Last name
+            if (!empty($data['contact']->last_name)) {
+
+                $order->user_last_name = $data['contact']->last_name;
+
+            } elseif (isLoggedIn()) {
+
+                $order->user_last_name = activeUser('last_name');
+
+            } else {
+
+                $order->user_last_name = null;
+            }
+
+            //  Telephone
+            if (!empty($data['contact']->telephone)) {
+
+                $order->user_telephone = $data['contact']->telephone;
+
+            } elseif (isLoggedIn()) {
+
+                $order->user_telephone = activeUser('telephone');
+
+            } else {
+
+                $order->user_telephone = null;
+            }
+
+            // --------------------------------------------------------------------------
+
+            //  Set voucher ID
+            if (!empty($data['basket']->voucher->id)) {
+                $order->voucher_id = $data['basket']->voucher->id;
+            }
+
+            // --------------------------------------------------------------------------
+
+            //  Order Note
+            if (!empty($data['basket']->note)) {
+                $order->note = $data['basket']->note;
+            }
+
+            // --------------------------------------------------------------------------
+
+            /**
+             * Does the order require shipping? It requires shipping if the option is not
+             * COLLECTION and at least one of the items is not collect_only.
+             */
+
+            $order->delivery_option   = $data['basket']->shipping->option;
+            $order->delivery_type     = $data['basket']->shipping->type;
+            $order->requires_shipping = $data['basket']->shipping->isRequired;
+
+            // --------------------------------------------------------------------------
+
+            //  Set currency and exchange rates
+            $order->currency      = SHOP_USER_CURRENCY_CODE;
+            $order->base_currency = SHOP_BASE_CURRENCY_CODE;
+
+            // --------------------------------------------------------------------------
+
+            //  Delivery Address
+            $order->shipping_line_1   = (string)$data['delivery']->line_1;
+            $order->shipping_line_2   = (string)$data['delivery']->line_2;
+            $order->shipping_town     = (string)$data['delivery']->town;
+            $order->shipping_state    = (string)$data['delivery']->state;
+            $order->shipping_postcode = (string)$data['delivery']->postcode;
+            $order->shipping_country  = (string)$data['delivery']->country;
+
+            //  Billing Address
+            $order->billing_line_1   = (string)$data['billing']->line_1;
+            $order->billing_line_2   = (string)$data['billing']->line_2;
+            $order->billing_town     = (string)$data['billing']->town;
+            $order->billing_state    = (string)$data['billing']->state;
+            $order->billing_postcode = (string)$data['billing']->postcode;
+            $order->billing_country  = (string)$data['billing']->country;
+
+            // --------------------------------------------------------------------------
+
+            //  Set totals
+            $order->total_base_item                  = $data['basket']->totals->base->item;
+            $order->total_base_item_discount         = $data['basket']->totals->base->item_discount;
+            $order->total_base_shipping              = $data['basket']->totals->base->shipping;
+            $order->total_base_shipping_discount     = $data['basket']->totals->base->shipping_discount;
+            $order->total_base_tax_item              = $data['basket']->totals->base->tax_item;
+            $order->total_base_tax_item_discount     = $data['basket']->totals->base->tax_item_discount;
+            $order->total_base_tax_shipping          = $data['basket']->totals->base->tax_shipping;
+            $order->total_base_tax_shipping_discount = $data['basket']->totals->base->tax_shipping_discount;
+            $order->total_base_tax_combined          = $data['basket']->totals->base->tax_combined;
+            $order->total_base_tax_combined_discount = $data['basket']->totals->base->tax_combined_discount;
+            $order->total_base_grand                 = $data['basket']->totals->base->grand;
+            $order->total_base_grand_discount        = $data['basket']->totals->base->grand_discount;
+
+            $order->total_user_item                  = $data['basket']->totals->user->item;
+            $order->total_user_item_discount         = $data['basket']->totals->user->item_discount;
+            $order->total_user_shipping              = $data['basket']->totals->user->shipping;
+            $order->total_user_shipping_discount     = $data['basket']->totals->user->shipping_discount;
+            $order->total_user_tax_item              = $data['basket']->totals->user->tax_item;
+            $order->total_user_tax_item_discount     = $data['basket']->totals->user->tax_item_discount;
+            $order->total_user_tax_shipping          = $data['basket']->totals->user->tax_shipping;
+            $order->total_user_tax_shipping_discount = $data['basket']->totals->user->tax_shipping_discount;
+            $order->total_user_tax_combined          = $data['basket']->totals->user->tax_combined;
+            $order->total_user_tax_combined_discount = $data['basket']->totals->user->tax_combined_discount;
+            $order->total_user_grand                 = $data['basket']->totals->user->grand;
+            $order->total_user_grand_discount        = $data['basket']->totals->user->grand_discount;
+
+            // --------------------------------------------------------------------------
+
+            $order->created  = $oNow->format('Y-m-d H:i:s');
+            $order->modified = $oNow->format('Y-m-d H{i{s');
+
+            // --------------------------------------------------------------------------
+
+            $oDb->set($order);
+            $oDb->insert(NAILS_DB_PREFIX . 'shop_order');
+
+            $order->id = $oDb->insert_id();
+
+            if ($order->id) {
+
+                //  Add the items
+                $items = array();
+
+                foreach ($data['basket']->items as $item) {
+
+                    $temp = array();
+                    $temp['order_id']             = $order->id;
+                    $temp['product_id']           = $item->product_id;
+                    $temp['product_label']        = $item->product_label;
+                    $temp['variant_id']           = $item->variant_id;
+                    $temp['variant_label']        = $item->variant_label;
+                    $temp['quantity']             = $item->quantity;
+                    $temp['tax_rate_id']          = !empty($item->product->tax_rate->id) ? $item->product->tax_rate->id : null;
+                    $temp['ship_collection_only'] = $item->variant->ship_collection_only;
+
+                    //  Price
+                    $temp['price_base_value_inc_tax']          = $item->price->base->value_inc_tax;
+                    $temp['price_base_value_ex_tax']           = $item->price->base->value_ex_tax;
+                    $temp['price_base_value_tax']              = $item->price->base->value_tax;
+                    $temp['price_base_discount_value_inc_tax'] = $item->price->base->discount_value_inc_tax;
+                    $temp['price_base_discount_value_ex_tax']  = $item->price->base->discount_value_ex_tax;
+                    $temp['price_base_discount_value_tax']     = $item->price->base->discount_value_tax;
+                    $temp['price_user_value_inc_tax']          = $item->price->user->value_inc_tax;
+                    $temp['price_user_value_ex_tax']           = $item->price->user->value_ex_tax;
+                    $temp['price_user_value_tax']              = $item->price->user->value_tax;
+                    $temp['price_user_discount_value_inc_tax'] = $item->price->user->discount_value_inc_tax;
+                    $temp['price_user_discount_value_ex_tax']  = $item->price->user->discount_value_ex_tax;
+                    $temp['price_user_discount_value_tax']     = $item->price->user->discount_value_tax;
+
+                    /**
+                     * To order?
+                     * If this item is to order then make a note in the `extra_data column so it can be
+                     * rendered on invoices etc.
+                     */
+
+                    if ($item->variant->stock_status == 'TO_ORDER') {
+
+                        //  Save the lead_time
+                        if (!isset($item->extra_data)) {
+
+                            $item->extra_data = array();
+
+                        } elseif (isset($item->extra_data) && !is_array($item->extra_data)) {
+
+                            $item->extra_data = (array)$item->extra_data;
+                        }
+
+                        $item->extra_data['to_order'] = new \stdClass();
+                        $item->extra_data['to_order']->is_to_order = true;
+                        $item->extra_data['to_order']->lead_time = $item->variant->lead_time;
+                    }
+
+                    //  Extra data
+                    if (isset($item->extra_data) && $item->extra_data) {
+
+                        $temp['extra_data'] = json_encode((array)$item->extra_data);
+                    }
+
+                    $items[] = $temp;
+                    unset($temp);
+
+                }
+
+                $oDb->insert_batch(NAILS_DB_PREFIX . 'shop_order_product', $items);
+
+                if (!$oDb->affected_rows()) {
+                    throw new NailsException('Unable to add products to order.');
+                }
+
+            } else {
+                throw new NailsException('An error occurred while creating the order.');
+            }
+
+            // --------------------------------------------------------------------------
+
+            //  Set the order's lifecycle
+            $oLifecycleModel = Factory::model('OrderLifecycle', 'nailsapp/module-shop');
+            $oLifecycleModel->setPlaced($order->id);
+
+            //  Commit everything
+            $oDb->trans_commit();
+
+            return $returnObj ? $this->getById($order->id) : $order->id;
+            
+        } catch (NailsException $e) {
+            $this->setError($e->getMessage());
+            return false;
         }
     }
 
@@ -394,19 +382,19 @@ class Shop_order_model extends Base
      **/
     public function update($id, $data)
     {
+        dump($id, $data);
         if (!$data) {
-
             return false;
         }
 
         // --------------------------------------------------------------------------
 
-        $this->db->set($data);
-        $this->db->set('modified', 'NOW()', false);
-        $this->db->where('id', $id);
-        $this->db->update(NAILS_DB_PREFIX . 'shop_order');
+        $oDb = Factory::service('Database');
 
-        return $this->db->affected_rows() ? true : false;
+        $oDb->set($data);
+        $oDb->set('modified', 'NOW()', false);
+        $oDb->where('id', $id);
+        return $oDb->update(NAILS_DB_PREFIX . 'shop_order');
     }
 
     // --------------------------------------------------------------------------
@@ -419,20 +407,22 @@ class Shop_order_model extends Base
      **/
     protected function getCountCommon($data = array())
     {
+        $oDb = Factory::service('Database');
+
         //  Selects
-        $this->db->select($this->tablePrefix . '.*');
-        $this->db->select('ue.email, u.first_name, u.last_name, u.gender, u.profile_img,ug.id user_group_id');
-        $this->db->select('ug.label user_group_label');
-        $this->db->select('v.code v_code,v.label v_label, v.type v_type, v.discount_type v_discount_type');
-        $this->db->select('v.discount_value v_discount_value, v.discount_application v_discount_application');
-        $this->db->select('v.product_type_id v_product_type_id, v.is_active v_is_active, v.is_deleted v_is_deleted');
-        $this->db->select('v.valid_from v_valid_from, v.valid_to v_valid_to');
+        $oDb->select($this->tablePrefix . '.*');
+        $oDb->select('ue.email, u.first_name, u.last_name, u.gender, u.profile_img,ug.id user_group_id');
+        $oDb->select('ug.label user_group_label');
+        $oDb->select('v.code v_code,v.label v_label, v.type v_type, v.discount_type v_discount_type');
+        $oDb->select('v.discount_value v_discount_value, v.discount_application v_discount_application');
+        $oDb->select('v.product_type_id v_product_type_id, v.is_active v_is_active, v.is_deleted v_is_deleted');
+        $oDb->select('v.valid_from v_valid_from, v.valid_to v_valid_to');
 
         //  Joins
-        $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = o.user_id', 'LEFT');
-        $this->db->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.user_id = u.id AND ue.is_primary = 1', 'LEFT');
-        $this->db->join(NAILS_DB_PREFIX . 'user_group ug', 'ug.id = u.group_id', 'LEFT');
-        $this->db->join(NAILS_DB_PREFIX . 'shop_voucher v', 'v.id = o.voucher_id', 'LEFT');
+        $oDb->join(NAILS_DB_PREFIX . 'user u', 'u.id = o.user_id', 'LEFT');
+        $oDb->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.user_id = u.id AND ue.is_primary = 1', 'LEFT');
+        $oDb->join(NAILS_DB_PREFIX . 'user_group ug', 'ug.id = u.group_id', 'LEFT');
+        $oDb->join(NAILS_DB_PREFIX . 'shop_voucher v', 'v.id = o.voucher_id', 'LEFT');
 
         // --------------------------------------------------------------------------
 
@@ -547,21 +537,22 @@ class Shop_order_model extends Base
      */
     public function getItemsForOrder($order_id)
     {
-        $this->db->select('op.*');
-        $this->db->select('pt.id pt_id, pt.label pt_label, pt.ipn_method pt_ipn_method');
-        $this->db->select('tr.id tax_rate_id, tr.label tax_rate_label, tr.rate tax_rate_rate');
-        $this->db->select('v.sku v_sku');
+        $oDb = Factory::service('Database');
 
-        $this->db->join(NAILS_DB_PREFIX . 'shop_product p', 'p.id = op.product_id');
-        $this->db->join(NAILS_DB_PREFIX . 'shop_product_type pt', 'pt.id = p.type_id');
-        $this->db->join(NAILS_DB_PREFIX . 'shop_tax_rate tr', 'tr.id = p.tax_rate_id', 'LEFT');
-        $this->db->join(NAILS_DB_PREFIX . 'shop_product_variation v', 'v.id = op.variant_id', 'LEFT');
+        $oDb->select('op.*');
+        $oDb->select('pt.id pt_id, pt.label pt_label, pt.ipn_method pt_ipn_method');
+        $oDb->select('tr.id tax_rate_id, tr.label tax_rate_label, tr.rate tax_rate_rate');
+        $oDb->select('v.sku v_sku');
 
-        $this->db->where('op.order_id', $order_id);
-        $items = $this->db->get(NAILS_DB_PREFIX . 'shop_order_product op')->result();
+        $oDb->join(NAILS_DB_PREFIX . 'shop_product p', 'p.id = op.product_id');
+        $oDb->join(NAILS_DB_PREFIX . 'shop_product_type pt', 'pt.id = p.type_id');
+        $oDb->join(NAILS_DB_PREFIX . 'shop_tax_rate tr', 'tr.id = p.tax_rate_id', 'LEFT');
+        $oDb->join(NAILS_DB_PREFIX . 'shop_product_variation v', 'v.id = op.variant_id', 'LEFT');
+
+        $oDb->where('op.order_id', $order_id);
+        $items = $oDb->get(NAILS_DB_PREFIX . 'shop_order_product op')->result();
 
         foreach ($items as $item) {
-
             $this->formatObjectItem($item);
         }
 
@@ -577,8 +568,9 @@ class Shop_order_model extends Base
      */
     public function getForUserId($userId)
     {
-        $this->db->where_in($this->tablePrefix . '.status', array('PAID', 'UNPAID'));
-        $this->db->where($this->tablePrefix . '.user_id', $userId);
+        $oDb = Factory::service('Database');
+        $oDb->where_in($this->tablePrefix . '.status', array('PAID', 'UNPAID'));
+        $oDb->where($this->tablePrefix . '.user_id', $userId);
         return $this->getAll();
     }
 
@@ -591,8 +583,9 @@ class Shop_order_model extends Base
      */
     public function getForUserEmail($email)
     {
-        $this->db->where_in($this->tablePrefix . '.status', array('PAID', 'UNPAID'));
-        $this->db->where($this->tablePrefix . '.user_email', $email);
+        $oDb = Factory::service('Database');
+        $oDb->where_in($this->tablePrefix . '.status', array('PAID', 'UNPAID'));
+        $oDb->where($this->tablePrefix . '.user_email', $email);
         return $this->getAll();
     }
 
@@ -637,13 +630,30 @@ class Shop_order_model extends Base
 
     /**
      * Marks an order as paid
-     * @param  int     $orderId The order's ID
+     * @param  int     $iOrderId The order's ID
      * @return boolean
      */
-    public function paid($orderId)
+    public function paid($iOrderId)
     {
-        $data = array('status' => 'PAID');
-        return $this->update($orderId, $data);
+        try {
+
+            //  Update order
+            $aData = array('status' => 'PAID');
+            if (!$this->update($iOrderId, $aData)) {
+                throw new NailsException('Failed to update order. ' . $this->lastError());
+            }
+
+            //  Set lifecycle
+            $oLifecycleModel = Factory::model('OrderLifecycle', 'nailsapp/module-shop');
+            $oLifecycleModel->setPaid($iOrderId);
+
+            return true;
+
+        } catch (\Exception $e) {
+            $this->setError($e->getMessage());
+            return false;
+        }
+
     }
 
     // --------------------------------------------------------------------------
@@ -689,16 +699,17 @@ class Shop_order_model extends Base
     public function cancelBatch($orderIds)
     {
         if (empty($orderIds)) {
-
             $this->setError('No IDs were supplied.');
             return false;
         }
 
-        $this->db->set('status', 'CANCELLED');
-        $this->db->where_in('id', $orderIds);
-        $this->db->set('modified', 'NOW()', false);
+        $oDb = Factory::service('Database');
 
-        if ($this->db->update(NAILS_DB_PREFIX . 'shop_order')) {
+        $oDb->set('status', 'CANCELLED');
+        $oDb->where_in('id', $orderIds);
+        $oDb->set('modified', 'NOW()', false);
+
+        if ($oDb->update(NAILS_DB_PREFIX . 'shop_order')) {
 
             return true;
 
@@ -937,25 +948,27 @@ class Shop_order_model extends Base
      */
     public function note_add($orderId, $note)
     {
-        $this->db->set('order_id', $orderId);
-        $this->db->set('note', $note);
-        $this->db->set('created', 'NOW()', false);
-        $this->db->set('modified', 'NOW()', false);
+        $oDb = Factory::service('Database');
 
-        if ($this->user_model->isLoggedIn()) {
+        $oDb->set('order_id', $orderId);
+        $oDb->set('note', $note);
+        $oDb->set('created', 'NOW()', false);
+        $oDb->set('modified', 'NOW()', false);
 
-            $this->db->set('created_by', activeUser('id'));
-            $this->db->set('modified_by', activeUser('id'));
+        if (isLoggedIn()) {
+
+            $oDb->set('created_by', activeUser('id'));
+            $oDb->set('modified_by', activeUser('id'));
 
         } else {
 
-            $this->db->set('created_by', null);
-            $this->db->set('modified_by', null);
+            $oDb->set('created_by', null);
+            $oDb->set('modified_by', null);
         }
 
-        $this->db->insert(NAILS_DB_PREFIX . 'shop_order_note');
+        $oDb->insert(NAILS_DB_PREFIX . 'shop_order_note');
 
-        return(bool) $this->db->affected_rows();
+        return(bool) $oDb->affected_rows();
     }
 
     // --------------------------------------------------------------------------
@@ -968,10 +981,11 @@ class Shop_order_model extends Base
      */
     public function noteDelete($orderId, $noteId)
     {
-        $this->db->where('id', $noteId);
-        $this->db->where('order_iid', $orderId);
-        $this->db->delete(NAILS_DB_PREFIX . 'shop_order_note');
-        return(bool) $this->db->affected_rows();
+        $oDb = Factory::service('Database');
+        $oDb->where('id', $noteId);
+        $oDb->where('order_iid', $orderId);
+        $oDb->delete(NAILS_DB_PREFIX . 'shop_order_note');
+        return(bool) $oDb->affected_rows();
     }
 
     // --------------------------------------------------------------------------
