@@ -42,6 +42,13 @@ return array(
                 return new \Nails\Shop\Model\Order\Lifecycle();
             }
         },
+        'OrderLifecycleHistory' => function () {
+            if (class_exists('\App\Shop\Model\Order\Lifecycle\History')) {
+                return new \App\Shop\Model\Order\Lifecycle\History();
+            } else {
+                return new \Nails\Shop\Model\Order\Lifecycle\History();
+            }
+        },
         'Feed' => function () {
             if (class_exists('\App\Shop\Model\Feed')) {
                 return new \App\Shop\Model\Feed();

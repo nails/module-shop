@@ -75,7 +75,6 @@ class Lifecycle extends Base
             'lifecycle_id' => $oLifeCycle->id
         );
 
-
         if (!$oOrderModel->update($oOrder->id, $aData)) {
             throw new NailsException('Failed to update order. ' . $oOrderModel->lastError());
         }
@@ -102,8 +101,20 @@ class Lifecycle extends Base
                 return true;
             }
 
-            $oEmailer = Factory::service('Emailer', 'nailsapp/module-email');
-            $oEmailer->send($oEmail);
+            $oEmailer     = Factory::service('Emailer', 'nailsapp/module-email');
+            $oEmailResult = $oEmailer->send($oEmail);
+        }
+
+        //  Log history
+        $aData = array(
+            'order_id'     => $oOrder->id,
+            'lifecycle_id' => $oLifeCycle->id,
+            'email_id'     => !empty($oEmailResult) ? $oEmailResult->id : null
+        );
+
+        $oLifecycleHistoryModel = Factory::model('OrderLifecycleHistory', 'nailsapp/module-shop');
+        if (!$oLifecycleHistoryModel->create($aData)) {
+            throw new NailsException('Failed to add lifecycle history. ' . $oLifeCycleHistoryModel->lastError());
         }
 
         return true;

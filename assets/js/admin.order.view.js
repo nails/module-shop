@@ -18,6 +18,14 @@ NAILS_Admin_Shop_Order_View = function()
         base.alertCollection();
         base.confirmLifecycle();
         base.todo();
+
+        var $container = $('#lifecycle-history');
+        var $table     = $('.table-responsive', $container);
+        var $header    = $('.panel-heading', $container);
+
+        $table
+            .height($container.height() - $header.outerHeight())
+            .show();
     };
 
     // --------------------------------------------------------------------------
@@ -33,7 +41,7 @@ NAILS_Admin_Shop_Order_View = function()
 
         orderElement    = $('#order');
         didSetLifecycle = orderElement.data('did-set-lifecycle');
-        console.log(didSetLifecycle);
+
         if (didSetLifecycle) {
             return;
         }

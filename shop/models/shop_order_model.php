@@ -126,7 +126,7 @@ class Shop_order_model extends Base
                 $order->user_email = activeUser('email');
 
             } else {
-                
+
                 throw new NailsException('An email address must be supplied.');
             }
 
@@ -365,7 +365,7 @@ class Shop_order_model extends Base
             $oDb->trans_commit();
 
             return $returnObj ? $this->getById($order->id) : $order->id;
-            
+
         } catch (NailsException $e) {
             $this->setError($e->getMessage());
             return false;
@@ -382,7 +382,6 @@ class Shop_order_model extends Base
      **/
     public function update($id, $data)
     {
-        dump($id, $data);
         if (!$data) {
             return false;
         }

@@ -272,6 +272,23 @@ class Orders extends BaseAdmin
         $this->data['allLifecycle']      = $oLifecycleModel->getAll();
         $this->data['did_set_lifecycle'] = $oSession->flashdata('did_set_lifecycle');
 
+        //  Get order lifecycle history
+        $oOrderLifecycleHistory = Factory::model('OrderLifecycleHistory', 'nailsapp/module-shop');
+        $this->data['lifecycleHistory'] = $oOrderLifecycleHistory->getAll(
+            null,
+            null,
+            array(
+                'expand' => array('lifecycle'),
+                'where' => array(
+                    array('order_id', $this->data['order']->id)
+                ),
+                'sort' => array(
+                    array('created', 'desc'),
+                    array('id', 'desc')
+                )
+            )
+        );
+
         // --------------------------------------------------------------------------
 
         $oAsset = Factory::service('Asset');
@@ -514,7 +531,7 @@ class Orders extends BaseAdmin
             $oSession->set_flashdata('success', 'Order lifecycle was updated.');
 
         } catch (\Exception $e) {
-            $oSession->set_flashdata('error', 'Failed to set order lifecycle. ' . $oLifecycleModel->lastError());
+            $oSession->set_flashdata('error', 'Failed to set order lifecycle. ' . $e->getMessage());
         }
 
         $oSession->set_flashdata('did_set_lifecycle', true);
@@ -525,7 +542,7 @@ class Orders extends BaseAdmin
     // --------------------------------------------------------------------------
 
     /**
-     * Set the lfiecycle state of multiple orders
+     * Set the lifecycle state of multiple orders
      */
     public function lifecycle_batch()
     {

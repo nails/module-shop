@@ -1,5 +1,7 @@
 <?php
 
+use Nails\Shop\Model\Order\Lifecycle;
+
 $iNumCollectItems = 0;
 
 foreach ($order->items as $oItem) {
@@ -23,6 +25,12 @@ foreach ($order->items as $oItem) {
         $bReachedCurrent = false;
 
         foreach ($allLifecycle as $oLifecycle) {
+
+            if ($order->delivery_type === 'COLLECT' && $oLifecycle->id === Lifecycle::ORDER_DISPATCHED) {
+                continue;
+            } else if ($order->delivery_type === 'DELIVER' && $oLifecycle->id === Lifecycle::ORDER_COLLECTED) {
+                continue;
+            }
 
             if ($oLifecycle->id == $order->lifecycle_id) {
                 $sStateClass = 'current';
@@ -445,7 +453,7 @@ foreach ($order->items as $oItem) {
         </div>
         <div class="col-md-4">
             <div class="match-height">
-                <div class="order-status-container">
+                <div class="order-status-container payment-status">
                     <div class="order-status <?=strtolower($order->status)?>">
                         <?php
 
@@ -552,6 +560,45 @@ foreach ($order->items as $oItem) {
                         }
 
                         ?>
+                    </div>
+                </div>
+                <div class="order-status-container lifecycle-history" id="lifecycle-history">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <strong>Status History</strong>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="order-products">
+                                <tbody>
+                                    <?php
+
+                                    foreach ($lifecycleHistory as $oHistory) {
+
+                                        ?>
+                                        <tr>
+                                            <td class="text-center"><b class="fa fa-lg <?=$oHistory->lifecycle->admin_icon?>"></b></td>
+                                            <td><?=$oHistory->lifecycle->label?></td>
+                                            <?=adminHelper('loadUserCell', $oHistory->created_by)?>
+                                            <?=adminHelper('loadDateTimeCell', $oHistory->created)?>
+                                            <td class="text-center">
+                                                <?php
+
+                                                if ($oHistory->email_id) {
+                                                    echo anchor('email/view_online/' . $oHistory->email_id, 'View Email', 'class="fancybox btn btn-xs btn-default"');
+                                                } else {
+                                                    echo '<span class="text-muted">No email sent</span>';
+                                                }
+
+                                                ?>
+                                            </td>
+                                        </tr>
+                                        <?php
+                                    }
+
+                                    ?>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
