@@ -724,7 +724,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function productSingle($slug)
     {
-        $this->data['product'] = $this->shop_product_model->getBySlug($slug);
+        $this->data['product'] = $this->shop_product_model->getBySlug($slug, array('includeShipping' => true));
 
         if (!$this->data['product']) {
 
