@@ -24,6 +24,6 @@ class Migration8 extends Base
      */
     public function execute()
     {
-        $this->query("UPDATE `nails_app_setting` SET `key` = 'enabled_driver_feed' WHERE `key` = 'enabled_feed_drivers' AND `grouping` = 'nailsapp/module-shop';");
+        $this->query("UPDATE `{{NAILS_DB_PREFIX}}app_setting` SET `key` = 'enabled_driver_feed' WHERE `key` = 'enabled_feed_drivers' AND `grouping` = 'nailsapp/module-shop';");
     }
 }
