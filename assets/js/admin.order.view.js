@@ -16,28 +16,39 @@ NAILS_Admin_Shop_Order_View = function()
     base.__construct = function()
     {
         base.alertCollection();
+        base.confirmLifecycle();
         base.todo();
     };
 
     // --------------------------------------------------------------------------
 
     /**
-     * Generates a dialog pop up if the order is unfulfilled and has collect only
+     * Generates a dialog pop up if the order has collect only
      * items in it or is a collect only order.
      * @return {Void}
      */
     base.alertCollection = function()
     {
-        var orderElement, fulfilmentStatus, deliveryType, numCollectItems, subject, message;
+        var didSetLifecycle, orderElement, lifecycleId, deliveryType, numCollectItems, lifecyclePaid, lifecycleCollected, subject, message;
 
-        orderElement     = $('#order');
-        fulfilmentStatus = orderElement.data('fulfilment-status');
-        deliveryType     = orderElement.data('delivery-type');
-        numCollectItems  = orderElement.data('num-collect-items');
+        orderElement    = $('#order');
+        didSetLifecycle = orderElement.data('did-set-lifecycle');
+        console.log(didSetLifecycle);
+        if (didSetLifecycle) {
+            return;
+        }
 
-        if (fulfilmentStatus === 'UNFULFILLED') {
+        lifecycleId     = orderElement.data('lifecycle-id');
+        deliveryType    = orderElement.data('delivery-type');
+        numCollectItems = orderElement.data('num-collect-items');
 
-            if (deliveryType === 'COLLECT') {
+        //  Magic numbers correspond to predefined lifecycle IDs
+        lifecyclePaid      = 2;
+        lifecycleCollected = 4;
+
+        if (lifecycleId > lifecycleCollected || lifecycleId == lifecyclePaid) {
+
+            if (deliveryType === 'COLLECTION') {
 
                 subject = 'Collection Order';
                 message = 'The customer has marked that they will come to collect this order. Do not ship.';
@@ -50,6 +61,47 @@ NAILS_Admin_Shop_Order_View = function()
                 base.dialog(subject, message);
             }
         }
+    };
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Generates a dialog pop up if the order has collect only
+     * items in it or is a collect only order.
+     * @return {Void}
+     */
+    base.confirmLifecycle = function()
+    {
+        $('a.order-lifecycle__step').on('click', function() {
+
+            var subject = 'Please Confirm';
+            var label   = $(this).data('label');
+            var href    = $(this).attr('href');
+            var message = '<p>Please confirm you would like to set this order to the <strong>' + label + '</strong> stage of its lifecycle.</p>';
+
+            if ($(this).data('will-send-email')) {
+                message += '<p>This action <strong>will</strong> send the customer an email.</p>';
+            }
+
+            $('<div>').html(message).dialog({
+                title: subject,
+                resizable: false,
+                draggable: false,
+                modal: true,
+                dialogClass: 'no-close',
+                buttons:  {
+                    OK: function()  {
+                        window.location.href = href;
+                        $(this).dialog('close');
+                    },
+                    Cancel: function()  {
+                        $(this).dialog('close');
+                    }
+                }
+            });
+
+            return false;
+        });
     };
 
     // --------------------------------------------------------------------------

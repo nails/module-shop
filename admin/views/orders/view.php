@@ -12,10 +12,45 @@ foreach ($order->items as $oItem) {
 <div
     id="order"
     class="group-shop orders single"
-    data-fulfilment-status="<?=$order->fulfilment_status?>"
+    data-lifecycle-id="<?=$order->lifecycle_id?>"
     data-delivery-type="<?=$order->delivery_option?>"
     data-num-collect-items="<?=$iNumCollectItems?>"
+    data-did-set-lifecycle="<?=!empty($did_set_lifecycle)?>"
 >
+    <div class="order-lifecycle">
+        <?php
+
+        $bReachedCurrent = false;
+
+        foreach ($allLifecycle as $oLifecycle) {
+
+            if ($oLifecycle->id == $order->lifecycle_id) {
+                $sStateClass = 'current';
+                $bReachedCurrent = true;
+            } elseif (!$bReachedCurrent) {
+                $sStateClass = 'complete';
+            } else {
+                $sStateClass = 'incomplete';
+            }
+
+            $sUrl = site_url('admin/shop/orders/lifecycle/' . $order->id . '/' . $oLifecycle->id)
+
+            ?>
+            <a href="<?=$sUrl?>" data-label="<?=$oLifecycle->label?>" data-will-send-email="<?=$oLifecycle->send_email ? 'true' : 'false'?>" class="order-lifecycle__step order-lifecycle__step--<?=$sStateClass?>" rel="tipsy" title="<?=$oLifecycle->admin_note?>">
+                <div class="order-lifecycle__step__line--left"></div>
+                <div class="order-lifecycle__step__line--right"></div>
+                <div class="order-lifecycle__step__icon">
+                    <b class="fa <?=$oLifecycle->admin_icon?>"></b>
+                </div>
+                <div class="order-lifecycle__step__label">
+                    <?=$oLifecycle->label?>
+                </div>
+            </a>
+        <?php
+        }
+
+        ?>
+    </div>
     <div class="row col-3-container">
         <div class="col-md-4">
             <div class="panel panel-default match-height">
@@ -375,25 +410,32 @@ foreach ($order->items as $oItem) {
                                     $order->shipping_address->town,
                                     $order->shipping_address->state,
                                     $order->shipping_address->postcode,
-                                    $order->shipping_address->country->label
+                                    !empty($order->shipping_address->country) ? $order->shipping_address->country->label : ''
                                 );
 
                                 $aAddress = array_filter($aAddress);
 
-                                echo implode('<br />', $aAddress);
-
-                                ?>
-                                <small>
-                                    <?php
-
-                                    echo anchor(
-                                        'https://www.google.com/maps/?q=' . urlencode(implode(', ', $aAddress)),
-                                        '<b class="fa fa-map-marker"></b> Map',
-                                        'target="_blank"'
-                                    );
+                                if (!empty($aAddress)) {
+                                    echo implode('<br />', $aAddress);
 
                                     ?>
-                                </small>
+                                    <small>
+                                        <?php
+
+                                        echo anchor(
+                                            'https://www.google.com/maps/?q=' . urlencode(implode(', ', $aAddress)),
+                                            '<b class="fa fa-map-marker"></b> Map',
+                                            'target="_blank"'
+                                        );
+
+                                        ?>
+                                    </small>
+                                    <?php
+                                } else {
+                                    echo '<span class="text-muted">No shipping address supplied.</span>';
+                                }
+
+                                ?>
                             </td>
                         </tr>
                         </tbody>
@@ -504,86 +546,6 @@ foreach ($order->items as $oItem) {
                                 </h1>
                                 <p>
                                     "<?=$sStatus?>" is not an order status I understand, there may be a problem.
-                                </p>
-                                <?php
-                                break;
-                        }
-
-                        ?>
-                    </div>
-                </div>
-                <div class="order-status-container">
-                    <div class="order-status <?=strtolower($order->fulfilment_status)?>">
-                        <?php
-
-                        $sVerbFulfilled   = $order->delivery_option !== 'COLLECTION' ? 'fulfilled' : 'collected';
-                        $sVerbUnfulfilled = $order->delivery_option !== 'COLLECTION' ? 'unfulfilled' : 'uncollected';
-
-                        $sButtonUrlUnfulfill   = 'admin/shop/orders/unfulfil/' . $order->id;
-                        $sButtonLabelUnfulfill = 'Mark ' . ucfirst($sVerbUnfulfilled);
-                        $sButtonUrlPack        = 'admin/shop/orders/pack/' . $order->id;
-                        $sButtonLabelPack      = 'Mark Packed';
-                        $sButtonUrlFulfill     = 'admin/shop/orders/fulfil/' . $order->id;
-                        $sButtonLabelFulfill   = 'Mark ' . ucfirst($sVerbFulfilled);
-
-                        switch ($order->fulfilment_status) {
-
-                            case 'FULFILLED':
-                                ?>
-                                <h1>
-                                    <b class="fa fa-truck"></b>
-                                    <?=strtoupper($sVerbFulfilled)?>
-                                </h1>
-                                <p>
-                                    This order has been <?=$sVerbFulfilled?>, no further action is nessecary.
-                                </p>
-                                <p>
-                                    <?=anchor($sButtonUrlUnfulfill, $sButtonLabelUnfulfill, 'class="btn btn-warning"')?>
-                                    <?=anchor($sButtonUrlPack, $sButtonLabelPack, 'class="btn btn-info"')?>
-                                </p>
-                                <?php
-                                break;
-
-                            case 'PACKED':
-                                ?>
-                                <h1>
-                                    <b class="fa fa-cube"></b>
-                                    PACKED
-                                </h1>
-                                <p>
-                                    This order has <strong>not</strong> been <?=$sVerbFulfilled?>.
-                                </p>
-                                <p>
-                                    <?=anchor($sButtonUrlUnfulfill, $sButtonLabelUnfulfill, 'class="btn btn-warning"')?>
-                                    <?=anchor($sButtonUrlFulfill, $sButtonLabelFulfill, 'class="btn btn-success"')?>
-                                </p>
-                                <?php
-                                break;
-
-                            case 'UNFULFILLED':
-                                ?>
-                                <h1>
-                                    <b class="fa fa-clock-o"></b>
-                                    <?=strtoupper($sVerbUnfulfilled)?>
-                                </h1>
-                                <p>
-                                    This order has <strong>not</strong> been <?=$sVerbFulfilled?>.
-                                </p>
-                                <p>
-                                    <?=anchor($sButtonUrlPack, $sButtonLabelPack, 'class="btn btn-info"')?>
-                                    <?=anchor($sButtonUrlFulfill, $sButtonLabelFulfill, 'class="btn btn-success"')?>
-                                </p>
-                                <?php
-                                break;
-
-                            default:
-                                $sStatus = ucwords(strtolower($order->fulfilment_status));
-                                ?>
-                                <h1>
-                                    <?=$sStatus?>
-                                </h1>
-                                <p>
-                                    "<?=$sStatus?>" is not a fulfilment status I understand, there may be a problem.
                                 </p>
                                 <?php
                                 break;

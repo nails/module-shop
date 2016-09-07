@@ -38,23 +38,8 @@ NAILS_Admin_Shop_Order_Browse = function()
 
         if (_orders.length) {
 
-            switch( _action )
+            switch(_action)
             {
-                case 'mark-fulfilled' :
-
-                    this._batch_action_fulfil(_orders);
-                    break;
-
-                case 'mark-packed' :
-
-                    this._batch_action_packed(_orders);
-                    break;
-
-                case 'mark-unfulfilled' :
-
-                    this._batch_action_unfulfil(_orders);
-                    break;
-
                 case 'mark-cancelled' :
 
                     this._batch_action_cancel(_orders);
@@ -64,8 +49,21 @@ NAILS_Admin_Shop_Order_Browse = function()
 
                     _title = 'Coming Soon!';
                     _body = 'Downloading multiple order invoices is in the pipeline and will be available soon.';
-
                     this._show_dialog(_title, _body);
+                    break;
+
+                default:
+
+                    var regexp = /^mark\-lifecycle-\d$/;
+
+                    if (regexp.test(_action)) {
+                        var command = _action.split('-');
+                        this._batch_action_lifecycle(command[2], _orders);
+                    } else {
+                        _title = 'Unknown command';
+                        _body  = '"' + _action + '" is not a known batch command.';
+                        this._show_dialog(_title, _body);
+                    }
                     break;
             }
 
@@ -83,33 +81,17 @@ NAILS_Admin_Shop_Order_Browse = function()
 
     // --------------------------------------------------------------------------
 
-    this._batch_action_fulfil = function(orders) {
-        //  Mark these orders as fulfilled!
-        var _url = window.SITE_URL + 'admin/shop/orders/fulfil_batch?' + $.param({ids:orders});
-        window.location = _url;
-    };
-
-    // --------------------------------------------------------------------------
-
-    this._batch_action_packed = function(orders) {
-        //  Mark these orders as fulfilled!
-        var _url = window.SITE_URL + 'admin/shop/orders/pack_batch?' + $.param({ids:orders});
-        window.location = _url;
-    };
-
-    // --------------------------------------------------------------------------
-
-    this._batch_action_unfulfil = function(orders) {
-        //  Mark these orders as unfulfilled!
-        var _url = window.SITE_URL + 'admin/shop/orders/unfulfil_batch?' + $.param({ids:orders});
-        window.location = _url;
-    };
-
-    // --------------------------------------------------------------------------
-
     this._batch_action_cancel = function(orders) {
         //  Mark these orders as cancelled!
         var _url = window.SITE_URL + 'admin/shop/orders/cancel_batch?' + $.param({ids:orders});
+        window.location = _url;
+    };
+
+    // --------------------------------------------------------------------------
+
+    this._batch_action_lifecycle = function(lifecycleId, orders) {
+        //  Set lifecycle on these orders
+        var _url = window.SITE_URL + 'admin/shop/orders/lifecycle_batch?' + $.param({lifecycle: lifecycleId, ids:orders});
         window.location = _url;
     };
 

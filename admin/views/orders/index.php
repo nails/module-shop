@@ -106,69 +106,50 @@
                         switch ($order->status) {
 
                             case 'UNPAID':
-                                $status = 'danger';
+                                $sStatus = 'danger';
+                                $sIcon   = 'fa-times-circle';
                                 break;
 
                             case 'PAID':
-                                $status = 'success';
+                                $sStatus = 'success';
+                                $sIcon   = 'fa-check-circle';
                                 break;
 
                             case 'ABANDONED':
-                                $status = 'warning';
+                                $sStatus = 'warning';
+                                $sIcon   = 'fa-times-circle';
                                 break;
 
                             case 'CANCELLED':
-                                $status = 'warning';
+                                $sStatus = 'warning';
+                                $sIcon   = 'fa-times-circle';
                                 break;
 
                             case 'FAILED':
-                                $status = 'danger';
+                                $sStatus = 'danger';
+                                $sIcon   = 'fa-times-circle';
                                 break;
 
                             case 'PENDING':
-                                $status = 'info';
+                                $sStatus = 'info';
+                                $sIcon   = 'fa-info-circle';
                                 break;
 
                             default:
-                                $status = '';
+                                $sStatus = '';
+                                $sIcon   = 'fa-info-circle';
                                 break;
                         }
 
                         ?>
-                        <td class="status text-center <?=$status?>">
-                            <?=$order->status?>
+                        <td class="status text-center <?=$sStatus?>">
+                            <i class="fa fa-lg <?=$sIcon?>"></i>
+                            <small><?=$order->status?></small>
                         </td>
-                        <?php
-
-                        if ($order->fulfilment_status == 'UNFULFILLED') {
-
-                            ?>
-                            <td class="status text-center warning">
-                                <i class="fa fa-clock-o"></i>
-                                <small>UNFULFILLED</small>
-                            </td>
-                            <?php
-
-                        } elseif ($order->fulfilment_status == 'PACKED') {
-
-                            ?>
-                            <td class="status text-center info">
-                                <i class="fa fa-cube"></i>
-                                <small>PACKED</small>
-                            </td>
-                            <?php
-
-                        } else {
-
-                            ?>
-                            <td class="status text-center success">
-                                <i class="fa fa-truck"></i>
-                                <small>FULFILLED</small>
-                            </td>
-                            <?php
-                        }
-
-                        ?>
+                        <td class="status text-center">
+                            <i class="fa fa-lg <?=$order->lifecycle->admin_icon?>"></i>
+                            <small><?=$order->lifecycle->label?></small>
+                        </td>
                         <td class="actions">
                             <?php
 
@@ -243,11 +224,12 @@
 
             $aOptions                     = array();
             $aOptions['']                 = 'Choose';
-            $aOptions['mark-fulfilled']   = 'Mark Fulfilled';
-            $aOptions['mark-packed']      = 'Mark Packed';
-            $aOptions['mark-unfulfilled'] = 'Mark Unfulfilled';
             $aOptions['mark-cancelled']   = 'Mark Cancelled';
             $aOptions['download']         = 'Download';
+            $aOptions['---']              = '---';
+            foreach ($lifecycles as $iId => $sLabel) {
+                $aOptions['mark-lifecycle-' . $iId] = 'Mark as ' . $sLabel;
+            }
 
             ?>
             <div class="panel" id="batch-action">

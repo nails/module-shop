@@ -12,6 +12,7 @@
 
 namespace Nails\Admin\Shop;
 
+use Nails\Common\Exception\NailsException;
 use Nails\Factory;
 use Nails\Admin\Helper;
 use Nails\Shop\Controller\BaseAdmin;
@@ -26,32 +27,42 @@ class Orders extends BaseAdmin
     {
         if (userHasPermission('admin:shop:orders:manage')) {
 
-            //  Alerts
-            $ci =& get_instance();
+            //  Show sidebar notifications for orders in a certain state
+            $aAlerts         = array();
+            $oLifecycleModel = Factory::model('OrderLifecycle', 'nailsapp/module-shop');
+            $oOrderModel     = Factory::model('Order', 'nailsapp/module-shop');
+            $aAllLifecycle   = $oLifecycleModel->getAll(
+                null,
+                null,
+                array(
+                    'where' => array(
+                        array('admin_sidebar_show', true)
+                    )
+                )
+            );
 
-            //  Unfulfilled orders
-            $ci->db->where('fulfilment_status', 'UNFULFILLED');
-            $ci->db->where('status', 'PAID');
-            $iNumUnfulfilled = $ci->db->count_all_results(NAILS_DB_PREFIX . 'shop_order');
+            foreach ($aAllLifecycle as $oLifecycle) {
+                $iCount = $oOrderModel->countAll(
+                    array(
+                        'where' => array(
+                            array('lifecycle_id', $oLifecycle->id)
+                        )
+                    )
+                );
 
-            $oAlertUnfulfilled = Factory::factory('NavAlert', 'nailsapp/module-admin');
-            $oAlertUnfulfilled->setValue($iNumUnfulfilled);
-            $oAlertUnfulfilled->setSeverity('warning');
-            $oAlertUnfulfilled->setLabel('Unfulfilled Orders');
-
-            //  Packed Orders
-            $ci->db->where('fulfilment_status', 'PACKED');
-            $iNumPacked = $ci->db->count_all_results(NAILS_DB_PREFIX . 'shop_order');
-
-            $oAlertPacked = Factory::factory('NavAlert', 'nailsapp/module-admin');
-            $oAlertPacked->setValue($iNumPacked);
-            $oAlertPacked->setSeverity('info');
-            $oAlertPacked->setLabel('Packed Orders');
+                if ($iCount) {
+                    $oAlert = Factory::factory('NavAlert', 'nailsapp/module-admin');
+                    $oAlert->setValue($iCount);
+                    $oAlert->setLabel($oLifecycle->label . ' - ' . $oLifecycle->admin_note);
+                    $oAlert->setSeverity($oLifecycle->admin_sidebar_severity);
+                    $aAlerts[] = $oAlert;
+                }
+            }
 
             $oNavGroup = Factory::factory('Nav', 'nailsapp/module-admin');
             $oNavGroup->setLabel('Shop');
             $oNavGroup->setIcon('fa-shopping-cart');
-            $oNavGroup->addAction('Manage Orders', 'index', array($oAlertUnfulfilled, $oAlertPacked), 0);
+            $oNavGroup->addAction('Manage Orders', 'index', $aAlerts, 0);
 
             return $oNavGroup;
         }
@@ -152,14 +163,20 @@ class Orders extends BaseAdmin
                 array('Pending', 'PENDING')
             )
         );
+
+        $oLifecycleModel          = Factory::model('OrderLifecycle', 'nailsapp/module-shop');
+        $aLifecycles              = $oLifecycleModel->getAllFlat();
+        $this->data['lifecycles'] = $aLifecycles;
+        $aLifecyclesFilter        = array();
+
+        foreach ($aLifecycles as $iId => $sLabel) {
+            $aLifecyclesFilter[] = array($sLabel, $iId);
+        }
+
         $cbFilters[] = Helper::searchFilterObject(
-            $tablePrefix . '.fulfilment_status',
-            'Ship Status',
-            array(
-                array('Unfulfilled', 'UNFULFILLED'),
-                array('Packed', 'PACKED'),
-                array('Fulfilled', 'FULFILLED')
-            )
+            $tablePrefix . '.lifecycle_id',
+            'State',
+            $aLifecyclesFilter
         );
 
         $this->load->model('shop/shop_shipping_driver_model');
@@ -174,7 +191,7 @@ class Orders extends BaseAdmin
 
         $cbFilters[] = Helper::searchFilterObject(
             $tablePrefix . '.delivery_option',
-            'Delivery Type',
+            'Delivery',
             $aFilterOptions
         );
 
@@ -184,6 +201,7 @@ class Orders extends BaseAdmin
 
         //  Define the $data variable for the queries
         $data = array(
+            'expand' => array('lifecycle'),
             'sort' => array(
                 array($sortOn, $sortOrder)
             ),
@@ -220,7 +238,6 @@ class Orders extends BaseAdmin
     public function view()
     {
         if (!userHasPermission('admin:shop:orders:view')) {
-
             $this->session->set_flashdata('error', 'You do not have permission to view order details.');
             redirect('admin/shop/orders');
         }
@@ -249,8 +266,17 @@ class Orders extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->asset->load('admin.order.view.min.js', 'nailsapp/module-shop');
-        $this->asset->inline('var _SHOP_ORDER_VIEW = new NAILS_Admin_Shop_Order_View()', 'JS');
+        //  Get order lifecycle
+        $oLifecycleModel                 = Factory::model('OrderLifecycle', 'nailsapp/module-shop');
+        $oSession                        = Factory::service('Session', 'nailsapp/module-auth');
+        $this->data['allLifecycle']      = $oLifecycleModel->getAll();
+        $this->data['did_set_lifecycle'] = $oSession->flashdata('did_set_lifecycle');
+
+        // --------------------------------------------------------------------------
+
+        $oAsset = Factory::service('Asset');
+        $oAsset->load('admin.order.view.min.js', 'nailsapp/module-shop');
+        $oAsset->inline('var _SHOP_ORDER_VIEW = new NAILS_Admin_Shop_Order_View()', 'JS');
 
         // --------------------------------------------------------------------------
 
@@ -259,7 +285,7 @@ class Orders extends BaseAdmin
             $this->data['negative']  = '<strong>Do not process this order!</strong>';
             $this->data['negative'] .= '<br />The customer has not completed payment.';
 
-        } elseif ($this->data['order']->fulfilment_status != 'FULFILLED') {
+        } elseif ($this->data['order']->lifecycle_id != $oLifecycleModel::ORDER_DISPATCHED) {
 
             if ($this->data['order']->delivery_type == 'COLLECT') {
 
@@ -364,25 +390,6 @@ class Orders extends BaseAdmin
 
         if ($this->db->affected_rows()) {
 
-            //  Product updated, check if order has been fulfilled
-            $this->db->where('order_id', $order_id);
-            $this->db->where('processed', false);
-
-            if (!$this->db->count_all_results(NAILS_DB_PREFIX . 'shop_order_product')) {
-
-                //  No unprocessed items, consider order FULFILLED
-                $this->load->model('shop/shop_order_model');
-                $this->shop_order_model->fulfil($order_id);
-
-            } else {
-
-                //  Still some unprocessed items, mark as unfulfilled (in case it was already fulfilled)
-                $this->load->model('shop/shop_order_model');
-                $this->shop_order_model->unfulfil($order_id);
-            }
-
-            // --------------------------------------------------------------------------
-
             $this->session->set_flashdata('success', 'Product\'s status was updated successfully.');
             redirect('admin/shop/orders/view/' . $order_id . $isModal);
 
@@ -391,262 +398,6 @@ class Orders extends BaseAdmin
             $this->session->set_flashdata('error', 'I was not able to update the status of that product.');
             redirect('admin/shop/orders/view/' . $order_id . $isModal);
         }
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Mark an order as fulfilled
-     * @return void
-     */
-    public function fulfil()
-    {
-        if (!userHasPermission('admin:shop:orders:edit')) {
-
-            $msg    = 'You do not have permission to edit orders.';
-            $status = 'error';
-            $this->session->set_flashdata($status, $msg);
-            redirect('admin/shop/orders');
-        }
-
-        // --------------------------------------------------------------------------
-
-        //    Fetch and check order
-        $this->load->model('shop/shop_order_model');
-
-        $order = $this->shop_order_model->getById($this->uri->segment(5));
-
-        if (!$order) {
-
-            $msg    = 'No order exists by that ID.';
-            $status = 'error';
-            $this->session->set_flashdata($status, $msg);
-            redirect('admin/shop/orders');
-        }
-
-        // --------------------------------------------------------------------------
-
-        if ($this->shop_order_model->fulfil($order->id)) {
-
-            $msg    = 'Order ' . $order->ref . ' was marked as fulfilled.';
-            $status = 'success';
-
-        } else {
-
-            $msg    = 'Failed to mark order ' . $order->ref . ' as fulfilled.';
-            $status = 'error';
-        }
-
-        $this->session->set_flashdata($status, $msg);
-        redirect('admin/shop/orders/view/' . $order->id);
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Batch fulfil orders
-     * @return void
-     */
-    public function fulfil_batch()
-    {
-        if (!userHasPermission('admin:shop:orders:edit')) {
-
-            $msg    = 'You do not have permission to edit orders.';
-            $status = 'error';
-            $this->session->set_flashdata($status, $msg);
-            redirect('admin/shop/orders');
-        }
-
-        // --------------------------------------------------------------------------
-
-        //    Fetch and check orders
-        $this->load->model('shop/shop_order_model');
-
-        if ($this->shop_order_model->fulfilBatch($this->input->get('ids'))) {
-
-            $msg    = 'Orders were marked as fulfilled.';
-            $status = 'success';
-
-        } else {
-
-            $msg     = 'Failed to mark orders as fulfilled. ';
-            $msg    .= $this->shop_order_model->lastError();
-            $status  = 'error';
-        }
-
-        $this->session->set_flashdata($status, $msg);
-        redirect('admin/shop/orders');
-    }
-
-    // --------------------------------------------------------------------------
-
-
-    /**
-     * Mark an order as fulfilled
-     * @return void
-     */
-    public function pack()
-    {
-        if (!userHasPermission('admin:shop:orders:edit')) {
-
-            $msg    = 'You do not have permission to edit orders.';
-            $status = 'error';
-            $this->session->set_flashdata($status, $msg);
-            redirect('admin/shop/orders');
-        }
-
-        // --------------------------------------------------------------------------
-
-        //    Fetch and check order
-        $this->load->model('shop/shop_order_model');
-
-        $order = $this->shop_order_model->getById($this->uri->segment(5));
-
-        if (!$order) {
-
-            $msg    = 'No order exists by that ID.';
-            $status = 'error';
-            $this->session->set_flashdata($status, $msg);
-            redirect('admin/shop/orders');
-        }
-
-        // --------------------------------------------------------------------------
-
-        if ($this->shop_order_model->pack($order->id)) {
-
-            $msg    = 'Order ' . $order->ref . ' was marked as packed.';
-            $status = 'success';
-
-        } else {
-
-            $msg    = 'Failed to mark order ' . $order->ref . ' as packed.';
-            $status = 'error';
-        }
-
-        $this->session->set_flashdata($status, $msg);
-        redirect('admin/shop/orders/view/' . $order->id);
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Batch fulfil orders
-     * @return void
-     */
-    public function pack_batch()
-    {
-        if (!userHasPermission('admin:shop:orders:edit')) {
-
-            $msg    = 'You do not have permission to edit orders.';
-            $status = 'error';
-            $this->session->set_flashdata($status, $msg);
-            redirect('admin/shop/orders');
-        }
-
-        // --------------------------------------------------------------------------
-
-        //    Fetch and check orders
-        $this->load->model('shop/shop_order_model');
-
-        if ($this->shop_order_model->packBatch($this->input->get('ids'))) {
-
-            $msg    = 'Orders were marked as packed.';
-            $status = 'success';
-
-        } else {
-
-            $msg     = 'Failed to mark orders as packed. ';
-            $msg    .= $this->shop_order_model->lastError();
-            $status  = 'error';
-        }
-
-        $this->session->set_flashdata($status, $msg);
-        redirect('admin/shop/orders');
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Mark an order as unfulfilled
-     * @return void
-     */
-    public function unfulfil()
-    {
-        if (!userHasPermission('admin:shop:orders:edit')) {
-
-            $msg    = 'You do not have permission to edit orders.';
-            $status = 'error';
-            $this->session->set_flashdata($status, $msg);
-            redirect('admin/shop/orders');
-        }
-
-        // --------------------------------------------------------------------------
-
-        //    Fetch and check order
-        $this->load->model('shop/shop_order_model');
-
-        $order = $this->shop_order_model->getById($this->uri->segment(5));
-
-        if (!$order) {
-
-            $msg    = 'No order exists by that ID.';
-            $status = 'error';
-            $this->session->set_flashdata($status, $msg);
-            redirect('admin/shop/orders');
-        }
-
-        // --------------------------------------------------------------------------
-
-        if ($this->shop_order_model->unfulfil($order->id)) {
-
-            $msg    = 'Order ' . $order->ref . ' was marked as unfulfilled.';
-            $status = 'success';
-
-        } else {
-
-            $msg    = 'Failed to mark order ' . $order->ref . ' as unfulfilled.';
-            $status = 'error';
-        }
-
-        $this->session->set_flashdata($status, $msg);
-        redirect('admin/shop/orders/view/' . $order->id);
-    }
-
-    //---------------------------------------------------------------------------
-
-    /**
-     * Batch unfulfil orders
-     * @return void
-     */
-    public function unfulfil_batch()
-    {
-        if (!userHasPermission('admin:shop:orders:edit')) {
-
-            $msg    = 'You do not have permission to edit orders.';
-            $status = 'error';
-            $this->session->set_flashdata($status, $msg);
-            redirect('admin/shop/orders');
-        }
-
-        // --------------------------------------------------------------------------
-
-        //    Fetch and check orders
-        $this->load->model('shop/shop_order_model');
-
-        if ($this->shop_order_model->unfulfilBatch($this->input->get('ids'))) {
-
-            $msg    = 'Orders were marked as unfulfilled.';
-            $status = 'success';
-
-        } else {
-
-            $msg     = 'Failed to mark orders as unfulfilled. ';
-            $msg    .= $this->shop_order_model->lastError();
-            $status  = 'error';
-        }
-
-        $this->session->set_flashdata($status, $msg);
-        redirect('admin/shop/orders');
     }
 
     // --------------------------------------------------------------------------
@@ -700,7 +451,7 @@ class Orders extends BaseAdmin
     //---------------------------------------------------------------------------
 
     /**
-     * Batch unfulfil orders
+     * Batch cancel orders
      * @return void
      */
     public function cancel_batch()
@@ -731,6 +482,93 @@ class Orders extends BaseAdmin
         }
 
         $this->session->set_flashdata($status, $msg);
+        redirect('admin/shop/orders');
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Set the lifecycle state of an order
+     */
+    public function lifecycle()
+    {
+        if (!userHasPermission('admin:shop:orders:edit')) {
+
+            $msg    = 'You do not have permission to edit orders.';
+            $status = 'error';
+            $this->session->set_flashdata($status, $msg);
+            redirect('admin/shop/orders');
+        }
+
+        $oUri            = Factory::service('Uri');
+        $oSession        = Factory::service('Session', 'nailsapp/module-auth');
+        $oLifecycleModel = Factory::model('OrderLifecycle', 'nailsapp/module-shop');
+
+        try {
+
+            $oLifecycleModel->setLifecycle(
+                $oUri->segment(5),
+                $oUri->segment(6)
+            );
+
+            $oSession->set_flashdata('success', 'Order lifecycle was updated.');
+
+        } catch (\Exception $e) {
+            $oSession->set_flashdata('error', 'Failed to set order lifecycle. ' . $oLifecycleModel->lastError());
+        }
+
+        $oSession->set_flashdata('did_set_lifecycle', true);
+
+        redirect('admin/shop/orders/view/' . $oUri->segment(5));
+    }
+
+    // --------------------------------------------------------------------------
+
+    /**
+     * Set the lfiecycle state of multiple orders
+     */
+    public function lifecycle_batch()
+    {
+        if (!userHasPermission('admin:shop:orders:edit')) {
+
+            $msg    = 'You do not have permission to edit orders.';
+            $status = 'error';
+            $this->session->set_flashdata($status, $msg);
+            redirect('admin/shop/orders');
+        }
+
+        $oDb          = Factory::service('Database');
+        $oInput       = Factory::service('Input');
+        $iLifecycleId = (int) $oInput->get('lifecycle');
+        $aOrderIds    = $oInput->get('ids');
+
+        $oLifecycleModel = Factory::model('OrderLifecycle', 'nailsapp/module-shop');
+        $oLifecycle      = $oLifecycleModel->getById($iLifecycleId);
+
+        if (empty($oLifecycle)) {
+            throw new NailsException('Invalid Lifecycle ID.');
+        }
+
+        $oDb->trans_begin();
+
+        try {
+
+            foreach ($aOrderIds as $iOrderId) {
+                $oLifecycleModel->setLifecycle($iOrderId, $oLifecycle->id);
+            }
+
+            $oDb->trans_commit();
+            $sStatus  = 'success';
+            $sMessage = 'Orders were successfully marked as ' . $oLifecycle->label;
+
+        } catch (\Exception $e) {
+            $oDb->trans_rollback();
+            $sStatus  = 'error';
+            $sMessage = 'Failed ot mark orders as ' . $oLifecycle->label;
+        }
+
+        $oSession = Factory::service('Session', 'nailsapp/module-auth');
+        $oSession->set_flashdata($sStatus, $sMessage);
         redirect('admin/shop/orders');
     }
 }
