@@ -103,14 +103,14 @@ class Inventory extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $tablePrefix = $this->shop_product_model->getTableAlias();
+        $tableAlias = $this->shop_product_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 
         //  Get pagination and search/sort variables
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
-        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tableAlias . '.label';
         $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
@@ -118,10 +118,10 @@ class Inventory extends BaseAdmin
 
         //  Define the sortable columns and the filters
         $sortColumns = array(
-            $tablePrefix . '.id'        => 'ID',
-            $tablePrefix . '.label'     => 'Label',
-            $tablePrefix . '.modified'  => 'Modified Date',
-            $tablePrefix . '.is_active' => 'Active State',
+            $tableAlias . '.id'        => 'ID',
+            $tableAlias . '.label'     => 'Label',
+            $tableAlias . '.modified'  => 'Modified Date',
+            $tableAlias . '.is_active' => 'Active State',
             'pt.label'                  => 'Type'
         );
 
@@ -130,7 +130,7 @@ class Inventory extends BaseAdmin
         //  Checkbox Filters
         $cbFilters = array();
         $cbFilters['isActive'] = Helper::searchFilterObject(
-            $tablePrefix . '.is_active',
+            $tableAlias . '.is_active',
             'Active',
             array(
                 array('Yes', 1, true),

@@ -26,7 +26,7 @@ class Shop_supplier_model extends Base
         parent::__construct();
 
         $this->table       = NAILS_DB_PREFIX . 'shop_supplier';
-        $this->tablePrefix = 'ss';
+        $this->tableAlias = 'ss';
 
         // --------------------------------------------------------------------------
 
@@ -52,7 +52,7 @@ class Shop_supplier_model extends Base
                 $data['sort'] = array();
             }
 
-            $data['sort'][] = array($this->tablePrefix . '.label', 'ASC');
+            $data['sort'][] = array($this->tableAlias . '.label', 'ASC');
         }
 
         // --------------------------------------------------------------------------
@@ -84,7 +84,7 @@ class Shop_supplier_model extends Base
             if (empty($this->db->ar_select)) {
 
                 //  No selects have been called, call this so that we don't *just* get the product count
-                $prefix = $this->tablePrefix ? $this->tablePrefix . '.' : '';
+                $prefix = $this->tableAlias ? $this->tableAlias . '.' : '';
                 $this->db->select($prefix . '*');
             }
 
@@ -92,7 +92,7 @@ class Shop_supplier_model extends Base
             $query .= 'FROM ' . NAILS_DB_PREFIX . 'shop_product_supplier nsps ';
             $query .= 'JOIN ' . NAILS_DB_PREFIX . 'shop_product nsp ON `nsps`.`product_id` = `nsp`.`id` ';
             $query .= 'WHERE ';
-            $query .= '`nsps`.`supplier_id` = `' . $this->tablePrefix . '`.`id` ';
+            $query .= '`nsps`.`supplier_id` = `' . $this->tableAlias . '`.`id` ';
             $query .= 'AND `nsp`.`is_active` = 1 ';
             $query .= 'AND `nsp`.`is_deleted` = 0';
 
@@ -110,7 +110,7 @@ class Shop_supplier_model extends Base
             }
 
             $data['or_like'][] = array(
-                'column' => $this->tablePrefix . '.label',
+                'column' => $this->tableAlias . '.label',
                 'value'  => $data['keywords']
             );
         }

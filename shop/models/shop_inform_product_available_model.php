@@ -22,7 +22,7 @@ class Shop_inform_product_available_model extends Base
         // --------------------------------------------------------------------------
 
         $this->table             = NAILS_DB_PREFIX . 'shop_inform_product_available';
-        $this->tablePrefix       = 'sipa';
+        $this->tableAlias       = 'sipa';
         $this->defaultSortColumn = null;
 
         // --------------------------------------------------------------------------
@@ -38,19 +38,19 @@ class Shop_inform_product_available_model extends Base
 
         if (empty($data['sort'])) {
 
-            $this->db->order_by($this->tablePrefix . '.created', 'DESC');
+            $this->db->order_by($this->tableAlias . '.created', 'DESC');
         }
 
-        $this->db->select($this->tablePrefix . '.*, ue.user_id, u.first_name, u.last_name, u.profile_img, u.gender');
+        $this->db->select($this->tableAlias . '.*, ue.user_id, u.first_name, u.last_name, u.profile_img, u.gender');
         $this->db->select('sp.label product_label, spv.label variation_label');
 
         //  Join the User tables
-        $this->db->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ' . $this->tablePrefix . '.email', 'LEFT');
+        $this->db->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ' . $this->tableAlias . '.email', 'LEFT');
         $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = ue.user_id', 'LEFT');
 
         //  Join the product & variartion tables
-        $this->db->join(NAILS_DB_PREFIX . 'shop_product sp', 'sp.id = ' . $this->tablePrefix . '.product_id');
-        $this->db->join(NAILS_DB_PREFIX . 'shop_product_variation spv', 'spv.id = ' . $this->tablePrefix . '.variation_id');
+        $this->db->join(NAILS_DB_PREFIX . 'shop_product sp', 'sp.id = ' . $this->tableAlias . '.product_id');
+        $this->db->join(NAILS_DB_PREFIX . 'shop_product_variation spv', 'spv.id = ' . $this->tableAlias . '.variation_id');
     }
 
     // --------------------------------------------------------------------------
@@ -101,10 +101,10 @@ class Shop_inform_product_available_model extends Base
 
                 foreach ($variationIds as $variationId) {
 
-                    $this->db->select($this->tablePrefix . '.*');
-                    $this->db->where($this->tablePrefix . '.product_id', $productId);
-                    $this->db->where($this->tablePrefix . '.variation_id', $variationId);
-                    $results = $this->db->get($this->table . ' ' . $this->tablePrefix)->result();
+                    $this->db->select($this->tableAlias . '.*');
+                    $this->db->where($this->tableAlias . '.product_id', $productId);
+                    $this->db->where($this->tableAlias . '.variation_id', $variationId);
+                    $results = $this->db->get($this->table . ' ' . $this->tableAlias)->result();
 
                     foreach ($results as $result) {
 

@@ -128,14 +128,14 @@ class Orders extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $tablePrefix = $this->shop_order_model->getTableAlias();
+        $tableAlias = $this->shop_order_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 
         //  Get pagination and search/sort variables
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
-        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.created';
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tableAlias . '.created';
         $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'desc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
@@ -143,8 +143,8 @@ class Orders extends BaseAdmin
 
         //  Define the sortable columns and the filters
         $sortColumns = array(
-            $tablePrefix . '.created'          => 'Order Placed',
-            $tablePrefix . '.total_base_grand' => 'Order Value'
+            $tableAlias . '.created'          => 'Order Placed',
+            $tableAlias . '.total_base_grand' => 'Order Value'
         );
 
         // --------------------------------------------------------------------------
@@ -152,7 +152,7 @@ class Orders extends BaseAdmin
         //  Filter Checkboxes
         $cbFilters   = array();
         $cbFilters[] = Helper::searchFilterObject(
-            $tablePrefix . '.status',
+            $tableAlias . '.status',
             'Status',
             array(
                 array('Paid', 'PAID', true),
@@ -174,7 +174,7 @@ class Orders extends BaseAdmin
         }
 
         $cbFilters[] = Helper::searchFilterObject(
-            $tablePrefix . '.lifecycle_id',
+            $tableAlias . '.lifecycle_id',
             'State',
             $aLifecyclesFilter
         );
@@ -190,7 +190,7 @@ class Orders extends BaseAdmin
 
 
         $cbFilters[] = Helper::searchFilterObject(
-            $tablePrefix . '.delivery_option',
+            $tableAlias . '.delivery_option',
             'Delivery',
             $aFilterOptions
         );

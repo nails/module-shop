@@ -23,7 +23,7 @@ class Shop_range_model extends Base
         parent::__construct();
 
         $this->table        = NAILS_DB_PREFIX . 'shop_range';
-        $this->tablePrefix = 'sr';
+        $this->tableAlias = 'sr';
 
         // --------------------------------------------------------------------------
 
@@ -49,7 +49,7 @@ class Shop_range_model extends Base
                 $data['sort'] = array();
             }
 
-            $data['sort'][] = array($this->tablePrefix . '.label', 'ASC');
+            $data['sort'][] = array($this->tableAlias . '.label', 'ASC');
         }
 
         // --------------------------------------------------------------------------
@@ -81,14 +81,14 @@ class Shop_range_model extends Base
             if (empty($this->db->ar_select)) {
 
                 //  No selects have been called, call this so that we don't *just* get the product count
-                $this->db->select($this->tablePrefix . '.*');
+                $this->db->select($this->tableAlias . '.*');
             }
 
             $sql  = 'SELECT COUNT(DISTINCT(`nspr`.`product_id`)) ';
             $sql .= 'FROM ' . NAILS_DB_PREFIX . 'shop_product_range nspr ';
             $sql .= 'JOIN ' . NAILS_DB_PREFIX . 'shop_product nsp ON `nspr`.`product_id` = `nsp`.`id` ';
             $sql .= 'WHERE ';
-            $sql .= '`nspr`.`range_id` = `' . $this->tablePrefix . '`.`id` ';
+            $sql .= '`nspr`.`range_id` = `' . $this->tableAlias . '`.`id` ';
             $sql .= 'AND `nsp`.`is_active` = 1 ';
             $sql .= 'AND `nsp`.`is_deleted` = 0';
 
@@ -106,11 +106,11 @@ class Shop_range_model extends Base
             }
 
             $data['or_like'][] = array(
-                'column' => $this->tablePrefix . '.label',
+                'column' => $this->tableAlias . '.label',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
-                'column' => $this->tablePrefix . '.description',
+                'column' => $this->tableAlias . '.description',
                 'value'  => $data['keywords']
             );
         }

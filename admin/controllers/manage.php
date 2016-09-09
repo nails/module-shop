@@ -184,14 +184,14 @@ class Manage extends BaseAdmin
     protected function attributeIndex()
     {
         //  Get the table prefix from the model
-        $tablePrefix = $this->shop_attribute_model->getTableAlias();
+        $tableAlias = $this->shop_attribute_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 
         //  Get pagination and search/sort variables
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
-        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tableAlias . '.label';
         $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
@@ -199,9 +199,9 @@ class Manage extends BaseAdmin
 
         //  Define the sortable columns and the filters
         $sortColumns = array(
-            $tablePrefix . '.label'   => 'Label',
-            $tablePrefix . '.created' => 'Created',
-            $tablePrefix . '.modified' => 'Modified'
+            $tableAlias . '.label'   => 'Label',
+            $tableAlias . '.created' => 'Created',
+            $tableAlias . '.modified' => 'Modified'
         );
 
         // --------------------------------------------------------------------------
@@ -438,14 +438,14 @@ class Manage extends BaseAdmin
     protected function brandIndex()
     {
         //  Get the table prefix from the model
-        $tablePrefix = $this->shop_brand_model->getTableAlias();
+        $tableAlias = $this->shop_brand_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 
         //  Get pagination and search/sort variables
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
-        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tableAlias . '.label';
         $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
@@ -453,9 +453,9 @@ class Manage extends BaseAdmin
 
         //  Define the sortable columns and the filters
         $sortColumns = array(
-            $tablePrefix . '.label'   => 'Label',
-            $tablePrefix . '.created' => 'Created',
-            $tablePrefix . '.modified' => 'Modified'
+            $tableAlias . '.label'   => 'Label',
+            $tableAlias . '.created' => 'Created',
+            $tableAlias . '.modified' => 'Modified'
         );
 
         // --------------------------------------------------------------------------
@@ -720,14 +720,14 @@ class Manage extends BaseAdmin
     protected function supplierIndex()
     {
         //  Get the table prefix from the model
-        $tablePrefix = $this->shop_supplier_model->getTableAlias();
+        $tableAlias = $this->shop_supplier_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 
         //  Get pagination and search/sort variables
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
-        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tableAlias . '.label';
         $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
@@ -735,9 +735,9 @@ class Manage extends BaseAdmin
 
         //  Define the sortable columns and the filters
         $sortColumns = array(
-            $tablePrefix . '.label'   => 'Label',
-            $tablePrefix . '.created' => 'Created',
-            $tablePrefix . '.modified' => 'Modified'
+            $tableAlias . '.label'   => 'Label',
+            $tableAlias . '.created' => 'Created',
+            $tableAlias . '.modified' => 'Modified'
         );
 
         // --------------------------------------------------------------------------
@@ -978,14 +978,14 @@ class Manage extends BaseAdmin
     protected function categoryIndex()
     {
         //  Get the table prefix from the model
-        $tablePrefix = $this->shop_category_model->getTableAlias();
+        $tableAlias = $this->shop_category_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 
         //  Get pagination and search/sort variables
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
-        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.slug';
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tableAlias . '.slug';
         $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
@@ -993,10 +993,10 @@ class Manage extends BaseAdmin
 
         //  Define the sortable columns and the filters
         $sortColumns = array(
-            $tablePrefix . '.slug'     => 'Label (maintain hierarchy)',
-            $tablePrefix . '.label'    => 'Label',
-            $tablePrefix . '.created'  => 'Created',
-            $tablePrefix . '.modified' => 'Modified'
+            $tableAlias . '.slug'     => 'Label (maintain hierarchy)',
+            $tableAlias . '.label'    => 'Label',
+            $tableAlias . '.created'  => 'Created',
+            $tableAlias . '.modified' => 'Modified'
         );
 
         // --------------------------------------------------------------------------
@@ -1255,14 +1255,14 @@ class Manage extends BaseAdmin
     protected function collectionIndex()
     {
         //  Get the table prefix from the model
-        $tablePrefix = $this->shop_collection_model->getTableAlias();
+        $tableAlias = $this->shop_collection_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 
         //  Get pagination and search/sort variables
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
-        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tableAlias . '.label';
         $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
@@ -1270,9 +1270,9 @@ class Manage extends BaseAdmin
 
         //  Define the sortable columns and the filters
         $sortColumns = array(
-            $tablePrefix . '.label'   => 'Label',
-            $tablePrefix . '.created' => 'Created',
-            $tablePrefix . '.modified' => 'Modified'
+            $tableAlias . '.label'   => 'Label',
+            $tableAlias . '.created' => 'Created',
+            $tableAlias . '.modified' => 'Modified'
         );
 
         // --------------------------------------------------------------------------
@@ -1532,14 +1532,14 @@ class Manage extends BaseAdmin
     protected function rangeIndex()
     {
         //  Get the table prefix from the model
-        $tablePrefix = $this->shop_range_model->getTableAlias();
+        $tableAlias = $this->shop_range_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 
         //  Get pagination and search/sort variables
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
-        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tableAlias . '.label';
         $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
@@ -1547,9 +1547,9 @@ class Manage extends BaseAdmin
 
         //  Define the sortable columns and the filters
         $sortColumns = array(
-            $tablePrefix . '.label'   => 'Label',
-            $tablePrefix . '.created' => 'Created',
-            $tablePrefix . '.modified' => 'Modified'
+            $tableAlias . '.label'   => 'Label',
+            $tableAlias . '.created' => 'Created',
+            $tableAlias . '.modified' => 'Modified'
         );
 
         // --------------------------------------------------------------------------
@@ -1808,14 +1808,14 @@ class Manage extends BaseAdmin
     protected function tagIndex()
     {
         //  Get the table prefix from the model
-        $tablePrefix = $this->shop_tag_model->getTableAlias();
+        $tableAlias = $this->shop_tag_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 
         //  Get pagination and search/sort variables
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
-        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tableAlias . '.label';
         $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
@@ -1823,9 +1823,9 @@ class Manage extends BaseAdmin
 
         //  Define the sortable columns and the filters
         $sortColumns = array(
-            $tablePrefix . '.label'   => 'Label',
-            $tablePrefix . '.created' => 'Created',
-            $tablePrefix . '.modified' => 'Modified'
+            $tableAlias . '.label'   => 'Label',
+            $tableAlias . '.created' => 'Created',
+            $tableAlias . '.modified' => 'Modified'
         );
 
         // --------------------------------------------------------------------------
@@ -2080,14 +2080,14 @@ class Manage extends BaseAdmin
     protected function taxRateIndex()
     {
         //  Get the table prefix from the model
-        $tablePrefix = $this->shop_tax_rate_model->getTableAlias();
+        $tableAlias = $this->shop_tax_rate_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 
         //  Get pagination and search/sort variables
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
-        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tableAlias . '.label';
         $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
@@ -2095,9 +2095,9 @@ class Manage extends BaseAdmin
 
         //  Define the sortable columns and the filters
         $sortColumns = array(
-            $tablePrefix . '.label'   => 'Label',
-            $tablePrefix . '.created' => 'Created',
-            $tablePrefix . '.modified' => 'Modified'
+            $tableAlias . '.label'   => 'Label',
+            $tableAlias . '.created' => 'Created',
+            $tableAlias . '.modified' => 'Modified'
         );
 
         // --------------------------------------------------------------------------
@@ -2337,14 +2337,14 @@ class Manage extends BaseAdmin
     protected function productTypeIndex()
     {
         //  Get the table prefix from the model
-        $tablePrefix = $this->shop_product_type_model->getTableAlias();
+        $tableAlias = $this->shop_product_type_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 
         //  Get pagination and search/sort variables
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
-        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tableAlias . '.label';
         $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
@@ -2352,9 +2352,9 @@ class Manage extends BaseAdmin
 
         //  Define the sortable columns and the filters
         $sortColumns = array(
-            $tablePrefix . '.label'   => 'Label',
-            $tablePrefix . '.created' => 'Created',
-            $tablePrefix . '.modified' => 'Modified'
+            $tableAlias . '.label'   => 'Label',
+            $tableAlias . '.created' => 'Created',
+            $tableAlias . '.modified' => 'Modified'
         );
 
         // --------------------------------------------------------------------------
@@ -2596,14 +2596,14 @@ class Manage extends BaseAdmin
     protected function productTypeMetaIndex()
     {
         //  Get the table prefix from the model
-        $tablePrefix = $this->shop_product_type_meta_model->getTableAlias();
+        $tableAlias = $this->shop_product_type_meta_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 
         //  Get pagination and search/sort variables
         $page      = $this->input->get('page')      ? $this->input->get('page')      : 0;
         $perPage   = $this->input->get('perPage')   ? $this->input->get('perPage')   : 50;
-        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tablePrefix . '.label';
+        $sortOn    = $this->input->get('sortOn')    ? $this->input->get('sortOn')    : $tableAlias . '.label';
         $sortOrder = $this->input->get('sortOrder') ? $this->input->get('sortOrder') : 'asc';
         $keywords  = $this->input->get('keywords')  ? $this->input->get('keywords')  : '';
 
@@ -2611,9 +2611,9 @@ class Manage extends BaseAdmin
 
         //  Define the sortable columns and the filters
         $sortColumns = array(
-            $tablePrefix . '.label'   => 'Label',
-            $tablePrefix . '.created' => 'Created',
-            $tablePrefix . '.modified' => 'Modified'
+            $tableAlias . '.label'   => 'Label',
+            $tableAlias . '.created' => 'Created',
+            $tableAlias . '.modified' => 'Modified'
         );
 
         // --------------------------------------------------------------------------

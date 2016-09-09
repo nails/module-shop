@@ -23,7 +23,7 @@ class Lifecycle extends Base
     {
         parent::__construct();
         $this->table             = NAILS_DB_PREFIX . 'shop_order_lifecycle';
-        $this->tablePrefix       = 'ol';
+        $this->tableAlias       = 'ol';
         $this->defaultSortColumn = 'order';
     }
 
