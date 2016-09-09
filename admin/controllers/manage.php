@@ -184,7 +184,7 @@ class Manage extends BaseAdmin
     protected function attributeIndex()
     {
         //  Get the table prefix from the model
-        $tablePrefix = $this->shop_attribute_model->getTablePrefix();
+        $tablePrefix = $this->shop_attribute_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 
@@ -438,7 +438,7 @@ class Manage extends BaseAdmin
     protected function brandIndex()
     {
         //  Get the table prefix from the model
-        $tablePrefix = $this->shop_brand_model->getTablePrefix();
+        $tablePrefix = $this->shop_brand_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 
@@ -720,7 +720,7 @@ class Manage extends BaseAdmin
     protected function supplierIndex()
     {
         //  Get the table prefix from the model
-        $tablePrefix = $this->shop_supplier_model->getTablePrefix();
+        $tablePrefix = $this->shop_supplier_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 
@@ -978,7 +978,7 @@ class Manage extends BaseAdmin
     protected function categoryIndex()
     {
         //  Get the table prefix from the model
-        $tablePrefix = $this->shop_category_model->getTablePrefix();
+        $tablePrefix = $this->shop_category_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 
@@ -1255,7 +1255,7 @@ class Manage extends BaseAdmin
     protected function collectionIndex()
     {
         //  Get the table prefix from the model
-        $tablePrefix = $this->shop_collection_model->getTablePrefix();
+        $tablePrefix = $this->shop_collection_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 
@@ -1532,7 +1532,7 @@ class Manage extends BaseAdmin
     protected function rangeIndex()
     {
         //  Get the table prefix from the model
-        $tablePrefix = $this->shop_range_model->getTablePrefix();
+        $tablePrefix = $this->shop_range_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 
@@ -1808,7 +1808,7 @@ class Manage extends BaseAdmin
     protected function tagIndex()
     {
         //  Get the table prefix from the model
-        $tablePrefix = $this->shop_tag_model->getTablePrefix();
+        $tablePrefix = $this->shop_tag_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 
@@ -2080,7 +2080,7 @@ class Manage extends BaseAdmin
     protected function taxRateIndex()
     {
         //  Get the table prefix from the model
-        $tablePrefix = $this->shop_tax_rate_model->getTablePrefix();
+        $tablePrefix = $this->shop_tax_rate_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 
@@ -2337,7 +2337,7 @@ class Manage extends BaseAdmin
     protected function productTypeIndex()
     {
         //  Get the table prefix from the model
-        $tablePrefix = $this->shop_product_type_model->getTablePrefix();
+        $tablePrefix = $this->shop_product_type_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 
@@ -2596,7 +2596,7 @@ class Manage extends BaseAdmin
     protected function productTypeMetaIndex()
     {
         //  Get the table prefix from the model
-        $tablePrefix = $this->shop_product_type_meta_model->getTablePrefix();
+        $tablePrefix = $this->shop_product_type_meta_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 

@@ -103,7 +103,7 @@ class Inventory extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $tablePrefix = $this->shop_product_model->getTablePrefix();
+        $tablePrefix = $this->shop_product_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 

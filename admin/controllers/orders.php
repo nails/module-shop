@@ -128,7 +128,7 @@ class Orders extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $tablePrefix = $this->shop_order_model->getTablePrefix();
+        $tablePrefix = $this->shop_order_model->getTableAlias();
 
         // --------------------------------------------------------------------------
 

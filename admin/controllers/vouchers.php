@@ -100,7 +100,7 @@ class Vouchers extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $tablePrefix = $this->oVoucherModel->getTablePrefix();
+        $tablePrefix = $this->oVoucherModel->getTableAlias();
 
         // --------------------------------------------------------------------------
 
