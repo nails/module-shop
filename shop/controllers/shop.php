@@ -782,6 +782,48 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
+        //  Extract shipping and calculate range
+        $oShipRange = (object) array(
+            'option' => (object) $this->shop_shipping_driver_model->getOption(
+                $this->shop_shipping_driver_model->defaultOption()
+            ),
+            'min' => (object) array(
+                'base'           => null,
+                'base_formatted' => null,
+                'user'           => null,
+                'user_formatted' => null,
+            ),
+            'max' => (object) array(
+                'base'           => null,
+                'base_formatted' => null,
+                'user'           => null,
+                'user_formatted' => null,
+            )
+        );
+
+        foreach ($this->data['product']->variations as $oVariation) {
+
+            //  Minimim
+            if (is_null($oShipRange->min->base) || $oVariation->price->shipping->base->value_inc_tax < $oShipRange->min->base->value_inc_tax) {
+                $oShipRange->min->base           = $oVariation->price->shipping->base;
+                $oShipRange->min->base_formatted = $oVariation->price->shipping->base_formatted;
+                $oShipRange->min->user           = $oVariation->price->shipping->user;
+                $oShipRange->min->user_formatted = $oVariation->price->shipping->user_formatted;
+            }
+
+            //  Maximum
+            if (is_null($oShipRange->max->base) || $oVariation->price->shipping->base->value_inc_tax > $oShipRange->max->base->value_inc_tax) {
+                $oShipRange->max->base           = $oVariation->price->shipping->base;
+                $oShipRange->max->base_formatted = $oVariation->price->shipping->base_formatted;
+                $oShipRange->max->user           = $oVariation->price->shipping->user;
+                $oShipRange->max->user_formatted = $oVariation->price->shipping->user_formatted;
+            }
+        }
+
+        $this->data['shipping_range'] = $oShipRange;
+
+        // --------------------------------------------------------------------------
+
         //  Related Products
         $this->data['relatedProducts'] = $this->shop_product_model->getRelatedProducts($this->data['product']->id);
 

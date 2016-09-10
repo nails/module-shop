@@ -304,7 +304,7 @@ class Shop_shipping_driver_model
     // --------------------------------------------------------------------------
 
     /**
-     * Retursn the default option slug
+     * Returns the default option slug
      * @return string
      */
     public function defaultOption()
