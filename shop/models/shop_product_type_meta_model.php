@@ -27,7 +27,7 @@ class Shop_product_type_meta_model extends Base
         parent::__construct();
 
         $this->table               = NAILS_DB_PREFIX . 'shop_product_type_meta_field';
-        $this->tablePrefix         = 'ptmf';
+        $this->tableAlias         = 'ptmf';
         $this->tableTaxonomy       = NAILS_DB_PREFIX . 'shop_product_type_meta_taxonomy';
         $this->tableTaxonomyPrefix = 'ptmt';
     }
@@ -81,7 +81,7 @@ class Shop_product_type_meta_model extends Base
                 $data['sort'] = array();
             }
 
-            $data['sort'][] = array($this->tablePrefix . '.label', 'ASC');
+            $data['sort'][] = array($this->tableAlias . '.label', 'ASC');
         }
 
         // --------------------------------------------------------------------------
@@ -95,7 +95,7 @@ class Shop_product_type_meta_model extends Base
             }
 
             $data['or_like'][] = array(
-                'column' => $this->tablePrefix . '.label',
+                'column' => $this->tableAlias . '.label',
                 'value'  => $data['keywords']
             );
         }
@@ -140,9 +140,9 @@ class Shop_product_type_meta_model extends Base
      */
     protected function getByProductType()
     {
-        $this->db->select($this->tablePrefix . '.*');
-        $this->db->join($this->table  . ' ' . $this->tablePrefix, $this->tablePrefix . '.id = ' . $this->tableTaxonomyPrefix . '.meta_field_id');
-        $this->db->group_by($this->tablePrefix . '.id');
+        $this->db->select($this->tableAlias . '.*');
+        $this->db->join($this->table  . ' ' . $this->tableAlias, $this->tableAlias . '.id = ' . $this->tableTaxonomyPrefix . '.meta_field_id');
+        $this->db->group_by($this->tableAlias . '.id');
         $results = $this->db->get($this->tableTaxonomy . ' ' . $this->tableTaxonomyPrefix)->result();
 
         foreach ($results as $result) {

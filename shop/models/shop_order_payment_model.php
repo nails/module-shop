@@ -22,7 +22,7 @@ class Shop_order_payment_model extends Base
     {
         parent::__construct();
         $this->table             = NAILS_DB_PREFIX . 'shop_order_payment';
-        $this->tablePrefix       = 'sop';
+        $this->tableAlias       = 'sop';
         $this->defaultSortColumn = 'created';
         $this->defaultSortOrder  = 'desc';
     }
@@ -62,8 +62,8 @@ class Shop_order_payment_model extends Base
     public function getByTransactionId($sTransactionId, $sGateway)
     {
         $aData['where']   = array(
-            array('column' => $this->tablePrefix . '.transaction_id', 'value' => $sTransactionId),
-            array('column' => $this->tablePrefix . '.payment_gateway', 'value' => $sGateway)
+            array('column' => $this->tableAlias . '.transaction_id', 'value' => $sTransactionId),
+            array('column' => $this->tableAlias . '.payment_gateway', 'value' => $sGateway)
         );
 
         $aResult = $this->getAll(null, null, $aData);
@@ -85,7 +85,7 @@ class Shop_order_payment_model extends Base
     public function getForOrder($iOrderId)
     {
         $aData['where'] = array(
-            array('column' => $this->tablePrefix . '.order_id', 'value' => $iOrderId)
+            array('column' => $this->tableAlias . '.order_id', 'value' => $iOrderId)
         );
 
         return $this->getAll(null, null, $aData);

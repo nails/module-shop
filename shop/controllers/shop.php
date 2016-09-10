@@ -61,7 +61,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
             case 'a-z':
 
-                $this->_product_sort->sort_on = $this->shop_product_model->getTablePrefix() . '.label';
+                $this->_product_sort->sort_on = $this->shop_product_model->getTableAlias() . '.label';
                 break;
 
             case 'recent':
@@ -724,7 +724,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
      */
     protected function productSingle($slug)
     {
-        $this->data['product'] = $this->shop_product_model->getBySlug($slug);
+        $this->data['product'] = $this->shop_product_model->getBySlug($slug, array('includeShipping' => true));
 
         if (!$this->data['product']) {
 
@@ -779,6 +779,48 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  Product Reviews
         //  @todo
         $this->data['productReviews'] = array();
+
+        // --------------------------------------------------------------------------
+
+        //  Extract shipping and calculate range
+        $oShipRange = (object) array(
+            'option' => (object) $this->shop_shipping_driver_model->getOption(
+                $this->shop_shipping_driver_model->defaultOption()
+            ),
+            'min' => (object) array(
+                'base'           => null,
+                'base_formatted' => null,
+                'user'           => null,
+                'user_formatted' => null,
+            ),
+            'max' => (object) array(
+                'base'           => null,
+                'base_formatted' => null,
+                'user'           => null,
+                'user_formatted' => null,
+            )
+        );
+
+        foreach ($this->data['product']->variations as $oVariation) {
+
+            //  Minimim
+            if (is_null($oShipRange->min->base) || $oVariation->price->shipping->base->value_inc_tax < $oShipRange->min->base->value_inc_tax) {
+                $oShipRange->min->base           = $oVariation->price->shipping->base;
+                $oShipRange->min->base_formatted = $oVariation->price->shipping->base_formatted;
+                $oShipRange->min->user           = $oVariation->price->shipping->user;
+                $oShipRange->min->user_formatted = $oVariation->price->shipping->user_formatted;
+            }
+
+            //  Maximum
+            if (is_null($oShipRange->max->base) || $oVariation->price->shipping->base->value_inc_tax > $oShipRange->max->base->value_inc_tax) {
+                $oShipRange->max->base           = $oVariation->price->shipping->base;
+                $oShipRange->max->base_formatted = $oVariation->price->shipping->base_formatted;
+                $oShipRange->max->user           = $oVariation->price->shipping->user;
+                $oShipRange->max->user_formatted = $oVariation->price->shipping->user_formatted;
+            }
+        }
+
+        $this->data['shipping_range'] = $oShipRange;
 
         // --------------------------------------------------------------------------
 

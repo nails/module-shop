@@ -26,7 +26,7 @@ class Shop_collection_model extends Base
         parent::__construct();
 
         $this->table        = NAILS_DB_PREFIX . 'shop_collection';
-        $this->tablePrefix = 'sc';
+        $this->tableAlias = 'sc';
 
         // --------------------------------------------------------------------------
 
@@ -52,7 +52,7 @@ class Shop_collection_model extends Base
                 $data['sort'] = array();
             }
 
-            $data['sort'][] = array($this->tablePrefix . '.label', 'ASC');
+            $data['sort'][] = array($this->tableAlias . '.label', 'ASC');
         }
 
         // --------------------------------------------------------------------------
@@ -84,7 +84,7 @@ class Shop_collection_model extends Base
             if (empty($this->db->ar_select)) {
 
                 //  No selects have been called, call this so that we don't *just* get the product count
-                $prefix = $this->tablePrefix ? $this->tablePrefix . '.' : '';
+                $prefix = $this->tableAlias ? $this->tableAlias . '.' : '';
                 $this->db->select($prefix . '*');
             }
 
@@ -92,7 +92,7 @@ class Shop_collection_model extends Base
             $query .= 'FROM ' . NAILS_DB_PREFIX . 'shop_product_collection nspc ';
             $query .= 'JOIN ' . NAILS_DB_PREFIX . 'shop_product nsp ON `nspc`.`product_id` = `nsp`.`id` ';
             $query .= 'WHERE ';
-            $query .= '`nspc`.`collection_id` = `' . $this->tablePrefix . '`.`id` ';
+            $query .= '`nspc`.`collection_id` = `' . $this->tableAlias . '`.`id` ';
             $query .= 'AND `nsp`.`is_active` = 1 ';
             $query .= 'AND `nsp`.`is_deleted` = 0';
 
@@ -110,11 +110,11 @@ class Shop_collection_model extends Base
             }
 
             $data['or_like'][] = array(
-                'column' => $this->tablePrefix . '.label',
+                'column' => $this->tableAlias . '.label',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
-                'column' => $this->tablePrefix . '.description',
+                'column' => $this->tableAlias . '.description',
                 'value'  => $data['keywords']
             );
         }

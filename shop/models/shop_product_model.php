@@ -57,7 +57,7 @@ class Shop_product_model extends Base
         // --------------------------------------------------------------------------
 
         $this->table                             = NAILS_DB_PREFIX . 'shop_product';
-        $this->tablePrefix                       = 'p';
+        $this->tableAlias                       = 'p';
         $this->table_attribute                   = NAILS_DB_PREFIX . 'shop_product_attribute';
         $this->table_brand                       = NAILS_DB_PREFIX . 'shop_product_brand';
         $this->table_supplier                    = NAILS_DB_PREFIX . 'shop_product_supplier';
@@ -1225,6 +1225,14 @@ class Shop_product_model extends Base
                 $v->price->price->user           = unserialize(serialize($prototypeFields));
                 $v->price->price->user_formatted = unserialize(serialize($prototypeFields));
 
+                if (!empty($data['includeShipping'])) {
+                    $v->price->shipping                 = new \stdClass();
+                    $v->price->shipping->base           = unserialize(serialize($prototypeFields));
+                    $v->price->shipping->base_formatted = unserialize(serialize($prototypeFields));
+                    $v->price->shipping->user           = unserialize(serialize($prototypeFields));
+                    $v->price->shipping->user_formatted = unserialize(serialize($prototypeFields));
+                }
+
                 $basePrice = isset($v->price_raw->{SHOP_BASE_CURRENCY_CODE}) ? $v->price_raw->{SHOP_BASE_CURRENCY_CODE}->price : null;
 
                 if (is_null($basePrice)) {
@@ -1237,9 +1245,12 @@ class Shop_product_model extends Base
                 // --------------------------------------------------------------------------
 
                 //  Tax pricing
+
                 if (appSetting('price_exclude_tax', 'nailsapp/module-shop')) {
 
                     //  Prices do not include any applicable taxes
+
+                    //  Item
                     $v->price->price->base->value_ex_tax = $basePrice;
 
                     //  Work out the ex-tax price by working out the tax and adding
@@ -1258,6 +1269,8 @@ class Shop_product_model extends Base
                 } else {
 
                     //  Prices are inclusive of any applicable taxes
+
+                    //  Item
                     $v->price->price->base->value_inc_tax = $basePrice;
 
                     //  Work out the ex-tax price by working out the tax and subtracting
@@ -1269,9 +1282,18 @@ class Shop_product_model extends Base
 
                     } else {
 
-                        $v->price->price->base->value_tax   = 0;
+                        $v->price->price->base->value_tax    = 0;
                         $v->price->price->base->value_ex_tax = $v->price->price->base->value_inc_tax;
                     }
+                }
+
+                if (!empty($data['includeShipping'])) {
+
+                    $oShippingCost = $this->shop_shipping_driver_model->calculateVariant($v->id);
+
+                    $v->price->shipping->base->value_inc_tax = $oShippingCost->total_inc_tax;
+                    $v->price->shipping->base->value_ex_tax = $oShippingCost->total_ex_tax;
+                    $v->price->shipping->base->value_tax = $oShippingCost->tax;
                 }
 
                 // --------------------------------------------------------------------------
@@ -1297,7 +1319,27 @@ class Shop_product_model extends Base
 
                 // --------------------------------------------------------------------------
 
-                //  Take note of the final values so we can easily extract the higest and lowest variation price
+                if (!empty($data['includeShipping'])) {
+                    $v->price->shipping->base->value_inc_tax = (int)$v->price->shipping->base->value_inc_tax;
+                    $v->price->shipping->base->value_ex_tax  = (int)$v->price->shipping->base->value_ex_tax;
+                    $v->price->shipping->base->value_tax     = (int)$v->price->shipping->base->value_tax;
+
+                    $v->price->shipping->user->value_inc_tax = $this->oCurrencyModel->convertBaseToUser($v->price->shipping->base->value_inc_tax);
+                    $v->price->shipping->user->value_ex_tax  = $this->oCurrencyModel->convertBaseToUser($v->price->shipping->base->value_ex_tax);
+                    $v->price->shipping->user->value_tax     = $this->oCurrencyModel->convertBaseToUser($v->price->shipping->base->value_tax);
+
+                    $v->price->shipping->base_formatted->value_inc_tax = $this->oCurrencyModel->formatBase($v->price->shipping->base->value_inc_tax);
+                    $v->price->shipping->base_formatted->value_ex_tax  = $this->oCurrencyModel->formatBase($v->price->shipping->base->value_ex_tax);
+                    $v->price->shipping->base_formatted->value_tax     = $this->oCurrencyModel->formatBase($v->price->shipping->base->value_tax);
+
+                    $v->price->shipping->user_formatted->value_inc_tax = $this->oCurrencyModel->formatUser($v->price->shipping->user->value_inc_tax);
+                    $v->price->shipping->user_formatted->value_ex_tax  = $this->oCurrencyModel->formatUser($v->price->shipping->user->value_ex_tax);
+                    $v->price->shipping->user_formatted->value_tax     = $this->oCurrencyModel->formatUser($v->price->shipping->user->value_tax);
+                }
+
+                // --------------------------------------------------------------------------
+
+                //  Take note of the final values so we can easily extract the higgest and lowest variation price
                 $aVariationPricesIncTax[] = $v->price->price->user->value_inc_tax;
                 $aVariationPricesExTax[]  = $v->price->price->user->value_ex_tax;
                 $aVariationPricesTax[]    = $v->price->price->user->value_tax;
@@ -1530,7 +1572,7 @@ class Shop_product_model extends Base
         //  Selects
         if (empty($data['_do_not_select'])) {
 
-            $this->db->select($this->tablePrefix . '.*');
+            $this->db->select($this->tableAlias . '.*');
             $this->db->select('pt.label type_label, pt.max_per_order type_max_per_order, pt.is_physical type_is_physical');
             $this->db->select('tr.label tax_rate_label, tr.rate tax_rate_rate');
         }
@@ -1542,7 +1584,7 @@ class Shop_product_model extends Base
         //  Default sort
         if (empty($customSort) && empty($data['sort'])) {
 
-            $this->db->order_by($this->tablePrefix . '.label');
+            $this->db->order_by($this->tableAlias . '.label');
 
         } elseif (!empty($customSort) && $customSort[0] === 'PRICE') {
 
@@ -1567,10 +1609,10 @@ class Shop_product_model extends Base
             $search = $this->db->escape_like_str($data['keywords']);
 
             $where   = array();
-            $where[] = $this->tablePrefix . '.id IN (SELECT product_id FROM ' . NAILS_DB_PREFIX . 'shop_product_variation WHERE label REGEXP \'([[:<:]]|^)' . $search . '([[:>:]]|$)\' OR sku LIKE \'%' . $search . '%\')' ;
-            $where[] = $this->tablePrefix . '.id LIKE \'%' . $search  . '%\'';
-            $where[] = $this->tablePrefix . '.label REGEXP \'([[:<:]]|^)' . $search . '([[:>:]]|$)\'';
-            $where[] = $this->tablePrefix . '.description REGEXP \'([[:<:]]|^)' . $search . '([[:>:]]|$)\'';
+            $where[] = $this->tableAlias . '.id IN (SELECT product_id FROM ' . NAILS_DB_PREFIX . 'shop_product_variation WHERE label REGEXP \'([[:<:]]|^)' . $search . '([[:>:]]|$)\' OR sku LIKE \'%' . $search . '%\')' ;
+            $where[] = $this->tableAlias . '.id LIKE \'%' . $search  . '%\'';
+            $where[] = $this->tableAlias . '.label REGEXP \'([[:<:]]|^)' . $search . '([[:>:]]|$)\'';
+            $where[] = $this->tableAlias . '.description REGEXP \'([[:<:]]|^)' . $search . '([[:>:]]|$)\'';
             $where   = '(' . implode(' OR ', $where) . ')';
 
             $this->db->where($where);
@@ -1581,7 +1623,7 @@ class Shop_product_model extends Base
         //  Unless told otherwise, only return active items
         if (empty($data['include_inactive'])) {
 
-            $this->db->where($this->tablePrefix . '.is_active', true);
+            $this->db->where($this->tableAlias . '.is_active', true);
         }
 
         // --------------------------------------------------------------------------
@@ -1615,7 +1657,7 @@ class Shop_product_model extends Base
 
         if (!empty($data['brand_id'])) {
 
-            $where = $this->tablePrefix . '.id IN (SELECT product_id FROM ' . $this->table_brand . ' WHERE brand_id ';
+            $where = $this->tableAlias . '.id IN (SELECT product_id FROM ' . $this->table_brand . ' WHERE brand_id ';
 
             if (is_array($data['brand_id'])) {
 
@@ -1658,7 +1700,7 @@ class Shop_product_model extends Base
 
         if (!empty($data['supplier_id'])) {
 
-            $where = $this->tablePrefix . '.id IN (SELECT product_id FROM ' . $this->table_supplier . ' WHERE supplier_id ';
+            $where = $this->tableAlias . '.id IN (SELECT product_id FROM ' . $this->table_supplier . ' WHERE supplier_id ';
 
             if (is_array($data['supplier_id'])) {
 
@@ -1681,7 +1723,7 @@ class Shop_product_model extends Base
 
         if (!empty($data['category_id'])) {
 
-            $where = $this->tablePrefix . '.id IN (SELECT product_id FROM ' . $this->table_category . ' WHERE category_id ';
+            $where = $this->tableAlias . '.id IN (SELECT product_id FROM ' . $this->table_category . ' WHERE category_id ';
 
             if (is_array($data['category_id'])) {
 
@@ -1705,7 +1747,7 @@ class Shop_product_model extends Base
 
         if (!empty($data['collection_id'])) {
 
-            $where = $this->tablePrefix . '.id IN (SELECT product_id FROM ' . $this->table_collection . ' WHERE collection_id ';
+            $where = $this->tableAlias . '.id IN (SELECT product_id FROM ' . $this->table_collection . ' WHERE collection_id ';
 
             if (is_array($data['collection_id'])) {
 
@@ -1729,7 +1771,7 @@ class Shop_product_model extends Base
 
         if (!empty($data['range_id'])) {
 
-            $where = $this->tablePrefix . '.id IN (SELECT product_id FROM ' . $this->table_range . ' WHERE range_id ';
+            $where = $this->tableAlias . '.id IN (SELECT product_id FROM ' . $this->table_range . ' WHERE range_id ';
 
             if (is_array($data['range_id'])) {
 
@@ -1753,7 +1795,7 @@ class Shop_product_model extends Base
 
         if (!empty($data['sale_id'])) {
 
-            $where = $this->tablePrefix . '.id IN (SELECT product_id FROM ' . $this->table_sale . ' WHERE sale_id ';
+            $where = $this->tableAlias . '.id IN (SELECT product_id FROM ' . $this->table_sale . ' WHERE sale_id ';
 
             if (is_array($data['sale_id'])) {
 
@@ -1777,7 +1819,7 @@ class Shop_product_model extends Base
 
         if (!empty($data['tag_id'])) {
 
-            $where = $this->tablePrefix . '.id IN (SELECT product_id FROM ' . $this->table_tag . ' WHERE tag_id ';
+            $where = $this->tableAlias . '.id IN (SELECT product_id FROM ' . $this->table_tag . ' WHERE tag_id ';
 
             if (is_array($data['tag_id'])) {
 
@@ -1826,7 +1868,7 @@ class Shop_product_model extends Base
         if (empty($data['_ignore_filters']) && !empty($data['filter'])) {
 
             //  Join the avriation table
-            $this->db->join($this->table_variation . ' spv', $this->tablePrefix . '.id = spv.product_id');
+            $this->db->join($this->table_variation . ' spv', $this->tableAlias . '.id = spv.product_id');
 
             foreach ($data['filter'] as $meta_field_id => $values) {
 
@@ -1848,7 +1890,7 @@ class Shop_product_model extends Base
                 );
             }
 
-            $this->db->group_by($this->tablePrefix . '.id');
+            $this->db->group_by($this->tableAlias . '.id');
         }
     }
 
@@ -2310,7 +2352,7 @@ class Shop_product_model extends Base
 
         } else {
 
-            $table  = $this->tablePrefix ? $this->table . ' ' . $this->tablePrefix : $this->table;
+            $table  = $this->tableAlias ? $this->table . ' ' . $this->tableAlias : $this->table;
         }
 
         // --------------------------------------------------------------------------

@@ -10,7 +10,7 @@ class History extends Base
     {
         parent::__construct();
         $this->table       = NAILS_DB_PREFIX . 'shop_order_lifecycle_history';
-        $this->tablePrefix = 'olh';
+        $this->tableAlias = 'olh';
 
         $this->addExpandableField(
             array(

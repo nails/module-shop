@@ -30,7 +30,7 @@ class Shop_order_model extends Base
         parent::__construct();
 
         $this->table       = NAILS_DB_PREFIX . 'shop_order';
-        $this->tablePrefix = 'o';
+        $this->tableAlias = 'o';
 
         $this->defaultSortColumn  = 'created';
         $this->defaultSortOrder   = 'DESC';
@@ -409,7 +409,7 @@ class Shop_order_model extends Base
         $oDb = Factory::service('Database');
 
         //  Selects
-        $oDb->select($this->tablePrefix . '.*');
+        $oDb->select($this->tableAlias . '.*');
         $oDb->select('ue.email, u.first_name, u.last_name, u.gender, u.profile_img,ug.id user_group_id');
         $oDb->select('ug.label user_group_label');
         $oDb->select('v.code v_code,v.label v_label, v.type v_type, v.discount_type v_discount_type');
@@ -434,27 +434,27 @@ class Shop_order_model extends Base
             }
 
             $data['or_like'][] = array(
-                'column' => $this->tablePrefix . '.id',
+                'column' => $this->tableAlias . '.id',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
-                'column' => $this->tablePrefix . '.ref',
+                'column' => $this->tableAlias . '.ref',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
-                'column' => $this->tablePrefix . '.user_email',
+                'column' => $this->tableAlias . '.user_email',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
-                'column' => $this->tablePrefix . '.user_first_name',
+                'column' => $this->tableAlias . '.user_first_name',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
-                'column' => $this->tablePrefix . '.user_last_name',
+                'column' => $this->tableAlias . '.user_last_name',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
-                'column' => $this->tablePrefix . '.user_telephone',
+                'column' => $this->tableAlias . '.user_telephone',
                 'value'  => $data['keywords']
             );
             $data['or_like'][] = array(
@@ -492,7 +492,7 @@ class Shop_order_model extends Base
             $data['where'] = array();
         }
 
-        $data['where'][] = array($this->tablePrefix . '.ref', $ref);
+        $data['where'][] = array($this->tableAlias . '.ref', $ref);
 
         $result = $this->getAll(null, null, $data);
 
@@ -522,7 +522,7 @@ class Shop_order_model extends Base
             $data['where_in'] = array();
         }
 
-        $data['where_in'][] = array($this->tablePrefix . '.ref', $refs);
+        $data['where_in'][] = array($this->tableAlias . '.ref', $refs);
 
         return $this->getAll(null, null, $data);
     }
@@ -568,8 +568,8 @@ class Shop_order_model extends Base
     public function getForUserId($userId)
     {
         $oDb = Factory::service('Database');
-        $oDb->where_in($this->tablePrefix . '.status', array('PAID', 'UNPAID'));
-        $oDb->where($this->tablePrefix . '.user_id', $userId);
+        $oDb->where_in($this->tableAlias . '.status', array('PAID', 'UNPAID'));
+        $oDb->where($this->tableAlias . '.user_id', $userId);
         return $this->getAll();
     }
 
@@ -583,8 +583,8 @@ class Shop_order_model extends Base
     public function getForUserEmail($email)
     {
         $oDb = Factory::service('Database');
-        $oDb->where_in($this->tablePrefix . '.status', array('PAID', 'UNPAID'));
-        $oDb->where($this->tablePrefix . '.user_email', $email);
+        $oDb->where_in($this->tableAlias . '.status', array('PAID', 'UNPAID'));
+        $oDb->where($this->tableAlias . '.user_email', $email);
         return $this->getAll();
     }
 

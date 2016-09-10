@@ -26,7 +26,7 @@ class Shop_category_model extends Base
         parent::__construct();
 
         $this->table        = NAILS_DB_PREFIX . 'shop_category';
-        $this->tablePrefix = 'sc';
+        $this->tableAlias = 'sc';
 
         // --------------------------------------------------------------------------
 
@@ -624,7 +624,7 @@ class Shop_category_model extends Base
                 $data['sort'] = array();
             }
 
-            $data['sort'][] = array($this->tablePrefix . '.slug', 'ASC');
+            $data['sort'][] = array($this->tableAlias . '.slug', 'ASC');
         }
 
         // --------------------------------------------------------------------------
@@ -634,7 +634,7 @@ class Shop_category_model extends Base
             if (empty($this->db->ar_select)) {
 
                 //   No selects have been called, call this so that we don't *just* get the product count
-                $prefix = $this->tablePrefix ? $this->tablePrefix . '.' : '';
+                $prefix = $this->tableAlias ? $this->tableAlias . '.' : '';
                 $this->db->select($prefix . '*');
             }
 
@@ -643,8 +643,8 @@ class Shop_category_model extends Base
             $query .= 'JOIN ' . NAILS_DB_PREFIX . 'shop_product nsp ON `nspc`.`product_id` = `nsp`.`id` ';
             $query .= 'WHERE ';
             $query .= '(';
-            $query .= '`nspc`.`category_id` = `' . $this->tablePrefix . '`.`id` ';
-            $query .= 'OR FIND_IN_SET (`nspc`.`category_id`, `' . $this->tablePrefix . '`.`children_ids`)';
+            $query .= '`nspc`.`category_id` = `' . $this->tableAlias . '`.`id` ';
+            $query .= 'OR FIND_IN_SET (`nspc`.`category_id`, `' . $this->tableAlias . '`.`children_ids`)';
             $query .= ') ';
             $query .= 'AND `nsp`.`is_active` = 1 ';
             $query .= 'AND `nsp`.`is_deleted` = 0';
@@ -663,8 +663,8 @@ class Shop_category_model extends Base
                 $data['or_like'] = array();
             }
 
-            $data['or_like'][] = array($this->tablePrefix . '.label', $data['keywords']);
-            $data['or_like'][] = array($this->tablePrefix . '.description', $data['keywords']);
+            $data['or_like'][] = array($this->tableAlias . '.label', $data['keywords']);
+            $data['or_like'][] = array($this->tableAlias . '.description', $data['keywords']);
         }
 
         // --------------------------------------------------------------------------

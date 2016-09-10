@@ -44,7 +44,7 @@ class Voucher extends Base
     {
         parent::__construct();
         $this->table             = NAILS_DB_PREFIX . 'shop_voucher';
-        $this->tablePrefix       = 'sv';
+        $this->tableAlias       = 'sv';
         $this->destructiveDelete = false;
         $this->oCurrencyModel    = Factory::model('Currency', 'nailsapp/module-shop');
     }
@@ -293,15 +293,15 @@ class Voucher extends Base
             }
 
             $data['or_like'][] = array(
-                'column' => $this->tablePrefix . '.code',
+                'column' => $this->tableAlias . '.code',
                 'value'  => $data['keywords']
             );
         }
 
         parent::getCountCommon($data);
 
-        $this->db->select($this->tablePrefix . '.*,u.first_name, u.last_name, u.gender, u.profile_img, ue.email');
-        $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = ' . $this->tablePrefix . '.created_by', 'LEFT');
+        $this->db->select($this->tableAlias . '.*,u.first_name, u.last_name, u.gender, u.profile_img, ue.email');
+        $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = ' . $this->tableAlias . '.created_by', 'LEFT');
         $this->db->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.user_id = u.id AND ue.is_primary = 1', 'LEFT');
     }
 
@@ -321,7 +321,7 @@ class Voucher extends Base
             $data['where'] = array();
         }
 
-        $data['where'][] = array($this->tablePrefix . '.code', $code);
+        $data['where'][] = array($this->tableAlias . '.code', $code);
 
         $result = $this->getAll(null, null, $data);
 

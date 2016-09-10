@@ -100,7 +100,7 @@ class Vouchers extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $tablePrefix = $this->oVoucherModel->getTablePrefix();
+        $tableAlias = $this->oVoucherModel->getTableAlias();
 
         // --------------------------------------------------------------------------
 
@@ -108,7 +108,7 @@ class Vouchers extends BaseAdmin
         $oInput = Factory::service('Input');
         $page      = $oInput->get('page')      ? $oInput->get('page')      : 0;
         $perPage   = $oInput->get('perPage')   ? $oInput->get('perPage')   : 50;
-        $sortOn    = $oInput->get('sortOn')    ? $oInput->get('sortOn')    : $tablePrefix . '.created';
+        $sortOn    = $oInput->get('sortOn')    ? $oInput->get('sortOn')    : $tableAlias . '.created';
         $sortOrder = $oInput->get('sortOrder') ? $oInput->get('sortOrder') : 'desc';
         $keywords  = $oInput->get('keywords')  ? $oInput->get('keywords')  : '';
 
@@ -116,10 +116,10 @@ class Vouchers extends BaseAdmin
 
         //  Define the sortable columns and the filters
         $sortColumns = array(
-            $tablePrefix . '.created'    => 'Created',
-            $tablePrefix . '.code'       => 'Code',
-            $tablePrefix . '.type'       => 'Type',
-            $tablePrefix . '.valid_from' => 'Valid From Date'
+            $tableAlias . '.created'    => 'Created',
+            $tableAlias . '.code'       => 'Code',
+            $tableAlias . '.type'       => 'Type',
+            $tableAlias . '.valid_from' => 'Valid From Date'
         );
 
         // --------------------------------------------------------------------------
@@ -131,7 +131,7 @@ class Vouchers extends BaseAdmin
         }
         $filters   = array();
         $filters[] = Helper::searchFilterObject(
-            $tablePrefix . '.type',
+            $tableAlias . '.type',
             'View only',
             $aTypeFilter
         );

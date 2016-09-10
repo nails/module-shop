@@ -22,7 +22,7 @@ class Shop_sale_model extends Base
         parent::__construct();
 
         $this->table        = NAILS_DB_PREFIX . 'shop_sale';
-        $this->tablePrefix = 'ss';
+        $this->tableAlias = 'ss';
     }
 
     // --------------------------------------------------------------------------
@@ -51,7 +51,7 @@ class Shop_sale_model extends Base
             if (empty($this->db->ar_select)) {
 
                 //  No selects have been called, call this so that we don't *just* get the product count
-                $_prefix = $this->tablePrefix ? $this->tablePrefix . '.' : '';
+                $_prefix = $this->tableAlias ? $this->tableAlias . '.' : '';
                 $this->db->select($_prefix . '*');
             }
 
