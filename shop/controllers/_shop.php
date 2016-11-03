@@ -11,8 +11,9 @@
  */
 
 use Nails\Factory;
+use App\Controller\Base;
 
-class NAILS_Shop_Controller extends NAILS_Controller
+class NAILS_Shop_Controller extends Base
 {
     protected $shopName;
     protected $shopUrl;
