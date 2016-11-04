@@ -102,9 +102,16 @@ class Settings extends BaseAdmin
         $oShopPageModel = Factory::model('Page', 'nailsapp/module-shop');
         $this->data['pages'] = $oShopPageModel->getAll();
         if (isModuleEnabled('nailsapp/module-cms')) {
-
             $oPageModel = Factory::model('Page', 'nailsapp/module-cms');
-            $this->data['cmsPages'] = $oPageModel->getAllFlat();
+            $this->data['cmsPages'] = $oPageModel->getAllFlat(
+                null,
+                null,
+                [
+                    'where' => [
+                        '`published_hash` IS NOT NULL'
+                    ]
+                ]
+            );
         }
 
         // --------------------------------------------------------------------------
