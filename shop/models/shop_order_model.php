@@ -39,6 +39,8 @@ class Shop_order_model extends Base
         $this->oCountryModel  = Factory::model('Country');
         $this->oLogger        = Factory::service('Logger');
 
+        $this->searchableFields = ['id','ref'];
+
         // --------------------------------------------------------------------------
 
         $this->addExpandableField(
