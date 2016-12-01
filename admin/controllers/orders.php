@@ -43,11 +43,12 @@ class Orders extends BaseAdmin
 
             foreach ($aAllLifecycle as $oLifecycle) {
                 $iCount = $oOrderModel->countAll(
-                    array(
-                        'where' => array(
-                            array('lifecycle_id', $oLifecycle->id)
-                        )
-                    )
+                    [
+                        'where' => [
+                            ['status', 'PAID'],
+                            ['lifecycle_id', $oLifecycle->id]
+                        ]
+                    ]
                 );
 
                 if ($iCount) {
