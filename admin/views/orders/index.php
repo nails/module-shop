@@ -27,7 +27,7 @@
                     <th class="value">Total</th>
                     <th class="value">Discount</th>
                     <th class="status">Status</th>
-                    <th class="fulfilment">Fulfilled</th>
+                    <th class="text-center">State</th>
                     <th class="actions">Actions</th>
                 </tr>
             </thead>
@@ -146,7 +146,15 @@
                             <i class="fa fa-lg <?=$sIcon?>"></i>
                             <small><?=$order->status?></small>
                         </td>
-                        <td class="status text-center">
+                        <?php
+
+                        $aClass = ['status text-center'];
+                        if ($order->lifecycle->admin_sidebar_severity) {
+                            $aClass[] = $order->lifecycle->admin_sidebar_severity;
+                        }
+
+                        ?>
+                        <td class="<?=implode(' ', $aClass)?>">
                             <i class="fa fa-lg <?=$order->lifecycle->admin_icon?>"></i>
                             <small><?=$order->lifecycle->label?></small>
                         </td>
