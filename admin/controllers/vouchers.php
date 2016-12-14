@@ -292,9 +292,8 @@ class Vouchers extends BaseAdmin
                     throw new \Exception(lang('fv_there_were_errors'));
                 }
 
-                //  Test to ensure we're not applying an amount based voucher in a context which
+                //  @todo: ensure we're not applying an amount based voucher in a context which
                 //  could be applied to shipping costs
-                dumpanddie('ok');
 
                 //  Prepare the $data variable
                 $data = array(
