@@ -613,7 +613,7 @@ class Shop_basket_model
         $iDiscount  = 0;
         if ($oVoucher->discount_type == 'PERCENTAGE') {
 
-            $iDiscount = (int) round($iItemPrice * $oItem->quantity * ($oVoucher->discount_value/100));
+            $iDiscount = (int) round($iItemPrice * ($oVoucher->discount_value/100));
 
         } else if ($oVoucher->discount_type == 'AMOUNT') {
 
@@ -638,7 +638,7 @@ class Shop_basket_model
         $iDiscount  = 0;
         if ($oVoucher->discount_type == 'PERCENTAGE') {
 
-            $iDiscount = (int) round($iItemPrice * $oItem->quantity * ($oVoucher->discount_value/100));
+            $iDiscount = (int) round($iItemPrice * ($oVoucher->discount_value/100));
 
         } else if ($oVoucher->discount_type == 'AMOUNT') {
 
