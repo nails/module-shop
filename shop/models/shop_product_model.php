@@ -77,6 +77,11 @@ class Shop_product_model extends Base
 
         // --------------------------------------------------------------------------
 
+        //  Null this out, we're handling searching manually in getCountCommon()
+        $this->searchableFields = [];
+
+        // --------------------------------------------------------------------------
+
         $this->destructiveDelete = false;
 
         // --------------------------------------------------------------------------
