@@ -16,19 +16,21 @@ class Routes
 {
     /**
      * Returns an array of routes for this module
+
      * @return array
      */
     public function getRoutes()
     {
-        $routes   = array();
-        $settings = appSetting(null, 'nailsapp/module-shop', true);
+        $aRoutes   = array();
+        $aSettings = appSetting(null, 'nailsapp/module-shop', true);
 
         //  Shop front page route
-        $shopUrl = isset($settings['url']) ? substr($settings['url'], 0, -1) : 'shop';
-        $routes[$shopUrl . '(/(.+))?'] = 'shop/$2';
+        $sShopUrl = isset($aSettings['url']) ? substr($aSettings['url'], 0, -1) : 'shop';
+
+        $aRoutes[$sShopUrl . '(/(.+))?'] = 'shop/$2';
 
         //  @todo: all shop product/category/tag/sale routes etc
 
-        return $routes;
+        return $aRoutes;
     }
 }
