@@ -12,16 +12,17 @@
 
 namespace Nails\Routes\Shop;
 
-class Routes
+use Nails\Common\Model\BaseRoutes;
+
+class Routes extends BaseRoutes
 {
     /**
      * Returns an array of routes for this module
-
      * @return array
      */
     public function getRoutes()
     {
-        $aRoutes   = array();
+        $aRoutes   = [];
         $aSettings = appSetting(null, 'nailsapp/module-shop', true);
 
         //  Shop front page route
