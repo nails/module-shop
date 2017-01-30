@@ -13,6 +13,8 @@
 namespace Nails\Routes\Shop;
 
 use Nails\Common\Model\BaseRoutes;
+use Nails\Factory;
+use PDO;
 
 class Routes extends BaseRoutes
 {
@@ -22,15 +24,26 @@ class Routes extends BaseRoutes
      */
     public function getRoutes()
     {
-        $aRoutes   = [];
-        $aSettings = appSetting(null, 'nailsapp/module-shop', true);
+        $oDb     = Factory::service('ConsoleDatabase', 'nailsapp/module-console');
+        $oModel  = Factory::model('AppSetting');
+        $aRoutes = [];
 
-        //  Shop front page route
-        $sShopUrl = isset($aSettings['url']) ? substr($aSettings['url'], 0, -1) : 'shop';
+        $oRows = $oDb->query('
+          SELECT * FROM ' . $oModel->getTableName() . '
+          WHERE `grouping` = "nailsapp/module-shop"
+          AND `key` = "url"
+          
+        ');
 
-        $aRoutes[$sShopUrl . '(/(.+))?'] = 'shop/$2';
+        if (!$oRows->rowCount()) {
+            return $aRoutes;
+        }
 
-        //  @todo: all shop product/category/tag/sale routes etc
+        $sUrl = json_decode($oRows->fetch(PDO::FETCH_OBJ)->value) ?: 'shop';
+        $sUrl = preg_replace('/^\//', '', $sUrl);
+        $sUrl = preg_replace('/\/$/', '', $sUrl);
+
+        $aRoutes[$sUrl . '(/(.+))?'] = 'shop/$2';
 
         return $aRoutes;
     }
