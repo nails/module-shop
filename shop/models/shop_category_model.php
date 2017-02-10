@@ -244,7 +244,7 @@ class Shop_category_model extends Base
                         $_child_data->slug_end = array_pop(explode('/', $_child_data->slug));
                     }
 
-                    if (!parent::update($child_id, $_child_data)) {
+                    if (!parent::update($child_id, (array) $_child_data)) {
 
                         $this->db->trans_rollback();
                         $this->setError('Failed to update child category.');
