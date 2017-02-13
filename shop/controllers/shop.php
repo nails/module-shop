@@ -449,7 +449,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         //  SEO
         //  ===
-        $this->data['page']->title = $this->shopName . ': Category: "' . $this->data['category']->label . '"';
+        $this->data['page']->title = $this->shopName . ': Category: "' . $this->data['category']->seo_title . '"';
         $this->data['page']->seo->description = $this->data['category']->seo_description;
         $this->data['page']->seo->keywords    = $this->data['category']->seo_keywords;
 
@@ -759,7 +759,7 @@ class NAILS_Shop extends NAILS_Shop_Controller
         //  ===
 
         $this->data['page']->title             = $this->shopName . ': ';
-        $this->data['page']->title            .= $this->data['product']->seo_title ? $this->data['product']->seo_title : $this->data['product']->label;
+        $this->data['page']->title            .= $this->data['product']->seo_title;
         $this->data['page']->seo->description  = $this->data['product']->seo_description;
         $this->data['page']->seo->keywords     = $this->data['product']->seo_keywords;
 

@@ -706,6 +706,10 @@ class Shop_category_model extends Base
             $category->seo_description = htmlentities($category->seo_description);
         }
 
+        if (empty($category->seo_title)) {
+            $category->seo_title = $category->label;
+        }
+
         if (empty($category->seo_keywords)) {
 
             //  Sanitise the description
