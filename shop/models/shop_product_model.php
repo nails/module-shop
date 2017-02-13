@@ -2194,10 +2194,6 @@ class Shop_product_model extends Base
          * Buy {{PRODUCT}} at {{STORE}} ({{CATEGORIES}}) - {{DESCRIPTION,FIRST SENTENCE}}
          */
 
-        if (empty($product->seo_title)) {
-            $product->seo_title = $product->label;
-        }
-
         if (empty($product->seo_description)) {
 
             //  Base string
