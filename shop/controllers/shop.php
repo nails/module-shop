@@ -284,10 +284,15 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        //  Page title
-        //  ==========
-
-        $this->data['page']->title = $this->shopName . ': Brand: "' . $this->data['brand']->label . '"';
+        //  SEO
+        //  ===
+        if (!empty($this->data['brand']->seo_title)) {
+            $this->data['page']->title = $this->data['brand']->seo_title;
+        } else {
+            $this->data['page']->title = $this->shopName . ': Brand: "' . $this->data['brand']->label . '"';
+        }
+        $this->data['page']->seo->description = $this->data['brand']->seo_description;
+        $this->data['page']->seo->keywords    = $this->data['brand']->seo_keywords;
 
         // --------------------------------------------------------------------------
 
@@ -624,10 +629,15 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        //  Page title
-        //  ==========
-
-        $this->data['page']->title = $this->shopName . ': Collection: "' . $this->data['collection']->label . '"';
+        //  SEO
+        //  ===
+        if (!empty($this->data['collection']->seo_title)) {
+            $this->data['page']->title = $this->data['collection']->seo_title;
+        } else {
+            $this->data['page']->title = $this->shopName . ': Collection: "' . $this->data['collection']->label . '"';
+        }
+        $this->data['page']->seo->description = $this->data['collection']->seo_description;
+        $this->data['page']->seo->keywords    = $this->data['collection']->seo_keywords;
 
         // --------------------------------------------------------------------------
 
@@ -917,10 +927,15 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        //  Page title
-        //  ==========
-
-        $this->data['page']->title = $this->shopName . ': Range: "' . $this->data['range']->label . '"';
+        //  SEO
+        //  ===
+        if (!empty($this->data['range']->seo_title)) {
+            $this->data['page']->title = $this->data['range']->seo_title;
+        } else {
+            $this->data['page']->title = $this->shopName . ': Range: "' . $this->data['range']->label . '"';
+        }
+        $this->data['page']->seo->description = $this->data['range']->seo_description;
+        $this->data['page']->seo->keywords    = $this->data['range']->seo_keywords;
 
         // --------------------------------------------------------------------------
 
@@ -1065,10 +1080,15 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        //  Page title
-        //  ==========
-
-        $this->data['page']->title = $this->shopName . ': Sale: "' . $this->data['sale']->label . '"';
+        //  SEO
+        //  ===
+        if (!empty($this->data['sale']->seo_title)) {
+            $this->data['page']->title = $this->data['sale']->seo_title;
+        } else {
+            $this->data['page']->title = $this->shopName . ': Sale: "' . $this->data['sale']->label . '"';
+        }
+        $this->data['page']->seo->description = $this->data['sale']->seo_description;
+        $this->data['page']->seo->keywords    = $this->data['sale']->seo_keywords;
 
         // --------------------------------------------------------------------------
 
@@ -1212,10 +1232,15 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        //  Page title
-        //  ==========
-
-        $this->data['page']->title = $this->shopName . ': Tag: "' . $this->data['tag']->label . '"';
+        //  SEO
+        //  ===
+        if (!empty($this->data['tag']->seo_title)) {
+            $this->data['page']->title = $this->data['tag']->seo_title;
+        } else {
+            $this->data['page']->title = $this->shopName . ': Tag: "' . $this->data['tag']->label . '"';
+        }
+        $this->data['page']->seo->description = $this->data['tag']->seo_description;
+        $this->data['page']->seo->keywords    = $this->data['tag']->seo_keywords;
 
         // --------------------------------------------------------------------------
 
