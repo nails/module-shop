@@ -171,6 +171,7 @@ class Settings extends BaseAdmin
                         'expand_variants'          => (bool) $this->input->post('expand_variants'),
                         'default_product_per_page' => $this->input->post('default_product_per_page'),
                         'default_product_sort'     => $this->input->post('default_product_sort'),
+                        'area_product_footer'      => $this->input->post('area_product_footer'),
 
                         //  Skin settings
                         'skin_front'    => $this->input->post('skin_front'),

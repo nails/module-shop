@@ -486,6 +486,22 @@
 
                 ?>
             </fieldset>
+            <?php if (function_exists('form_field_cms_widgets')) { ?>
+            <fieldset id="shop-browsing-areas">
+                <legend>Editable Areas</legend>
+                <?php
+
+                $field            = array();
+                $field['key']     = 'area_product_footer';
+                $field['label']   = 'Product Footer';
+                $field['default'] = appSetting($field['key'], 'nailsapp/module-shop');
+                $field['tip']     = 'Content which sits beneath the main product information';
+
+                echo form_field_cms_widgets($field);
+
+                ?>
+            </fieldset>
+            <?php } ?>
         </div>
         <div class="tab-page tab-skin">
             <?php
