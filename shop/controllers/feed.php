@@ -25,7 +25,8 @@ class NAILS_Feed extends NAILS_Shop_Controller
             return;
         }
 
-        $sDriver = $this->uri->rsegment(2) . '/' . $this->uri->rsegment(3);
+        $oUri    = Factory::service('Uri');
+        $sDriver = $oUri->rsegment(2) . '/' . $oUri->rsegment(3);
 
         //  Test for a cache file first, if it's there serve that
         $oDate         = Factory::factory('DateTime');

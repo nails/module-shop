@@ -13,10 +13,11 @@
 namespace Nails\Shop\Model;
 
 use Nails\Common\Model\BaseDriver;
+use Nails\Common\Traits\ErrorHandling;
 
 class Feed extends BaseDriver
 {
-    use \Nails\Common\Traits\ErrorHandling;
+    use ErrorHandling;
 
     // --------------------------------------------------------------------------
 
@@ -26,14 +27,16 @@ class Feed extends BaseDriver
     // --------------------------------------------------------------------------
 
     /**
-     * Search a textfile containing a lsit of Google shopping categories
+     * Search a text file containing a list of Google shopping categories
      * @todo find a home for this other than here, should probably live within the Google driver
+     *
      * @param  string $sTerm The search term
-     * @return array
+     *
+     * @return array|boolean
      */
     public function searchGoogleCategories($sTerm)
     {
-        //  Open the cachefile, if it's not available then fetch a new one
+        //  Open the cache file, if it's not available then fetch a new one
         $sCacheFile = DEPLOY_CACHE_DIR . 'shop-feed-google-categories-' . date('m-Y') . '.txt';
 
         if (!file_exists($sCacheFile)) {
@@ -42,7 +45,6 @@ class Feed extends BaseDriver
             $sData = file_get_contents('http://www.google.com/basepages/producttype/taxonomy.en-GB.txt');
 
             if (empty($sData)) {
-
                 $this->setError('Failed to fetch feed from Google.');
                 return false;
             }
@@ -51,7 +53,7 @@ class Feed extends BaseDriver
         }
 
         $oHandle  = fopen($sCacheFile, 'r');
-        $aResults = array();
+        $aResults = [];
 
         if ($oHandle) {
 
@@ -62,7 +64,6 @@ class Feed extends BaseDriver
                 }
 
                 if (preg_match('/' . $sTerm . '/i', $sLine)) {
-
                     $aResults[] = $sLine;
                 }
             }
@@ -72,7 +73,6 @@ class Feed extends BaseDriver
             return $aResults;
 
         } else {
-
             $this->setError('Failed to read feed from cache.');
             return false;
         }

@@ -7,7 +7,7 @@
  * @subpackage  module-shop
  * @category    Model
  * @author      Nails Dev Team
- * @todo use base driver implementation
+ * @todo        use base driver implementation
  */
 
 use Nails\Factory;
@@ -67,9 +67,9 @@ class Shop_shipping_driver_model
         }
 
         //  Apply driver configurations
-        $aSettings = array(
-            'sSlug' => $this->oDriverConfig->slug
-        );
+        $aSettings = [
+            'sSlug' => $this->oDriverConfig->slug,
+        ];
         if (!empty($this->oDriverConfig->data->settings)) {
             $aSettings = array_merge(
                 $aSettings,
@@ -87,17 +87,19 @@ class Shop_shipping_driver_model
 
     /**
      * Recursively gets all the settings from the settings array
+     *
      * @param  array  $aSettings The array of fieldsets and/or settings
      * @param  string $sSlug     The driver's slug
+     *
      * @return array
      */
     protected function extractDriverSettings($aSettings, $sSlug)
     {
-        $aOut = array();
+        $aOut = [];
 
         foreach ($aSettings as $oSetting) {
 
-            //  If the object contains a `fields` property then consider this a fieldset and inception
+            //  If the object contains a `fields` property then consider this a field set and inception
             if (isset($oSetting->fields)) {
 
                 $aOut = array_merge($aOut, $this->extractDriverSettings($oSetting->fields, $sSlug));
@@ -119,7 +121,9 @@ class Shop_shipping_driver_model
 
     /**
      * Fetches all available shipping drivers
-     * @param  boolean $refresh Fetchf rom refresh - skip the cache
+     *
+     * @param  boolean $refresh Fetch from refresh - skip the cache
+     *
      * @return array
      */
     public function getAvailable($refresh = false)
@@ -131,8 +135,10 @@ class Shop_shipping_driver_model
 
     /**
      * Gets a single driver
-     * @param  string   $sSlug The driver's slug
-     * @return stdClass
+     *
+     * @param  string $sSlug The driver's slug
+     *
+     * @return stdClass|boolean
      */
     public function get($sSlug)
     {
@@ -149,7 +155,7 @@ class Shop_shipping_driver_model
 
     /**
      * Returns the config for the enabled driver
-     * @return sdClass
+     * @return \stdClass
      */
     public function getEnabled()
     {
@@ -160,17 +166,17 @@ class Shop_shipping_driver_model
 
     /**
      * Returns an array of the shippable items from the basket object
+     *
      * @param  object $basket The basket object
+     *
      * @return array
      */
     private function getShippableItemsFromBasket($basket)
     {
-        $aShippableItems = array();
+        $aShippableItems = [];
 
         foreach ($basket->items as $item) {
-
             if (!empty($item->product->type->is_physical) && empty($item->variant->shipping->collection_only)) {
-
                 $aShippableItems[] = $item;
             }
         }
@@ -182,20 +188,20 @@ class Shop_shipping_driver_model
 
     /**
      * Get the available shipping options from the driver
-     * @return [type] [description]
+     * @return array
      */
     public function options()
     {
-        $aOut = array();
+        $aOut = [];
 
         //  If warehouse collection is enabled then add it as an option
         if (appSetting('warehouse_collection_enabled', 'nailsapp/module-shop')) {
 
-            $aOut[] = array(
+            $aOut[] = [
                 'slug'    => 'COLLECTION',
                 'label'   => 'Collection',
-                'default' => false
-            );
+                'default' => false,
+            ];
         }
 
         return array_merge($aOut, $this->oDriver->options());
@@ -206,22 +212,26 @@ class Shop_shipping_driver_model
     /**
      * Returns an array of the available shipping options, including the cost of
      * shipping the supplied basket
+     *
+     * @param \stdClass $oBasket The basket object
+     *
+     * @throws ShippingDriverException
      * @return array
      */
     public function optionsWithCost($oBasket)
     {
         /**
          * Ask the driver what the available options are, pass it the shippable items so it can
-         * amend it's responses as nessecary and work out the cost
+         * amend it's responses as necessary and work out the cost
          */
 
         $aShippableItems = $this->getShippableItemsFromBasket($oBasket);
         $aOptions        = $this->options();
         $oCurrencyModel  = Factory::model('Currency', 'nailsapp/module-shop');
 
-        $aSlugs      = array();
+        $aSlugs      = [];
         $bHasDefault = false;
-        $aOut        = array();
+        $aOut        = [];
 
         if ($oBasket->shipping->isPossible) {
 
@@ -286,7 +296,9 @@ class Shop_shipping_driver_model
 
     /**
      * Returns the desired option
-     * @param  string   $sOptionSlug The desired option
+     *
+     * @param  string $sOptionSlug The desired option
+     *
      * @return stdClass
      */
     public function getOption($sOptionSlug)
@@ -323,15 +335,19 @@ class Shop_shipping_driver_model
 
     /**
      * Takes a basket object and calculates the cost of shipping
-     * @param  stdClass $basket A basket object
-     * @return stdClass
+     *
+     * @param \stdClass $basket the basket object
+     *
+     * @return object
+     * @throws ShippingDriverException
      */
     public function calculate($basket)
     {
-        $oFree                = new \stdClass();
-        $oFree->total_inc_tax = 0;
-        $oFree->total_ex_tax  = 0;
-        $oFree->tax           = 0;
+        $oFree = (object) [
+            'total_inc_tax' => 0,
+            'total_ex_tax'  => 0,
+            'tax'           => 0,
+        ];
 
         // --------------------------------------------------------------------------
 
@@ -375,10 +391,11 @@ class Shop_shipping_driver_model
          * `price_exclude_tax` setting).
          */
 
-        $oOut                = new \stdClass();
-        $oOut->total_inc_tax = 0;
-        $oOut->total_ex_tax  = 0;
-        $oOut->tax           = 0;
+        $oOut = (object) [
+            'total_inc_tax' => 0,
+            'total_ex_tax'  => 0,
+            'tax'           => 0,
+        ];
 
         if (appSetting('price_exclude_tax', 'nailsapp/module-shop')) {
 
@@ -403,16 +420,20 @@ class Shop_shipping_driver_model
 
     /**
      * Takes a product variant ID and works out what the shipping would be on it
-     * @param  integer  $iVariantId  ID of the variant in question
-     * @param  string   $sOptionSlug The slug for the shipping option to calculate for
-     * @throws Nails\Shop\Exception\ShippingDriverException
+     *
+     * @param  integer $iVariantId  ID of the variant in question
+     * @param  string  $sOptionSlug The slug for the shipping option to calculate for
+     *
+     * @throws ShippingDriverException
      * @return \stdClass
      */
     public function calculateVariant($iVariantId, $sOptionSlug = null)
     {
-        $oFree       = new \stdClass();
-        $oFree->base = (int) 0;
-        $oFree->user = (int) 0;
+        $oFree = (object) [
+            'total_inc_tax' => 0,
+            'total_ex_tax'  => 0,
+            'tax'           => 0,
+        ];
 
         // --------------------------------------------------------------------------
 
@@ -447,15 +468,11 @@ class Shop_shipping_driver_model
 
         $oVariant = null;
         foreach ($oItem->variations as $oVariation) {
-
             if ($oVariation->id == $iVariantId) {
                 if (!empty($oVariation->ship_collection_only)) {
-
                     //  Item is collect only, assume no charge for delivery
                     return $oFree;
-
                 } else {
-
                     $oVariant = $oVariation;
                 }
             }
@@ -495,10 +512,11 @@ class Shop_shipping_driver_model
          * `price_exclude_tax` setting).
          */
 
-        $oOut                = new \stdClass();
-        $oOut->total_inc_tax = 0;
-        $oOut->total_ex_tax  = 0;
-        $oOut->tax           = 0;
+        $oOut = (object) [
+            'total_inc_tax' => 0,
+            'total_ex_tax'  => 0,
+            'tax'           => 0,
+        ];
 
         if (appSetting('price_exclude_tax', 'nailsapp/module-shop')) {
 
@@ -546,23 +564,23 @@ class Shop_shipping_driver_model
     /**
      * Returns an object containing the shipping promotions strings, if any
      * promotion is available.
+     *
      * @param  stdClass $basket A basket object
+     *
      * @return object
      */
     public function getPromotion($basket)
     {
-        $oEmptyPromo = new \stdClass();
-        $oEmptyPromo->title = '';
-        $oEmptyPromo->body = '';
-        $oEmptyPromo->applied = false;
+        $oEmptyPromo = (object) [
+            'title'   => '',
+            'body'    => '',
+            'applied' => false,
+        ];
 
         if (method_exists($this->oDriver, 'getPromotion')) {
-
             $aShippableItems = $this->getShippableItemsFromBasket($basket);
             return $this->oDriver->getPromotion($aShippableItems, $basket);
-
         } else {
-
             return $oEmptyPromo;
         }
     }
