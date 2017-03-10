@@ -61,7 +61,7 @@ class Shop_basket_model
         //  Populate basket from session data?
         $savedBasket = json_decode(get_instance()->session->userdata($this->sessVar));
 
-        if (empty($savedBasket) && $this->oUser->isLoggedIn()) {
+        if (empty($savedBasket) && isLoggedIn()) {
 
             //  Check the activeUser data in case it exists there
             $oUserMeta = $this->oUserMeta->get(
@@ -1526,7 +1526,7 @@ class Shop_basket_model
     protected function saveUser()
     {
         //  If logged in, save the basket to the user's meta data for safe keeping.
-        if ($this->oUser->isLoggedIn()) {
+        if (isLoggedIn()) {
 
             $this->oUserMeta->update(
                 NAILS_DB_PREFIX . 'user_meta_shop',

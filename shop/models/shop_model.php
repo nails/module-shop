@@ -150,7 +150,7 @@ class Shop_model
                 get_instance()->session->unset_userdata('shop_currency', $currencyCode);
             }
 
-            if ($this->oUser->isLoggedIn()) {
+            if (isLoggedIn()) {
 
                 $this->oUserMeta->update(
                     NAILS_DB_PREFIX . 'user_meta_shop',

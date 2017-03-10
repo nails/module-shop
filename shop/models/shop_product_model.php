@@ -575,7 +575,7 @@ class Shop_product_model extends Base
 
             $this->db->set('created', 'NOW()', false);
 
-            if ($this->oUser->isLoggedIn()) {
+            if (isLoggedIn()) {
 
                 $this->db->set('created_by', activeUser('id'));
             }
@@ -583,7 +583,7 @@ class Shop_product_model extends Base
 
         $this->db->set('modified', 'NOW()', false);
 
-        if ($this->oUser->isLoggedIn()) {
+        if (isLoggedIn()) {
 
             $this->db->set('modified_by', activeUser('id'));
         }
@@ -2299,7 +2299,7 @@ class Shop_product_model extends Base
         // --------------------------------------------------------------------------
 
         //  Logged in?
-        if ($this->oUser->isLoggedIn()) {
+        if (isLoggedIn()) {
 
             $this->oUserMeta->update(
                 NAILS_DB_PREFIX . 'user_meta_shop',
@@ -2325,7 +2325,7 @@ class Shop_product_model extends Base
         // --------------------------------------------------------------------------
 
         //  Logged in?
-        if (empty($recentlyViewed) && $this->oUser->isLoggedIn()) {
+        if (empty($recentlyViewed) && isLoggedIn()) {
 
             $oUserMeta = $this->oUserMeta->get(
                 NAILS_DB_PREFIX . 'user_meta_shop',

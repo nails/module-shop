@@ -452,7 +452,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
             //  Valid currency
             $this->session->set_userdata('shop_currency', $oCurrency->code);
 
-            if ($this->user_model->isLoggedIn()) {
+            if (isLoggedIn()) {
 
                 //  Save to the user object
                 $oUserMeta = Factory::model('UserMeta', 'nailsapp/module-auth');

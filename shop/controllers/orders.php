@@ -58,7 +58,7 @@ class NAILS_Orders extends NAILS_Shop_Controller
         $idMatch    = $this->data['order']->user->id && $this->data['order']->user->id != activeUser('id');
         $emailMatch = $this->data['order']->user->email && $this->data['order']->user->email != activeUser('email');
 
-        if (!$this->user_model->isAdmin() && !$idMatch && !$emailMatch) {
+        if (!isAdmin() && !$idMatch && !$emailMatch) {
 
             return $this->badInvoice('Permission Denied.');
         }

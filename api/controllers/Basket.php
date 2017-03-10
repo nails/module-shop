@@ -292,7 +292,7 @@ class Basket extends \Nails\Api\Controller\Base
 
             $this->session->set_userdata('shop_currency', $oCurrency->code);
 
-            if ($this->user_model->isLoggedIn()) {
+            if (isLoggedIn()) {
 
                 //  Save to the user meta object
                 $oUserMeta = Factory::model('UserMeta', 'nailsapp/module-auth');
