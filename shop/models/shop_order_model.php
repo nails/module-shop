@@ -133,7 +133,8 @@ class Shop_order_model extends Base
             }
 
             //  User ID
-            $user = $this->user_model->getByEmail($order->user_email);
+            $oUserModel = Factory::model('User', 'nailsapp/module-auth');
+            $user = $oUserModel->getByEmail($order->user_email);
 
             if ($user) {
 
