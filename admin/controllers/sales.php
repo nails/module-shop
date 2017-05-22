@@ -148,13 +148,13 @@ class Sales extends BaseAdmin
     public function delete()
     {
         if (!userHasPermission('admin:shop:sales:delete')) {
-
             unauthorised();
         }
 
         // --------------------------------------------------------------------------
 
-        $this->session->set_flashdata('message', '<strong>TODO:</strong> Delete a sale.');
+        $oSession = Factory::service('Session', 'nailsapp/module-auth');
+        $oSession->set_flashdata('message', '<strong>TODO:</strong> Delete a sale.');
         redirect('admin/shop/sales/index');
     }
 }

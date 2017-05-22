@@ -225,7 +225,7 @@ class Settings extends BaseAdmin
 
                     // --------------------------------------------------------------------------
 
-                    $this->db->trans_begin();
+                    $oDb->trans_begin();
 
                     //  Normal settings
                     if (!$oAppSettingModel->set($aSettings, 'nailsapp/module-shop')) {
@@ -240,7 +240,7 @@ class Settings extends BaseAdmin
                     //  Drivers & Skins
                     $oFeedModel->saveEnabled($this->input->post($sKeyFeedDriver));
 
-                    $this->db->trans_commit();
+                    $oDb->trans_commit();
                     $this->data['success'] = 'Shop settings were saved.';
 
                     // --------------------------------------------------------------------------
@@ -321,9 +321,10 @@ class Settings extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Load assets
-        $this->asset->load('admin.settings.min.js', 'nailsapp/module-shop');
-        $this->asset->library('MUSTACHE');
-        $this->asset->inline('<script>_nails_settings = new NAILS_Admin_Shop_Settings();</script>');
+        $oAsset = Factory::service('Asset');
+        $oAsset->load('admin.settings.min.js', 'nailsapp/module-shop');
+        $oAsset->library('MUSTACHE');
+        $oAsset->inline('<script>_nails_settings = new NAILS_Admin_Shop_Settings();</script>');
 
         // --------------------------------------------------------------------------
 
@@ -458,21 +459,22 @@ class Settings extends BaseAdmin
                             break;
                     }
 
-                    $this->db->trans_begin();
+                    $oDb = Factory::service('Database');
+                    $oDb->trans_begin();
 
                     $oAppSettingModel = Factory::model('AppSetting');
 
                     $bResult          = $oAppSettingModel->set($settings, 'nailsapp/module-shop', null, false);
                     $bResultEncrypted = $oAppSettingModel->set($settings_encrypted, 'nailsapp/module-shop', null, true);
 
-                    if ($this->db->trans_status() !== false && $bResult && $bResultEncrypted) {
+                    if ($oDb->trans_status() !== false && $bResult && $bResultEncrypted) {
 
-                        $this->db->trans_commit();
+                        $oDb->trans_commit();
                         $this->data['success'] = '' . $this->data['gateway_name'] . ' Payment Gateway settings have been saved.';
 
                     } else {
 
-                        $this->db->trans_rollback();
+                        $oDb->trans_rollback();
                         $this->data['error'] = 'There was a problem saving the ' . $this->data['gateway_name'] . ' Payment Gateway settings.';
                     }
 
@@ -487,7 +489,8 @@ class Settings extends BaseAdmin
             $this->data['isModal']     = $this->input->get('isModal');
 
             //  Load common assets
-            $this->asset->load('nails.admin.settings.min.js', 'NAILS');
+            $oAsset = Factory::service('Asset');
+            $oAsset->load('nails.admin.settings.min.js', 'NAILS');
 
             $sMethodName = strtolower($gateway);
             $sMethodName = str_replace('_', ' ', $sMethodName);
@@ -531,8 +534,9 @@ class Settings extends BaseAdmin
      */
     protected function shopPgWorldpay()
     {
-        $this->asset->load('admin.settings.paymentgateway.worldpay.min.js', 'nailsapp/module-shop');
-        $this->asset->inline('<script>_worldpay_config = new NAILS_Admin_Shop_Settings_PaymentGateway_WorldPay();</script>');
+        $oAsset = Factory::service('Asset');
+        $oAsset->load('admin.settings.paymentgateway.worldpay.min.js', 'nailsapp/module-shop');
+        $oAsset->inline('<script>_worldpay_config = new NAILS_Admin_Shop_Settings_PaymentGateway_WorldPay();</script>');
 
         // --------------------------------------------------------------------------
 

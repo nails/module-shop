@@ -68,7 +68,8 @@ class NAILS_Orders extends NAILS_Shop_Controller
         //  Render PDF
         if (isset($_GET['dl']) && !$_GET['dl']) {
 
-            $this->load->view($this->skin->path . 'views/order/invoice', $this->data);
+            $oView = Factory::service('View');
+            $oView->load($this->skin->path . 'views/order/invoice', $this->data);
 
         } else {
 
@@ -87,10 +88,11 @@ class NAILS_Orders extends NAILS_Shop_Controller
      */
     protected function badInvoice($message)
     {
-        $this->output->set_content_type('application/json');
-        $this->output->set_header('Cache-Control: no-cache, must-revalidate');
-        $this->output->set_header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
-        $this->output->set_header($this->input->server('SERVER_PROTOCOL') . ' 400 Bad Request');
+        $oOutput = Factory::service('Output');
+        $oOutput->set_content_type('application/json');
+        $oOutput->set_header('Cache-Control: no-cache, must-revalidate');
+        $oOutput->set_header('Expires: Mon, 26 Jul 1997 05:00:00 GMT');
+        $oOutput->set_header($this->input->server('SERVER_PROTOCOL') . ' 400 Bad Request');
 
         // --------------------------------------------------------------------------
 
@@ -99,7 +101,7 @@ class NAILS_Orders extends NAILS_Shop_Controller
             'message' => $message
        );
 
-        $this->output->set_output(json_encode($out));
+        $oOutput->set_output(json_encode($out));
     }
 }
 

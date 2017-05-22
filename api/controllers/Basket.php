@@ -44,9 +44,10 @@ class Basket extends \Nails\Api\Controller\Base
      */
     protected function renderMaintenance()
     {
-        $this->output->set_header($this->input->server('SERVER_PROTOCOL') . ' 503 Service Temporarily Unavailable');
-        $this->output->set_header('Status: 503 Service Temporarily Unavailable');
-        $this->output->set_header('Retry-After: 7200');
+        $oOutput = Factory::service('Output');
+        $oOutput->set_header($this->input->server('SERVER_PROTOCOL') . ' 503 Service Temporarily Unavailable');
+        $oOutput->set_header('Status: 503 Service Temporarily Unavailable');
+        $oOutput->set_header('Retry-After: 7200');
 
         return array(
             'status' => '503',
@@ -290,7 +291,8 @@ class Basket extends \Nails\Api\Controller\Base
 
         if ($oCurrency) {
 
-            $this->session->set_userdata('shop_currency', $oCurrency->code);
+            $oSession = Factory::service('Session', 'nailsapp/module-auth');
+            $oSession->set_userdata('shop_currency', $oCurrency->code);
 
             if (isLoggedIn()) {
 

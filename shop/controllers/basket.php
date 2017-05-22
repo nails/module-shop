@@ -125,9 +125,10 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skin->path . 'views/basket/index', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        $oView = Factory::service('View');
+        $oView->load('structure/header', $this->data);
+        $oView->load($this->skin->path . 'views/basket/index', $this->data);
+        $oView->load('structure/footer', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -169,7 +170,8 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        $this->session->set_flashdata($status, $message);
+        $oSession = Factory::service('Session', 'nailsapp/module-auth');
+        $oSession->set_flashdata($status, $message);
         redirect($this->data['return']);
     }
 
@@ -205,7 +207,8 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        $this->session->set_flashdata($status, $message);
+        $oSession = Factory::service('Session', 'nailsapp/module-auth');
+        $oSession->set_flashdata($status, $message);
         redirect($this->data['return']);
     }
 
@@ -260,7 +263,8 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        $this->session->set_flashdata($status, $message);
+        $oSession = Factory::service('Session', 'nailsapp/module-auth');
+        $oSession->set_flashdata($status, $message);
         redirect($this->data['return']);
     }
 
@@ -295,7 +299,8 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        $this->session->set_flashdata($status, $message);
+        $oSession = Factory::service('Session', 'nailsapp/module-auth');
+        $oSession->set_flashdata($status, $message);
         redirect($this->data['return']);
     }
 
@@ -326,7 +331,8 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        $this->session->set_flashdata($status, $message);
+        $oSession = Factory::service('Session', 'nailsapp/module-auth');
+        $oSession->set_flashdata($status, $message);
         redirect($this->data['return']);
     }
 
@@ -360,7 +366,8 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        $this->session->set_flashdata($status, $message);
+        $oSession = Factory::service('Session', 'nailsapp/module-auth');
+        $oSession->set_flashdata($status, $message);
         redirect($this->data['return']);
     }
 
@@ -394,7 +401,8 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        $this->session->set_flashdata($status, $message);
+        $oSession = Factory::service('Session', 'nailsapp/module-auth');
+        $oSession->set_flashdata($status, $message);
         redirect($this->data['return']);
     }
 
@@ -424,7 +432,8 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        $this->session->set_flashdata($status, $message);
+        $oSession = Factory::service('Session', 'nailsapp/module-auth');
+        $oSession->set_flashdata($status, $message);
         redirect($this->data['return']);
     }
 
@@ -437,20 +446,20 @@ class NAILS_Basket extends NAILS_Shop_Controller
     public function set_currency()
     {
         if ($this->maintenance->enabled) {
-
             $this->renderMaintenancePage();
             return;
         }
 
         // --------------------------------------------------------------------------
 
+        $oSession       = Factory::service('Session', 'nailsapp/module-auth');
         $oCurrencyModel = Factory::model('Currency', 'nailsapp/module-shop');
         $oCurrency      = $oCurrencyModel->getByCode($this->input->get_post('currency'));
 
         if ($oCurrency) {
 
             //  Valid currency
-            $this->session->set_userdata('shop_currency', $oCurrency->code);
+            $oSession->set_userdata('shop_currency', $oCurrency->code);
 
             if (isLoggedIn()) {
 
@@ -477,7 +486,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        $this->session->set_flashdata($sStatus, $sMessage);
+        $oSession->set_flashdata($sStatus, $sMessage);
         redirect($this->data['return']);
     }
 
@@ -509,7 +518,8 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        $this->session->set_flashdata($status, $message);
+        $oSession = Factory::service('Session', 'nailsapp/module-auth');
+        $oSession->set_flashdata($status, $message);
         redirect($this->data['return']);
     }
 }

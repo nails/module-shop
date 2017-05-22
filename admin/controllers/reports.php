@@ -391,8 +391,9 @@ class Reports extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->asset->load('admin.reports.min.js', 'nailsapp/module-shop');
-        $this->asset->inline('<script>_nails_shop_reports = new NAILS_Admin_Shop_Reports();</script>');
+        $oAsset = Factory::service('Asset');
+        $oAsset->load('admin.reports.min.js', 'nailsapp/module-shop');
+        $oAsset->inline('<script>_nails_shop_reports = new NAILS_Admin_Shop_Reports();</script>');
 
         // --------------------------------------------------------------------------
 
@@ -436,14 +437,15 @@ class Reports extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch all variants which are out of stock
-        $this->db->select('p.id product_id, p.label product_label, v.id variation_id, v.label variation_label, v.sku, v.quantity_available');
-        $this->db->select('(SELECT GROUP_CONCAT(DISTINCT `b`.`label` ORDER BY `b`.`label` SEPARATOR \', \') FROM `' . NAILS_DB_PREFIX . 'shop_product_brand` pb JOIN `' . NAILS_DB_PREFIX . 'shop_brand` b ON `b`.`id` = `pb`.`brand_id` WHERE `pb`.`product_id` = `p`.`id` GROUP BY `pb`.`product_id`) brands', false);
-        $this->db->join(NAILS_DB_PREFIX . 'shop_product p', 'p.id = v.product_id', 'LEFT');
-        $this->db->where('v.stock_status', 'OUT_OF_STOCK');
-        $this->db->where('p.is_deleted', 0);
-        $this->db->where('v.is_deleted', 0);
-        $this->db->where('p.is_active', 1);
-        $out->data = $this->db->get(NAILS_DB_PREFIX . 'shop_product_variation v')->result_array();
+        $oDb = Factory::service('Database');
+        $oDb->select('p.id product_id, p.label product_label, v.id variation_id, v.label variation_label, v.sku, v.quantity_available');
+        $oDb->select('(SELECT GROUP_CONCAT(DISTINCT `b`.`label` ORDER BY `b`.`label` SEPARATOR \', \') FROM `' . NAILS_DB_PREFIX . 'shop_product_brand` pb JOIN `' . NAILS_DB_PREFIX . 'shop_brand` b ON `b`.`id` = `pb`.`brand_id` WHERE `pb`.`product_id` = `p`.`id` GROUP BY `pb`.`product_id`) brands', false);
+        $oDb->join(NAILS_DB_PREFIX . 'shop_product p', 'p.id = v.product_id', 'LEFT');
+        $oDb->where('v.stock_status', 'OUT_OF_STOCK');
+        $oDb->where('p.is_deleted', 0);
+        $oDb->where('v.is_deleted', 0);
+        $oDb->where('p.is_active', 1);
+        $out->data = $oDb->get(NAILS_DB_PREFIX . 'shop_product_variation v')->result_array();
 
         if ($out->data) {
 
@@ -534,39 +536,41 @@ class Reports extends BaseAdmin
             'o.billing_postcode',
             'o.billing_country'
         );
-        $this->db->select($select);
-        $this->db->where('o.status', 'PAID');
-        $this->db->order_by('o.created');
+
+        $oDb = Factory::service('Database');
+        $oDb->select($select);
+        $oDb->where('o.status', 'PAID');
+        $oDb->order_by('o.created');
 
         //  Restrict to period
         switch ($period) {
 
             case 'THIS_MONTH':
 
-                $this->db->where('MONTH(o.created) = MONTH(CURDATE())');
-                $this->db->where('YEAR(o.created) = YEAR(CURDATE())');
+                $oDb->where('MONTH(o.created) = MONTH(CURDATE())');
+                $oDb->where('YEAR(o.created) = YEAR(CURDATE())');
                 break;
 
             case 'LAST_MONTH':
 
-                $this->db->where('MONTH(o.created) = MONTH(CURDATE() - INTERVAL 1 MONTH)');
-                $this->db->where('YEAR(o.created) = YEAR(CURDATE() - INTERVAL 1 MONTH)');
+                $oDb->where('MONTH(o.created) = MONTH(CURDATE() - INTERVAL 1 MONTH)');
+                $oDb->where('YEAR(o.created) = YEAR(CURDATE() - INTERVAL 1 MONTH)');
                 break;
 
             case 'CURRENT_FY':
 
-                $this->db->where('o.created >=', $this->currentFY->start->format('Y-m-d H:i:s'));
-                $this->db->where('o.created <', $this->currentFY->end->format('Y-m-d H:i:s'));
+                $oDb->where('o.created >=', $this->currentFY->start->format('Y-m-d H:i:s'));
+                $oDb->where('o.created <', $this->currentFY->end->format('Y-m-d H:i:s'));
                 break;
 
             case 'PREVIOUS_FY':
 
-                $this->db->where('o.created >=', $this->previousFY->start->format('Y-m-d H:i:s'));
-                $this->db->where('o.created <', $this->previousFY->end->format('Y-m-d H:i:s'));
+                $oDb->where('o.created >=', $this->previousFY->start->format('Y-m-d H:i:s'));
+                $oDb->where('o.created <', $this->previousFY->end->format('Y-m-d H:i:s'));
                 break;
         }
 
-        $out->data = $this->db->get(NAILS_DB_PREFIX . 'shop_order o')->result_array();
+        $out->data = $oDb->get(NAILS_DB_PREFIX . 'shop_order o')->result_array();
 
         if ($out->data) {
 
@@ -602,43 +606,44 @@ class Reports extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Fetch all products from the order products table
-        $this->db->select('o.id order_id, o.ref order_ref, o.created, op.quantity as quantity_sold, p.id product_id, p.label product_label, v.id variation_id, v.label variation_label, v.sku');
-        $this->db->select('(SELECT GROUP_CONCAT(DISTINCT `b`.`label` ORDER BY `b`.`label` SEPARATOR \', \') FROM `' . NAILS_DB_PREFIX . 'shop_product_brand` pb JOIN `' . NAILS_DB_PREFIX . 'shop_brand` b ON `b`.`id` = `pb`.`brand_id` WHERE `pb`.`product_id` = `p`.`id` GROUP BY `pb`.`product_id`) brands', false);
-        $this->db->join(NAILS_DB_PREFIX . 'shop_order o', 'o.id = op.order_id', 'LEFT');
-        $this->db->join(NAILS_DB_PREFIX . 'shop_product p', 'p.id = op.product_id', 'LEFT');
-        $this->db->join(NAILS_DB_PREFIX . 'shop_product_variation v', 'v.id = op.variant_id', 'LEFT');
-        $this->db->where('o.status', 'PAID');
-        $this->db->order_by('o.created');
+        $oDb = Factory::service('Database');
+        $oDb->select('o.id order_id, o.ref order_ref, o.created, op.quantity as quantity_sold, p.id product_id, p.label product_label, v.id variation_id, v.label variation_label, v.sku');
+        $oDb->select('(SELECT GROUP_CONCAT(DISTINCT `b`.`label` ORDER BY `b`.`label` SEPARATOR \', \') FROM `' . NAILS_DB_PREFIX . 'shop_product_brand` pb JOIN `' . NAILS_DB_PREFIX . 'shop_brand` b ON `b`.`id` = `pb`.`brand_id` WHERE `pb`.`product_id` = `p`.`id` GROUP BY `pb`.`product_id`) brands', false);
+        $oDb->join(NAILS_DB_PREFIX . 'shop_order o', 'o.id = op.order_id', 'LEFT');
+        $oDb->join(NAILS_DB_PREFIX . 'shop_product p', 'p.id = op.product_id', 'LEFT');
+        $oDb->join(NAILS_DB_PREFIX . 'shop_product_variation v', 'v.id = op.variant_id', 'LEFT');
+        $oDb->where('o.status', 'PAID');
+        $oDb->order_by('o.created');
 
         //  Restrict to period
         switch ($period) {
 
             case 'THIS_MONTH':
 
-                $this->db->where('MONTH(o.created) = MONTH(CURDATE())');
-                $this->db->where('YEAR(o.created) = YEAR(CURDATE())');
+                $oDb->where('MONTH(o.created) = MONTH(CURDATE())');
+                $oDb->where('YEAR(o.created) = YEAR(CURDATE())');
                 break;
 
             case 'LAST_MONTH':
 
-                $this->db->where('MONTH(o.created) = MONTH(CURDATE() - INTERVAL 1 MONTH)');
-                $this->db->where('YEAR(o.created) = YEAR(CURDATE() - INTERVAL 1 MONTH)');
+                $oDb->where('MONTH(o.created) = MONTH(CURDATE() - INTERVAL 1 MONTH)');
+                $oDb->where('YEAR(o.created) = YEAR(CURDATE() - INTERVAL 1 MONTH)');
                 break;
 
             case 'CURRENT_FY':
 
-                $this->db->where('o.created >=', $this->currentFY->start->format('Y-m-d H:i:s'));
-                $this->db->where('o.created <', $this->currentFY->end->format('Y-m-d H:i:s'));
+                $oDb->where('o.created >=', $this->currentFY->start->format('Y-m-d H:i:s'));
+                $oDb->where('o.created <', $this->currentFY->end->format('Y-m-d H:i:s'));
                 break;
 
             case 'PREVIOUS_FY':
 
-                $this->db->where('o.created >=', $this->previousFY->start->format('Y-m-d H:i:s'));
-                $this->db->where('o.created <', $this->previousFY->end->format('Y-m-d H:i:s'));
+                $oDb->where('o.created >=', $this->previousFY->start->format('Y-m-d H:i:s'));
+                $oDb->where('o.created <', $this->previousFY->end->format('Y-m-d H:i:s'));
                 break;
         }
 
-        $out->data = $this->db->get(NAILS_DB_PREFIX . 'shop_order_product op')->result_array();
+        $out->data = $oDb->get(NAILS_DB_PREFIX . 'shop_order_product op')->result_array();
 
         if ($out->data) {
             $out->fields = array_keys($out->data[0]);
@@ -660,15 +665,16 @@ class Reports extends BaseAdmin
         //  Send header
         if (!$returnData) {
 
-            $oDate = Factory::factory('DateTime');
+            $oOutput = Factory::service('Output');
+            $oDate   = Factory::factory('DateTime');
 
-            $this->output->set_content_type('application/octet-stream');
-            $this->output->set_header('Pragma: public');
-            $this->output->set_header('Expires: 0');
-            $this->output->set_header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-            $this->output->set_header('Cache-Control: private', false);
-            $this->output->set_header('Content-Disposition: attachment; filename=shop-report-' . $data->filename . '-' . $oDate->format('Y-m-d_H-i-s') . '.csv;');
-            $this->output->set_header('Content-Transfer-Encoding: binary');
+            $oOutput->set_content_type('application/octet-stream');
+            $oOutput->set_header('Pragma: public');
+            $oOutput->set_header('Expires: 0');
+            $oOutput->set_header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+            $oOutput->set_header('Cache-Control: private', false);
+            $oOutput->set_header('Content-Disposition: attachment; filename=shop-report-' . $data->filename . '-' . $oDate->format('Y-m-d_H-i-s') . '.csv;');
+            $oOutput->set_header('Content-Transfer-Encoding: binary');
         }
 
         // --------------------------------------------------------------------------
@@ -708,15 +714,16 @@ class Reports extends BaseAdmin
         //  Send header
         if (!$returnData) {
 
-            $oDate = Factory::factory('DateTime');
+            $oOutput = Factory::service('Output');
+            $oDate   = Factory::factory('DateTime');
 
-            $this->output->set_content_type('application/octet-stream');
-            $this->output->set_header('Pragma: public');
-            $this->output->set_header('Expires: 0');
-            $this->output->set_header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-            $this->output->set_header('Cache-Control: private', false);
-            $this->output->set_header('Content-Disposition: attachment; filename=shop-report-' . $data->filename . '-' . $oDate->format('Y-m-d_H-i-s') . '.html;');
-            $this->output->set_header('Content-Transfer-Encoding: binary');
+            $oOutput->set_content_type('application/octet-stream');
+            $oOutput->set_header('Pragma: public');
+            $oOutput->set_header('Expires: 0');
+            $oOutput->set_header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+            $oOutput->set_header('Cache-Control: private', false);
+            $oOutput->set_header('Content-Disposition: attachment; filename=shop-report-' . $data->filename . '-' . $oDate->format('Y-m-d_H-i-s') . '.html;');
+            $oOutput->set_header('Content-Transfer-Encoding: binary');
         }
 
         // --------------------------------------------------------------------------
@@ -757,7 +764,11 @@ class Reports extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $oPdf = Factory::service('Pdf', 'nailsapp/module-pdf');
+        $oSession = Factory::service('Session', 'nailsapp/module-auth');
+        $oPdf     = Factory::service('Pdf', 'nailsapp/module-pdf');
+
+        // --------------------------------------------------------------------------
+
         $oPdf->setPaperSize('A4', 'landscape');
         $oPdf->load_html($html[1]);
 
@@ -770,7 +781,7 @@ class Reports extends BaseAdmin
                 $message = 'Failed to render PDF. ';
                 $message .= $oPdf->lastError() ? 'DOMPDF gave the following error: ' . $oPdf->lastError() : '';
 
-                $this->session->set_flashdata($status, $message);
+                $oSession->set_flashdata($status, $message);
                 redirect('admin/shop/reports');
             }
 
@@ -794,7 +805,7 @@ class Reports extends BaseAdmin
                 $message  = 'Failed to render PDF. The following exception was raised: ';
                 $message .= $e->getMessage();
 
-                $this->session->set_flashdata($status, $message);
+                $oSession->set_flashdata($status, $message);
                 redirect('admin/shop/reports');
             }
         }
@@ -813,15 +824,16 @@ class Reports extends BaseAdmin
         //  Send header
         if (!$returnData) {
 
-            $oDate = Factory::factory('DateTime');
+            $oOutput = Factory::service('Output');
+            $oDate   = Factory::factory('DateTime');
 
-            $this->output->set_content_type('application/octet-stream');
-            $this->output->set_header('Pragma: public');
-            $this->output->set_header('Expires: 0');
-            $this->output->set_header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-            $this->output->set_header('Cache-Control: private', false);
-            $this->output->set_header('Content-Disposition: attachment; filename=shop-report-' . $data->filename . '-' . $oDate->format('Y-m-d_H-i-s') . '.txt;');
-            $this->output->set_header('Content-Transfer-Encoding: binary');
+            $oOutput->set_content_type('application/octet-stream');
+            $oOutput->set_header('Pragma: public');
+            $oOutput->set_header('Expires: 0');
+            $oOutput->set_header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+            $oOutput->set_header('Cache-Control: private', false);
+            $oOutput->set_header('Content-Disposition: attachment; filename=shop-report-' . $data->filename . '-' . $oDate->format('Y-m-d_H-i-s') . '.txt;');
+            $oOutput->set_header('Content-Transfer-Encoding: binary');
         }
 
         // --------------------------------------------------------------------------
@@ -859,15 +871,16 @@ class Reports extends BaseAdmin
         //  Send header
         if (!$returnData) {
 
-            $oDate = Factory::factory('DateTime');
+            $oOutput = Factory::service('Output');
+            $oDate   = Factory::factory('DateTime');
 
-            $this->output->set_content_type('application/octet-stream');
-            $this->output->set_header('Pragma: public');
-            $this->output->set_header('Expires: 0');
-            $this->output->set_header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-            $this->output->set_header('Cache-Control: private', false);
-            $this->output->set_header('Content-Disposition: attachment; filename=shop-report-' . $data->filename . '-' . $oDate->format('Y-m-d_H-i-s') . '.json;');
-            $this->output->set_header('Content-Transfer-Encoding: binary');
+            $oOutput->set_content_type('application/octet-stream');
+            $oOutput->set_header('Pragma: public');
+            $oOutput->set_header('Expires: 0');
+            $oOutput->set_header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+            $oOutput->set_header('Cache-Control: private', false);
+            $oOutput->set_header('Content-Disposition: attachment; filename=shop-report-' . $data->filename . '-' . $oDate->format('Y-m-d_H-i-s') . '.json;');
+            $oOutput->set_header('Content-Transfer-Encoding: binary');
         }
 
         // --------------------------------------------------------------------------

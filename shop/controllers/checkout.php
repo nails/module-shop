@@ -55,9 +55,10 @@ class NAILS_Checkout extends NAILS_Shop_Controller
             $this->data['error'] = '<strong>Error:</strong> No Payment Gateways are configured.';
             $this->data['page']->title = $this->shopName . ': No Payment Gateways have been configured';
 
-            $this->load->view('structure/header', $this->data);
-            $this->load->view($this->skin->path . 'views/checkout/no_gateway', $this->data);
-            $this->load->view('structure/footer', $this->data);
+            $oView = Factory::service('View');
+            $oView->load('structure/header', $this->data);
+            $oView->load($this->skin->path . 'views/checkout/no_gateway', $this->data);
+            $oView->load('structure/footer', $this->data);
             return;
         }
 
@@ -238,6 +239,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Load assets required by the payment gateways
+        $oAsset = Factory::service('Asset');
         foreach ($this->data['payment_gateways'] as $pg) {
 
             $assets = $this->shop_payment_gateway_model->getCheckoutAssets($pg->slug);
@@ -247,12 +249,9 @@ class NAILS_Checkout extends NAILS_Shop_Controller
                 $inline = array('JS-INLINE', 'CSS-INLINE');
 
                 if (in_array($asset[2], $inline)) {
-
-                    $this->asset->inline($asset[0], $asset[2]);
-
+                    $oAsset->inline($asset[0], $asset[2]);
                 } else {
-
-                    $this->asset->load($asset[0], $asset[1], $asset[2]);
+                    $oAsset->load($asset[0], $asset[1], $asset[2]);
                 }
             }
         }
@@ -264,9 +263,10 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skin->path . 'views/checkout/index', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        $oView = Factory::service('View');
+        $oView->load('structure/header', $this->data);
+        $oView->load($this->skin->path . 'views/checkout/index', $this->data);
+        $oView->load('structure/footer', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -367,7 +367,8 @@ class NAILS_Checkout extends NAILS_Shop_Controller
      */
     protected function processingUnpaid()
     {
-        $this->load->view($this->skin->path . 'views/checkout/processing/unpaid', $this->data);
+        $oView = Factory::service('View');
+        $oView->load($this->skin->path . 'views/checkout/processing/unpaid', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -382,7 +383,8 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         $this->shop_payment_gateway_model->checkoutSessionClear();
 
         //  And load the view
-        $this->load->view($this->skin->path . 'views/checkout/processing/pending', $this->data);
+        $oView = Factory::service('View');
+        $oView->load($this->skin->path . 'views/checkout/processing/pending', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -402,7 +404,8 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         $this->shop_payment_gateway_model->checkoutSessionClear();
 
         //  And load the view
-        $this->load->view($this->skin->path . 'views/checkout/processing/paid', $this->data);
+        $oView = Factory::service('View');
+        $oView->load($this->skin->path . 'views/checkout/processing/paid', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -429,7 +432,8 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         $this->shop_payment_gateway_model->checkoutSessionClear();
 
         //  And load the view
-        $this->load->view($this->skin->path . 'views/checkout/processing/failed', $this->data);
+        $oView = Factory::service('View');
+        $oView->load($this->skin->path . 'views/checkout/processing/failed', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -456,7 +460,8 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         $this->shop_payment_gateway_model->checkoutSessionClear();
 
         //  And load the view
-        $this->load->view($this->skin->path . 'views/checkout/processing/abandoned', $this->data);
+        $oView = Factory::service('View');
+        $oView->load($this->skin->path . 'views/checkout/processing/abandoned', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -483,7 +488,8 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         $this->shop_payment_gateway_model->checkoutSessionClear();
 
         //  And load the view
-        $this->load->view($this->skin->path . 'views/checkout/processing/cancelled', $this->data);
+        $oView = Factory::service('View');
+        $oView->load($this->skin->path . 'views/checkout/processing/cancelled', $this->data);
     }
 
 
@@ -512,7 +518,8 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         $this->shop_payment_gateway_model->checkoutSessionClear();
 
         //  And load the view
-        $this->load->view($this->skin->path . 'views/checkout/processing/error', $this->data);
+        $oView = Factory::service('View');
+        $oView->load($this->skin->path . 'views/checkout/processing/error', $this->data);
     }
 
     // --------------------------------------------------------------------------

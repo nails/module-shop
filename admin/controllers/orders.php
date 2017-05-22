@@ -222,8 +222,9 @@ class Orders extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->asset->load('admin.order.browse.min.js', 'nailsapp/module-shop');
-        $this->asset->inline('var _orders = new NAILS_Admin_Shop_Order_Browse()', 'JS');
+        $oAsset = Factory::service('Asset');
+        $oAsset->load('admin.order.browse.min.js', 'nailsapp/module-shop');
+        $oAsset->inline('var _orders = new NAILS_Admin_Shop_Order_Browse()', 'JS');
 
         // --------------------------------------------------------------------------
 
@@ -378,7 +379,6 @@ class Orders extends BaseAdmin
     public function process()
     {
         if (!userHasPermission('admin:shop:orders:process')) {
-
             $this->session->set_flashdata('error', 'You do not have permission to process order items.');
             redirect('admin/shop/orders');
         }
@@ -387,26 +387,25 @@ class Orders extends BaseAdmin
 
         $order_id   = $this->uri->segment(5);
         $product_id = $this->uri->segment(6);
-        $isModal = $this->input->get('isModal') ? '?isModal=true' : '';
+        $isModal    = $this->input->get('isModal') ? '?isModal=true' : '';
 
         // --------------------------------------------------------------------------
 
         //  Update item
+        $oDb = Factory::service('Database');
+
         if ($this->uri->segment(7) == 'processed') {
-
-            $this->db->set('processed', true);
-
+            $oDb->set('processed', true);
         } else {
-
-            $this->db->set('processed', false);
+            $oDb->set('processed', false);
         }
 
-        $this->db->where('order_id', $order_id);
-        $this->db->where('id', $product_id);
+        $oDb->where('order_id', $order_id);
+        $oDb->where('id', $product_id);
 
-        $this->db->update(NAILS_DB_PREFIX . 'shop_order_product');
+        $oDb->update(NAILS_DB_PREFIX . 'shop_order_product');
 
-        if ($this->db->affected_rows()) {
+        if ($oDb->affected_rows()) {
 
             $this->session->set_flashdata('success', 'Product\'s status was updated successfully.');
             redirect('admin/shop/orders/view/' . $order_id . $isModal);

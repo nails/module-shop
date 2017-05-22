@@ -157,18 +157,15 @@ class NAILS_Shop_Controller extends Base
      */
     protected function loadSkinAssets($assets, $cssInline, $jsInline, $url)
     {
+        $oAsset = Factory::service('Asset');
+
         //  CSS and JS
         if (!empty($assets) && is_array($assets)) {
-
             foreach ($assets as $asset) {
-
                 if (is_string($asset)) {
-
-                    $this->asset->load($url . 'assets/' . $asset);
-
+                    $oAsset->load($url . 'assets/' . $asset);
                 } else {
-
-                    $this->asset->load($asset[0], $asset[1]);
+                    $oAsset->load($asset[0], $asset[1]);
                 }
             }
         }
@@ -177,10 +174,8 @@ class NAILS_Shop_Controller extends Base
 
         //  CSS - Inline
         if (!empty($cssInline) && is_array($cssInline)) {
-
             foreach ($cssInline as $asset) {
-
-                $this->asset->inline($asset, 'CSS-INLINE');
+                $oAsset->inline($asset, 'CSS-INLINE');
             }
         }
 
@@ -188,10 +183,8 @@ class NAILS_Shop_Controller extends Base
 
         //  JS - Inline
         if (!empty($jsInline) && is_array($jsInline)) {
-
             foreach ($jsInline as $asset) {
-
-                $this->asset->inline($asset, 'JS-INLINE');
+                $oAsset->inline($asset, 'JS-INLINE');
             }
         }
     }
@@ -206,8 +199,9 @@ class NAILS_Shop_Controller extends Base
     {
         $this->data['page']->title = $this->shopName + ' - Down for maintenance';
 
-        $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skin->path . 'views/maintenance', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        $oView = Factory::service('View');
+        $oView->load('structure/header', $this->data);
+        $oView->load($this->skin->path . 'views/maintenance', $this->data);
+        $oView->load('structure/footer', $this->data);
     }
 }

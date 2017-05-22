@@ -13,6 +13,8 @@ require_once '_shop.php';
  * @link
  */
 
+use Nails\Factory;
+
 class NAILS_Shop extends NAILS_Shop_Controller
 {
     protected $product_sort;
@@ -203,9 +205,10 @@ class NAILS_Shop extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Load views
-        $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skin->path . 'views/front/index', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        $oView = Factory::service('View');
+        $oView->load('structure/header', $this->data);
+        $oView->load($this->skin->path . 'views/front/index', $this->data);
+        $oView->load('structure/footer', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -262,9 +265,10 @@ class NAILS_Shop extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Load views
-        $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skin->path . 'views/front/brand/index', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        $oView = Factory::service('View');
+        $oView->load('structure/header', $this->data);
+        $oView->load($this->skin->path . 'views/front/brand/index', $this->data);
+        $oView->load('structure/footer', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -356,9 +360,10 @@ class NAILS_Shop extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Load views
-        $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skin->path . 'views/front/brand/single', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        $oView = Factory::service('View');
+        $oView->load('structure/header', $this->data);
+        $oView->load($this->skin->path . 'views/front/brand/single', $this->data);
+        $oView->load('structure/footer', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -424,9 +429,10 @@ class NAILS_Shop extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Load views
-        $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skin->path . 'views/front/category/index', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        $oView = Factory::service('View');
+        $oView->load('structure/header', $this->data);
+        $oView->load($this->skin->path . 'views/front/category/index', $this->data);
+        $oView->load('structure/footer', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -548,9 +554,10 @@ class NAILS_Shop extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Load views
-        $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skin->path . 'views/front/category/single', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        $oView = Factory::service('View');
+        $oView->load('structure/header', $this->data);
+        $oView->load($this->skin->path . 'views/front/category/single', $this->data);
+        $oView->load('structure/footer', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -607,9 +614,10 @@ class NAILS_Shop extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Load views
-        $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skin->path . 'views/front/collection/index', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        $oView = Factory::service('View');
+        $oView->load('structure/header', $this->data);
+        $oView->load($this->skin->path . 'views/front/collection/index', $this->data);
+        $oView->load('structure/footer', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -704,9 +712,10 @@ class NAILS_Shop extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Load views
-        $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skin->path . 'views/front/collection/single', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        $oView = Factory::service('View');
+        $oView->load('structure/header', $this->data);
+        $oView->load($this->skin->path . 'views/front/collection/single', $this->data);
+        $oView->load('structure/footer', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -846,9 +855,10 @@ class NAILS_Shop extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Load views
-        $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skin->path . 'views/front/product/single', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        $oView = Factory::service('View');
+        $oView->load('structure/header', $this->data);
+        $oView->load($this->skin->path . 'views/front/product/single', $this->data);
+        $oView->load('structure/footer', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -905,9 +915,10 @@ class NAILS_Shop extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Load views
-        $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skin->path . 'views/front/range/index', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        $oView = Factory::service('View');
+        $oView->load('structure/header', $this->data);
+        $oView->load($this->skin->path . 'views/front/range/index', $this->data);
+        $oView->load('structure/footer', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -999,9 +1010,10 @@ class NAILS_Shop extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Load views
-        $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skin->path . 'views/front/range/single', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        $oView = Factory::service('View');
+        $oView->load('structure/header', $this->data);
+        $oView->load($this->skin->path . 'views/front/range/single', $this->data);
+        $oView->load('structure/footer', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -1058,9 +1070,10 @@ class NAILS_Shop extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Load views
-        $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skin->path . 'views/front/sale/index', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        $oView = Factory::service('View');
+        $oView->load('structure/header', $this->data);
+        $oView->load($this->skin->path . 'views/front/sale/index', $this->data);
+        $oView->load('structure/footer', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -1151,9 +1164,10 @@ class NAILS_Shop extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skin->path . 'views/front/sale/single', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        $oView = Factory::service('View');
+        $oView->load('structure/header', $this->data);
+        $oView->load($this->skin->path . 'views/front/sale/single', $this->data);
+        $oView->load('structure/footer', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -1210,9 +1224,10 @@ class NAILS_Shop extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Load views
-        $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skin->path . 'views/front/tag/index', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        $oView = Factory::service('View');
+        $oView->load('structure/header', $this->data);
+        $oView->load($this->skin->path . 'views/front/tag/index', $this->data);
+        $oView->load('structure/footer', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -1304,9 +1319,10 @@ class NAILS_Shop extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Load views
-        $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skin->path . 'views/front/tag/single', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        $oView = Factory::service('View');
+        $oView->load('structure/header', $this->data);
+        $oView->load($this->skin->path . 'views/front/tag/single', $this->data);
+        $oView->load('structure/footer', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -1374,9 +1390,10 @@ class NAILS_Shop extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         //  Load views
-        $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skin->path . 'views/front/search/index', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        $oView = Factory::service('View');
+        $oView->load('structure/header', $this->data);
+        $oView->load($this->skin->path . 'views/front/search/index', $this->data);
+        $oView->load('structure/footer', $this->data);
     }
 
     // --------------------------------------------------------------------------
@@ -1415,9 +1432,10 @@ class NAILS_Shop extends NAILS_Shop_Controller
         );
 
         //  Load views
-        $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skin->path . 'views/front/page', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        $oView = Factory::service('View');
+        $oView->load('structure/header', $this->data);
+        $oView->load($this->skin->path . 'views/front/page', $this->data);
+        $oView->load('structure/footer', $this->data);
     }
 
     // --------------------------------------------------------------------------

@@ -111,8 +111,9 @@ class Availability extends BaseAdmin
 
         // --------------------------------------------------------------------------
 
-        $this->asset->load('admin.productAvailabilityNotification.min.js', 'nailsapp/module-shop');
-        $this->asset->inline('var _availabilty = new NAILS_Admin_Shop_Product_Availability_Notification_Browse()', 'JS');
+        $oAsset = Factory::service('Asset');
+        $oAsset->load('admin.productAvailabilityNotification.min.js', 'nailsapp/module-shop');
+        $oAsset->inline('var _availabilty = new NAILS_Admin_Shop_Product_Availability_Notification_Browse()', 'JS');
 
         // --------------------------------------------------------------------------
 

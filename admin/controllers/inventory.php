@@ -286,23 +286,24 @@ class Inventory extends BaseAdmin
         //  Finally, a bit of a database integrity check.
 
         //  Undeleted products which have only deleted variants
-        $this->db->select('p.id');
-        $this->db->select('(SELECT COUNT(*) FROM ' . $this->shop_product_model->getMetaTable('variation') . ' v WHERE v.product_id = p.id) variantCount');
-        $this->db->select('(SELECT COUNT(*) FROM ' . $this->shop_product_model->getMetaTable('variation') . ' v WHERE v.product_id = p.id AND v.is_deleted=1) variantCountDeleted');
-        $this->db->where('p.is_deleted', false);
-        $this->db->having('variantCount = variantCountDeleted');
-        $this->db->group_by('p.id');
-        $aResultInactive = $this->db->get($this->shop_product_model->getTableName() . ' p')->result();
+        $oDb = Factory::service('Database');
+        $oDb->select('p.id');
+        $oDb->select('(SELECT COUNT(*) FROM ' . $this->shop_product_model->getMetaTable('variation') . ' v WHERE v.product_id = p.id) variantCount');
+        $oDb->select('(SELECT COUNT(*) FROM ' . $this->shop_product_model->getMetaTable('variation') . ' v WHERE v.product_id = p.id AND v.is_deleted=1) variantCountDeleted');
+        $oDb->where('p.is_deleted', false);
+        $oDb->having('variantCount = variantCountDeleted');
+        $oDb->group_by('p.id');
+        $aResultInactive = $oDb->get($this->shop_product_model->getTableName() . ' p')->result();
 
         //  Undeleted and active products which only have inactive variants
-        $this->db->select('p.id');
-        $this->db->select('(SELECT COUNT(*) FROM ' . $this->shop_product_model->getMetaTable('variation') . ' v WHERE v.product_id = p.id) variantCount');
-        $this->db->select('(SELECT COUNT(*) FROM ' . $this->shop_product_model->getMetaTable('variation') . ' v WHERE v.product_id = p.id AND v.is_active=0 AND v.is_deleted=0) variantCountInactive');
-        $this->db->where('p.is_deleted', false);
-        $this->db->where('p.is_active', true);
-        $this->db->having('variantCount = variantCountInactive');
-        $this->db->group_by('p.id');
-        $aResultDeleted = $this->db->get($this->shop_product_model->getTableName() . ' p')->result();
+        $oDb->select('p.id');
+        $oDb->select('(SELECT COUNT(*) FROM ' . $this->shop_product_model->getMetaTable('variation') . ' v WHERE v.product_id = p.id) variantCount');
+        $oDb->select('(SELECT COUNT(*) FROM ' . $this->shop_product_model->getMetaTable('variation') . ' v WHERE v.product_id = p.id AND v.is_active=0 AND v.is_deleted=0) variantCountInactive');
+        $oDb->where('p.is_deleted', false);
+        $oDb->where('p.is_active', true);
+        $oDb->having('variantCount = variantCountInactive');
+        $oDb->group_by('p.id');
+        $aResultDeleted = $oDb->get($this->shop_product_model->getTableName() . ' p')->result();
 
         if (!empty($aResultInactive) || !empty($aResultInactive)) {
 
@@ -506,14 +507,15 @@ class Inventory extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Assets
-        $this->asset->library('uploadify');
-        $this->asset->library('MUSTACHE');
-        $this->asset->load('admin.inventory.createEdit.min.js', 'nailsapp/module-shop');
+        $oAsset = Factory::service('Asset');
+        $oAsset->library('uploadify');
+        $oAsset->library('MUSTACHE');
+        $oAsset->load('admin.inventory.createEdit.min.js', 'nailsapp/module-shop');
 
         $uploadToken = $this->cdn->generateApiUploadToken(activeUser('id'));
 
-        $this->asset->inline('var _edit = new NAILS_Admin_Shop_Inventory_Create_Edit();', 'JS');
-        $this->asset->inline('_edit.init(' . json_encode($this->data['product_types']) . ', "' . $uploadToken . '");', 'JS');
+        $oAsset->inline('var _edit = new NAILS_Admin_Shop_Inventory_Create_Edit();', 'JS');
+        $oAsset->inline('_edit.init(' . json_encode($this->data['product_types']) . ', "' . $uploadToken . '");', 'JS');
 
         // --------------------------------------------------------------------------
 
@@ -693,14 +695,15 @@ class Inventory extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Assets
-        $this->asset->library('uploadify');
-        $this->asset->library('MUSTACHE');
-        $this->asset->load('admin.inventory.createEdit.min.js', 'nailsapp/module-shop');
+        $oAsset = Factory::service('Asset');
+        $oAsset->library('uploadify');
+        $oAsset->library('MUSTACHE');
+        $oAsset->load('admin.inventory.createEdit.min.js', 'nailsapp/module-shop');
 
         $uploadToken = $this->cdn->generateApiUploadToken(activeUser('id'));
 
-        $this->asset->inline('var _edit = new NAILS_Admin_Shop_Inventory_Create_Edit();', 'JS');
-        $this->asset->inline('_edit.init(' . json_encode($this->data['product_types']) . ', "' . $uploadToken . '");', 'JS');
+        $oAsset->inline('var _edit = new NAILS_Admin_Shop_Inventory_Create_Edit();', 'JS');
+        $oAsset->inline('_edit.init(' . json_encode($this->data['product_types']) . ', "' . $uploadToken . '");', 'JS');
 
         // --------------------------------------------------------------------------
 
@@ -1131,18 +1134,18 @@ class Inventory extends BaseAdmin
         $str = trim($str);
 
         if (empty($str)) {
-
             return true;
         }
 
-        if ($variation_id) {
+        $oDb = Factory::service('Database');
 
-            $this->db->where('id !=', $variation_id);
+        if ($variation_id) {
+            $oDb->where('id !=', $variation_id);
         }
 
-        $this->db->where('is_deleted', false);
-        $this->db->where('sku', $str);
-        $result = $this->db->get(NAILS_DB_PREFIX . 'shop_product_variation')->row();
+        $oDb->where('is_deleted', false);
+        $oDb->where('sku', $str);
+        $result = $oDb->get(NAILS_DB_PREFIX . 'shop_product_variation')->row();
 
         if ($result) {
 

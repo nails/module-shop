@@ -180,9 +180,10 @@ class NAILS_Enquire extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        $this->load->view('structure/header', $this->data);
-        $this->load->view($this->skin->path . 'views/enquire/index', $this->data);
-        $this->load->view('structure/footer', $this->data);
+        $oView = Factory::service('View');
+        $oView->load('structure/header', $this->data);
+        $oView->load($this->skin->path . 'views/enquire/index', $this->data);
+        $oView->load('structure/footer', $this->data);
     }
 }
 
