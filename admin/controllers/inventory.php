@@ -512,7 +512,8 @@ class Inventory extends BaseAdmin
         $oAsset->library('MUSTACHE');
         $oAsset->load('admin.inventory.createEdit.min.js', 'nailsapp/module-shop');
 
-        $uploadToken = $this->cdn->generateApiUploadToken(activeUser('id'));
+        $oCdn        = Factory::service('Cdn', 'nailsapp/module-cdn');
+        $uploadToken = $oCdn->generateApiUploadToken(activeUser('id'));
 
         $oAsset->inline('var _edit = new NAILS_Admin_Shop_Inventory_Create_Edit();', 'JS');
         $oAsset->inline('_edit.init(' . json_encode($this->data['product_types']) . ', "' . $uploadToken . '");', 'JS');
@@ -700,7 +701,8 @@ class Inventory extends BaseAdmin
         $oAsset->library('MUSTACHE');
         $oAsset->load('admin.inventory.createEdit.min.js', 'nailsapp/module-shop');
 
-        $uploadToken = $this->cdn->generateApiUploadToken(activeUser('id'));
+        $oCdn        = Factory::service('Cdn', 'nailsapp/module-cdn');
+        $uploadToken = $oCdn->generateApiUploadToken(activeUser('id'));
 
         $oAsset->inline('var _edit = new NAILS_Admin_Shop_Inventory_Create_Edit();', 'JS');
         $oAsset->inline('_edit.init(' . json_encode($this->data['product_types']) . ', "' . $uploadToken . '");', 'JS');
