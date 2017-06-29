@@ -996,6 +996,12 @@ class Shop_product_model extends Base
     {
         $this->load->model('shop/shop_category_model');
 
+        //  If the first value is an array then treat as if called with getAll(null, null, $aData);
+        if (is_array($page)) {
+            $data = $page;
+            $page = null;
+        }
+
         $products = parent::getAll($page, $perPage, $data, $includeDeleted);
 
         // --------------------------------------------------------------------------
