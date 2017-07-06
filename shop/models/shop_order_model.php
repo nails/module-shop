@@ -59,11 +59,11 @@ class Shop_order_model extends Base
 
     /**
      * Creates a new order in the system
-     * @param  object  $data      The data required to create the order
-     * @param  boolean $returnObj Whether or not to return the entire order object, or just the ID.
+     * @param  object  $aData      The data required to create the order
+     * @param  boolean $bReturnObject Whether or not to return the entire order object, or just the ID.
      * @return mixed
      */
-    public function create($data, $returnObj = false)
+    public function create($aData = [], $bReturnObject = false)
     {
         $oDb    = Factory::service('Database');
         $oInput = Factory::service('Input');
@@ -75,15 +75,15 @@ class Shop_order_model extends Base
         try {
 
             //  Basket has items?
-            if (empty($data['basket']->items)) {
+            if (empty($aData['basket']->items)) {
                 throw new NailsException('Basket is empty.');
             }
 
             // --------------------------------------------------------------------------
 
             //  Is the basket already associated with an order?
-            if (!empty($data['basket']->order->id)) {
-                $this->abandon($data['basket']->order->id);
+            if (!empty($aData['basket']->order->id)) {
+                $this->abandon($aData['basket']->order->id);
             }
 
             // --------------------------------------------------------------------------
@@ -119,9 +119,9 @@ class Shop_order_model extends Base
              */
 
             //  Email
-            if (!empty($data['contact']->email)) {
+            if (!empty($aData['contact']->email)) {
 
-                $order->user_email = $data['contact']->email;
+                $order->user_email = $aData['contact']->email;
 
             } elseif (isLoggedIn()) {
 
@@ -152,9 +152,9 @@ class Shop_order_model extends Base
             unset($user);
 
             //  First name
-            if (!empty($data['contact']->first_name)) {
+            if (!empty($aData['contact']->first_name)) {
 
-                $order->user_first_name = $data['contact']->first_name;
+                $order->user_first_name = $aData['contact']->first_name;
 
             } elseif (isLoggedIn()) {
 
@@ -166,9 +166,9 @@ class Shop_order_model extends Base
             }
 
             //  Last name
-            if (!empty($data['contact']->last_name)) {
+            if (!empty($aData['contact']->last_name)) {
 
-                $order->user_last_name = $data['contact']->last_name;
+                $order->user_last_name = $aData['contact']->last_name;
 
             } elseif (isLoggedIn()) {
 
@@ -180,9 +180,9 @@ class Shop_order_model extends Base
             }
 
             //  Telephone
-            if (!empty($data['contact']->telephone)) {
+            if (!empty($aData['contact']->telephone)) {
 
-                $order->user_telephone = $data['contact']->telephone;
+                $order->user_telephone = $aData['contact']->telephone;
 
             } elseif (isLoggedIn()) {
 
@@ -196,15 +196,15 @@ class Shop_order_model extends Base
             // --------------------------------------------------------------------------
 
             //  Set voucher ID
-            if (!empty($data['basket']->voucher->id)) {
-                $order->voucher_id = $data['basket']->voucher->id;
+            if (!empty($aData['basket']->voucher->id)) {
+                $order->voucher_id = $aData['basket']->voucher->id;
             }
 
             // --------------------------------------------------------------------------
 
             //  Order Note
-            if (!empty($data['basket']->note)) {
-                $order->note = $data['basket']->note;
+            if (!empty($aData['basket']->note)) {
+                $order->note = $aData['basket']->note;
             }
 
             // --------------------------------------------------------------------------
@@ -214,9 +214,9 @@ class Shop_order_model extends Base
              * COLLECTION and at least one of the items is not collect_only.
              */
 
-            $order->delivery_option   = $data['basket']->shipping->option;
-            $order->delivery_type     = $data['basket']->shipping->type;
-            $order->requires_shipping = $data['basket']->shipping->isRequired;
+            $order->delivery_option   = $aData['basket']->shipping->option;
+            $order->delivery_type     = $aData['basket']->shipping->type;
+            $order->requires_shipping = $aData['basket']->shipping->isRequired;
 
             // --------------------------------------------------------------------------
 
@@ -227,49 +227,49 @@ class Shop_order_model extends Base
             // --------------------------------------------------------------------------
 
             //  Delivery Address
-            $order->shipping_line_1   = (string)$data['delivery']->line_1;
-            $order->shipping_line_2   = (string)$data['delivery']->line_2;
-            $order->shipping_town     = (string)$data['delivery']->town;
-            $order->shipping_state    = (string)$data['delivery']->state;
-            $order->shipping_postcode = (string)$data['delivery']->postcode;
-            $order->shipping_country  = (string)$data['delivery']->country;
+            $order->shipping_line_1   = (string)$aData['delivery']->line_1;
+            $order->shipping_line_2   = (string)$aData['delivery']->line_2;
+            $order->shipping_town     = (string)$aData['delivery']->town;
+            $order->shipping_state    = (string)$aData['delivery']->state;
+            $order->shipping_postcode = (string)$aData['delivery']->postcode;
+            $order->shipping_country  = (string)$aData['delivery']->country;
 
             //  Billing Address
-            $order->billing_line_1   = (string)$data['billing']->line_1;
-            $order->billing_line_2   = (string)$data['billing']->line_2;
-            $order->billing_town     = (string)$data['billing']->town;
-            $order->billing_state    = (string)$data['billing']->state;
-            $order->billing_postcode = (string)$data['billing']->postcode;
-            $order->billing_country  = (string)$data['billing']->country;
+            $order->billing_line_1   = (string)$aData['billing']->line_1;
+            $order->billing_line_2   = (string)$aData['billing']->line_2;
+            $order->billing_town     = (string)$aData['billing']->town;
+            $order->billing_state    = (string)$aData['billing']->state;
+            $order->billing_postcode = (string)$aData['billing']->postcode;
+            $order->billing_country  = (string)$aData['billing']->country;
 
             // --------------------------------------------------------------------------
 
             //  Set totals
-            $order->total_base_item                  = $data['basket']->totals->base->item;
-            $order->total_base_item_discount         = $data['basket']->totals->base->item_discount;
-            $order->total_base_shipping              = $data['basket']->totals->base->shipping;
-            $order->total_base_shipping_discount     = $data['basket']->totals->base->shipping_discount;
-            $order->total_base_tax_item              = $data['basket']->totals->base->tax_item;
-            $order->total_base_tax_item_discount     = $data['basket']->totals->base->tax_item_discount;
-            $order->total_base_tax_shipping          = $data['basket']->totals->base->tax_shipping;
-            $order->total_base_tax_shipping_discount = $data['basket']->totals->base->tax_shipping_discount;
-            $order->total_base_tax_combined          = $data['basket']->totals->base->tax_combined;
-            $order->total_base_tax_combined_discount = $data['basket']->totals->base->tax_combined_discount;
-            $order->total_base_grand                 = $data['basket']->totals->base->grand;
-            $order->total_base_grand_discount        = $data['basket']->totals->base->grand_discount;
+            $order->total_base_item                  = $aData['basket']->totals->base->item;
+            $order->total_base_item_discount         = $aData['basket']->totals->base->item_discount;
+            $order->total_base_shipping              = $aData['basket']->totals->base->shipping;
+            $order->total_base_shipping_discount     = $aData['basket']->totals->base->shipping_discount;
+            $order->total_base_tax_item              = $aData['basket']->totals->base->tax_item;
+            $order->total_base_tax_item_discount     = $aData['basket']->totals->base->tax_item_discount;
+            $order->total_base_tax_shipping          = $aData['basket']->totals->base->tax_shipping;
+            $order->total_base_tax_shipping_discount = $aData['basket']->totals->base->tax_shipping_discount;
+            $order->total_base_tax_combined          = $aData['basket']->totals->base->tax_combined;
+            $order->total_base_tax_combined_discount = $aData['basket']->totals->base->tax_combined_discount;
+            $order->total_base_grand                 = $aData['basket']->totals->base->grand;
+            $order->total_base_grand_discount        = $aData['basket']->totals->base->grand_discount;
 
-            $order->total_user_item                  = $data['basket']->totals->user->item;
-            $order->total_user_item_discount         = $data['basket']->totals->user->item_discount;
-            $order->total_user_shipping              = $data['basket']->totals->user->shipping;
-            $order->total_user_shipping_discount     = $data['basket']->totals->user->shipping_discount;
-            $order->total_user_tax_item              = $data['basket']->totals->user->tax_item;
-            $order->total_user_tax_item_discount     = $data['basket']->totals->user->tax_item_discount;
-            $order->total_user_tax_shipping          = $data['basket']->totals->user->tax_shipping;
-            $order->total_user_tax_shipping_discount = $data['basket']->totals->user->tax_shipping_discount;
-            $order->total_user_tax_combined          = $data['basket']->totals->user->tax_combined;
-            $order->total_user_tax_combined_discount = $data['basket']->totals->user->tax_combined_discount;
-            $order->total_user_grand                 = $data['basket']->totals->user->grand;
-            $order->total_user_grand_discount        = $data['basket']->totals->user->grand_discount;
+            $order->total_user_item                  = $aData['basket']->totals->user->item;
+            $order->total_user_item_discount         = $aData['basket']->totals->user->item_discount;
+            $order->total_user_shipping              = $aData['basket']->totals->user->shipping;
+            $order->total_user_shipping_discount     = $aData['basket']->totals->user->shipping_discount;
+            $order->total_user_tax_item              = $aData['basket']->totals->user->tax_item;
+            $order->total_user_tax_item_discount     = $aData['basket']->totals->user->tax_item_discount;
+            $order->total_user_tax_shipping          = $aData['basket']->totals->user->tax_shipping;
+            $order->total_user_tax_shipping_discount = $aData['basket']->totals->user->tax_shipping_discount;
+            $order->total_user_tax_combined          = $aData['basket']->totals->user->tax_combined;
+            $order->total_user_tax_combined_discount = $aData['basket']->totals->user->tax_combined_discount;
+            $order->total_user_grand                 = $aData['basket']->totals->user->grand;
+            $order->total_user_grand_discount        = $aData['basket']->totals->user->grand_discount;
 
             // --------------------------------------------------------------------------
 
@@ -288,7 +288,7 @@ class Shop_order_model extends Base
                 //  Add the items
                 $items = array();
 
-                foreach ($data['basket']->items as $item) {
+                foreach ($aData['basket']->items as $item) {
 
                     $temp = array();
                     $temp['order_id']             = $order->id;
@@ -367,36 +367,12 @@ class Shop_order_model extends Base
             //  Commit everything
             $oDb->trans_commit();
 
-            return $returnObj ? $this->getById($order->id) : $order->id;
+            return $bReturnObject ? $this->getById($order->id) : $order->id;
 
         } catch (NailsException $e) {
             $this->setError($e->getMessage());
             return false;
         }
-    }
-
-    // --------------------------------------------------------------------------
-
-    /**
-     * Updates an existing object
-     * @param  int   $id   The ID of the object to update
-     * @param  array $data The data to update the object with
-     * @return bool
-     **/
-    public function update($id, $data)
-    {
-        if (!$data) {
-            return false;
-        }
-
-        // --------------------------------------------------------------------------
-
-        $oDb = Factory::service('Database');
-
-        $oDb->set($data);
-        $oDb->set('modified', 'NOW()', false);
-        $oDb->where('id', $id);
-        return $oDb->update(NAILS_DB_PREFIX . 'shop_order');
     }
 
     // --------------------------------------------------------------------------
