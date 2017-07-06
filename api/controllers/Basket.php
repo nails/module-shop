@@ -73,7 +73,7 @@ class Basket extends \Nails\Api\Controller\Base
         $variantId = $this->input->post('variantId');
         $quantity  = $this->input->post('quantity') ? $this->input->post('quantity') : 1;
 
-        if (!$this->shop_basket_model->add($variantId, $$quantity)) {
+        if (!$this->shop_basket_model->add($variantId, $quantity)) {
 
             $out['status'] = 400;
             $out['error']  = $this->shop_basket_model->lastError();

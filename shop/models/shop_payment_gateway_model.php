@@ -44,7 +44,7 @@ class Shop_payment_gateway_model
          * to gather the production and staging credentials.
          */
 
-        $this->supported   = array();
+        $this->supported   = [];
         $this->supported[] = 'WorldPay';
         $this->supported[] = 'Stripe';
         $this->supported[] = 'PayPal_Express';
@@ -52,7 +52,7 @@ class Shop_payment_gateway_model
         // --------------------------------------------------------------------------
 
         //  These gateways use redirects rather than inline card details
-        $this->isRedirect   = array();
+        $this->isRedirect   = [];
         $this->isRedirect[] = 'WorldPay';
         $this->isRedirect[] = 'PayPal_Express';
 
@@ -76,7 +76,7 @@ class Shop_payment_gateway_model
     {
         // Available to the system
         $available = Omnipay::find();
-        $out       = array();
+        $out       = [];
 
         foreach ($available as $gateway) {
 
@@ -102,7 +102,7 @@ class Shop_payment_gateway_model
     {
         $available = $this->getAvailable();
         $enabled   = array_filter((array) appSetting('enabled_payment_gateways', 'nailsapp/module-shop'));
-        $out       = array();
+        $out       = [];
         foreach ($enabled as $gateway) {
 
             if (array_search($gateway, $available) !== false) {
@@ -123,7 +123,7 @@ class Shop_payment_gateway_model
     public function getEnabledFormatted()
     {
         $enabledPaymentGateways = $this->getEnabled();
-        $paymentGateways        = array();
+        $paymentGateways        = [];
 
         foreach ($enabledPaymentGateways as $pg) {
 
@@ -149,7 +149,9 @@ class Shop_payment_gateway_model
 
     /**
      * Returns the correct casing for a payment gateway
+     *
      * @param  string $gatewayName The payment gateway to retrieve
+     *
      * @return mixed               String on success, null on failure
      */
     public function getCorrectCasing($gatewayName)
@@ -173,26 +175,30 @@ class Shop_payment_gateway_model
 
     /**
      * Returns any assets which the gateway requires for checkout
+     *
      * @param  string $gateway The name of the gateway to check for
+     *
      * @return array
      */
     public function getCheckoutAssets($gateway)
     {
         $gatewayName = $this->getCorrectCasing($gateway);
 
-        $assets             = array();
-        $assets['Stripe']   = array();
-        $assets['Stripe'][] = array('https://js.stripe.com/v2/', 'APP', 'JS');
-        $assets['Stripe'][] = array('window.NAILS.SHOP_Checkout_Stripe_publishableKey = "' . appSetting('omnipay_Stripe_publishableKey', 'nailsapp/module-shop') . '";', 'APP', 'JS-INLINE');
+        $assets             = [];
+        $assets['Stripe']   = [];
+        $assets['Stripe'][] = ['https://js.stripe.com/v2/', 'APP', 'JS'];
+        $assets['Stripe'][] = ['window.NAILS.SHOP_Checkout_Stripe_publishableKey = "' . appSetting('omnipay_Stripe_publishableKey', 'nailsapp/module-shop') . '";', 'APP', 'JS-INLINE'];
 
-        return isset($assets[$gatewayName]) ? $assets[$gatewayName] : array();
+        return isset($assets[$gatewayName]) ? $assets[$gatewayName] : [];
     }
 
     // --------------------------------------------------------------------------
 
     /**
      * Determines whether a gateway is available or not
-     * @param  string  $gateway The gateway to check
+     *
+     * @param  string $gateway The gateway to check
+     *
      * @return boolean
      */
     public function isAvailable($gateway)
@@ -214,7 +220,9 @@ class Shop_payment_gateway_model
 
     /**
      * Determines whether a gateway is enabled or not
-     * @param  string  $gateway The gateway to check
+     *
+     * @param  string $gateway The gateway to check
+     *
      * @return boolean
      */
     public function isEnabled($gateway)
@@ -238,7 +246,9 @@ class Shop_payment_gateway_model
     /**
      * Determines whether the payment gateway is going to redirect to take card
      * details or whether the card details are taken inline.
-     * @param  string  $gateway The gateway to check
+     *
+     * @param  string $gateway The gateway to check
+     *
      * @return boolean          Boolean on success, null on failure
      */
     public function isRedirect($gateway)
@@ -257,8 +267,10 @@ class Shop_payment_gateway_model
 
     /**
      * Attempts to make a payment for the order
+     *
      * @param  int    $orderId The order to make a payment against
      * @param  string $gateway The gateway to use
+     *
      * @return boolean
      */
     public function doPayment($orderId, $gateway)
@@ -290,7 +302,7 @@ class Shop_payment_gateway_model
         // --------------------------------------------------------------------------
 
         //  Prepare the CreditCard object (used by OmniPay)
-        $data                     = array();
+        $data                     = [];
         $data['firstName']        = $order->user->first_name;
         $data['lastName']         = $order->user->last_name;
         $data['email']            = $order->user->email;
@@ -321,7 +333,7 @@ class Shop_payment_gateway_model
         $creditCard = new CreditCard($data);
 
         //  And now the purchase request
-        $data                  = array();
+        $data                  = [];
         $data['amount']        = $this->oCurrencyModel->intToFloat($order->totals->user->grand, $order->currency);
         $data['currency']      = $order->currency;
         $data['card']          = $creditCard;
@@ -330,7 +342,7 @@ class Shop_payment_gateway_model
         $data['clientIp']      = get_instance()->input->ipAddress();
 
         //  Set the relevant URLs
-        $shopUrl = appSetting('url', 'nailsapp/module-shop') ? appSetting('url', 'nailsapp/module-shop') : 'shop/';
+        $shopUrl           = appSetting('url', 'nailsapp/module-shop') ? appSetting('url', 'nailsapp/module-shop') : 'shop/';
         $data['returnUrl'] = site_url($shopUrl . 'checkout/processing?ref=' . $order->ref);
         $data['cancelUrl'] = site_url($shopUrl . 'checkout/cancel?ref=' . $order->ref);
         $data['notifyUrl'] = site_url('api/shop/webhook/' . strtolower($gatewayName) . '?ref=' . $order->ref);
@@ -369,7 +381,7 @@ class Shop_payment_gateway_model
                 }
 
                 //  Define the payment data
-                $paymentData                   = array();
+                $paymentData                   = [];
                 $paymentData['order_id']       = $order->id;
                 $paymentData['transaction_id'] = $transactionId;
                 $paymentData['amount']         = $this->oCurrencyModel->intToFloat($order->totals->user->grand, $order->currency);
@@ -378,7 +390,7 @@ class Shop_payment_gateway_model
                 // --------------------------------------------------------------------------
 
                 //  Add payment against the order
-                $data                    = array();
+                $data                    = [];
                 $data['order_id']        = $paymentData['order_id'];
                 $data['payment_gateway'] = $gatewayName;
                 $data['transaction_id']  = $paymentData['transaction_id'];
@@ -389,8 +401,8 @@ class Shop_payment_gateway_model
 
                 if (!get_instance()->shop_order_payment_model->create($data)) {
 
-                    $subject  = 'Failed to create payment reference against order ' . $order->id;
-                    $message  = 'The customer was charged but the payment failed to associate with the order. ';
+                    $subject = 'Failed to create payment reference against order ' . $order->id;
+                    $message = 'The customer was charged but the payment failed to associate with the order. ';
                     $message .= get_instance()->shop_order_payment_model->lastError();
                     showFatalError(
                         $subject,
@@ -445,7 +457,7 @@ class Shop_payment_gateway_model
             } else {
 
                 //  Payment failed: display message to customer
-                $error  = 'Our payment processor denied the transaction and did not charge you.';
+                $error = 'Our payment processor denied the transaction and did not charge you.';
                 $error .= $gatewayResponse->getMessage() ? ' Reason: ' . $gatewayResponse->getMessage() : '';
                 $this->setError($error);
                 return false;
@@ -462,8 +474,10 @@ class Shop_payment_gateway_model
 
     /**
      * Completes a payment, called from the "confirm" page
+     *
      * @param  string   $gateway The gateway name
      * @param  stdClass $order   The order object
+     *
      * @return boolean
      */
     public function confirmCompletePayment($gateway, $order)
@@ -479,7 +493,7 @@ class Shop_payment_gateway_model
         // --------------------------------------------------------------------------
 
         //  Payment data
-        $paymentData                   = array();
+        $paymentData                   = [];
         $paymentData['order_id']       = $order->id;
         $paymentData['transaction_id'] = null;
         $paymentData['amount']         = $order->totals->user->grand;
@@ -495,8 +509,10 @@ class Shop_payment_gateway_model
 
     /**
      * Completes a payment, called from the webhook/API
+     *
      * @param  string  $gateway   The gateway name
      * @param  boolean $enableLog Whether or not to write to the log
+     *
      * @return boolean
      */
     public function webhookCompletePayment($gateway, $enableLog = false)
@@ -608,10 +624,12 @@ class Shop_payment_gateway_model
 
     /**
      * Completes payment for an order
+     *
      * @param  string  $gatewayName The gateway name
      * @param  array   $paymentData the payment data
      * @param  object  $order       The order object
      * @param  boolean $enableLog   Whether to write to the log or not
+     *
      * @return boolean
      */
     protected function completePayment($gatewayName, $paymentData, $order, $enableLog)
@@ -642,7 +660,7 @@ class Shop_payment_gateway_model
         // --------------------------------------------------------------------------
 
         //  Add payment against the order
-        $data                    = array();
+        $data                    = [];
         $data['order_id']        = $paymentData['order_id'];
         $data['payment_gateway'] = $gatewayName;
         $data['transaction_id']  = $gatewayResponse->getTransactionReference();
@@ -740,8 +758,10 @@ class Shop_payment_gateway_model
 
     /**
      * Prepares the gateway, creates a new instance and sets all the settings
+     *
      * @param  string  $gatewayName The gateway name
      * @param  boolean $enableLog   Whether to write to the log or not
+     *
      * @return object
      */
     protected function prepareGateway($gatewayName, $enableLog = false)
@@ -781,8 +801,10 @@ class Shop_payment_gateway_model
 
     /**
      * Prepares the request object when submitting to Stripe
+     *
      * @param  array  &$data The raw request array
      * @param  object $order The order object
+     *
      * @return void
      */
     protected function prepareRequestStripe(&$data, $order)
@@ -794,14 +816,16 @@ class Shop_payment_gateway_model
 
     /**
      * Prepares the request object when submitting to PayPal Express
+     *
      * @param  array  &$data The raw request array
      * @param  object $order The order object
+     *
      * @return void
      */
     protected function prepareRequestPaypalExpress(&$data, $order)
     {
         //  Alter the return URL so we go to an intermediary page
-        $shopUrl = appSetting('url', 'nailsapp/module-shop') ? appSetting('url', 'nailsapp/module-shop') : 'shop/';
+        $shopUrl           = appSetting('url', 'nailsapp/module-shop') ? appSetting('url', 'nailsapp/module-shop') : 'shop/';
         $data['returnUrl'] = site_url($shopUrl . 'checkout/confirm/paypal_express?ref=' . $order->ref);
     }
 
@@ -809,7 +833,9 @@ class Shop_payment_gateway_model
 
     /**
      * Extracts payment details from the response, can vary per gateway
+     *
      * @param  string $gateway The gateway name
+     *
      * @return array
      */
     protected function extractPaymentData($gateway)
@@ -823,7 +849,7 @@ class Shop_payment_gateway_model
 
         } else {
 
-            $out                   = array();
+            $out                   = [];
             $out['order_id']       = null;
             $out['transaction_id'] = null;
             $out['amount']         = null;
@@ -841,7 +867,7 @@ class Shop_payment_gateway_model
      */
     protected function extractPaymentDataWorldpay()
     {
-        $out                   = array();
+        $out                   = [];
         $out['order_id']       = (int) get_instance()->input->post('cartId');
         $out['transaction_id'] = get_instance()->input->post('transId');
         $out['currency']       = get_instance()->input->post('currency');
@@ -854,7 +880,9 @@ class Shop_payment_gateway_model
 
     /**
      * Returns the default parameters for a gateway
+     *
      * @param  string $gateway The gateway name
+     *
      * @return array
      */
     public function getDefaultParameters($gateway)
@@ -863,7 +891,7 @@ class Shop_payment_gateway_model
 
         if (!$gatewayName) {
 
-            return array();
+            return [];
         }
 
         $gateway = Omnipay::create($gatewayName);
@@ -875,9 +903,11 @@ class Shop_payment_gateway_model
 
     /**
      * Saves the order ID to the session in an encrypted format
+     *
      * @param  int    $orderId   The order's ID
      * @param  string $orderRef  The order's ref
      * @param  string $orderCode The order's code
+     *
      * @return void
      */
     public function checkoutSessionSave($orderId, $orderRef, $orderCode)
@@ -886,10 +916,12 @@ class Shop_payment_gateway_model
 
         // --------------------------------------------------------------------------
 
-        $hash = $orderId . ':' . $orderRef . ':' . $orderCode;
-        $hash = get_instance()->encrypt->encode($hash, APP_PRIVATE_KEY);
+        $oEncrypt = Factory::service('Encrypt');
 
-        $session              = array();
+        $hash = $orderId . ':' . $orderRef . ':' . $orderCode;
+        $hash = $oEncrypt->encode($hash, APP_PRIVATE_KEY);
+
+        $session              = [];
         $session['hash']      = $hash;
         $session['signature'] = md5($hash . APP_PRIVATE_KEY);
 
@@ -923,7 +955,8 @@ class Shop_payment_gateway_model
 
                 if ($hash['signature'] == md5($hash['hash'] . APP_PRIVATE_KEY)) {
 
-                    $hash = get_instance()->encrypt->decode($hash['hash'], APP_PRIVATE_KEY);
+                    $oEncrypt = Factory::service('Encrypt');
+                    $hash     = $oEncrypt->decode($hash['hash'], APP_PRIVATE_KEY);
 
                     if (!empty($hash)) {
 
