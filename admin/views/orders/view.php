@@ -12,12 +12,12 @@ foreach ($order->items as $oItem) {
 
 ?>
 <div
-    id="order"
-    class="group-shop orders single"
-    data-lifecycle-id="<?=$order->lifecycle_id?>"
-    data-delivery-type="<?=$order->delivery_option?>"
-    data-num-collect-items="<?=$iNumCollectItems?>"
-    data-did-set-lifecycle="<?=!empty($did_set_lifecycle)?>"
+        id="order"
+        class="group-shop orders single"
+        data-lifecycle-id="<?=$order->lifecycle_id?>"
+        data-delivery-type="<?=$order->delivery_option?>"
+        data-num-collect-items="<?=$iNumCollectItems?>"
+        data-did-set-lifecycle="<?=!empty($did_set_lifecycle)?>"
 >
     <div class="order-lifecycle">
         <?php
@@ -28,12 +28,12 @@ foreach ($order->items as $oItem) {
 
             if ($order->delivery_type === 'COLLECT' && $oLifecycle->id === Lifecycle::ORDER_DISPATCHED) {
                 continue;
-            } else if ($order->delivery_type === 'DELIVER' && $oLifecycle->id === Lifecycle::ORDER_COLLECTED) {
+            } elseif ($order->delivery_type === 'DELIVER' && $oLifecycle->id === Lifecycle::ORDER_COLLECTED) {
                 continue;
             }
 
             if ($oLifecycle->id == $order->lifecycle_id) {
-                $sStateClass = 'current';
+                $sStateClass     = 'current';
                 $bReachedCurrent = true;
             } elseif (!$bReachedCurrent) {
                 $sStateClass = 'complete';
@@ -54,7 +54,7 @@ foreach ($order->items as $oItem) {
                     <?=$oLifecycle->label?>
                 </div>
             </a>
-        <?php
+            <?php
         }
 
         ?>
@@ -94,7 +94,6 @@ foreach ($order->items as $oItem) {
                                         echo '<span class="text-muted">No Voucher Used</span>';
 
                                     } else {
-
 
                                         echo $order->voucher->label;
                                         echo '<small>' . $order->voucher->code . '</small>';
@@ -337,93 +336,43 @@ foreach ($order->items as $oItem) {
                 <div class="table-responsive">
                     <table>
                         <tbody>
-                        <tr>
-                            <td class="label">Name &amp; Email</td>
-                            <?php echo adminHelper('loadUserCell', $order->user); ?>
-                        </tr>
-                        <tr>
-                            <td class="label">Telephone</td>
-                            <td class="value">
-                                <?php
-
-                                if ($order->user->telephone) {
-
-                                    echo tel($order->user->telephone);
-
-                                } else {
-
-                                    echo '<span class="text-muted">Not supplied</span>';
-                                }
-
-                                ?>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="label">Billing<br />Address</td>
-                            <td class="value">
-                                <?php
-
-                                $aAddress = array(
-                                    $order->billing_address->line_1,
-                                    $order->billing_address->line_2,
-                                    $order->billing_address->town,
-                                    $order->billing_address->state,
-                                    $order->billing_address->postcode,
-                                    $order->billing_address->country->label
-                                );
-
-                                $aAddress = array_filter($aAddress);
-
-                                echo implode('<br />', $aAddress);
-
-                                ?>
-                                <small>
+                            <tr>
+                                <td class="label">Name &amp; Email</td>
+                                <?php echo adminHelper('loadUserCell', $order->user); ?>
+                            </tr>
+                            <tr>
+                                <td class="label">Telephone</td>
+                                <td class="value">
                                     <?php
 
-                                    echo anchor(
-                                        'https://www.google.com/maps/?q=' . urlencode(implode(', ', $aAddress)),
-                                        '<b class="fa fa-map-marker"></b> Map',
-                                        'target="_blank"'
-                                    );
+                                    if ($order->user->telephone) {
+
+                                        echo tel($order->user->telephone);
+
+                                    } else {
+
+                                        echo '<span class="text-muted">Not supplied</span>';
+                                    }
 
                                     ?>
-                                </small>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="label">Shipping<br />Option</td>
-                            <td class="value">
-                                <?php
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">Billing<br/>Address</td>
+                                <td class="value">
+                                    <?php
 
-                                if (!empty($order->shipping_option['label'])) {
+                                    $aAddress = [
+                                        $order->billing_address->line_1,
+                                        $order->billing_address->line_2,
+                                        $order->billing_address->town,
+                                        $order->billing_address->state,
+                                        $order->billing_address->postcode,
+                                        $order->billing_address->country->label,
+                                    ];
 
-                                    echo $order->shipping_option['label'];
+                                    $aAddress = array_filter($aAddress);
 
-                                } else {
-
-                                    echo $order->delivery_option;
-                                }
-
-                                ?>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="label">Shipping<br />Address</td>
-                            <td class="value">
-                                <?php
-
-                                $aAddress = array(
-                                    $order->shipping_address->line_1,
-                                    $order->shipping_address->line_2,
-                                    $order->shipping_address->town,
-                                    $order->shipping_address->state,
-                                    $order->shipping_address->postcode,
-                                    !empty($order->shipping_address->country) ? $order->shipping_address->country->label : ''
-                                );
-
-                                $aAddress = array_filter($aAddress);
-
-                                if (!empty($aAddress)) {
                                     echo implode('<br />', $aAddress);
 
                                     ?>
@@ -438,14 +387,64 @@ foreach ($order->items as $oItem) {
 
                                         ?>
                                     </small>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">Shipping<br/>Option</td>
+                                <td class="value">
                                     <?php
-                                } else {
-                                    echo '<span class="text-muted">No shipping address supplied.</span>';
-                                }
 
-                                ?>
-                            </td>
-                        </tr>
+                                    if (!empty($order->shipping_option['label'])) {
+
+                                        echo $order->shipping_option['label'];
+
+                                    } else {
+
+                                        echo $order->delivery_option;
+                                    }
+
+                                    ?>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="label">Shipping<br/>Address</td>
+                                <td class="value">
+                                    <?php
+
+                                    $aAddress = [
+                                        $order->shipping_address->line_1,
+                                        $order->shipping_address->line_2,
+                                        $order->shipping_address->town,
+                                        $order->shipping_address->state,
+                                        $order->shipping_address->postcode,
+                                        !empty($order->shipping_address->country) ? $order->shipping_address->country->label : '',
+                                    ];
+
+                                    $aAddress = array_filter($aAddress);
+
+                                    if (!empty($aAddress)) {
+                                        echo implode('<br />', $aAddress);
+
+                                        ?>
+                                        <small>
+                                            <?php
+
+                                            echo anchor(
+                                                'https://www.google.com/maps/?q=' . urlencode(implode(', ', $aAddress)),
+                                                '<b class="fa fa-map-marker"></b> Map',
+                                                'target="_blank"'
+                                            );
+
+                                            ?>
+                                        </small>
+                                        <?php
+                                    } else {
+                                        echo '<span class="text-muted">No shipping address supplied.</span>';
+                                    }
+
+                                    ?>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -576,7 +575,8 @@ foreach ($order->items as $oItem) {
 
                                         ?>
                                         <tr>
-                                            <td class="text-center"><b class="fa fa-lg <?=$oHistory->lifecycle->admin_icon?>"></b></td>
+                                            <td class="text-center">
+                                                <b class="fa fa-lg <?=$oHistory->lifecycle->admin_icon?>"></b></td>
                                             <td><?=$oHistory->lifecycle->label?></td>
                                             <?=adminHelper('loadUserCell', $oHistory->created_by)?>
                                             <?=adminHelper('loadDateTimeCell', $oHistory->created)?>
@@ -622,71 +622,71 @@ foreach ($order->items as $oItem) {
                     </tr>
                 </thead>
                 <tbody>
-                <?php
+                    <?php
 
-                if (!empty($order->items)) {
+                    if (!empty($order->items)) {
 
-                    foreach ($order->items as $item) {
+                        foreach ($order->items as $item) {
+
+                            ?>
+                            <tr>
+                                <td>
+                                    <?=$item->sku?>
+                                </td>
+                                <td>
+                                    <?php
+
+                                    echo $item->product_label;
+                                    echo $item->variant_label != $item->product_label ? '<br /><small>' . $item->variant_label . '</small>' : '';
+
+                                    if ($item->ship_collection_only) {
+
+                                        ?>
+                                        <p class="alert alert-warning skinny">
+                                            <strong>Note:</strong> This item is for collection only.
+                                        </p>
+                                        <?php
+                                    }
+
+                                    ?>
+                                </td>
+                                <td>
+                                    <?=$item->type->label?>
+                                </td>
+                                <td class="text-center">
+                                    <?=$item->quantity?>
+                                </td>
+                                <td class="text-center">
+                                    <?=$item->price->base_formatted->value_ex_tax?>
+                                </td>
+                                <td class="text-center">
+                                    <?=$item->price->base_formatted->value_tax?>
+                                </td>
+                                <td class="text-center">
+                                    <?=$item->price->base_formatted->item_total?>
+                                </td>
+                                <td class="text-center">
+                                    <?=$item->refunded ? 'Refunded ' . $item->refunded_date : 'No'?>
+                                </td>
+                                <td class="text-center">
+                                    <?=anchor('', 'Refund', 'class="btn btn-xs btn-primary todo"')?>
+                                </td>
+                            </tr>
+                            <?php
+                        }
+
+                    } else {
 
                         ?>
                         <tr>
-                            <td>
-                                <?=$item->sku?>
-                            </td>
-                            <td>
-                                <?php
-
-                                echo $item->product_label;
-                                echo $item->variant_label != $item->product_label ? '<br /><small>' . $item->variant_label . '</small>' : '';
-
-                                if ($item->ship_collection_only) {
-
-                                    ?>
-                                    <p class="alert alert-warning skinny">
-                                        <strong>Note:</strong> This item is for collection only.
-                                    </p>
-                                    <?php
-                                }
-
-                                ?>
-                            </td>
-                            <td>
-                                <?=$item->type->label?>
-                            </td>
-                            <td class="text-center">
-                                <?=$item->quantity?>
-                            </td>
-                            <td class="text-center">
-                                <?=$item->price->base_formatted->value_ex_tax?>
-                            </td>
-                            <td class="text-center">
-                                <?=$item->price->base_formatted->value_tax?>
-                            </td>
-                            <td class="text-center">
-                                <?=$item->price->base_formatted->item_total?>
-                            </td>
-                            <td class="text-center">
-                                <?=$item->refunded ? 'Refunded ' . $item->refunded_date : 'No'?>
-                            </td>
-                            <td class="text-center">
-                                <?=anchor('', 'Refund', 'class="btn btn-xs btn-primary todo"')?>
+                            <td colspan="9" class="no-data">
+                                No Items
                             </td>
                         </tr>
                         <?php
                     }
 
-                } else {
-
                     ?>
-                    <tr>
-                        <td colspan="9" class="no-data">
-                            No Items
-                        </td>
-                    </tr>
-                    <?php
-                }
-
-                ?>
                 </tbody>
             </table>
         </div>
@@ -704,44 +704,44 @@ foreach ($order->items as $oItem) {
                     </tr>
                 </thead>
                 <tbody>
-                <?php
+                    <?php
 
-                if (!empty($payments)) {
+                    if (!empty($payments)) {
 
-                    $oCurrencyModel = nailsFactory('model', 'Currency', 'nailsapp/module-shop');
+                        $oCurrencyModel = \Nails\Factory::model('Currency', 'nailsapp/module-shop');
 
-                    foreach ($payments as $payment) {
+                        foreach ($payments as $payment) {
+
+                            ?>
+                            <tr>
+                                <td>
+                                    <?=$payment->payment_gateway?>
+                                </td>
+                                <td>
+                                    <?=$payment->transaction_id?>
+                                </td>
+                                <td>
+                                    <?=$oCurrencyModel->formatBase($payment->amount_base)?>
+                                </td>
+                                <?=adminHelper('loadDatetimeCell', $payment->created)?>
+                            </tr>
+                            <?php
+
+                        }
+
+                    } else {
 
                         ?>
                         <tr>
-                            <td>
-                                <?=$payment->payment_gateway?>
+                            <td colspan="4" class="no-data">
+                                No Payments
                             </td>
-                            <td>
-                                <?=$payment->transaction_id?>
-                            </td>
-                            <td>
-                                <?=$oCurrencyModel->formatBase($payment->amount_base)?>
-                            </td>
-                            <?=adminHelper('loadDatetimeCell', $payment->created)?>
                         </tr>
                         <?php
 
                     }
 
-                } else {
-
                     ?>
-                    <tr>
-                        <td colspan="4" class="no-data">
-                            No Payments
-                        </td>
-                    </tr>
-                    <?php
-
-                }
-
-                ?>
                 </tbody>
             </table>
         </div>

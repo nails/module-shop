@@ -211,7 +211,7 @@
                     $field['default']   = site_url('api/shop/webhook/worldpay');
                     $field['readonly']  = true;
                     $field['info']      = 'Please note that this URL will vary between installations. The URL shown ';
-                    $field['info']     .= 'above is correct for the <strong>' . nailsEnvironment('get') . '</strong> (or equivilent) ';
+                    $field['info']     .= 'above is correct for the <strong>' . \Nails\Environment::get() . '</strong> (or equivilent) ';
                     $field['info']     .= 'installation. If ' . $gateway_name . ' is having problems confirming payments ensure this URL ';
                     $field['info']     .= 'is worldwide accessible.';
 

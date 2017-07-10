@@ -1,14 +1,17 @@
+<?php
+$oInput = \Nails\Factory::service('Input');
+?>
 <div class="group-shop inventory edit">
     <?php
 
-        echo form_open(null, 'id="product-form"');
-        echo '<input type="hidden" name="activeTab" value="' . set_value('activeTab') . '" id="activeTab" />';
+    echo form_open(null, 'id="product-form"');
+    echo '<input type="hidden" name="activeTab" value="' . set_value('activeTab') . '" id="activeTab" />';
 
     ?>
     <ul class="tabs" data-tabgroup="main-product">
         <?php
 
-            $active = $this->input->post('activeTab') == 'tab-basics' || !$this->input->post('activeTab') ? 'active' : '';
+        $active = $oInput->post('activeTab') == 'tab-basics' || !$oInput->post('activeTab') ? 'active' : '';
 
         ?>
         <li class="tab <?=$active?>">
@@ -16,7 +19,7 @@
         </li>
         <?php
 
-            $active = $this->input->post('activeTab') == 'tab-meta' ? 'active' : '';
+        $active = $oInput->post('activeTab') == 'tab-meta' ? 'active' : '';
 
         ?>
         <li class="tab <?=$active?>">
@@ -24,7 +27,7 @@
         </li>
         <?php
 
-            $active = $this->input->post('activeTab') == 'tab-description' ? 'active' : '';
+        $active = $oInput->post('activeTab') == 'tab-description' ? 'active' : '';
 
         ?>
         <li class="tab <?=$active?>">
@@ -32,7 +35,7 @@
         </li>
         <?php
 
-            $active = $this->input->post('activeTab') == 'tab-variations' ? 'active' : '';
+        $active = $oInput->post('activeTab') == 'tab-variations' ? 'active' : '';
 
         ?>
         <li class="tab <?=$active?>">
@@ -40,7 +43,7 @@
         </li>
         <?php
 
-            $active = $this->input->post('activeTab') == 'tab-gallery' ? 'active' : '';
+        $active = $oInput->post('activeTab') == 'tab-gallery' ? 'active' : '';
 
         ?>
         <li class="tab <?=$active?>">
@@ -48,7 +51,7 @@
         </li>
         <?php
 
-            $active = $this->input->post('activeTab') == 'tab-attributes' ? 'active' : '';
+        $active = $oInput->post('activeTab') == 'tab-attributes' ? 'active' : '';
 
         ?>
         <li class="tab <?=$active?>">
@@ -56,7 +59,7 @@
         </li>
         <?php
 
-            $active = $this->input->post('activeTab') == 'tab-ranges-collections' ? 'active' : '';
+        $active = $oInput->post('activeTab') == 'tab-ranges-collections' ? 'active' : '';
 
         ?>
         <li class="tab <?=$active?>">
@@ -64,7 +67,7 @@
         </li>
         <?php
 
-            $active = $this->input->post('activeTab') == 'tab-related' ? 'active' : '';
+        $active = $oInput->post('activeTab') == 'tab-related' ? 'active' : '';
 
         ?>
         <li class="tab <?=$active?>">
@@ -72,7 +75,7 @@
         </li>
         <?php
 
-            $active = $this->input->post('activeTab') == 'tab-seo' ? 'active' : '';
+        $active = $oInput->post('activeTab') == 'tab-seo' ? 'active' : '';
 
         ?>
         <li class="tab <?=$active?>">
@@ -82,13 +85,13 @@
     <section class="tabs" data-tabgroup="main-product">
         <?php
 
-            $active = $this->input->post('activeTab') == 'tab-customise' || !$this->input->post('activeTab') ? 'active' : '';
+        $active = $oInput->post('activeTab') == 'tab-customise' || !$oInput->post('activeTab') ? 'active' : '';
 
         ?>
         <div class="tab-page basics tab-basics <?=$active?> fieldset">
             <?php
 
-            $field             = array();
+            $field             = [];
             $field['key']      = 'type_id';
             $field['label']    = 'Type';
             $field['required'] = true;
@@ -112,7 +115,7 @@
 
             // --------------------------------------------------------------------------
 
-            $field                = array();
+            $field                = [];
             $field['key']         = 'label';
             $field['label']       = 'Label';
             $field['required']    = true;
@@ -123,7 +126,7 @@
 
             // --------------------------------------------------------------------------
 
-            $field             = array();
+            $field             = [];
             $field['key']      = 'is_active';
             $field['label']    = 'Is Active';
             $field['default']  = true;
@@ -136,7 +139,7 @@
 
             // --------------------------------------------------------------------------
 
-            $field          = array();
+            $field          = [];
             $field['key']   = 'brands[]';
             $field['label'] = 'Brands';
             $field['class'] = 'brands select2';
@@ -144,13 +147,13 @@
             $field['tip']   = 'If this product contains multiple brands (e.g a hamper) specify them all here.';
 
             //  Defaults
-            if ($this->input->post('brands')) {
+            if ($oInput->post('brands')) {
 
-                $field['default'] = $this->input->post('brands');
+                $field['default'] = $oInput->post('brands');
 
             } elseif (!empty($item->brands)) {
 
-                $field['default'] = array();
+                $field['default'] = [];
 
                 //  Build an array which matches the potential $_POST array
                 foreach ($item->brands as $brand) {
@@ -163,7 +166,7 @@
 
             // --------------------------------------------------------------------------
 
-            $field          = array();
+            $field          = [];
             $field['key']   = 'suppliers[]';
             $field['label'] = 'Suppliers';
             $field['class'] = 'suppliers select2';
@@ -171,13 +174,13 @@
             $field['tip']   = 'If required, specify the supplier of this product.';
 
             //  Defaults
-            if ($this->input->post('suppliers')) {
+            if ($oInput->post('suppliers')) {
 
-                $field['default'] = $this->input->post('suppliers');
+                $field['default'] = $oInput->post('suppliers');
 
             } elseif (!empty($item->suppliers)) {
 
-                $field['default'] = array();
+                $field['default'] = [];
 
                 //  Build an array which matches the potential $_POST array
                 foreach ($item->suppliers as $supplier) {
@@ -190,7 +193,7 @@
 
             // --------------------------------------------------------------------------
 
-            $field          = array();
+            $field          = [];
             $field['key']   = 'categories[]';
             $field['label'] = 'Categories';
             $field['class'] = 'categories select2';
@@ -198,13 +201,13 @@
             $field['tip']   = 'Specify which categories this product falls into.';
 
             //  Defaults
-            if ($this->input->post('categories')) {
+            if ($oInput->post('categories')) {
 
-                $field['default'] = $this->input->post('categories');
+                $field['default'] = $oInput->post('categories');
 
             } elseif (!empty($item->categories)) {
 
-                $field['default'] = array();
+                $field['default'] = [];
 
                 //  Build an array which matches the potential $_POST array
                 foreach ($item->categories as $category) {
@@ -217,7 +220,7 @@
 
             // --------------------------------------------------------------------------
 
-            $field            = array();
+            $field            = [];
             $field['key']     = 'google_category';
             $field['label']   = 'Google Category';
             $field['id']      = 'google-category';
@@ -228,7 +231,7 @@
 
             // --------------------------------------------------------------------------
 
-            $field          = array();
+            $field          = [];
             $field['key']   = 'tags[]';
             $field['label'] = 'Tags';
             $field['class'] = 'tags select2';
@@ -236,13 +239,13 @@
             $field['tip']   = 'Use tags to associate products together, e.g. events.';
 
             //  Defaults
-            if ($this->input->post('tags')) {
+            if ($oInput->post('tags')) {
 
-                $field['default'] = $this->input->post('tags');
+                $field['default'] = $oInput->post('tags');
 
             } elseif (!empty($item->tags)) {
 
-                $field['default'] = array();
+                $field['default'] = [];
 
                 //  Build an array which matches the potential $_POST array
                 foreach ($item->tags as $tag) {
@@ -255,7 +258,7 @@
 
             // --------------------------------------------------------------------------
 
-            $field             = array();
+            $field             = [];
             $field['key']      = 'tax_rate_id';
             $field['label']    = 'Tax Rate';
             $field['class']    = 'tax_rate_id select2';
@@ -269,7 +272,7 @@
         </div>
         <?php
 
-            $active = $this->input->post('activeTab') == 'tab-meta' ? 'active' : '';
+        $active = $oInput->post('activeTab') == 'tab-meta' ? 'active' : '';
 
         ?>
         <div class="tab-page meta tab-meta <?=$active?> fieldset">
@@ -286,82 +289,81 @@
                     $publishedTime = toUserDatetime(date('Y-m-d H:i:00'), 'Y-m-d H:i:s');
                 }
 
-                $field                = array();
+                $field                = [];
                 $field['key']         = 'published';
                 $field['label']       = 'Published';
                 $field['required']    = true;
                 $field['placeholder'] = 'What date and time should this item be published on site.';
                 $field['default']     = $publishedTime;
                 $field['info']        = 'You can specify a date in the future if you wish, the system will not show ';
-                $field['info']       .= 'products where the published date is in the future.';
+                $field['info']        .= 'products where the published date is in the future.';
 
                 echo form_field_datetime($field);
 
                 ?>
             </fieldset>
             <?php if (appSetting('enable_external_products', 'nailsapp/module-shop')) { ?>
-            <fieldset>
-                <legend>External Product</legend>
-                <p>
-                    If this item is sold on an external site then turn this setting on and the store will handle
-                    redirecting users to the appropriate vendor.
-                </p>
-                <?php
+                <fieldset>
+                    <legend>External Product</legend>
+                    <p>
+                        If this item is sold on an external site then turn this setting on and the store will handle
+                        redirecting users to the appropriate vendor.
+                    </p>
+                    <?php
 
                     echo '<div id="is-external">';
 
-                        $field             = array();
-                        $field['key']      = 'is_external';
-                        $field['label']    = 'Is External';
-                        $field['text_on']  = strtoupper(lang('yes'));
-                        $field['text_off'] = strtoupper(lang('no'));
-                        $field['default']  = isset($item->is_external) ? $item->is_external : false;
+                    $field             = [];
+                    $field['key']      = 'is_external';
+                    $field['label']    = 'Is External';
+                    $field['text_on']  = strtoupper(lang('yes'));
+                    $field['text_off'] = strtoupper(lang('no'));
+                    $field['default']  = isset($item->is_external) ? $item->is_external : false;
 
-                        echo form_field_boolean($field);
+                    echo form_field_boolean($field);
 
                     echo '</div>';
 
-                    $_display = $field['default'] || $this->input->post('is_external') ? 'block' : 'none';
+                    $_display = $field['default'] || $oInput->post('is_external') ? 'block' : 'none';
                     echo '<div id="is-external-fields" style="display:' . $_display . '">';
 
-                        $field                = array();
-                        $field['key']         = 'external_vendor_label';
-                        $field['label']       = 'External Vendor';
-                        $field['sub_label']   = 'Max. 150 characters';
-                        $field['placeholder'] = 'The name of the vendor';
-                        $field['default']     = isset($item->external_vendor_label) ? $item->external_vendor_label : '';
+                    $field                = [];
+                    $field['key']         = 'external_vendor_label';
+                    $field['label']       = 'External Vendor';
+                    $field['sub_label']   = 'Max. 150 characters';
+                    $field['placeholder'] = 'The name of the vendor';
+                    $field['default']     = isset($item->external_vendor_label) ? $item->external_vendor_label : '';
 
-                        echo form_field($field);
+                    echo form_field($field);
 
-                        // --------------------------------------------------------------------------
+                    // --------------------------------------------------------------------------
 
-                        $field                = array();
-                        $field['key']         = 'external_vendor_url';
-                        $field['label']       = 'External Vendor URL';
-                        $field['sub_label']   = 'Max. 500 characters';
-                        $field['placeholder'] = 'The URL of the page to redirect the user to';
-                        $field['default']     = isset($item->external_vendor_url) ? $item->external_vendor_url : '';
+                    $field                = [];
+                    $field['key']         = 'external_vendor_url';
+                    $field['label']       = 'External Vendor URL';
+                    $field['sub_label']   = 'Max. 500 characters';
+                    $field['placeholder'] = 'The URL of the page to redirect the user to';
+                    $field['default']     = isset($item->external_vendor_url) ? $item->external_vendor_url : '';
 
-                        echo form_field($field);
+                    echo form_field($field);
 
                     echo '</div>';
 
-                ?>
-            </fieldset>
+                    ?>
+                </fieldset>
             <?php }; ?>
         </div>
         <?php
 
-            $active = $this->input->post('activeTab') == 'tab-description' ? 'active' : '';
+        $active = $oInput->post('activeTab') == 'tab-description' ? 'active' : '';
 
         ?>
         <div class="tab-page tab-description <?=$active?>">
             <?php
 
-            $field            = array();
+            $field            = [];
             $field['key']     = 'description';
             $field['default'] = !empty($item->description) ? $item->description : '';
-
 
             echo form_error($field['key'], '<p class="alert alert-danger">', '</p>');
             echo form_textarea($field['key'], set_value($field['key'], $field['default']), 'class="wysiwyg" id="productDescription"');
@@ -370,7 +372,7 @@
         </div>
         <?php
 
-            $active = $this->input->post('activeTab') == 'tab-variations' ? 'active' : '';
+        $active = $oInput->post('activeTab') == 'tab-variations' ? 'active' : '';
 
         ?>
         <div class="tab-page tab-variations <?=$active?>">
@@ -378,65 +380,50 @@
                 Variations allow you to offer the same product but with different attributes (e.g colours or sizes).
                 Shoppers will be given the choice of which variation they wish to purchase. There must always be at
                 least one variation of a product. Confused? <a href="#help-variation-examples" class="fancybox">See
-                some examples</a>.
+                    some examples</a>.
             </p>
             <div id="product-variations">
                 <?php
 
-                    //  Data which will be passed to template
-                    $viewData                = array();
-                    $viewData['isFirst']     = true;
-                    $viewData['isPhp']       = true;
-                    $viewData['counter']     = 0;
-                    $viewData['numVariants'] = 0;
+                //  Data which will be passed to template
+                $viewData                = [];
+                $viewData['isFirst']     = true;
+                $viewData['isPhp']       = true;
+                $viewData['counter']     = 0;
+                $viewData['numVariants'] = 0;
 
-                    /**
-                     * Render, if there's POST then make sure we render it enough times,
-                     * otherwise check to see if there's $item data
-                     */
+                /**
+                 * Render, if there's POST then make sure we render it enough times,
+                 * otherwise check to see if there's $item data
+                 */
 
-                    if ($this->input->post('variation')) {
+                if ($oInput->post('variation')) {
 
-                        $_variations = $this->input->post('variation');
+                    $_variations = $oInput->post('variation');
 
-                    } elseif (!empty($item->variations)) {
+                } elseif (!empty($item->variations)) {
 
-                        $_variations = array();
+                    $_variations = [];
 
-                        //  Build an array which matches the potential $_POST array
-                        foreach ($item->variations as $variation) {
+                    //  Build an array which matches the potential $_POST array
+                    foreach ($item->variations as $variation) {
 
-                            $_variations[] = $variation;
-                        }
-
-                    } else {
-
-                        $_variations = array();
+                        $_variations[] = $variation;
                     }
 
-                    $oMustache = nailsFactory('service', 'Mustache');
+                } else {
 
-                    if (!empty($_variations)) {
+                    $_variations = [];
+                }
 
-                        foreach ($_variations as $variation) {
+                $oMustache = \Nails\Factory::service('Mustache');
 
-                            $viewData['variation']    = $variation;
-                            $viewData['numVariants'] = count($_variations);
+                if (!empty($_variations)) {
 
-                            $template = adminHelper(
-                                'loadInlineView',
-                                'utilities/template-mustache-inventory-variant',
-                                $viewData,
-                                true
-                            );
+                    foreach ($_variations as $variation) {
 
-                            echo $oMustache->render($template, $viewData);
-
-                            $viewData['counter']++;
-                            $viewData['isFirst'] = false;
-                        }
-
-                    } else {
+                        $viewData['variation']   = $variation;
+                        $viewData['numVariants'] = count($_variations);
 
                         $template = adminHelper(
                             'loadInlineView',
@@ -446,7 +433,22 @@
                         );
 
                         echo $oMustache->render($template, $viewData);
+
+                        $viewData['counter']++;
+                        $viewData['isFirst'] = false;
                     }
+
+                } else {
+
+                    $template = adminHelper(
+                        'loadInlineView',
+                        'utilities/template-mustache-inventory-variant',
+                        $viewData,
+                        true
+                    );
+
+                    echo $oMustache->render($template, $viewData);
+                }
 
                 ?>
             </div>
@@ -464,90 +466,90 @@
         </div>
         <?php
 
-            $active = $this->input->post('activeTab') == 'tab-gallery' ? 'active' : '';
+        $active = $oInput->post('activeTab') == 'tab-gallery' ? 'active' : '';
 
         ?>
-        <div class="tab-page tab-gallery <?=$active?>" >
+        <div class="tab-page tab-gallery <?=$active?>">
             <p>
                 Upload images to the product gallery. Once uploaded you can specify which variations are featured
                 on the <a href="#" class="switch-to-variations">variations tab</a>.
                 <small>
-                <?php
+                    <?php
 
-                    $_max_upload   = ini_get('upload_max_filesize');
-                    $_max_upload   = returnBytes($_max_upload);
+                    $_max_upload = ini_get('upload_max_filesize');
+                    $_max_upload = returnBytes($_max_upload);
 
-                    $_max_post     = ini_get('post_max_size');
-                    $_max_post     = returnBytes($_max_post);
+                    $_max_post = ini_get('post_max_size');
+                    $_max_post = returnBytes($_max_post);
 
                     $_memory_limit = ini_get('memory_limit');
                     $_memory_limit = returnBytes($_memory_limit);
 
-                    $_upload_mb    = min($_max_upload, $_max_post, $_memory_limit);
-                    $_upload_mb    = formatBytes($_upload_mb);
+                    $_upload_mb = min($_max_upload, $_max_post, $_memory_limit);
+                    $_upload_mb = formatBytes($_upload_mb);
 
                     echo 'Images only, max file size is ' . $_upload_mb . '.';
 
-                ?>
+                    ?>
                 </small>
             </p>
             <p>
-                <input type="file" id="file_upload" />
+                <input type="file" id="file_upload"/>
             </p>
             <p class="alert alert-info" id="upload-message" style="display:none">
                 <strong>Please be patient while files upload.</strong>
-                <br />Tabs have been disabled until uploads are complete.
+                <br/>Tabs have been disabled until uploads are complete.
             </p>
             <?php
 
-                /**
-                 * Render, if there's POST then make sure we render it enough times,
-                 * otherwise check to see if there's $item data
-                 */
+            /**
+             * Render, if there's POST then make sure we render it enough times,
+             * otherwise check to see if there's $item data
+             */
 
-                if ($this->input->post('gallery')) {
+            if ($oInput->post('gallery')) {
 
-                    $_gallery = $this->input->post('gallery');
+                $_gallery = $oInput->post('gallery');
 
-                } elseif (!empty($item->gallery)) {
+            } elseif (!empty($item->gallery)) {
 
-                    $_gallery = $item->gallery;
+                $_gallery = $item->gallery;
 
-                } else {
+            } else {
 
-                    $_gallery = array();
-                }
+                $_gallery = [];
+            }
 
             ?>
-            <ul id="gallery-items" class="<?=!empty($_gallery) ? '' : 'empty' ?>">
+            <ul id="gallery-items" class="<?=!empty($_gallery) ? '' : 'empty'?>">
                 <li class="empty">
                     No images, why not upload some?
                 </li>
                 <?php
 
-                    if (!empty($_gallery)) {
+                if (!empty($_gallery)) {
 
-                        foreach ($_gallery as $image) {
+                    foreach ($_gallery as $image) {
 
-                            $viewData = array(
-                                'objectId' => $image
-                            );
+                        $viewData = [
+                            'objectId' => $image,
+                        ];
 
-                            echo adminHelper(
-                                'loadInlineView',
-                                'utilities/template-mustache-gallery-item',
-                                $viewData,
-                                true
-                            );
-                        }
+                        echo adminHelper(
+                            'loadInlineView',
+                            'utilities/template-mustache-gallery-item',
+                            $viewData,
+                            true
+                        );
                     }
+                }
 
                 ?>
             </ul>
         </div>
         <?php
 
-            $active = $this->input->post('activeTab') == 'tab-attributes' ? 'active' : '';
+        $active = $oInput->post('activeTab') == 'tab-attributes' ? 'active' : '';
 
         ?>
         <div class="tab-page tab-attributes <?=$active?>">
@@ -566,51 +568,51 @@
                 <tbody id="product-attributes">
                     <?php
 
-                        /**
-                         * Render, if there's POST then make sure we render it enough times,
-                         * otherwise check to see if there's $item data
-                         */
+                    /**
+                     * Render, if there's POST then make sure we render it enough times,
+                     * otherwise check to see if there's $item data
+                     */
 
-                        if ($this->input->post('attributes')) {
+                    if ($oInput->post('attributes')) {
 
-                            $_attributes = $this->input->post('attributes');
+                        $_attributes = $oInput->post('attributes');
 
-                        } elseif (!empty($item->attributes)) {
+                    } elseif (!empty($item->attributes)) {
 
-                            $_attributes = array();
+                        $_attributes = [];
 
-                            //  Build an array which matches the potential $_POST array
-                            foreach ($item->attributes as $attribute) {
+                        //  Build an array which matches the potential $_POST array
+                        foreach ($item->attributes as $attribute) {
 
-                                $_temp                 = array();
-                                $_temp['attribute_id'] = $attribute->id;
-                                $_temp['value']        = $attribute->value;
+                            $_temp                 = [];
+                            $_temp['attribute_id'] = $attribute->id;
+                            $_temp['value']        = $attribute->value;
 
-                                $_attributes[] = $_temp;
-                            }
-
-                        } else {
-
-                            $_attributes = array();
+                            $_attributes[] = $_temp;
                         }
 
-                        if (!empty($_attributes)) {
+                    } else {
 
-                            $counter = 0;
-                            foreach ($_attributes as $attribute) {
+                        $_attributes = [];
+                    }
 
-                                $viewData = array('attribute' => $attribute, 'counter' => $counter);
+                    if (!empty($_attributes)) {
 
-                                echo adminHelper(
-                                    'loadInlineView',
-                                    'utilities/template-mustache-attribute',
-                                    $viewData,
-                                    true
-                                );
+                        $counter = 0;
+                        foreach ($_attributes as $attribute) {
 
-                                $counter++;
-                            }
+                            $viewData = ['attribute' => $attribute, 'counter' => $counter];
+
+                            echo adminHelper(
+                                'loadInlineView',
+                                'utilities/template-mustache-attribute',
+                                $viewData,
+                                true
+                            );
+
+                            $counter++;
                         }
+                    }
 
                     ?>
                 </tbody>
@@ -622,7 +624,7 @@
         </div>
         <?php
 
-            $active = $this->input->post('activeTab') == 'tab-ranges-collections' ? 'active' : '';
+        $active = $oInput->post('activeTab') == 'tab-ranges-collections' ? 'active' : '';
 
         ?>
         <div class="tab-page tab-ranges-collections <?=$active?>">
@@ -643,20 +645,20 @@
             </p>
             <p>
                 <select name="ranges[]" class="ranges select2" multiple="multiple" style="width:100%">
-                <?php
+                    <?php
 
                     /**
                      * Render, if there's POST then make sure we render it enough times,
                      * otherwise check to see if there's $item data
                      */
 
-                    if ($this->input->post('ranges')) {
+                    if ($oInput->post('ranges')) {
 
-                        $_selected = $this->input->post('ranges');
+                        $_selected = $oInput->post('ranges');
 
                     } elseif (!empty($item->ranges)) {
 
-                        $_selected = array();
+                        $_selected = [];
 
                         //  Build an array which matches the potential $_POST array
                         foreach ($item->ranges as $range) {
@@ -666,7 +668,7 @@
 
                     } else {
 
-                        $_selected = array();
+                        $_selected = [];
                     }
 
                     foreach ($ranges as $range) {
@@ -680,30 +682,30 @@
                         echo '</option>';
                     }
 
-                ?>
+                    ?>
                 </select>
             </p>
             <p>
                 <a href="#" class="btn btn-xs btn-default manage-ranges">Manage Ranges</a>
             </p>
-            <hr />
+            <hr/>
             <p>
                 <strong>Collections</strong>
             </p>
             <p>
                 <select name="collections[]" class="collections select2" multiple="multiple" style="width:100%">
-                <?php
+                    <?php
 
                     //  Render, if there's POST then make sure we render it enough times
                     //  Otherwise check to see if there's $item data
 
-                    if ($this->input->post('collections')) {
+                    if ($oInput->post('collections')) {
 
-                        $_selected = $this->input->post('collections');
+                        $_selected = $oInput->post('collections');
 
                     } elseif (!empty($item->collections)) {
 
-                        $_selected = array();
+                        $_selected = [];
 
                         //  Build an array which matches the potential $_POST array
                         foreach ($item->collections as $collection) {
@@ -713,7 +715,7 @@
 
                     } else {
 
-                        $_selected = array();
+                        $_selected = [];
                     }
 
                     foreach ($collections as $collection) {
@@ -727,7 +729,7 @@
                         echo '</option>';
                     }
 
-                ?>
+                    ?>
                 </select>
             </p>
             <p>
@@ -736,7 +738,7 @@
         </div>
         <?php
 
-            $active = $this->input->post('activeTab') == 'tab-related' ? 'active' : '';
+        $active = $oInput->post('activeTab') == 'tab-related' ? 'active' : '';
 
         ?>
         <div class="tab-page tab-related <?=$active?>">
@@ -747,11 +749,11 @@
                 <strong>Related</strong>
             </p>
             <p>
-            <?php
+                <?php
 
                 if (isset($relatedProducts)) {
 
-                    $default = array();
+                    $default = [];
                     foreach ($relatedProducts as $relatedItem) {
                         $default[] = $relatedItem->id;
                     }
@@ -768,12 +770,12 @@
                     'class="related" id="related-products" style="width:100%"'
                 );
 
-            ?>
+                ?>
             </p>
         </div>
         <?php
 
-            $active = $this->input->post('activeTab') == 'tab-seo' ? 'active' : '';
+        $active = $oInput->post('activeTab') == 'tab-seo' ? 'active' : '';
 
         ?>
         <div class="tab-page tab-seo <?=$active?>">
@@ -785,60 +787,60 @@
                 <legend>Search Engine Optimisation</legend>
                 <?php
 
-                    $field                = array();
-                    $field['key']         = 'seo_title';
-                    $field['label']       = 'Title';
-                    $field['sub_label']   = 'Max. 150 characters';
-                    $field['placeholder'] = 'Search Engine Optimised title';
-                    $field['default']     = !empty($item->seo_title) ? $item->seo_title : '';
+                $field                = [];
+                $field['key']         = 'seo_title';
+                $field['label']       = 'Title';
+                $field['sub_label']   = 'Max. 150 characters';
+                $field['placeholder'] = 'Search Engine Optimised title';
+                $field['default']     = !empty($item->seo_title) ? $item->seo_title : '';
 
-                    echo form_field($field, 'Keep this below 100 characters');
+                echo form_field($field, 'Keep this below 100 characters');
 
-                    // --------------------------------------------------------------------------
+                // --------------------------------------------------------------------------
 
-                    $field                = array();
-                    $field['key']         = 'seo_description';
-                    $field['label']       = 'Description';
-                    $field['sub_label']   = 'Max. 300 characters';
-                    $field['placeholder'] = 'Search Engine Optimised description';
-                    $field['type']        = 'textarea';
-                    $field['default']     = !empty($item->seo_description) ? $item->seo_description : '';
+                $field                = [];
+                $field['key']         = 'seo_description';
+                $field['label']       = 'Description';
+                $field['sub_label']   = 'Max. 300 characters';
+                $field['placeholder'] = 'Search Engine Optimised description';
+                $field['type']        = 'textarea';
+                $field['default']     = !empty($item->seo_description) ? $item->seo_description : '';
 
-                    echo form_field($field, 'Keep this relevant and below 140 characters');
+                echo form_field($field, 'Keep this relevant and below 140 characters');
 
-                    // --------------------------------------------------------------------------
+                // --------------------------------------------------------------------------
 
-                    $field                = array();
-                    $field['key']         = 'seo_keywords';
-                    $field['label']       = 'Keywords';
-                    $field['sub_label']   = 'Max. 150 characters';
-                    $field['placeholder'] = 'Comma separated keywords';
-                    $field['default']     = !empty($item->seo_keywords) ? $item->seo_keywords : '';
+                $field                = [];
+                $field['key']         = 'seo_keywords';
+                $field['label']       = 'Keywords';
+                $field['sub_label']   = 'Max. 150 characters';
+                $field['placeholder'] = 'Comma separated keywords';
+                $field['default']     = !empty($item->seo_keywords) ? $item->seo_keywords : '';
 
-                    echo form_field($field, 'Comma seperated keywords. Try to keep to 10 or fewer.');
+                echo form_field($field, 'Comma seperated keywords. Try to keep to 10 or fewer.');
 
                 ?>
             </fieldset>
         </div>
     </section>
     <p>
-    <?php
+        <?php
 
         $_action = empty($item->id) ? lang('action_create') : lang('action_save_changes');
         echo form_submit('submit', $_action, 'class="btn btn-primary"');
 
-    ?>
+        ?>
     </p>
     <?=form_close()?>
 </div>
 <script type="text/template" id="template-variation">
-<?php
+    <?php
 
-    $viewData                 = array();
+    $viewData                = [];
     $viewData['isFirst']     = false;
     $viewData['isPhp']       = false;
-    $viewData['counter']      = false;
-    $viewData['variation']    = null;
+    $viewData['counter']     = false;
+    $viewData['variation']   = null;
     $viewData['numVariants'] = null;
 
     echo adminHelper(
@@ -848,7 +850,7 @@
         true
     );
 
-?>
+    ?>
 </script>
 <div id="dialog-confirm-delete" title="Confirm Delete" style="display:none;">
     <p>
@@ -871,9 +873,9 @@
     </li>
 </script>
 <script type="text/template" id="template-gallery-item">
-<?php
+    <?php
 
-    $viewData             = array();
+    $viewData             = [];
     $viewData['objectId'] = false;
 
     echo adminHelper(
@@ -883,12 +885,12 @@
         true
     );
 
-?>
+    ?>
 </script>
 <script type="text/template" id="template-attribute">
-<?php
+    <?php
 
-    $viewData = array('attribute' => null);
+    $viewData = ['attribute' => null];
     echo adminHelper(
         'loadInlineView',
         'utilities/template-mustache-attribute',
@@ -896,7 +898,7 @@
         true
     );
 
-?>
+    ?>
 </script>
 <div id="help-variation-examples" style="display:none;">
     <h1>Variations Explained</h1>
