@@ -225,6 +225,13 @@ class Voucher extends Base
      **/
     public function getAll($page = null, $perPage = null, $data = array())
     {
+        //  If the first value is an array then treat as if called with getAll(null, null, $aData);
+        //  @todo (Pablo - 2017-11-09) - Convert these to expandable fields
+        if (is_array($page)) {
+            $data = $page;
+            $page = null;
+        }
+
         $result = parent::getAll($page, $perPage, $data, false);
 
         // --------------------------------------------------------------------------

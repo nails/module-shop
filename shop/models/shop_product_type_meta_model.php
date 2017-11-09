@@ -45,6 +45,13 @@ class Shop_product_type_meta_model extends Base
      **/
     public function getAll($page = null, $per_page = null, $data = array(), $include_deleted = false)
     {
+        //  If the first value is an array then treat as if called with getAll(null, null, $aData);
+        //  @todo (Pablo - 2017-11-09) - Convert these to expandable fields
+        if (is_array($page)) {
+            $data = $page;
+            $page = null;
+        }
+
         $fields = parent::getAll($page, $per_page, $data, $include_deleted);
 
         foreach ($fields as $field) {
