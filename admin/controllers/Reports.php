@@ -305,9 +305,9 @@ class Reports extends BaseAdmin
             $oFormValidation = Factory::service('FormValidation');
 
             //  Define rules
-            $oFormValidation->set_rules('report', '', 'xss_clean|required');
-            $oFormValidation->set_rules('period', '', 'xss_clean');
-            $oFormValidation->set_rules('format', '', 'xss_clean|required');
+            $oFormValidation->set_rules('report', '', 'required');
+            $oFormValidation->set_rules('period', '', '');
+            $oFormValidation->set_rules('format', '', 'required');
 
             //  Set Messages
             $oFormValidation->set_message('required', lang('fv_required'));

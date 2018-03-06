@@ -110,11 +110,11 @@ class NAILS_Enquire extends NAILS_Shop_Controller
 
             $oFormValidation = Factory::service('FormValidation');
 
-            $oFormValidation->set_rules('name', '', 'xss_clean|required');
-            $oFormValidation->set_rules('email', '', 'xss_clean|required|valid_email');
-            $oFormValidation->set_rules('telephone', '', 'xss_clean');
-            $oFormValidation->set_rules('address', '', 'xss_clean|required');
-            $oFormValidation->set_rules('notes', '', 'xss_clean');
+            $oFormValidation->set_rules('name', '', 'required');
+            $oFormValidation->set_rules('email', '', 'required|valid_email');
+            $oFormValidation->set_rules('telephone', '', '');
+            $oFormValidation->set_rules('address', '', 'required');
+            $oFormValidation->set_rules('notes', '', '');
 
 
             $oFormValidation->set_message('required', lang('fv_required'));

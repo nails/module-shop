@@ -723,33 +723,33 @@ class Inventory extends BaseAdmin
     {
         //  Product Info
         //  ============
-        $this->oFormValidation->set_rules('type_id', '', 'xss_clean|required');
-        $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
-        $this->oFormValidation->set_rules('is_active', '', 'xss_clean');
-        $this->oFormValidation->set_rules('brands', '', 'xss_clean');
-        $this->oFormValidation->set_rules('suppliers', '', 'xss_clean');
-        $this->oFormValidation->set_rules('categories', '', 'xss_clean');
-        $this->oFormValidation->set_rules('google_category', '', 'xss_clean');
-        $this->oFormValidation->set_rules('tags', '', 'xss_clean');
-        $this->oFormValidation->set_rules('tax_rate_id', '', 'xss_clean|required');
-        $this->oFormValidation->set_rules('published', '', 'xss_clean|required');
+        $this->oFormValidation->set_rules('type_id', '', 'required');
+        $this->oFormValidation->set_rules('label', '', 'required');
+        $this->oFormValidation->set_rules('is_active', '', '');
+        $this->oFormValidation->set_rules('brands', '', '');
+        $this->oFormValidation->set_rules('suppliers', '', '');
+        $this->oFormValidation->set_rules('categories', '', '');
+        $this->oFormValidation->set_rules('google_category', '', '');
+        $this->oFormValidation->set_rules('tags', '', '');
+        $this->oFormValidation->set_rules('tax_rate_id', '', 'required');
+        $this->oFormValidation->set_rules('published', '', 'required');
 
         // --------------------------------------------------------------------------
 
         //  External product
         if (appSetting('enable_external_products', 'nailsapp/module-shop')) {
 
-            $this->oFormValidation->set_rules('is_external', '', 'xss_clean');
+            $this->oFormValidation->set_rules('is_external', '', '');
 
             if ($this->input->post('is_external')) {
 
-                $this->oFormValidation->set_rules('external_vendor_label', '', 'xss_clean|required');
-                $this->oFormValidation->set_rules('external_vendor_url', '', 'xss_clean|required');
+                $this->oFormValidation->set_rules('external_vendor_label', '', 'required');
+                $this->oFormValidation->set_rules('external_vendor_url', '', 'required');
 
             } else {
 
-                $this->oFormValidation->set_rules('external_vendor_label', '', 'xss_clean');
-                $this->oFormValidation->set_rules('external_vendor_url', '', 'xss_clean');
+                $this->oFormValidation->set_rules('external_vendor_label', '', '');
+                $this->oFormValidation->set_rules('external_vendor_url', '', '');
             }
         }
 
@@ -770,16 +770,16 @@ class Inventory extends BaseAdmin
                 //  Details
                 //  -------
 
-                $this->oFormValidation->set_rules('variation[' . $index . '][label]', '', 'xss_clean|trim|required');
+                $this->oFormValidation->set_rules('variation[' . $index . '][label]', '', 'trim|required');
 
                 $v_id = !empty($v['id']) ? $v['id'] : '';
-                $this->oFormValidation->set_rules('variation[' . $index . '][sku]', '', 'xss_clean|trim|callback_callbackInventoryValidSku[' . $v_id . ']');
-                $this->oFormValidation->set_rules('variation[' . $index . '][is_active]', '', 'xss_clean');
+                $this->oFormValidation->set_rules('variation[' . $index . '][sku]', '', 'trim|callback_callbackInventoryValidSku[' . $v_id . ']');
+                $this->oFormValidation->set_rules('variation[' . $index . '][is_active]', '', '');
 
                 //  Stock
                 //  -----
 
-                $this->oFormValidation->set_rules('variation[' . $index . '][stock_status]', '', 'xss_clean|callback_callbackInventoryValidStockStatus|required');
+                $this->oFormValidation->set_rules('variation[' . $index . '][stock_status]', '', 'callback_callbackInventoryValidStockStatus|required');
 
                 $stock_status = isset($v['stock_status']) ? $v['stock_status'] : '';
 
@@ -787,14 +787,14 @@ class Inventory extends BaseAdmin
 
                     case 'IN_STOCK':
 
-                        $this->oFormValidation->set_rules('variation[' . $index . '][quantity_available]', '', 'xss_clean|trim|callback_callbackInventoryValidQuantity');
-                        $this->oFormValidation->set_rules('variation[' . $index . '][lead_time]', '', 'xss_clean|trim');
+                        $this->oFormValidation->set_rules('variation[' . $index . '][quantity_available]', '', 'trim|callback_callbackInventoryValidQuantity');
+                        $this->oFormValidation->set_rules('variation[' . $index . '][lead_time]', '', 'trim');
                         break;
 
                     case 'OUT_OF_STOCK':
 
-                        $this->oFormValidation->set_rules('variation[' . $index . '][quantity_available]', '', 'xss_clean|trim');
-                        $this->oFormValidation->set_rules('variation[' . $index . '][lead_time]', '', 'xss_clean|trim');
+                        $this->oFormValidation->set_rules('variation[' . $index . '][quantity_available]', '', 'trim');
+                        $this->oFormValidation->set_rules('variation[' . $index . '][lead_time]', '', 'trim');
                         break;
                 }
 
@@ -806,7 +806,7 @@ class Inventory extends BaseAdmin
 
                         $required = $price['currency'] == SHOP_BASE_CURRENCY_CODE ? '|required' : '';
 
-                        $this->oFormValidation->set_rules('variation[' . $index . '][pricing][' . $price_index . '][price]', '', 'xss_clean|callback_callbackInventoryValidPrice' . $required);
+                        $this->oFormValidation->set_rules('variation[' . $index . '][pricing][' . $price_index . '][price]', '', 'callback_callbackInventoryValidPrice' . $required);
                     }
                 }
 
@@ -816,7 +816,7 @@ class Inventory extends BaseAdmin
 
                     foreach ($v['gallery'] as $gallery_index => $image) {
 
-                        $this->oFormValidation->set_rules('variation[' . $index . '][gallery][' . $gallery_index . ']', '', 'xss_clean');
+                        $this->oFormValidation->set_rules('variation[' . $index . '][gallery][' . $gallery_index . ']', '', '');
                     }
                 }
 
@@ -824,14 +824,13 @@ class Inventory extends BaseAdmin
                 //  --------
 
                 //  Collect only switch
-                $this->oFormValidation->set_rules('variation[' . $index . '][shipping][collection_only]', '', 'xss_clean');
+                $this->oFormValidation->set_rules('variation[' . $index . '][shipping][collection_only]', '', '');
 
                 //  Foreach of the driver's settings and apply any rules, but if collect only is on then don't bother
                 $shipping_options = $this->shop_shipping_driver_model->fieldsVariant();
                 foreach ($shipping_options as $option) {
 
-                    $rules      = array();
-                    $rules[]    = 'xss_clean';
+                    $rules = array();
 
                     if (empty($_POST['variation'][$index]['shipping']['collection_only'])) {
 
@@ -859,30 +858,30 @@ class Inventory extends BaseAdmin
         // --------------------------------------------------------------------------
 
         //  Gallery
-        $this->oFormValidation->set_rules('gallery', '', 'xss_clean');
+        $this->oFormValidation->set_rules('gallery', '', '');
 
         // --------------------------------------------------------------------------
 
         //  Attributes
-        $this->oFormValidation->set_rules('attributes', '', 'xss_clean');
+        $this->oFormValidation->set_rules('attributes', '', '');
 
         // --------------------------------------------------------------------------
 
         //  Ranges & Collections
-        $this->oFormValidation->set_rules('ranges', '', 'xss_clean');
-        $this->oFormValidation->set_rules('collections', '', 'xss_clean');
+        $this->oFormValidation->set_rules('ranges', '', '');
+        $this->oFormValidation->set_rules('collections', '', '');
 
         // --------------------------------------------------------------------------
 
         //  Related products
-        $this->oFormValidation->set_rules('related', '', 'xss_clean');
+        $this->oFormValidation->set_rules('related', '', '');
 
         // --------------------------------------------------------------------------
 
         //  SEO
-        $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-        $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-        $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+        $this->oFormValidation->set_rules('seo_title', '', 'max_length[150]');
+        $this->oFormValidation->set_rules('seo_description', '', 'max_length[300]');
+        $this->oFormValidation->set_rules('seo_keywords', '', 'max_length[150]');
 
         // --------------------------------------------------------------------------
 

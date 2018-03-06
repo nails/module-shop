@@ -99,39 +99,39 @@ class NAILS_Checkout extends NAILS_Shop_Controller
                 $oFormValidation = Factory::service('FormValidation');
 
                 if ($basket->shipping->isRequired) {
-                    $oFormValidation->set_rules('delivery_address_line_1', '', 'xss_clean|trim|required');
-                    $oFormValidation->set_rules('delivery_address_line_2', '', 'xss_clean|trim');
-                    $oFormValidation->set_rules('delivery_address_town', '', 'xss_clean|trim|required');
-                    $oFormValidation->set_rules('delivery_address_state', '', 'xss_clean|trim');
-                    $oFormValidation->set_rules('delivery_address_postcode', '', 'xss_clean|trim|required');
-                    $oFormValidation->set_rules('delivery_address_country', '', 'xss_clean|required');
+                    $oFormValidation->set_rules('delivery_address_line_1', '', 'trim|required');
+                    $oFormValidation->set_rules('delivery_address_line_2', '', 'trim');
+                    $oFormValidation->set_rules('delivery_address_town', '', 'trim|required');
+                    $oFormValidation->set_rules('delivery_address_state', '', 'trim');
+                    $oFormValidation->set_rules('delivery_address_postcode', '', 'trim|required');
+                    $oFormValidation->set_rules('delivery_address_country', '', 'required');
                 }
 
-                $oFormValidation->set_rules('first_name', '', 'xss_clean|trim|required');
-                $oFormValidation->set_rules('last_name', '', 'xss_clean|trim|required');
-                $oFormValidation->set_rules('email', '', 'xss_clean|trim|required');
-                $oFormValidation->set_rules('telephone', '', 'xss_clean|trim|required');
+                $oFormValidation->set_rules('first_name', '', 'trim|required');
+                $oFormValidation->set_rules('last_name', '', 'trim|required');
+                $oFormValidation->set_rules('email', '', 'trim|required');
+                $oFormValidation->set_rules('telephone', '', 'trim|required');
 
                 if (!$this->input->post('same_billing_address')) {
 
-                    $oFormValidation->set_rules('billing_address_line_1', '', 'xss_clean|trim|required');
-                    $oFormValidation->set_rules('billing_address_line_2', '', 'xss_clean|trim');
-                    $oFormValidation->set_rules('billing_address_town', '', 'xss_clean|trim|required');
-                    $oFormValidation->set_rules('billing_address_state', '', 'xss_clean|trim');
-                    $oFormValidation->set_rules('billing_address_postcode', '', 'xss_clean|trim|required');
-                    $oFormValidation->set_rules('billing_address_country', '', 'xss_clean|trim|required');
+                    $oFormValidation->set_rules('billing_address_line_1', '', 'trim|required');
+                    $oFormValidation->set_rules('billing_address_line_2', '', 'trim');
+                    $oFormValidation->set_rules('billing_address_town', '', 'trim|required');
+                    $oFormValidation->set_rules('billing_address_state', '', 'trim');
+                    $oFormValidation->set_rules('billing_address_postcode', '', 'trim|required');
+                    $oFormValidation->set_rules('billing_address_country', '', 'trim|required');
 
                 } else {
 
-                    $oFormValidation->set_rules('billing_address_line_1', '', 'xss_clean|trim');
-                    $oFormValidation->set_rules('billing_address_line_2', '', 'xss_clean|trim');
-                    $oFormValidation->set_rules('billing_address_town', '', 'xss_clean|trim');
-                    $oFormValidation->set_rules('billing_address_state', '', 'xss_clean|trim');
-                    $oFormValidation->set_rules('billing_address_postcode', '', 'xss_clean|trim');
-                    $oFormValidation->set_rules('billing_address_country', '', 'xss_clean|trim');
+                    $oFormValidation->set_rules('billing_address_line_1', '', 'trim');
+                    $oFormValidation->set_rules('billing_address_line_2', '', 'trim');
+                    $oFormValidation->set_rules('billing_address_town', '', 'trim');
+                    $oFormValidation->set_rules('billing_address_state', '', 'trim');
+                    $oFormValidation->set_rules('billing_address_postcode', '', 'trim');
+                    $oFormValidation->set_rules('billing_address_country', '', 'trim');
                 }
 
-                $oFormValidation->set_rules('payment_gateway', '', 'xss_clean|trim|required');
+                $oFormValidation->set_rules('payment_gateway', '', 'trim|required');
 
                 $oFormValidation->set_message('required', lang('fv_required'));
 

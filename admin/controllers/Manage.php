@@ -259,8 +259,8 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
-            $this->oFormValidation->set_rules('description', '', 'xss_clean');
+            $this->oFormValidation->set_rules('label', '', 'required');
+            $this->oFormValidation->set_rules('description', '', '');
 
             $this->oFormValidation->set_message('required', lang('fv_required'));
 
@@ -329,8 +329,8 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
-            $this->oFormValidation->set_rules('description', '', 'xss_clean');
+            $this->oFormValidation->set_rules('label', '', 'required');
+            $this->oFormValidation->set_rules('description', '', '');
 
             $this->oFormValidation->set_message('required', lang('fv_required'));
 
@@ -514,14 +514,14 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
-            $this->oFormValidation->set_rules('logo_id', '', 'xss_clean');
-            $this->oFormValidation->set_rules('cover_id', '', 'xss_clean');
-            $this->oFormValidation->set_rules('description', '', 'xss_clean');
-            $this->oFormValidation->set_rules('is_active', '', 'xss_clean');
-            $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-            $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-            $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_rules('label', '', 'required');
+            $this->oFormValidation->set_rules('logo_id', '', '');
+            $this->oFormValidation->set_rules('cover_id', '', '');
+            $this->oFormValidation->set_rules('description', '', '');
+            $this->oFormValidation->set_rules('is_active', '', '');
+            $this->oFormValidation->set_rules('seo_title', '', 'max_length[150]');
+            $this->oFormValidation->set_rules('seo_description', '', 'max_length[300]');
+            $this->oFormValidation->set_rules('seo_keywords', '', 'max_length[150]');
 
             $this->oFormValidation->set_message('required', lang('fv_required'));
             $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
@@ -598,14 +598,14 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
-            $this->oFormValidation->set_rules('logo_id', '', 'xss_clean');
-            $this->oFormValidation->set_rules('cover_id', '', 'xss_clean');
-            $this->oFormValidation->set_rules('description', '', 'xss_clean');
-            $this->oFormValidation->set_rules('is_active', '', 'xss_clean');
-            $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-            $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-            $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_rules('label', '', 'required');
+            $this->oFormValidation->set_rules('logo_id', '', '');
+            $this->oFormValidation->set_rules('cover_id', '', '');
+            $this->oFormValidation->set_rules('description', '', '');
+            $this->oFormValidation->set_rules('is_active', '', '');
+            $this->oFormValidation->set_rules('seo_title', '', 'max_length[150]');
+            $this->oFormValidation->set_rules('seo_description', '', 'max_length[300]');
+            $this->oFormValidation->set_rules('seo_keywords', '', 'max_length[150]');
 
             $this->oFormValidation->set_message('required', lang('fv_required'));
             $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
@@ -796,8 +796,8 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
-            $this->oFormValidation->set_rules('is_active', '', 'xss_clean');
+            $this->oFormValidation->set_rules('label', '', 'required');
+            $this->oFormValidation->set_rules('is_active', '', '');
 
             $this->oFormValidation->set_message('required', lang('fv_required'));
             $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
@@ -868,8 +868,8 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
-            $this->oFormValidation->set_rules('is_active', '', 'xss_clean');
+            $this->oFormValidation->set_rules('label', '', 'required');
+            $this->oFormValidation->set_rules('is_active', '', '');
 
             $this->oFormValidation->set_message('required', lang('fv_required'));
             $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
@@ -1054,13 +1054,13 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
-            $this->oFormValidation->set_rules('parent_id', '', 'xss_clean');
-            $this->oFormValidation->set_rules('cover_id', '', 'xss_clean');
-            $this->oFormValidation->set_rules('description', '', 'xss_clean');
-            $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-            $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-            $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_rules('label', '', 'required');
+            $this->oFormValidation->set_rules('parent_id', '', '');
+            $this->oFormValidation->set_rules('cover_id', '', '');
+            $this->oFormValidation->set_rules('description', '', '');
+            $this->oFormValidation->set_rules('seo_title', '', 'max_length[150]');
+            $this->oFormValidation->set_rules('seo_description', '', 'max_length[300]');
+            $this->oFormValidation->set_rules('seo_keywords', '', 'max_length[150]');
 
             $this->oFormValidation->set_message('required', lang('fv_required'));
             $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
@@ -1135,13 +1135,13 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
-            $this->oFormValidation->set_rules('parent_id', '', 'xss_clean');
-            $this->oFormValidation->set_rules('cover_id', '', 'xss_clean');
-            $this->oFormValidation->set_rules('description', '', 'xss_clean');
-            $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-            $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-            $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_rules('label', '', 'required');
+            $this->oFormValidation->set_rules('parent_id', '', '');
+            $this->oFormValidation->set_rules('cover_id', '', '');
+            $this->oFormValidation->set_rules('description', '', '');
+            $this->oFormValidation->set_rules('seo_title', '', 'max_length[150]');
+            $this->oFormValidation->set_rules('seo_description', '', 'max_length[300]');
+            $this->oFormValidation->set_rules('seo_keywords', '', 'max_length[150]');
 
             $this->oFormValidation->set_message('required', lang('fv_required'));
             $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
@@ -1331,13 +1331,13 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
-            $this->oFormValidation->set_rules('cover_id', '', 'xss_clean');
-            $this->oFormValidation->set_rules('description', '', 'xss_clean');
-            $this->oFormValidation->set_rules('is_active', '', 'xss_clean');
-            $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-            $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-            $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_rules('label', '', 'required');
+            $this->oFormValidation->set_rules('cover_id', '', '');
+            $this->oFormValidation->set_rules('description', '', '');
+            $this->oFormValidation->set_rules('is_active', '', '');
+            $this->oFormValidation->set_rules('seo_title', '', 'max_length[150]');
+            $this->oFormValidation->set_rules('seo_description', '', 'max_length[300]');
+            $this->oFormValidation->set_rules('seo_keywords', '', 'max_length[150]');
 
             $this->oFormValidation->set_message('required', lang('fv_required'));
             $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
@@ -1412,13 +1412,13 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
-            $this->oFormValidation->set_rules('cover_id', '', 'xss_clean');
-            $this->oFormValidation->set_rules('description', '', 'xss_clean');
-            $this->oFormValidation->set_rules('is_active', '', 'xss_clean');
-            $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-            $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-            $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_rules('label', '', 'required');
+            $this->oFormValidation->set_rules('cover_id', '', '');
+            $this->oFormValidation->set_rules('description', '', '');
+            $this->oFormValidation->set_rules('is_active', '', '');
+            $this->oFormValidation->set_rules('seo_title', '', 'max_length[150]');
+            $this->oFormValidation->set_rules('seo_description', '', 'max_length[300]');
+            $this->oFormValidation->set_rules('seo_keywords', '', 'max_length[150]');
 
             $this->oFormValidation->set_message('required', lang('fv_required'));
             $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
@@ -1607,13 +1607,13 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
-            $this->oFormValidation->set_rules('cover_id', '', 'xss_clean');
-            $this->oFormValidation->set_rules('description', '', 'xss_clean');
-            $this->oFormValidation->set_rules('is_active', '', 'xss_clean');
-            $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-            $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-            $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_rules('label', '', 'required');
+            $this->oFormValidation->set_rules('cover_id', '', '');
+            $this->oFormValidation->set_rules('description', '', '');
+            $this->oFormValidation->set_rules('is_active', '', '');
+            $this->oFormValidation->set_rules('seo_title', '', 'max_length[150]');
+            $this->oFormValidation->set_rules('seo_description', '', 'max_length[300]');
+            $this->oFormValidation->set_rules('seo_keywords', '', 'max_length[150]');
 
             $this->oFormValidation->set_message('required', lang('fv_required'));
             $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
@@ -1688,13 +1688,13 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
-            $this->oFormValidation->set_rules('cover_id', '', 'xss_clean');
-            $this->oFormValidation->set_rules('description', '', 'xss_clean');
-            $this->oFormValidation->set_rules('is_active', '', 'xss_clean');
-            $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-            $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-            $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_rules('label', '', 'required');
+            $this->oFormValidation->set_rules('cover_id', '', '');
+            $this->oFormValidation->set_rules('description', '', '');
+            $this->oFormValidation->set_rules('is_active', '', '');
+            $this->oFormValidation->set_rules('seo_title', '', 'max_length[150]');
+            $this->oFormValidation->set_rules('seo_description', '', 'max_length[300]');
+            $this->oFormValidation->set_rules('seo_keywords', '', 'max_length[150]');
 
             $this->oFormValidation->set_message('required', lang('fv_required'));
             $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
@@ -1883,12 +1883,12 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
-            $this->oFormValidation->set_rules('cover_id', '', 'xss_clean');
-            $this->oFormValidation->set_rules('description', '', 'xss_clean');
-            $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-            $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-            $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_rules('label', '', 'required');
+            $this->oFormValidation->set_rules('cover_id', '', '');
+            $this->oFormValidation->set_rules('description', '', '');
+            $this->oFormValidation->set_rules('seo_title', '', 'max_length[150]');
+            $this->oFormValidation->set_rules('seo_description', '', 'max_length[300]');
+            $this->oFormValidation->set_rules('seo_keywords', '', 'max_length[150]');
 
             $this->oFormValidation->set_message('required', lang('fv_required'));
             $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
@@ -1962,12 +1962,12 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
-            $this->oFormValidation->set_rules('cover_id', '', 'xss_clean');
-            $this->oFormValidation->set_rules('description', '', 'xss_clean');
-            $this->oFormValidation->set_rules('seo_title', '', 'xss_clean|max_length[150]');
-            $this->oFormValidation->set_rules('seo_description', '', 'xss_clean|max_length[300]');
-            $this->oFormValidation->set_rules('seo_keywords', '', 'xss_clean|max_length[150]');
+            $this->oFormValidation->set_rules('label', '', 'required');
+            $this->oFormValidation->set_rules('cover_id', '', '');
+            $this->oFormValidation->set_rules('description', '', '');
+            $this->oFormValidation->set_rules('seo_title', '', 'max_length[150]');
+            $this->oFormValidation->set_rules('seo_description', '', 'max_length[300]');
+            $this->oFormValidation->set_rules('seo_keywords', '', 'max_length[150]');
 
             $this->oFormValidation->set_message('required', lang('fv_required'));
             $this->oFormValidation->set_message('max_length', lang('fv_max_length'));
@@ -2155,8 +2155,8 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
-            $this->oFormValidation->set_rules('rate', '', 'xss_clean|required|in_range[0-1]');
+            $this->oFormValidation->set_rules('label', '', 'required');
+            $this->oFormValidation->set_rules('rate', '', 'required|in_range[0-1]');
 
             $this->oFormValidation->set_message('required', lang('fv_required'));
             $this->oFormValidation->set_message('in_range', lang('fv_in_range'));
@@ -2227,8 +2227,8 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
-            $this->oFormValidation->set_rules('rate', '', 'xss_clean|required|in_range[0-1]');
+            $this->oFormValidation->set_rules('label', '', 'required');
+            $this->oFormValidation->set_rules('rate', '', 'required|in_range[0-1]');
 
             $this->oFormValidation->set_message('required', lang('fv_required'));
             $this->oFormValidation->set_message('in_range', lang('fv_in_range'));
@@ -2412,12 +2412,12 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->oFormValidation->set_rules('label', '', 'xss_clean|required|is_unique[' . NAILS_DB_PREFIX . 'shop_product_type.label]');
-            $this->oFormValidation->set_rules('description', '', 'xss_clean');
-            $this->oFormValidation->set_rules('is_physical', '', 'xss_clean');
-            $this->oFormValidation->set_rules('ipn_method', '', 'xss_clean');
-            $this->oFormValidation->set_rules('max_per_order', '', 'xss_clean');
-            $this->oFormValidation->set_rules('max_variations', '', 'xss_clean');
+            $this->oFormValidation->set_rules('label', '', 'required|is_unique[' . NAILS_DB_PREFIX . 'shop_product_type.label]');
+            $this->oFormValidation->set_rules('description', '', '');
+            $this->oFormValidation->set_rules('is_physical', '', '');
+            $this->oFormValidation->set_rules('ipn_method', '', '');
+            $this->oFormValidation->set_rules('max_per_order', '', '');
+            $this->oFormValidation->set_rules('max_variations', '', '');
 
             $this->oFormValidation->set_message('required', lang('fv_required'));
             $this->oFormValidation->set_message('is_unique', lang('fv_is_unique'));
@@ -2493,12 +2493,12 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->oFormValidation->set_rules('label', '', 'xss_clean|required|unique_if_diff[' . NAILS_DB_PREFIX . 'shop_product_type.label.' . $this->data['product_type']->label . ']');
-            $this->oFormValidation->set_rules('description', '', 'xss_clean');
-            $this->oFormValidation->set_rules('is_physical', '', 'xss_clean');
-            $this->oFormValidation->set_rules('ipn_method', '', 'xss_clean');
-            $this->oFormValidation->set_rules('max_per_order', '', 'xss_clean');
-            $this->oFormValidation->set_rules('max_variations', '', 'xss_clean');
+            $this->oFormValidation->set_rules('label', '', 'required|unique_if_diff[' . NAILS_DB_PREFIX . 'shop_product_type.label.' . $this->data['product_type']->label . ']');
+            $this->oFormValidation->set_rules('description', '', '');
+            $this->oFormValidation->set_rules('is_physical', '', '');
+            $this->oFormValidation->set_rules('ipn_method', '', '');
+            $this->oFormValidation->set_rules('max_per_order', '', '');
+            $this->oFormValidation->set_rules('max_variations', '', '');
 
             $this->oFormValidation->set_message('required', lang('fv_required'));
 
@@ -2671,13 +2671,13 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
-            $this->oFormValidation->set_rules('admin_form_sub_label', '', 'xss_clean');
-            $this->oFormValidation->set_rules('admin_form_placeholder', '', 'xss_clean');
-            $this->oFormValidation->set_rules('admin_form_tip', '', 'xss_clean');
-            $this->oFormValidation->set_rules('associated_product_types', '', 'xss_clean');
-            $this->oFormValidation->set_rules('allow_multiple', '', 'xss_clean');
-            $this->oFormValidation->set_rules('is_filter', '', 'xss_clean');
+            $this->oFormValidation->set_rules('label', '', 'required');
+            $this->oFormValidation->set_rules('admin_form_sub_label', '', '');
+            $this->oFormValidation->set_rules('admin_form_placeholder', '', '');
+            $this->oFormValidation->set_rules('admin_form_tip', '', '');
+            $this->oFormValidation->set_rules('associated_product_types', '', '');
+            $this->oFormValidation->set_rules('allow_multiple', '', '');
+            $this->oFormValidation->set_rules('is_filter', '', '');
 
             $this->oFormValidation->set_message('required', lang('fv_required'));
 
@@ -2752,13 +2752,13 @@ class Manage extends BaseAdmin
 
         if ($this->input->post()) {
 
-            $this->oFormValidation->set_rules('label', '', 'xss_clean|required');
-            $this->oFormValidation->set_rules('admin_form_sub_label', '', 'xss_clean');
-            $this->oFormValidation->set_rules('admin_form_placeholder', '', 'xss_clean');
-            $this->oFormValidation->set_rules('admin_form_tip', '', 'xss_clean');
-            $this->oFormValidation->set_rules('associated_product_types', '', 'xss_clean');
-            $this->oFormValidation->set_rules('allow_multiple', '', 'xss_clean');
-            $this->oFormValidation->set_rules('is_filter', '', 'xss_clean');
+            $this->oFormValidation->set_rules('label', '', 'required');
+            $this->oFormValidation->set_rules('admin_form_sub_label', '', '');
+            $this->oFormValidation->set_rules('admin_form_placeholder', '', '');
+            $this->oFormValidation->set_rules('admin_form_tip', '', '');
+            $this->oFormValidation->set_rules('associated_product_types', '', '');
+            $this->oFormValidation->set_rules('allow_multiple', '', '');
+            $this->oFormValidation->set_rules('is_filter', '', '');
 
             $this->oFormValidation->set_message('required', lang('fv_required'));
 

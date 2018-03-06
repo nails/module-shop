@@ -146,8 +146,8 @@ class Availability extends BaseAdmin
         if ($this->input->post()) {
 
             $oFormValidation = Factory::service('FormValidation');
-            $oFormValidation->set_rules('email', '', 'xss_clean|required|valid_email');
-            $oFormValidation->set_rules('item', '', 'xss_clean|required');
+            $oFormValidation->set_rules('email', '', 'required|valid_email');
+            $oFormValidation->set_rules('item', '', 'required');
 
             $oFormValidation->set_message('required', lang('fv_required'));
             $oFormValidation->set_message('valid_email', lang('fv_valid_email'));
@@ -220,8 +220,8 @@ class Availability extends BaseAdmin
         if ($this->input->post()) {
 
             $oFormValidation = Factory::service('FormValidation');
-            $oFormValidation->set_rules('email', '', 'xss_clean|required|valid_email');
-            $oFormValidation->set_rules('item', '', 'xss_clean|required');
+            $oFormValidation->set_rules('email', '', 'required|valid_email');
+            $oFormValidation->set_rules('item', '', 'required');
 
             $oFormValidation->set_message('required', lang('fv_required'));
             $oFormValidation->set_message('valid_email', lang('fv_valid_email'));

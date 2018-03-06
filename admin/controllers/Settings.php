@@ -388,8 +388,8 @@ class Settings extends BaseAdmin
                 $aRules = array();
 
                 //  Common
-                $aRules['omnipay_' . $this->data['gateway_slug'] . '_customise_label'] = 'xss_clean';
-                $aRules['omnipay_' . $this->data['gateway_slug'] . '_customise_img']   = 'xss_clean';
+                $aRules['omnipay_' . $this->data['gateway_slug'] . '_customise_label'] = '';
+                $aRules['omnipay_' . $this->data['gateway_slug'] . '_customise_img']   = '';
 
 
                 //  Gateway specific
@@ -397,11 +397,11 @@ class Settings extends BaseAdmin
 
                     if ($key == 'testMode') {
 
-                        $aRules['omnipay_' . $this->data['gateway_slug'] . '_' . $key] = 'xss_clean';
+                        $aRules['omnipay_' . $this->data['gateway_slug'] . '_' . $key] = '';
 
                     } else {
 
-                        $aRules['omnipay_' . $this->data['gateway_slug'] . '_' . $key] = 'xss_clean|required';
+                        $aRules['omnipay_' . $this->data['gateway_slug'] . '_' . $key] = 'required';
                     }
                 }
 
@@ -409,15 +409,15 @@ class Settings extends BaseAdmin
                 switch ($gateway) {
 
                     case 'stripe':
-                        $aRules['omnipay_' . $this->data['gateway_slug'] . '_publishableKey'] = 'xss_clean';
+                        $aRules['omnipay_' . $this->data['gateway_slug'] . '_publishableKey'] = '';
                         break;
 
                     case 'paypal_express':
                         //  Defining these here despite being default parameters to make them not required.
-                        $aRules['omnipay_' . $this->data['gateway_slug'] . '_brandName']      = 'xss_clean';
-                        $aRules['omnipay_' . $this->data['gateway_slug'] . '_headerImageUrl'] = 'xss_clean';
-                        $aRules['omnipay_' . $this->data['gateway_slug'] . '_logoImageUrl']   = 'xss_clean';
-                        $aRules['omnipay_' . $this->data['gateway_slug'] . '_borderColor']    = 'xss_clean';
+                        $aRules['omnipay_' . $this->data['gateway_slug'] . '_brandName']      = '';
+                        $aRules['omnipay_' . $this->data['gateway_slug'] . '_headerImageUrl'] = '';
+                        $aRules['omnipay_' . $this->data['gateway_slug'] . '_logoImageUrl']   = '';
+                        $aRules['omnipay_' . $this->data['gateway_slug'] . '_borderColor']    = '';
                         break;
                 }
 
