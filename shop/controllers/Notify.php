@@ -79,7 +79,7 @@ class NAILS_Notify extends NAILS_Shop_Controller
 
             } else {
 
-                $this->data['error']  = '<strong>Sorry,</strong> could not add you to the mailing list. ';
+                $this->data['error']  = 'Sorry, could not add you to the mailing list. ';
                 $this->data['error'] .= $this->shop_inform_product_available_model->lastError();
             }
         }

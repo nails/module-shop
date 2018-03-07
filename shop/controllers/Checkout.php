@@ -69,7 +69,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
         if (empty($basket->items)) {
 
             $status  = 'error';
-            $message = '<strong>Sorry,</strong> you cannot checkout just now. Your basket is empty.';
+            $message = 'Sorry, you cannot checkout just now. Your basket is empty.';
             $this->session->set_flashdata($status, $message);
             redirect($this->shopUrl . 'basket');
         }
@@ -216,7 +216,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
                             //  Payment failed, mark this order as a failure too.
                             $this->shop_order_model->fail($order->id, $this->shop_payment_gateway_model->lastError());
 
-                            $this->data['error']  = '<strong>Sorry,</strong> something went wrong during checkout. ';
+                            $this->data['error']  = 'Sorry, something went wrong during checkout. ';
                             $this->data['error'] .= $this->shop_payment_gateway_model->lastError();
                             $this->data['payment_error'] = $this->shop_payment_gateway_model->lastError();
 
@@ -225,7 +225,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
 
                     } else {
 
-                        $this->data['error']  = '<strong>Sorry,</strong> there was a problem processing your order. ';
+                        $this->data['error']  = 'Sorry, there was a problem processing your order. ';
                         $this->data['error'] .= $this->shop_order_model->lastError();
                     }
 
@@ -418,7 +418,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
     {
         if (!$this->data['error']) {
 
-            $this->data['error'] = '<strong>Sorry,</strong> there was a problem processing your order';
+            $this->data['error'] = 'Sorry, there was a problem processing your order';
         }
 
         if (!isset($this->data['page']->title) || !$this->data['page']->title) {
@@ -446,7 +446,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
     {
         if (!$this->data['error']) {
 
-            $this->data['error'] = '<strong>Sorry,</strong> there was a problem processing your order';
+            $this->data['error'] = 'Sorry, there was a problem processing your order';
         }
 
         if (!isset($this->data['page']->title) || !$this->data['page']->title) {
@@ -474,7 +474,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
     {
         if (!$this->data['error']) {
 
-            $this->data['error'] = '<strong>Sorry,</strong> there was a problem processing your order';
+            $this->data['error'] = 'Sorry, there was a problem processing your order';
         }
 
         if (!isset($this->data['page']->title) || !$this->data['page']->title) {
@@ -504,7 +504,7 @@ class NAILS_Checkout extends NAILS_Shop_Controller
     {
         if (!$this->data['error']) {
 
-            $this->data['error'] = '<strong>Sorry,</strong> there was a problem processing your order. ' . $error;
+            $this->data['error'] = 'Sorry, there was a problem processing your order. ' . $error;
         }
 
         if (!isset($this->data['page']->title) || !$this->data['page']->title) {
