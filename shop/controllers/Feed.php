@@ -31,8 +31,8 @@ class NAILS_Feed extends NAILS_Shop_Controller
         //  Test for a cache file first, if it's there serve that
         $oDate         = Factory::factory('DateTime');
         $sDate         = $oDate->format('Y-m-d');
-        $sCacheHeaders = DEPLOY_CACHE_DIR . 'shop-feed-' . $sDate . '-' . str_replace(DIRECTORY_SEPARATOR, '-', $sDriver) . '-headers.txt';
-        $sCacheData    = DEPLOY_CACHE_DIR . 'shop-feed-' . $sDate . '-' . str_replace(DIRECTORY_SEPARATOR, '-', $sDriver) . '-data.txt';
+        $sCacheHeaders = CACHE_PATH . 'shop-feed-' . $sDate . '-' . str_replace(DIRECTORY_SEPARATOR, '-', $sDriver) . '-headers.txt';
+        $sCacheData    = CACHE_PATH . 'shop-feed-' . $sDate . '-' . str_replace(DIRECTORY_SEPARATOR, '-', $sDriver) . '-data.txt';
 
         if (!file_exists($sCacheData)) {
 

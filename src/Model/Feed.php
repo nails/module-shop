@@ -37,7 +37,7 @@ class Feed extends BaseDriver
     public function searchGoogleCategories($sTerm)
     {
         //  Open the cache file, if it's not available then fetch a new one
-        $sCacheFile = DEPLOY_CACHE_DIR . 'shop-feed-google-categories-' . date('m-Y') . '.txt';
+        $sCacheFile = CACHE_PATH . 'shop-feed-google-categories-' . date('m-Y') . '.txt';
 
         if (!file_exists($sCacheFile)) {
 
