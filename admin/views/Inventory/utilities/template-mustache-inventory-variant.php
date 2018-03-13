@@ -395,8 +395,8 @@ $_counter = isset($variation) && $counter !== false ? $counter : '{{counter}}';
                         echo '<li class="image object-id-' . $image . ' ' . $_checked . '">';
                         echo form_checkbox('variation[' . $_counter . '][gallery][]', $image, (bool) $_checked);
                         echo img([
-                            'src'   => cdnCrop($image, 34, 34),
-                            'style' => 'width:34px;height:34px;',
+                            'src'   => cdnCrop($image, 35, 35),
+                            'style' => 'width:35px;height:35px;',
                         ]);
                         echo '</li>';
                     }
