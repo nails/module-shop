@@ -25,4 +25,5 @@ if (in_array($emailObject->data->order->delivery_type, array('COLLECT', 'DELIVER
     <?php
 }
 
-$this->load->view('shop/email/order/_component/order_details', array('order' => $emailObject->data->order));
+$oView = \Nails\Factory::service('View');
+$oView->load('shop/email/order/_component/order_details', array('order' => $emailObject->data->order));
