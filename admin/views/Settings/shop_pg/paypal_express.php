@@ -196,10 +196,10 @@
             </fieldset>
         </div>
     </section>
-    <p>
+    <div class="admin-floating-controls">
         <button type="submit" class="btn btn-primary">
             Save Changes
         </button>
-    </p>
+    </div>
     <?=form_close()?>
 </div>
