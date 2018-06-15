@@ -142,12 +142,13 @@ class Voucher extends Base
     protected function redeemNormal($oVoucher)
     {
         //  Bump the use count
-        $this->db->set('last_used', 'NOW()', false);
-        $this->db->set('modified', 'NOW()', false);
-        $this->db->set('use_count', 'use_count+1', false);
+        $oDb = Factory::service('Database');
+        $oDb->set('last_used', 'NOW()', false);
+        $oDb->set('modified', 'NOW()', false);
+        $oDb->set('use_count', 'use_count+1', false);
 
-        $this->db->where('id', $oVoucher->id);
-        return $this->db->update($this->table);
+        $oDb->where('id', $oVoucher->id);
+        return $oDb->update($this->table);
     }
 
     // --------------------------------------------------------------------------
@@ -201,17 +202,18 @@ class Voucher extends Base
         }
 
         //  Bump the use count
-        $this->db->set('last_used', 'NOW()', false);
-        $this->db->set('modified', 'NOW()', false);
-        $this->db->set('use_count', 'use_count+1', false);
+        $oDb = Factory::service('Database');
+        $oDb->set('last_used', 'NOW()', false);
+        $oDb->set('modified', 'NOW()', false);
+        $oDb->set('use_count', 'use_count+1', false);
 
         // --------------------------------------------------------------------------
 
         //  Alter the available balance
-        $this->db->set('gift_card_balance', 'gift_card_balance-' . $spend, false);
+        $oDb->set('gift_card_balance', 'gift_card_balance-' . $spend, false);
 
-        $this->db->where('id', $voucher->id);
-        return $this->db->update($this->table);
+        $oDb->where('id', $voucher->id);
+        return $oDb->update($this->table);
     }
 
     // --------------------------------------------------------------------------
@@ -285,7 +287,7 @@ class Voucher extends Base
 
     /**
      * Applies common conditionals
-     * @param  mixed  $where  A conditional to pass to $this->db->where()
+     * @param  mixed  $where  A conditional to pass to $oDb->where()
      * @param  array $search Keywords to restrict the query by
      * @return void
      */
@@ -307,9 +309,10 @@ class Voucher extends Base
 
         parent::getCountCommon($data);
 
-        $this->db->select($this->tableAlias . '.*,u.first_name, u.last_name, u.gender, u.profile_img, ue.email');
-        $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = ' . $this->tableAlias . '.created_by', 'LEFT');
-        $this->db->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.user_id = u.id AND ue.is_primary = 1', 'LEFT');
+        $oDb = Factory::service('Database');
+        $oDb->select($this->tableAlias . '.*,u.first_name, u.last_name, u.gender, u.profile_img, ue.email');
+        $oDb->join(NAILS_DB_PREFIX . 'user u', 'u.id = ' . $this->tableAlias . '.created_by', 'LEFT');
+        $oDb->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.user_id = u.id AND ue.is_primary = 1', 'LEFT');
     }
 
     // --------------------------------------------------------------------------
@@ -619,16 +622,17 @@ class Voucher extends Base
     public function generateValidCode()
     {
         Factory::helper('string');
+        $oDb = Factory::service('Database');
 
         do {
 
-            $code = strtoupper(random_string('alnum'));
-            $this->db->where('code', $code);
-            $codeExists = (bool) $this->db->count_all_results($this->table);
+            $sCode = strtoupper(random_string('alnum'));
+            $oDb->where('code', $sCode);
+            $bCodeExists = (bool) $oDb->count_all_results($this->table);
 
-        } while ($codeExists);
+        } while ($bCodeExists);
 
-        return $code;
+        return $sCode;
     }
 
     // --------------------------------------------------------------------------

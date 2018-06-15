@@ -11,6 +11,7 @@
  */
 
 use Nails\Common\Model\Base;
+use Nails\Factory;
 
 class Shop_attribute_model extends Base
 {
@@ -50,16 +51,18 @@ class Shop_attribute_model extends Base
 
         if (!empty($data['include_count'])) {
 
-            if (empty($this->db->ar_select)) {
+            $oDb = Factory::service('Database');
+
+            if (empty($oDb->ar_select)) {
 
                 //  No selects have been called, call this so that we don't *just* get the product count
-                $this->db->select($this->tableAlias . '.*');
+                $oDb->select($this->tableAlias . '.*');
             }
 
             $sql  = 'SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product_attribute ';
             $sql .= 'WHERE `attribute_id` = `' . $this->tableAlias . '`.`id`';
 
-            $this->db->select('(' . $sql . ') product_count');
+            $oDb->select('(' . $sql . ') product_count');
         }
 
         // --------------------------------------------------------------------------

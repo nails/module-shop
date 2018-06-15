@@ -36,21 +36,22 @@ class Shop_inform_product_available_model extends Base
     {
         parent::getCountCommon($data);
 
-        if (empty($data['sort'])) {
+        $oDb = Factory::service('Database');
 
-            $this->db->order_by($this->tableAlias . '.created', 'DESC');
+        if (empty($data['sort'])) {
+            $oDb->order_by($this->tableAlias . '.created', 'DESC');
         }
 
-        $this->db->select($this->tableAlias . '.*, ue.user_id, u.first_name, u.last_name, u.profile_img, u.gender');
-        $this->db->select('sp.label product_label, spv.label variation_label');
+        $oDb->select($this->tableAlias . '.*, ue.user_id, u.first_name, u.last_name, u.profile_img, u.gender');
+        $oDb->select('sp.label product_label, spv.label variation_label');
 
         //  Join the User tables
-        $this->db->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ' . $this->tableAlias . '.email', 'LEFT');
-        $this->db->join(NAILS_DB_PREFIX . 'user u', 'u.id = ue.user_id', 'LEFT');
+        $oDb->join(NAILS_DB_PREFIX . 'user_email ue', 'ue.email = ' . $this->tableAlias . '.email', 'LEFT');
+        $oDb->join(NAILS_DB_PREFIX . 'user u', 'u.id = ue.user_id', 'LEFT');
 
         //  Join the product & variartion tables
-        $this->db->join(NAILS_DB_PREFIX . 'shop_product sp', 'sp.id = ' . $this->tableAlias . '.product_id');
-        $this->db->join(NAILS_DB_PREFIX . 'shop_product_variation spv', 'spv.id = ' . $this->tableAlias . '.variation_id');
+        $oDb->join(NAILS_DB_PREFIX . 'shop_product sp', 'sp.id = ' . $this->tableAlias . '.product_id');
+        $oDb->join(NAILS_DB_PREFIX . 'shop_product_variation spv', 'spv.id = ' . $this->tableAlias . '.variation_id');
     }
 
     // --------------------------------------------------------------------------
@@ -87,6 +88,8 @@ class Shop_inform_product_available_model extends Base
 
     public function inform($productId, $variationIds)
     {
+        $oDb = Factory::service('Database');
+
         $variationIds = (array) $variationIds;
         $variationIds = array_filter($variationIds);
         $variationIds = array_unique($variationIds);
@@ -101,10 +104,10 @@ class Shop_inform_product_available_model extends Base
 
                 foreach ($variationIds as $variationId) {
 
-                    $this->db->select($this->tableAlias . '.*');
-                    $this->db->where($this->tableAlias . '.product_id', $productId);
-                    $this->db->where($this->tableAlias . '.variation_id', $variationId);
-                    $results = $this->db->get($this->table . ' ' . $this->tableAlias)->result();
+                    $oDb->select($this->tableAlias . '.*');
+                    $oDb->where($this->tableAlias . '.product_id', $productId);
+                    $oDb->where($this->tableAlias . '.variation_id', $variationId);
+                    $results = $oDb->get($this->table . ' ' . $this->tableAlias)->result();
 
                     foreach ($results as $result) {
 
@@ -135,9 +138,9 @@ class Shop_inform_product_available_model extends Base
         }
 
         //  Delete requests
-        $this->db->where('product_id', $productId);
-        $this->db->where_in('variation_id', $variationIds);
-        $this->db->delete($this->table);
+        $oDb->where('product_id', $productId);
+        $oDb->where_in('variation_id', $variationIds);
+        $oDb->delete($this->table);
     }
 
     // --------------------------------------------------------------------------

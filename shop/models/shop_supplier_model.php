@@ -11,6 +11,7 @@
  */
 
 use Nails\Common\Model\Base;
+use Nails\Factory;
 
 class Shop_supplier_model extends Base
 {
@@ -81,11 +82,12 @@ class Shop_supplier_model extends Base
 
         if (!empty($data['include_count'])) {
 
-            if (empty($this->db->ar_select)) {
+            $oDb = Factory::service('Database');
+            if (empty($oDb->ar_select)) {
 
                 //  No selects have been called, call this so that we don't *just* get the product count
                 $prefix = $this->tableAlias ? $this->tableAlias . '.' : '';
-                $this->db->select($prefix . '*');
+                $oDb->select($prefix . '*');
             }
 
             $query  = 'SELECT COUNT(DISTINCT(`nsps`.`product_id`)) ';
@@ -96,7 +98,7 @@ class Shop_supplier_model extends Base
             $query .= 'AND `nsp`.`is_active` = 1 ';
             $query .= 'AND `nsp`.`is_deleted` = 0';
 
-            $this->db->select('(' . $query . ') product_count', false);
+            $oDb->select('(' . $query . ') product_count', false);
         }
 
         // --------------------------------------------------------------------------

@@ -547,58 +547,59 @@ class Shop_product_model extends Base
         // --------------------------------------------------------------------------
 
         //  Start the transaction, safety first!
-        $this->db->trans_begin();
+        $oDb = Factory::service('Database');
+        $oDb->trans_begin();
         $rollback = false;
 
         //  Add the product
-        $this->db->set('slug', $data->slug);
-        $this->db->set('type_id', $data->type_id);
-        $this->db->set('label', $data->label);
-        $this->db->set('description', $data->description);
-        $this->db->set('seo_title', $data->seo_title);
-        $this->db->set('seo_description', $data->seo_description);
-        $this->db->set('seo_keywords', $data->seo_keywords);
-        $this->db->set('tax_rate_id', $data->tax_rate_id);
-        $this->db->set('is_active', $data->is_active);
-        $this->db->set('is_deleted', $data->is_deleted);
-        $this->db->set('published', $data->published);
-        $this->db->set('google_category', $data->google_category);
+        $oDb->set('slug', $data->slug);
+        $oDb->set('type_id', $data->type_id);
+        $oDb->set('label', $data->label);
+        $oDb->set('description', $data->description);
+        $oDb->set('seo_title', $data->seo_title);
+        $oDb->set('seo_description', $data->seo_description);
+        $oDb->set('seo_keywords', $data->seo_keywords);
+        $oDb->set('tax_rate_id', $data->tax_rate_id);
+        $oDb->set('is_active', $data->is_active);
+        $oDb->set('is_deleted', $data->is_deleted);
+        $oDb->set('published', $data->published);
+        $oDb->set('google_category', $data->google_category);
 
         if (appSetting('enable_external_products', 'nailsapp/module-shop')) {
 
-            $this->db->set('is_external', $data->is_external);
-            $this->db->set('external_vendor_label', $data->external_vendor_label);
-            $this->db->set('external_vendor_url', $data->external_vendor_url);
+            $oDb->set('is_external', $data->is_external);
+            $oDb->set('external_vendor_label', $data->external_vendor_label);
+            $oDb->set('external_vendor_url', $data->external_vendor_url);
         }
 
         if (empty($data->id)) {
 
-            $this->db->set('created', 'NOW()', false);
+            $oDb->set('created', 'NOW()', false);
 
             if (isLoggedIn()) {
 
-                $this->db->set('created_by', activeUser('id'));
+                $oDb->set('created_by', activeUser('id'));
             }
         }
 
-        $this->db->set('modified', 'NOW()', false);
+        $oDb->set('modified', 'NOW()', false);
 
         if (isLoggedIn()) {
 
-            $this->db->set('modified_by', activeUser('id'));
+            $oDb->set('modified_by', activeUser('id'));
         }
 
         if (!empty($data->id)) {
 
-            $this->db->where('id', $data->id);
-            $result = $this->db->update($this->table);
+            $oDb->where('id', $data->id);
+            $result = $oDb->update($this->table);
             $action = 'update';
 
         } else {
 
-            $result = $this->db->insert($this->table);
+            $result = $oDb->insert($this->table);
             $action = 'create';
-            $data->id = $this->db->insert_id();
+            $data->id = $oDb->insert_id();
         }
 
         if ($result) {
@@ -626,8 +627,8 @@ class Shop_product_model extends Base
                 list($items, $field, $human, $table) = $type;
 
                 //  Clear old items
-                $this->db->where('product_id', $data->id);
-                if (!$this->db->delete($table)) {
+                $oDb->where('product_id', $data->id);
+                if (!$oDb->delete($table)) {
 
                     $this->setError('Failed to clear old product ' . $human . '.');
                     $rollback = true;
@@ -675,7 +676,7 @@ class Shop_product_model extends Base
 
                 if ($temp) {
 
-                    if (!$this->db->insert_batch($table, $temp)) {
+                    if (!$oDb->insert_batch($table, $temp)) {
 
                         $this->setError('Failed to add product ' . $human . '.');
                         $rollback = true;
@@ -702,30 +703,30 @@ class Shop_product_model extends Base
                     //  Product Variation: Details
                     //  ==========================
 
-                    $this->db->set('label', $v->label);
-                    $this->db->set('sku', $v->sku);
-                    $this->db->set('is_active', $v->is_active);
-                    $this->db->set('order', $counter);
+                    $oDb->set('label', $v->label);
+                    $oDb->set('sku', $v->sku);
+                    $oDb->set('is_active', $v->is_active);
+                    $oDb->set('order', $counter);
 
 
                     //  Product Variation: Stock Status
                     //  ===============================
 
-                    $this->db->set('stock_status', $v->stock_status);
-                    $this->db->set('quantity_available', $v->quantity_available);
-                    $this->db->set('lead_time', $v->lead_time);
+                    $oDb->set('stock_status', $v->stock_status);
+                    $oDb->set('quantity_available', $v->quantity_available);
+                    $oDb->set('lead_time', $v->lead_time);
 
                     //  Product Variation: Out of Stock Behaviour
                     //  =========================================
 
-                    $this->db->set('out_of_stock_behaviour', $v->out_of_stock_behaviour);
-                    $this->db->set('out_of_stock_to_order_lead_time', $v->out_of_stock_to_order_lead_time);
+                    $oDb->set('out_of_stock_behaviour', $v->out_of_stock_behaviour);
+                    $oDb->set('out_of_stock_to_order_lead_time', $v->out_of_stock_to_order_lead_time);
 
 
                     //  Product Variation: Shipping
                     //  ===========================
 
-                    $this->db->set('ship_collection_only', $v->shipping->collection_only);
+                    $oDb->set('ship_collection_only', $v->shipping->collection_only);
 
                     if (!empty($v->id)) {
 
@@ -752,12 +753,12 @@ class Shop_product_model extends Base
 
                             //  Data exists, only update the detaisl for the specific driver
                             $currentDriverData->{$enabledDriver->slug} = $v->shipping->driver_data[$enabledDriver->slug];
-                            $this->db->set('ship_driver_data', json_encode($currentDriverData));
+                            $oDb->set('ship_driver_data', json_encode($currentDriverData));
 
                         } else {
 
                             //  Nothing exists, use whatever's been passed
-                            $this->db->set('ship_driver_data', json_encode($v->shipping->driver_data));
+                            $oDb->set('ship_driver_data', json_encode($v->shipping->driver_data));
                         }
                     }
 
@@ -766,8 +767,8 @@ class Shop_product_model extends Base
                     if (!empty($v->id)) {
 
                         //  Existing variation, update what's there
-                        $this->db->where('id', $v->id);
-                        $result = $this->db->update($this->table_variation);
+                        $oDb->where('id', $v->id);
+                        $result = $oDb->update($this->table_variation);
                         $action = 'update';
 
                         $variantIdTracker[] = $v->id;
@@ -775,13 +776,13 @@ class Shop_product_model extends Base
                     } else {
 
                         //  New variation, add it.
-                        $this->db->set('product_id', $data->id);
-                        $result = $this->db->insert($this->table_variation);
+                        $oDb->set('product_id', $data->id);
+                        $result = $oDb->insert($this->table_variation);
                         $action = 'create';
 
-                        $variantIdTracker[] = $this->db->insert_id();
+                        $variantIdTracker[] = $oDb->insert_id();
 
-                        $v->id = $this->db->insert_id();
+                        $v->id = $oDb->insert_id();
                     }
 
                     if ($result) {
@@ -789,8 +790,8 @@ class Shop_product_model extends Base
                         //  Product Variation: Gallery
                         //  ==========================
 
-                        $this->db->where('variation_id', $v->id);
-                        if (!$this->db->delete($this->table_variation_gallery)) {
+                        $oDb->where('variation_id', $v->id);
+                        if (!$oDb->delete($this->table_variation_gallery)) {
 
                             $this->setError('Failed to clear gallery items for variant with label "' . $v->label . '"');
                             $rollback = true;
@@ -809,7 +810,7 @@ class Shop_product_model extends Base
 
                             if ($temp) {
 
-                                if (!$this->db->insert_batch($this->table_variation_gallery, $temp)) {
+                                if (!$oDb->insert_batch($this->table_variation_gallery, $temp)) {
 
                                     $this->setError('Failed to update gallery items variant with label "' . $v->label . '"');
                                     $rollback = true;
@@ -828,9 +829,9 @@ class Shop_product_model extends Base
                                 $meta['variation_id'] = $v->id;
                             }
 
-                            $this->db->where('variation_id', $v->id);
+                            $oDb->where('variation_id', $v->id);
 
-                            if (!$this->db->delete($this->table_variation_product_type_meta)) {
+                            if (!$oDb->delete($this->table_variation_product_type_meta)) {
 
                                 $this->setError('Failed to clear meta data for variant with label "' . $v->label . '"');
                                 $rollback = true;
@@ -838,7 +839,7 @@ class Shop_product_model extends Base
 
                             if (!$rollback && !empty($v->meta)) {
 
-                                if (!$this->db->insert_batch($this->table_variation_product_type_meta, $v->meta)) {
+                                if (!$oDb->insert_batch($this->table_variation_product_type_meta, $v->meta)) {
 
                                     $this->setError('Failed to update meta data for variant with label "' . $v->label . '"');
                                     $rollback = true;
@@ -852,8 +853,8 @@ class Shop_product_model extends Base
 
                         if (!$rollback) {
 
-                            $this->db->where('variation_id', $v->id);
-                            if (!$this->db->delete($this->table_variation_price)) {
+                            $oDb->where('variation_id', $v->id);
+                            if (!$oDb->delete($this->table_variation_price)) {
 
                                 $this->setError('Failed to clear price data for variant with label "' . $v->label . '"');
                                 $rollback = true;
@@ -871,7 +872,7 @@ class Shop_product_model extends Base
 
                                 if ($v->pricing) {
 
-                                    if (!$this->db->insert_batch($this->table_variation_price, $v->pricing)) {
+                                    if (!$oDb->insert_batch($this->table_variation_price, $v->pricing)) {
 
                                         $this->setError('Failed to update price data for variant with label "' . $v->label . '"');
                                         $rollback = true;
@@ -893,11 +894,11 @@ class Shop_product_model extends Base
                 //  Mark all untouched variants as deleted
                 if (!$rollback) {
 
-                    $this->db->set('is_deleted', true);
-                    $this->db->where('product_id', $data->id);
-                    $this->db->where_not_in('id', $variantIdTracker);
+                    $oDb->set('is_deleted', true);
+                    $oDb->where('product_id', $data->id);
+                    $oDb->where_not_in('id', $variantIdTracker);
 
-                    if (!$this->db->update($this->table_variation)) {
+                    if (!$oDb->update($this->table_variation)) {
 
                         $this->setError('Unable to delete old variations.');
                         $rollback = true;
@@ -915,26 +916,26 @@ class Shop_product_model extends Base
         // --------------------------------------------------------------------------
 
         //  Wrap it all up
-        if ($this->db->trans_status() === false || $rollback) {
+        if ($oDb->trans_status() === false || $rollback) {
 
-            $this->db->trans_rollback();
+            $oDb->trans_rollback();
             return false;
 
         } else {
 
-            $this->db->trans_commit();
+            $oDb->trans_commit();
 
             // --------------------------------------------------------------------------
 
             //  Inform any persons who may have subscribed to a 'keep me informed' notification
             $variantsAvailable = array();
 
-            $this->db->select('id');
-            $this->db->where('product_id', $data->id);
-            $this->db->where('is_deleted', false);
-            $this->db->where('stock_status', 'IN_STOCK');
-            $this->db->where('(quantity_available IS null OR quantity_available > 0)');
-            $variantsAvailable_raw = $this->db->get($this->table_variation)->result();
+            $oDb->select('id');
+            $oDb->where('product_id', $data->id);
+            $oDb->where('is_deleted', false);
+            $oDb->where('stock_status', 'IN_STOCK');
+            $oDb->where('(quantity_available IS null OR quantity_available > 0)');
+            $variantsAvailable_raw = $oDb->get($this->table_variation)->result();
             $variantsAvailable = array();
 
             foreach ($variantsAvailable_raw as $v) {
@@ -995,6 +996,7 @@ class Shop_product_model extends Base
     public function getAll($page = null, $perPage = null, $data = array(), $includeDeleted = false)
     {
         $this->load->model('shop/shop_category_model');
+        $oDb = Factory::service('Database');
 
         //  If the first value is an array then treat as if called with getAll(null, null, $aData);
         if (is_array($page)) {
@@ -1039,31 +1041,31 @@ class Shop_product_model extends Base
 
             //  Attributes
             //  ==========
-            $this->db->select('pa.attribute_id id, a.label, pa.value');
-            $this->db->where('pa.product_id', $product->id);
-            $this->db->join(NAILS_DB_PREFIX . 'shop_attribute a', 'a.id = pa.attribute_id');
-            $product->attributes = $this->db->get($this->table_attribute . ' pa')->result();
+            $oDb->select('pa.attribute_id id, a.label, pa.value');
+            $oDb->where('pa.product_id', $product->id);
+            $oDb->join(NAILS_DB_PREFIX . 'shop_attribute a', 'a.id = pa.attribute_id');
+            $product->attributes = $oDb->get($this->table_attribute . ' pa')->result();
 
             //  Brands
             //  ======
-            $this->db->select('b.id, b.slug, b.label, b.logo_id, b.is_active');
-            $this->db->where('pb.product_id', $product->id);
-            $this->db->join(NAILS_DB_PREFIX . 'shop_brand b', 'b.id = pb.brand_id');
-            $product->brands = $this->db->get($this->table_brand . ' pb')->result();
+            $oDb->select('b.id, b.slug, b.label, b.logo_id, b.is_active');
+            $oDb->where('pb.product_id', $product->id);
+            $oDb->join(NAILS_DB_PREFIX . 'shop_brand b', 'b.id = pb.brand_id');
+            $product->brands = $oDb->get($this->table_brand . ' pb')->result();
 
             //  Suppliers
             //  =========
-            $this->db->select('s.id, s.slug, s.label, s.is_active');
-            $this->db->where('ps.product_id', $product->id);
-            $this->db->join(NAILS_DB_PREFIX . 'shop_supplier s', 's.id = ps.supplier_id');
-            $product->suppliers = $this->db->get($this->table_supplier . ' ps')->result();
+            $oDb->select('s.id, s.slug, s.label, s.is_active');
+            $oDb->where('ps.product_id', $product->id);
+            $oDb->join(NAILS_DB_PREFIX . 'shop_supplier s', 's.id = ps.supplier_id');
+            $product->suppliers = $oDb->get($this->table_supplier . ' ps')->result();
 
             //  Categories
             //  ==========
-            $this->db->select('c.id, c.slug, c.label, c.breadcrumbs');
-            $this->db->where('pc.product_id', $product->id);
-            $this->db->join(NAILS_DB_PREFIX . 'shop_category c', 'c.id = pc.category_id');
-            $product->categories = $this->db->get($this->table_category . ' pc')->result();
+            $oDb->select('c.id, c.slug, c.label, c.breadcrumbs');
+            $oDb->where('pc.product_id', $product->id);
+            $oDb->join(NAILS_DB_PREFIX . 'shop_category c', 'c.id = pc.category_id');
+            $product->categories = $oDb->get($this->table_category . ' pc')->result();
             foreach ($product->categories as $category) {
 
                 $category->id          = (int) $category->id;
@@ -1073,17 +1075,17 @@ class Shop_product_model extends Base
 
             //  Collections
             //  ===========
-            $this->db->select('c.id, c.slug, c.label');
-            $this->db->where('pc.product_id', $product->id);
-            $this->db->join(NAILS_DB_PREFIX . 'shop_collection c', 'c.id = pc.collection_id');
-            $product->collections = $this->db->get($this->table_collection . ' pc')->result();
+            $oDb->select('c.id, c.slug, c.label');
+            $oDb->where('pc.product_id', $product->id);
+            $oDb->join(NAILS_DB_PREFIX . 'shop_collection c', 'c.id = pc.collection_id');
+            $product->collections = $oDb->get($this->table_collection . ' pc')->result();
 
             //  Gallery
             //  =======
-            $this->db->select('object_id');
-            $this->db->where('product_id', $product->id);
-            $this->db->order_by('order');
-            $temp = $this->db->get($this->table_gallery)->result();
+            $oDb->select('object_id');
+            $oDb->where('product_id', $product->id);
+            $oDb->order_by('order');
+            $temp = $oDb->get($this->table_gallery)->result();
 
             $product->gallery = array();
             foreach ($temp as $image) {
@@ -1104,33 +1106,33 @@ class Shop_product_model extends Base
 
             //  Range
             //  =====
-            $this->db->select('r.id, r.slug, r.label');
-            $this->db->where('pr.product_id', $product->id);
-            $this->db->join(NAILS_DB_PREFIX . 'shop_range r', 'r.id = pr.range_id');
-            $product->ranges = $this->db->get($this->table_range . ' pr')->result();
+            $oDb->select('r.id, r.slug, r.label');
+            $oDb->where('pr.product_id', $product->id);
+            $oDb->join(NAILS_DB_PREFIX . 'shop_range r', 'r.id = pr.range_id');
+            $product->ranges = $oDb->get($this->table_range . ' pr')->result();
 
             //  Tags
             //  ====
-            $this->db->select('t.id, t.slug, t.label');
-            $this->db->where('pt.product_id', $product->id);
-            $this->db->join(NAILS_DB_PREFIX . 'shop_tag t', 't.id = pt.tag_id');
-            $product->tags = $this->db->get($this->table_tag . ' pt')->result();
+            $oDb->select('t.id, t.slug, t.label');
+            $oDb->where('pt.product_id', $product->id);
+            $oDb->join(NAILS_DB_PREFIX . 'shop_tag t', 't.id = pt.tag_id');
+            $product->tags = $oDb->get($this->table_tag . ' pt')->result();
 
             //  Variations
             //  ==========
-            $this->db->select('pv.*');
-            $this->db->where('pv.product_id', $product->id);
+            $oDb->select('pv.*');
+            $oDb->where('pv.product_id', $product->id);
 
             if (empty($data['include_inactive_variants'])) {
 
-                $this->db->where('pv.is_active', true);
+                $oDb->where('pv.is_active', true);
             }
             if (empty($data['include_deleted_variants'])) {
 
-                $this->db->where('pv.is_deleted', false);
+                $oDb->where('pv.is_deleted', false);
             }
-            $this->db->order_by('pv.order');
-            $product->variations = $this->db->get($this->table_variation . ' pv')->result();
+            $oDb->order_by('pv.order');
+            $product->variations = $oDb->get($this->table_variation . ' pv')->result();
 
             $aVariationPricesIncTax = array();
             $aVariationPricesExTax  = array();
@@ -1141,10 +1143,10 @@ class Shop_product_model extends Base
                 //  Meta
                 //  ====
 
-                $this->db->select('a.id,a.meta_field_id,b.label,a.value,b.allow_multiple');
-                $this->db->join(NAILS_DB_PREFIX . 'shop_product_type_meta_field b', 'a.meta_field_id = b.id');
-                $this->db->where('variation_id', $v->id);
-                $metaRaw = $this->db->get($this->table_variation_product_type_meta . ' a')->result();
+                $oDb->select('a.id,a.meta_field_id,b.label,a.value,b.allow_multiple');
+                $oDb->join(NAILS_DB_PREFIX . 'shop_product_type_meta_field b', 'a.meta_field_id = b.id');
+                $oDb->where('variation_id', $v->id);
+                $metaRaw = $oDb->get($this->table_variation_product_type_meta . ' a')->result();
 
                 //  Merge `allow_multiple` fields into one
                 $v->meta = array();
@@ -1179,8 +1181,8 @@ class Shop_product_model extends Base
                 //  Gallery
                 //  =======
 
-                $this->db->where('variation_id', $v->id);
-                $temp = $this->db->get($this->table_variation_gallery)->result();
+                $oDb->where('variation_id', $v->id);
+                $temp = $oDb->get($this->table_variation_gallery)->result();
                 $v->gallery = array();
 
                 foreach ($temp as $image) {
@@ -1200,10 +1202,10 @@ class Shop_product_model extends Base
                 //  Raw Price
                 //  =========
 
-                $this->db->select('pvp.price, pvp.currency');
-                $this->db->where('pvp.variation_id', $v->id);
-                $this->db->where_in('pvp.currency', $supportedCurrencyFlat);
-                $_price = $this->db->get($this->table_variation_price . ' pvp')->result();
+                $oDb->select('pvp.price, pvp.currency');
+                $oDb->where('pvp.variation_id', $v->id);
+                $oDb->where_in('pvp.currency', $supportedCurrencyFlat);
+                $_price = $oDb->get($this->table_variation_price . ' pvp')->result();
 
                 //  Dirty hack to "clone" the object, otherwise all variants will have the same price
                 $v->price_raw = unserialize(serialize($basePriceRaw));
@@ -1408,12 +1410,13 @@ class Shop_product_model extends Base
      */
     public function getAllProductVariationFlat()
     {
-        $this->db->select('p.id p_id, v.id v_id, p.label p_label, v.label v_label, v.sku');
-        $this->db->join($this->table . ' p', 'v.product_id = p.id');
-        $this->db->order_by('p.label');
-        $this->db->where('v.is_deleted', false);
-        $this->db->where('p.is_deleted', false);
-        $items = $this->db->get($this->table_variation . ' v')->result();
+        $oDb = Factory::service('Database');
+        $oDb->select('p.id p_id, v.id v_id, p.label p_label, v.label v_label, v.sku');
+        $oDb->join($this->table . ' p', 'v.product_id = p.id');
+        $oDb->order_by('p.label');
+        $oDb->where('v.is_deleted', false);
+        $oDb->where('p.is_deleted', false);
+        $items = $oDb->get($this->table_variation . ' v')->result();
 
         $out = array();
 
@@ -1510,10 +1513,11 @@ class Shop_product_model extends Base
      */
     public function getByVariantId($variantId)
     {
-        $this->db->select('product_id');
-        $this->db->where('id', $variantId);
-        $this->db->where('is_deleted', false);
-        $variant = $this->db->get($this->table_variation)->row();
+        $oDb = Factory::service('Database');
+        $oDb->select('product_id');
+        $oDb->where('id', $variantId);
+        $oDb->where('is_deleted', false);
+        $variant = $oDb->get($this->table_variation)->row();
 
         if ($variant) {
 
@@ -1529,9 +1533,10 @@ class Shop_product_model extends Base
 
     public function getRelatedProducts($productId)
     {
-        $this->db->select('related_id');
-        $this->db->where('product_id', $productId);
-        $result = $this->db->get($this->table_related)->result();
+        $oDb = Factory::service('Database');
+        $oDb->select('related_id');
+        $oDb->where('product_id', $productId);
+        $result = $oDb->get($this->table_related)->result();
 
         if (empty($result)) {
 
@@ -1578,33 +1583,35 @@ class Shop_product_model extends Base
 
         parent::getCountCommon($data);
 
+        $oDb = Factory::service('Database');
+
         // --------------------------------------------------------------------------
 
         //  Selects
         if (empty($data['_do_not_select'])) {
 
-            $this->db->select($this->tableAlias . '.*');
-            $this->db->select('pt.label type_label, pt.max_per_order type_max_per_order, pt.is_physical type_is_physical');
-            $this->db->select('tr.label tax_rate_label, tr.rate tax_rate_rate');
+            $oDb->select($this->tableAlias . '.*');
+            $oDb->select('pt.label type_label, pt.max_per_order type_max_per_order, pt.is_physical type_is_physical');
+            $oDb->select('tr.label tax_rate_label, tr.rate tax_rate_rate');
         }
 
         //  Joins
-        $this->db->join($this->table_type . ' pt', 'p.type_id = pt.id');
-        $this->db->join($this->table_tax_rate . ' tr', 'p.tax_rate_id = tr.id', 'LEFT');
+        $oDb->join($this->table_type . ' pt', 'p.type_id = pt.id');
+        $oDb->join($this->table_tax_rate . ' tr', 'p.tax_rate_id = tr.id', 'LEFT');
 
         //  Default sort
         if (empty($customSort) && empty($data['sort'])) {
 
-            $this->db->order_by($this->tableAlias . '.label');
+            $oDb->order_by($this->tableAlias . '.label');
 
         } elseif (!empty($customSort) && $customSort[0] === 'PRICE') {
 
-            $this->db->order_by('(SELECT MIN(`price`) FROM `' . $this->table_variation_price . '` vp WHERE vp.product_id = p.id)', $customSort[1]);
+            $oDb->order_by('(SELECT MIN(`price`) FROM `' . $this->table_variation_price . '` vp WHERE vp.product_id = p.id)', $customSort[1]);
 
         } elseif (!empty($customSort) && $customSort[0] === 'PUBLISHED') {
 
-            $this->db->order_by('p.published', 'DESC');
-            $this->db->order_by('p.created', 'DESC');
+            $oDb->order_by('p.published', 'DESC');
+            $oDb->order_by('p.created', 'DESC');
         }
 
         //  Search
@@ -1617,7 +1624,7 @@ class Shop_product_model extends Base
 
             Factory::helper('string');
             $data['keywords'] = removeStopWords($data['keywords']);
-            $search = $this->db->escape_like_str($data['keywords']);
+            $search = $oDb->escape_like_str($data['keywords']);
 
             $where   = array();
             $where[] = $this->tableAlias . '.id IN (SELECT product_id FROM ' . NAILS_DB_PREFIX . 'shop_product_variation WHERE label REGEXP \'([[:<:]]|^)' . $search . '([[:>:]]|$)\' OR sku LIKE \'%' . $search . '%\')' ;
@@ -1626,7 +1633,7 @@ class Shop_product_model extends Base
             $where[] = $this->tableAlias . '.description REGEXP \'([[:<:]]|^)' . $search . '([[:>:]]|$)\'';
             $where   = '(' . implode(' OR ', $where) . ')';
 
-            $this->db->where($where);
+            $oDb->where($where);
         }
 
         // --------------------------------------------------------------------------
@@ -1634,7 +1641,7 @@ class Shop_product_model extends Base
         //  Unless told otherwise, only return active items
         if (empty($data['include_inactive'])) {
 
-            $this->db->where($this->tableAlias . '.is_active', true);
+            $oDb->where($this->tableAlias . '.is_active', true);
         }
 
         // --------------------------------------------------------------------------
@@ -1672,17 +1679,17 @@ class Shop_product_model extends Base
 
             if (is_array($data['brand_id'])) {
 
-                $brandIds = array_map(array($this->db, 'escape'), $data['brand_id']);
+                $brandIds = array_map(array($oDb, 'escape'), $data['brand_id']);
                 $where .= 'IN (' . implode(',', $brandIds) . ')';
 
             } else {
 
-                $where .= '= ' . $this->db->escape($data['brand_id']);
+                $where .= '= ' . $oDb->escape($data['brand_id']);
             }
 
             $where .= ')';
 
-            $this->db->where($where);
+            $oDb->where($where);
         }
 
         //  Suppliers
@@ -1715,17 +1722,17 @@ class Shop_product_model extends Base
 
             if (is_array($data['supplier_id'])) {
 
-                $suplierIds = array_map(array($this->db, 'escape'), $data['supplier_id']);
+                $suplierIds = array_map(array($oDb, 'escape'), $data['supplier_id']);
                 $where .= 'IN (' . implode(',', $suplierIds) . ')';
 
             } else {
 
-                $where .= '= ' . $this->db->escape($data['supplier_id']);
+                $where .= '= ' . $oDb->escape($data['supplier_id']);
             }
 
             $where .= ')';
 
-            $this->db->where($where);
+            $oDb->where($where);
         }
 
 
@@ -1739,17 +1746,17 @@ class Shop_product_model extends Base
             if (is_array($data['category_id'])) {
 
                 $categoryIds = array_map('intval', $data['category_id']);
-                $categoryIds = array_map(array($this->db, 'escape'), $categoryIds);
+                $categoryIds = array_map(array($oDb, 'escape'), $categoryIds);
                 $where .= 'IN (' . implode(',', $categoryIds) . ')';
 
             } else {
 
-                $where .= '= ' . $this->db->escape($data['category_id']);
+                $where .= '= ' . $oDb->escape($data['category_id']);
             }
 
             $where .= ')';
 
-            $this->db->where($where);
+            $oDb->where($where);
         }
 
 
@@ -1763,17 +1770,17 @@ class Shop_product_model extends Base
             if (is_array($data['collection_id'])) {
 
                 $collectionIds = array_map('intval', $data['collection_id']);
-                $collectionIds = array_map(array($this->db, 'escape'), $collectionIds);
+                $collectionIds = array_map(array($oDb, 'escape'), $collectionIds);
                 $where .= 'IN (' . implode(',', $collectionIds) . ')';
 
             } else {
 
-                $where .= '= ' . $this->db->escape($data['collection_id']);
+                $where .= '= ' . $oDb->escape($data['collection_id']);
             }
 
             $where .= ')';
 
-            $this->db->where($where);
+            $oDb->where($where);
         }
 
 
@@ -1787,17 +1794,17 @@ class Shop_product_model extends Base
             if (is_array($data['range_id'])) {
 
                 $rangeIds = array_map('intval', $data['range_id']);
-                $rangeIds = array_map(array($this->db, 'escape'), $rangeIds);
+                $rangeIds = array_map(array($oDb, 'escape'), $rangeIds);
                 $where .= 'IN (' . implode(',', $rangeIds) . ')';
 
             } else {
 
-                $where .= '= ' . $this->db->escape($data['range_id']);
+                $where .= '= ' . $oDb->escape($data['range_id']);
             }
 
             $where .= ')';
 
-            $this->db->where($where);
+            $oDb->where($where);
         }
 
 
@@ -1811,17 +1818,17 @@ class Shop_product_model extends Base
             if (is_array($data['sale_id'])) {
 
                 $saleIds = array_map('intval', $data['sale_id']);
-                $saleIds = array_map(array($this->db, 'escape'), $saleIds);
+                $saleIds = array_map(array($oDb, 'escape'), $saleIds);
                 $where .= 'IN (' . implode(',', $saleIds) . ')';
 
             } else {
 
-                $where .= '= ' . $this->db->escape($data['sale_id']);
+                $where .= '= ' . $oDb->escape($data['sale_id']);
             }
 
             $where .= ')';
 
-            $this->db->where($where);
+            $oDb->where($where);
         }
 
 
@@ -1835,17 +1842,17 @@ class Shop_product_model extends Base
             if (is_array($data['tag_id'])) {
 
                 $tagIds = array_map('intval', $data['tag_id']);
-                $tagIds = array_map(array($this->db, 'escape'), $tagIds);
+                $tagIds = array_map(array($oDb, 'escape'), $tagIds);
                 $where .= 'IN (' . implode(',', $tagIds) . ')';
 
             } else {
 
-                $where .= '= ' . $this->db->escape($data['tag_id']);
+                $where .= '= ' . $oDb->escape($data['tag_id']);
             }
 
             $where .= ')';
 
-            $this->db->where($where);
+            $oDb->where($where);
         }
 
 
@@ -1858,15 +1865,15 @@ class Shop_product_model extends Base
 
             if (is_array($data['stockStatus'])) {
 
-                $statuses = array_map(array($this->db, 'escape'), $data['stockStatus']);
+                $statuses = array_map(array($oDb, 'escape'), $data['stockStatus']);
                 $where .= 'IN (' . implode(',', $statuses) . ')';
 
             } else {
 
-                $where .= '= ' . $this->db->escape($data['stockStatus']);
+                $where .= '= ' . $oDb->escape($data['stockStatus']);
             }
 
-            $this->db->where('(' . $where . ') > 0');
+            $oDb->where('(' . $where . ') > 0');
         }
 
         // --------------------------------------------------------------------------
@@ -1879,7 +1886,7 @@ class Shop_product_model extends Base
         if (empty($data['_ignore_filters']) && !empty($data['filter'])) {
 
             //  Join the avriation table
-            $this->db->join($this->table_variation . ' spv', $this->tableAlias . '.id = spv.product_id');
+            $oDb->join($this->table_variation . ' spv', $this->tableAlias . '.id = spv.product_id');
 
             foreach ($data['filter'] as $meta_field_id => $values) {
 
@@ -1892,16 +1899,16 @@ class Shop_product_model extends Base
                 $valuesClean = array_filter($valuesClean);
                 $valuesClean = array_unique($valuesClean);
                 $valuesClean = array_map('intval', $valuesClean);
-                $valuesClean = array_map(array($this->db, 'escape'), $valuesClean);
+                $valuesClean = array_map(array($oDb, 'escape'), $valuesClean);
                 $valuesClean = implode(',', $valuesClean);
 
-                $this->db->join(
+                $oDb->join(
                     $this->table_variation_product_type_meta . ' spvptm' . $meta_field_id,
                     'spvptm' . $meta_field_id . '.variation_id = spv.id AND spvptm' . $meta_field_id . '.meta_field_id = \'' . $meta_field_id . '\' AND spvptm' . $meta_field_id . '.value IN (' . $valuesClean . ')'
                 );
             }
 
-            $this->db->group_by($this->tableAlias . '.id');
+            $oDb->group_by($this->tableAlias . '.id');
         }
     }
 
@@ -2358,11 +2365,8 @@ class Shop_product_model extends Base
     public function getFiltersForProducts($data)
     {
         if (!$this->table) {
-
             throw new ModelException(get_called_class() . '::getFiltersForProducts() Table variable not set', 1);
-
         } else {
-
             $table  = $this->tableAlias ? $this->table . ' ' . $this->tableAlias : $this->table;
         }
 
@@ -2383,8 +2387,9 @@ class Shop_product_model extends Base
         $data['_do_not_select']  = true;
         $data['_ignore_filters'] = true;
         $this->getCountCommon($data, 'GET_FILTERS_FOR_PRODUCTS');
-        $this->db->select('p.id, p.type_id');
-        $productIdsRaw  = $this->db->get($table)->result();
+        $oDb = Factory::service('Database');
+        $oDb->select('p.id, p.type_id');
+        $productIdsRaw  = $oDb->get($table)->result();
         $productIds     = array();
         $productTypeIds = array();
 
@@ -2410,12 +2415,12 @@ class Shop_product_model extends Base
 
             if (!isset($data['brand_id'])) {
 
-                $this->db->select('sb.id value, sb.label, COUNT(spb.product_id) product_count');
-                $this->db->join(NAILS_DB_PREFIX . 'shop_brand sb', 'sb.id = spb.brand_id');
-                $this->db->where_in('spb.product_id', $productIds);
-                $this->db->group_by('sb.id');
-                $this->db->order_by('sb.label');
-                $result = $this->db->get($this->table_brand . ' spb')->result();
+                $oDb->select('sb.id value, sb.label, COUNT(spb.product_id) product_count');
+                $oDb->join(NAILS_DB_PREFIX . 'shop_brand sb', 'sb.id = spb.brand_id');
+                $oDb->where_in('spb.product_id', $productIds);
+                $oDb->group_by('sb.id');
+                $oDb->order_by('sb.label');
+                $result = $oDb->get($this->table_brand . ' spb')->result();
 
                 if ($result) {
 
@@ -2433,9 +2438,9 @@ class Shop_product_model extends Base
              * to restrict the values we show in the filters
              */
 
-            $this->db->select('id');
-            $this->db->where_in('product_id', $productIds);
-            $variantIdsRaw = $this->db->get($this->table_variation)->result();
+            $oDb->select('id');
+            $oDb->where_in('product_id', $productIds);
+            $variantIdsRaw = $oDb->get($this->table_variation)->result();
             $variantIds    = array();
 
             foreach ($variantIdsRaw as $vid) {
@@ -2473,12 +2478,12 @@ class Shop_product_model extends Base
                 $temp->id    = $field->id;
                 $temp->label = $field->label;
 
-                $this->db->select('DISTINCT(`value`) `value`, COUNT(variation_id) product_count');
-                $this->db->where('meta_field_id', $field->id);
-                $this->db->where('value !=', '');
-                $this->db->where_in('variation_id', $variantIds);
-                $this->db->group_by('value');
-                $temp->values = $this->db->get($this->table_variation_product_type_meta)->result();
+                $oDb->select('DISTINCT(`value`) `value`, COUNT(variation_id) product_count');
+                $oDb->where('meta_field_id', $field->id);
+                $oDb->where('value !=', '');
+                $oDb->where_in('variation_id', $variantIds);
+                $oDb->group_by('value');
+                $temp->values = $oDb->get($this->table_variation_product_type_meta)->result();
 
                 if (!empty($temp->values)) {
 

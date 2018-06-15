@@ -11,6 +11,7 @@
  */
 
 use Nails\Common\Model\Base;
+use Nails\Factory;
 
 class Shop_sale_model extends Base
 {
@@ -48,14 +49,16 @@ class Shop_sale_model extends Base
 
         if (!empty($data['include_count'])) {
 
-            if (empty($this->db->ar_select)) {
+            $oDb = Factory::service('Database');
+
+            if (empty($oDb->ar_select)) {
 
                 //  No selects have been called, call this so that we don't *just* get the product count
                 $_prefix = $this->tableAlias ? $this->tableAlias . '.' : '';
-                $this->db->select($_prefix . '*');
+                $oDb->select($_prefix . '*');
             }
 
-            $this->db->select('(SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product_sale sps LEFT JOIN ' . NAILS_DB_PREFIX . 'shop_product p ON p.id = sps.product_id  WHERE sps.sale_id = s.id AND p.is_active = 1) product_count');
+            $oDb->select('(SELECT COUNT(*) FROM ' . NAILS_DB_PREFIX .  'shop_product_sale sps LEFT JOIN ' . NAILS_DB_PREFIX . 'shop_product p ON p.id = sps.product_id  WHERE sps.sale_id = s.id AND p.is_active = 1) product_count');
         }
 
         // --------------------------------------------------------------------------

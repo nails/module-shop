@@ -11,6 +11,7 @@
  */
 
 use Nails\Common\Model\Base;
+use Nails\Factory;
 
 class Shop_category_model extends Base
 {
@@ -58,7 +59,8 @@ class Shop_category_model extends Base
 
         // --------------------------------------------------------------------------
 
-        $this->db->trans_begin();
+        $oDb = Factory::service('Database');
+        $oDb->trans_begin();
 
         //  Create a new blank object to work with
         $_data = array('label' => $data['label']);
@@ -67,12 +69,12 @@ class Shop_category_model extends Base
         if (!$_id) {
 
             $this->setError('Unable to create base category object.');
-            $this->db->trans_rollback();
+            $oDb->trans_rollback();
             return false;
 
         } elseif ($this->update($_id, $data)) {
 
-            $this->db->trans_commit();
+            $oDb->trans_commit();
 
             if ($returnObject) {
 
@@ -85,7 +87,7 @@ class Shop_category_model extends Base
 
         } else {
 
-            $this->db->trans_rollback();
+            $oDb->trans_rollback();
             return false;
         }
     }
@@ -101,6 +103,7 @@ class Shop_category_model extends Base
     public function update($id, $data = array())
     {
         $_data = array();
+        $oDb   = Factory::service('Database');
 
         //  Prep the data
         if (empty($data['label'])) {
@@ -158,9 +161,9 @@ class Shop_category_model extends Base
 
         if (!empty($_data['parent_id'])) {
 
-            $this->db->select('slug');
-            $this->db->where('id', $_data['parent_id']);
-            $_parent = $this->db->get($this->table)->row();
+            $oDb->select('slug');
+            $oDb->where('id', $_data['parent_id']);
+            $_parent = $oDb->get($this->table)->row();
 
             if (empty($_parent)) {
 
@@ -199,7 +202,7 @@ class Shop_category_model extends Base
         // --------------------------------------------------------------------------
 
         //  Attempt the update
-        $this->db->trans_begin();
+        $oDb->trans_begin();
 
         if (parent::update($id, $_data)) {
 
@@ -209,7 +212,7 @@ class Shop_category_model extends Base
 
             if (!parent::update($id, $_data)) {
 
-                $this->db->trans_rollback();
+                $oDb->trans_rollback();
                 $this->setError('Failed to update category breadcrumbs.');
                 return false;
             }
@@ -229,15 +232,15 @@ class Shop_category_model extends Base
                     $_child_data->breadcrumbs = json_encode($this->generateBreadcrumbs($child_id));
 
                     //  Slugs are slightly harder, we need to get the child's parent's slug and use it as a prefix
-                    $this->db->select('parent_id, label');
-                    $this->db->where('id', $child_id);
-                    $_child = $this->db->get($this->table)->row();
+                    $oDb->select('parent_id, label');
+                    $oDb->where('id', $child_id);
+                    $_child = $oDb->get($this->table)->row();
 
                     if (!empty($_child)) {
 
-                        $this->db->select('slug');
-                        $this->db->where('id', $_child->parent_id);
-                        $_parent = $this->db->get($this->table)->row();
+                        $oDb->select('slug');
+                        $oDb->where('id', $_child->parent_id);
+                        $_parent = $oDb->get($this->table)->row();
                         $_prefix = empty($_parent) ? '' : $_parent->slug . '/';
 
                         $_child_data->slug     = $this->generateSlug($_child->label, $_prefix, '', null, null, $child_id);
@@ -246,7 +249,7 @@ class Shop_category_model extends Base
 
                     if (!parent::update($child_id, (array) $_child_data)) {
 
-                        $this->db->trans_rollback();
+                        $oDb->trans_rollback();
                         $this->setError('Failed to update child category.');
                         return false;
                     }
@@ -272,7 +275,7 @@ class Shop_category_model extends Base
 
                 if (!parent::update($parent_id, $_data)) {
 
-                    $this->db->trans_rollback();
+                    $oDb->trans_rollback();
                     $this->setError('Failed to update parent\'s children IDs.');
                     return false;
                 }
@@ -280,12 +283,12 @@ class Shop_category_model extends Base
 
             // --------------------------------------------------------------------------
 
-            $this->db->trans_commit();
+            $oDb->trans_commit();
             return true;
 
         } else {
 
-            $this->db->trans_rollback();
+            $oDb->trans_rollback();
             return false;
         }
     }
@@ -311,7 +314,8 @@ class Shop_category_model extends Base
 
         // --------------------------------------------------------------------------
 
-        $this->db->trans_begin();
+        $oDb = Factory::service('Database');
+        $oDb->trans_begin();
 
         if (parent::delete($id)) {
 
@@ -327,19 +331,19 @@ class Shop_category_model extends Base
 
                 if (!parent::update($parentId, $data)) {
 
-                    $this->db->trans_rollback();
+                    $oDb->trans_rollback();
                     $this->setError('Failed to update parent\'s children IDs.');
                     return false;
                 }
             }
 
-            $this->db->trans_commit();
+            $oDb->trans_commit();
             return true;
 
         } else {
 
             $this->setError('Invalid Category ID');
-            $this->db->trans_rollback();
+            $oDb->trans_rollback();
             return false;
         }
     }
@@ -354,9 +358,10 @@ class Shop_category_model extends Base
     protected function generateBreadcrumbs($id)
     {
         //  Fetch current
-        $this->db->select('id,slug,label');
-        $this->db->where('id', $id);
-        $current = $this->db->get($this->table)->result();
+        $oDb = Factory::service('Database');
+        $oDb->select('id,slug,label');
+        $oDb->where('id', $id);
+        $current = $oDb->get($this->table)->result();
 
         if (empty($current)) {
 
@@ -375,9 +380,9 @@ class Shop_category_model extends Base
 
         if (!empty($parents)) {
 
-            $this->db->select('id,slug,label');
-            $this->db->where_in('id', $parents);
-            $parents = $this->db->get($this->table)->result();
+            $oDb->select('id,slug,label');
+            $oDb->where_in('id', $parents);
+            $parents = $oDb->get($this->table)->result();
 
             if (!empty($parents)) {
 
@@ -401,11 +406,12 @@ class Shop_category_model extends Base
      */
     public function get_ids_of_parents($id)
     {
+        $oDb    = Factory::service('Database');
         $return = array();
 
-        $this->db->select('parent_id');
-        $this->db->where('id', $id);
-        $parent = $this->db->get($this->table)->row();
+        $oDb->select('parent_id');
+        $oDb->where('id', $id);
+        $parent = $oDb->get($this->table)->row();
 
         if (!empty($parent->parent_id)) {
 
@@ -426,11 +432,12 @@ class Shop_category_model extends Base
      */
     public function getIdsOfChildren($id, $onlyImmediate = false)
     {
+        $oDb    = Factory::service('Database');
         $return = array();
 
-        $this->db->select('id');
-        $this->db->where('parent_id', $id);
-        $children = $this->db->get($this->table)->result();
+        $oDb->select('id');
+        $oDb->where('parent_id', $id);
+        $children = $oDb->get($this->table)->result();
 
         if ($onlyImmediate) {
 
@@ -484,16 +491,17 @@ class Shop_category_model extends Base
      */
     public function get_ids_of_siblings($categoryId)
     {
-        $this->db->select('parent_id');
-        $this->db->where('id', $categoryId);
-        $parent = $this->db->get($this->table)->row();
+        $oDb = Factory::service('Database');
+        $oDb->select('parent_id');
+        $oDb->where('id', $categoryId);
+        $parent = $oDb->get($this->table)->row();
 
         if (!empty($parent->parent_id)) {
 
             return array();
         }
 
-        $this->db->where('id !=', $categoryId);
+        $oDb->where('id !=', $categoryId);
         return $this->getIdsOfChildren($parent->parent_id, true);
     }
 
@@ -631,11 +639,13 @@ class Shop_category_model extends Base
 
         if (!empty($data['include_count'])) {
 
-            if (empty($this->db->ar_select)) {
+            $oDb = Factory::service('Database');
+
+            if (empty($oDb->ar_select)) {
 
                 //   No selects have been called, call this so that we don't *just* get the product count
                 $prefix = $this->tableAlias ? $this->tableAlias . '.' : '';
-                $this->db->select($prefix . '*');
+                $oDb->select($prefix . '*');
             }
 
             $query  = 'SELECT COUNT(DISTINCT(`nspc`.`product_id`)) ';
@@ -649,7 +659,7 @@ class Shop_category_model extends Base
             $query .= 'AND `nsp`.`is_active` = 1 ';
             $query .= 'AND `nsp`.`is_deleted` = 0';
 
-            $this->db->select('(' . $query . ') product_count', false);
+            $oDb->select('(' . $query . ') product_count', false);
 
         }
 

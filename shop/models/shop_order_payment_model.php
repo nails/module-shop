@@ -108,9 +108,10 @@ class Shop_order_payment_model extends Base
             return false;
         }
 
-        $this->db->select('SUM(amount_base) as total_paid');
-        $this->db->where('order_id', $oOrder->id);
-        $oResult = $this->db->get($this->table)->row();
+        $oDb = Factory::service('Database');
+        $oDb->select('SUM(amount_base) as total_paid');
+        $oDb->where('order_id', $oOrder->id);
+        $oResult = $oDb->get($this->table)->row();
 
         return (int) $oResult->total_paid >= $oOrder->totals->base->grand;
     }

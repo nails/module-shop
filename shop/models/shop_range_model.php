@@ -11,6 +11,7 @@
  */
 
 use Nails\Common\Model\Base;
+use Nails\Factory;
 
 class Shop_range_model extends Base
 {
@@ -78,10 +79,11 @@ class Shop_range_model extends Base
 
         if (!empty($data['include_count'])) {
 
-            if (empty($this->db->ar_select)) {
+            $oDb = Factory::service('Database');
+            if (empty($oDb->ar_select)) {
 
                 //  No selects have been called, call this so that we don't *just* get the product count
-                $this->db->select($this->tableAlias . '.*');
+                $oDb->select($this->tableAlias . '.*');
             }
 
             $sql  = 'SELECT COUNT(DISTINCT(`nspr`.`product_id`)) ';
@@ -92,7 +94,7 @@ class Shop_range_model extends Base
             $sql .= 'AND `nsp`.`is_active` = 1 ';
             $sql .= 'AND `nsp`.`is_deleted` = 0';
 
-            $this->db->select('(' . $sql . ') product_count', false);
+            $oDb->select('(' . $sql . ') product_count', false);
         }
 
         // --------------------------------------------------------------------------

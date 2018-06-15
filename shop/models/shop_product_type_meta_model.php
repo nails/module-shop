@@ -11,6 +11,7 @@
  */
 
 use Nails\Common\Model\Base;
+use Nails\Factory;
 
 class Shop_product_type_meta_model extends Base
 {
@@ -53,17 +54,18 @@ class Shop_product_type_meta_model extends Base
         }
 
         $fields = parent::getAll($page, $per_page, $data, $include_deleted);
+        $oDb    = Factory::service('Database');
 
         foreach ($fields as $field) {
 
             if (isset($data['includeAssociatedProductTypes'])) {
 
-                $this->db->select('pt.id,pt.label');
-                $this->db->join(NAILS_DB_PREFIX . 'shop_product_type pt', 'pt.id = ' . $this->tableTaxonomyPrefix . '.product_type_id');
-                $this->db->group_by('pt.id');
-                $this->db->order_by('pt.label');
-                $this->db->where($this->tableTaxonomyPrefix . '.meta_field_id', $field->id);
-                $field->associated_product_types = $this->db->get($this->tableTaxonomy . ' ' . $this->tableTaxonomyPrefix)->result();
+                $oDb->select('pt.id,pt.label');
+                $oDb->join(NAILS_DB_PREFIX . 'shop_product_type pt', 'pt.id = ' . $this->tableTaxonomyPrefix . '.product_type_id');
+                $oDb->group_by('pt.id');
+                $oDb->order_by('pt.label');
+                $oDb->where($this->tableTaxonomyPrefix . '.meta_field_id', $field->id);
+                $field->associated_product_types = $oDb->get($this->tableTaxonomy . ' ' . $this->tableTaxonomyPrefix)->result();
             }
         }
 
@@ -121,7 +123,8 @@ class Shop_product_type_meta_model extends Base
      */
     public function getByProductTypeId($typeId)
     {
-        $this->db->where($this->tableTaxonomyPrefix . '.product_type_id', $typeId);
+        $oDb = Factory::service('Database');
+        $oDb->where($this->tableTaxonomyPrefix . '.product_type_id', $typeId);
         return $this->getByProductType();
     }
 
@@ -134,7 +137,8 @@ class Shop_product_type_meta_model extends Base
      */
     public function getByProductTypeIds($typeIds)
     {
-        $this->db->where_in($this->tableTaxonomyPrefix . '.product_type_id', $typeIds);
+        $oDb = Factory::service('Database');
+        $oDb->where_in($this->tableTaxonomyPrefix . '.product_type_id', $typeIds);
         return $this->getByProductType();
     }
 
@@ -147,10 +151,11 @@ class Shop_product_type_meta_model extends Base
      */
     protected function getByProductType()
     {
-        $this->db->select($this->tableAlias . '.*');
-        $this->db->join($this->table  . ' ' . $this->tableAlias, $this->tableAlias . '.id = ' . $this->tableTaxonomyPrefix . '.meta_field_id');
-        $this->db->group_by($this->tableAlias . '.id');
-        $results = $this->db->get($this->tableTaxonomy . ' ' . $this->tableTaxonomyPrefix)->result();
+        $oDb = Factory::service('Database');
+        $oDb->select($this->tableAlias . '.*');
+        $oDb->join($this->table  . ' ' . $this->tableAlias, $this->tableAlias . '.id = ' . $this->tableTaxonomyPrefix . '.meta_field_id');
+        $oDb->group_by($this->tableAlias . '.id');
+        $results = $oDb->get($this->tableTaxonomy . ' ' . $this->tableTaxonomyPrefix)->result();
 
         foreach ($results as $result) {
 
@@ -170,7 +175,8 @@ class Shop_product_type_meta_model extends Base
      */
     public function create($data = array(), $returnObject = false)
     {
-        $this->db->trans_begin();
+        $oDb = Factory::service('Database');
+        $oDb->trans_begin();
 
         $associatedProductTypes = isset($data['associated_product_types']) ? $data['associated_product_types'] : array();
         unset($data['associated_product_types']);
@@ -180,11 +186,11 @@ class Shop_product_type_meta_model extends Base
         if (!$result) {
 
             $this->setError('Failed to create parent object.');
-            $this->db->trans_rollback();
+            $oDb->trans_rollback();
             return false;
         }
 
-        $id = $this->db->insert_id();
+        $id = $oDb->insert_id();
 
         if ($associatedProductTypes) {
 
@@ -198,15 +204,15 @@ class Shop_product_type_meta_model extends Base
                 );
             }
 
-            if (!$this->db->insert_batch($this->tableTaxonomy, $data)) {
+            if (!$oDb->insert_batch($this->tableTaxonomy, $data)) {
 
                 $this->setError('Failed to add new product type/meta field relationships.');
-                $this->db->trans_rollback();
+                $oDb->trans_rollback();
                 return false;
             }
         }
 
-        $this->db->trans_commit();
+        $oDb->trans_commit();
         return $result;
     }
 
@@ -220,7 +226,8 @@ class Shop_product_type_meta_model extends Base
      */
     public function update($id, $data = array())
     {
-        $this->db->trans_begin();
+        $oDb = Factory::service('Database');
+        $oDb->trans_begin();
 
         $associatedProductTypes = isset($data['associated_product_types']) ? $data['associated_product_types'] : array();
         unset($data['associated_product_types']);
@@ -230,15 +237,15 @@ class Shop_product_type_meta_model extends Base
         if (!$result) {
 
             $this->setError('Failed to update parent object.');
-            $this->db->trans_rollback();
+            $oDb->trans_rollback();
             return false;
         }
 
-        $this->db->where('meta_field_id', $id);
-        if (!$this->db->delete($this->tableTaxonomy)) {
+        $oDb->where('meta_field_id', $id);
+        if (!$oDb->delete($this->tableTaxonomy)) {
 
             $this->setError('Failed to remove existing product type/meta field relationships.');
-            $this->db->trans_rollback();
+            $oDb->trans_rollback();
             return false;
         }
 
@@ -254,15 +261,15 @@ class Shop_product_type_meta_model extends Base
                 );
             }
 
-            if (!$this->db->insert_batch($this->tableTaxonomy, $data)) {
+            if (!$oDb->insert_batch($this->tableTaxonomy, $data)) {
 
                 $this->setError('Failed to add new product type/meta field relationships.');
-                $this->db->trans_rollback();
+                $oDb->trans_rollback();
                 return false;
             }
         }
 
-        $this->db->trans_commit();
+        $oDb->trans_commit();
         return true;
     }
 }
