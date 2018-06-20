@@ -171,7 +171,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         $oSession = Factory::service('Session', 'nailsapp/module-auth');
-        $oSession->set_flashdata($status, $message);
+        $oSession->setFlashData($status, $message);
         redirect($this->data['return']);
     }
 
@@ -208,7 +208,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         $oSession = Factory::service('Session', 'nailsapp/module-auth');
-        $oSession->set_flashdata($status, $message);
+        $oSession->setFlashData($status, $message);
         redirect($this->data['return']);
     }
 
@@ -264,7 +264,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         $oSession = Factory::service('Session', 'nailsapp/module-auth');
-        $oSession->set_flashdata($status, $message);
+        $oSession->setFlashData($status, $message);
         redirect($this->data['return']);
     }
 
@@ -300,7 +300,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         $oSession = Factory::service('Session', 'nailsapp/module-auth');
-        $oSession->set_flashdata($status, $message);
+        $oSession->setFlashData($status, $message);
         redirect($this->data['return']);
     }
 
@@ -332,7 +332,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         $oSession = Factory::service('Session', 'nailsapp/module-auth');
-        $oSession->set_flashdata($status, $message);
+        $oSession->setFlashData($status, $message);
         redirect($this->data['return']);
     }
 
@@ -367,7 +367,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         $oSession = Factory::service('Session', 'nailsapp/module-auth');
-        $oSession->set_flashdata($status, $message);
+        $oSession->setFlashData($status, $message);
         redirect($this->data['return']);
     }
 
@@ -402,7 +402,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         $oSession = Factory::service('Session', 'nailsapp/module-auth');
-        $oSession->set_flashdata($status, $message);
+        $oSession->setFlashData($status, $message);
         redirect($this->data['return']);
     }
 
@@ -433,7 +433,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         $oSession = Factory::service('Session', 'nailsapp/module-auth');
-        $oSession->set_flashdata($status, $message);
+        $oSession->setFlashData($status, $message);
         redirect($this->data['return']);
     }
 
@@ -459,7 +459,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         if ($oCurrency) {
 
             //  Valid currency
-            $oSession->set_userdata('shop_currency', $oCurrency->code);
+            $oSession->setUserData('shop_currency', $oCurrency->code);
 
             if (isLoggedIn()) {
 
@@ -486,7 +486,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
 
         // --------------------------------------------------------------------------
 
-        $oSession->set_flashdata($sStatus, $sMessage);
+        $oSession->setFlashData($sStatus, $sMessage);
         redirect($this->data['return']);
     }
 
@@ -519,7 +519,7 @@ class NAILS_Basket extends NAILS_Shop_Controller
         // --------------------------------------------------------------------------
 
         $oSession = Factory::service('Session', 'nailsapp/module-auth');
-        $oSession->set_flashdata($status, $message);
+        $oSession->setFlashData($status, $message);
         redirect($this->data['return']);
     }
 }

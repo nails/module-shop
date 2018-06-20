@@ -187,7 +187,7 @@ class Vouchers extends BaseAdmin
     {
         if (!userHasPermission('admin:shop:vouchers:create')) {
             $oSession = Factory::service('Session', 'nailsapp/module-auth');
-            $oSession->set_flashdata('error', 'You do not have permission to create vouchers.');
+            $oSession->setFlashData('error', 'You do not have permission to create vouchers.');
             redirect('admin/shop/vouchers');
         }
 
@@ -339,7 +339,7 @@ class Vouchers extends BaseAdmin
                 }
 
                 $oSession = Factory::service('Session', 'nailsapp/module-auth');
-                $oSession->set_flashdata('success', 'Voucher "' . $data['code'] . '" was created successfully.');
+                $oSession->setFlashData('success', 'Voucher "' . $data['code'] . '" was created successfully.');
                 redirect('admin/shop/vouchers');
 
             } catch (\Exception $e) {
@@ -402,7 +402,7 @@ class Vouchers extends BaseAdmin
         }
 
         $oSession = Factory::service('Session', 'nailsapp/module-auth');
-        $oSession->set_flashdata($status, $message);
+        $oSession->setFlashData($status, $message);
 
         redirect('admin/shop/vouchers');
     }
@@ -439,7 +439,7 @@ class Vouchers extends BaseAdmin
         }
 
         $oSession = Factory::service('Session', 'nailsapp/module-auth');
-        $oSession->set_flashdata($status, $message);
+        $oSession->setFlashData($status, $message);
 
         redirect('admin/shop/vouchers');
     }

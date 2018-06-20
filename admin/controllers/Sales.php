@@ -154,7 +154,7 @@ class Sales extends BaseAdmin
         // --------------------------------------------------------------------------
 
         $oSession = Factory::service('Session', 'nailsapp/module-auth');
-        $oSession->set_flashdata('message', '<strong>TODO:</strong> Delete a sale.');
+        $oSession->setFlashData('message', '<strong>TODO:</strong> Delete a sale.');
         redirect('admin/shop/sales/index');
     }
 }

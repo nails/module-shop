@@ -292,7 +292,7 @@ class Basket extends \Nails\Api\Controller\Base
         if ($oCurrency) {
 
             $oSession = Factory::service('Session', 'nailsapp/module-auth');
-            $oSession->set_userdata('shop_currency', $oCurrency->code);
+            $oSession->setUserData('shop_currency', $oCurrency->code);
 
             if (isLoggedIn()) {
 

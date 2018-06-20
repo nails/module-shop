@@ -781,7 +781,7 @@ class Reports extends BaseAdmin
                 $message = 'Failed to render PDF. ';
                 $message .= $oPdf->lastError() ? 'DOMPDF gave the following error: ' . $oPdf->lastError() : '';
 
-                $oSession->set_flashdata($status, $message);
+                $oSession->setFlashData($status, $message);
                 redirect('admin/shop/reports');
             }
 
@@ -805,7 +805,7 @@ class Reports extends BaseAdmin
                 $message  = 'Failed to render PDF. The following exception was raised: ';
                 $message .= $e->getMessage();
 
-                $oSession->set_flashdata($status, $message);
+                $oSession->setFlashData($status, $message);
                 redirect('admin/shop/reports');
             }
         }

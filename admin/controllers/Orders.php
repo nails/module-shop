@@ -528,13 +528,13 @@ class Orders extends BaseAdmin
                 $oUri->segment(6)
             );
 
-            $oSession->set_flashdata('success', 'Order lifecycle was updated.');
+            $oSession->setFlashData('success', 'Order lifecycle was updated.');
 
         } catch (\Exception $e) {
-            $oSession->set_flashdata('error', 'Failed to set order lifecycle. ' . $e->getMessage());
+            $oSession->setFlashData('error', 'Failed to set order lifecycle. ' . $e->getMessage());
         }
 
-        $oSession->set_flashdata('did_set_lifecycle', true);
+        $oSession->setFlashData('did_set_lifecycle', true);
 
         redirect('admin/shop/orders/view/' . $oUri->segment(5));
     }
@@ -585,7 +585,7 @@ class Orders extends BaseAdmin
         }
 
         $oSession = Factory::service('Session', 'nailsapp/module-auth');
-        $oSession->set_flashdata($sStatus, $sMessage);
+        $oSession->setFlashData($sStatus, $sMessage);
         redirect('admin/shop/orders');
     }
 }
