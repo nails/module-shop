@@ -225,7 +225,7 @@ class Voucher extends Base
      * @param mixed  $data    Any data to pass to getCountCommon()
      * @return array
      **/
-    public function getAll($page = null, $perPage = null, $data = array())
+    public function getAll($page = null, $perPage = null, array $data = array())
     {
         //  If the first value is an array then treat as if called with getAll(null, null, $aData);
         //  @todo (Pablo - 2017-11-09) - Convert these to expandable fields
@@ -291,7 +291,7 @@ class Voucher extends Base
      * @param  array $search Keywords to restrict the query by
      * @return void
      */
-    protected function getCountCommon($data = array())
+    protected function getCountCommon(array $data = array())
     {
         //  Search
         if (!empty($data['keywords'])) {
@@ -643,7 +643,7 @@ class Voucher extends Base
      * @param  boolean $bReturnObject Whether to return just the new ID or the full voucher
      * @return mixed
      */
-    public function create($aData = array(), $bReturnObject = false)
+    public function create(array $aData = array(), $bReturnObject = false)
     {
         if (empty($aData['label'])) {
             $this->setError('Discount label is a required field.');
@@ -727,10 +727,10 @@ class Voucher extends Base
      */
     protected function formatObject(
         &$oObj,
-        $aData = array(),
-        $aIntegers = array(),
-        $aBools = array(),
-        $aFloats = array()
+        array $aData = [],
+        array $aIntegers = [],
+        array $aBools = [],
+        array $aFloats = []
     ) {
 
         parent::formatObject($oObj, $aData, $aIntegers, $aBools, $aFloats);
